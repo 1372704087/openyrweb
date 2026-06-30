@@ -1,0 +1,449 @@
+// === Reconstructed SystemJS module: game/Warhead ===
+// deps: ["game/gameobject/common/DeathType","game/gameobject/infantry/StanceType","game/gameobject/unit/ZoneType","game/gameobject/task/system/CallbackTask","game/gameobject/task/ScatterTask","game/map/BridgeOverlayTypes","game/trait/interface/NotifyAttack","game/type/ArmorType","game/gameobject/unit/CollisionType","game/gameobject/unit/RangeHelper","game/map/tileFinder/RadialTileFinder","game/Coords","util/math","game/gameobject/unit/FacingUtil","engine/type/ObjectType","game/event/WarheadDetonateEvent","game/WeaponType","game/rules/WeaponRules","data/IniSection","game/rules/ProjectileRules","game/gameobject/common/AnimTerrainEffect","game/event/ObjectAttackedEvent","game/SpecialWarheadType"]
+// Note: variable/type names are minified approximations of the original TypeScript.
+
+System.register(
+  "game/Warhead",
+  [
+    "game/gameobject/common/DeathType",
+    "game/gameobject/infantry/StanceType",
+    "game/gameobject/unit/ZoneType",
+    "game/gameobject/task/system/CallbackTask",
+    "game/gameobject/task/ScatterTask",
+    "game/map/BridgeOverlayTypes",
+    "game/trait/interface/NotifyAttack",
+    "game/type/ArmorType",
+    "game/gameobject/unit/CollisionType",
+    "game/gameobject/unit/RangeHelper",
+    "game/map/tileFinder/RadialTileFinder",
+    "game/Coords",
+    "util/math",
+    "game/gameobject/unit/FacingUtil",
+    "engine/type/ObjectType",
+    "game/event/WarheadDetonateEvent",
+    "game/WeaponType",
+    "game/rules/WeaponRules",
+    "data/IniSection",
+    "game/rules/ProjectileRules",
+    "game/gameobject/common/AnimTerrainEffect",
+    "game/event/ObjectAttackedEvent",
+    "game/SpecialWarheadType",
+    "game/gameobject/task/MagnetronDragTask",
+  ],
+  function (e, t) {
+    "use strict";
+    var n, o, k, i, r, l, c, h, B, N, j, L, D, F, s, _, a, u, d, g, U, p, H, Md, m;
+    t && t.id;
+    return {
+      setters: [
+        function (e) {
+          n = e;
+        },
+        function (e) {
+          o = e;
+        },
+        function (e) {
+          k = e;
+        },
+        function (e) {
+          i = e;
+        },
+        function (e) {
+          r = e;
+        },
+        function (e) {
+          l = e;
+        },
+        function (e) {
+          c = e;
+        },
+        function (e) {
+          h = e;
+        },
+        function (e) {
+          B = e;
+        },
+        function (e) {
+          N = e;
+        },
+        function (e) {
+          j = e;
+        },
+        function (e) {
+          L = e;
+        },
+        function (e) {
+          D = e;
+        },
+        function (e) {
+          F = e;
+        },
+        function (e) {
+          s = e;
+        },
+        function (e) {
+          _ = e;
+        },
+        function (e) {
+          a = e;
+        },
+        function (e) {
+          u = e;
+        },
+        function (e) {
+          d = e;
+        },
+        function (e) {
+          g = e;
+        },
+        function (e) {
+          U = e;
+        },
+        function (e) {
+          p = e;
+        },
+        function (e) {
+          H = e;
+        },
+        function (e) {
+          Md = e;
+        },
+      ],
+      execute: function () {
+        (e(
+          "Warhead",
+          (m = class {
+            constructor(e) {
+              this.rules = e;
+            }
+            canDamage(e, t, i) {
+              return (
+                !(!e.isSpawned || e.isDisposed || e.isDestroyed || e.isCrashing) &&
+                !(e.isTechno() && e.warpedOutTrait.isInvulnerable() && !this.rules.temporal) &&
+                (!e.isUnit() || !e.moveTrait.reservedPathNodes.find((e) => e.tile === t)) &&
+                !!e.healthTrait &&
+                (!e.isUnit() || e.zone !== k.ZoneType.Air || i === k.ZoneType.Air) &&
+                !(!e.isUnit() && i === k.ZoneType.Air) &&
+                (!e.isBuilding() || !e.rules.invisibleInGame) &&
+                !((e.isTechno() || e.isTerrain()) && e.rules.immune && !this.rules.temporal) &&
+                !(e.isTechno() && !e.rules.warpable && this.rules.temporal) &&
+                !(this.rules.radiation && (!e.isUnit() || e.rules.immuneToRadiation)) &&
+                !(this.rules.psychicDamage && (!e.isUnit() || e.rules.immuneToPsionics)) &&
+                (!e.isOverlay() || !l.BridgeOverlayTypes.isLowBridgeHead(e.overlayId))
+              );
+            }
+            computeDamage(e, t, i, r = !1) {
+              let s = e;
+              if (0 < e && t.isTechno() && t.invulnerableTrait.isActive()) return 0;
+              if (t.isAircraft() && t.missileSpawnTrait && t.zone !== k.ZoneType.Air) return 0;
+              if (!i.gameOpts.destroyableBridges && t.isOverlay() && t.bridgeTrait) return 0;
+              // OpenYRWeb (2026-06-30, REVERSED): a building currently being drained by a
+              // DrainWeapon unit takes no damage from that drain weapon (vanilla: a drained
+              // building is never destroyed — DrainWeapon siphons power/money, dealing 0 damage).
+              // The DrainTrait sets target.drainedBy while actively siphoning; suppress damage to
+              // the drained building so it survives the disc's attack. RE: DrainWeapon @ yrmd.exe.
+              if (0 < e && t.isBuilding && t.isBuilding() && t.drainedBy && t.rules.drainable) return 0;
+              if (
+                (this.rules.radiation ||
+                  this.rules.temporal ||
+                  !t.isInfantry() ||
+                  t.stance !== o.StanceType.Prone ||
+                  (s *= this.rules.proneDamage),
+                t.isTechno() || t.isOverlay() || t.isTerrain())
+              ) {
+                let e = t.isTerrain() ? h.ArmorType.Wood : t.rules.armor;
+                var a;
+                (t.isOverlay() &&
+                  t.isBridge() &&
+                  ((a = l.BridgeOverlayTypes.getOverlayBridgeType(t.overlayId)) === l.OverlayBridgeType.Wood
+                    ? (e = h.ArmorType.Wood)
+                    : a === l.OverlayBridgeType.Concrete && (e = h.ArmorType.Concrete)),
+                  (r && t.isOverlay() && (t.isBridge() || t.rules.wall)) || (s *= this.rules.verses.get(e)),
+                  0 < s && t.isTechno() && t.veteranTrait && (s /= t.veteranTrait.getVeteranArmorMultiplier()),
+                  0 < s && t.isUnit() && (s /= t.crateBonuses.armor));
+              }
+              return (
+                (t.isOverlay() || t.isBuilding()) &&
+                  t.rules.wall &&
+                  (this.rules.wallAbsoluteDestroyer
+                    ? (s = Number.POSITIVE_INFINITY)
+                    : this.rules.wall || (this.rules.wood && t.rules.armor === h.ArmorType.Wood) || (s = 0)),
+                t.isOverlay() && t.isBridge() && (this.rules.wall || (s = 0)),
+                (s = 0 < s ? Math.floor(s) : Math.ceil(s)),
+                s
+              );
+            }
+            inflictDamage(e, t, i, r, s = !1) {
+              let a = t.healthTrait;
+              return (
+                e === Number.POSITIVE_INFINITY && (e = a.getHitPoints()),
+                a.inflictDamage(e, i, r),
+                r.traits.filter(c.NotifyAttack).forEach((e) => {
+                  e[c.NotifyAttack.onAttack](t, i?.obj, r);
+                }),
+                t.onAttack(r, i),
+                r.events.dispatch(new p.ObjectAttackedEvent(t, i, s)),
+                t.isTechno() && !this.rules.temporal && this.supressOrScatterTarget(t, r),
+                !a.health &&
+                  (t.isInfantry() && (t.infDeathType = this.rules.infDeath),
+                  this.rules.temporal && (t.deathType = n.DeathType.Temporal),
+                  // OpenYRWeb: Genetic Mutator transform. A warhead with InfDeath=Mutate (9) that
+                  // kills convertible infantry spawns a Brute under the attacker's owner instead
+                  // of leaving a corpse. Mirrors the ParadropTask/BridgeTrait idiom of suppressing
+                  // the death anim (infDeathType=None) before silent destroy. Brute unit type is
+                  // resolved from rules ("BRUTE"); immuneToPsionics / already-Brute victims are skipped.
+                  // vanilla YR: InfDeath=9 (=Mutate) is the ONLY value that triggers mutation
+                  // (ModEnc/InfDeath). The earlier `=== 8` check matched Virus instead and never fired.
+                  this.rules.infDeath === 9 &&
+                  t.isInfantry() &&
+                  !t.rules.immuneToPsionics &&
+                  "BRUTE" !== t.name &&
+                  r.rules.hasObject("BRUTE", j.ObjectType.Infantry)
+                    ? (this._mutateInfantryToBrute(t, i, r), !1)
+                    : t.isUnit() && t.crashableTrait && t.zone === k.ZoneType.Air && !this.rules.temporal
+                      ? t.crashableTrait.crash(i)
+                      : r.destroyObject(t, i, void 0, s),
+                  !0)
+              );
+            }
+            supressOrScatterTarget(e, t) {
+              e.rules.fraidycat || (e.isVehicle() && !e.owner.isCombatant() && e.rules.insignificant)
+                ? e.unitOrderTrait.hasTasks() ||
+                  (e.isInfantry() && (e.isPanicked = !0),
+                  e.unitOrderTrait.addTask(new r.ScatterTask(t)),
+                  e.isInfantry() &&
+                    e.unitOrderTrait.addTask(new i.CallbackTask(() => (e.isPanicked = !1)).setCancellable(!1)))
+                : e.isInfantry() &&
+                  (e.moveTrait.isIdle() || e.suppressionTrait?.isSuppressed()) &&
+                  e.suppressionTrait?.suppress();
+            }
+            // OpenYRWeb: Magnetron locomotor-beam drag. Called from detonate() (delegated
+            // because detonate's params shadow the module aliases). The drag itself is a
+            // MagnetronDragTask that installs a real JumpjetLocomotor on the victim and flies
+            // it to a tile next to the firing Magnetron — vanilla-equivalent (vanilla YR
+            // temporarily swaps the victim's Locomotor= to Jumpjet for the drag). `game`=t,
+            // `target`=e, `attacker`=i (un-shadowed here).
+            _dragVehicleTo(e, t, i) {
+              // OpenYRWeb: vanilla-equivalent Magnetron drag. Push a MagnetronDragTask that
+              // wraps a real MoveTask child: MoveTask builds a JumpjetLocomotor
+              // (rules.locomotor overridden to Jumpjet) and flies the victim toward a passable
+              // tile adjacent to the firing Magnetron. While the beam keeps firing the victim
+              // hovers; once the Magnetron stops (out of range/retargets/dies/suppressed) the
+              // victim drops and crushes whatever is below (see MagnetronDragTask._applyDrop).
+              // `e`=victim, `t`=game, `i`=attacker (magnetron). `this` is the LocomotorBeam
+              // warhead instance (passed to the task for drop crush damage).
+              // Guard: if the victim is already being dragged, do not stack another drag task.
+              if (e.magnetronDraggedBy) {
+                // Same Magnetron keeping the beam alive on an already-lifted victim → just
+                // refresh the maintenance timer so the victim stays airborne (vanilla: the beam
+                // must keep firing to sustain the lift).
+                if (e.magnetronDraggedBy === i && e.unitOrderTrait) {
+                  var cur = e.unitOrderTrait.getCurrentTask();
+                  if (cur && cur.refreshBeam) cur.refreshBeam(t.currentTick);
+                }
+                return;
+              }
+              if (!e.unitOrderTrait) return;
+              // Stop the victim's current orders so it doesn't fight the involuntary drag.
+              e.unitOrderTrait.cancelAllTasks();
+              // OpenYRWeb: cancelAllTasks() only marks tasks cancelled; their onEnd (which clears
+              // moveTrait.currentWaypoint / unreserves path nodes) doesn't run until the next
+              // TaskRunner tick. If the victim was mid-move (currentWaypoint set), the drag task's
+              // MoveTask child would throw "Nested move tasks are not supported" on onStart. Force
+              // the victim's move state clean now so the drag's MoveTask can start cleanly.
+              // (CollisionState.Resolved=1, MoveState.Idle=0 — see MoveTrait.ts.js enums.)
+              if (e.moveTrait) {
+                try { e.moveTrait.unreservePathNodes && e.moveTrait.unreservePathNodes(); } catch (err) {}
+                e.moveTrait.currentWaypoint = void 0;
+                e.moveTrait.collisionState = 1; // CollisionState.Resolved
+                e.moveTrait.moveState = 0; // MoveState.Idle
+                e.moveTrait.velocity && e.moveTrait.velocity.set(0, 0, 0);
+                e.moveTrait.locomotor = void 0;
+              }
+              e.unitOrderTrait.addTaskToFront(new Md.MagnetronDragTask(t, e, i, this));
+            }
+            // OpenYRWeb: Genetic Mutator transform helper. Spawns a Brute under the attacker's
+            // owner at the victim's tile, then silently destroys the victim (no death anim).
+            _mutateInfantryToBrute(e, t, i) {
+              var r = t?.player ?? e.owner,
+                s = i.rules.getObject("BRUTE", j.ObjectType.Infantry),
+                a = i.createUnitForPlayer(s, r),
+                l = e.tile;
+              (i.spawnObject(a, l),
+                (e.infDeathType = 0),
+                i.destroyObject(e, t, void 0, !1));
+            }
+            createDummyWeaponInfo() {
+              return {
+                minRange: 0,
+                range: 0,
+                speed: Number.POSITIVE_INFINITY,
+                type: a.WeaponType.Primary,
+                rules: new u.WeaponRules(new d.IniSection("Dummy")),
+                projectileRules: new g.ProjectileRules(s.ObjectType.Projectile, new d.IniSection("Dummy")),
+                warhead: this,
+              };
+            }
+            detonate(r, e, t, i, s, a, n, o, l, c = H.SpecialWarheadType.None, h, u, d = !1) {
+              var g,
+                p,
+                m,
+                f,
+                y,
+                T = l?.weapon ?? this.createDummyWeaponInfo(),
+                v = l?.obj,
+                b = l?.player,
+                S = c === H.SpecialWarheadType.Shrapnel,
+                w = c === H.SpecialWarheadType.LightningStrike,
+                E = u ? u / L.Coords.LEPTONS_PER_TILE : this.rules.cellSpread,
+                C = this.rules.percentAtMax;
+              let x = new Set(),
+                O = new Map(),
+                A = new N.RangeHelper(r.map.tileOccupation),
+                M = new j.RadialTileFinder(
+                  r.map.tiles,
+                  r.map.mapBounds,
+                  t,
+                  { width: 1, height: 1 },
+                  0,
+                  Math.ceil(E),
+                  () => !0,
+                  !1,
+                );
+              for (; (g = M.getNextTile());)
+                for (p of r.map.getObjectsOnTile(g))
+                  if (
+                    (!x.has(p) || p.isBuilding()) &&
+                    (n !== B.CollisionType.UnderBridge || !p.isUnit() || !p.onBridge) &&
+                    !(v && p.isTechno() && p.rules.typeImmune && p.owner === b && p.name === v.name) &&
+                    (p !== v || v.rules.damageSelf) &&
+                    this.canDamage(p, g, a) &&
+                    (!p.isOverlay() ||
+                      !(
+                        (!n && 0.1 < Math.abs(p.tileElevation - i)) ||
+                        (n === B.CollisionType.OnBridge && !p.isBridge())
+                      ))
+                  ) {
+                    let e = p.isBuilding()
+                      ? g === t
+                        ? 0
+                        : A.distance3(g, s) / L.Coords.LEPTONS_PER_TILE
+                      : p.isTerrain() || p.isOverlay()
+                        ? A.distance3(g, t) / L.Coords.LEPTONS_PER_TILE
+                        : A.distance3(p, s) / L.Coords.LEPTONS_PER_TILE;
+                    if (
+                      (E && p.isAircraft() && p.zone === k.ZoneType.Air && (e /= 2),
+                      e < 0.001 && (e = 0),
+                      !(S && p.isInfantry() && b) || (p.owner !== b && !r.alliances.areAllied(p.owner, b)))
+                    ) {
+                      if (!E)
+                        if (p.isTerrain()) {
+                          if (g !== t || !this.rules.wall) continue;
+                        } else if (!S && (g !== t || (!p.isBuilding() && p !== (o.obj || o.getBridge())))) continue;
+                      (E && e > E) || (x.add(p), O.set(p, p.isBuilding() ? (O.get(p) || []).concat(e) : [e]));
+                    }
+                  }
+              let R = !1,
+                P;
+              for (m of x)
+                if (!m.isDestroyed && !m.isCrashing) {
+                  // OpenYRWeb: Magnetron locomotor beam. Delegated to a helper method because
+                  // detonate()'s params shadow the module-level aliases (r=game, m=target, etc.),
+                  // so the ScatterTask class can't be referenced inline. See _dragVehicleTo.
+                  if (this.rules.isLocomotor && m.isVehicle() && m.moveTrait && !m.moveTrait.isDisabled() && v) {
+                    this._dragVehicleTo(m, r, v);
+                    continue;
+                  }
+                  let i = this.computeDamage(e, m, r, w);
+                  if (
+                    (0 < e &&
+                      !this.rules.affectsAllies &&
+                      m.isTechno() &&
+                      b &&
+                      (r.alliances.areAllied(m.owner, b) || m.owner === b) &&
+                      (i = 0),
+                    i)
+                  )
+                    for (var I of O.get(m)) {
+                      let t = i;
+                      if (
+                        (0 < E && Number.isFinite(t) && (t = D.lerp(t, C * t, I / E)),
+                        Math.abs(t) < 1 && (!E || 0.25 <= t / i) && (t = +Math.sign(t)),
+                        (t = 0 < t ? Math.floor(t) : Math.ceil(t)),
+                        t)
+                      ) {
+                        let e = m.healthTrait;
+                        if (t < 0) {
+                          if (!v) throw new Error("Expected healer object to be set");
+                          if ((e.healBy(-t, v, r), 100 === e.health)) break;
+                        } else {
+                          if (
+                            (m === o.obj && I < 1 && (P = m),
+                            this.rules.causesDelayKill &&
+                              m.isBuilding() &&
+                              m.delayedKillTrait &&
+                              ((f = m.healthTrait.getHitPoints()),
+                              t >= f &&
+                                ((t = f - 1),
+                                m.delayedKillTrait.isActive() ||
+                                  ((f = this.rules.delayKillAtMax),
+                                  (y = this.rules.delayKillFrames),
+                                  (y = D.lerp(y, f * y, I / E)),
+                                  m.delayedKillTrait.activate(y, l)))),
+                            this.inflictDamage(t, m, l, r, !P))
+                          )
+                            break;
+                          m.isVehicle() &&
+                            this.rules.rocker &&
+                            0 < (I = D.clamp(i / 300, 0, 1)) &&
+                            ((y =
+                              F.FacingUtil.fromMapCoords(
+                                m.position.getMapPosition().clone().sub(L.Coords.vecWorldToGround(s)),
+                              ) - m.direction),
+                            m.applyRocking(y, I));
+                        }
+                      }
+                    }
+                  else m.isTechno() && m.invulnerableTrait.isActive() && (R = !0);
+                }
+              T = T.rules.radLevel;
+              T && E && r.mapRadiationTrait.createRadSite(t, T, E + 1);
+              T = d ? void 0 : R ? r.rules.audioVisual.weaponNullifyAnim : this.pickExplodeAnim(e, P, a, r, w);
+              if (!R && a === k.ZoneType.Ground) {
+                let e = new U.AnimTerrainEffect();
+                (T && e.destroyOre(T, t, r), h && e.spawnSmudges(h, t, r), T && e.spawnSmudges(T, t, r));
+              }
+              r.events.dispatch(new _.WarheadDetonateEvent(this, s, T, w));
+            }
+            pickExplodeAnim(t, i, r, s, a) {
+              if (t) {
+                if (a) return s.rules.audioVisual.weatherConBoltExplosion;
+                if (
+                  this.rules.conventional &&
+                  r === k.ZoneType.Water &&
+                  (!i || i.isBuilding() || (i.isVehicle() && i.submergibleTrait))
+                ) {
+                  var n = s.rules.combatDamage.splashList;
+                  return n[D.clamp(Math.floor(t / 50), 0, n.length - 1)];
+                }
+                n = this.rules.animList.length;
+                let e;
+                return n
+                  ? ((e =
+                      s.rules.combatDamage.c4Warhead === this.rules.name
+                        ? n - 1
+                        : this.rules.emEffect
+                          ? s.generateRandomInt(0, n - 1)
+                          : D.clamp(Math.floor(t / 25), 0, n - 1)),
+                    this.rules.animList[e])
+                  : void 0;
+              }
+            }
+          }),
+        ),
+          (m.SPECIAL_WARHEAD_NAME = "Special"),
+          (m.HE_WARHEAD_NAME = "HE"));
+      },
+    };
+  },
+);

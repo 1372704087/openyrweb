@@ -1,0 +1,87 @@
+// === Reconstructed SystemJS module: gui/screen/options/StorageScreen ===
+// deps: ["gui/jsx/jsx","gui/jsx/HtmlView","gui/screen/options/component/StorageExplorer","gui/screen/mainMenu/MainMenuScreen"]
+// Note: variable/type names are minified approximations of the original TypeScript.
+
+System.register(
+  "gui/screen/options/StorageScreen",
+  [
+    "gui/jsx/jsx",
+    "gui/jsx/HtmlView",
+    "gui/screen/options/component/StorageExplorer",
+    "gui/screen/mainMenu/MainMenuScreen",
+  ],
+  function (e, t) {
+    "use strict";
+    var i, r, s, a, n;
+    t && t.id;
+    return {
+      setters: [
+        function (e) {
+          i = e;
+        },
+        function (e) {
+          r = e;
+        },
+        function (e) {
+          s = e;
+        },
+        function (e) {
+          a = e;
+        },
+      ],
+      execute: function () {
+        ((n = class extends a.MainMenuScreen {
+          constructor(e, t, i, r) {
+            (super(),
+              (this.strings = e),
+              (this.jsxRenderer = t),
+              (this.messageBoxApi = i),
+              (this.rfs = r),
+              (this.title = this.strings.get("GUI:Storage")));
+          }
+          onEnter(e) {
+            (this.controller.setSidebarButtons([
+              {
+                label: this.strings.get("GUI:Back"),
+                isBottom: !0,
+                onClick: () => {
+                  this.controller?.leaveCurrentScreen();
+                },
+              },
+            ]),
+              this.controller.showSidebarButtons());
+            var [t] = this.jsxRenderer.render(
+              i.jsx(r.HtmlView, {
+                width: "100%",
+                height: "100%",
+                component: s.StorageExplorer,
+                props: {
+                  strings: this.strings,
+                  messageBoxApi: this.messageBoxApi,
+                  storageDirHandle: this.rfs.getRootDirectoryHandle(),
+                  startIn: e?.startIn,
+                  onFileSystemChange: () => {
+                    this.controller?.setSidebarButtons([
+                      {
+                        label: this.strings.get("GUI:ExitAndReload"),
+                        isBottom: !0,
+                        onClick: () => {
+                          location.reload();
+                        },
+                      },
+                    ]);
+                  },
+                },
+              }),
+            );
+            this.controller.setMainComponent(t);
+          }
+          async onLeave() {
+            await this.controller.hideSidebarButtons();
+          }
+        }),
+          e("StorageScreen", n));
+      },
+    };
+  },
+);
