@@ -1,0 +1,36 @@
+### 修复内容 
+1. 建筑动画表现修复（ src/engine/renderable/entity/Building.ts.js ）
+- 建造期间仅显示建造动画，避免 IDLE / ACTIVE 与建造动画叠加。
+- 生化反应炉（ bioReactorPowerTrait ）建成后只保留一个 ACTIVE 动画：
+  - 未进驻时显示状态1；
+  - 进驻后切换到状态2。
+- IDLE 动画对生化反应炉默认隐藏，避免与 ACTIVE 同时出现。
+- 动画状态在 STOPPED / DELAYED 之间切换时，使用 intendedVisible 记录并恢复真实可见性，防止状态切换后模型误显/误隐。
+- 建筑受损时，根据 damagedImage 找到对应受损 SHP 帧并设置 frameOffset ，正确播放受损动画。
+- 生化反应炉不再被错误地套用普通驻守建筑的 frame 2 作为“已进驻”外观。
+- 异常处理收紧：只吞掉 RangeError ，其它异常继续抛出。 
+
+2. 动画配置解析补充（ src/engine/renderable/entity/building/BuildingAnimArtProps.ts.js ）
+- 解析建筑动画配置时，若存在 damagedArt ，则记录其图片名到 damagedImage ，为受损动画切换提供数据支持。 
+
+3. 建筑 SHP 帧信息支持受损图（ src/engine/renderable/entity/building/BuildingShpHelper.ts.js ）
+- getShpFrameInfos 增加 animArtProps 参数，统一遍历所有动画配置。
+- 同时为 image 和 damagedImage 注册 SHP 帧信息，并分别通过 ImageFinder 查找资源，保证受损图也能被正确加载。 
+
+4. SHP 构建器支持运行时切帧（ src/engine/renderable/builder/ShpBuilder.ts.js ）
+- frameOffset setter 不再在 build() 后抛错，而是立即刷新当前渲染帧，支撑受损/正常状态切换。 
+
+5. 加载流程传入动画配置（ src/gui/screen/game/GameLoader.ts.js ）
+- 调用 getShpFrameInfos 时传入 animArtProps ，与 BuildingShpHelper 的新签名配套。 
+
+6. 发电建筑电力标签（ src/engine/renderable/entity/PipOverlay.ts.js ）
+- 选中发电建筑（发电厂、核电站、生化反应炉等）后，在建筑上方显示 电力=XXX 负载=XXX 标签。
+- 行为类似原版“主要”标签：选中出现，取消选中消失。
+- 仅对 rules.power > 0 的建筑显示，耗电建筑不显示。
+- 增加对应的纹理/材质创建、状态缓存与清理逻辑，避免内存泄漏。
+
+ 7. 鼠标悬停提示还原（ src/gui/screen/game/worldInteraction/TooltipHandler.ts.js ）
+- 去掉悬停时显示 +200 / -50 电力的自定义代码，恢复原版提示行为。
+
+### 未修复
+生化反应炉 进驻逻辑不应该是平民建筑逻辑

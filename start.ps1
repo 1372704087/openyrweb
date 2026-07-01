@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env pwsh
+#!/usr/bin/env pwsh
 # OpenYRWeb 一键启动脚本（Windows）
 # 功能：检查环境 -> 安装依赖 -> 构建 vendor -> 构建客户端 -> 启动服务 -> 打开浏览器
 
@@ -85,14 +85,33 @@ if (-not (Test-Path $buildIndex)) {
 
 # 5. 启动服务
 Write-Step "启动本地服务器"
-$serveProc = Start-Process -FilePath "node" -ArgumentList "server/index.mjs", $SERVE_PORT -WorkingDirectory $ROOT -WindowStyle Hidden -PassThru
+
+# 先检查端口占用，避免启动后隐藏窗口吞掉 EADDRINUSE 错误
+$portInUse = Get-NetTCPConnection -LocalPort $SERVE_PORT -State Listen -ErrorAction SilentlyContinue
+if ($portInUse) {
+    $owner = $portInUse | Select-Object -First 1 -ExpandProperty OwningProcess
+    Write-Host "错误：端口 $SERVE_PORT 已被占用（PID: $owner）" -ForegroundColor Red
+    Write-Host "请先停止占用该端口的进程，或换端口启动：例如 `$env:PORT=8081; .\start.ps1" -ForegroundColor Yellow
+    pause
+    exit 1
+}
+
+$outLog = Join-Path $ROOT "server-start.out.log"
+$errLog = Join-Path $ROOT "server-start.err.log"
+Remove-Item $outLog, $errLog -ErrorAction SilentlyContinue
+$serveProc = Start-Process -FilePath "node" -ArgumentList "server/index.mjs", $SERVE_PORT -WorkingDirectory $ROOT -WindowStyle Hidden -PassThru -RedirectStandardOutput $outLog -RedirectStandardError $errLog
 
 # 6. 等待服务可用
 Write-Host "等待服务器启动..." -NoNewline
 $maxWait = 30
 $started = $false
+$crashed = $false
 for ($i = 0; $i -lt $maxWait; $i++) {
     Start-Sleep -Seconds 1
+    if ($serveProc.HasExited) {
+        $crashed = $true
+        break
+    }
     try {
         $resp = Invoke-WebRequest -Uri $SERVE_URL -Method HEAD -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
         if ($resp.StatusCode -eq 200) {
@@ -106,9 +125,28 @@ for ($i = 0; $i -lt $maxWait; $i++) {
 
 if (-not $started) {
     Write-Host "`n错误：服务器未能在 ${maxWait}s 内启动" -ForegroundColor Red
+    if ($crashed) {
+        Write-Host "服务器进程已提前退出。" -ForegroundColor Red
+    }
+    foreach ($log in @($outLog, $errLog)) {
+        if (Test-Path $log) {
+            $content = Get-Content $log -Raw
+            if ($content) {
+                Write-Host "`n--- $(Split-Path $log -Leaf) ---" -ForegroundColor Yellow
+                Write-Host $content
+                Write-Host "--- 日志结束 ---`n" -ForegroundColor Yellow
+            }
+        }
+    }
+    if ($serveProc -and -not $serveProc.HasExited) {
+        Stop-Process -Id $serveProc.Id -Force -ErrorAction SilentlyContinue
+    }
     pause
     exit 1
 }
+
+# 启动成功后清理日志
+Remove-Item $outLog, $errLog -ErrorAction SilentlyContinue
 Write-Host "`n服务器已启动：$SERVE_URL" -ForegroundColor Green
 
 # 7. 打开浏览器
@@ -122,4 +160,5 @@ Write-Host "`n按任意键停止服务器并退出..." -ForegroundColor Yellow
 if ($serveProc -and -not $serveProc.HasExited) {
     Stop-Process -Id $serveProc.Id -Force
 }
+Remove-Item $outLog, $errLog -ErrorAction SilentlyContinue
 Write-Host "已停止服务器" -ForegroundColor Green

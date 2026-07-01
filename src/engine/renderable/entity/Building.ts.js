@@ -223,7 +223,7 @@ System.register(
                 this.bibShpFile = C;
                 let x = new N.BuildingShpHelper(this.imageFinder);
                 w = this.animShpFiles = x.collectAnimShpFiles(w, this.objectArt);
-                let O = (this.shpFrameInfos = x.getShpFrameInfos(this.objectArt, E, C, w)),
+                let O = (this.shpFrameInfos = x.getShpFrameInfos(this.objectArt, E, C, w, this.animArtProps)),
                   A = this.buildingImageDataCache.get(this.gameObject.name);
                 (A ||
                   ((A = y.aggregate(O.values(), `agg_${this.objectRules.name}.shp`)),
@@ -498,9 +498,14 @@ System.register(
                       (this.animations.forEach((e, t) => {
                         switch (e.getState()) {
                           case f.AnimationState.STOPPED:
+                            t.get3DObject().visible = !1;
                             return;
                           case f.AnimationState.DELAYED:
-                            (e.update(i), (t.get3DObject().visible = e.getState() !== f.AnimationState.DELAYED));
+                            (e.update(i),
+                            (t.get3DObject().visible =
+                              e.getState() !== f.AnimationState.DELAYED
+                                ? t.get3DObject().userData.intendedVisible !== !1
+                                : !1));
                             break;
                           case f.AnimationState.NOT_STARTED:
                             e.start(i);
@@ -543,6 +548,13 @@ System.register(
                     (this.lastHealth = this.gameObject.healthTrait.health),
                     (this.lastWallType = this.gameObject.wallTrait?.wallType),
                     (c || d || g) && this.updateImage(h),
+                    d &&
+                      this.currentAnimType === M.AnimationType.IDLE &&
+                      (this.setActiveAnimationVisible(),
+                        this.setAnimationVisibility(
+                          M.AnimationType.IDLE,
+                          !this.gameObject.bioReactorPowerTrait,
+                        )),
                     g &&
                       h === p.DamageType.DESTROYED &&
                       this.objectRules.explosion.length &&
@@ -625,7 +637,9 @@ System.register(
                       : e > 100 * this.rules.audioVisual.conditionRed
                         ? p.DamageType.CONDITION_YELLOW
                         : p.DamageType.CONDITION_RED),
-                  ((t && this.objectRules.canBeOccupied) || t === p.DamageType.CONDITION_RED) && (t -= 1),
+                  (!this.gameObject.bioReactorPowerTrait &&
+                    ((t && this.objectRules.ini.getBool("CanBeOccupied")) || t === p.DamageType.CONDITION_RED) &&
+                    (t -= 1)),
                   t
                 );
               }
@@ -643,13 +657,17 @@ System.register(
                   this.animObjects.forEach((a, n) => {
                     a.forEach((t, i) => {
                       if (n !== M.AnimationType.BUILDUP && n !== M.AnimationType.UNBUILD) {
-                        l && a.forEach((e) => (e.get3DObject().visible = !1));
+                        l && a.forEach((e) => ((e.get3DObject().visible = !1), (e.get3DObject().userData.intendedVisible = !1)));
                         let e = this.animations.get(t);
                         var r = o !== p.DamageType.NORMAL,
                           s = this.animArtProps.getByType(n)[i];
-                        !r || s.damagedArt
-                          ? (e.props.setArt(r ? s.damagedArt : s.art), e.rewind())
-                          : console.warn(`<${this.gameObject.name}>: Missing damaged anim ${M.AnimationType[n]},` + i);
+                        if (!r || s.damagedArt) {
+                          let a = r ? s.damagedImage : s.image,
+                            l = this.animShpFiles.get(a);
+                          e.props.setArt(r ? s.damagedArt : s.art),
+                            e.rewind(),
+                            l && t.builder.setFrameOffset(this.aggregatedImageData.imageIndexes.get(l));
+                        } else console.warn(`<${this.gameObject.name}>: Missing damaged anim ${M.AnimationType[n]},` + i);
                       }
                     });
                   }));
@@ -660,10 +678,14 @@ System.register(
                   t.rewind();
                   var i = t.props.getArt().getString("StartSound");
                   i && this.handleSoundChange(i, e, r, 0.15);
-                });
+                }),
+                  !l && this.gameObject.bioReactorPowerTrait && this.currentAnimType === M.AnimationType.IDLE && this.setActiveAnimationVisible();
               }
               updateMainObjFrame(e, t) {
-                let i = e ? 2 : t;
+                // Bio Reactor (bioReactorPowerTrait) SHP has no "occupied" frame — frame 2 is the
+                // RED damage frame, not a garrisoned appearance. Only civilian garrisonables (Battle
+                // Bunker etc.) use frame 2 for the occupied state.
+                let i = e && !this.gameObject.bioReactorPowerTrait ? 2 : t;
                 var r;
                 this.mainShpFile &&
                   this.mainObj &&
@@ -828,7 +850,7 @@ System.register(
                     let i = [],
                       r = 1;
                     for (var s of e) {
-                      var a = this.animShpFiles.get(s);
+                      var a = this.animShpFiles.get(s.image);
                       if (a) {
                         let e = this.createAnimObject(s, a, n, r++, o);
                         e && (l.push(e.get3DObject()), i.push(e));
@@ -1038,6 +1060,7 @@ System.register(
                 }
                 for (var s of r) {
                   s.get3DObject().visible = i;
+                  s.get3DObject().userData.intendedVisible = i;
                   let e = this.animations.get(s).props.getArt(),
                     t = e.getString("Report");
                   ((t = t || e.getString("StartSound")), t && this.handleSoundChange(t, s, i));
@@ -1047,10 +1070,15 @@ System.register(
                 let e = this.animArtProps.getByType(M.AnimationType.ACTIVE);
                 (this.objectRules.refinery && (e = [e[0]]),
                   e.forEach(({ showWhenUnpowered: e }, t) => {
+                    let i = this.powered || e;
+                    if (this.gameObject.bioReactorPowerTrait) {
+                      let r = !!this.gameObject.garrisonTrait?.isOccupied();
+                      0 === t && (i = i && !r), 1 === t && (i = i && r);
+                    }
                     try {
-                      this.setAnimationVisibility(M.AnimationType.ACTIVE, this.powered || e, t);
+                      this.setAnimationVisibility(M.AnimationType.ACTIVE, i, t);
                     } catch (e) {
-                      RangeError;
+                      if (!(e instanceof RangeError)) throw e;
                     }
                   }));
               }
@@ -1185,7 +1213,10 @@ System.register(
                         ? (this.setAnimationVisibility(M.AnimationType.SUPER, !0, 0),
                           (a = this.animObjects.get(M.AnimationType.SUPER)[0]),
                           this.animations.get(a).start(t))
-                        : (this.setAnimationVisibility(M.AnimationType.IDLE, !0),
+                        : (this.setAnimationVisibility(
+                            M.AnimationType.IDLE,
+                            !this.gameObject.bioReactorPowerTrait,
+                          ),
                           this.animObjects.get(M.AnimationType.IDLE).forEach((e) => {
                             this.animations.get(e).start(t);
                           })));

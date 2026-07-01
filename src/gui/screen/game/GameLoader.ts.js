@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: gui/screen/game/GameLoader ===
+﻿// === Reconstructed SystemJS module: gui/screen/game/GameLoader ===
 // deps: ["data/DataStream","@puzzl/core/lib/async/cancellation","engine/ResourceLoader","engine/resourceConfigs","engine/Engine","engine/EngineType","engine/TheaterType","util/time","game/SideType","game/Coords","engine/IsoCoords","engine/type/ObjectType","engine/ImageFinder","engine/renderable/builder/ShpBuilder","engine/renderable/entity/PipOverlay","engine/renderable/builder/CanvasSpriteBuilder","game/theater/TileSets","game/GameFactory","engine/renderable/fx/TrailerSmokeFx","engine/renderable/builder/ShpAggregator","engine/renderable/entity/building/BuildingShpHelper","engine/renderable/entity/building/BuildingAnimArtProps","util/math","data/MixFile","util/userAgent","game/gameopts/GameOptRandomGen","engine/renderable/DebugRenderable","game/ini/MixinRules","util/typeGuard"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -451,7 +451,7 @@ System.register(
                       var w = r.findByObjectArt(v),
                         E = v.bibShape ? r.find(v.bibShape, v.useTheaterExtension) : void 0,
                         C = n.collectAnimShpFiles(t, v);
-                      let e = n.getShpFrameInfos(v, w, E, C);
+                      let e = n.getShpFrameInfos(v, w, E, C, t);
                       var x = o.aggregate(e.values(), `agg_${f}.shp`);
                       (this.buildingImageDataCache.set(f, x), I.ShpBuilder.prepareTexture(x.file));
                     } catch (e) {

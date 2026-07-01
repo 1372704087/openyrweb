@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingShpHelper ===
+﻿// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingShpHelper ===
 // deps: ["engine/AnimProps","engine/ImageFinder","engine/renderable/builder/ShpAggregator"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -28,14 +28,23 @@ System.register(
             constructor(e) {
               this.imageFinder = e;
             }
-            getShpFrameInfos(e, t, i, r) {
+            getShpFrameInfos(e, t, i, r, a) {
               let s = new Map();
               (t && s.set(t, l.ShpAggregator.getShpFrameInfo(t, e.hasShadow)),
                 i && s.set(i, l.ShpAggregator.getShpFrameInfo(i, e.hasShadow)));
-              for (var [a, n] of r) {
-                ((a = new o.AnimProps(a.art, n)), (a = l.ShpAggregator.getShpFrameInfo(n, a.shadow)));
-                s.set(n, a);
-              }
+              a.getAll().forEach((t) => {
+                t.forEach((e) => {
+                  let addFrameInfo = (t, i) => {
+                    if (!i) return;
+                    let a = r.get(i);
+                    if (a) {
+                      let e = new o.AnimProps(t, a);
+                      s.set(a, l.ShpAggregator.getShpFrameInfo(a, e.shadow));
+                    }
+                  };
+                  addFrameInfo(e.art, e.image), e.damagedArt && addFrameInfo(e.damagedArt, e.damagedImage);
+                });
+              });
               return s;
             }
             collectAnimShpFiles(e, r) {
@@ -43,17 +52,20 @@ System.register(
               return (
                 e.getAll().forEach((e, t) => {
                   for (var i of e) {
-                    let e;
-                    try {
-                      e = this.imageFinder.find(i.image, r.useTheaterExtension);
-                    } catch (e) {
-                      if (e instanceof a.ImageFinder.MissingImageError) {
-                        console.warn(e.message);
-                        continue;
+                    for (var n of [i.image, i.damagedImage]) {
+                      if (!n || s.has(n)) continue;
+                      let e;
+                      try {
+                        e = this.imageFinder.find(n, r.useTheaterExtension);
+                      } catch (e) {
+                        if (e instanceof a.ImageFinder.MissingImageError) {
+                          console.warn(e.message);
+                          continue;
+                        }
+                        throw e;
                       }
-                      throw e;
+                      s.set(n, e);
                     }
-                    s.set(i, e);
                   }
                 }),
                 s

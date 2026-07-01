@@ -35,3 +35,5 @@ AGENTS.md
 .DS_Store
 *.swp
 /.vs
+/server-start.err.log
+/server-start.out.log

@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: gui/screen/game/worldInteraction/TooltipHandler ===
+﻿// === Reconstructed SystemJS module: gui/screen/game/worldInteraction/TooltipHandler ===
 // deps: ["util/disposable/CompositeDisposable","gui/screen/game/worldInteraction/Tooltip"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -114,18 +114,6 @@ System.register(
                       ? (i = e.replace(/\{([^}]+)\}/g, (e, t) => this.strings.get(t)))
                       : (this.strings.has(e) || e.match(/^NOSTR:/i)) && (i = this.strings.get(e))),
                     this.debugText.value && (i += ` (ID: ${t.entity.gameObject.id})`));
-                  // OpenYRWeb: append power output for power-generating buildings. Vanilla YR shows
-                  // "+<N>" on power-plant tooltips and "-<N>" on drains. For the Bio Reactor the
-                  // current output already includes the per-garrison ExtraPower bonus (the Bio Reactor's
-                  // full output is owned by BioReactorPowerTrait.registered), so the tooltip reflects
-                  // the live garrisoned total.
-                  if (t.entity.isTechno?.() && t.entity.rules?.power && t.entity.owner && !t.entity.owner.isNeutral) {
-                    var p = t.entity.bioReactorPowerTrait ? t.entity.bioReactorPowerTrait.registered : t.entity.rules.power;
-                    if (p) {
-                      i = i ? i + "\n" : "";
-                      i += 0 < p ? "+" + p : "" + p;
-                    }
-                  }
                 } else t.uiObject && (i = t.uiObject.userData.tooltip);
                 return i;
               }

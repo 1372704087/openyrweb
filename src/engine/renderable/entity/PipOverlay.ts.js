@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/entity/PipOverlay ===
+﻿// === Reconstructed SystemJS module: engine/renderable/entity/PipOverlay ===
 // deps: ["engine/gfx/TextureAtlas","data/Bitmap","engine/gfx/SpriteUtils","game/Coords","engine/gfx/TextureUtils","game/gameobject/selection/SelectionLevel","game/type/PipColor","util/disposable/CompositeDisposable","engine/gfx/OverlayUtils","engine/renderable/fx/RallyPointFx","engine/renderable/entity/unit/FlyerHelperMode","game/gameobject/unit/ZoneType","engine/gfx/BufferGeometryUtils","engine/gfx/material/PaletteBasicMaterial","engine/gfx/batch/BatchedMesh","game/gameobject/unit/HealthLevel","engine/renderable/entity/unit/DebugLabel","engine/Engine","engine/EngineType","engine/renderable/entity/UnitCastBarSprite","engine/renderable/entity/SecureProgressSprite"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -108,6 +108,7 @@ System.register(
             3: a.SelectionLevel.Hover,
             4: a.SelectionLevel.Selected,
             5: a.SelectionLevel.Selected,
+            6: a.SelectionLevel.Selected,
           }),
           (M = new Map()
             // OpenYRWeb: YR-only — health-pip texture indices for YR (16/17/18). RA2 entry dropped.
@@ -133,7 +134,11 @@ System.register(
                   [...R.primaryFactoryTextures.values()].forEach((e) => e.dispose()),
                   R.primaryFactoryTextures.clear(),
                   R.primaryFactoryMaterials.forEach((e) => e.dispose()),
-                  R.primaryFactoryMaterials.clear());
+                  R.primaryFactoryMaterials.clear(),
+                  [...R.powerInfoTextures.values()].forEach((e) => e.dispose()),
+                  R.powerInfoTextures.clear(),
+                  R.powerInfoMaterials.forEach((e) => e.dispose()),
+                  R.powerInfoMaterials.clear());
               }
               constructor(e, t, i, r, s, a, n, o, l, c, h, u, d, g, p, m) {
                 ((this.paradropRules = e),
@@ -153,6 +158,9 @@ System.register(
                   (this.useSpriteBatching = p),
                   (this.useMeshInstancing = m),
                   (this.lastPrimaryFactory = !1),
+                  (this.lastPowerInfo = !1),
+                  (this.lastPowerVal = -1),
+                  (this.lastDrainVal = -1),
                   (this.invalidatedElements = []),
                   (this.disposables = new f.CompositeDisposable()));
               }
@@ -609,6 +617,48 @@ System.register(
                   return ((i.renderOrder = 999999), i);
                 }
               }
+              createPowerInfoTexture(e) {
+                var t = r.OverlayUtils.createTextBox(e, {
+                  color: this.gameObject.owner.color.asHexString(),
+                  borderColor: this.gameObject.owner.color.asHexString(),
+                  backgroundColor: "#000",
+                  fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+                  fontSize: 14,
+                  fontWeight: "500",
+                  paddingTop: 5,
+                  paddingBottom: 5,
+                  paddingLeft: 2,
+                  paddingRight: 4,
+                });
+                let i = new THREE.Texture(t);
+                return (
+                  (i.minFilter = THREE.NearestFilter),
+                  (i.magFilter = THREE.NearestFilter),
+                  (i.needsUpdate = !0),
+                  i
+                );
+              }
+              createPowerInfoSprite(e) {
+                if (!this.objectIsOpaqueToViewer()) {
+                  var t = this.createPowerInfoTexture(e),
+                    i = d.SpriteUtils.createSpriteGeometry({
+                      texture: t,
+                      camera: this.camera,
+                      align: { x: 1, y: 1 },
+                      offset: { x: -Math.floor(t.image.width / 2), y: Math.floor(t.image.height / 2) },
+                      scale: p.Coords.ISO_WORLD_SCALE,
+                    });
+                  let r = new THREE.MeshBasicMaterial({
+                    map: t,
+                    alphaTest: 0.5,
+                    transparent: !0,
+                    depthTest: !1,
+                    flatShading: !0,
+                  });
+                  let s = this.useSpriteBatching ? new v.BatchedMesh(i, r, v.BatchMode.Merging) : new THREE.Mesh(i, r);
+                  return ((s.renderOrder = 999998), s);
+                }
+              }
               createVeteranIndicator(t) {
                 if (t.veteranLevel) {
                   var i = R.pipsFile.getImage(13 + t.veteranLevel - 1),
@@ -650,6 +700,15 @@ System.register(
                     this.invalidatedElements[4] &&
                       i >= A[4] &&
                       ((this.invalidatedElements[4] = void 0), this.updatePrimaryFactorySprite(r)));
+                  // OpenYRWeb: show power info overlay for power-generating buildings
+                  r = t.isBuilding() && 0 < t.rules.power && !!t.owner?.powerTrait;
+                  var pv = r ? t.owner.powerTrait.power : -1,
+                    dv = r ? t.owner.powerTrait.drain : -1;
+                  ((this.lastPowerInfo === r && this.lastPowerVal === pv && this.lastDrainVal === dv) ||
+                    ((this.lastPowerInfo = r), (this.lastPowerVal = pv), (this.lastDrainVal = dv), (this.invalidatedElements[6] = !0)),
+                    this.invalidatedElements[6] &&
+                      i >= A[6] &&
+                      ((this.invalidatedElements[6] = void 0), this.updatePowerInfoSprite(r, pv, dv)));
                   r = (t.isBuilding() && t.rallyTrait?.getRallyPoint()) || void 0;
                   if (
                     ((this.lastRallyPoint === r && this.lastOwner === t.owner) ||
@@ -678,6 +737,7 @@ System.register(
                       [3, this.controlGroupSprite],
                       [4, this.primaryFactorySprite],
                       [5, this.rallyLine],
+                      [6, this.powerInfoSprite],
                     ]);
                     e.forEach((e, t) => {
                       e && (e.visible = i >= A[t]);
@@ -788,6 +848,14 @@ System.register(
                 var t;
                 (this.primaryFactorySprite && this.rootObj.remove(this.primaryFactorySprite),
                   !e || ((t = this.primaryFactorySprite = this.createPrimaryFactorySprite()) && this.rootObj.add(t)));
+              }
+              updatePowerInfoSprite(e, t, i) {
+                this.powerInfoSprite && (this.rootObj.remove(this.powerInfoSprite), (this.powerInfoSprite = void 0));
+                if (e && void 0 !== t && void 0 !== i) {
+                  var r = this.strings.get("TXT_POWER_DRAIN", t, i),
+                    s = this.createPowerInfoSprite(r);
+                  s && ((this.powerInfoSprite = s), this.rootObj.add(s));
+                }
               }
               updateControlGroupSprite(i) {
                 if ((this.controlGroupSprite && this.rootObj.remove(this.controlGroupSprite), void 0 !== i)) {
@@ -913,6 +981,7 @@ System.register(
                   this.flyHelper?.dispose(),
                   this.behindAnim?.dispose(),
                   this.debugLabel?.dispose(),
+                  this.powerInfoSprite && (this.rootObj.remove(this.powerInfoSprite), (this.powerInfoSprite = void 0)),
                   (this.animFactory = void 0));
               }
             }),
@@ -926,7 +995,9 @@ System.register(
           (R.controlGroupTextures = new Map()),
           (R.controlGroupMaterials = new Map()),
           (R.primaryFactoryTextures = new Map()),
-          (R.primaryFactoryMaterials = new Map()));
+          (R.primaryFactoryMaterials = new Map()),
+          (R.powerInfoTextures = new Map()),
+          (R.powerInfoMaterials = new Map()));
       },
     };
   },

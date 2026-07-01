@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingAnimArtProps ===
+﻿// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingAnimArtProps ===
 // deps: ["engine/renderable/entity/building/AnimationType","data/IniSection","engine/renderable/entity/building/BuildingAnimData","engine/type/ObjectType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -75,6 +75,7 @@ System.register(
                       let r = t.getString("Image");
                       ((r = r || a),
                         (e.image = r),
+                        e.damagedArt && (e.damagedImage = e.damagedArt.getString("Image") || n),
                         (e.flat = "UnderDoorAnim" === s || "UnderRoofDoorAnim" === s || t.getBool("Flat")),
                         i && ((e.translucent = i.translucent), (e.translucency = i.translucency)),
                         l.push(e));

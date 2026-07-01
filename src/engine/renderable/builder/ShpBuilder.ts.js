@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/builder/ShpBuilder ===
+﻿// === Reconstructed SystemJS module: engine/renderable/builder/ShpBuilder ===
 // deps: ["engine/gfx/TextureUtils","engine/gfx/SpriteUtils","engine/renderable/builder/ShpTextureAtlas","engine/gfx/material/PaletteBasicMaterial","engine/gfx/batch/BatchedMesh"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -100,8 +100,10 @@ System.register(
               this.offset = e;
             }
             setFrameOffset(e) {
-              if (this.mesh) throw new Error("frameOffset can only be set before calling build()");
-              this.frameOffset = e;
+              if (((this.frameOffset = e), this.mesh)) {
+                let t = this.frameNo;
+                (this.frameNo = -1), this.setFrame(t);
+              }
             }
             initTexture() {
               (a.prepareTexture(this.shpFile), (this.atlas = a.textureCache.get(this.shpFile)));
