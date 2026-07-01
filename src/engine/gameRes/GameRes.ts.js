@@ -545,7 +545,9 @@ System.register(
                 r.set("menulogo.png", f.Engine.vfs.openFile("menulogo.png").asFile("image/png"));
               } catch (e) {
                 if (!(e instanceof k.FileNotFoundError)) throw e;
-                console.warn('Image "menulogo.png" not found in browser FS (branding asset intentionally not shipped).');
+                // OpenYRWeb: expected — menulogo.png is an upstream branding asset we don't ship.
+                // The neutral CSS fallback (style.css) is used; keep this quiet (debug only).
+                console.debug('Image "menulogo.png" not found in browser FS (branding asset intentionally not shipped).');
               }
               r.set("icons24.pcx", await this.generateIconSprite(f.Engine.vfs));
               var s,
@@ -564,7 +566,11 @@ System.register(
                 var n = r.get(a[s]);
                 n
                   ? ((n = URL.createObjectURL(n)), (i[s] = `url("${n}")`))
-                  : console.warn(`Image "${a[s]}" not found in browser FS`);
+                  : // menulogo.png is the only optional entry here (upstream branding, not shipped);
+                    // the rest are engine-required assets whose absence indicates a real problem.
+                    a[s] === "menulogo.png"
+                    ? console.debug(`Image "${a[s]}" not found in browser FS`)
+                    : console.warn(`Image "${a[s]}" not found in browser FS`);
               }
               Object.keys(i).forEach((e) => {
                 t.style.setProperty(e, i[e]);

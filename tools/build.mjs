@@ -294,6 +294,9 @@ const EN_LOCALE = {
   "ts:gameres_locate_title": "Locate your Red Alert 2 game files",
   "ts:gameres_import_desc":
     "This project does not distribute copyrighted game data, so there is no automatic download.\n\nProvide your own copy of the game: click \"Browse for folder\" and select an installed Red Alert 2 / Yuri's Revenge folder, or click \"Browse for archive\" and choose a .zip/.7z/.rar that contains the six .mix files.",
+  "ts:gameres_oneclick_desc":
+    "Don't have the files handy? Download both Red Alert 2 and Yuri's Revenge installers and the required .mix files will be extracted automatically. (Uses your own legitimately obtained copies.)",
+  "ts:gameres_oneclick_button": "One-click download & extract",
   "gui:importmodunsupportedwarn":
     "The mod you are trying to install may not be fully compatible with this engine. You may still install it, but it may not work correctly. Proceed at your own risk!",
   "ts:donateprompt": "",
@@ -314,6 +317,9 @@ const ZH_CN_LOCALE = {
   "ts:gameres_locate_title": "请定位你的红警2游戏文件",
   "ts:gameres_import_desc":
     "本项目不分发受版权保护的游戏数据，因此无法自动下载。\n\n请提供你自己的正版游戏：点击「浏览文件夹」选择已安装的红警2/尤里的复仇目录；或点击「浏览压缩包」选择包含六个 .mix 文件的 .zip/.7z/.rar 压缩包。",
+  "ts:gameres_oneclick_desc":
+    "手头没有游戏文件？可一键下载红警2与尤里的复仇安装程序，所需的 .mix 文件将自动解压。（使用你合法获得的正版。）",
+  "ts:gameres_oneclick_button": "一键下载并解压",
   "gui:importmodunsupportedwarn": "您尝试安装的 Mod 可能与本引擎不完全兼容。仍可安装，但可能无法正常工作，风险自负！",
   "ts:donateprompt": "",
   "ts:donatenow": "",
@@ -333,6 +339,9 @@ const ZH_TW_LOCALE = {
   "ts:gameres_locate_title": "請定位您的紅警2遊戲檔案",
   "ts:gameres_import_desc":
     "本專案不分發受版權保護的遊戲資料，因此無法自動下載。\n\n請提供您自己的正版遊戲：點擊「瀏覽資料夾」選擇已安裝的紅警2/尤里的復仇目錄；或點擊「瀏覽壓縮檔」選擇包含六個 .mix 檔案的 .zip/.7z/.rar 壓縮檔。",
+  "ts:gameres_oneclick_desc":
+    "手邊沒有遊戲檔案？可一鍵下載紅警2與尤里的復仇安裝程式，所需的 .mix 檔案將自動解壓。（使用您合法取得的正版。）",
+  "ts:gameres_oneclick_button": "一鍵下載並解壓",
   "gui:importmodunsupportedwarn": "您嘗試安裝的模組可能與本引擎不完全相容。仍可安裝，但可能無法正常運作，風險自負！",
   "ts:donateprompt": "",
   "ts:donatenow": "",

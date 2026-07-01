@@ -91,7 +91,13 @@ System.register(
                   var s;
                   i.includes(r)
                     ? ((s = t.getNumber(r)), this.changeHotKey(r, s))
-                    : console.warn("Unknown keyboard command " + r);
+                    : // OpenYRWeb: keyboardmd.ini (shipped inside the user's langmd.mix) contains
+                      // Westwood map-editor / debug leftovers (CopyBlock, PasteBlock, FileNew,
+                      // FileOpen, FileSave, MultiplayerDebug, ForceLose) that were never part of
+                      // the released KeyCommandType enum and have no handler here. They are dead
+                      // bindings even in the original PC game. Demote to debug so the console
+                      // stays clean while keeping a breadcrumb for diagnosis.
+                      console.debug("Unknown keyboard command " + r);
                 }
                 return this;
               }
