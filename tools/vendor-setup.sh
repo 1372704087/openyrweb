@@ -25,18 +25,22 @@ fi
 echo "Populating vendor/ from client/ baseline (FOSS libs only)..."
 
 # lib/ — FOSS single-file libs (drop poll.js: upstream-only popup widget).
+# NOTE: ffmpeg-core.{js,wasm,worker.js} live HERE (not in dist/) because the
+# engine hardcodes corePath "lib/ffmpeg-core.js?v=1" (GameResImporter.ts.js)
+# and ffmpeg.min.js derives the .wasm/.worker.js paths from it by string
+# replace — so all three must sit under lib/ to match the runtime request.
 mkdir -p "$VENDOR/lib/three"
 cp "$CLIENT/lib/three.min.js" "$VENDOR/lib/"
 cp "$CLIENT/lib/three/"*.js "$VENDOR/lib/three/"
 for f in system.js lzo1x.js growingpacker.js fullscreen-api-polyfill.min.js; do
   cp "$CLIENT/lib/$f" "$VENDOR/lib/"
 done
+cp "$CLIENT/lib/ffmpeg-core.js" "$CLIENT/lib/ffmpeg-core.wasm" "$CLIENT/lib/ffmpeg-core.worker.js" "$VENDOR/lib/"
 
 # dist/ — FOSS wasm tools + polyfills (vendor.bundle.js + worker.js come from build-vendor.mjs).
 mkdir -p "$VENDOR/dist"
 cp "$CLIENT/dist/7zz.js" "$CLIENT/dist/7zz.wasm" "$VENDOR/dist/"
 cp "$CLIENT/dist/ffmpeg.min.js" "$VENDOR/dist/"
-cp "$CLIENT/lib/ffmpeg-core.js" "$CLIENT/lib/ffmpeg-core.wasm" "$CLIENT/lib/ffmpeg-core.worker.js" "$VENDOR/dist/"
 cp "$CLIENT/dist/web-audio-polyfill.min.js" "$VENDOR/dist/"
 
 # res/fonts — Fira Sans (OFL).

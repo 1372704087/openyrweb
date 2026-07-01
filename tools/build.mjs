@@ -85,8 +85,9 @@ function stepRepack() {
 
 // ---- 2. Vendor third-party FOSS libs from vendor/ ---------------------------
 // vendor/dist already contains: vendor.bundle.js, worker.js (npm-built),
-// 7zz.{js,wasm}, ffmpeg.{js,wasm}, web-audio-polyfill.min.js.
-// vendor/lib contains the single-file FOSS libs (three, systemjs, lzo, ...).
+// 7zz.{js,wasm}, ffmpeg.min.js, web-audio-polyfill.min.js.
+// vendor/lib contains the single-file FOSS libs (three, systemjs, lzo, ...) and
+// the ffmpeg-core.{js,wasm,worker.js} trio (engine corePath = "lib/ffmpeg-core.js").
 function stepVendor() {
   log("[2/6] Copying vendored FOSS libraries (vendor/dist, vendor/lib)");
   // dist/ — npm-built bundles + wasm tools + polyfills, verbatim.
@@ -114,6 +115,20 @@ function stepVendor() {
   // lib/ — FOSS single-file libs, verbatim.
   const libCount = copyTree(VENDOR, "lib", join(BUILD, "lib"));
   logv("lib/ (" + libCount + " files)");
+
+  // Guard against path drift: the engine hardcodes corePath "lib/ffmpeg-core.js"
+  // and ffmpeg.min.js derives the .wasm/.worker.js paths from it, so all three
+  // must land in build/lib/. A silent miss here 404s at runtime (regression that
+  // once shipped to Pages undetected).
+  for (const f of ["ffmpeg-core.js", "ffmpeg-core.wasm", "ffmpeg-core.worker.js"]) {
+    if (!existsSync(join(BUILD, "lib", f))) {
+      throw new Error(
+        "build/lib/" + f + " missing — ffmpeg core must be in vendor/lib/ " +
+        "(engine corePath is \"lib/ffmpeg-core.js\"). Check tools/vendor-setup.sh."
+      );
+    }
+  }
+  logv("lib/ffmpeg-core.{js,wasm,worker.js} present (corePath target verified)");
 }
 
 // ---- 3. Generate index.html -------------------------------------------------
