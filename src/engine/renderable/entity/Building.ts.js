@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/entity/Building ===
+﻿// === Reconstructed SystemJS module: engine/renderable/entity/Building ===
 // deps: ["engine/renderable/builder/ShpBuilder","engine/renderable/entity/building/DamageType","engine/renderable/entity/building/AnimationType","engine/gfx/OverlayUtils","game/gameobject/Building","engine/Animation","game/map/wallTypes","game/Coords","util/math","engine/AnimProps","engine/renderable/WithPosition","engine/renderable/ShpRenderable","engine/ImageFinder","engine/gfx/DebugUtils","engine/renderable/MapSpriteTranslation","engine/renderable/entity/building/BuildingAnimArtProps","util/typeGuard","engine/renderable/entity/HighlightAnimRunner","game/rules/TechnoRules","game/gameobject/trait/AttackTrait","game/SideType","game/gameobject/trait/FactoryTrait","game/gameobject/trait/UnitRepairTrait","game/gameobject/common/DeathType","engine/renderable/entity/InvulnerableAnimRunner","engine/renderable/entity/building/BuildingShpHelper","engine/renderable/entity/unit/ExtraLightHelper","engine/renderable/AlphaRenderable","engine/renderable/DebugRenderable","engine/gfx/MathUtils"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -1079,6 +1079,11 @@ System.register(
                       this.setAnimationVisibility(M.AnimationType.ACTIVE, i, t);
                     } catch (e) {
                       if (!(e instanceof RangeError)) throw e;
+                    }
+                    // Bio Reactor: hide shadow on ACTIVE animation overlays — main building already provides shadow
+                    if (this.gameObject.bioReactorPowerTrait) {
+                      let r = this.animObjects.get(M.AnimationType.ACTIVE);
+                      r && t < r.length && r[t].setShadowVisible(!1);
                     }
                   }));
               }

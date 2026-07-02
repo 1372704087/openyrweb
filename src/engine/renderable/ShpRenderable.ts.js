@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/ShpRenderable ===
+﻿// === Reconstructed SystemJS module: engine/renderable/ShpRenderable ===
 // deps: ["engine/renderable/builder/ShpBuilder","engine/renderable/ShadowRenderable","game/Coords"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 

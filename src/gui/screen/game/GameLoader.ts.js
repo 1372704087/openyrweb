@@ -215,7 +215,7 @@ System.register(
                   try {
                     await v.Engine.vfs.addMixFile("cameocd.mix");
                   } catch (e) {
-                    console.warn('Optional asset "cameocd.mix" not found — skipping (upstream custom cameo override intentionally not shipped).');
+                    console.debug('Optional asset "cameocd.mix" not found — skipping (upstream custom cameo override intentionally not shipped).');
                   }
                 })());
               var p,
@@ -305,7 +305,13 @@ System.register(
                   (await this.workerHostApi.waitForTasks(), s?.throwIfCancelled());
                 } catch (e) {
                   if (e instanceof b.OperationCanceledError) throw e;
-                  console.error(e);
+                  // OpenYRWeb: the worker intentionally rejects these jobs (WORKER_UNAVAILABLE),
+                  // routing to the main-thread WAV decoder (WavFile.decodeData via wavefile).
+                  // That fallback is fully functional, so demote the expected reject to debug
+                  // and only surface genuinely unexpected errors at error level.
+                  if (String(e?.message || e).includes("WORKER_UNAVAILABLE"))
+                    console.debug("Sounds will decode on demand (worker unavailable).");
+                  else console.error(e);
                 }
               }
             }
@@ -398,7 +404,7 @@ System.register(
                 try {
                   await v.Engine.vfs.addMixFile(t === S.SideType.GDI ? "sidec01cd.mix" : "sidec02cd.mix");
                 } catch (e) {
-                  console.warn('Optional side-cd mix not found — skipping (upstream custom side-UI override intentionally not shipped).');
+                  console.debug('Optional side-cd mix not found — skipping (upstream custom side-UI override intentionally not shipped).');
                 }
               })();
             }
@@ -553,7 +559,13 @@ System.register(
                   (await this.workerHostApi.waitForTasks(), n?.throwIfCancelled());
                 } catch (e) {
                   if (e instanceof b.OperationCanceledError) throw e;
-                  (console.error(e), console.warn("Failed to pre-load VXL geometries. Skipping."));
+                  // OpenYRWeb: see prepareSounds — the worker rejects on purpose
+                  // (WORKER_UNAVAILABLE); VXL geometries are built on the main thread on
+                  // demand via VxlGeometryPool.get() -> VxlGeometryMonotoneBuilder, so models
+                  // still render. Only the pre-load cache is skipped.
+                  if (String(e?.message || e).includes("WORKER_UNAVAILABLE"))
+                    console.debug("VXL geometries will build on demand (worker unavailable).");
+                  else (console.error(e), console.warn("Failed to pre-load VXL geometries. Skipping."));
                 }
                 await Promise.all(a.map((e) => e())).catch((e) =>
                   console.warn("Failed to persist VXL geometry cache", [e]),

@@ -1,4 +1,4 @@
-// vendor/worker-source.mjs — the engine's Web Worker endpoint.
+﻿// vendor/worker-source.mjs — the engine's Web Worker endpoint.
 //
 // The engine spawns this with `threads.spawn(new Worker("dist/worker.js"))` and
 // expects three job functions exposed via threads.js `expose()`:
@@ -18,18 +18,18 @@ import { expose } from "threads/worker";
 /** Decode a WAV/MP3 buffer into a playable AudioBuffer-shaped object.
  *  Rejected -> the engine decodes on the main thread. */
 async function decodeWav(_buffer) {
-  throw new Error("worker.decodeWav: not available; using main-thread decoder");
+  throw new Error("WORKER_UNAVAILABLE: worker.decodeWav rejected; using main-thread decoder");
 }
 
 /** Build a voxel geometry from a plain VXL description.
  *  Rejected -> the engine builds it on the main thread (VxlGeometryMonotoneBuilder). */
 async function generateVxlGeometry(_vxlPlain, _options) {
-  throw new Error("worker.generateVxlGeometry: not available; using main-thread builder");
+  throw new Error("WORKER_UNAVAILABLE: worker.generateVxlGeometry rejected; using main-thread builder");
 }
 
 /** Compress a file for storage. Rejected -> the engine compresses on the main thread. */
 async function compressFile(_name, _data) {
-  throw new Error("worker.compressFile: not available; using main-thread compression");
+  throw new Error("WORKER_UNAVAILABLE: worker.compressFile rejected; using main-thread compression");
 }
 
 expose({ decodeWav, generateVxlGeometry, compressFile });

@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/renderable/ShadowRenderable ===
+﻿// === Reconstructed SystemJS module: engine/renderable/ShadowRenderable ===
 // deps: ["data/Palette","engine/renderable/builder/ShpBuilder","game/Coords","engine/IsoCoords","engine/renderable/entity/map/MapSurface"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -56,7 +56,7 @@ System.register(
               ((this.visible = e),
                 this.object3d &&
                   ((t = this.computeShadowFrameNo(this.baseFrameNo)),
-                  (this.object3d.visible = e && this.frameHasShadowData(t))));
+                  (this.object3d.visible = e && t >= 0 && this.frameHasShadowData(t))));
             }
             setSize(e) {
               ((this.shpSize = e), this.builder?.setSize(e));
@@ -69,14 +69,17 @@ System.register(
               ((this.baseFrameNo = e),
                 this.builder &&
                   ((t = this.computeShadowFrameNo(e)),
-                  this.builder.setFrame(t),
-                  (this.object3d.visible = this.visible && this.frameHasShadowData(t))));
+                  t >= 0
+                    ? (this.builder.setFrame(t),
+                      (this.object3d.visible = this.visible && this.frameHasShadowData(t)))
+                    : (this.object3d.visible = !1)));
             }
             setFrameOffset(e) {
               ((this.frameOffset = e), this.builder && this.builder.setFrameOffset(e));
             }
             computeShadowFrameNo(e) {
-              return e < this.shpFile.numImages ? this.shpFile.numImages / 2 + e : 1;
+              let t = this.shpFile.numImages / 2 + e;
+              return Number.isInteger(t) && t < this.shpFile.numImages ? t : -1;
             }
             create3DObject() {
               if (!this.object3d) {
@@ -88,7 +91,7 @@ System.register(
                   this.useBatching && e.setBatchPalettes([i]),
                   (e.flat = !0));
                 var r = this.computeShadowFrameNo(this.baseFrameNo);
-                (e.setFrame(r),
+                (e.setFrame(Math.max(0, r)),
                   this.shadowHeightTileAdjust &&
                     ((i = n.IsoCoords.tileHeightToScreen(this.shadowHeightTileAdjust)), (this.drawOffset.y += -i)),
                   e.setOffset(this.drawOffset),
@@ -96,15 +99,18 @@ System.register(
                 let t = e.build();
                 (this.shadowHeightTileAdjust &&
                   ((t.position.y += a.Coords.tileHeightToWorld(-this.shadowHeightTileAdjust)), t.updateMatrix()),
-                  (t.visible = this.visible && this.frameHasShadowData(r)),
+                  (t.visible = this.visible && r >= 0 && this.frameHasShadowData(r)),
                   (t.position.y += o.MAGIC_OFFSET / 5),
+                  (t.material.polygonOffset = !0),
+                  (t.material.polygonOffsetFactor = -1),
+                  (t.material.polygonOffsetUnits = -1),
                   t.updateMatrix(),
                   (this.builder = e),
                   (this.object3d = t));
               }
             }
             frameHasShadowData(e) {
-              return !!this.shpFile.getImage(this.frameOffset + e).imageData.length;
+              return e >= 0 && !!this.shpFile.getImage(this.frameOffset + e).imageData.length;
             }
             get3DObject() {
               return this.object3d;

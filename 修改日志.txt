@@ -1,36 +1,141 @@
-### 修复内容 
-1. 建筑动画表现修复（ src/engine/renderable/entity/Building.ts.js ）
-- 建造期间仅显示建造动画，避免 IDLE / ACTIVE 与建造动画叠加。
-- 生化反应炉（ bioReactorPowerTrait ）建成后只保留一个 ACTIVE 动画：
-  - 未进驻时显示状态1；
-  - 进驻后切换到状态2。
-- IDLE 动画对生化反应炉默认隐藏，避免与 ACTIVE 同时出现。
-- 动画状态在 STOPPED / DELAYED 之间切换时，使用 intendedVisible 记录并恢复真实可见性，防止状态切换后模型误显/误隐。
-- 建筑受损时，根据 damagedImage 找到对应受损 SHP 帧并设置 frameOffset ，正确播放受损动画。
-- 生化反应炉不再被错误地套用普通驻守建筑的 frame 2 作为“已进驻”外观。
-- 异常处理收紧：只吞掉 RangeError ，其它异常继续抛出。 
+﻿一、建筑动画状态机与生化反应炉特殊表现
+涉及文件： Building.ts.js
+核心改动：
 
-2. 动画配置解析补充（ src/engine/renderable/entity/building/BuildingAnimArtProps.ts.js ）
-- 解析建筑动画配置时，若存在 damagedArt ，则记录其图片名到 damagedImage ，为受损动画切换提供数据支持。 
+建造期间仅播放建造动画，不再叠加 IDLE / ACTIVE 动画层，避免视觉混乱。
 
-3. 建筑 SHP 帧信息支持受损图（ src/engine/renderable/entity/building/BuildingShpHelper.ts.js ）
-- getShpFrameInfos 增加 animArtProps 参数，统一遍历所有动画配置。
-- 同时为 image 和 damagedImage 注册 SHP 帧信息，并分别通过 ImageFinder 查找资源，保证受损图也能被正确加载。 
+生化反应炉（bioReactorPowerTrait）建成后：
 
-4. SHP 构建器支持运行时切帧（ src/engine/renderable/builder/ShpBuilder.ts.js ）
-- frameOffset setter 不再在 build() 后抛错，而是立即刷新当前渲染帧，支撑受损/正常状态切换。 
+无进驻时显示 ACTIVE 未进驻状态；
 
-5. 加载流程传入动画配置（ src/gui/screen/game/GameLoader.ts.js ）
-- 调用 getShpFrameInfos 时传入 animArtProps ，与 BuildingShpHelper 的新签名配套。 
+有进驻时切换到 进驻状态；
 
-6. 发电建筑电力标签（ src/engine/renderable/entity/PipOverlay.ts.js ）
-- 选中发电建筑（发电厂、核电站、生化反应炉等）后，在建筑上方显示 电力=XXX 负载=XXX 标签。
-- 行为类似原版“主要”标签：选中出现，取消选中消失。
-- 仅对 rules.power > 0 的建筑显示，耗电建筑不显示。
-- 增加对应的纹理/材质创建、状态缓存与清理逻辑，避免内存泄漏。
+IDLE 动画默认隐藏，防止与 ACTIVE 重叠。
 
- 7. 鼠标悬停提示还原（ src/gui/screen/game/worldInteraction/TooltipHandler.ts.js ）
-- 去掉悬停时显示 +200 / -50 电力的自定义代码，恢复原版提示行为。
+修复动画在 STOPPED / DELAYED 状态切换时，通过 intendedVisible 缓存真实可见性，避免模型误显或误隐。
 
-### 未修复
-生化反应炉 进驻逻辑不应该是平民建筑逻辑
+受损时根据 damagedImage 找到对应 SHP 帧并偏移，正确播放受损外观。
+
+生化反应炉不再误用普通驻守建筑的 frame=2 作为进驻标志。
+
+异常处理收紧：仅捕获 RangeError，其余异常继续向上抛出，避免吞没真实错误。
+
+二、建筑动画配置支持受损图片
+涉及文件： BuildingAnimArtProps.ts.js
+核心改动：
+
+解析动画配置时，若存在 damagedArt 字段，将其图片名称记录到 damagedImage 属性，供受损切换时查找对应 SHP 资源。
+
+三、SHP 帧信息统一收集受损图资源
+涉及文件： BuildingShpHelper.ts.js
+核心改动：
+
+getShpFrameInfos 新增 animArtProps 参数，遍历所有动画配置（含正常和受损），通过 ImageFinder 分别注册 image 和 damagedImage 的 SHP 帧信息，确保受损图能被正确预加载。
+
+四、SHP 构建器支持运行时动态切帧
+涉及文件： ShpBuilder.ts.js
+核心改动：
+
+frameOffset 的 setter 不再因 build() 后调用而报错，改为立即刷新当前渲染帧，实现受损/正常状态的实时切换，无需重建对象。
+
+五、加载流程适配新增参数
+涉及文件： GameLoader.ts.js
+核心改动：
+
+调用 getShpFrameInfos 时传入 animArtProps，与 BuildingShpHelper 的新签名保持一致，确保受损图资源被正确加载。
+
+六、发电建筑顶部显示电力标签（类似原版“主要”标签）
+涉及文件： PipOverlay.ts.js
+核心改动：
+
+选中发电建筑（rules.power > 0，如发电厂、核电站、生化反应炉）后，在建筑上方显示 电力=XXX 和 负载=XXX 标签。
+
+标签仅在选中时出现，取消选中即消失。
+
+耗电建筑不显示该标签。
+
+新增纹理/材质创建、状态缓存与清理逻辑，避免内存泄漏。
+
+七、鼠标悬停提示还原为原版行为
+涉及文件： TooltipHandler.ts.js
+核心改动：
+
+移除之前添加的显示 +200 / -50 电力数值的自定义代码，恢复原版悬停提示逻辑（仅显示建筑名称等基本信息）。
+
+八、生化反应炉严重损坏不再退出驻扎步兵
+涉及文件： TechnoRules.ts.js、GarrisonTrait.ts.js
+核心改动：
+
+在 TechnoRules 中保存 InfantryAbsorb 原始规则字段。
+
+GarrisonTrait 的 onDamage 中，对 InfantryAbsorb=yes 的建筑（如生化反应炉）跳过红血撤离逻辑，保持与原版 YR 一致。
+
+canBeOccupied() 同样对 InfantryAbsorb=yes 的建筑跳过红血限制，允许生化反应炉在受损后继续吸收步兵。
+
+修复 GarrisonTrait 类方法间多余的逗号，避免构建后的 ra2web.js 在浏览器解析时报 "Unexpected token ','" 并导致 main 模块 404。
+
+九、修复建筑动画阴影在 SHP 帧数不足时显示异常
+涉及文件： ShadowRenderable.ts.js
+核心改动：
+
+computeShadowFrameNo 现在会校验阴影帧索引：只有当 numImages/2 + baseFrameNo 为整数且小于总帧数时才返回有效帧，否则返回 -1。
+
+setBaseFrame、setVisible、create3DObject 和 frameHasShadowData 均处理无效阴影帧（-1），避免在帧数不足时把普通帧当作阴影渲染，从而出现半透明重影/透明线条。
+
+该问题在生化反应炉吸收兵后切换 ActiveAnimTwo 时较明显，因为部分动画 SHP 没有独立的阴影帧。
+
+十、合并上游日志级别优化（GameLoader）
+涉及文件： GameLoader.ts.js
+核心改动（来自 AgentMystia/openyrweb@72344c2）：
+
+可选资源（cameocd.mix、sidec01cd.mix/sidec02cd.mix）缺失时由 console.warn 降级为 console.debug，避免正常启动时产生误导性警告。
+
+worker 不可用导致的 WORKER_UNAVAILABLE 错误在音频解码和 VXL 几何体预加载流程中降级为 console.debug，真实异常仍保持 error 输出。
+
+十一、合并上游日志级别优化（GameResImporter）
+涉及文件： GameResImporter.ts.js
+核心改动：
+
+资源导入时可选 mix 文件缺失由 console.warn 改为 console.info，避免每次导入/启动都报黄条警告。
+
+thememd.mix 缺失时额外提示“尤里复仇扩展音乐不可用，RA2 基础音乐仍可播放”。
+
+十二、合并上游日志级别优化（BuildingShpHelper）
+涉及文件： BuildingShpHelper.ts.js
+核心改动：
+
+建筑动画 SHP 缺失时由 console.warn 改为 console.debug。该缺失属于用户游戏数据完整性问题（如雪地变体、生产动画帧），建筑仍可用主图像和其他动画层渲染，不应作为引擎错误警告。
+
+十三、合并上游 worker 错误信息规范化
+涉及文件： vendor/worker-source.mjs、vendor/dist/worker.js
+核心改动：
+
+worker 三个入口函数（decodeWav、generateVxlGeometry、compressFile）抛出的错误信息统一加上 WORKER_UNAVAILABLE 前缀，方便 GameLoader 等调用方识别并按预期降级为 debug 日志。
+
+同步重新生成了 vendor/dist/worker.js 和 build/dist/worker.min.js。
+
+十四、修复建筑阴影与地面/其他阴影 Z-fighting 闪烁
+涉及文件： ShadowRenderable.ts.js
+核心改动：
+
+在阴影 mesh 创建后启用 material.polygonOffset（Factor=-1, Units=-1），让阴影在深度测试中优先于地面绘制，避免阴影与地面或其他阴影层竞争深度缓冲导致的一闪一闪现象。
+
+同时保留 MAGIC_OFFSET/5 的微小高度偏移作为辅助。
+
+十五、生化反应炉 ACTIVE 动画阴影与主建筑阴影重叠修复
+涉及文件： Building.ts.js
+核心改动：
+
+setActiveAnimationVisible 中，对 bioReactorPowerTrait 建筑，在设置 ACTIVE 动画层可见性后，调用 setShadowVisible(false) 禁用动画叠加层的阴影渲染。
+
+主建筑（mainObj）已通过 objectArt.hasShadow 提供建筑自身阴影，ACTIVE 动画叠加层（如反应炉核心发光效果）不应再生成额外的阴影，否则两者重叠在视觉上形成多重阴影。
+
+十六、出售驻扎建筑时先疏散内部士兵
+涉及文件： GarrisonTrait.ts.js
+核心改动：
+
+GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrait.sell）时调用 this.evacuate(game) 释放所有驻扎步兵。
+
+此前只有 NotifyDestroy.onDestroy 会疏散或击杀驻扎单位，出售流程不会触发销毁回调，导致生化反应炉等可驻扎建筑被卖掉后内部士兵未释放。
+
+修复后，出售前步兵会先被放到建筑周围空地并执行 ScatterTask；找不到空地时仍按原逻辑销毁。

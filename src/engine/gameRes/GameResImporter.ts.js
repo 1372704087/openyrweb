@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: engine/gameRes/GameResImporter ===
+﻿// === Reconstructed SystemJS module: engine/gameRes/GameResImporter ===
 // deps: ["data/MixFile","engine/Engine","engine/EngineType","util/time","engine/gameRes/importError/ChecksumError","engine/gameRes/importError/FileNotFoundError","engine/gameRes/importError/ArchiveExtractionError","data/vfs/VirtualFile","engine/mixDatabase","data/Palette","data/ShpFile","engine/gfx/ImageUtils","util/string","engine/gameRes/VideoConverter","engine/gameRes/importError/InvalidArchiveError","data/vfs/FileNotFoundError","data/vfs/IOError","data/vfs/RealFileSystemDir","engine/gameRes/importError/NoWebAssemblyError","network/HttpRequest","engine/gameRes/importError/ArchiveDownloadError"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -245,7 +245,11 @@ System.register(
                       } catch (e) {
                         if (44 !== e.errno) throw e;
                         if (d.has(t)) {
-                          console.warn(`Mix file "${t}" not found. Skipping.`);
+                          // OpenYRWeb: optional mix missing. For thememd.mix (YR expansion BGM)
+                          // this means the Yuri's Revenge soundtrack won't play — worth telling
+                          // the user, but not a warning (the base game still works). info-level
+                          // keeps it visible without crying wolf on every launch.
+                          console.info(`Optional mix "${t}" not found - skipping.` + (t.toLowerCase() === "thememd.mix" ? " (Yuris Revenge expansion music will be unavailable; base RA2 music still plays.)" : ""));
                           continue;
                         }
                         throw new w.FileNotFoundError(t);
@@ -291,7 +295,8 @@ System.register(
                     } catch (e) {
                       if (e instanceof O.FileNotFoundError) {
                         if (d.has(s)) {
-                          console.warn(`Mix file "${s}" not found. Skipping.`);
+                          // OpenYRWeb: see the archive-path branch above — optional mix skip.
+                          console.info(`Optional mix "${s}" not found - skipping.` + (s.toLowerCase() === "thememd.mix" ? " (Yuris Revenge expansion music will be unavailable; base RA2 music still plays.)" : ""));
                           continue;
                         }
                         throw new w.FileNotFoundError(s);

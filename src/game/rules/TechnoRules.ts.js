@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: game/rules/TechnoRules ===
+﻿// === Reconstructed SystemJS module: game/rules/TechnoRules ===
 // deps: ["engine/type/ObjectType","game/SideType","game/type/SpeedType","game/type/PipColor","game/type/LocomotorType","game/type/MovementZone","game/type/ArmorType","game/type/LandTargeting","game/type/NavalTargeting","game/rules/ObjectRules","game/WeaponType","game/gameobject/unit/VeteranAbility","game/type/VhpScan","game/math/Vector3"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -174,7 +174,8 @@ System.register(
                   "TooBigToFitUnderBridge",
                   this.type === s.ObjectType.Building,
                 )),
-                (this.canBeOccupied = this.ini.getBool("CanBeOccupied") || this.ini.getBool("InfantryAbsorb")),
+                (this.infantryAbsorb = this.ini.getBool("InfantryAbsorb")),
+                (this.canBeOccupied = this.ini.getBool("CanBeOccupied") || this.infantryAbsorb),
                 (this.maxNumberOccupants =
                   this.ini.getNumber("MaxNumberOccupants") || this.ini.getNumber("Passengers")),
                 (this.leaveRubble = this.ini.getBool("LeaveRubble")),

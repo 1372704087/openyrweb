@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # OpenYRWeb 一键启动脚本（Windows）
 # 功能：检查环境 -> 安装依赖 -> 构建 vendor -> 构建客户端 -> 启动服务 -> 打开浏览器
 
