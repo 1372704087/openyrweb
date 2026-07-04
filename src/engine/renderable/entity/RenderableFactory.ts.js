@@ -337,15 +337,11 @@ System.register(
                     a,
                     this.worldSound,
                   )),
-                    // OpenYRWeb (2026-06-30, REVERSED): attach HarvesterPlugin to enslaved
-                    // infantry (SLAV) so the OREGATH digging anim plays while mining. Vanilla
-                    // yrmd.exe (FUN_0073ced6) spawns OREGATH at the Techno's ore tile when its
-                    // "is harvesting" flag is set — the SAME path vehicles use. Only infantry
-                    // with a harvesterTrait (i.e. SLAV via SlaveCargoTrait, storage>0) qualify;
-                    // regular infantry have no harvesterTrait. SlaveGatherTask toggles
-                    // harvesterTrait.status = Harvesting during the HARVESTING state, which
-                    // HarvesterPlugin watches to create/dispose the OREGATH anim. See re/NOTES.md §6.
-                    e.harvesterTrait && this.mapRenderable && r.push(new v.HarvesterPlugin(e, e.harvesterTrait)),
+                    // OpenYRWeb: HarvesterPlugin (OREGATH spark) is NOT attached to enslaved
+                    // infantry — vanilla YR slaves do NOT show the OREGATH ground sparkle while
+                    // mining; only the body Shovel digging sequence plays. The spark is exclusive
+                    // to vehicle harvesters (HARV). harvesterTrait.status is still set by
+                    // SlaveGatherTask for tracking but has no visual effect without HarvesterPlugin.
                     this.forcedYuriDisguise &&
                     this.rules.audioVisual.benderOfSpoons &&
                     e.rules.isHuman &&

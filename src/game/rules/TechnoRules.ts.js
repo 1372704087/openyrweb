@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: game/rules/TechnoRules ===
+// === Reconstructed SystemJS module: game/rules/TechnoRules ===
 // deps: ["engine/type/ObjectType","game/SideType","game/type/SpeedType","game/type/PipColor","game/type/LocomotorType","game/type/MovementZone","game/type/ArmorType","game/type/LandTargeting","game/type/NavalTargeting","game/rules/ObjectRules","game/WeaponType","game/gameobject/unit/VeteranAbility","game/type/VhpScan","game/math/Vector3"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -408,6 +408,7 @@ System.register(
                 (this.createSound = this.ini.getString("CreateSound") || void 0),
                 (this.deploySound = this.ini.getString("DeploySound") || void 0),
                 (this.undeploySound = this.ini.getString("UndeploySound") || void 0),
+                (this.packupSound = this.ini.getString("PackupSound") || void 0),
                 (this.voiceSelect = this.ini.getString("VoiceSelect") || void 0),
                 (this.voiceMove = this.ini.getString("VoiceMove") || void 0),
                 (this.voiceAttack = this.ini.getString("VoiceAttack") || void 0),

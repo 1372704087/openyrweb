@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/trait/SlaveMinerVehicleTrait ===
-// deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/map/tileFinder/RadialTileFinder","game/type/LandType","game/gameobject/trait/TiberiumTrait","game/gameobject/task/move/MoveTask","game/gameobject/task/morph/DeployIntoTask","game/gameobject/task/SlaveGatherTask"]
+// deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/map/tileFinder/RadialTileFinder","game/type/LandType","game/gameobject/trait/TiberiumTrait","game/gameobject/task/move/MoveTask","game/gameobject/task/morph/DeployIntoTask","game/gameobject/task/SlaveGatherTask","engine/type/ObjectType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
 // OpenYRWeb: Slave Miner VEHICLE (YASLMN, Yuri faction) auto-deploy AI.
@@ -23,15 +23,16 @@
 //   SlaveManager driver class (slaves run their own SlaveGatherTask instead).
 //
 // Trigger model (NotifyTick):
-//   * While the vehicle has player/AI orders (unitOrderTrait.hasTasks()) we do nothing — the
-//     player is repositioning it. The instant it goes idle we resume, so a manual move onto ore
-//     results in a deploy on arrival (vanilla "click ore → deploy there").
-//   * If the vehicle is ALREADY standing on a tile where its DeploysInto building can be placed
-//     AND ore lies within ORE_PROXIMITY tiles, we deploy immediately.
-//   * Otherwise we scan (SCAN_RADIUS) for the nearest reachable ore, then pick the closest
-//     placement-valid tile near that ore and issue a MoveTask toward it. On arrival the idle
-//     check above fires the deploy.
-//   * A small cooldown prevents per-tick re-scanning while travelling or when no ore is found.
+//   * While the vehicle has active orders (player or AI MoveTask), _playerLockTicks is kept at
+//     KickFrameDelay (factory ExitFactoryTask is exempted via _aiTaskingIsFactory so it deploys
+//     immediately after leaving the factory).
+//   * When orders finish, the lock counts down. During the lock the AI does nothing — this
+//     prevents the AI from immediately fighting the player for control.
+//   * When the lock expires and no cooldown is active: check if we can deploy at current tile
+//     (ShortScan on nearby ore). If yes, deploy immediately.
+//   * Otherwise LongScan (48 tiles) for nearest ore, find a placeable spot near it (ScanCorrection=3),
+//     issue a MoveTask. On arrival the idle check fires the deploy.
+//   * If no ore anywhere: KickFrameDelay cooldown before retry.
 
 System.register(
   "game/gameobject/trait/SlaveMinerVehicleTrait",
@@ -45,10 +46,11 @@ System.register(
     "game/gameobject/task/move/MoveTask",
     "game/gameobject/task/morph/DeployIntoTask",
     "game/gameobject/task/SlaveGatherTask",
+    "engine/type/ObjectType",
   ],
   function (e, t) {
     "use strict";
-    var n, i, ds, r, l, b, m, d, g;
+    var n, i, ds, r, l, b, m, d, g, ot;
     t && t.id;
     return {
       setters: [
@@ -79,23 +81,23 @@ System.register(
         function (e) {
           g = e;
         },
+        function (e) {
+          ot = e;
+        },
       ],
       execute: function () {
         var o;
-        // Radii (tiles). Ore-proximity gates the deploy (slaves spawn and scan outward from the
-        // building); SCAN_RADIUS is how far the vehicle looks for the nearest ore to drive to;
-        // SPOT_SEARCH is the radius around a found ore cell in which we look for a buildable
-        // placement tile. Cooldowns are in ticks (15 fps engine clock).
-        var ORE_PROXIMITY = 5,
-          SCAN_RADIUS = 20,
-          SPOT_SEARCH = 4,
-          POST_ACTION_COOLDOWN = 7,
-          NO_ORE_COOLDOWN = 30;
+        // Radii (tiles). Most values now come from GeneralRules INI keys (SlaveMinerShortScan,
+        // SlaveMinerLongScan, SlaveMinerScanCorrection, SlaveMinerKickFrameDelay).
+        // POST_ACTION_COOLDOWN (7 ticks) is a small settle delay and has no INI counterpart.
+        var POST_ACTION_COOLDOWN = 7;
         e(
           "SlaveMinerVehicleTrait",
           (o = class {
             constructor() {
               this.scanCooldown = 0;
+              this._playerLockTicks = 0;
+              this._aiTaskingIsFactory = !1;
               // OpenYRWeb (2026-06-30, REVERSED): slaves ride INSIDE the vehicle (off the map).
               // Populated either at spawn (claiming the pool handed over from the undeployed
               // building via game._pendingMinerSlaves) or by SlaveMinerTrait.NotifyUnspawn. The
@@ -105,7 +107,19 @@ System.register(
             }
             // small settle delay on spawn so the vehicle clears the factory exit before seeking
             [n.NotifySpawn.onSpawn](e, t) {
-              this.scanCooldown = POST_ACTION_COOLDOWN;
+              this._playerLockTicks = 0;
+              if (t._slaveMinerAutoDeployMode) {
+                // auto-undeploy (no-ore timer expired): seek and deploy immediately
+                this.scanCooldown = 0;
+                t._slaveMinerAutoDeployMode = !1;
+              } else if (e.unitOrderTrait && e.unitOrderTrait.hasTasks && e.unitOrderTrait.hasTasks()) {
+                // factory-produced: has ExitFactoryTask, skip player lock via _aiTaskingIsFactory
+                this._aiTaskingIsFactory = !0;
+                this.scanCooldown = 0;
+              } else {
+                // manual undeploy or script spawn: enforce player-lock delay before AI resumes
+                this._playerLockTicks = t.rules.general.slaveMinerKickFrameDelay || 150;
+              }
               // claim any slave pool handed over from the just-undeployed building and repoint
               // their gather task at THIS vehicle. The slaves are already on the map (they were
               // the building's workforce); we do NOT spawn/unspawn them — that would teleport.
@@ -178,6 +192,31 @@ System.register(
                 return !0;
               return !1;
             }
+            _countOreBailsAround(e, s, a) {
+              for (
+                var total = 0,
+                  i = new o._RadialTileFinder(
+                    e.map.tiles,
+                    e.map.mapBounds,
+                    s,
+                    { width: 1, height: 1 },
+                    0,
+                    a,
+                    (t) => !0,
+                  ),
+                  r;
+                (r = i.getNextTile());
+
+              ) {
+                if (r.landType !== l.LandType.Tiberium) continue;
+                var ov = e.map.getGroundObjectsOnTile(r).find(
+                    (t) => t.isOverlay() && t.isTiberium(),
+                  ),
+                  tt = ov && ov.traits ? ov.traits.get(b.TiberiumTrait) : void 0;
+                if (tt && 0 < tt.getBailCount()) total += tt.getBailCount();
+              }
+              return total;
+            }
             // nearest reachable ore tile within SCAN_RADIUS (island-id connectivity, like
             // SlaveGatherTask._findOre / GatherOreTask.findClosestReachableOreSite, so the vehicle
             // never drives toward ore on a different landmass it cannot reach).
@@ -191,7 +230,7 @@ System.register(
                   t.tile,
                   { width: 1, height: 1 },
                   0,
-                  SCAN_RADIUS,
+                  e.rules.general.slaveMinerLongScan,
                   (i) =>
                     !!i &&
                     i.landType === l.LandType.Tiberium &&
@@ -213,7 +252,7 @@ System.register(
                     s,
                     { width: 1, height: 1 },
                     0,
-                    SPOT_SEARCH,
+                    e.rules.general.slaveMinerScanCorrection,
                     (e) => !0,
                   ),
                   r = void 0,
@@ -233,42 +272,123 @@ System.register(
             }
             _canDeployHere(e, t) {
               var s = e.getConstructionWorker(t.owner);
-              return (
-                !!t.rules.deploysInto &&
-                s.canPlaceAt(t.rules.deploysInto, t.tile, { ignoreAdjacent: !0, ignoreObjects: [t] }) &&
-                this._hasOreNearby(e, t, t.tile, ORE_PROXIMITY)
-              );
+              if (
+                !t.rules.deploysInto ||
+                !s.canPlaceAt(t.rules.deploysInto, t.tile, { ignoreAdjacent: !0, ignoreObjects: [t] })
+              )
+                return !1;
+              var totalOre = this._countOreBailsAround(e, t.tile, e.rules.general.slaveMinerShortScan);
+              return totalOre > 0;
             }
             [i.NotifyTick.onTick](e, t) {
-              if (!e || e.isDisposed || e.isDestroyed) return;
-              // only drive the undeployed vehicle form; once deployed it morphs into a building
-              // (disposed as a vehicle) and this trait is gone.
-              if (!e.isVehicle || !e.isVehicle() || !e.unitOrderTrait || !e.rules.deploysInto) return;
-              if (!e.owner || !e.owner.isCombatant || !e.owner.isCombatant()) return;
-              // While the vehicle has orders (player repositioning / mid-move) do nothing. The
-              // moment it goes idle we act, so a manual move onto ore deploys on arrival.
-              if (e.unitOrderTrait.hasTasks()) return;
-              if (0 < this.scanCooldown) return void this.scanCooldown--;
-              var pushed = !1;
-              // already standing on a valid deploy spot with ore nearby -> deploy now
-              if (this._canDeployHere(t, e))
-                (e.unitOrderTrait.addTask(new o._DeployIntoTask(t)), (pushed = !0));
-              else {
-                // seek nearest reachable ore, then the closest placement-valid tile near it
-                var s = this._findNearestOre(t, e);
-                if (s) {
-                  var a = this._findPlaceableNear(t, e, s);
-                  if (a) {
-                    a.rx === e.tile.rx && a.ry === e.tile.ry
-                      ? e.unitOrderTrait.addTask(new o._DeployIntoTask(t))
-                      : e.unitOrderTrait.addTask(new o._MoveTask(t, a, !!e.onBridge));
-                    pushed = !0;
+              // e = vehicle (self), t = game
+              if (!e.isVehicle || !e.isVehicle()) return;
+              var vt = e;
+              // ---- player-control lock ----
+              // When the vehicle has any active orders (player or AI), reset the lock to
+              // KickFrameDelay so the player has a window to take over after orders finish.
+              // Exception: factory-produced vehicles with ExitFactoryTask (_aiTaskingIsFactory)
+              // skip the lock and deploy immediately once the exit task completes.
+              var hasOrders = vt.unitOrderTrait && vt.unitOrderTrait.hasTasks && vt.unitOrderTrait.hasTasks();
+              if (hasOrders) {
+                if (!this._aiTaskingIsFactory) {
+                  this._playerLockTicks = t.rules.general.slaveMinerKickFrameDelay || 150;
+                }
+                return;
+              }
+              // clear factory flag once ExitFactoryTask finishes
+              if (this._aiTaskingIsFactory) {
+                this._aiTaskingIsFactory = !1;
+              }
+              if (this._playerLockTicks > 0) {
+                this._playerLockTicks--;
+                return;
+              }
+              // ---- scan cooldown ----
+              if (this.scanCooldown > 0) { this.scanCooldown--; return; }
+              var deployTarget = vt.rules.deploysInto;
+              if (!deployTarget) return;
+              var bldgRules = t.rules.getObject(deployTarget, ot.ObjectType.Building);
+              if (!bldgRules) return;
+              // ---- AI slave miner count limit (AISlaveMinerNumber=4,3,2) ----
+              // When at the limit, skip the feet ShortScan and search for NEW ore patches
+              // that aren't already crowded by existing deployed miners.
+              if (vt.owner.isAi) {
+                var aiLimits = (t.rules.ai && t.rules.ai.aislaveMinerNumber) || [4, 3, 2],
+                  aiDiffIdx = vt.owner.aiDifficulty,
+                  aiMaxSlavesBuildings = aiLimits[Math.min(aiDiffIdx, aiLimits.length - 1)] || 4;
+                var aiDeployed = 0,
+                  existingMinerTiles = [];
+                try {
+                  for (var cobj of t.combatants.get(vt.owner)?.allObjects || []) {
+                    if (
+                      cobj !== vt &&
+                      cobj.isBuilding &&
+                      !cobj.isDisposed &&
+                      !cobj.isDestroyed &&
+                      cobj.rules &&
+                      cobj.rules.slaveMiner
+                    ) {
+                      aiDeployed++;
+                      cobj.tile && existingMinerTiles.push(cobj.tile);
+                    }
                   }
+                } catch (cntErr) {}
+                if (aiDeployed >= aiMaxSlavesBuildings) {
+                  // at limit → find an ore field NOT near our existing deployed miners
+                  var farOre = void 0,
+                    farPlace = void 0,
+                    rf = new o._RadialTileFinder(
+                      t.map.tiles,
+                      t.map.mapBounds,
+                      vt.tile,
+                      { width: 1, height: 1 },
+                      0,
+                      t.rules.general.slaveMinerLongScan,
+                    );
+                  for (var scanTile; (scanTile = rf.getNextTile()); ) {
+                    if (!this._isOreTile(t, scanTile)) continue;
+                    var tooClose = !1;
+                    for (var mt of existingMinerTiles) {
+                      if (
+                        Math.abs(mt.rx - scanTile.rx) + Math.abs(mt.ry - scanTile.ry) <=
+                        t.rules.general.slaveMinerShortScan
+                      ) {
+                        tooClose = !0;
+                        break;
+                      }
+                    }
+                    if (tooClose) continue;
+                    farOre = scanTile;
+                    farPlace = this._findPlaceableNear(t, vt, farOre);
+                    if (farPlace) break;
+                  }
+                  if (farPlace) {
+                    vt.unitOrderTrait.addTask(new m.MoveTask(t, farPlace, !1));
+                  } else
+                    this.scanCooldown = t.rules.general.slaveMinerKickFrameDelay || 150;
+                  return;
                 }
               }
-              // if we issued an order the vehicle is now busy (no re-scan needed); otherwise back
-              // off so we don't spin every tick when ore / a placement tile isn't available.
-              this.scanCooldown = pushed ? 0 : NO_ORE_COOLDOWN;
+              // 1) check feet: can deploy and ore under/near us?
+              if (this._canDeployHere(t, vt)) {
+                vt.unitOrderTrait.addTask(new d.DeployIntoTask(t));
+                return;
+              }
+              // 2) look far: LongScan (48) for nearest ore
+              var oreTile = this._findNearestOre(t, vt);
+              if (oreTile) {
+                // 3) find placeable spot near ore (ScanCorrection=3)
+                var placeTile = this._findPlaceableNear(t, vt, oreTile);
+                if (placeTile) {
+                  vt.unitOrderTrait.addTask(new m.MoveTask(t, placeTile, !1));
+                } else {
+                  this.scanCooldown = POST_ACTION_COOLDOWN;
+                }
+              } else {
+                // 5) no ore anywhere: long cooldown
+                this.scanCooldown = t.rules.general.slaveMinerKickFrameDelay || 150;
+              }
             }
           }),
         );

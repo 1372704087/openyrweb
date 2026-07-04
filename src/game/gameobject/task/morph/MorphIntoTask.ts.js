@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/task/morph/MorphIntoTask ===
-// deps: ["game/gameobject/task/system/Task","engine/type/ObjectType","game/gameobject/Building","game/gameobject/task/move/MoveTask","game/event/ObjectMorphEvent","game/gameobject/task/TurnTask","game/gameobject/task/morph/PackBuildingTask"]
+// deps: ["game/gameobject/task/system/Task","engine/type/ObjectType","game/gameobject/Building","game/gameobject/task/move/MoveTask","game/event/ObjectMorphEvent","game/gameobject/task/TurnTask","game/gameobject/task/morph/PackBuildingTask","game/event/UnitDeployUndeployEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -12,10 +12,11 @@ System.register(
     "game/event/ObjectMorphEvent",
     "game/gameobject/task/TurnTask",
     "game/gameobject/task/morph/PackBuildingTask",
+    "game/event/UnitDeployUndeployEvent",
   ],
   function (e, t) {
     "use strict";
-    var i, o, r, l, c, s, a, n;
+    var i, o, r, l, c, s, a, n, h;
     t && t.id;
     return {
       setters: [
@@ -40,6 +41,9 @@ System.register(
         function (e) {
           a = e;
         },
+        function (e) {
+          h = e;
+        },
       ],
       execute: function () {
         ((n = class extends i.Task {
@@ -60,7 +64,7 @@ System.register(
             if (!this.morphInto) throw new Error("morphInto not set");
             let e = this.game.getUnitSelection();
             var i = e.isSelected(t),
-              r = e.getOrCreateSelectionModel(t).getControlGroupNumber(),
+              cg = e.getOrCreateSelectionModel(t).getControlGroupNumber(),
               s = this.morphInto;
             let a;
             if (s.type === o.ObjectType.Building) {
@@ -76,13 +80,21 @@ System.register(
               // for the new building's SlaveMinerTrait.NotifySpawn to re-enter onto the map.
               if (t.slaveMinerTrait) t.slaveMinerTrait._morphInFlight = !0;
               if (t.slaveMinerVehicleTrait) t.slaveMinerVehicleTrait._stashSlavesForMorph(this.game);
+              // Dispatch deploy/undeploy sound BEFORE unspawn (vehicle still alive, can play sound).
+              this.game.events.dispatch(
+                new h.UnitDeployUndeployEvent(t, "deploy"),
+              );
               (this.game.unspawnObject(t),
                 t.dispose(),
                 ([a] = e.placeAt(this.morphInto.name, n)),
-                (a.healthTrait.health = t.healthTrait.health));
+                a.healthTrait.health = t.healthTrait.health);
             } else {
               let e = t.unitOrderTrait.getTasks().filter((e) => e instanceof l.MoveTask);
               if (t.slaveMinerTrait) t.slaveMinerTrait._morphInFlight = !0;
+              // Dispatch deploy/undeploy sound BEFORE unspawn (unit still alive, can play sound).
+              this.game.events.dispatch(
+                new h.UnitDeployUndeployEvent(t, "undeploy"),
+              );
               (this.game.unspawnObject(t),
                 t.dispose(),
                 (a = this.game.createUnitForPlayer(this.morphInto, t.owner)),
@@ -96,7 +108,7 @@ System.register(
               (a.purchaseValue = t.purchaseValue),
               (t.replacedBy = a),
               i && e.addToSelection(a),
-              void 0 !== r && e.addUnitsToGroup(r, [a], !1),
+              void 0 !== cg && e.addUnitsToGroup(cg, [a], !1),
               this.game.events.dispatch(new c.ObjectMorphEvent(t, a)),
               !0
             );

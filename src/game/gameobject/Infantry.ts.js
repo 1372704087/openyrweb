@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: game/gameobject/Infantry ===
+﻿// === Reconstructed SystemJS module: game/gameobject/Infantry ===
 // deps: ["engine/type/ObjectType","game/gameobject/unit/ZoneType","game/gameobject/infantry/StanceType","game/gameobject/infantry/InfDeathType","game/gameobject/trait/MoveTrait","game/gameobject/trait/SuppressionTrait","game/gameobject/Techno","game/gameobject/trait/IdleActionTrait","game/gameobject/trait/CrashableTrait","game/gameobject/trait/AgentTrait","game/gameobject/unit/CrateBonuses","game/gameobject/trait/CastProgressTrait","game/gameobject/trait/SlaveCargoTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -86,6 +86,9 @@ System.register(
               // carry ore (Storage>0, e.g. SLAV slaves). Exposed as `harvesterTrait` so PipOverlay
               // renders ore pips. The full HarvesterTrait is NOT used because its auto-gather loop
               // would conflict with SlaveGatherTask; this trait is a passive cargo counter only.
+              // Slaved infantry (SLAV) must always get a cargo trait with at least 3 storage so the
+              // OREGATH mining animation and ore pips work even when rulesmd omits Storage=.
+              (s.rules.slaved && (s.rules.storage = Math.max(s.rules.storage || 0, 3))),
               0 < s.rules.storage &&
                 ((s.harvesterTrait = new m.SlaveCargoTrait(s.rules.storage)),
                 s.traits.add(s.harvesterTrait)),

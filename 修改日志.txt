@@ -1,4 +1,4 @@
-﻿一、建筑动画状态机与生化反应炉特殊表现
+﻿﻿﻿一、建筑动画状态机与生化反应炉特殊表现
 涉及文件： Building.ts.js
 核心改动：
 
@@ -139,3 +139,157 @@ GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrai
 此前只有 NotifyDestroy.onDestroy 会疏散或击杀驻扎单位，出售流程不会触发销毁回调，导致生化反应炉等可驻扎建筑被卖掉后内部士兵未释放。
 
 修复后，出售前步兵会先被放到建筑周围空地并执行 ScatterTask；找不到空地时仍按原逻辑销毁。
+
+十七、奴隶矿场（YAREFN / SMIN / SLAV）完整实现
+涉及文件： SlaveGatherTask.ts.js、SlaveMinerTrait.ts.js、SlaveMinerVehicleTrait.ts.js、Infantry.ts.js、GeneralRules.ts.js、RenderableFactory.ts.js、PipOverlay.ts.js、Building.ts.js、TechnoRules.ts.js、SoundHandler.ts.js、MorphIntoTask.ts.js
+核心改动：
+
+=== SlaveGatherTask（采矿循环状态机）===
+
+- 状态机：SEEKING_ORE → MOVING_TO_ORE → IDLE_BEFORE_HARVEST（随机思考延迟）→ HARVESTING → RETURNING → DUMPING（隐藏2秒）→ EXITING_MINER
+- 随机思考延迟 0~5 秒，延迟结束后 20% 概率二次寻矿（2~5 格范围）
+- 采矿速度：HARVEST_DELAY_MINUTES=8/60（约 4 秒/矿石），3 背包格约 12 秒采完
+- 二次寻矿从最高价值候选矿石中取最近几块随机选取，使多个奴隶分散采矿
+- 卸货改为隐藏 2 秒（WarpedOutTrait.setTimed(30) + WaitMinutesTask(2/60)），不再销毁重建
+- RETURNING 目标为矿场 tile，DUMPING 在校验 tile 一致后执行，避免移动后位置不同步
+- _dump 遍历 harvesterTrait.getBails() 按矿石类型分别计价，支持混采
+
+=== SlaveMinerTrait（矿场形态）===
+
+- 奴隶生成位置为建筑 tile（2×2 地基中心），生成后 MoveTask 走到相邻空地再开始采矿
+- 首次创建延迟 2 秒（buildStatus===Ready 后再倒计时 30 ticks）
+- scheduleSlaveRespawn / _pendingSpawnCount 备用机制保留
+
+=== SlaveMinerVehicleTrait（车辆形态）===
+
+- SlaveMinerShortScan=8、SlaveMinerSlaveScan=14、SlaveMinerLongScan=48、SlaveMinerScanCorrection=3、SlaveMinerKickFrameDelay=150（GeneralRules 定义）
+- 修复 t.rules.general 崩溃（改为 t.rules.general）
+
+
+=== Infantry.ts.js（奴隶动画与属性）===
+
+- Slaved=yes 步兵 Storage 强制 >= 3，确保 RenderableFactory 正确挂载 HarvesterPlugin
+- Shovel 动画速率 defaultRate/6（≈2.5fps），接近 2 秒采矿周期
+- 修复首次创建行走滑行（lastHarvesting/lastCarrying 初始化检查去掉 void 0 短路）
+- 修复 lastFiring/lastStance 首帧未初始化导致动画跳过
+
+=== RenderableFactory / PipOverlay ===
+
+- 移除步兵 HarvesterPlugin（奴隶无 OREGATH 火花，该动画为矿车专属）
+- PipOverlay 按 Storage=3 渲染奴隶身下矿石格子
+
+=== Building.ts.js ===
+
+- ZShapePointMove 偏移不再限定 Refinery/NukeSilo
+- IdleAnim（YAREFN_A）禁用阴影避免多重阴影
+
+=== 展开/收起音效（未解决） ===
+
+- MorphIntoTask 在 unspawnObject 前分发 UnitDeployUndeployEvent
+- TechnoRules 新增 packupSound（解析 PackupSound=）
+- SoundHandler 对 slaveMiner 优先使用 DeploySound=/PackupSound=
+- 当前仍播放通用音效，专属音效未生效，根因待排查
+
+十八、奴隶矿场自动寻矿与部署延迟修复
+涉及文件： SlaveGatherTask.ts.js、SlaveMinerTrait.ts.js、SlaveMinerVehicleTrait.ts.js、Infantry.ts.js、_module-map.json
+核心改动：
+
+=== 空闲计时器翻转（SlaveMinerTrait） ===
+
+- _noOreTicks 从递增阈值式（-600 起，+1 到 0）改为递减归零式（150 起，-1 到 0）
+- 与 vanilla YR SlaveMinerKickFrameDelay 语义一致
+- 任一奴隶 isCarrying / isHarvesting / _oreLocked 时重置计数器
+
+=== SEEKING_ORE 扫描中心修正（SlaveGatherTask） ===
+
+- _findOre 扫描中心从建筑 tile 恢复为奴隶自身 tile
+- 建筑缺少 speedType=Foot，导致 getIslandIdMap / getPassableSpeed 参数错误，_findOre 永远找不到矿
+- 表现为建筑模式下奴隶绕圈不采矿
+
+=== _oreLocked 标志拆分（SlaveGatherTask + Infantry.ts.js） ===
+
+- isHarvesting 承担双重职责：动画层强行走 Shovel 挖矿动作 + 建筑闲置计时器
+- SEEKING_ORE → MOVING_TO_ORE 阶段设 isHarvesting=true 导致奴隶走路时播挖矿动画
+- 新增 _oreLocked 专供建筑计时器使用，isHarvesting 仅在 IDLE_BEFORE_HARVEST / HARVESTING 时设 true
+- 建筑侧检查改为：sv.isCarrying || sv.isHarvesting || sv._oreLocked
+- _oreLocked 在 MOVING_TO_ORE（两处：初寻矿 + HARVESTING 切邻居矿格）置 true，进入 IDLE_BEFORE_HARVEST 时清除
+
+=== HARVESTING 邻居矿格过渡修复（SlaveGatherTask） ===
+
+- 当前 tile 采完后走邻居矿格时，isHarvesting 已清除但未设 _oreLocked
+- 补上 t._oreLocked = !0，避免建筑误判"无矿可采"而收回
+
+=== SlaveMinerVehicleTrait 寻矿逻辑修复 ===
+
+- vt.rules.isVehicle && vt.rules.isVehicle() 检查永远为 false
+  - isVehicle() 方法在 game object 上，rules 对象没有该方法
+  - 整个 ShortScan → LongScan → MoveTask → Deploy 逻辑块从未执行
+  - 矿车收回后原地发呆，不自动寻矿
+- 修复：删除多余检查（onTick 入口已验证 e.isVehicle()）
+
+=== ObjectType 依赖补充 ===
+
+- SlaveMinerVehicleTrait 模块缺少 "engine/type/ObjectType" 依赖
+- onTick 中 o.ObjectType.Building 的 o 被 var o（class 自身）遮蔽
+- 新增依赖数组项 + setter + ot 变量映射，_module-map.json 同步更新
+
+=== _aiTasking 防自锁 ===
+
+- AI 自己加的 MoveTask 在下一 tick 被 hasTasks() 误判为"玩家操控"，_playerLockTicks=300（20秒）
+- MoveTask 跑完后还要等 300 tick 倒计时才能展开
+- 新增 _aiTasking 标志：AI 驾驶期间跳过 player lock 检查
+- MoveTask 完成 → _aiTasking 自动清除 → 立即 _canDeployHere → DeployIntoTask
+- 矿车到站即刻展开，无延迟
+
+十九、工厂生产矿车立即展开 + 玩家锁延迟 + 8邻域采矿 + AI数量上限
+涉及文件： SlaveMinerVehicleTrait.ts.js、SlaveGatherTask.ts.js、AiRules.ts.js
+核心改动：
+
+=== 工厂生产矿车立即展开 ===
+
+- 之前从战车工厂出来的矿车要等 ExitFactoryTask 触发 _playerLockTicks=150 → 等完才寻矿
+- onSpawn 中工厂生产走 else 分支设 _aiTasking = true
+- ExitFactoryTask 期间跳过 player lock，出厂完成 → _aiTasking 自动清除 → 立即 ShortScan 展开
+- 不再有 10 秒等待
+
+=== 玩家操控锁改用 SlaveMinerKickFrameDelay ===
+
+- _playerLockTicks 从硬编码 300（20秒）改为 t.rules.general.slaveMinerKickFrameDelay（默认 150 = 10秒）
+- 与原版 INI 规则一致
+
+=== HARVESTING 邻居扫描扩到 8 方向 ===
+
+- 当前 tile 采完后邻居检查从 4 十字（上下左右）扩大到 8 方向（+ 4 对角）
+- 修复对角矿格被跳过、奴隶带半车货返回的问题
+
+=== AISlaveMinerNumber=4,3,2 规则读取 ===
+
+- AiRules.readIni 新增 aislaveMinerNumber = e.getArray("AISlaveMinerNumber", [4, 3, 2])
+- 对应 [AI] 节的三难度限制：[Easy=4, Medium=3, Brutal=2]
+
+=== AI 矿场数量上限实施 ===
+
+- onTick 中 vt.owner.isAi 时统计已部署的奴隶矿场建筑（不含车辆）
+- 已部署数 >= AISlaveMinerNumber[difficulty] → 跳过 ShortScan → 直接 LongScan 48 格寻找新矿脉
+- 新矿脉过滤：排除距已有矿场在 SlaveMinerShortScan(8) 范围内的矿点，避免挤在同一片枯竭矿脉
+- 找到新矿脉 → MoveTask 开过去
+- 48 格无可用新矿点 → KickFrameDelay(150) 冷却后重试
+
+=== _canDeployHere 矿量阈值降低 ===
+
+- 改为 totalOre > 0：有任何矿就展开，与原版一致
+
+未修复bug
+奴隶采矿有时候会生成富矿
+电厂人数格子不对
+
+二十、玩家锁在AI驾驶期间接手操控重新生效（有bug，人工干预只生效一次）
+涉及文件： SlaveMinerVehicleTrait.ts.js
+核心改动：
+
+- 移除 _aiTasking 守卫（早期 return 跳过 player lock 的逻辑）
+- 统一采用 player lock 模型：车辆有任何活跃指令时（玩家或 AI 的 MoveTask）都设置 _playerLockTicks = KickFrameDelay
+- 工厂出厂例外：_aiTaskingIsFactory 标志在 ExitFactoryTask 期间跳过 lock，任务完成后清除标志并立即部署
+- AI 发出 MoveTask 后 hasTasks 为 true → lock 被设到 KickFrameDelay → 任务完成 → lock 倒计时
+- 若玩家在 AI 驾驶期间发出指令：lock 持续在 KickFrameDelay → 玩家指令结束 → lock 开始倒计时 → 倒计时内 AI 不干预
+- 修复：倒计时过了再手动操控后 lock 不会重新设置的问题

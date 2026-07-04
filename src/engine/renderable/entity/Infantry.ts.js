@@ -203,6 +203,8 @@ System.register(
                 isPanicked: n,
                 owner: o,
                 veteranLevel: l,
+                isHarvesting: hv,
+                isCarrying: cv,
               } = this.gameObject;
               (this.pipOverlay?.update(t),
                 this.blobShadow?.update(t),
@@ -301,20 +303,31 @@ System.register(
                 this.lastZone !== i ||
                 void 0 === this.lastPanicked ||
                 this.lastPanicked !== n ||
+                this.lastHarvesting !== hv ||
+                this.lastCarrying !== cv ||
                 this.disguiseChanged
               ) {
                 var p = this.disguiseChanged,
-                  m = this.lastFiring !== a;
+                  m = void 0 !== this.lastFiring && this.lastFiring !== a;
                 if (
-                  ((this.lastMoving = s),
-                  (this.lastFiring = a),
-                  (this.lastZone = i),
-                  (this.lastPanicked = n),
-                  (this.computedDirection = this.gameObject.direction),
-                  (this.disguiseChanged = !1),
-                  !e && ((this.sequenceQueue = []), !m || a || p))
+                  (void 0 === this.lastStance && (this.lastStance = r),
+                    (this.lastMoving = s),
+                    (this.lastFiring = a),
+                    (this.lastZone = i),
+                    (this.lastPanicked = n),
+                    (this.lastHarvesting = hv),
+                    (this.lastCarrying = cv),
+                    (this.computedDirection = this.gameObject.direction),
+                    (this.disguiseChanged = !1),
+                    !e && ((this.sequenceQueue = []), hv || !m || a || p))
                 ) {
-                  let e = this.findSequenceBy(i, r, s, a, n);
+                  let e;
+                  if (hv && this.objectArt.sequences.has(S.SequenceType.Shovel))
+                    e = S.SequenceType.Shovel;
+                  else {
+                    e = this.findSequenceBy(i, r, s, a, n);
+                    cv && s && e === S.SequenceType.Walk && this.objectArt.sequences.has(S.SequenceType.Carry) && (e = S.SequenceType.Carry);
+                  }
                   void 0 !== e &&
                     (this.disguise &&
                       [S.SequenceType.FireUp, S.SequenceType.FireProne].includes(e) &&
@@ -324,6 +337,7 @@ System.register(
               }
               if (
                 ((void 0 !== this.lastStance && this.lastStance === r) ||
+                  hv ||
                   ((this.sequenceQueue = []),
                   (g = !1),
                   (m = T.getStanceTransitionSequenceBy(this.lastStance, r)),
@@ -356,6 +370,7 @@ System.register(
                 this.sequenceQueue.length ||
                   s ||
                   a ||
+                  hv ||
                   (r !== b.StanceType.None && r !== b.StanceType.Guard) ||
                   i === v.ZoneType.Air ||
                   !g ||
@@ -369,8 +384,13 @@ System.register(
                     void 0 !== this.currentSequenceParams.onlyFacing &&
                     (this.computedDirection = this.directionFromFacingNo(this.currentSequenceParams.onlyFacing));
                   let e;
-                  ((e = this.sequenceQueue.length ? this.sequenceQueue.shift() : this.findSequenceBy(i, r, s, a, n)),
-                    void 0 !== e && this.setAnimParams(e, t, !a));
+                  if (this.sequenceQueue.length) e = this.sequenceQueue.shift();
+                  else if (hv && this.objectArt.sequences.has(S.SequenceType.Shovel)) e = S.SequenceType.Shovel;
+                  else {
+                    e = this.findSequenceBy(i, r, s, a, n);
+                    cv && s && e === S.SequenceType.Walk && this.objectArt.sequences.has(S.SequenceType.Carry) && (e = S.SequenceType.Carry);
+                  }
+                  void 0 !== e && this.setAnimParams(e, t, !a);
                 }
                 this.animRunner.tick(t);
                 a = this.computeFacingNumber(this.computedDirection);
@@ -417,6 +437,7 @@ System.register(
                         : (e.rate = l.AnimProps.defaultRate)
                       : (e.rate = l.AnimProps.defaultRate / 2),
                     [S.SequenceType.Walk].includes(t) && (e.rate /= 1.33),
+                    [S.SequenceType.Shovel].includes(t) && (e.rate = l.AnimProps.defaultRate / 6),
                     this.animRunner.animation.start(i));
                 } else console.warn(`Infantry "${this.gameObject.name}" is missing sequence "${S.SequenceType[t]}"`);
               }
@@ -427,7 +448,8 @@ System.register(
                 this.shpRenderable &&
                 this.animRunner &&
                 (({ startFrame: t, facingMult: i } = this.currentSequenceParams),
-                (i = t + i * e + this.animRunner.animation.getCurrentFrame()) < this.shpRenderable.frameCount &&
+                (i = t + i * e + this.animRunner.animation.getCurrentFrame()),
+                i < this.shpRenderable.frameCount &&
                   this.shpRenderable.setFrame(i));
             }
             computeFacingNumber(e) {

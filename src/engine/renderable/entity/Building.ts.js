@@ -723,7 +723,7 @@ System.register(
                   l = { ...a },
                   c = !1;
                 r = this.objectArt.zShapePointMove;
-                if ((this.gameObject.rules.refinery || this.gameObject.rules.nukeSilo) && r.length) {
+                if (r.length) {
                   ((o = new THREE.Object3D()), (o.matrixAutoUpdate = !1), n.add(o), (c = !0));
                   r = { x: -r[0] / g.Coords.ISO_TILE_SIZE, y: -r[1] / g.Coords.ISO_TILE_SIZE };
                   let e = new b.MapSpriteTranslation(r.x, r.y);
@@ -732,6 +732,7 @@ System.register(
                 }
                 (this.mainShpFile
                   ? ((this.mainObj = this.createMainObject(this.mainShpFile, l, c)),
+                    this.gameObject.slaveMinerTrait && this.mainObj.setBatched(!1),
                     this.mainObj.create3DObject(),
                     o.add(this.mainObj.get3DObject()),
                     this.mainObj.getFlat() &&
@@ -1224,7 +1225,12 @@ System.register(
                           ),
                           this.animObjects.get(M.AnimationType.IDLE).forEach((e) => {
                             this.animations.get(e).start(t);
-                          })));
+                          }),
+                          // Slave Miner: hide shadow on IDLE animation overlays — main building already provides shadow
+                          this.gameObject.slaveMinerTrait &&
+                            this.animObjects.get(M.AnimationType.IDLE).forEach((e) => {
+                              e.setShadowVisible(!1);
+                            })));
                 }
               }
               doWithAnimation(e, i) {

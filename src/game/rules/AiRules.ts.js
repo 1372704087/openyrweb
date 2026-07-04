@@ -17,7 +17,8 @@ System.register("game/rules/AiRules", [], function (e, t) {
               (this.buildRefinery = e.getArray("BuildRefinery")),
               (this.buildTech = e.getArray("BuildTech")),
               (this.tiberiumFarScan = e.getNumber("TiberiumFarScan", 50)),
-              (this.tiberiumNearScan = e.getNumber("TiberiumNearScan", 5)));
+              (this.tiberiumNearScan = e.getNumber("TiberiumNearScan", 5)),
+              (this.aislaveMinerNumber = e.getArray("AISlaveMinerNumber", [4, 3, 2])));
           }
         }),
       );

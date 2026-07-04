@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: game/rules/GeneralRules ===
+﻿﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
 // deps: ["game/rules/general/RadarRules","game/rules/general/RepairRules","game/rules/general/VeteranRules","game/rules/general/CrewRules","game/rules/general/PrismRules","game/rules/general/ThreatRules","game/rules/general/ParadropRules","game/rules/general/LightningStormRules","game/rules/general/V3RocketRules","game/rules/general/DMislRules","game/rules/general/HoverRules","util/math"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -112,6 +112,15 @@ System.register(
                   (this.guardAreaTargetingDelay = e.getNumber("GuardAreaTargetingDelay")),
                   (this.harvesterTooFarDistance = e.getNumber("HarvesterTooFarDistance")),
                   (this.harvesterUnit = e.getArray("HarvesterUnit")),
+                  (this.harvestRate = e.getNumber("HarvestRate", 2 / 60)),
+                  (this.slaveMinerShortScan = e.getNumber("SlaveMinerShortScan", 8)),
+                  (this.slaveMinerSlaveScan = e.getNumber("SlaveMinerSlaveScan", 14)),
+                  (this.slaveMinerLongScan = e.getNumber("SlaveMinerLongScan", 48)),
+                  (this.slaveMinerScanCorrection = e.getNumber("SlaveMinerScanCorrection", 3)),
+                  (this.slaveMinerKickFrameDelay = e.getNumber("SlaveMinerKickFrameDelay", 150)),
+                  (this.slavesFreeSound = e.getString("SlavesFreeSound")),
+                  (this.slaveMinerDeploySound = e.getString("SlaveMinerDeploySound")),
+                  (this.slaveMinerUndeploySound = e.getString("SlaveMinerUndeploySound")),
                   (this.hover = new d.HoverRules().readIni(e)),
                   (this.infantryBlinkDisguiseTime = e.getNumber("InfantryBlinkDisguiseTime")),
                   (this.lightningStorm = new c.LightningStormRules().readIni(e)),

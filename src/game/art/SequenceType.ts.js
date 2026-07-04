@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: game/art/SequenceType ===
+﻿﻿// === Reconstructed SystemJS module: game/art/SequenceType ===
 // deps: []
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -44,7 +44,9 @@ System.register("game/art/SequenceType", [], function (t, e) {
         (e[(e.Undeploy = 31)] = "Undeploy"),
         (e[(e.Paradrop = 32)] = "Paradrop"),
         (e[(e.Cheer = 33)] = "Cheer"),
-        (e[(e.Panic = 34)] = "Panic"));
+        (e[(e.Panic = 34)] = "Panic"),
+        (e[(e.Shovel = 35)] = "Shovel"),
+        (e[(e.Carry = 36)] = "Carry"));
     },
   };
 });

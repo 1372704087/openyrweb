@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: game/gameobject/trait/GarrisonTrait ===
+﻿﻿// === Reconstructed SystemJS module: game/gameobject/trait/GarrisonTrait ===
 // deps: ["game/gameobject/trait/interface/NotifyDestroy","game/map/tileFinder/RadialTileFinder","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifySell","util/math","game/event/BuildingEvacuateEvent","game/gameobject/task/ScatterTask"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 

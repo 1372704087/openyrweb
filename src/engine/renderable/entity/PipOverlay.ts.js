@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: engine/renderable/entity/PipOverlay ===
+﻿﻿// === Reconstructed SystemJS module: engine/renderable/entity/PipOverlay ===
 // deps: ["engine/gfx/TextureAtlas","data/Bitmap","engine/gfx/SpriteUtils","game/Coords","engine/gfx/TextureUtils","game/gameobject/selection/SelectionLevel","game/type/PipColor","util/disposable/CompositeDisposable","engine/gfx/OverlayUtils","engine/renderable/fx/RallyPointFx","engine/renderable/entity/unit/FlyerHelperMode","game/gameobject/unit/ZoneType","engine/gfx/BufferGeometryUtils","engine/gfx/material/PaletteBasicMaterial","engine/gfx/batch/BatchedMesh","game/gameobject/unit/HealthLevel","engine/renderable/entity/unit/DebugLabel","engine/Engine","engine/EngineType","engine/renderable/entity/UnitCastBarSprite","engine/renderable/entity/SecureProgressSprite"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -913,14 +913,14 @@ System.register(
                     e && (r = this.createPipsSprite(i, e)));
                 } else if (
                   // OpenYRWeb: infantry with a cargo trait (SlaveMiner slaves, SLAV). Renders
-                  // ore/gems pips exactly like the vehicle harvester branch above. Mirrors the
-                  // YR slave ore-carrying pips (PipScale=Tiberium, Storage=4).
+                  // ore/gems pips exactly like the vehicle harvester branch above. Slaves are
+                  // forced to Storage=3 so the pip scale matches the expected 3-cell cargo.
                   t.isInfantry() &&
                   t.harvesterTrait &&
                   0 < t.rules.storage
                 ) {
                   let i = [],
-                    e = 5,
+                    e = t.rules.storage,
                     a = t.rules.storage,
                     s = Math.floor((t.harvesterTrait.gems / a) * e);
                   a = Math.floor((t.harvesterTrait.ore / a) * e);

@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: game/art/Art ===
+﻿﻿// === Reconstructed SystemJS module: game/art/Art ===
 // deps: ["game/art/ObjectArt","engine/type/ObjectType","game/rules/ObjectRules","data/IniSection"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -48,7 +48,7 @@ System.register(
                 new a.ObjectArt(
                   t,
                   this.rules.hasObject(e, t) ? this.rules.getObject(e, t) : new o.ObjectRules(t, new l.IniSection(e)),
-                  new l.IniSection(e),
+                  this.artIni.getSection(e) || new l.IniSection(e),
                 ))
               );
             }

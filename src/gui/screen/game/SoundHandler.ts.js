@@ -1,4 +1,4 @@
-// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
+﻿﻿// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
 // deps: ["game/order/OrderType","engine/sound/SoundKey","engine/sound/ChannelType","util/disposable/CompositeDisposable","game/event/EventType","util/math","gui/screen/game/worldInteraction/UnitSelectionHandler","util/typeGuard","game/gameobject/Building","game/rules/TechnoRules","util/array","game/rules/general/RadarRules","game/player/production/ProductionQueue","engine/type/ObjectType","game/Coords","game/event/AllianceChangeEvent","game/gameobject/unit/VeteranLevel","game/order/OrderFeedbackType","game/gameopts/constants","game/gameobject/common/DeathType","game/WeaponType","game/gameobject/unit/ZoneType","game/type/SuperWeaponType","game/gameobject/infantry/StanceType","game/type/PowerupType","game/gameobject/unit/HealthLevel","game/trait/StalemateDetectTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -183,12 +183,22 @@ System.register(
                   case L.EventType.Cheer:
                     this.sound.play(N.SoundKey.CheerSound, j.ChannelType.Effect);
                     break;
-                  case L.EventType.UnitDeployUndeploy:
-                    var e = "undeploy" === r.deployType,
-                      t = r.unit,
-                      e = e ? t.rules.undeploySound : t.rules.deploySound;
+                  case L.EventType.UnitDeployUndeploy: {
+                    var t = r.unit,
+                      isUndeploy = "undeploy" === r.deployType,
+                      e;
+                    // OpenYRWeb: slave miners use the unit/building's own
+                    // DeploySound=/PackupSound= directly.
+                    if (t.rules.slaveMiner) {
+                      e = isUndeploy
+                        ? (t.rules.packupSound || t.rules.undeploySound || t.rules.deploySound)
+                        : (t.rules.deploySound || t.rules.undeploySound);
+                    } else {
+                      e = isUndeploy ? t.rules.undeploySound : t.rules.deploySound;
+                    }
                     e && this.worldSound.playEffect(e, t, t.owner);
                     break;
+                  }
                   case L.EventType.ObjectTeleport:
                     e = r;
                     e.isChronoshift &&
@@ -337,12 +347,12 @@ System.register(
                   case L.EventType.ObjectSpawn:
                     {
                       let e = r.gameObject;
-                      (e.isTechno() &&
+                      e.isTechno() &&
                         e.rules.createSound &&
-                        this.worldSound.playEffect(e.rules.createSound, e, e.owner),
-                        e.isInfantry() &&
-                          e.stance === $.StanceType.Paradrop &&
-                          this.worldSound.playEffect(N.SoundKey.ChuteSound, e, e.owner));
+                        this.worldSound.playEffect(e.rules.createSound, e, e.owner);
+                      e.isInfantry() &&
+                        e.stance === $.StanceType.Paradrop &&
+                        this.worldSound.playEffect(N.SoundKey.ChuteSound, e, e.owner);
                     }
                     break;
                   case L.EventType.ObjectUnspawn:
@@ -351,6 +361,11 @@ System.register(
                       e.isBuilding() &&
                         e.rules.spySat &&
                         this.worldSound.playEffect(N.SoundKey.SpySatDeactivationSound, e, e.owner);
+                      // OpenYRWeb: play SlavesFreeSound when a Slave Miner is destroyed (liberation)
+                      if (e._slavesLiberated) {
+                        var freeSound = this.game.rules.general.slavesFreeSound;
+                        freeSound && this.worldSound.playEffect(freeSound, e, e.owner);
+                      }
                     }
                     break;
                   case L.EventType.ObjectMorph: {

@@ -1,5 +1,5 @@
-// === Reconstructed SystemJS module: game/gameobject/trait/SlaveMinerTrait ===
-// deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyUnspawn","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyOwnerChange","engine/type/ObjectType","game/map/tileFinder/RadialTileFinder","game/gameobject/task/SlaveGatherTask"]
+﻿﻿﻿﻿﻿﻿﻿﻿// === Reconstructed SystemJS module: game/gameobject/trait/SlaveMinerTrait ===
+// deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyUnspawn","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyOwnerChange","engine/type/ObjectType","game/map/tileFinder/RadialTileFinder","game/gameobject/task/SlaveGatherTask","game/gameobject/task/move/MoveTask","game/gameobject/task/morph/UndeployIntoTask","game/type/LandType","game/gameobject/trait/TiberiumTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
 // OpenYRWeb: SlaveMiner economy (YR Yuri faction). Attached to a building whose rules have
@@ -31,10 +31,14 @@ System.register(
     "engine/type/ObjectType",
     "game/map/tileFinder/RadialTileFinder",
     "game/gameobject/task/SlaveGatherTask",
+    "game/gameobject/task/move/MoveTask",
+    "game/gameobject/task/morph/UndeployIntoTask",
+    "game/type/LandType",
+    "game/gameobject/trait/TiberiumTrait",
   ],
   function (e, t) {
     "use strict";
-    var n, i, r, d, oc, o, a, s;
+    var n, i, r, d, oc, o, a, s, m, u, lt, tt;
     t && t.id;
     return {
       setters: [
@@ -62,6 +66,18 @@ System.register(
         function (e) {
           s = e;
         },
+        function (e) {
+          m = e;
+        },
+        function (e) {
+          u = e;
+        },
+        function (e) {
+          lt = e;
+        },
+        function (e) {
+          tt = e;
+        },
       ],
       execute: function () {
         var l;
@@ -79,27 +95,52 @@ System.register(
               // NotifyUnspawn knows this is a deploy/undeploy morph (NOT a destroy/sell) and
               // silently recalls the slaves instead of liberating them to the civilian player.
               this._morphInFlight = !1;
+              // Deferred initial spawn count: slaves are created only after the building
+              // reaches buildStatus === Ready (fully deployed), not during BUILDUP.
+              this._pendingSpawnCount = 0;
+              // Initial spawn delay (game ticks). After buildStatus becomes Ready, wait this
+              // many ticks before spawning the first slaves (~2s = 30 ticks @ speed 6).
+              this._initialSpawnTicksLeft = 0;
+              // Respawn countdown timer (game ticks). Set to ~1s (15 ticks @ speed 6) by
+              // scheduleSlaveRespawn(). When it reaches 0, a new slave is spawned at the door.
+              this._respawnTicksLeft = 0;
+              // OpenYRWeb: counter for auto-undeploy triggered by slaves. Increments each
+              // tick when no slave has recently found ore. Reset by any slave finding ore.
+              // When it reaches SlaveMinerKickFrameDelay, the building undeploys.
+              // Start at a large negative value so a freshly-built building doesn't
+              // auto-undeploy before its slaves have a chance to find the nearest ore field.
+              this._noOreTicks = 150;
             }
             _spawnOneSlave(e, t) {
               var i = e.rules.getObject(t.rules.slaves, o.ObjectType.Infantry),
                 r = e.createUnitForPlayer(i, t.owner),
-                // find a free adjacent tile around the miner to drop the slave on
+                // Door tile = bottom-left cell of the building's foundation
+                doorRy = t.tile.ry + t.art.foundation.height - 1,
+                doorTile = e.map.tiles.getByMapCoords(t.tile.rx, doorRy) ?? e.map.tiles.getPlaceholderTile(t.tile.rx, doorRy),
+                // find a free adjacent tile for the slave to walk out to after spawning at the door
                 a = new l._RadialTileFinder(
                   e.map.tiles,
                   e.map.mapBounds,
-                  t.tile,
-                  { width: t.art.foundation.width, height: t.art.foundation.height },
-                  0,
+                  doorTile,
+                  { width: 1, height: 1 },
+                  1,
                   3,
                   (i) => {
                     var r = e.map.getGroundObjectsOnTile(i);
                     return !r.some((e) => e.isTechno()) && i.passable !== !1;
                   },
                 ),
-                s = a.getNextTile() ?? t.tile;
-              e.spawnObject(r, s),
+                s = a.getNextTile() ?? doorTile;
+              // Vanilla YR: slaves spawn at the door (bottom-left) of the building and walk out.
+              e.spawnObject(r, doorTile),
                 this.slaves.push(r),
+                s !== doorTile && r.unitOrderTrait.addTask(new m.MoveTask(e, s, void 0)),
                 r.unitOrderTrait.addTask(new l._SlaveGatherTask(e, t));
+            }
+            // Schedule a new slave to be spawned at the door after ~1 second. Used by
+            // SlaveGatherTask DUMPING when the slave is consumed (vanilla YR: destroy old, create new).
+            scheduleSlaveRespawn() {
+              this._respawnTicksLeft = 15; // ~1s at game speed 6 (15 ticks per game minute)
             }
             // Free the surviving slaves: transfer each to `newOwner`, drop the automated
             // SlaveGatherTask so the new owner can command them, and clear our pool. Vanilla
@@ -142,19 +183,79 @@ System.register(
                 }
               } catch (err) {}
               if (!claimed && e.owner.isCombatant())
-                for (var i = 0; i < e.rules.initialSlaves; i++) t.afterTick(() => this._spawnOneSlave(t, e));
+                this._pendingSpawnCount = e.rules.initialSlaves;
             }
             // repoint a slave's SlaveGatherTask at this building/vehicle (the new miner form),
             // so after a morph the slave keeps gathering/dumping against the current form.
             // Cancels any in-flight move so the slave immediately re-plans toward the new miner.
+            //
+            // When the miner is a building (just deployed from vehicle), pre-scan for ore near
+            // the building and direct the slave to walk there. Otherwise the slave scans from
+            // wherever it happens to be (possibly far from the building).
             _repointSlaveMiner(s, miner, game) {
               try {
                 s.unitOrderTrait?.cancelAll?.();
+                if (miner.isBuilding && miner.isBuilding()) {
+                  if (s.isCarrying) {
+                    // Carrying ore: walk to the building to dump.
+                    s.unitOrderTrait?.addTask?.(new m.MoveTask(game, miner.tile, !1, { ignoredBlockers: [miner] }));
+                  } else {
+                    var oreTile = this._findOreNearMiner(game, miner, s);
+                    if (oreTile)
+                      s.unitOrderTrait?.addTask?.(new m.MoveTask(game, oreTile, !1));
+                  }
+                }
                 s.unitOrderTrait?.addTask?.(new l._SlaveGatherTask(game, miner));
               } catch (err) {}
             }
+            // Scan for ore tiles near the miner building, using the SLAVE's speedType
+            // (not the building's) so island-id connectivity and passable-speed checks
+            // match what the slave can actually walk on.
+            // Returns the first viable ore tile or undefined.
+            _findOreNearMiner(e, t, s) {
+              try {
+                var spd = s.rules.speedType,  // slave infantry speed type (Foot)
+                    islandMap = e.map.terrain.getIslandIdMap(spd, !0),
+                    homeIsland = islandMap ? islandMap.get(t.tile, t.onBridge) : void 0,
+                    o = new l._RadialTileFinder(
+                      e.map.tiles,
+                      e.map.mapBounds,
+                      t.tile,
+                      t.getFoundation(),
+                      1,
+                      e.rules.general.slaveMinerSlaveScan,
+                      (r) =>
+                        r.landType === lt.LandType.Tiberium &&
+                        0 < e.map.terrain.getPassableSpeed(r, spd, !0, !1) &&
+                        Math.abs(r.z - t.tile.z) < 2 &&
+                        (!islandMap || islandMap.get(r, !1) === homeIsland),
+                    );
+                for (;;) {
+                  var d = o.getNextTile();
+                  if (!d) break;
+                  var c = e.map.getGroundObjectsOnTile(d).find((i) => i.isOverlay() && i.isTiberium()),
+                      tv = c && c.traits ? c.traits.get(tt.TiberiumTrait) : void 0;
+                  if (tv && 0 < tv.getBailCount()) return d;
+                }
+              } catch (err) {}
+              return void 0;
+            }
             [i.NotifyTick.onTick](e, t) {
               if (!e.owner || !e.owner.isCombatant || !e.owner.isCombatant()) return;
+              // Deferred initial spawn: wait until building is fully deployed (buildStatus 1=Ready),
+              // then wait an additional ~2 seconds (30 ticks) before spawning the first slaves.
+              if (this._pendingSpawnCount > 0 && e.isBuilding && e.isBuilding() && e.buildStatus === 1) {
+                if (this._initialSpawnTicksLeft === 0) {
+                  this._initialSpawnTicksLeft = 30; // ~2s @ speed 6
+                }
+                if (--this._initialSpawnTicksLeft > 0) return;
+                for (var si = 0; si < this._pendingSpawnCount; si++) this._spawnOneSlave(t, e);
+                this._pendingSpawnCount = 0;
+              }
+              // Respawn timer (vanilla YR: new slave appears at door ~1s after previous slave was consumed in DUMPING)
+              if (this._respawnTicksLeft > 0 && 0 >= --this._respawnTicksLeft) {
+                this._spawnOneSlave(t, e);
+              }
               // prune dead/destroyed slaves from the pool
               if (
                 ((this.slaves = this.slaves.filter((e) => !e.isDisposed && !e.isDestroyed)),
@@ -169,6 +270,31 @@ System.register(
                   (this.regenTicksLeft = 0), this._spawnOneSlave(t, e);
                 }
               } else this.regenTicksLeft = 0;
+              // OpenYRWeb: auto-undeploy when no slave has found ore for too long.
+              // We check the slaves directly: if any slave is carrying ore (isCarrying)
+              // or is actively harvesting (isHarvesting), ore is clearly available and
+              // we reset the counter. Only when ALL slaves are idle/searching and the
+              // counter reaches SlaveMinerKickFrameDelay do we pack up.
+              if (e.isBuilding && e.isBuilding() && e.buildStatus === 1) {
+                // If any slave currently has cargo or is digging, ore is available.
+                var anyActive = !1;
+                for (var si = 0; si < this.slaves.length; si++) {
+                  var sv = this.slaves[si];
+                  if (!sv || sv.isDisposed || sv.isDestroyed) continue;
+                  if (sv.isCarrying || sv.isHarvesting || sv._oreLocked) { anyActive = !0; break; }
+                }
+                if (anyActive) { this._noOreTicks = t.rules.general.slaveMinerKickFrameDelay || 150; }
+                else if (--this._noOreTicks <= 0) {
+                  this._noOreTicks = t.rules.general.slaveMinerKickFrameDelay || 150;
+                  if (!e.unitOrderTrait || !e.unitOrderTrait.hasTasks || !e.unitOrderTrait.hasTasks()) {
+                    var vehicleType = t.rules.getObject(e.rules.undeploysInto, o.ObjectType.Vehicle);
+                    if (!vehicleType) return;
+                    // Tell the vehicle to skip the idle delay so it deploys on arrival.
+                    t._slaveMinerAutoDeployMode = !0;
+                    e.unitOrderTrait.addTask(new u.UndeployIntoTask(t));
+                  }
+                }
+              }
             }
             // OpenYRWeb: capture the destroyer so onUnspawn can free slaves to them. Vanilla YR
             // liberates enslaved workers to the House that killed their Slave Miner.
@@ -219,6 +345,7 @@ System.register(
               }
               if (this._liberator) {
                 // destroyed by an enemy → free slaves to the destroyer (vanilla liberation)
+                e._slavesLiberated = !0; // flag for SoundHandler to play SlavesFreeSound
                 this._liberateSlaves(t, e, this._liberator);
               } else {
                 // sold / limboed with no killer → free to civilian player (neutral free units)
