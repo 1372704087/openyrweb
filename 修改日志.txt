@@ -292,4 +292,14 @@ GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrai
 - 工厂出厂例外：_aiTaskingIsFactory 标志在 ExitFactoryTask 期间跳过 lock，任务完成后清除标志并立即部署
 - AI 发出 MoveTask 后 hasTasks 为 true → lock 被设到 KickFrameDelay → 任务完成 → lock 倒计时
 - 若玩家在 AI 驾驶期间发出指令：lock 持续在 KickFrameDelay → 玩家指令结束 → lock 开始倒计时 → 倒计时内 AI 不干预
-- 修复：倒计时过了再手动操控后 lock 不会重新设置的问题
+- 修复：倒计时过了再手动操控后 lock 不会重新设置的问题(未解决)
+
+二十一、关闭超级武器不再误禁作战实验室（ForceShield）
+涉及文件： Production.ts.js、_module-map.json
+核心改动：
+
+- isAvailableForProduction() 中原逻辑：建筑有 SuperWeapon= 且该超武 DisableableFromShell=yes 且对局选项 superweapons=false → 不允许生产
+- 作战实验室通常挂载 ForceShield（防护力场），该超武 DisableableFromShell=yes，因此在关闭超级武器时被误判为"超级武器建筑"而从建造列表过滤掉
+- 修复：在禁用条件中增加 ForceShield 例外判断，ForceShield 不再是阻止建造的理由
+- 真正的超级武器建筑（如核弹发射井、闪电风暴等）仍会在关闭超级武器时被正常禁用
+- 同步新增 game/type/SuperWeaponType 依赖并更新 _module-map.json

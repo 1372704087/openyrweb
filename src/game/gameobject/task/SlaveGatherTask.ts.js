@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: game/gameobject/task/SlaveGatherTask ===
+﻿﻿// === Reconstructed SystemJS module: game/gameobject/task/SlaveGatherTask ===
 // deps: ["game/gameobject/task/system/Task","game/gameobject/task/move/MoveTask","game/map/tileFinder/RadialTileFinder","game/type/LandType","game/gameobject/task/system/WaitMinutesTask","game/gameobject/trait/TiberiumTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //

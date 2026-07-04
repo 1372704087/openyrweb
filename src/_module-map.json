@@ -3227,7 +3227,8 @@
         "engine/type/ObjectType",
         "util/event",
         "game/rules/GeneralRules",
-        "game/SideType"
+        "game/SideType",
+        "game/type/SuperWeaponType"
       ],
       "bytes": 5831
     },

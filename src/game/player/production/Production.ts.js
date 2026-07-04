@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/player/production/Production ===
-// deps: ["game/player/production/ProductionQueue","game/rules/TechnoRules","engine/type/ObjectType","util/event","game/rules/GeneralRules","game/SideType"]
+// deps: ["game/player/production/ProductionQueue","game/rules/TechnoRules","engine/type/ObjectType","util/event","game/rules/GeneralRules","game/SideType","game/type/SuperWeaponType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -11,10 +11,11 @@ System.register(
     "util/event",
     "game/rules/GeneralRules",
     "game/SideType",
+    "game/type/SuperWeaponType",
   ],
   function (e, t) {
     "use strict";
-    var n, r, i, a, s, o, l, c;
+    var n, r, i, a, s, o, u, l, c;
     t && t.id;
     return {
       setters: [
@@ -35,6 +36,9 @@ System.register(
         },
         function (e) {
           o = e;
+        },
+        function (e) {
+          u = e;
         },
       ],
       execute: function () {
@@ -126,7 +130,8 @@ System.register(
                   !(
                     e.superWeapon &&
                     this.rules.getSuperWeapon(e.superWeapon).disableableFromShell &&
-                    !this.gameOpts.superWeapons
+                    !this.gameOpts.superWeapons &&
+                    this.rules.getSuperWeapon(e.superWeapon).type !== u.SuperWeaponType.ForceShield
                   ) &&
                   this.hasFactoryFor(e) &&
                   this.meetsPrerequisites(e)

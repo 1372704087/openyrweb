@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿// === Reconstructed SystemJS module: game/gameobject/trait/SlaveMinerTrait ===
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// === Reconstructed SystemJS module: game/gameobject/trait/SlaveMinerTrait ===
 // deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyUnspawn","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyOwnerChange","engine/type/ObjectType","game/map/tileFinder/RadialTileFinder","game/gameobject/task/SlaveGatherTask","game/gameobject/task/move/MoveTask","game/gameobject/task/morph/UndeployIntoTask","game/type/LandType","game/gameobject/trait/TiberiumTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
