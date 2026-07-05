@@ -1,4 +1,4 @@
-﻿﻿﻿一、建筑动画状态机与生化反应炉特殊表现
+﻿一、建筑动画状态机与生化反应炉特殊表现
 涉及文件： Building.ts.js
 核心改动：
 
@@ -183,13 +183,6 @@ GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrai
 - ZShapePointMove 偏移不再限定 Refinery/NukeSilo
 - IdleAnim（YAREFN_A）禁用阴影避免多重阴影
 
-=== 展开/收起音效（未解决） ===
-
-- MorphIntoTask 在 unspawnObject 前分发 UnitDeployUndeployEvent
-- TechnoRules 新增 packupSound（解析 PackupSound=）
-- SoundHandler 对 slaveMiner 优先使用 DeploySound=/PackupSound=
-- 当前仍播放通用音效，专属音效未生效，根因待排查
-
 十八、奴隶矿场自动寻矿与部署延迟修复
 涉及文件： SlaveGatherTask.ts.js、SlaveMinerTrait.ts.js、SlaveMinerVehicleTrait.ts.js、Infantry.ts.js、_module-map.json
 核心改动：
@@ -279,10 +272,6 @@ GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrai
 
 - 改为 totalOre > 0：有任何矿就展开，与原版一致
 
-未修复bug
-奴隶采矿有时候会生成富矿
-电厂人数格子不对
-
 二十、玩家锁在AI驾驶期间接手操控重新生效（有bug，人工干预只生效一次）
 涉及文件： SlaveMinerVehicleTrait.ts.js
 核心改动：
@@ -292,7 +281,7 @@ GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrai
 - 工厂出厂例外：_aiTaskingIsFactory 标志在 ExitFactoryTask 期间跳过 lock，任务完成后清除标志并立即部署
 - AI 发出 MoveTask 后 hasTasks 为 true → lock 被设到 KickFrameDelay → 任务完成 → lock 倒计时
 - 若玩家在 AI 驾驶期间发出指令：lock 持续在 KickFrameDelay → 玩家指令结束 → lock 开始倒计时 → 倒计时内 AI 不干预
-- 修复：倒计时过了再手动操控后 lock 不会重新设置的问题(未解决)
+- 修复：倒计时过了再手动操控后 lock 不会重新设置的问题（见已知未修复问题.txt）
 
 二十一、关闭超级武器不再误禁作战实验室（ForceShield）
 涉及文件： Production.ts.js、_module-map.json
@@ -303,3 +292,27 @@ GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrai
 - 修复：在禁用条件中增加 ForceShield 例外判断，ForceShield 不再是阻止建造的理由
 - 真正的超级武器建筑（如核弹发射井、闪电风暴等）仍会在关闭超级武器时被正常禁用
 - 同步新增 game/type/SuperWeaponType 依赖并更新 _module-map.json
+
+二十二、战车工厂出厂修复（内部生成 + 完整碰撞）
+涉及文件：
+- Terrain.ts.js            isBlockerObject 战车工厂阻挡逻辑
+- FactoryTrait.ts.js        computeWarFactoryExitCoords 生成点
+
+问题：车辆出厂不像原版，且单位可穿过 5x3 战车工厂。
+
+根因一（碰撞）：GAWEAP（盟军战车工厂，5x3）规则中 NumberImpassableRows=1，
+原版 isBlockerObject 对 weaponsFactory 做 width-1 穿透处理，但条件 !e 被
+NumberImpassableRows=1 跳过，导致 (1||5)-1=0，阻拦盒宽度为 0，只挡 1 列，
+第 2~5 列全部放行 → 外部单位能穿过 80% 的工厂区域。
+
+根因二（出厂）：computeWarFactoryExitCoords 原本在工厂外侧 (rx+width) 生成
+车辆，不像原版"从工厂内部开出来"。
+
+修复内容：
+1. Terrain.ts.js: 移除 weaponsFactory 的 width-1 全局穿透特例，车辆经过
+   战车工厂时强制使用完整 Foundation 宽度（s?e=width:weaponsFactory&&e=width）
+   - 普通碰撞：战车工厂按完整 Foundation 阻挡，外部单位无法穿过
+   - 出厂通道：ExitFactoryTask 通过 ignoredBlockers:[factory] 临时忽略工厂本体
+2. FactoryTrait.ts.js: computeWarFactoryExitCoords 改回工厂内部中心点
+   (rx+floor(w/2), ry+floor(h/2))，车辆在工厂内部生成，ExitFactoryTask
+   利用 ignoredBlockers 忽略工厂阻挡，自动开到外侧集结点

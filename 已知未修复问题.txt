@@ -1,0 +1,20 @@
+已知未修复问题
+================
+
+一、展开/收起音效未生效
+- MorphIntoTask 在 unspawnObject 前分发 UnitDeployUndeployEvent
+- TechnoRules 新增 packupSound（解析 PackupSound=）
+- SoundHandler 对 slaveMiner 优先使用 DeploySound=/PackupSound=
+- 当前仍播放通用音效，专属音效未生效，根因待排查
+
+二、奴隶采矿有时候会生成富矿
+
+三、生化反应炉人数格子样式不正确
+- 当前显示为房屋样式的人数小点（Pips），应改为原版 YR 的血条样式、竖排布局
+
+四、苏联电厂标签未居中
+- 生化反应炉的标签在 2x2 显示时居中正确，但苏联电厂的标签位置偏移未居中，疑似渲染坐标硬编码导致
+
+五、玩家锁在AI驾驶期间接手操控：倒计时过了再手动操控后 lock 不会重新设置
+
+六、展开/收起铁矿特定帧可能出现鬼畜

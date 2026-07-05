@@ -329,7 +329,12 @@ System.register(
                 if (t.rules.gate) return !1;
                 var a = t.art.foundation;
                 let e = t.rules.numberImpassableRows;
-                s ? (e = a.width) : t.rules.weaponsFactory && !e && (e = a.width - 1);
+                // OpenYRWeb: war factories must block their full foundation for all
+                // units. The original code used width-1 for vehicles and did not
+                // override NumberImpassableRows, leaving most columns passable on
+                // 5-wide factories (GAWEAP etc). ExitFactoryTask handles the exit
+                // via ignoredBlockers for the newly-built unit only.
+                s ? (e = a.width) : t.rules.weaponsFactory && (e = a.width);
                 a = { x: t.tile.rx, y: t.tile.ry, width: (e || a.width) - 1, height: a.height - 1 };
                 return n.rectContainsPoint(a, { x: i.rx, y: i.ry });
               }

@@ -378,16 +378,12 @@ System.register(
               );
             }
             computeWarFactoryExitCoords(e) {
-              // OpenYRWeb: spawn the produced vehicle on a passable tile at the building's right
-              // edge, NOT the geometric center. The center is inside the building foundation and
-              // the vehicle physically cannot drive through the building to exit. The original
-              // used the center, which only worked for 3x3 foundations where the unit could clip
-              // through — but for wider foundations (YAWEAP is 5x3) the unit is permanently
-              // trapped. Spawn at (rx + width, ry + floor(height/2)) — the tile just outside the
-              // right edge, which is where the unit needs to end up anyway. If that tile is
-              // blocked, the produceGroundUnitAt caller will fall back via the map tile lookup.
+              // OpenYRWeb: spawn the produced vehicle at the geometric center of the
+              // factory foundation (matching original YR behavior). ExitFactoryTask
+              // then drives the unit to the external rally point, ignoring the factory
+              // building as a blocker (ignoredBlockers).
               var t = e.getFoundation();
-              return { rx: e.tile.rx + t.width, ry: e.tile.ry + Math.floor(t.height / 2) };
+              return { rx: e.tile.rx + Math.floor(t.width / 2), ry: e.tile.ry + Math.floor(t.height / 2) };
             }
             computeWarFactoryInternalRallyCoords(e) {
               var t = e.getFoundation();
