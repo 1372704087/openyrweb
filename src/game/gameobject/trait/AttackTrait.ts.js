@@ -149,14 +149,23 @@ System.register(
                     ? t
                     : void 0
                   : [e.primaryWeapon, e.secondaryWeapon].find((e) => e !== t);
+              } else if (e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()) {
+                // OpenYRWeb: garrisoned buildings use all occupants' weapons
+                // Return the first available weapon from any occupant
+                for (var occupant of e.garrisonTrait.units) {
+                  if (occupant.primaryWeapon) {
+                    i = occupant.primaryWeapon;
+                    break;
+                  }
+                  if (occupant.secondaryWeapon) {
+                    i = occupant.secondaryWeapon;
+                    break;
+                  }
+                }
               } else
                 i =
                   e.isBuilding() && e.garrisonTrait
-                    ? e.garrisonTrait.isOccupied()
-                      ? e.owner.country.side === a.SideType.GDI
-                        ? e.primaryWeapon
-                        : (e.secondaryWeapon ?? e.primaryWeapon)
-                      : void 0
+                    ? void 0
                     : e.isBuilding() && e.overpoweredTrait
                       ? e.overpoweredTrait.getWeapon()
                       : e.primaryWeapon;
@@ -202,19 +211,23 @@ System.register(
                             ? e.primaryWeapon
                             : e.secondaryWeapon,
                       ])
-                    : e.isBuilding() && e.garrisonTrait
-                      ? e.garrisonTrait.isOccupied()
-                        ? [
-                            e.owner.country.side === a.SideType.GDI
-                              ? e.primaryWeapon
-                              : (e.secondaryWeapon ?? e.primaryWeapon),
-                          ]
-                        : []
-                      : e.isBuilding() && e.overpoweredTrait
-                        ? [e.overpoweredTrait.getWeapon()]
-                        : i || t
-                          ? [e.primaryWeapon, !i && t && e.secondaryWeapon ? e.secondaryWeapon : void 0]
-                          : [e.primaryWeapon, e.secondaryWeapon]),
+                    : e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()
+                      ? // OpenYRWeb: garrisoned buildings use all occupants' weapons
+                        (() => {
+                          var weapons = [];
+                          for (var occupant of e.garrisonTrait.units) {
+                            if (occupant.primaryWeapon) weapons.push(occupant.primaryWeapon);
+                            if (occupant.secondaryWeapon) weapons.push(occupant.secondaryWeapon);
+                          }
+                          return weapons;
+                        })()
+                      : e.isBuilding() && e.garrisonTrait
+                        ? []
+                        : e.isBuilding() && e.overpoweredTrait
+                          ? [e.overpoweredTrait.getWeapon()]
+                          : i || t
+                            ? [e.primaryWeapon, !i && t && e.secondaryWeapon ? e.secondaryWeapon : void 0]
+                            : [e.primaryWeapon, e.secondaryWeapon]),
                 r.filter((e) => e && !e.rules.neverUse)
               );
             }

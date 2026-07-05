@@ -53,7 +53,9 @@ System.register(
             return this.building.rules.infantryAbsorb || this.building.healthTrait.health > 100 * this.evacThreshold;
           }
           [r.NotifyDamage.onDamage](e, t) {
-            !e.rules.infantryAbsorb && e.healthTrait.health <= 100 * this.evacThreshold && this.evacuate(t);
+            // OpenYRWeb: military buildings (IsBaseDefense=yes) and InfantryAbsorb=yes buildings
+            // never evacuate when damaged. Only civilian-capturable buildings evacuate when red.
+            !e.rules.infantryAbsorb && !e.rules.isBaseDefense && e.wasCapturedFromCivilian && e.healthTrait.health <= 100 * this.evacThreshold && this.evacuate(t);
           }
           [i.NotifyDestroy.onDestroy](e, t, i, r) {
             if (r) {
@@ -105,15 +107,13 @@ System.register(
                 }
               }
               var f = n.owner;
-              // OpenYRWeb: only flip a neutral/capturable garrisonable (e.g. Battle Bunker) back to
-              // civilian when its last occupant leaves. Player-built absorbers like the Yuri Bio Reactor
-              // (InfantryAbsorb=yes, carries bioReactorPowerTrait) stay owned by their builder —
-              // evacuating a power-boosting infantry must NOT surrender the building.
-              (o.length ||
-                n.isDestroyed ||
-                !!n.bioReactorPowerTrait ||
-                r.changeObjectOwner(n, r.getCivilianPlayer()),
-                r.events.dispatch(new p.BuildingEvacuateEvent(n, f)));
+              // OpenYRWeb: only flip a neutral/capturable garrisonable back to civilian when its last
+              // occupant leaves AND the building was originally captured from civilian. Player-built
+              // garrison buildings (combat bunkers, bio reactors) stay owned by their builder.
+              if (0 === o.length && !n.isDestroyed && !n.bioReactorPowerTrait && n.wasCapturedFromCivilian) {
+                r.changeObjectOwner(n, r.getCivilianPlayer());
+              }
+              r.events.dispatch(new p.BuildingEvacuateEvent(n, f));
             }
           }
         }),

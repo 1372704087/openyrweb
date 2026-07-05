@@ -138,13 +138,29 @@ System.register(
                 : this.secondaryWeapon;
           }
           isEquippedWithWeapon(e) {
-            return [this.primaryWeapon, this.secondaryWeapon].includes(e);
+            if ([this.primaryWeapon, this.secondaryWeapon].includes(e)) return !0;
+            // OpenYRWeb: garrisoned buildings use occupant weapons
+            var g = this.gameObject;
+            if (g && g.garrisonTrait && g.garrisonTrait.isOccupied()) {
+              for (var u of g.garrisonTrait.units) {
+                if (u.primaryWeapon === e || u.secondaryWeapon === e) return !0;
+              }
+            }
+            return !1;
           }
           getWeapons() {
             return [this.primaryWeapon, this.secondaryWeapon].filter(o.isNotNullOrUndefined);
           }
           [i.NotifyTick.onTick]() {
             (this.primaryWeapon && this.primaryWeapon.tick(), this.secondaryWeapon && this.secondaryWeapon.tick());
+            // OpenYRWeb: tick weapons of garrisoned units so their cooldowns expire.
+            var g = this.gameObject;
+            if (g && g.garrisonTrait && g.garrisonTrait.isOccupied()) {
+              for (var u of g.garrisonTrait.units) {
+                u.primaryWeapon && u.primaryWeapon.tick();
+                u.secondaryWeapon && u.secondaryWeapon.tick();
+              }
+            }
           }
           [r.NotifyDestroy.onDestroy](t, e, i) {
             !this.deathWeapon ||

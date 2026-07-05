@@ -130,9 +130,6 @@ System.register(
               get rof() {
                 let e = this.rules.rof;
                 return (
-                  this.gameObject.isBuilding() &&
-                    this.gameObject.garrisonTrait?.isOccupied() &&
-                    (e /= this.gameObject.garrisonTrait.units.length),
                   this.gameObject.veteranTrait && (e *= this.gameObject.veteranTrait.getVeteranRofMultiplier()),
                   Math.floor(e)
                 );

@@ -325,7 +325,7 @@ System.register(
                   ? (n.position.subCell = 0)
                   : n.isBuilding() && n.position.setCenterOffset(n.getFoundationCenterOffset()),
                 n.isTechno() &&
-                  ((n.rules.primary || n.rules.secondary || n.rules.weaponCount || n.rules.explodes) &&
+                  ((n.rules.primary || n.rules.secondary || n.rules.weaponCount || n.rules.explodes || (n.garrisonTrait && !n.bioReactorPowerTrait)) &&
                     ((n.armedTrait = new k.ArmedTrait(n, i)), n.traits.add(n.armedTrait)),
                   // OpenYRWeb: Gattling escalation. Technos with WeaponCount>1 that are NOT gunners
                   // (IFV turret swap) advance weapon stage while firing. Gunners use GunnerTrait
@@ -351,7 +351,7 @@ System.register(
                     n.traits.add(n.ammoTrait)),
                   (n.unitOrderTrait = new v.UnitOrderTrait(n)),
                   n.traits.addToFront(n.unitOrderTrait),
-                  (n.primaryWeapon || n.secondaryWeapon) &&
+                  (n.primaryWeapon || n.secondaryWeapon || (n.garrisonTrait && !n.bioReactorPowerTrait)) &&
                     ((n.attackTrait = new S.AttackTrait(this.tiles, this.tileOccupation)), n.traits.add(n.attackTrait)),
                   (n.isInfantry() || n.isVehicle()) &&
                     n.rules.deployer &&

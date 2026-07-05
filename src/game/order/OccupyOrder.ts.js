@@ -89,6 +89,16 @@ System.register(
                           this.target.obj.garrisonTrait.units.length &&
                           this.target.obj.garrisonTrait.units[0].owner !== this.sourceObject.owner
                         ) &&
+                        // OpenYRWeb: military buildings (isBaseDefense=yes) owned by civilian cannot be garrisoned.
+                        (this.target.obj.rules.isBaseDefense && this.target.obj.owner === this.game.getCivilianPlayer()
+                          ? !1
+                          : !0) &&
+                        // OpenYRWeb: empty player-owned garrison buildings cannot be entered by enemies.
+                        (!this.target.obj.garrisonTrait.units.length &&
+                        !this.game.areFriendly(this.sourceObject, this.target.obj) &&
+                        this.target.obj.owner !== this.game.getCivilianPlayer()
+                          ? !1
+                          : !0) &&
                         !this.sourceObject.mindControllableTrait?.isActive() &&
                         !this.sourceObject.mindControllerTrait?.isActive()
                       : !(

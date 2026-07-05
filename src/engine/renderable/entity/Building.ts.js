@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: engine/renderable/entity/Building ===
+// === Reconstructed SystemJS module: engine/renderable/entity/Building ===
 // deps: ["engine/renderable/builder/ShpBuilder","engine/renderable/entity/building/DamageType","engine/renderable/entity/building/AnimationType","engine/gfx/OverlayUtils","game/gameobject/Building","engine/Animation","game/map/wallTypes","game/Coords","util/math","engine/AnimProps","engine/renderable/WithPosition","engine/renderable/ShpRenderable","engine/ImageFinder","engine/gfx/DebugUtils","engine/renderable/MapSpriteTranslation","engine/renderable/entity/building/BuildingAnimArtProps","util/typeGuard","engine/renderable/entity/HighlightAnimRunner","game/rules/TechnoRules","game/gameobject/trait/AttackTrait","game/SideType","game/gameobject/trait/FactoryTrait","game/gameobject/trait/UnitRepairTrait","game/gameobject/common/DeathType","engine/renderable/entity/InvulnerableAnimRunner","engine/renderable/entity/building/BuildingShpHelper","engine/renderable/entity/unit/ExtraLightHelper","engine/renderable/AlphaRenderable","engine/renderable/DebugRenderable","engine/gfx/MathUtils"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -637,9 +637,13 @@ System.register(
                       : e > 100 * this.rules.audioVisual.conditionRed
                         ? p.DamageType.CONDITION_YELLOW
                         : p.DamageType.CONDITION_RED),
-                  (!this.gameObject.bioReactorPowerTrait &&
-                    ((t && this.objectRules.ini.getBool("CanBeOccupied")) || t === p.DamageType.CONDITION_RED) &&
-                    (t -= 1)),
+                  // OpenYRWeb: civilian buildings (non-military, non-bio reactor) use normal model
+                  // at yellow and only show damage at red (only 2 frames: 0=normal, 1=damaged).
+                  !this.gameObject.bioReactorPowerTrait &&
+                    !this.objectRules.isBaseDefense &&
+                    (t === p.DamageType.CONDITION_YELLOW
+                      ? (t = p.DamageType.NORMAL)
+                      : t === p.DamageType.CONDITION_RED && (t = p.DamageType.CONDITION_YELLOW)),
                   t
                 );
               }
@@ -671,7 +675,13 @@ System.register(
                       }
                     });
                   }));
-                let r = o !== p.DamageType.NORMAL && !l;
+                var r;
+                if (this.objectRules.isBaseDefense && this.gameObject.garrisonTrait) {
+                  // Military garrison buildings: fire only at red health
+                  r = o === p.DamageType.CONDITION_RED && !l;
+                } else {
+                  r = o !== p.DamageType.NORMAL && !l;
+                }
                 this.fireObjects.forEach((e) => {
                   e.get3DObject().visible = r;
                   let t = this.animations.get(e);
@@ -682,10 +692,18 @@ System.register(
                   !l && this.gameObject.bioReactorPowerTrait && this.currentAnimType === M.AnimationType.IDLE && this.setActiveAnimationVisible();
               }
               updateMainObjFrame(e, t) {
-                // Bio Reactor (bioReactorPowerTrait) SHP has no "occupied" frame — frame 2 is the
-                // RED damage frame, not a garrisoned appearance. Only civilian garrisonables (Battle
-                // Bunker etc.) use frame 2 for the occupied state.
-                let i = e && !this.gameObject.bioReactorPowerTrait ? 2 : t;
+                // Military garrison buildings (isBaseDefense) have 4-frame SHP:
+                // 0=empty-normal, 1=empty-damaged, 2=occupied-normal, 3=occupied-damaged.
+                // Bio Reactor has no occupied frame — frame 2 is the RED damage frame.
+                let i;
+                if (e && !this.gameObject.bioReactorPowerTrait && this.objectRules.isBaseDefense) {
+                  i = t === p.DamageType.NORMAL ? 2 : 3;
+                } else if (this.objectRules.isBaseDefense) {
+                  // Unoccupied military building: CONDITION_RED maps to same damaged frame as CONDITION_YELLOW
+                  i = t === p.DamageType.CONDITION_RED ? p.DamageType.CONDITION_YELLOW : t;
+                } else {
+                  i = t;
+                }
                 var r;
                 this.mainShpFile &&
                   this.mainObj &&

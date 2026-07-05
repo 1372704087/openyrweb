@@ -351,6 +351,19 @@ System.register(
                   }
                   i = !0;
                 }
+                // OpenYRWeb: Garrisoned buildings — each soldier fires independently
+                // with their own weapon and own ROF, not divided by occupant count.
+                if (r.isBuilding() && r.garrisonTrait && r.garrisonTrait.isOccupied()) {
+                  for (var occ of r.garrisonTrait.units) {
+                    var wp = occ.primaryWeapon;
+                    if (wp && 0 === wp.getCooldownTicks() &&
+                        wp.targeting.canTarget(this.target.obj, this.target.tile, this.game, !!this.options.force, !!this.options.passive)) {
+                      wp.fire(this.target, this.game, 1);
+                    }
+                  }
+                  s.attackState = T.AttackState.JustFired;
+                  return !1;
+                }
                 return (this.weapon.fire(this.target, this.game, e), i)
                   ? !0
                   : !!this.weapon.rules.fireOnce ||

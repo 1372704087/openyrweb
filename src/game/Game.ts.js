@@ -815,6 +815,10 @@ System.register(
                 const i = t.owner;
                 (i && i.removeOwnedObject(t),
                   e.addOwnedObject(t),
+                  // OpenYRWeb: mark garrison buildings as "captured from civilian" when they become
+                  // civilian-owned. This allows them to flip back to civilian when emptied later.
+                  // Player-built garrison buildings never get this flag, so they stay player-owned.
+                  t.garrisonTrait && e === this.getCivilianPlayer() && (t.wasCapturedFromCivilian = !0),
                   i &&
                     i !== e &&
                     (this.traits.filter(g.NotifyOwnerChange).forEach((e) => {
