@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1235,
+  "moduleCount": 1236,
   "modules": [
     {
       "name": "data/IniSection",
@@ -7726,6 +7726,15 @@
       "bytes": 1894
     },
     {
+      "name": "engine/renderable/fx/MagBeamFx",
+      "file": "engine/renderable/fx/MagBeamFx.ts.js",
+      "deps": [
+        "three.meshline",
+        "game/Coords"
+      ],
+      "bytes": 6200
+    },
+    {
       "name": "engine/gfx/lighting/LightingFx",
       "file": "engine/gfx/lighting/LightingFx.ts.js",
       "deps": [
@@ -7767,7 +7776,8 @@
         "engine/gfx/batch/BatchedMesh",
         "game/rules/ObjectRules",
         "game/math/geometry",
-        "engine/type/PaletteType"
+        "engine/type/PaletteType",
+        "engine/renderable/fx/MagBeamFx"
       ],
       "bytes": 9544
     },
@@ -7924,9 +7934,9 @@
       "name": "engine/renderable/entity/plugin/MagnetronBeamPlugin",
       "file": "engine/renderable/entity/plugin/MagnetronBeamPlugin.ts.js",
       "deps": [
-        "engine/renderable/fx/MindControlLinkFx"
+        "engine/renderable/fx/MagBeamFx"
       ],
-      "bytes": 2913
+      "bytes": 3970
     },
     {
       "name": "engine/renderable/entity/plugin/InfantryDisguisePlugin",
@@ -8058,6 +8068,7 @@
         "engine/renderable/entity/plugin/ChronoSparkleFxPlugin",
         "engine/renderable/entity/plugin/TntFxPlugin",
         "engine/renderable/entity/plugin/MindControlLinkPlugin",
+        "engine/renderable/entity/plugin/MagnetronBeamPlugin",
         "engine/renderable/entity/plugin/InfantryDisguisePlugin",
         "engine/renderable/entity/building/PsychicDetectPlugin",
         "engine/renderable/entity/plugin/TrailerSmokePlugin",

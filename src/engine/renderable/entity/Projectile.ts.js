@@ -22,10 +22,11 @@ System.register(
     "game/rules/ObjectRules",
     "game/math/geometry",
     "engine/type/PaletteType",
+    "engine/renderable/fx/MagBeamFx",
   ],
   function (e, t) {
     "use strict";
-    var y, o, s, u, d, g, p, m, f, T, v, l, a, c, h, n, b, S;
+    var y, o, s, u, d, g, p, m, f, T, v, l, a, c, h, n, b, B, S;
     t && t.id;
     return {
       setters: [
@@ -79,6 +80,9 @@ System.register(
         },
         function (e) {
           b = e;
+        },
+        function (e) {
+          B = e;
         },
       ],
       execute: function () {
@@ -340,14 +344,41 @@ System.register(
                 (e = 1 / this.gameSpeed.value),
                 (e = new v.RadBeamFx(this.camera, c, h, i, e, 1)),
                 r.addEffect(e)),
-              // OpenYRWeb: Magnetron magnetic beam visual. Reuses RadBeamFx with a purple
-              // (Yuri faction) colour, matching the vanilla Magnetron beam appearance.
+              // OpenYRWeb: Magnetron magnetic beam visual.
+              // Any weapon with IsMagBeam=yes draws the beam (both MagneticBeam against vehicles
+              // and MagneShake against buildings). The actual drag is only triggered by the
+              // Locomotor warhead in Warhead._dragVehicleTo.
+              // Skip per-shot MagBeamFx when the firing unit's MagnetronBeamPlugin is already
+              // handling a continuous beam (dragging vehicles OR actively firing at any target).
+              // AttackState <= 1 (Idle/CheckRange) means the plugin won't render, so use per-shot.
               (s.isMagBeam &&
+                !this.gameObject.fromObject?.magnetronDragging &&
+                !(this.gameObject.fromObject?.attackTrait?.attackState > 1) &&
                 ((c = this.gameObject.position.worldPosition.clone()),
                 (h = this.gameObject.target.getWorldCoords().clone()),
-                (i = new THREE.Color(0.5, 0.1, 0.7)),
-                (e = 1 / this.gameSpeed.value),
-                (e = new v.RadBeamFx(this.camera, c, h, i, e, 1)),
+                // Resolve beam colour: MagnaBeamHouseColor overrides MagnaBeamColor with player colour.
+                (i = s.isCustomColor && s.magnaBeamHouseColor
+                  ? new THREE.Color(this.gameObject.fromPlayer.color.asHex())
+                  : s.isCustomColor
+                    ? new THREE.Color(...s.magnaBeamColor.map(function(e) { return e / 255; }))
+                    : new THREE.Color(160 / 255, 80 / 255, 240 / 255)),
+                // Make the per-shot beam last for one ROF cycle plus a comfortable overlap so building
+                // attacks (MagneShake) look like a continuous sustained beam instead of flickering
+                // between shots. The overlap covers state-machine/tick timing jitter.
+                (e = Math.max(0.4, s.rof / m.GameSpeed.BASE_TICKS_PER_SECOND / this.gameSpeed.value + 0.4)),
+                (e = new B.MagBeamFx(c, h, this.camera, {
+                  color: i,
+                  alpha: s.magnaBeamAlpha,
+                  width: s.magnaBeamWidth,
+                  outerSpread: s.magnaBeamOuterSpread,
+                  waveAmplitude: s.magnaBeamWaveAmplitude,
+                  waveFrequency: s.magnaBeamWaveFrequency,
+                  waveSpeed: s.magnaBeamWaveSpeed,
+                  pulseStrength: s.magnaBeamPulse,
+                  pulseRate: s.magnaBeamPulseRate,
+                  additive: s.magnaBeamAdditive,
+                  durationSeconds: e,
+                })),
                 r.addEffect(e))),
                 this.objectArt.useLineTrail &&
                   ((e = new THREE.Color().fromArray(this.objectArt.lineTrailColor.map((e) => e / 255))),

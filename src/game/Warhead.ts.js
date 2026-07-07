@@ -224,34 +224,21 @@ System.register(
             // temporarily swaps the victim's Locomotor= to Jumpjet for the drag). `game`=t,
             // `target`=e, `attacker`=i (un-shadowed here).
             _dragVehicleTo(e, t, i) {
-              // OpenYRWeb: vanilla-equivalent Magnetron drag. Push a MagnetronDragTask that
-              // wraps a real MoveTask child: MoveTask builds a JumpjetLocomotor
-              // (rules.locomotor overridden to Jumpjet) and flies the victim toward a passable
-              // tile adjacent to the firing Magnetron. While the beam keeps firing the victim
-              // hovers; once the Magnetron stops (out of range/retargets/dies/suppressed) the
-              // victim drops and crushes whatever is below (see MagnetronDragTask._applyDrop).
+              // OpenYRWeb: OpenRA-equivalent Magnetron drag. Push a MagnetronDragTask that
+              // flies the victim toward the firing Magnetron and holds it at 1-tile distance.
+              // The drag persists as long as the Magnetron's AttackTask targets this victim —
+              // no beam timeout, no movement-interruption, no range-optimization back-off.
               // `e`=victim, `t`=game, `i`=attacker (magnetron). `this` is the LocomotorBeam
               // warhead instance (passed to the task for drop crush damage).
-              // Guard: if the victim is already being dragged, do not stack another drag task.
-              if (e.magnetronDraggedBy) {
-                // Same Magnetron keeping the beam alive on an already-lifted victim → just
-                // refresh the maintenance timer so the victim stays airborne (vanilla: the beam
-                // must keep firing to sustain the lift).
-                if (e.magnetronDraggedBy === i && e.unitOrderTrait) {
-                  var cur = e.unitOrderTrait.getCurrentTask();
-                  if (cur && cur.refreshBeam) cur.refreshBeam(t.currentTick);
-                }
-                return;
-              }
+              // Guard: if the victim is already being dragged by this same Magnetron, no-op.
+              // (Unlike the old YR-reversed logic, there is no refreshBeam — the drag task
+              // persists as long as the attack task exists, OpenRA-style.)
+              if (e.magnetronDraggedBy) { return; }
               if (!e.unitOrderTrait) return;
               // Stop the victim's current orders so it doesn't fight the involuntary drag.
               e.unitOrderTrait.cancelAllTasks();
-              // OpenYRWeb: cancelAllTasks() only marks tasks cancelled; their onEnd (which clears
-              // moveTrait.currentWaypoint / unreserves path nodes) doesn't run until the next
-              // TaskRunner tick. If the victim was mid-move (currentWaypoint set), the drag task's
-              // MoveTask child would throw "Nested move tasks are not supported" on onStart. Force
-              // the victim's move state clean now so the drag's MoveTask can start cleanly.
-              // (CollisionState.Resolved=1, MoveState.Idle=0 — see MoveTrait.ts.js enums.)
+              // Force the victim's move state clean so the drag task can start cleanly
+              // (cancelAllTasks only marks tasks cancelled; their onEnd cleanup runs later).
               if (e.moveTrait) {
                 try { e.moveTrait.unreservePathNodes && e.moveTrait.unreservePathNodes(); } catch (err) {}
                 e.moveTrait.currentWaypoint = void 0;

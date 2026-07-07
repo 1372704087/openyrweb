@@ -273,7 +273,9 @@ System.register(
               let s = r.attackTrait;
               (r.isInfantry() || r.isVehicle()) && s.attackState !== T.AttackState.Firing && (r.isFiring = !1);
               let t = this.target.obj,
-                a = this.children.find((e) => e instanceof p.MoveInWeaponRangeTask);
+                a = this.children.find((e) => e instanceof p.MoveInWeaponRangeTask),
+                magDragging = r.magnetronDragging === t;
+
               if (this.isCancelling() && s.attackState !== T.AttackState.FireUp)
                 return !r.airSpawnTrait?.isLaunchingMissiles() && (a?.cancel(), !0);
               let n = !1;
@@ -294,14 +296,15 @@ System.register(
                   if (
                     !this.game.isValidTarget(this.target.obj) ||
                     this.shouldDropTarget(this.target.obj) ||
-                    !this.weapon.targeting.canTarget(
-                      this.target.obj,
-                      this.target.tile,
-                      this.game,
-                      !!this.options.force,
-                      !!this.options.passive,
-                    ) ||
-                    !this.rangeHelper.isInWeaponRange(r, o, this.weapon, this.game.rules) ||
+                    (!magDragging &&
+                      !this.weapon.targeting.canTarget(
+                        this.target.obj,
+                        this.target.tile,
+                        this.game,
+                        !!this.options.force,
+                        !!this.options.passive,
+                      )) ||
+                    (!magDragging && !this.rangeHelper.isInWeaponRange(r, o, this.weapon, this.game.rules)) ||
                     !this.losHelper.hasLineOfSight(r, o, this.weapon)
                   )
                     return ((s.attackState = T.AttackState.CheckRange), this.onTick(r));
@@ -385,7 +388,7 @@ System.register(
                   (t = t.replacedBy),
                   this.onTargetChange(r)));
               let i = this.game.isValidTarget(t) && !this.shouldDropTarget(t);
-              if (i) {
+              if (i && !magDragging) {
                 let e = this.weapon.targeting.canTarget(
                   t,
                   this.target.tile,
@@ -422,8 +425,18 @@ System.register(
                       : this.target.obj.tile
                     : this.lastValidTargetPosition.tile
                   : this.target.tile;
+                // OpenYRWeb: Magnetron dragging a vehicle skips minimum-range check
+                // (OpenRA has no "back away from min range" behavior) but still enforces
+                // maximum range so that if the target is teleported away, the attack task
+                // will chase (and the drag will naturally follow) or end.
+                var inRange;
+                if (magDragging) {
+                  inRange = this.rangeHelper.isInRange(r, e, 0, this.weapon.range, !1);
+                } else {
+                  inRange = this.rangeHelper.isInWeaponRange(r, e, this.weapon, this.game.rules);
+                }
                 if (
-                  !this.rangeHelper.isInWeaponRange(r, e, this.weapon, this.game.rules) ||
+                  !inRange ||
                   !this.losHelper.hasLineOfSight(r, e, this.weapon) ||
                   (r.isUnit() &&
                     r.rules.balloonHover &&
