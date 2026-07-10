@@ -219,20 +219,20 @@ System.register(
             }
             // OpenYRWeb: Magnetron locomotor-beam drag. Called from detonate() (delegated
             // because detonate's params shadow the module aliases). The drag itself is a
-            // MagnetronDragTask that installs a real JumpjetLocomotor on the victim and flies
-            // it to a tile next to the firing Magnetron — vanilla-equivalent (vanilla YR
-            // temporarily swaps the victim's Locomotor= to Jumpjet for the drag). `game`=t,
-            // `target`=e, `attacker`=i (un-shadowed here).
+            // MagnetronDragTask that sets victim zone=Air (vanilla YR: IsLocomotor swaps
+            // victim Locomotor= to Jumpjet, making it an air unit), lifts it to cruise
+            // height, drags it toward the Magnetron, then drops it on a random nearby
+            // tile. `game`=t, `target`=e, `attacker`=i (un-shadowed here).
             _dragVehicleTo(e, t, i) {
-              // OpenYRWeb: OpenRA-equivalent Magnetron drag. Push a MagnetronDragTask that
-              // flies the victim toward the firing Magnetron and holds it at 1-tile distance.
-              // The drag persists as long as the Magnetron's AttackTask targets this victim —
-              // no beam timeout, no movement-interruption, no range-optimization back-off.
+              // OpenYRWeb: Vanilla YR Magnetron drag. Push a MagnetronDragTask that
+              // lifts the victim (zone→Air, vulnerable to AA), flies it toward the
+              // Magnetron, then drops it on a random nearby unoccupied tile. The drag
+              // persists as long as the Magnetron's AttackTask targets this victim —
+              // approximating vanilla's "continuous firing refreshes locomotor" behavior.
               // `e`=victim, `t`=game, `i`=attacker (magnetron). `this` is the LocomotorBeam
               // warhead instance (passed to the task for drop crush damage).
               // Guard: if the victim is already being dragged by this same Magnetron, no-op.
-              // (Unlike the old YR-reversed logic, there is no refreshBeam — the drag task
-              // persists as long as the attack task exists, OpenRA-style.)
+              // (No refreshBeam — the drag task persists as long as the attack task exists.)
               if (e.magnetronDraggedBy) { return; }
               if (!e.unitOrderTrait) return;
               // Stop the victim's current orders so it doesn't fight the involuntary drag.

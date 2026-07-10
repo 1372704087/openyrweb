@@ -77,7 +77,9 @@ System.register(
                   (this.primaryFactories = new Map()),
                   (this.factoryCounts = new Map()),
                   (this.veteranTypes = new Set()),
-                  (this.stolenTech = new Set()));
+                  (this.stolenTech = new Set()),
+                  // [CHEAT] 作弊调试用：为true时跳过工厂和前置建筑检查，使所有建筑/单位可建造。后续删除作弊时一并移除
+                  (this.cheatsBypassPrereqs = false));
               }
               get onQueueUpdate() {
                 return this._onQueueUpdate.asEvent();
@@ -133,8 +135,8 @@ System.register(
                     !this.gameOpts.superWeapons &&
                     this.rules.getSuperWeapon(e.superWeapon).type !== u.SuperWeaponType.ForceShield
                   ) &&
-                  this.hasFactoryFor(e) &&
-                  this.meetsPrerequisites(e)
+                  // [CHEAT] 作弊调试用：cheatsBypassPrereqs为true时跳过工厂和前置检查。后续删除作弊时恢复原逻辑
+                  (this.cheatsBypassPrereqs || (this.hasFactoryFor(e) && this.meetsPrerequisites(e)))
                 );
               }
               getAvailableObjects() {

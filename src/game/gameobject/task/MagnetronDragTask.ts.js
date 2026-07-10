@@ -1,33 +1,36 @@
 // === Reconstructed SystemJS module: game/gameobject/task/MagnetronDragTask ===
-// deps: ["game/gameobject/task/system/Task","game/map/tileFinder/RadialTileFinder","game/type/LocomotorType","game/Coords","game/math/Vector2","game/math/Vector3","game/gameobject/unit/ZoneType","game/gameobject/trait/MoveTrait","game/gameobject/task/move/MoveTask","game/event/ObjectLandEvent","game/event/ObjectLiftOffEvent","game/gameobject/common/DeathType","game/type/LandType","game/type/SpeedType","game/gameobject/locomotor/JumpjetLocomotor","game/Warhead"]
+// deps: ["game/gameobject/task/system/Task","game/map/tileFinder/RandomTileFinder","game/type/LocomotorType","game/Coords","game/math/Vector2","game/math/Vector3","game/gameobject/unit/ZoneType","game/gameobject/trait/MoveTrait","game/gameobject/task/move/MoveTask","game/event/ObjectLandEvent","game/event/ObjectLiftOffEvent","game/gameobject/common/DeathType","game/type/LandType","game/type/SpeedType","game/gameobject/locomotor/JumpjetLocomotor","game/Warhead","game/gameobject/trait/AttackTrait"]
 // 注意：变量/类型名是原始 TypeScript 的精简近似。
 //
-// OpenYRWeb: 磁电坦克磁场光束拖拽。
+// OpenYRWeb: 磁电坦克磁场光束拖拽（原版尤里复仇行为还原）。
 //
-// 行为参考：
-//   - TractorBeam 弹头击中目标 → 目标进入可拖拽（Tractable）状态。
-//   - 只要磁电持续攻击同一目标，拖拽就保持 —— 无光束超时，无需"刷新"概念。
-//     攻击任务存在即拖拽持续。
-//   - 磁电可自由移动；移动不会打断拖拽。受害者跟随磁电水平移动（巡航高度不变）。
-//   - 磁电停止移动时，目标被拉向磁电当前位置。受害者到达 1 格距离后攻击完成，目标坠落。
-//   - 拖拽结束条件：(a) 磁电停止攻击（死亡、新命令、目标被毁），
-//     (b) 目标离开攻击范围（攻击任务消失），(c) 目标变为不可拖拽（铁幕、死亡）。
-//   - 落点：对下方格子内的地面单位造成碾压伤害（基于受害者血量）+ 自身坠落伤害
-//     （可配置倍率，默认 25%）。
+// 原版 YR 行为参考（ModEnc / CnC Wiki 考证）：
+//   - IsLocomotor=yes 弹头命中载具后，临时将目标的 Locomotor 替换为 Jumpjet，
+//     使其升空并拖向磁电。受害者变为空中单位（zone=Air），可被防空武器攻击，
+//     自身武器失效（战斗要塞内部乘员例外）。
+//   - 磁电持续开火（ROF=20）时每次命中刷新 locomotor，维持拖拽。磁电停止开火
+//     （死亡、新命令、目标被毁、超射程）时 locomotor 失效，受害者坠落。
+//   - 受害者被拖到磁电附近后，扔在磁电附近一个随机的、尽量空闲的格子上。
+//   - 坠落伤害：坠落单位自身受到 base × FallingDamageMultiplier（默认 1.0）伤害，
+//     base = 当前血量（CurrentStrengthDamage=true，默认）或最大血量。
+//     落点格子上的地面单位被碾压，伤害值 = 坠落单位的 base 血量。
+//   - 非两栖单位落水 → 沉没摧毁；空旷地面 → 安全落地无伤害。
 //
-// 攻击系统无"射程优化自动后退/前进"机制 —— 单位一旦开始攻击就停在原地，
-// 除非目标超出最大射程才会追击。不存在"因目标进入最小射程而后退"的问题。
-//
-// 实现（自包含 —— 不派生 MoveTask 子任务）：
-//   每 tick 直接驱动受害者位置（爬升到巡航高度 + 向磁电漂移）。无子任务、
-//   无 TaskRunner 阻塞、无嵌套移动风险。MoveTrait.NotifyTick 通过保持
-//   moveTrait.moveState = Idle 保持休眠。
+// 本引擎实现说明：
+//   - 直接编辑受害者位置（不使用真实 Jumpjet locomotor），但正确模拟 zone=Air、
+//     事件分发（ObjectLiftOffEvent/ObjectLandEvent）和坠落伤害。
+//   - AttackTask 的 magDragging 标志已跳过 canTarget 检查（见 AttackTask.ts.js），
+//     因此磁电的纯对地 MagneticBeam 武器在受害者变为 Air 后仍能持续锁定目标。
+//   - 拖拽持续判定：检查磁电是否有活跃 AttackTask 指向受害者 —— 近似原版的
+//     "持续开火即拖拽"行为。
+//   - 自包含：每 tick 直接驱动受害者位置，不派生 MoveTask 子任务。保持
+//     moveTrait.moveState = Idle 使 MoveTrait.NotifyTick 休眠。
 
 System.register(
   "game/gameobject/task/MagnetronDragTask",
   [
     "game/gameobject/task/system/Task",
-    "game/map/tileFinder/RadialTileFinder",
+    "game/map/tileFinder/RandomTileFinder",
     "game/type/LocomotorType",
     "game/Coords",
     "game/math/Vector2",
@@ -41,17 +44,17 @@ System.register(
     "game/type/LandType",
     "game/type/SpeedType",
     "game/gameobject/locomotor/JumpjetLocomotor",
-  "game/Warhead",
-  "game/gameobject/trait/AttackTrait",
-],
+    "game/Warhead",
+    "game/gameobject/trait/AttackTrait",
+  ],
   function (e, t) {
     "use strict";
-    var s, r, lt, C, V2, V3, Z, MT, MV, OLE, OLFE, DT, LL, SP, JJ, WH, AT;
+    var s, RTF, lt, C, V2, V3, Z, MT, MV, OLE, OLFE, DT, LL, SP, JJ, WH, AT;
     t && t.id;
     return {
       setters: [
         function (e) { s = e; },
-        function (e) { r = e; },
+        function (e) { RTF = e; },
         function (e) { lt = e; },
         function (e) { C = e; },
         function (e) { V2 = e; },
@@ -70,12 +73,13 @@ System.register(
       ],
       execute: function () {
         var n;
-        // 拖拽物理参数。巡航高度针对本引擎坐标尺度调整。
-        var CRUISE_HEIGHT = 500; // 地面以上 leptons
-        var CLIMB_RATE = 20;     // leptons/帧 爬升速度
-        var HORIZ_SPEED = 20;    // leptons/帧 向磁电漂移速度
-        var FALL_GRAVITY = 4;    // leptons/帧² 重力加速度（从巡航高度落地约 15 帧）
-        var DRAG_DIST_TILES = 1; // 目标保持在距磁电恰好 1 格
+        // 拖拽物理参数。
+        var CRUISE_HEIGHT = 500;   // 地面以上 leptons
+        var CLIMB_RATE = 20;       // leptons/帧 爬升速度
+        var HORIZ_SPEED = 20;      // leptons/帧 水平漂移速度
+        var FALL_GRAVITY = 4;      // leptons/帧² 重力加速度
+        var DRAG_DIST_TILES = 2;   // 到达此距离内时寻找落点
+        var DROP_SEARCH_RADIUS = 2; // 落点搜索半径（格）
         e(
           "MagnetronDragTask",
           (n = class extends s.Task {
@@ -90,6 +94,8 @@ System.register(
                 (this._dropped = !1),
                 (this._dropping = !1),
                 (this._fallSpeed = 0),
+                (this._dropTile = null),
+                (this._movingToDrop = !1),
                 // 安全上限（约 20 秒）。超时但仍在空中时，onEnd 强制落地。
                 (this._maxTicks = 300),
                 ((this.cancellable = !0), (this.blocking = !0), (this.preventOpportunityFire = !0));
@@ -99,15 +105,22 @@ System.register(
               if (!v || v.isDisposed || v.isDestroyed) { this._aborted = !0; return; }
               if (!v.moveTrait || !v.unitOrderTrait) { this._aborted = !0; return; }
               if (v.magnetronDraggedBy) { this._aborted = !0; return; }
-              // OpenYRWeb：受害者保持 zone=Ground 用于瞄准。翻转为 zone=Air 会让
-              // 磁电的仅对地 MagneticBeam 武器无法重新获取目标，导致 AttackTask
-              // 终止并使受害者瞬间坠落。保持 Ground 让磁电持续开火。
-              // 悬浮是纯视觉的，通过 elevation 实现。"无法还击"效果由
-              // magnetronDraggedBy 标志强制执行（AttackTrait.scanForTarget 提前返回）。
+
+              // 原版 YR：IsLocomotor 弹头将受害者的 Locomotor 替换为 Jumpjet，
+              // 使其变为空中单位（zone=Air）。受害者可被防空武器攻击，自身武器失效。
+              // AttackTask 的 magDragging 标志已跳过 canTarget 检查（见 AttackTask.ts.js），
+              // 因此磁电的纯对地 MagneticBeam 武器在受害者变为 Air 后仍能持续锁定目标。
+              v.zone = Z.ZoneType.Air;
+              v.onBridge = !1;
+              try {
+                this.game.events.dispatch(new OLFE.ObjectLiftOffEvent(v));
+              } catch (err) {}
+
               v.magnetronDraggedBy = this.magnetron;
-              // OpenYRWeb 反向链接：磁电渲染器使用此引用绘制持续牵引光束
+              // 反向链接：磁电渲染器使用此引用绘制持续牵引光束
               // （MagnetronBeamPlugin 读取此字段）。
               this.magnetron.magnetronDragging = v;
+
               // 保持 MoveTrait 休眠，不干扰直接位置编辑。
               try {
                 v.moveTrait.locomotor = void 0;
@@ -121,7 +134,7 @@ System.register(
               if (!v || v.isDisposed || v.isDestroyed) return !0;
               if (++this._tickCount > this._maxTicks) return !0;
 
-              // 下降阶段激活 —— 仅驱动坠落，跳过所有提升/拖拽/光束逻辑。
+              // 坠落阶段 —— 仅驱动重力下落。
               if (this._dropping) {
                 return this._descend(v);
               }
@@ -140,22 +153,21 @@ System.register(
               // 光束活跃：保持磁电视觉上持续开火（连续光束）。
               mag.isFiring = !0;
 
-              // 爬升到巡航高度并向磁电水平漂移。
-              // 若已在 1 格距离内，到达后触发坠落，而不是悬停。
-              this._liftAndDrag(v, mag);
-
-              // 如果 _liftAndDrag 触发了坠落，驱动它。
-              if (this._dropping) {
-                return this._descend(v);
+              // 若正在移向落点格子，继续水平移动。
+              if (this._movingToDrop && this._dropTile) {
+                this._moveToDropTile(v, mag);
+                if (this._dropping) return this._descend(v);
+                return !1;
               }
 
+              // 爬升到巡航高度并向磁电水平漂移。
+              this._liftAndDrag(v, mag);
+
+              if (this._dropping) return this._descend(v);
               return !1;
             }
+
             // 磁场光束期间：将受害者提升到巡航高度并水平拉向磁电。
-            // 所有移动通过直接编辑受害者位置实现。
-            //
-            // 行为：磁电移动时受害者跟随。磁电静止且受害者到达 1 格距离时，
-            // 攻击完成并触发坠落（不是悬停）。
             _liftAndDrag(v, mag) {
               var pos = v.position;
               var beforeTile = v.tile;
@@ -183,11 +195,9 @@ System.register(
                 var hlen = Math.hypot(hx, hz);
                 var minSep = DRAG_DIST_TILES * C.Coords.LEPTONS_PER_TILE;
 
-                // 已拖到 1 格距离 —— 攻击完成，触发坠落。
+                // 已拖到磁电附近 —— 寻找随机落点（原版行为）。
                 if (hlen <= minSep + 0.01) {
-                  this._dropping = true;
-                  this._fallSpeed = 0;
-                  this._startDrop(mag, v);
+                  this._initiateDrop(v, mag);
                   return;
                 }
                 var want = Math.max(0, hlen - minSep);
@@ -201,7 +211,6 @@ System.register(
                 try { pos.moveByLeptons3(new V3.Vector3(dx, 0, dz)); } catch (err) {}
               }
 
-              // 同步格子占用（可能将高度重置为地面）。
               this._syncTile(v, beforeTile);
 
               // 在巡航高度上叠加波浪浮动效果。
@@ -209,16 +218,117 @@ System.register(
               var floatFrequency = 0.02094; // 约 5 秒一个完整起伏周期
               var floatOffset = floatAmplitude * Math.sin(this._tickCount * floatFrequency);
               var finalY = targetY + floatOffset;
-              // 防止浮动到地面以下。
               if (finalY < groundY + 10) finalY = groundY + 10;
               try { pos.setAbsoluteElevationWorld(finalY); } catch (err) {}
             }
+
+            // 受害者到达磁电附近：寻找随机空闲落点格子并开始移向该格子。
+            // 原版 YR：磁电将目标扔在附近一个随机的、尽量空闲的格子上。
+            _initiateDrop(v, mag) {
+              var dropTile = this._findDropTile(mag);
+              if (dropTile) {
+                this._dropTile = dropTile;
+                this._movingToDrop = !0;
+              } else {
+                // 未找到空闲格子 —— 就地坠落。
+                this._dropping = !0;
+                this._fallSpeed = 0;
+                this._startDrop(mag, v);
+              }
+            }
+
+            // 向落点格子水平移动（巡航高度不变）。
+            _moveToDropTile(v, mag) {
+              var pos = v.position;
+              var beforeTile = v.tile;
+              var targetTile = this._dropTile;
+              if (!targetTile) {
+                this._dropping = !0;
+                this._fallSpeed = 0;
+                this._startDrop(mag, v);
+                return;
+              }
+
+              // 计算落点格子的世界坐标中心。
+              var targetLeptons = new V2.Vector2(
+                targetTile.rx * C.Coords.LEPTONS_PER_TILE + C.Coords.LEPTONS_PER_TILE / 2,
+                targetTile.ry * C.Coords.LEPTONS_PER_TILE + C.Coords.LEPTONS_PER_TILE / 2
+              );
+              var vp = pos.getMapPosition();
+              var dx = targetLeptons.x - vp.x;
+              var dz = targetLeptons.y - vp.y;
+              var hlen = Math.hypot(dx, dz);
+
+              if (hlen <= HORIZ_SPEED + 0.01) {
+                // 到达落点格子上方 —— 开始坠落。
+                try { pos.moveByLeptons3(new V3.Vector3(dx, 0, dz)); } catch (err) {}
+                this._syncTile(v, beforeTile);
+                this._dropping = !0;
+                this._fallSpeed = 0;
+                this._startDrop(mag, v);
+                return;
+              }
+
+              var step = Math.min(HORIZ_SPEED, hlen);
+              if (hlen > 0.001 && step > 0) {
+                try {
+                  pos.moveByLeptons3(new V3.Vector3((dx / hlen) * step, 0, (dz / hlen) * step));
+                } catch (err) {}
+              }
+              this._syncTile(v, beforeTile);
+
+              // 保持巡航高度 + 浮动。
+              var groundY = this._groundWorldY(v);
+              var targetY = groundY + CRUISE_HEIGHT;
+              var floatAmplitude = 30;
+              var floatFrequency = 0.02094;
+              var floatOffset = floatAmplitude * Math.sin(this._tickCount * floatFrequency);
+              var finalY = targetY + floatOffset;
+              if (finalY < groundY + 10) finalY = groundY + 10;
+              try { pos.setAbsoluteElevationWorld(finalY); } catch (err) {}
+            }
+
+            // 在磁电附近寻找一个随机的空闲地面格子作为落点。
+            _findDropTile(mag) {
+              try {
+                var game = this.game;
+                var victim = this.victim;
+                var rng = (game.prng && game.prng.generateRandomInt)
+                  ? game.prng
+                  : {
+                      generateRandomInt: function (a, b) {
+                        return Math.floor(Math.random() * (b - a)) + a;
+                      },
+                    };
+                var finder = new RTF.RandomTileFinder(
+                  game.map.tiles,
+                  game.map,
+                  mag.tile,
+                  DROP_SEARCH_RADIUS,
+                  rng,
+                  function (tile) {
+                    if (!tile) return !1;
+                    // 排除被其他地面 techno 占据的格子。
+                    var objs = game.map.tileOccupation.getGroundObjectsOnTile(tile);
+                    for (var i = 0; i < objs.length; i++) {
+                      var o = objs[i];
+                      if (o !== victim && o.isTechno && o.isTechno()) return !1;
+                    }
+                    return !0;
+                  },
+                  !1, // includeStartTile
+                  !0  // checkBounds
+                );
+                return finder.getNextTile();
+              } catch (err) {
+                return null;
+              }
+            }
+
             // 判断磁电是否已不再主动攻击此受害者。
-            // 当攻击任务消失时拖拽结束（磁电死亡、收到新命令、
-            // 目标被毁等）。磁电移动不打断光束。
+            // 近似原版"持续开火即拖拽"：AttackTask 存在且以该受害者为目标时光束存活。
             _isBeamBroken(mag, v) {
               if (!mag || mag.isDisposed || mag.isDestroyed) return !0;
-              // 检查磁电是否有仍以此受害者为目标的活跃 AttackTask。
               try {
                 var uot = mag.unitOrderTrait;
                 if (uot) {
@@ -226,20 +336,20 @@ System.register(
                   for (var ti = 0; ti < tasks.length; ti++) {
                     var t = tasks[ti];
                     if (t && !t.isCancelling() && t.target && t.target.obj === v && typeof t.getWeapon === "function") {
-                      return !1; // AttackTask 仍在以该受害者为目标 —— 光束存活。
+                      return !1;
                     }
                   }
                 }
               } catch (err) {}
               return !0;
             }
+
             // 标记光束断裂：清除磁电拖拽状态，停止视觉光束，
             // 并取消 AttackTask 使磁电不再重新攻击已落地的受害者。
             _startDrop(mag, v) {
               if (!mag || mag.magnetronDragging !== v) return;
               mag.magnetronDragging = void 0;
               mag.isFiring = !1;
-              // 取消以该受害者为目标的 AttackTask，使磁电不再继续攻击已落地的单位。
               try {
                 var uot = mag.unitOrderTrait;
                 if (uot) {
@@ -260,7 +370,8 @@ System.register(
                 }
               } catch (err) {}
             }
-            // 坠落阶段：重力加速下落（TractionFallToEarth 模式）。
+
+            // 坠落阶段：重力加速下落。
             _descend(v) {
               if (this._dropped) return !0;
               this._dropping = !0;
@@ -278,15 +389,33 @@ System.register(
               try { pos.setAbsoluteElevationWorld(groundY); } catch (err) {}
               this._dropped = !0;
               this._fallSpeed = 0;
+              // 原版 YR：落地时恢复 zone=Ground，分发 ObjectLandEvent。
+              this._restoreZone(v);
               this._applyDrop(v, this.game);
               return !0;
             }
-            // 受害者所在格子的地面世界 Y 坐标（tile.z + 桥梁），世界单位。
+
+            // 恢复受害者的 zone 为地面（按落点地形）。
+            _restoreZone(v) {
+              try {
+                var tile = v.tile;
+                if (tile) {
+                  var lt2 = tile.onBridgeLandType != null ? tile.onBridgeLandType : tile.landType;
+                  v.zone = Z.getZoneType(lt2);
+                } else {
+                  v.zone = Z.ZoneType.Ground;
+                }
+                this.game.events.dispatch(new OLE.ObjectLandEvent(v));
+              } catch (err) {}
+            }
+
+            // 受害者所在格子的地面世界 Y 坐标（tile.z），世界单位。
             _groundWorldY(v) {
               var t = v.tile;
               var z = t ? t.z : 0;
               return C.Coords.tileHeightToWorld(z);
             }
+
             // 在受害者漂移过程中保持其在当前格子上的注册。
             _syncTile(v, beforeTile) {
               try {
@@ -298,22 +427,24 @@ System.register(
                 }
               } catch (err) {}
             }
-            // OpenYRWeb：磁电原版碾压伤害 —— 由 yrmd.exe 逆向还原。
-            //
-            // 落地时原版执行两个伤害机制：
-            //   (B) 落点格子下方的地形单位被碾压，伤害值 = 坠落单位原始血量。
-            //       无阵营过滤。
-            //   (A) 坠落单位自身受到 Strength × FallingDamageMultiplier 伤害，
-            //       通过专用的 FallingDamage 弹头。
-            //
-            // 我们模拟原版：查询落点格子的地面占用者，通过 CrushWarhead 施加碾压，
-            // 然后对坠落受害者自身造成最大血量 25% 的伤害（匹配Tractable DamageFactor 默认值）。
+
+            // 原版 YR 坠落伤害（ModEnc 考证）：
+            //   base = CurrentStrengthDamage ? 当前血量 : 最大血量
+            //   自身坠落伤害 = base × FallingDamageMultiplier（默认 1.0）
+            //   落点格子地面单位被碾压，伤害 = base（经 CrushWarhead）
+            //   非两栖单位落水 → 沉没摧毁
+            //   空旷地面 → 安全落地
             _applyDrop(victim, game) {
               try {
                 if (!victim || victim.isDisposed || victim.isDestroyed || !victim.healthTrait) return;
                 var cd = game.rules && game.rules.combatDamage;
-                // 自身落地伤害：最大血量 25%（Tractable DamageFactor 默认值）。
-                var fallDmg = Math.max(1, Math.round(victim.healthTrait.maxHitPoints * 0.25));
+                var multiplier = cd ? cd.fallingDamageMultiplier : 1;
+                var useCurrent = cd ? cd.currentStrengthDamage : !0;
+                var baseStrength = useCurrent
+                  ? victim.healthTrait.getHitPoints()
+                  : victim.healthTrait.maxHitPoints;
+                var fallDmg = Math.max(1, Math.round(baseStrength * multiplier));
+
                 // 机制 B：碾压所有站在落点格子上的地面 techno。
                 var targets = [];
                 try {
@@ -326,6 +457,7 @@ System.register(
                     targets.push(o);
                   }
                 } catch (err) {}
+
                 if (targets.length) {
                   var crushWhName = (cd && cd.crushWarhead) || "Crush";
                   var crushWh = void 0;
@@ -333,7 +465,6 @@ System.register(
                     var whRules = game.rules.getWarhead(crushWhName);
                     if (whRules) crushWh = new WH.Warhead(whRules);
                   } catch (err) {}
-                  var victimStrength = victim.healthTrait.maxHitPoints;
                   var attackerInfo = { obj: victim, player: victim.owner, weapon: void 0 };
                   for (var ti = 0; ti < targets.length; ti++) {
                     var target = targets[ti];
@@ -342,15 +473,15 @@ System.register(
                         target.infDeathType = 0;
                       target.deathType = DT.DeathType.Crush;
                       if (crushWh && crushWh.computeDamage && crushWh.inflictDamage) {
-                        var reduced = crushWh.computeDamage(victimStrength, target, game);
+                        var reduced = crushWh.computeDamage(baseStrength, target, game);
                         crushWh.inflictDamage(reduced, target, attackerInfo, game);
                       } else {
-                        target.healthTrait.inflictDamage(victimStrength, attackerInfo, game);
+                        target.healthTrait.inflictDamage(baseStrength, attackerInfo, game);
                         if (
                           (target.healthTrait && target.healthTrait.getHitPoints() <= 0) ||
                           target.isDestroyed
                         )
-                          game.destroyObject(target, attackerInfo);
+                          this._forceDestroyObject(target, game, attackerInfo);
                       }
                     } catch (err) {}
                   }
@@ -363,11 +494,12 @@ System.register(
                         (victim.healthTrait && victim.healthTrait.getHitPoints() <= 0) ||
                         victim.isDestroyed
                       )
-                        game.destroyObject(victim, { obj: void 0 });
+                        this._forceDestroyObject(victim, game);
                     } catch (err) {}
                   }
                   return;
                 }
+
                 // 下方无 techno。非两栖载具在水格上 → 直接摧毁。
                 if (
                   victim.tile.landType === LL.LandType.Water &&
@@ -375,28 +507,61 @@ System.register(
                 ) {
                   try {
                     victim.deathType = DT.DeathType.Sink;
-                    game.destroyObject(victim, { obj: void 0 });
+                    this._forceDestroyObject(victim, game);
                   } catch (err) {}
                   return;
                 }
                 // 空旷地面 → 正常安全落地，无伤害。
               } catch (err) {}
             }
+
+            // OpenYRWeb: 安全销毁无 limboData 的 techno 对象。
+            // game.destroyObject 强制要求 techno 有 limboData，但被磁电拖拽的单位
+            // （zone=Air）并未经过 limbo 流程，直接调用会抛异常。
+            _forceDestroyObject(obj, game, attackerInfo) {
+              var info = attackerInfo || { obj: void 0 };
+              try { game.destroyObject(obj, info); } catch (e) {
+                // 回退：手动标记销毁并从世界移除。
+                if (!obj || obj.isDestroyed || obj.isDisposed) return;
+                try {
+                  obj.isDestroyed = !0;
+                  if (obj.healthTrait) obj.healthTrait.health = 0;
+                  obj.onDestroy(game, info);
+                  game.map.tileOccupation.unoccupyTileRange(obj.tile, obj);
+                  if (obj.isTechno && obj.isTechno()) {
+                    game.unitSelection && game.unitSelection.cleanupUnit(obj);
+                    game.map.technosByTile && game.map.technosByTile.remove(obj);
+                    if (obj.owner) obj.owner.removeOwnedObject(obj);
+                  }
+                  game.world.removeObject(obj);
+                  game.updatableObjects.delete(obj);
+                  obj.onUnspawn(game);
+                } catch (e2) {}
+              }
+            }
+
             onEnd(unit) {
               var v = this.victim;
               if (!v || v.isDisposed || v.isDestroyed) {
                 this._aborted && (this._aborted = !1);
                 return;
               }
-              // 若受害者仍在抬升状态，强制贴回地面。
+              // 若受害者仍在空中，强制贴回地面并恢复 zone。
               try {
                 if (v.position) {
                   var groundY = this._groundWorldY(v);
                   if (v.position.worldPosition.y > groundY + 0.5)
                     v.position.setAbsoluteElevationWorld(groundY);
                 }
+                if (v.zone === Z.ZoneType.Air)
+                  this._restoreZone(v);
               } catch (err) {}
-              // 恢复受害者的每个实例的移动状态。
+              // OpenYRWeb: 取消拖拽时走完坠落伤害流程
+              // （落水沉没、落建筑碾压、自身坠落伤害），否则直接落地会跳过所有伤害。
+              if (!this._dropped) {
+                try { this._applyDrop(v, this.game); } catch (err) {}
+              }
+              // 恢复受害者的移动状态。
               if (v.moveTrait) {
                 v.moveTrait.locomotor = void 0;
                 v.moveTrait.moveState = MT.MoveState.Idle;

@@ -618,8 +618,109 @@ System.register(
                       () => w.DevToolsApi.unregisterCommand("reset"),
                       () => w.DevToolsApi.unregisterVar("speed"),
                     ),
+                    // ============ [CHEAT] 调试作弊系统 开始 ============
+                    // 按 F10 打开作弊菜单，提供无限金钱、秒建造、科技全开、地图全开等功能
+                    // 后续删除作弊时，删除从本注释到 "[CHEAT] 调试作弊系统 结束" 之间的整块代码
                     w.DevToolsApi.registerVar("cheats", this.runtimeVars.cheatsEnabled),
-                    this.disposables.add(() => w.DevToolsApi.unregisterVar("cheats")));
+                    this.disposables.add(() => w.DevToolsApi.unregisterVar("cheats")),
+                    (() => {
+                      let _cheatMenu = null, _cheatInfMoneyTimer = null;
+                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, mapRevealed: false };
+                      const _gs = this;
+                      function _destroyCheatMenu() {
+                        if (_cheatMenu) { _cheatMenu.remove(); _cheatMenu = null; }
+                      }
+                      function _createCheatMenu() {
+                        if (_cheatMenu) { _destroyCheatMenu(); return; }
+                        const g = i, lp = s, rv = _gs.runtimeVars, sc = _gs.speedCheat;
+                        const el = document.createElement("div");
+                        el.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;background:rgba(0,0,0,0.92);border:2px solid #f60;border-radius:8px;padding:20px 28px;font-family:monospace;color:#fff;min-width:320px;user-select:none;";
+                        const title = document.createElement("div");
+                        title.textContent = "调试作弊菜单";
+                        title.style.cssText = "text-align:center;font-size:18px;font-weight:bold;color:#f60;margin-bottom:16px;border-bottom:1px solid #333;padding-bottom:10px;";
+                        el.appendChild(title);
+                        function addToggle(label, getter, onToggle) {
+                          const row = document.createElement("div");
+                          row.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:6px 0;";
+                          const lbl = document.createElement("span");
+                          lbl.textContent = label; lbl.style.fontSize = "14px";
+                          const btn = document.createElement("button");
+                          btn.style.cssText = "padding:4px 14px;border:1px solid #888;border-radius:4px;cursor:pointer;font-family:monospace;font-size:13px;min-width:60px;";
+                          const refresh = () => {
+                            const on = getter();
+                            btn.textContent = on ? "ON" : "OFF";
+                            btn.style.background = on ? "#2a5a2a" : "#5a2a2a";
+                            btn.style.color = on ? "#6f6" : "#f66";
+                            btn.style.borderColor = on ? "#4a4" : "#a44";
+                          };
+                          btn.addEventListener("click", () => { onToggle(); refresh(); });
+                          refresh(); row.appendChild(lbl); row.appendChild(btn); el.appendChild(row);
+                          return refresh;
+                        }
+                        function addBtn(label, onClick) {
+                          const row = document.createElement("div");
+                          row.style.cssText = "padding:6px 0;";
+                          const btn = document.createElement("button");
+                          btn.textContent = label;
+                          btn.style.cssText = "width:100%;padding:6px 12px;border:1px solid #888;border-radius:4px;cursor:pointer;font-family:monospace;font-size:13px;background:#2a3a5a;color:#adf;";
+                          btn.addEventListener("click", onClick);
+                          row.appendChild(btn); el.appendChild(row);
+                        }
+                        function addSeparator() {
+                          const sep = document.createElement("div");
+                          sep.style.cssText = "border-top:1px solid #333;margin:6px 0;";
+                          el.appendChild(sep);
+                        }
+                        // [CHEAT] 无限金钱：每200ms增加50000金钱
+                        addToggle("无限金钱", () => _cheatState.infMoney, () => {
+                          _cheatState.infMoney = !_cheatState.infMoney;
+                          if (_cheatState.infMoney) {
+                            if (!_cheatInfMoneyTimer) _cheatInfMoneyTimer = setInterval(() => { if (g.status === 1) lp.credits += 50000; }, 200);
+                          } else { if (_cheatInfMoneyTimer) { clearInterval(_cheatInfMoneyTimer); _cheatInfMoneyTimer = null; } }
+                        });
+                        // [CHEAT] 秒建造：设置speedCheat为true，建造速度变为极快
+                        addToggle("秒建造", () => _cheatState.fastBuild, () => { _cheatState.fastBuild = !_cheatState.fastBuild; sc.value = _cheatState.fastBuild; });
+                        addSeparator();
+                        // [CHEAT] 一次性增加10万金钱
+                        addBtn("增加 100,000 金钱", () => { lp.credits += 100000; });
+                        // [CHEAT] 地图全开：揭示整个地图的战争迷雾
+                        addBtn("地图全开", () => { g.mapShroudTrait.revealMap(lp, g); _cheatState.mapRevealed = true; });
+                        // [CHEAT] 科技全开：设置maxTechLevel=99，添加所有阵营科技，跳过工厂和前置建筑检查
+                        addBtn("科技全开", () => {
+                          const prod = lp.production;
+                          if (prod) {
+                            prod.maxTechLevel = 99;
+                            prod.addStolenTech(0); // GDI
+                            prod.addStolenTech(1); // Nod
+                            prod.addStolenTech(2); // ThirdSide
+                            prod.cheatsBypassPrereqs = true; // 跳过工厂和前置建筑检查
+                            _cheatState.allTech = true;
+                          }
+                        });
+                        addSeparator();
+                        // [CHEAT] 一键全部开启：同时启用无限金钱、秒建造、地图全开、科技全开
+                        addBtn("一键全部开启", () => {
+                          rv.cheatsEnabled.value = true;
+                          if (!_cheatState.infMoney) { _cheatState.infMoney = true; if (!_cheatInfMoneyTimer) _cheatInfMoneyTimer = setInterval(() => { if (g.status === 1) lp.credits += 50000; }, 200); }
+                          if (!_cheatState.fastBuild) { _cheatState.fastBuild = true; sc.value = true; }
+                          g.mapShroudTrait.revealMap(lp, g); _cheatState.mapRevealed = true;
+                          const prod = lp.production;
+                          if (prod) { prod.maxTechLevel = 99; prod.addStolenTech(0); prod.addStolenTech(1); prod.addStolenTech(2); prod.cheatsBypassPrereqs = true; _cheatState.allTech = true; }
+                          _destroyCheatMenu(); _createCheatMenu();
+                        });
+                        const hint = document.createElement("div");
+                        hint.textContent = "按 F10 关闭菜单";
+                        hint.style.cssText = "text-align:center;font-size:11px;color:#666;margin-top:12px;";
+                        el.appendChild(hint);
+                        document.body.appendChild(el); _cheatMenu = el;
+                      }
+                      const _onF10Key = (ev) => { if (ev.key === "F10") { ev.preventDefault(); _createCheatMenu(); } };
+                      document.addEventListener("keydown", _onF10Key);
+                      this.disposables.add(
+                        () => { document.removeEventListener("keydown", _onF10Key); _destroyCheatMenu(); if (_cheatInfMoneyTimer) { clearInterval(_cheatInfMoneyTimer); _cheatInfMoneyTimer = null; } }
+                      );
+                    }).call(this));
+                    // ============ [CHEAT] 调试作弊系统 结束 ============
                 else if (this.gservCon.isOpen()) {
                   let e = (e) => this.gameTurnMgr.setRate(e);
                   (this.gservCon.onRateChange.subscribe(e),

@@ -10,18 +10,21 @@
 // OpenYRWeb (2026-07-06): Now uses MagBeamFx with MagnaBeam parameters from the Magnetron's
 // IsMagBeam weapon rules instead of the old hardcoded MindControlLinkFx. This gives the
 // continuous tractor beam the full wave/pulse/glow pipeline matching the per-shot beam.
-// deps: ["engine/renderable/fx/MagBeamFx"]
+// deps: ["engine/renderable/fx/MagBeamFx", "game/Coords"]
 System.register(
   "engine/renderable/entity/plugin/MagnetronBeamPlugin",
-  ["engine/renderable/fx/MagBeamFx"],
+  ["engine/renderable/fx/MagBeamFx", "game/Coords"],
   function (e, t) {
     "use strict";
-    var F;
+    var F, C;
     t && t.id;
     return {
       setters: [
         function (x) {
           F = x;
+        },
+        function (x) {
+          C = x;
         },
       ],
       execute: function () {
@@ -33,6 +36,7 @@ System.register(
               this.source = source;
               this.beam = void 0;
               this.renderableManager = void 0;
+              this._waveReverseAgainstVehicles = false;
               this._params = this._resolveParams();
             }
             /** Find the IsMagBeam weapon on this unit and build MagBeamFx params from it. */
@@ -45,23 +49,28 @@ System.register(
               else if (src.secondaryWeapon && src.secondaryWeapon.rules && src.secondaryWeapon.rules.isMagBeam)
                 wr = src.secondaryWeapon.rules;
               if (!wr) return null;
-              // Build params object matching MagBeamFx constructor.
+              // Store wave reversal flag for per-frame direction control in update().
+              this._waveReverseAgainstVehicles = wr.waveReverseAgainstVehicles;
+              // Build params for shader-based MagBeamFx (vanilla YR Wave blending).
+              // Formula: result = c + color*x + c*intensity*x  (Ares reverse-engineered)
+              var houseColor = wr.waveIsHouseColor
+                ? new THREE.Color(src.owner ? src.owner.color.asHex() : 0xB000D0)
+                : null;
               return {
-                color: wr.isCustomColor && wr.magnaBeamHouseColor
-                  ? new THREE.Color(src.owner ? src.owner.color.asHex() : null)
-                  : wr.isCustomColor
-                    ? new THREE.Color(wr.magnaBeamColor[0] / 255, wr.magnaBeamColor[1] / 255, wr.magnaBeamColor[2] / 255)
-                    : new THREE.Color(160 / 255, 80 / 255, 240 / 255),
-                alpha: wr.magnaBeamAlpha,
+                waveColor: wr.waveColor,
+                waveIntensity: wr.waveIntensity,
+                waveIsHouseColor: wr.waveIsHouseColor,
+                waveReverse: false,  // set per-frame via setWaveReverse()
+                growFromTarget: false, // set per-frame via update()
+                growthSpeed: 3.0,      // 光束生长/收缩速度（每秒）
                 width: wr.magnaBeamWidth,
-                outerSpread: wr.magnaBeamOuterSpread,
-                waveAmplitude: wr.magnaBeamWaveAmplitude,
                 waveFrequency: wr.magnaBeamWaveFrequency,
                 waveSpeed: wr.magnaBeamWaveSpeed,
                 pulseStrength: wr.magnaBeamPulse,
                 pulseRate: wr.magnaBeamPulseRate,
-                additive: wr.magnaBeamAdditive,
+                alpha: wr.magnaBeamAlpha,
                 durationSeconds: null,  // continuous beam, no timeout
+                color: houseColor,
               };
             }
             onCreate(rm) {
@@ -86,54 +95,105 @@ System.register(
               }
 
               if (!beamTarget) {
-                this.disposeBeam();
+                if (this.beam) {
+                  if (!this.beam.isDying()) this.beam.startDying();
+                  if (this.beam.isFinished()) this.beam = void 0;
+                }
                 return;
               }
 
+              // 炮口位置 = 单位位置 + PrimaryFireFLH 偏移（含炮塔旋转）
               var a = src.position.worldPosition.clone();
-              var b = beamTarget.position
-                ? beamTarget.position.worldPosition.clone()
-                : (typeof beamTarget.getWorldCoords === "function"
-                    ? beamTarget.getWorldCoords().clone()
-                    : null);
+              try {
+                var flh = src.art && src.art.primaryFireFlh;
+                if (flh && (flh.forward || flh.lateral || flh.vertical)) {
+                  var muzzleFacing = src.turretTrait ? src.turretTrait.facing : src.direction;
+                  var rad = muzzleFacing * Math.PI / 180;
+                  var cos = Math.cos(rad), sin = Math.sin(rad);
+                  var lx = flh.lateral, fy = flh.forward;
+                  var rx = lx * cos - fy * sin;   // rotated lateral
+                  var ry = lx * sin + fy * cos;   // rotated forward
+                  // 炮塔偏移（TurretOffset 沿车身中心线）
+                  var turretOff = src.art && src.art.turretOffset || 0;
+                  if (turretOff) {
+                    var dirRad = src.direction * Math.PI / 180;
+                    a.x += -turretOff * Math.sin(dirRad);
+                    a.z += -turretOff * Math.cos(dirRad);
+                  }
+                  // FLH 偏移：leptons → world（X/Z 1:1，Y 同 world 单位）
+                  a.x += rx;
+                  a.z += -ry;
+                  a.y += flh.vertical;
+                }
+              } catch (err) {}
+              var b;
+              // Handle both game objects (with position) and tile objects (with rx, ry, z)
+              if (beamTarget.position) {
+                b = beamTarget.position.worldPosition.clone();
+              } else if (typeof beamTarget.getWorldCoords === "function") {
+                b = beamTarget.getWorldCoords().clone();
+              } else if (beamTarget.rx !== undefined && beamTarget.ry !== undefined) {
+                // Tile object: { dx, dy, rx, ry, z, ... } - rx/ry are tile indices
+                // Use tile center (rx+0.5, ry+0.5) for proper world position
+                b = C.Coords.tile3dToWorld(beamTarget.rx + 0.5, beamTarget.ry + 0.5, beamTarget.z || 0);
+              }
               if (!b) { this.disposeBeam(); return; }
+
+              // 目标是车辆/坦克（包括已举起的拖拽目标和正在攻击的车辆）：光束从目标向炮口生长
+              // 目标是建筑/地面：光束从炮口向目标生长
+              var isVehicleTarget = !!(victim && !victim.isDestroyed && !victim.isDisposed) ||
+                !!(beamTarget && typeof beamTarget.isVehicle === "function" && beamTarget.isVehicle());
 
               if (!this.beam) {
                 if (!this._params) {
                   this._params = {
-                    color: new THREE.Color(160 / 255, 80 / 255, 240 / 255),
-                    alpha: 0.85,
+                    waveColor: [0, 0, 0],
+                    waveIntensity: [128, 0, 1024],
+                    waveIsHouseColor: false,
+                    waveReverse: false,
+                    growFromTarget: false,
+                    growthSpeed: 3.0,
                     width: 10.0,
-                    outerSpread: 5.0,
-                    waveAmplitude: 1.8,
                     waveFrequency: 6.0,
                     waveSpeed: 2.2,
                     pulseStrength: 0.3,
                     pulseRate: 3.5,
-                    additive: true,
+                    alpha: 0.85,
                     durationSeconds: null,
+                    color: null,
                   };
                 }
+                this._params.growFromTarget = isVehicleTarget;
                 var cam = this.renderableManager && this.renderableManager.camera;
                 this.beam = new F.MagBeamFx(a, b, cam, this._params);
                 this.renderableManager && this.renderableManager.addEffect(this.beam);
-              } else {
+              } else if (!this.beam.isDying()) {
                 this.beam.updateEndpoints(a, b);
+              } else if (this.beam.isFinished()) {
+                // 旧光束已缩完，清理后下帧创建新光束
+                this.beam = void 0;
+              }
+              // 波纹方向：车辆目标从目标流向炮口，建筑/地面从炮口流向目标
+              if (this.beam) {
+                this.beam.setWaveReverse(this._waveReverseAgainstVehicles && isVehicleTarget);
               }
             }
 
             /** Check if the source is attacking a target with an IsMagBeam weapon
-             *  (e.g. MagneShake vs buildings) and return the attack target for beam rendering. */
+             *  (e.g. MagneShake vs buildings, or ground attack) and return the attack target for beam rendering. */
             _getAttackBeamTarget(src) {
               try {
                 var at = src.attackTrait;
-                if (!at || !at.currentTarget || !at.currentTarget.obj) return null;
+                if (!at || !at.currentTarget) return null;
                 // Must be actively firing (not in Idle/CheckRange).
                 // AttackState: Idle=0, CheckRange=1, PrepareToFire=2, FireUp=3, Firing=4, JustFired=5
                 // Allow beam through PrepareToFire/FireUp/Firing/JustFired to avoid gaps between shots.
                 if (at.attackState == null || at.attackState <= 1) return null;
-                var target = at.currentTarget.obj;
-                if (!target || target.isDestroyed || target.isDisposed) return null;
+                // Support both object targets and ground (tile) targets
+                var target = at.currentTarget.obj || at.currentTarget.tile;
+                if (!target) return null;
+                // For object targets, check if destroyed/disposed
+                if (target.isDestroyed || target.isDisposed) return null;
                 // Verify the source has an IsMagBeam weapon (primary or secondary).
                 // The MagnetronBeamPlugin is only created for units with IsMagBeam weapons,
                 // but double-check to be safe.

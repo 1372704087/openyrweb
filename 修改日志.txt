@@ -1,442 +1,67 @@
-﻿﻿﻿﻿﻿一、建筑动画状态机与生化反应炉特殊表现
-涉及文件： Building.ts.js
-核心改动：
-
-建造期间仅播放建造动画，不再叠加 IDLE / ACTIVE 动画层，避免视觉混乱。
-
-生化反应炉（bioReactorPowerTrait）建成后：
-
-无进驻时显示 ACTIVE 未进驻状态；
-
-有进驻时切换到 进驻状态；
-
-IDLE 动画默认隐藏，防止与 ACTIVE 重叠。
-
-修复动画在 STOPPED / DELAYED 状态切换时，通过 intendedVisible 缓存真实可见性，避免模型误显或误隐。
-
-受损时根据 damagedImage 找到对应 SHP 帧并偏移，正确播放受损外观。
-
-生化反应炉不再误用普通驻守建筑的 frame=2 作为进驻标志。
-
-异常处理收紧：仅捕获 RangeError，其余异常继续向上抛出，避免吞没真实错误。
-
-二、建筑动画配置支持受损图片
-涉及文件： BuildingAnimArtProps.ts.js
-核心改动：
-
-解析动画配置时，若存在 damagedArt 字段，将其图片名称记录到 damagedImage 属性，供受损切换时查找对应 SHP 资源。
-
-三、SHP 帧信息统一收集受损图资源
-涉及文件： BuildingShpHelper.ts.js
-核心改动：
-
-getShpFrameInfos 新增 animArtProps 参数，遍历所有动画配置（含正常和受损），通过 ImageFinder 分别注册 image 和 damagedImage 的 SHP 帧信息，确保受损图能被正确预加载。
-
-四、SHP 构建器支持运行时动态切帧
-涉及文件： ShpBuilder.ts.js
-核心改动：
-
-frameOffset 的 setter 不再因 build() 后调用而报错，改为立即刷新当前渲染帧，实现受损/正常状态的实时切换，无需重建对象。
-
-五、加载流程适配新增参数
-涉及文件： GameLoader.ts.js
-核心改动：
-
-调用 getShpFrameInfos 时传入 animArtProps，与 BuildingShpHelper 的新签名保持一致，确保受损图资源被正确加载。
-
-六、发电建筑顶部显示电力标签（类似原版“主要”标签）
-涉及文件： PipOverlay.ts.js
-核心改动：
-
-选中发电建筑（rules.power > 0，如发电厂、核电站、生化反应炉）后，在建筑上方显示 电力=XXX 和 负载=XXX 标签。
-
-标签仅在选中时出现，取消选中即消失。
-
-耗电建筑不显示该标签。
-
-新增纹理/材质创建、状态缓存与清理逻辑，避免内存泄漏。
-
-七、鼠标悬停提示还原为原版行为
-涉及文件： TooltipHandler.ts.js
-核心改动：
-
-移除之前添加的显示 +200 / -50 电力数值的自定义代码，恢复原版悬停提示逻辑（仅显示建筑名称等基本信息）。
-
-八、生化反应炉严重损坏不再退出驻扎步兵
-涉及文件： TechnoRules.ts.js、GarrisonTrait.ts.js
-核心改动：
-
-在 TechnoRules 中保存 InfantryAbsorb 原始规则字段。
-
-GarrisonTrait 的 onDamage 中，对 InfantryAbsorb=yes 的建筑（如生化反应炉）跳过红血撤离逻辑，保持与原版 YR 一致。
-
-canBeOccupied() 同样对 InfantryAbsorb=yes 的建筑跳过红血限制，允许生化反应炉在受损后继续吸收步兵。
-
-修复 GarrisonTrait 类方法间多余的逗号，避免构建后的 ra2web.js 在浏览器解析时报 "Unexpected token ','" 并导致 main 模块 404。
-
-九、修复建筑动画阴影在 SHP 帧数不足时显示异常
-涉及文件： ShadowRenderable.ts.js
-核心改动：
-
-computeShadowFrameNo 现在会校验阴影帧索引：只有当 numImages/2 + baseFrameNo 为整数且小于总帧数时才返回有效帧，否则返回 -1。
-
-setBaseFrame、setVisible、create3DObject 和 frameHasShadowData 均处理无效阴影帧（-1），避免在帧数不足时把普通帧当作阴影渲染，从而出现半透明重影/透明线条。
-
-该问题在生化反应炉吸收兵后切换 ActiveAnimTwo 时较明显，因为部分动画 SHP 没有独立的阴影帧。
-
-十、合并上游日志级别优化（GameLoader）
-涉及文件： GameLoader.ts.js
-核心改动（来自 AgentMystia/openyrweb@72344c2）：
-
-可选资源（cameocd.mix、sidec01cd.mix/sidec02cd.mix）缺失时由 console.warn 降级为 console.debug，避免正常启动时产生误导性警告。
-
-worker 不可用导致的 WORKER_UNAVAILABLE 错误在音频解码和 VXL 几何体预加载流程中降级为 console.debug，真实异常仍保持 error 输出。
-
-十一、合并上游日志级别优化（GameResImporter）
-涉及文件： GameResImporter.ts.js
-核心改动：
-
-资源导入时可选 mix 文件缺失由 console.warn 改为 console.info，避免每次导入/启动都报黄条警告。
-
-thememd.mix 缺失时额外提示“尤里复仇扩展音乐不可用，RA2 基础音乐仍可播放”。
-
-十二、合并上游日志级别优化（BuildingShpHelper）
-涉及文件： BuildingShpHelper.ts.js
-核心改动：
-
-建筑动画 SHP 缺失时由 console.warn 改为 console.debug。该缺失属于用户游戏数据完整性问题（如雪地变体、生产动画帧），建筑仍可用主图像和其他动画层渲染，不应作为引擎错误警告。
-
-十三、合并上游 worker 错误信息规范化
-涉及文件： vendor/worker-source.mjs、vendor/dist/worker.js
-核心改动：
-
-worker 三个入口函数（decodeWav、generateVxlGeometry、compressFile）抛出的错误信息统一加上 WORKER_UNAVAILABLE 前缀，方便 GameLoader 等调用方识别并按预期降级为 debug 日志。
-
-同步重新生成了 vendor/dist/worker.js 和 build/dist/worker.min.js。
-
-十四、修复建筑阴影与地面/其他阴影 Z-fighting 闪烁
-涉及文件： ShadowRenderable.ts.js
-核心改动：
-
-在阴影 mesh 创建后启用 material.polygonOffset（Factor=-1, Units=-1），让阴影在深度测试中优先于地面绘制，避免阴影与地面或其他阴影层竞争深度缓冲导致的一闪一闪现象。
-
-同时保留 MAGIC_OFFSET/5 的微小高度偏移作为辅助。
-
-十五、生化反应炉 ACTIVE 动画阴影与主建筑阴影重叠修复
-涉及文件： Building.ts.js
-核心改动：
-
-setActiveAnimationVisible 中，对 bioReactorPowerTrait 建筑，在设置 ACTIVE 动画层可见性后，调用 setShadowVisible(false) 禁用动画叠加层的阴影渲染。
-
-主建筑（mainObj）已通过 objectArt.hasShadow 提供建筑自身阴影，ACTIVE 动画叠加层（如反应炉核心发光效果）不应再生成额外的阴影，否则两者重叠在视觉上形成多重阴影。
-
-十六、出售驻扎建筑时先疏散内部士兵
-涉及文件： GarrisonTrait.ts.js
-核心改动：
-
-GarrisonTrait 新增实现 NotifySell.onSell 接口，建筑被出售（SellTrait.sell）时调用 this.evacuate(game) 释放所有驻扎步兵。
-
-此前只有 NotifyDestroy.onDestroy 会疏散或击杀驻扎单位，出售流程不会触发销毁回调，导致生化反应炉等可驻扎建筑被卖掉后内部士兵未释放。
-
-修复后，出售前步兵会先被放到建筑周围空地并执行 ScatterTask；找不到空地时仍按原逻辑销毁。
-
-十七、奴隶矿场（YAREFN / SMIN / SLAV）完整实现
-涉及文件： SlaveGatherTask.ts.js、SlaveMinerTrait.ts.js、SlaveMinerVehicleTrait.ts.js、Infantry.ts.js、GeneralRules.ts.js、RenderableFactory.ts.js、PipOverlay.ts.js、Building.ts.js、TechnoRules.ts.js、SoundHandler.ts.js、MorphIntoTask.ts.js
-核心改动：
-
-=== SlaveGatherTask（采矿循环状态机）===
-
-- 状态机：SEEKING_ORE → MOVING_TO_ORE → IDLE_BEFORE_HARVEST（随机思考延迟）→ HARVESTING → RETURNING → DUMPING（隐藏2秒）→ EXITING_MINER
-- 随机思考延迟 0~5 秒，延迟结束后 20% 概率二次寻矿（2~5 格范围）
-- 采矿速度：HARVEST_DELAY_MINUTES=8/60（约 4 秒/矿石），3 背包格约 12 秒采完
-- 二次寻矿从最高价值候选矿石中取最近几块随机选取，使多个奴隶分散采矿
-- 卸货改为隐藏 2 秒（WarpedOutTrait.setTimed(30) + WaitMinutesTask(2/60)），不再销毁重建
-- RETURNING 目标为矿场 tile，DUMPING 在校验 tile 一致后执行，避免移动后位置不同步
-- _dump 遍历 harvesterTrait.getBails() 按矿石类型分别计价，支持混采
-
-=== SlaveMinerTrait（矿场形态）===
-
-- 奴隶生成位置为建筑 tile（2×2 地基中心），生成后 MoveTask 走到相邻空地再开始采矿
-- 首次创建延迟 2 秒（buildStatus===Ready 后再倒计时 30 ticks）
-- scheduleSlaveRespawn / _pendingSpawnCount 备用机制保留
-
-=== SlaveMinerVehicleTrait（车辆形态）===
-
-- SlaveMinerShortScan=8、SlaveMinerSlaveScan=14、SlaveMinerLongScan=48、SlaveMinerScanCorrection=3、SlaveMinerKickFrameDelay=150（GeneralRules 定义）
-- 修复 t.rules.general 崩溃（改为 t.rules.general）
-
-
-=== Infantry.ts.js（奴隶动画与属性）===
-
-- Slaved=yes 步兵 Storage 强制 >= 3，确保 RenderableFactory 正确挂载 HarvesterPlugin
-- Shovel 动画速率 defaultRate/6（≈2.5fps），接近 2 秒采矿周期
-- 修复首次创建行走滑行（lastHarvesting/lastCarrying 初始化检查去掉 void 0 短路）
-- 修复 lastFiring/lastStance 首帧未初始化导致动画跳过
-
-=== RenderableFactory / PipOverlay ===
-
-- 移除步兵 HarvesterPlugin（奴隶无 OREGATH 火花，该动画为矿车专属）
-- PipOverlay 按 Storage=3 渲染奴隶身下矿石格子
-
-=== Building.ts.js ===
-
-- ZShapePointMove 偏移不再限定 Refinery/NukeSilo
-- IdleAnim（YAREFN_A）禁用阴影避免多重阴影
-
-十八、奴隶矿场自动寻矿与部署延迟修复
-涉及文件： SlaveGatherTask.ts.js、SlaveMinerTrait.ts.js、SlaveMinerVehicleTrait.ts.js、Infantry.ts.js、_module-map.json
-核心改动：
-
-=== 空闲计时器翻转（SlaveMinerTrait） ===
-
-- _noOreTicks 从递增阈值式（-600 起，+1 到 0）改为递减归零式（150 起，-1 到 0）
-- 与 vanilla YR SlaveMinerKickFrameDelay 语义一致
-- 任一奴隶 isCarrying / isHarvesting / _oreLocked 时重置计数器
-
-=== SEEKING_ORE 扫描中心修正（SlaveGatherTask） ===
-
-- _findOre 扫描中心从建筑 tile 恢复为奴隶自身 tile
-- 建筑缺少 speedType=Foot，导致 getIslandIdMap / getPassableSpeed 参数错误，_findOre 永远找不到矿
-- 表现为建筑模式下奴隶绕圈不采矿
-
-=== _oreLocked 标志拆分（SlaveGatherTask + Infantry.ts.js） ===
-
-- isHarvesting 承担双重职责：动画层强行走 Shovel 挖矿动作 + 建筑闲置计时器
-- SEEKING_ORE → MOVING_TO_ORE 阶段设 isHarvesting=true 导致奴隶走路时播挖矿动画
-- 新增 _oreLocked 专供建筑计时器使用，isHarvesting 仅在 IDLE_BEFORE_HARVEST / HARVESTING 时设 true
-- 建筑侧检查改为：sv.isCarrying || sv.isHarvesting || sv._oreLocked
-- _oreLocked 在 MOVING_TO_ORE（两处：初寻矿 + HARVESTING 切邻居矿格）置 true，进入 IDLE_BEFORE_HARVEST 时清除
-
-=== HARVESTING 邻居矿格过渡修复（SlaveGatherTask） ===
-
-- 当前 tile 采完后走邻居矿格时，isHarvesting 已清除但未设 _oreLocked
-- 补上 t._oreLocked = !0，避免建筑误判"无矿可采"而收回
-
-=== SlaveMinerVehicleTrait 寻矿逻辑修复 ===
-
-- vt.rules.isVehicle && vt.rules.isVehicle() 检查永远为 false
-  - isVehicle() 方法在 game object 上，rules 对象没有该方法
-  - 整个 ShortScan → LongScan → MoveTask → Deploy 逻辑块从未执行
-  - 矿车收回后原地发呆，不自动寻矿
-- 修复：删除多余检查（onTick 入口已验证 e.isVehicle()）
-
-=== ObjectType 依赖补充 ===
-
-- SlaveMinerVehicleTrait 模块缺少 "engine/type/ObjectType" 依赖
-- onTick 中 o.ObjectType.Building 的 o 被 var o（class 自身）遮蔽
-- 新增依赖数组项 + setter + ot 变量映射，_module-map.json 同步更新
-
-=== _aiTasking 防自锁 ===
-
-- AI 自己加的 MoveTask 在下一 tick 被 hasTasks() 误判为"玩家操控"，_playerLockTicks=300（20秒）
-- MoveTask 跑完后还要等 300 tick 倒计时才能展开
-- 新增 _aiTasking 标志：AI 驾驶期间跳过 player lock 检查
-- MoveTask 完成 → _aiTasking 自动清除 → 立即 _canDeployHere → DeployIntoTask
-- 矿车到站即刻展开，无延迟
-
-十九、工厂生产矿车立即展开 + 玩家锁延迟 + 8邻域采矿 + AI数量上限
-涉及文件： SlaveMinerVehicleTrait.ts.js、SlaveGatherTask.ts.js、AiRules.ts.js
-核心改动：
-
-=== 工厂生产矿车立即展开 ===
-
-- 之前从战车工厂出来的矿车要等 ExitFactoryTask 触发 _playerLockTicks=150 → 等完才寻矿
-- onSpawn 中工厂生产走 else 分支设 _aiTasking = true
-- ExitFactoryTask 期间跳过 player lock，出厂完成 → _aiTasking 自动清除 → 立即 ShortScan 展开
-- 不再有 10 秒等待
-
-=== 玩家操控锁改用 SlaveMinerKickFrameDelay ===
-
-- _playerLockTicks 从硬编码 300（20秒）改为 t.rules.general.slaveMinerKickFrameDelay（默认 150 = 10秒）
-- 与原版 INI 规则一致
-
-=== HARVESTING 邻居扫描扩到 8 方向 ===
-
-- 当前 tile 采完后邻居检查从 4 十字（上下左右）扩大到 8 方向（+ 4 对角）
-- 修复对角矿格被跳过、奴隶带半车货返回的问题
-
-=== AISlaveMinerNumber=4,3,2 规则读取 ===
-
-- AiRules.readIni 新增 aislaveMinerNumber = e.getArray("AISlaveMinerNumber", [4, 3, 2])
-- 对应 [AI] 节的三难度限制：[Easy=4, Medium=3, Brutal=2]
-
-=== AI 矿场数量上限实施 ===
-
-- onTick 中 vt.owner.isAi 时统计已部署的奴隶矿场建筑（不含车辆）
-- 已部署数 >= AISlaveMinerNumber[difficulty] → 跳过 ShortScan → 直接 LongScan 48 格寻找新矿脉
-- 新矿脉过滤：排除距已有矿场在 SlaveMinerShortScan(8) 范围内的矿点，避免挤在同一片枯竭矿脉
-- 找到新矿脉 → MoveTask 开过去
-- 48 格无可用新矿点 → KickFrameDelay(150) 冷却后重试
-
-=== _canDeployHere 矿量阈值降低 ===
-
-- 改为 totalOre > 0：有任何矿就展开，与原版一致
-
-二十、玩家锁在AI驾驶期间接手操控重新生效（有bug，人工干预只生效一次）
-涉及文件： SlaveMinerVehicleTrait.ts.js
-核心改动：
-
-- 移除 _aiTasking 守卫（早期 return 跳过 player lock 的逻辑）
-- 统一采用 player lock 模型：车辆有任何活跃指令时（玩家或 AI 的 MoveTask）都设置 _playerLockTicks = KickFrameDelay
-- 工厂出厂例外：_aiTaskingIsFactory 标志在 ExitFactoryTask 期间跳过 lock，任务完成后清除标志并立即部署
-- AI 发出 MoveTask 后 hasTasks 为 true → lock 被设到 KickFrameDelay → 任务完成 → lock 倒计时
-- 若玩家在 AI 驾驶期间发出指令：lock 持续在 KickFrameDelay → 玩家指令结束 → lock 开始倒计时 → 倒计时内 AI 不干预
-- 修复：倒计时过了再手动操控后 lock 不会重新设置的问题（见已知未修复问题.txt）
-
-二十一、关闭超级武器不再误禁作战实验室（ForceShield）
-涉及文件： Production.ts.js、_module-map.json
-核心改动：
-
-- isAvailableForProduction() 中原逻辑：建筑有 SuperWeapon= 且该超武 DisableableFromShell=yes 且对局选项 superweapons=false → 不允许生产
-- 作战实验室通常挂载 ForceShield（防护力场），该超武 DisableableFromShell=yes，因此在关闭超级武器时被误判为"超级武器建筑"而从建造列表过滤掉
-- 修复：在禁用条件中增加 ForceShield 例外判断，ForceShield 不再是阻止建造的理由
-- 真正的超级武器建筑（如核弹发射井、闪电风暴等）仍会在关闭超级武器时被正常禁用
-- 同步新增 game/type/SuperWeaponType 依赖并更新 _module-map.json
-
-二十二、战车工厂出厂修复（内部生成 + 完整碰撞）
-涉及文件：
-- Terrain.ts.js            isBlockerObject 战车工厂阻挡逻辑
-- FactoryTrait.ts.js        computeWarFactoryExitCoords 生成点
-
-问题：车辆出厂不像原版，且单位可穿过 5x3 战车工厂。
-
-根因一（碰撞）：GAWEAP（盟军战车工厂，5x3）规则中 NumberImpassableRows=1，
-原版 isBlockerObject 对 weaponsFactory 做 width-1 穿透处理，但条件 !e 被
-NumberImpassableRows=1 跳过，导致 (1||5)-1=0，阻拦盒宽度为 0，只挡 1 列，
-第 2~5 列全部放行 → 外部单位能穿过 80% 的工厂区域。
-
-根因二（出厂）：computeWarFactoryExitCoords 原本在工厂外侧 (rx+width) 生成
-车辆，不像原版"从工厂内部开出来"。
-
-修复内容：
-1. Terrain.ts.js: 移除 weaponsFactory 的 width-1 全局穿透特例，车辆经过
-   战车工厂时强制使用完整 Foundation 宽度（s?e=width:weaponsFactory&&e=width）
-   - 普通碰撞：战车工厂按完整 Foundation 阻挡，外部单位无法穿过
-   - 出厂通道：ExitFactoryTask 通过 ignoredBlockers:[factory] 临时忽略工厂本体
-2. FactoryTrait.ts.js: computeWarFactoryExitCoords 改回工厂内部中心点
-   (rx+floor(w/2), ry+floor(h/2))，车辆在工厂内部生成，ExitFactoryTask
-   利用 ignoredBlockers 忽略工厂阻挡，自动开到外侧集结点
-
-二十三、战斗碉堡（NABNKR）驻军归属与占领逻辑完整实现
-涉及文件： GarrisonBuildingTask.ts.js、OccupyOrder.ts.js、Game.ts.js、GarrisonTrait.ts.js
-核心改动：
-
-=== 问题背景 ===
-原代码将所有 CanBeOccupied=yes 建筑（含战斗碉堡）按"平民可占领建筑"处理：
-- 被打到红血自动撤兵 → 撤空后 changeObjectOwner → Civilian 变中立
-- 敌方步兵能把空碉堡当平民楼钻进去
-这不符合原版 YR 行为：战斗碉堡是玩家军事建筑，不该走平民楼逻辑。
-
-=== 归属变化判断（GarrisonTrait.ts.js evacuate） ===
-- 撤空后仅当 wasCapturedFromCivilian=true 时才 changeObjectOwner → Civilian
-- 玩家建造的建筑（wasCapturedFromCivilian=false）撤空后保持玩家所有
-
-=== wasCapturedFromCivilian 标记（Game.ts.js changeObjectOwner） ===
-- 建筑归属变更时，若原主人为平民且新主人为战斗玩家，标记 wasCapturedFromCivilian=true
-- 供后续撤离逻辑判断建筑是否从平民手中夺取
-
-=== 驻军进入校验（GarrisonBuildingTask.ts.js、OccupyOrder.ts.js） ===
-- 军事建筑（isBaseDefense=yes）不能按"占领平民建筑"逻辑处理
-- 属于平民 → 不能驻军（步兵不能进入平民的战斗碉堡）
-- 属于玩家/盟友 → 可以驻军
-- 属于敌方 → 不能驻军（空的玩家建筑不能被敌方步兵进入）
-
-=== 红血撤离保护（GarrisonTrait.ts.js NotifyDamage/onDamage） ===
-- 增加 !e.rules.infantryAbsorb 检查：InfantryAbsorb=yes（生化反应炉）红血不撤离
-- 增加 !e.rules.isBaseDefense 检查：军事建筑红血不撤离
-- 仅平民可驻军建筑（wasCapturedFromCivilian && 非 InfantryAbsorb && 非军事）在红血时撤离
-
-=== 出售撤离（GarrisonTrait.ts.js NotifySell/onSell） ===
-- InfantryAbsorb=yes 建筑出售时也执行 evacuate()，不因 infantryAbsorb 跳过
-- 确保生化反应炉被卖时驻军能疏散
-
-二十四、驻军建筑音效与 EVA 语音修复
-涉及文件： GarrisonBuildingTask.ts.js
-核心改动：
-
-- BuildingGarrisonEvent 仅在建筑为空（首个步兵进入）时派发，已有驻军时不再重复播放音效/EVA 语音
-- 生化反应炉（bioReactorPowerTrait）驻军时不派发 BuildingGarrisonEvent，避免误触发普通驻军音效
-
-二十五、建筑损坏动画修复（黄血/红血损坏帧 + 平民建筑表现）
-涉及文件： Building.ts.js
-核心改动：
-
-=== computeDamageType 逻辑重写 ===
-- 移除原有错误的 bioReactorPowerTrait/CanBeOccupied 偏移（导致黄血→正常、红血→黄血）
-- 平民建筑（非军事、非生化反应炉）：黄血返回 NORMAL（保持正常模型），红血返回 CONDITION_YELLOW（显示损坏帧）
-- 军事建筑（isBaseDefense）：保留真实 damageType（NORMAL/YELLOW/RED），帧映射在 updateMainObjFrame 中处理
-
-=== updateMainObjFrame 帧映射修复 ===
-- 军事驻军建筑（战斗碉堡）SHP 布局为 4 帧：0=空无损, 1=空损, 2=驻军无损, 3=驻军损
-- 未驻扎时：CONDITION_RED 映射到 CONDITION_YELLOW（共用 frame 1 损坏帧），避免 frame 2 越界显示驻军帧
-- 驻扎时：t=NORMAL → frame 2（驻军正常），否则 → frame 3（驻军损伤）
-
-=== 火焰效果精确控制 ===
-- 军事驻军建筑（isBaseDefense + garrisonTrait）：仅在 CONDITION_RED 时显示火焰
-- 其他建筑（含哨戒炮等无驻军功能的军事建筑）：沿用原逻辑，CONDITION_YELLOW 起即显示火焰
-
-二十六、驻军建筑攻击系统完整支持
-涉及文件： ObjectFactory.ts.js、ArmedTrait.ts.js、AttackTrait.ts.js、Weapon.ts.js
-核心改动：
-
-=== 攻击能力绑定（ObjectFactory.ts.js） ===
-- garrisonTrait 存在时强制创建 attackTrait（即使建筑本身无武器），解决 AttackOrder.isValid() 直接返回 false
-- garrisonTrait 存在时强制创建 armedTrait，解决 "Cannot read properties of undefined (reading 'isEquippedWithWeapon')" 错误
-
-=== 武器收集（AttackTrait.ts.js） ===
-- getAvailableWeapons：驻军建筑遍历所有驻扎步兵的主副武器，收集为武器列表
-- selectDefaultWeapon：返回第一个驻扎步兵的可用武器，不再依赖建筑自身武器或建筑所有者阵营
-
-=== 武器归属验证（ArmedTrait.ts.js） ===
-- isEquippedWithWeapon：除了检查建筑自身武器，还遍历 garrisonTrait.units 检查每个驻扎步兵的武器
-
-=== 射速分配（AttackTask.ts.js） ===
-- 开火循环改为遍历所有驻扎步兵武器，每个兵用自己的武器和 ROF 独立开火
-- 移除 Weapon.ts.js 中无效的 ROF 分摊逻辑（武器属于步兵，isBuilding() 永为 false，该代码从未执行）
-
-=== 驻军武器冷却驱动（ArmedTrait.ts.js） ===
-- 建筑 ArmedTrait.onTick 遍历驻扎步兵，递减其武器 cooldown
-- 步兵在 limbo 中自身 ArmedTrait 不触发，需建筑代为 tick 武器冷却
-
-=== 生化反应炉排除驻军攻击 ===
-- ObjectFactory 创建 armedTrait 和 attackTrait 时，排除 bioReactorPowerTrait 建筑
-- 生化反应炉仅作为电力加成建筑，不具备驻军开火功能，与原版 YR 一致
-
-=== 驻军仅使用主武器 ===
-- 移除副武器遍历，驻军步兵只使用 primaryWeapon 开火
-- 与原版 YR 行为一致（驻军步兵不用 deploy 副武器）
-
-二十七、驻军建筑攻击系统完整支持（补充 - 冷却与开火修正）
-涉及文件： AttackTask.ts.js、ArmedTrait.ts.js、ObjectFactory.ts.js
-核心改动：
-
-- 开火后状态机正确跳转 JustFired → PrepareToFire → FireUp，避免卡在 Firing 状态
-- 建筑 ArmedTrait.onTick 为 limbo 中的步兵武器驱动冷却
-- 生化反应炉（bioReactorPowerTrait）排除驻军攻击，不创建 armedTrait/attackTrait
-- 驻军仅使用主武器开火，与 vanilla YR 一致
-
-# 磁电坦克系统重构
-### 一、核心重构目标
-1. 解耦视觉与逻辑
-    - 将光束渲染（MagBeamFx）与拖拽/攻击逻辑分离，通过武器规则的 IsMagBeam 标志控制视觉表现，而拖拽行为由 IsLocomotor=yes 弹头标志驱动。
-    - 支持 MagnaBeam 参数独立配置（如颜色、波动），同时允许其他武器（如 MagneShake）复用光束效果。
-2. 行为标准化（这里需要实现YR的效果，OpenRA的逻辑不对）
-    - 从《红色警戒》（YR）的“光束超时坠落”机制改为《OpenRA》的“攻击任务持续即拖拽”风格，移除固定超时（原40 tick），依赖攻击任务状态维持拖拽。
-3. 视觉体验升级（暂未实现）
-    - 新增专用渲染器 MagBeamFx，支持双层光束（核心+光晕）、动态波动/脉冲效果，并修复原“白色条纹”渲染bug（通过正交相机分辨率计算）。
----
-### 二、关键技术实现
-#### 1. 视觉渲染层（MagBeamFx）（暂未实现YR的效果）
-- 双层光束结构：不透明核心 + 半透明外发光（outerSpread 控制扩散宽度）。
-- 动态效果：通过 waveAmplitude（波动幅度）、pulseRate（脉冲频率）等参数实现实时视觉反馈。
-- 性能优化：使用像素单位 lineWidth 和 sizeAttenuation: 0 避免距离衰减，解决屏幕边缘渲染异常。
-#### 2. 武器规则扩展
-- 12项新参数：涵盖颜色（MagnaBeamColor）、透明度（alpha）、宽度（width）、波动（wave*）、脉冲（pulse*）、混合模式（additive）等，支持全自定义。
-- 逻辑分离：IsMagBeam 仅控制渲染，拖拽功能需弹头标记 IsLocomotor=yes，增强灵活性。
-#### 3. 拖拽逻辑重构（未完全实现，只实现大部分功能）
-- 持续机制：攻击任务存在时拖拽持续，无需超时计时器；目标到达1格距离后自动坠落。
-- 断裂检测：通过检查 AttackTask 目标状态（而非 _lastBeamTick）判断光束是否中断。
-- 物理调整：提升爬升/水平速度（5→20 leptons/帧），新增坠落重力（4 leptons/帧²），目标距离固定为1格。
-#### 4. 投射物与插件适配（未完全实现，只实现大部分功能）
-- Projectile.ts：跳过连续光束场景的单次渲染（避免重复），动态解析玩家/自定义颜色优先级。
-- MagnetronBeamPlugin.ts：支持拖拽车辆和建筑攻击双场景，从武器规则动态读取参数（替代硬编码紫色）。
+- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
+  建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
+
+- 🎬 **建筑动画配置支持受损图片**  
+  解析 `damagedArt` 字段并记录到 `damagedImage`，供受损切换使用。`getShpFrameInfos` 统一注册正常与受损 SHP 帧信息，确保预加载。`ShpBuilder` 的 `frameOffset` setter 支持运行时动态切帧，无需重建。
+
+- ☀️ **发电建筑顶部显示电力/负载标签**  
+  选中发电建筑（rules.power > 0）时在建筑上方显示“电力=XXX”和“负载=XXX”，取消选中即消失，新增纹理/材质缓存与清理。
+
+- 🛠️ **鼠标悬停提示恢复原版**  
+  移除之前添加的显示 +200/-50 电力数值的定制代码，仅显示建筑名称等基本信息。
+
+- 🧱 **建筑阴影修复与 Z-fighting 消除**  
+  `ShadowRenderable` 校验阴影帧索引，帧数不足时返回 -1 避免错误渲染。启用 `material.polygonOffset` 消除阴影与地面 Z-fighting 闪烁。生化反应炉 ACTIVE 动画层禁用自身阴影，避免与主阴影重叠。
+
+- 🏭 **战车工厂碰撞与出厂修复**  
+  `isBlockerObject` 移除 weaponsFactory 的 width-1 穿透特例，使用完整 Foundation 宽度阻挡。`computeWarFactoryExitCoords` 改为工厂内部中心点生成，ExitFactoryTask 利用 ignoredBlockers 忽略工厂本体，车辆正常开出。
+
+- 🪖 **战斗碉堡驻军归属与攻击系统完整实现**  
+  驻军建筑（CanBeOccupied=yes）不再走平民楼逻辑，玩家建造的碉堡撤空后仍保持玩家所有。红血时不撤离军事建筑（isBaseDefense=yes）和生化反应炉。驻军步兵攻击：建筑 ArmedTrait 遍历驻军步兵，递减武器冷却，AttackTask 按每个步兵主武器独立开火，射速与 ROF 正确分配。生化反应炉排除驻军攻击。
+
+- ⛏️ **奴隶矿场完整实现（采矿循环、AI 控制、部署逻辑）**  
+  - `SlaveGatherTask` 实现完整状态机：SEEKING_ORE → MOVING_TO_ORE → IDLE_BEFORE_HARVEST（随机思考 0~5s）→ HARVESTING → RETURNING → DUMPING（隐藏 2s）→ EXITING_MINER。  
+  - 采矿速度 HARVEST_DELAY_MINUTES=8/60，3 背包格约 12 秒采完。二次寻矿从高价值矿石中随机选取，分散采集。  
+  - 卸货改为隐藏 2 秒而非销毁重建。  
+  - 矿场形态生成奴隶位置为建筑 tile 中心，创建延迟 2 秒。  
+  - 车辆形态：修复 `rules.isVehicle` 检查永远为 false 的 bug，删除多余判断，寻矿逻辑恢复。  
+  - AI 数量上限按 `AISlaveMinerNumber=[4,3,2]` 控制，矿量阈值改为 totalOre > 0 即展开。  
+  - 工厂生产矿车立即展开，玩家操控锁用 `SlaveMinerKickFrameDelay`（默认 150 ticks）。  
+  - HARVESTING 邻居扫描从十字扩展为 8 方向，避免漏采对角矿格。
+
+- 🧲 **磁电坦克系统重构（解耦视觉与逻辑）**  
+  - 光束渲染从 `three.meshline` 切换为 Three.js 原生 BufferGeometry + CPU 顶点颜色计算，实现原版 YR 波纹混合算法（`result = c + color*x + c*intensity*x`）。  
+  - 新增光束生长/收缩动画（3.0s），波纹方向根据目标类型动态切换（车辆反向，建筑正向）。  
+  - 拖拽逻辑改为攻击任务持续驱动，移除固定超时，目标到达 1 格距离后自动坠落，物理速度与重力调整。  
+  - 武器规则新增 12 项 MagnaBeam 参数（颜色、宽度、波纹、脉冲、混合模式等），`IsMagBeam` 仅控制渲染，拖拽由弹头 `IsLocomotor=yes` 驱动。  
+  - 移除 `Projectile.ts` 中重复渲染代码，由 `MagnetronBeamPlugin` 统一管理光束生命周期。
+
+- 🔇 **音效与 EVA 语音修复**  
+  注释掉武器音效打断逻辑，确保磁电开火音效完整播放。驻军建筑首个步兵进入时仅派发一次 BuildingGarrisonEvent，避免重复语音。
+
+- 🐛 **损坏动画帧映射修复**  
+  `computeDamageType` 重写，平民建筑黄血→正常，红血→损坏；军事驻军建筑（战斗碉堡）红血共用 frame 1 损坏帧。火焰效果仅军事驻军建筑红血时显示。
+
+- 🧪 **调试作弊系统新增**  
+  F10 菜单支持无限金钱、秒建造、地图全开、科技全开（`cheatsBypassPrereqs`）。
+
+- 📦 **构建与依赖优化**  
+  新增 Windows 构建脚本（build.bat/build.ps1），`module-map.json` 记录模块依赖。合并上游日志级别优化，可选资源缺失降级为 debug/info，减少误导性警告。
+
+### ⚠️ 破坏性变更
+- 移除 `three.meshline` 依赖，需更新构建配置。  
+- 磁电拖拽受害者变为空中单位（zone=Air），防空武器可锁定（符合原版 YR）。  
+- 战车工厂碰撞使用完整宽度，外部单位无法穿过，仅出厂任务忽略工厂本身。  
+- 战斗碉堡归属逻辑改变：玩家建造的碉堡撤空后不会变中立，敌方步兵无法进入空碉堡。  
+- `WeaponRules` 新增 MagnaBeam 参数字段，旧配置使用默认值兼容。
+
+### 🧪 测试建议
+- **建筑动画**：验证建造过程动画不叠加，生化反应炉进驻/未进驻状态切换正确，受损帧显示正确。  
+- **电力标签**：选中发电建筑显示电力/负载，取消选中消失。  
+- **阴影**：检查建筑阴影无闪烁、无重影，生化反应炉 ACTIVE 动画无额外阴影。  
+- **战车工厂**：外部单位无法穿过工厂，车辆从内部正常开出，集结点有效。  
+- **战斗碉堡**：玩家碉堡驻军后撤空仍为玩家所有，驻军步兵按各自武器开火，射速正确，红血不撤军。  
+- **奴隶矿场**：矿车自动寻矿、采矿、卸货、AI 数量限制、人工干预后 AI 恢复等场景全面测试。  
+- **磁电坦克**：光束生长方向、波纹方向、拖拽坠落、防空锁定等回归测试。  
+- **音效**：磁电开火音效连续，驻军建筑首个步兵进驻语音只播一次。  
+- **调试作弊**：F10 各功能正常，科技全开后所有单位可建造。

@@ -426,9 +426,10 @@ System.register(
                     : this.lastValidTargetPosition.tile
                   : this.target.tile;
                 // OpenYRWeb: Magnetron dragging a vehicle skips minimum-range check
-                // (OpenRA has no "back away from min range" behavior) but still enforces
-                // maximum range so that if the target is teleported away, the attack task
-                // will chase (and the drag will naturally follow) or end.
+                // (vanilla YR: the Magnetron does not back away from min range while
+                // dragging; the victim is being pulled in, not kept at distance) but still
+                // enforces maximum range so that if the target is teleported away, the
+                // attack task will chase (and the drag will naturally follow) or end.
                 var inRange;
                 if (magDragging) {
                   inRange = this.rangeHelper.isInRange(r, e, 0, this.weapon.range, !1);

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
+﻿// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
 // deps: ["game/order/OrderType","engine/sound/SoundKey","engine/sound/ChannelType","util/disposable/CompositeDisposable","game/event/EventType","util/math","gui/screen/game/worldInteraction/UnitSelectionHandler","util/typeGuard","game/gameobject/Building","game/rules/TechnoRules","util/array","game/rules/general/RadarRules","game/player/production/ProductionQueue","engine/type/ObjectType","game/Coords","game/event/AllianceChangeEvent","game/gameobject/unit/VeteranLevel","game/order/OrderFeedbackType","game/gameopts/constants","game/gameobject/common/DeathType","game/WeaponType","game/gameobject/unit/ZoneType","game/type/SuperWeaponType","game/gameobject/infantry/StanceType","game/type/PowerupType","game/gameobject/unit/HealthLevel","game/trait/StalemateDetectTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -218,9 +218,9 @@ System.register(
                     if (s.magnetronDragging) break;
                     var a = i.rules.report;
                     if (a.length) {
-                      // OpenYRWeb: stop previous weapon-fire loop sound for this unit
-                      // (e.g. Gattling rapid fire stacks Report sounds if they have Loop control).
-                      s.__weaponFireSound && s.__weaponFireSound.isPlaying() && s.__weaponFireSound.stop();
+                      // OpenYRWeb: 原版不会在这里打断前一个武器音效，
+                      // 让每个 Report 音效完整播放；否则磁电光束这类按 ROF 触发的效果会听起来断断续续。
+                      // s.__weaponFireSound && s.__weaponFireSound.isPlaying() && s.__weaponFireSound.stop();
                       (n = r.weapon.warhead.rules.electricAssault ? 0.25 : 1);
                       var h = this.worldSound.playEffect(
                         a[D.getRandomInt(0, a.length - 1)],

@@ -46,12 +46,25 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               // width, wave distortion, pulse/flicker, glow halo, and blending mode.
               // Parsed from weapon INI section (e.g. [MagneticBeam]) to replace the old hardcoded
               // RadBeamFx visual. Defaults match vanilla YR purple-beam appearance.
+              // Vanilla YR wave blending (Ares reverse-engineered):
+              //   result = c + color * x + c * intensity * x
+              //   where c = background pixel, x = wave value along path (0..1)
+              // Defaults for Magnetron: Wave.Color=0,0,0, Wave.Intensity=128,0,1024
+              (this.waveColor = this.rules.getNumberArray("Wave.Color", /,\s*/, [0, 0, 0])),
+              (this.waveIntensity = this.rules.getNumberArray("Wave.Intensity", /,\s*/, [128, 0, 1024])),
+              (this.waveIsHouseColor = this.rules.getBool("Wave.IsHouseColor")),
+              // Wave direction: vanilla YR defaults IsMagBeam weapons to reverse against vehicles
+              // (wave drawn from target→firer). Other wave types default to no reversal.
+              (this.waveReverseAgainstVehicles = this.rules.getBool("Wave.ReverseAgainstVehicles", !!this.isMagBeam)),
               (this.isCustomColor = this.rules.getBool("IsCustomColor")),
-              (this.magnaBeamColor = this.rules.getNumberArray("MagnaBeamColor", /,\s*/, [160, 80, 240])),
+              // Vanilla YR: beam color is hardcoded #B000D0 (176,0,208). MagnaBeamColor
+              // has no effect in vanilla (ModEnc confirms). We use it as default here.
+              (this.magnaBeamColor = this.rules.getNumberArray("MagnaBeamColor", /,\s*/, [176, 0, 208])),
               (this.magnaBeamAlpha = this.rules.getNumber("MagnaBeamAlpha", 0.85)),
               (this.magnaBeamHouseColor = this.rules.getBool("MagnaBeamHouseColor")),
               (this.magnaBeamWidth = this.rules.getNumber("MagnaBeamWidth", 10.0)),
-              (this.magnaBeamOuterSpread = this.rules.getNumber("MagnaBeamOuterSpread", 5.0)),
+              // Vanilla YR: single-layer flat 2D wave, no glow halo. Default 0 = no halo.
+              (this.magnaBeamOuterSpread = this.rules.getNumber("MagnaBeamOuterSpread", 0)),
               (this.magnaBeamWaveAmplitude = this.rules.getNumber("MagnaBeamWaveAmplitude", 1.8)),
               (this.magnaBeamWaveFrequency = this.rules.getNumber("MagnaBeamWaveFrequency", 6.0)),
               (this.magnaBeamWaveSpeed = this.rules.getNumber("MagnaBeamWaveSpeed", 2.2)),
