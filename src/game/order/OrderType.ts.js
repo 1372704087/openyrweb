@@ -28,7 +28,10 @@ System.register("game/order/OrderType", [], function (t, e) {
         (e[(e.Repair = 15)] = "Repair"),
         (e[(e.Scatter = 16)] = "Scatter"),
         (e[(e.EnterTransport = 17)] = "EnterTransport"),
-        (e[(e.PlaceBomb = 18)] = "PlaceBomb"));
+        (e[(e.PlaceBomb = 18)] = "PlaceBomb"),
+        // OpenYRWeb: Bio Reactor (YAPOWR) "Unload All" sidebar command — dumps absorbed infantry
+        // LIFO via InfantryAbsorbTrait.requestUnloadAll.
+        (e[(e.UnloadAll = 19)] = "UnloadAll"));
     },
   };
 });

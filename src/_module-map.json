@@ -2742,6 +2742,30 @@
       "bytes": 1932
     },
     {
+	      "name": "game/gameobject/trait/InfantryAbsorbTrait",
+	      "file": "game/gameobject/trait/InfantryAbsorbTrait.ts.js",
+	      "deps": [
+	        "game/gameobject/trait/GarrisonTrait",
+	        "game/gameobject/trait/interface/NotifyDestroy",
+	        "game/gameobject/trait/interface/NotifyDamage",
+	        "game/gameobject/trait/interface/NotifySell",
+	        "game/gameobject/trait/interface/NotifyTick",
+	        "game/gameobject/trait/interface/NotifyOwnerChange",
+	        "game/gameobject/task/EvacuateBioReactorTask"
+	      ],
+	      "bytes": 5800
+	    },
+    {
+      "name": "game/gameobject/trait/OccupiableGarrisonTrait",
+      "file": "game/gameobject/trait/OccupiableGarrisonTrait.ts.js",
+      "deps": [
+        "game/gameobject/trait/GarrisonTrait",
+        "game/gameobject/trait/interface/NotifyDamage",
+        "game/gameobject/trait/interface/NotifySell"
+      ],
+      "bytes": 800
+    },
+    {
       "name": "game/event/BuildStatusChangeEvent",
       "file": "game/event/BuildStatusChangeEvent.ts.js",
       "deps": [
@@ -3168,7 +3192,8 @@
       "file": "game/gameobject/Building.ts.js",
       "deps": [
         "engine/type/ObjectType",
-        "game/gameobject/trait/GarrisonTrait",
+        "game/gameobject/trait/InfantryAbsorbTrait",
+        "game/gameobject/trait/OccupiableGarrisonTrait",
         "game/gameobject/trait/TurretTrait",
         "game/rules/TechnoRules",
         "game/event/BuildStatusChangeEvent",
@@ -3768,9 +3793,10 @@
         "game/gameobject/trait/interface/NotifyDamage",
         "game/gameobject/trait/interface/NotifyUnspawn",
         "game/event/PowerChangeEvent",
-        "game/trait/interface/NotifyPower"
+        "game/trait/interface/NotifyPower",
+        "game/gameobject/trait/interface/NotifyOwnerChange"
       ],
-      "bytes": 2800
+      "bytes": 3200
     },
     {
       "name": "game/gameobject/trait/DrainTrait",
@@ -4493,13 +4519,26 @@
       "bytes": 2755
     },
     {
-      "name": "game/gameobject/task/GarrisonBuildingTask",
-      "file": "game/gameobject/task/GarrisonBuildingTask.ts.js",
+      "name": "game/gameobject/task/EvacuateBioReactorTask",
+      "file": "game/gameobject/task/EvacuateBioReactorTask.ts.js",
       "deps": [
-        "game/event/BuildingGarrisonEvent",
-        "game/gameobject/task/EnterBuildingTask"
+        "game/gameobject/task/system/Task",
+        "game/gameobject/task/move/MoveOutsideTask",
+        "game/gameobject/task/system/WaitMinutesTask",
+        "game/event/BuildingEvacuateEvent"
       ],
-      "bytes": 980
+      "bytes": 3300
+    },
+    {
+	      "name": "game/gameobject/task/GarrisonBuildingTask",
+	      "file": "game/gameobject/task/GarrisonBuildingTask.ts.js",
+	      "deps": [
+	        "game/event/BuildingGarrisonEvent",
+	        "game/gameobject/task/EnterBuildingTask",
+	        "game/event/EnterObjectEvent",
+	        "game/gameobject/task/move/MoveNextToTask"
+	      ],
+	      "bytes": 4200
     },
     {
       "name": "game/event/UnitRecycleEvent",
@@ -4812,6 +4851,18 @@
       "bytes": 1690
     },
     {
+      "name": "game/order/UnloadAllOrder",
+      "file": "game/order/UnloadAllOrder.ts.js",
+      "deps": [
+        "game/order/Order",
+        "game/order/OrderType",
+        "engine/type/PointerType",
+        "game/order/OrderFeedbackType",
+        "game/gameobject/task/EvacuateBioReactorTask"
+      ],
+      "bytes": 2400
+    },
+    {
       "name": "game/order/OrderFactory",
       "file": "game/order/OrderFactory.ts.js",
       "deps": [
@@ -4829,9 +4880,10 @@
         "game/order/GuardAreaOrder",
         "game/order/ScatterOrder",
         "game/order/EnterTransportOrder",
-        "game/order/CaptureOrder"
+        "game/order/CaptureOrder",
+        "game/order/UnloadAllOrder"
       ],
-      "bytes": 2194
+      "bytes": 2300
     },
     {
       "name": "game/order/orderPriorities",

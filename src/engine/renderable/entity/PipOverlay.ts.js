@@ -1,4 +1,4 @@
-﻿﻿// === Reconstructed SystemJS module: engine/renderable/entity/PipOverlay ===
+// === Reconstructed SystemJS module: engine/renderable/entity/PipOverlay ===
 // deps: ["engine/gfx/TextureAtlas","data/Bitmap","engine/gfx/SpriteUtils","game/Coords","engine/gfx/TextureUtils","game/gameobject/selection/SelectionLevel","game/type/PipColor","util/disposable/CompositeDisposable","engine/gfx/OverlayUtils","engine/renderable/fx/RallyPointFx","engine/renderable/entity/unit/FlyerHelperMode","game/gameobject/unit/ZoneType","engine/gfx/BufferGeometryUtils","engine/gfx/material/PaletteBasicMaterial","engine/gfx/batch/BatchedMesh","game/gameobject/unit/HealthLevel","engine/renderable/entity/unit/DebugLabel","engine/Engine","engine/EngineType","engine/renderable/entity/UnitCastBarSprite","engine/renderable/entity/SecureProgressSprite"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -272,7 +272,19 @@ System.register(
               }
               initTexture() {
                 ((R.pipBrdFile = this.imageFinder.find("pipbrd", !1)),
+                  // pips.shp in ra2md.mix\conqmd.mix, 21 frames:
+                  //   0- 5 血条格子: 空 绿 金 白 红 蓝
+                  //   6-12 小人格子: 空 绿 金 白 红 蓝 紫
+                  //  13    步兵血条旁治疗图标
+                  //  14-15 单位一星/三星图标
+                  //  16-19 其他: 绿 金 红 黑
+                  //  20    坦克血条旁维修扳手
                   (R.pipsFile = this.imageFinder.find("pips", !1)),
+                  
+                  // pips2.shp in ra2md.mix\conqmd.mix, 19 frames:
+                  //   0- 5 单位进入士兵格子: 空 绿 金 白 红 蓝
+                  //   6-12 小人格: 空 绿 金 白 红 蓝 紫
+                  //  13-18 弹药格子: 绿 空 红 金 绿 蓝
                   (R.pips2File = this.imageFinder.find("pips2", !1)));
                 let e = [R.pipBrdFile, R.pipsFile, R.pips2File],
                   s = [];
@@ -461,21 +473,44 @@ System.register(
                 return (this.disposables.add(i, t), new THREE.LineSegments(i, t));
               }
               createBuildingOccupationInfo(r) {
-                if (r.garrisonTrait?.units.length && !this.objectIsOpaqueToViewer()) {
-                  var s = r.garrisonTrait.units.length,
+                var isBioReactor = !!r.bioReactorPowerTrait;
+                // Bio reactor shows pips even when empty (only to owner/allies).
+                // Standard garrison only shows when occupied.
+                if ((isBioReactor || r.garrisonTrait?.units.length) && !this.objectIsOpaqueToViewer()) {
+                  var s = r.garrisonTrait?.units?.length || 0,
                     a = r.rules.maxNumberOccupants;
-                  let t = [];
                   var n = 4 * p.Coords.ISO_WORLD_SCALE,
-                    o = R.pipsFile.getImage(6),
-                    l = R.pipsFile.getImage(7);
+                    o = R.pipsFile.getImage(isBioReactor ? 0 : 6),
+                    l = R.pipsFile.getImage(isBioReactor ? 3 : 7);
+                  if (!isBioReactor) {
+                    // Standard garrison: soldier pips, single material
+                    let t = [];
+                    for (let i = 1; i <= a; i++) {
+                      var c = i <= s ? l : o;
+                      let e = R.geometries.get(c).clone();
+                      c = n * i + n / 2;
+                      (e.applyMatrix(
+                        new THREE.Matrix4().makeTranslation(c, 0, r.art.foundation.height * p.Coords.getWorldTileSize()),
+                      ),
+                        t.push(e));
+                    }
+                    var h = y.BufferGeometryUtils.mergeBufferGeometries(t);
+                    let e = this.useSpriteBatching
+                      ? new v.BatchedMesh(h, R.material, v.BatchMode.Merging)
+                      : new THREE.Mesh(h, R.material);
+                    return ((e.matrixAutoUpdate = !1), (e.renderOrder = 999999), e);
+                  }
+                  // Bio Reactor: frame 3 = white health-bar pip (SHP preset), frame 0 = empty.
+                  // Same single-material approach as standard garrison.
+                  let t = [];
                   for (let i = 1; i <= a; i++) {
                     var c = i <= s ? l : o;
                     let e = R.geometries.get(c).clone();
                     c = n * i + n / 2;
-                    (e.applyMatrix(
+                    e.applyMatrix(
                       new THREE.Matrix4().makeTranslation(c, 0, r.art.foundation.height * p.Coords.getWorldTileSize()),
-                    ),
-                      t.push(e));
+                    );
+                    t.push(e);
                   }
                   var h = y.BufferGeometryUtils.mergeBufferGeometries(t);
                   let e = this.useSpriteBatching

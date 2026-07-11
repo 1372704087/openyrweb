@@ -21,19 +21,39 @@ System.register(
       execute: function () {
         ((s = class s extends i.MoveTask {
           static chooseTargetFoundationTile(t, i) {
-            if (t.isBuilding()) {
-              let e = t.centerTile;
-              return (
-                i.map.mapBounds.isWithinBounds(e) ||
-                  (e =
-                    i.map.tileOccupation
-                      .calculateTilesForGameObject(t.tile, t)
-                      .find((e) => i.map.mapBounds.isWithinBounds(e)) ?? t.tile),
-                e
-              );
-            }
-            return t.tile;
-          }
+	            if (t.isBuilding()) {
+	              // InfantryAbsorb: walk to a random tile on the front (SE) edge so
+	              // infantry gather at the entrance instead of the back.
+	              if (t.rules?.infantryAbsorb) {
+	                var fw = t.art.foundation.width;
+	                var fh = t.art.foundation.height;
+	                var bRx = t.tile.rx;
+	                var bRy = t.tile.ry;
+	                var candidates = [];
+	                for (var dx = 0; dx < fw; dx++) {
+	                  var ft = i.map.tiles.getByMapCoords(bRx + dx, bRy + fh);
+	                  if (ft && i.map.mapBounds.isWithinBounds(ft)) candidates.push(ft);
+	                }
+	                for (var dy = 0; dy < fh; dy++) {
+	                  var ft = i.map.tiles.getByMapCoords(bRx + fw, bRy + dy);
+	                  if (ft && i.map.mapBounds.isWithinBounds(ft)) candidates.push(ft);
+	                }
+	                var ft = i.map.tiles.getByMapCoords(bRx + fw, bRy + fh);
+	                if (ft && i.map.mapBounds.isWithinBounds(ft)) candidates.push(ft);
+	                if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
+	              }
+	              let e = t.centerTile;
+	              return (
+	                i.map.mapBounds.isWithinBounds(e) ||
+	                  (e =
+	                    i.map.tileOccupation
+	                      .calculateTilesForGameObject(t.tile, t)
+	                      .find((e) => i.map.mapBounds.isWithinBounds(e)) ?? t.tile),
+	                e
+	              );
+	            }
+	            return t.tile;
+	          }
           constructor(e, t) {
             (super(e, s.chooseTargetFoundationTile(t, e), !1, {
               ignoredBlockers: [t],

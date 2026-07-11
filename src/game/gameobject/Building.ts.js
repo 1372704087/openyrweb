@@ -1,12 +1,13 @@
 // === Reconstructed SystemJS module: game/gameobject/Building ===
-// deps: ["engine/type/ObjectType","game/gameobject/trait/GarrisonTrait","game/gameobject/trait/TurretTrait","game/rules/TechnoRules","game/event/BuildStatusChangeEvent","game/gameobject/trait/PoweredTrait","game/gameobject/trait/FactoryTrait","game/gameobject/trait/DockTrait","game/gameobject/trait/FreeUnitTrait","game/gameobject/Techno","game/gameobject/trait/CrewedTrait","game/gameobject/trait/CabHutTrait","game/gameobject/trait/OilDerrickTrait","game/gameobject/trait/WallTrait","game/Coords","game/gameobject/trait/OverpoweredTrait","game/gameobject/trait/UnitRepairTrait","game/gameobject/trait/RallyTrait","game/gameobject/trait/C4ChargeTrait","game/gameobject/trait/HelipadTrait","game/gameobject/trait/UnitReloadTrait","game/gameobject/task/WaitForBuildUpTask","game/gameobject/trait/SuperWeaponTrait","game/gameobject/trait/GapGeneratorTrait","game/gameobject/trait/PsychicDetectorTrait","game/gameobject/trait/HospitalTrait","game/math/Vector2","game/gameobject/trait/DelayedKillTrait","game/gameobject/trait/interface/NotifyBuildStatus","game/gameobject/trait/SecureProgressTrait"]
+// deps: ["engine/type/ObjectType","game/gameobject/trait/InfantryAbsorbTrait","game/gameobject/trait/OccupiableGarrisonTrait","game/gameobject/trait/TurretTrait","game/rules/TechnoRules","game/event/BuildStatusChangeEvent","game/gameobject/trait/PoweredTrait","game/gameobject/trait/FactoryTrait","game/gameobject/trait/DockTrait","game/gameobject/trait/FreeUnitTrait","game/gameobject/Techno","game/gameobject/trait/CrewedTrait","game/gameobject/trait/CabHutTrait","game/gameobject/trait/OilDerrickTrait","game/gameobject/trait/WallTrait","game/Coords","game/gameobject/trait/OverpoweredTrait","game/gameobject/trait/UnitRepairTrait","game/gameobject/trait/RallyTrait","game/gameobject/trait/C4ChargeTrait","game/gameobject/trait/HelipadTrait","game/gameobject/trait/UnitReloadTrait","game/gameobject/task/WaitForBuildUpTask","game/gameobject/trait/SuperWeaponTrait","game/gameobject/trait/GapGeneratorTrait","game/gameobject/trait/PsychicDetectorTrait","game/gameobject/trait/HospitalTrait","game/math/Vector2","game/gameobject/trait/DelayedKillTrait","game/gameobject/trait/interface/NotifyBuildStatus","game/gameobject/trait/SecureProgressTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
   "game/gameobject/Building",
   [
     "engine/type/ObjectType",
-    "game/gameobject/trait/GarrisonTrait",
+    "game/gameobject/trait/InfantryAbsorbTrait",
+    "game/gameobject/trait/OccupiableGarrisonTrait",
     "game/gameobject/trait/TurretTrait",
     "game/rules/TechnoRules",
     "game/event/BuildStatusChangeEvent",
@@ -38,7 +39,7 @@ System.register(
   ],
   function (t, e) {
     "use strict";
-    var r, o, l, c, s, h, u, d, g, i, p, m, f, y, a, T, v, b, S, w, E, n, C, x, O, A, M, R, P, I, k, B;
+    var r, ia, og, l, c, s, h, u, d, g, i, p, m, f, y, a, T, v, b, S, w, E, n, C, x, O, A, M, R, P, I, k, B;
     e && e.id;
     return {
       setters: [
@@ -46,7 +47,10 @@ System.register(
           r = e;
         },
         function (e) {
-          o = e;
+          ia = e;
+        },
+        function (e) {
+          og = e;
         },
         function (e) {
           l = e;
@@ -146,7 +150,9 @@ System.register(
               let n = new this(e, t, r);
               return (
                 t.canBeOccupied &&
-                  ((n.garrisonTrait = new o.GarrisonTrait(n, i.audioVisual.conditionRed, t.maxNumberOccupants)),
+                  ((n.garrisonTrait = t.infantryAbsorb
+                    ? new ia.InfantryAbsorbTrait(n, t.maxNumberOccupants)
+                    : new og.OccupiableGarrisonTrait(n, i.audioVisual.conditionRed, t.maxNumberOccupants)),
                   n.traits.add(n.garrisonTrait)),
                 t.capturable &&
                   t.needsEngineer &&

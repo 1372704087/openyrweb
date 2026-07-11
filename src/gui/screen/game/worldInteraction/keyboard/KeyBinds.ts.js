@@ -66,6 +66,7 @@ System.register(
                     [a.KeyCommandType.BuildCheat, 593],
                     [a.KeyCommandType.ToggleFps, 512 + "R".charCodeAt(0)],
                     [a.KeyCommandType.ToggleShroud, 1024 + "S".charCodeAt(0)],
+                    [a.KeyCommandType.UnloadGarrison, 512 + "E".charCodeAt(0)],
                   ]))
                     this.addHotKey(i, r);
                   this.loadHotKeys(t);

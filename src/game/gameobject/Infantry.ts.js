@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: game/gameobject/Infantry ===
+// === Reconstructed SystemJS module: game/gameobject/Infantry ===
 // deps: ["engine/type/ObjectType","game/gameobject/unit/ZoneType","game/gameobject/infantry/StanceType","game/gameobject/infantry/InfDeathType","game/gameobject/trait/MoveTrait","game/gameobject/trait/SuppressionTrait","game/gameobject/Techno","game/gameobject/trait/IdleActionTrait","game/gameobject/trait/CrashableTrait","game/gameobject/trait/AgentTrait","game/gameobject/unit/CrateBonuses","game/gameobject/trait/CastProgressTrait","game/gameobject/trait/SlaveCargoTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 

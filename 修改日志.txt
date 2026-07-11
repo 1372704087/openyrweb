@@ -1,4 +1,4 @@
-- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
+﻿- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
   建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
 
 - 🎬 **建筑动画配置支持受损图片**  
@@ -65,3 +65,47 @@
 - **磁电坦克**：光束生长方向、波纹方向、拖拽坠落、防空锁定等回归测试。  
 - **音效**：磁电开火音效连续，驻军建筑首个步兵进驻语音只播一次。  
 - **调试作弊**：F10 各功能正常，科技全开后所有单位可建造。
+
+feat(bioreactor): 实现尤里生化反应堆完整驻军/疏散机制与音效
+
+- 🆕 **InfantryAbsorbTrait** - 生化反应堆专用 FIFO 队列驻军特性  
+  实现排队进入机制：步兵按到达顺序注册到 `_entryQueue`，通过互斥锁（`_activeTask`）保证同一时刻只有一名步兵进入。提供 `registerEntry()`、`unitMayEnterNow()`、`onUnitEnteredBio()` 及队列提升逻辑（`_promoteNext()`），自动清理无效单位（死亡/心控）。
+
+- 🆕 **OccupiableGarrisonTrait** - 普通可驻军建筑特性  
+  从原 `GarrisonTrait` 拆分而来，保留平民建筑/战斗碉堡的红血撤离、售出疏散及归属归还逻辑，与生化反应堆逻辑彻底分离。
+
+- 🆕 **EvacuateBioReactorTask** - LIFO 疏散任务  
+  按后进先出顺序释放驻军步兵，每次只放出一个，间隔约 2 秒（30 ticks）。单位在建筑中心瓦片生成后执行 `MoveOutsideTask` 走到前方，实现可视化“走出”动画，并触发专属离开音效。
+
+- 🆕 **UnloadAllOrder** - Ctrl+E 卸载全部驻军  
+  新增订单类型 `UnloadAll`，仅对拥有 `bioReactorPowerTrait` 且有驻军的建筑有效，执行疏散任务。
+
+- 🔄 **GarrisonBuildingTask 三阶段状态机**  
+  为生化反应堆进驻流程增加 `MoveToRallyPoint`（移动到集合点）、`WaitForTurn`（排队等待）、`Entering`（进入建筑）三个阶段，与 `InfantryAbsorbTrait` 队列协同工作。
+
+- 🎵 **专属音效系统**  
+  新增 `EnterBioReactorSound` 和 `LeaveBioReactorSound`，在进入/离开时播放；EVA 语音不再对生化反应堆播报“StructureGarrisoned”，避免干扰。
+
+- 🎨 **视觉与 UI 更新**  
+  - Pips 显示：生化反应堆使用血条风格（`pips.shp` frame 0/3），即使为空也对拥有者/盟友可见。  
+  - 建筑帧切换：非生化反应堆的可驻军建筑使用 4 帧布局（空/损/驻军/驻军损），生化反应堆保持自身帧逻辑。  
+  - 建筑渲染实体更新，确保驻军状态变化时帧正确刷新。
+
+- 🔌 **所有权变更处理**  
+  在 `BioReactorPowerTrait` 中实现 `NotifyOwnerChange` 接口，被工程师占领时自动从旧玩家移除电力并重新注册到新玩家，同时清空进入队列，保证状态一致。
+
+- 🛠️ **模块拆分与依赖更新**  
+  `GarrisonTrait` 重构为基类，衍生出两个子类。`Building` 构造函数根据 `rules.infantryAbsorb` 动态创建对应特性。`_module-map.json` 同步更新所有新模块依赖。
+
+### ⚠️ 破坏性变更
+- `GarrisonTrait` 构造函数签名变更（移除 `evacThreshold`），所有引用需适配（已同步更新）。
+- 生化反应堆专属逻辑不再使用通用 `GarrisonTrait`，驻军行为（如红血撤离）已按原版 YR 修正。
+- 音效触发条件调整：生化反应堆进驻不再播放“StructureGarrisoned”EVA 语音，但保留进入音效。
+
+### 🧪 测试建议
+1. **队列进入**：同时选中多名步兵右键生化反应堆，验证 FIFO 顺序且无重叠进入动画。  
+2. **疏散顺序**：驻军后按 Ctrl+E，验证 LIFO 顺序及间隔时间。  
+3. **所有权变化**：用工程师占领敌方生化反应堆，检查电力增减及队列清除。  
+4. **边缘情况**：建筑被毁/出售时所有驻军单位正确处理；单位在队列中被心控后自动清理。  
+5. **Pips 与音效**：驻军数量变化时 Pips 实时更新，进入/离开音效正常播放。  
+6. **普通驻军建筑回归**：确认战斗碉堡、平民建筑的红血撤离和归属逻辑未受影响。

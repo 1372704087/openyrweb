@@ -93,6 +93,11 @@ System.register(
                         (this.target.obj.rules.isBaseDefense && this.target.obj.owner === this.game.getCivilianPlayer()
                           ? !1
                           : !0) &&
+                        // OpenYRWeb: neutral InfantryAbsorb buildings (Bio Reactor) cannot be garrisoned;
+                        // they must first be captured by an engineer.
+                        (this.target.obj.rules.infantryAbsorb && this.target.obj.owner === this.game.getCivilianPlayer()
+                          ? !1
+                          : !0) &&
                         // OpenYRWeb: empty player-owned garrison buildings cannot be entered by enemies.
                         (!this.target.obj.garrisonTrait.units.length &&
                         !this.game.areFriendly(this.sourceObject, this.target.obj) &&
@@ -132,6 +137,9 @@ System.register(
               : e.hospitalTrait
                 ? [new d.EnterHospitalTask(this.game, e)]
                 : e.garrisonTrait
+                  // OpenYRWeb: bio-reactors (InfantryAbsorb=yes) use FIFO queue-based serial
+                  // entry via InfantryAbsorbTrait. Infantry walk to the building first, then
+                  // wait in line when the mutex is held by another unit.
                   ? [new a.GarrisonBuildingTask(this.game, e)]
                   : [new u.InfiltrateBuildingTask(this.game, e)];
           }

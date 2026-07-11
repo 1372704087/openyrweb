@@ -125,7 +125,8 @@ System.register("gui/screen/game/worldInteraction/keyboard/KeyCommandType", [], 
         (e.SidebarPageDown = "SidebarPageDown"),
         (e.SidebarDown = "SidebarDown"),
         (e.ToggleFps = "ToggleFps"),
-        (e.Scoreboard = "Scoreboard"));
+        (e.Scoreboard = "Scoreboard"),
+        (e.UnloadGarrison = "UnloadGarrison"));
     },
   };
 });

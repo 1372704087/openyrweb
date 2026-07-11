@@ -692,13 +692,14 @@ System.register(
                   !l && this.gameObject.bioReactorPowerTrait && this.currentAnimType === M.AnimationType.IDLE && this.setActiveAnimationVisible();
               }
               updateMainObjFrame(e, t) {
-                // Military garrison buildings (isBaseDefense) have 4-frame SHP:
+                // Garrisonable buildings (non-BioReactor) may have 4-frame SHP:
                 // 0=empty-normal, 1=empty-damaged, 2=occupied-normal, 3=occupied-damaged.
                 // Bio Reactor has no occupied frame — frame 2 is the RED damage frame.
+                // Civilian buildings with only 2 frames are protected by the frameCount guard below.
                 let i;
-                if (e && !this.gameObject.bioReactorPowerTrait && this.objectRules.isBaseDefense) {
+                if (e && !this.gameObject.bioReactorPowerTrait) {
                   i = t === p.DamageType.NORMAL ? 2 : 3;
-                } else if (this.objectRules.isBaseDefense) {
+                } else if (!this.gameObject.bioReactorPowerTrait && this.objectRules.isBaseDefense) {
                   // Unoccupied military building: CONDITION_RED maps to same damaged frame as CONDITION_YELLOW
                   i = t === p.DamageType.CONDITION_RED ? p.DamageType.CONDITION_YELLOW : t;
                 } else {

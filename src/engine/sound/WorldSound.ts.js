@@ -194,6 +194,8 @@ System.register(
             i.SoundKey.BuildingSlam,
             i.SoundKey.SellSound,
             i.SoundKey.BuildingGarrisonedSound,
+            i.SoundKey.EnterBioReactorSound,
+            i.SoundKey.LeaveBioReactorSound,
             i.SoundKey.BuildingRepairedSound,
             i.SoundKey.SpySatActivationSound,
             i.SoundKey.SpySatDeactivationSound,

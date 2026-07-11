@@ -419,7 +419,7 @@ System.register(
                     .rotateAround(new THREE.Vector2(), n)
                     .setLength(e.getSize(a).length() + 1);
                   a = t.toArray();
-                  (o.default([0, 0], a, [e.min.x, e.min.y, e.max.x, e.max.y]),
+                  (o.clip([0, 0], a, [e.min.x, e.min.y, e.max.x, e.max.y]),
                     (this.rockingPoint = new THREE.Vector3(a[0], 0, a[1])));
                   a = t
                     .clone()

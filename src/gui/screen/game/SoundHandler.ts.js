@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
+﻿﻿// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
 // deps: ["game/order/OrderType","engine/sound/SoundKey","engine/sound/ChannelType","util/disposable/CompositeDisposable","game/event/EventType","util/math","gui/screen/game/worldInteraction/UnitSelectionHandler","util/typeGuard","game/gameobject/Building","game/rules/TechnoRules","util/array","game/rules/general/RadarRules","game/player/production/ProductionQueue","engine/type/ObjectType","game/Coords","game/event/AllianceChangeEvent","game/gameobject/unit/VeteranLevel","game/order/OrderFeedbackType","game/gameopts/constants","game/gameobject/common/DeathType","game/WeaponType","game/gameobject/unit/ZoneType","game/type/SuperWeaponType","game/gameobject/infantry/StanceType","game/type/PowerupType","game/gameobject/unit/HealthLevel","game/trait/StalemateDetectTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -432,11 +432,17 @@ System.register(
                     break;
                   case L.EventType.BuildingGarrison:
                     var b = r.target;
-                    (this.worldSound.playEffect(N.SoundKey.BuildingGarrisonedSound, b, b.owner),
-                      b.owner === this.player && this.eva.play("EVA_StructureGarrisoned"));
+                    b.bioReactorPowerTrait
+                      ? this.worldSound.playEffect(N.SoundKey.EnterBioReactorSound, b, b.owner)
+                      : (this.worldSound.playEffect(N.SoundKey.BuildingGarrisonedSound, b, b.owner),
+                        b.owner === this.player && this.eva.play("EVA_StructureGarrisoned"));
                     break;
                   case L.EventType.BuildingEvacuate:
-                    r.player === this.player && this.eva.play("EVA_StructureAbandoned");
+                    var R = r.target;
+                    if (R.bioReactorPowerTrait)
+                      this.worldSound.playEffect(N.SoundKey.LeaveBioReactorSound, R, R.owner);
+                    else
+                      r.player === this.player && this.eva.play("EVA_StructureAbandoned");
                     break;
                   case L.EventType.BuildingRepairStart:
                   case L.EventType.UnitRepairStart:

@@ -87,7 +87,9 @@ System.register("engine/sound/SoundKey", [], function (t, e) {
         (e[(e.ShellButtonSlideSound = 74)] = "ShellButtonSlideSound"),
         (e[(e.QuickMatchTimer = 75)] = "QuickMatchTimer"),
         (e[(e.PartyInvite = 76)] = "PartyInvite"),
-        (e[(e.PartyFormed = 77)] = "PartyFormed"));
+        (e[(e.PartyFormed = 77)] = "PartyFormed"),
+        (e[(e.EnterBioReactorSound = 78)] = "EnterBioReactorSound"),
+        (e[(e.LeaveBioReactorSound = 79)] = "LeaveBioReactorSound"));
     },
   };
 });

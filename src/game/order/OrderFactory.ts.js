@@ -20,10 +20,11 @@ System.register(
     "game/order/ScatterOrder",
     "game/order/EnterTransportOrder",
     "game/order/CaptureOrder",
+    "game/order/UnloadAllOrder",
   ],
   function (e, t) {
     "use strict";
-    var i, r, s, a, n, o, l, c, h, u, d, g, p, m, f, y;
+    var i, r, s, a, n, o, l, c, h, u, d, g, p, m, f, y, U;
     t && t.id;
     return {
       setters: [
@@ -71,6 +72,9 @@ System.register(
         },
         function (e) {
           f = e;
+        },
+        function (e) {
+          U = e;
         },
       ],
       execute: function () {
@@ -120,6 +124,8 @@ System.register(
                   return new p.ScatterOrder(this.game);
                 case i.OrderType.EnterTransport:
                   return new m.EnterTransportOrder(this.game);
+                case i.OrderType.UnloadAll:
+                  return new U.UnloadAllOrder(this.game);
                 default:
                   throw new Error("Unhandled order type " + i.OrderType[e]);
               }

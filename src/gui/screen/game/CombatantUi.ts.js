@@ -563,6 +563,7 @@ System.register(
                   .registerKeyCommand(T.KeyCommandType.Options, () => this.gameMenu.open())
                   .registerKeyCommand(T.KeyCommandType.Scoreboard, () => this.gameMenu.openDiplo())
                   .registerKeyCommand(T.KeyCommandType.DeployObject, () => this.handleDeploy())
+                  .registerKeyCommand(T.KeyCommandType.UnloadGarrison, () => this.handleUnloadAll())
                   .registerKeyCommand(T.KeyCommandType.StopObject, () => this.handleStop())
                   .registerKeyCommand(T.KeyCommandType.GuardObject, () => this.handleGuard())
                   .registerKeyCommand(T.KeyCommandType.AllToCheer, () => this.pushOrder(y.OrderType.Cheer, void 0))
@@ -770,6 +771,14 @@ System.register(
               this.planningMode.isActive()
                 ? this.handleInvalidCommand(this.strings.get("MSG:PlanningModeNoDeploy"))
                 : this.pushOrder(y.OrderType.DeploySelected, void 0);
+            }
+            // OpenYRWeb: Unload all garrisoned infantry from selected bio reactors (LIFO drain).
+            handleUnloadAll() {
+              if (this.planningMode.isActive()) {
+                this.handleInvalidCommand(this.strings.get("MSG:PlanningModeNoDeploy"));
+                return;
+              }
+              this.pushOrder(y.OrderType.UnloadAll, void 0);
             }
             handleStop() {
               this.planningMode.isActive()

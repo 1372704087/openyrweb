@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/trait/BioReactorPowerTrait ===
-// deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifyUnspawn","game/event/PowerChangeEvent","game/trait/interface/NotifyPower"]
+// deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifyUnspawn","game/event/PowerChangeEvent","game/trait/interface/NotifyPower","game/gameobject/trait/interface/NotifyOwnerChange"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
 // OpenYRWeb: Bio Reactor (YAPOWR, Yuri faction) power scaling. A building with ExtraPower= and
@@ -29,10 +29,11 @@ System.register(
     "game/gameobject/trait/interface/NotifyUnspawn",
     "game/event/PowerChangeEvent",
     "game/trait/interface/NotifyPower",
+    "game/gameobject/trait/interface/NotifyOwnerChange",
   ],
   function (e, t) {
     "use strict";
-    var n, i, d, r, c, p;
+    var n, i, d, r, c, p, oc;
     t && t.id;
     return {
       setters: [
@@ -53,6 +54,9 @@ System.register(
         },
         function (e) {
           p = e;
+        },
+        function (e) {
+          oc = e;
         },
       ],
       execute: function () {
@@ -118,6 +122,24 @@ System.register(
             }
             [r.NotifyUnspawn.onUnspawn](e, t) {
               this._remove(e, t);
+            }
+            [oc.NotifyOwnerChange.onChange](e, t, i) {
+              // e = building, t = oldOwner, i = game
+              // When Bio Reactor changes owner (e.g. engineer capture), remove power from old owner
+              // and reset so _reconcile re-registers under the new owner on next tick.
+              if (!this.added) return;
+              var r = t.powerTrait;
+              if (r) {
+                r.power -= this.registered;
+                r.powerByObject.delete(e);
+                r.updateLevel(i);
+                i.traits.filter(p.NotifyPower).forEach(function (e) {
+                  e[p.NotifyPower.onPowerChange](r.player, i);
+                });
+                i.events.dispatch(new c.PowerChangeEvent(r.player, r.power, r.drain));
+              }
+              this.registered = 0;
+              this.added = !1;
             }
           }),
         );
