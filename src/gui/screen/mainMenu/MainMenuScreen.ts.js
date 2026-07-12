@@ -15,6 +15,9 @@ System.register("gui/screen/mainMenu/MainMenuScreen", [], function (e, t) {
           setController(e) {
             this.controller = e;
           }
+          get backgroundImageName() {
+            return "mnscrnl.shp";
+          }
         }),
       );
     },

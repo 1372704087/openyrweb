@@ -49,7 +49,7 @@ System.register(
         e(
           "OptionsScreen",
           (h = class {
-            constructor(e, t, i, r, s, a, n) {
+            constructor(e, t, i, r, s, a, n, o, l) {
               ((this.strings = e),
                 (this.jsxRenderer = t),
                 (this.options = i),
@@ -57,6 +57,8 @@ System.register(
                 (this.fullScreen = s),
                 (this.inGame = a),
                 (this.storageOptsEnabled = n),
+                (this.mixer = o),
+                (this.music = l),
                 (this.title = this.strings.get("GUI:Options")));
             }
             setController(e) {
@@ -64,16 +66,9 @@ System.register(
             }
             onEnter() {
               ((this.initialOptionsStr = this.options.serialize()),
+                (this.initialMixerStr = this.mixer?.serialize()),
                 this.controller instanceof r.MainMenuController && this.controller.toggleMainVideo(!1),
                 this.controller.setSidebarButtons([
-                  {
-                    label: this.strings.get("GUI:Sound"),
-                    onClick: () => {
-                      this.controller instanceof s.GameMenuController
-                        ? this.controller.pushScreen(a.ScreenType.OptionsSound)
-                        : this.controller?.pushScreen(n.ScreenType.OptionsSound);
-                    },
-                  },
                   {
                     label: this.strings.get("GUI:Keyboard"),
                     onClick: () => {
@@ -111,6 +106,8 @@ System.register(
                     fullScreen: this.fullScreen,
                     strings: this.strings,
                     inGame: this.inGame,
+                    mixer: this.mixer,
+                    music: this.music,
                   },
                 }),
               );
@@ -118,8 +115,13 @@ System.register(
             }
             async onLeave() {
               var e = this.options.serialize();
-              (e !== this.initialOptionsStr && this.localPrefs.setItem(o.StorageKey.Options, e),
-                await this.controller.hideSidebarButtons());
+              e !== this.initialOptionsStr && this.localPrefs.setItem(o.StorageKey.Options, e);
+              if (this.mixer) {
+                var t = this.mixer.serialize();
+                t !== this.initialMixerStr && this.localPrefs.setItem(o.StorageKey.Mixer, t);
+                this.music && ((t = this.music.serializeOptions()), this.localPrefs.setItem(o.StorageKey.MusicOpts, t));
+              }
+              await this.controller.hideSidebarButtons();
             }
             async onStack() {
               await this.onLeave();

@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: gui/screen/options/component/GeneralOpts ===
-// deps: ["react","gui/component/Slider","gui/screen/options/GeneralOptions","gui/component/Select","gui/component/Option","engine/renderable/entity/unit/FlyerHelperMode","engine/renderable/entity/unit/ModelQuality","engine/renderable/entity/unit/ShadowQuality","gui/component/Image","gui/screen/options/component/Resolution"]
+// deps: ["react","gui/component/Slider","gui/screen/options/GeneralOptions","gui/component/Select","gui/component/Option","engine/renderable/entity/unit/FlyerHelperMode","engine/renderable/entity/unit/ModelQuality","engine/renderable/entity/unit/ShadowQuality","gui/component/Image","gui/screen/options/component/Resolution","engine/sound/ChannelType","gui/screen/options/component/MusicJukebox"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -15,10 +15,12 @@ System.register(
     "engine/renderable/entity/unit/ShadowQuality",
     "gui/component/Image",
     "gui/screen/options/component/Resolution",
+    "engine/sound/ChannelType",
+    "gui/screen/options/component/MusicJukebox",
   ],
   function (e, t) {
     "use strict";
-    var s, a, n, o, l, c, h, u, d, g, p;
+    var s, a, n, o, l, c, h, u, d, g, p, m, f, y;
     t && t.id;
     return {
       setters: [
@@ -52,9 +54,15 @@ System.register(
         function (e) {
           g = e;
         },
+        function (e) {
+          p = e;
+        },
+        function (e) {
+          m = e;
+        },
       ],
       execute: function () {
-        ((p = new Map([
+        ((f = new Map([
           [1, "TXT_SLOWEST"],
           [2, "TXT_SLOWER"],
           [3, "TXT_SLOW"],
@@ -63,7 +71,16 @@ System.register(
           [6, "TXT_FASTER"],
           [7, "TXT_FASTEST"],
         ])),
-          e("GeneralOpts", ({ strings: t, options: i, fullScreen: e, inGame: r }) =>
+          (y = new Map([
+            [p.ChannelType.Master, "GUI:MasterVolume"],
+            [p.ChannelType.Music, "GUI:MusicVolume"],
+            [p.ChannelType.Effect, "GUI:SFXVolume"],
+            [p.ChannelType.Voice, "GUI:VoiceVolume"],
+            [p.ChannelType.Ambient, "GUI:AmbientVolume"],
+            [p.ChannelType.Ui, "GUI:UIVolume"],
+            [p.ChannelType.CreditTicks, "GUI:CreditsVolume"],
+          ])),
+          e("GeneralOpts", ({ strings: t, options: i, fullScreen: e, inGame: r, mixer: x, music: b }) =>
             s.createElement(
               "div",
               { className: "opts general-opts" },
@@ -79,7 +96,7 @@ System.register(
                     min: 1,
                     max: 7,
                     value: "" + Math.floor(i.scrollRate.value / n.SCROLL_BASE_FACTOR),
-                    getLabel: (e) => t.get(p.get(Number(e))),
+                    getLabel: (e) => t.get(f.get(Number(e))),
                     onChange: (e) => (i.scrollRate.value = Number(e.target.value) * n.SCROLL_BASE_FACTOR),
                   }),
                 ),
@@ -232,6 +249,29 @@ System.register(
                     s.createElement(l.Option, { value: "" + u.ShadowQuality.Off, label: t.get("TS:GfxQualityOff") }),
                   ),
                 ),
+              ),
+              x && s.createElement(
+                "fieldset",
+                null,
+                s.createElement("legend", null, t.get("GUI:Sound")),
+                s.createElement(
+                  "div",
+                  { className: "sound-sliders" },
+                  [...y].map(([ch, labelKey]) =>
+                    s.createElement(
+                      "div",
+                      { className: "slider-item", key: ch },
+                      s.createElement("span", { className: "label" }, t.get(labelKey)),
+                      s.createElement(a.Slider, {
+                        min: 0,
+                        max: 10,
+                        value: "" + 10 * x.getVolume(ch),
+                        onChange: (e) => x.setVolume(ch, Number(e.target.value) / 10),
+                      }),
+                    ),
+                  ),
+                ),
+                b && s.createElement(m.MusicJukebox, { music: b, strings: t }),
               ),
             ),
           ));

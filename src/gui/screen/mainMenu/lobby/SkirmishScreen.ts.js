@@ -128,6 +128,9 @@ System.register(
               (this.playerName = "Player 1"),
               (this.disposables = new h.CompositeDisposable()));
           }
+          get backgroundImageName() {
+            return "mnscrnlcoopgamesetup.shp";
+          }
           onEnter() {
             (this.controller.toggleMainVideo(!1), (this.lobbyForm = void 0), this.initFormModel(), this.createGame());
           }

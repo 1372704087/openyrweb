@@ -157,3 +157,28 @@ fix(infantry): 修复姿态状态检查与伞兵动画生命周期管理
 ### ⚠️ 影响范围
 - 仅涉及步兵单位的渲染逻辑，不影响其他单位或游戏机制。
 - 无破坏性变更，向后兼容。
+
+feat(mainmenu): 实现动态背景图片系统与音频控制集成
+
+- 🎨 **动态背景图片系统**  
+  - `MainMenuComponent` 新增 `backgroundOverlay` 精灵节点及 `setBackgroundImageName()`/`setImageUrl()` 方法，支持按屏幕动态切换背景。  
+  - 各主菜单屏幕（`MainMenuScreen`、`SkirmishScreen`、`MapSelScreen`）新增 `backgroundImageName` getter，分别映射至 `mnscrnl.shp`、`mnscrnlcoopgamesetup.shp`、`mnscrnlcustomizebattle.shp`。  
+  - `MainMenuController.pushScreen()`/`popScreen()` 在屏幕切换/返回时自动更新背景图片，加载失败时回退至默认背景。
+
+- 🔊 **音频控制集成至通用选项**  
+  - `OptionsScreen` 构造函数新增 `mixer` 和 `music` 参数，将音量控制从独立侧边栏移至 `GeneralOpts` 组件。  
+  - `GeneralOpts` 新增 `engine/sound/ChannelType` 依赖，为 7 个音频通道（Master/Music/Effect/Voice/Ambient/Ui/CreditTicks）生成滑块控件，并嵌入 `MusicJukebox` 音乐播放器。  
+  - 用户离开选项页时自动序列化并持久化音量设置至 `localStorage`。
+
+- 🖌️ **UI 样式统一优化**  
+  - 将滚动条、滑块、下拉框、分组框、列表等组件的边框及阴影颜色从红色系（`red`/`#9c0000`）统一为蓝灰色系（`#A5BEC6`/`#6B7984`），提升视觉一致性。  
+  - 调整通用选项页内边距（`34px 86px` → `10px`）并添加滚动支持，音频滑块宽度单独加宽至 `200px`。
+
+### ⚠️ 破坏性变更
+- `OptionsScreen` 构造函数新增参数（`mixer`, `music`），调用方需同步更新（已适配 GUI 层调用）。
+
+### 🧪 测试建议
+1. 在主菜单各页面间切换，验证背景图片正确更新及加载失败回退。  
+2. 调整各通道音量滑块，确认实时生效且退出后设置持久化。  
+3. 检查所有 UI 边框/滚动条颜色一致性，验证 Chrome/Firefox 下渲染正常。  
+4. 测试 `MusicJukebox` 播放/暂停功能及音量联动。

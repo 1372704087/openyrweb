@@ -726,7 +726,7 @@ System.register(
                 .set(Y.ScreenType.Credits, new je.CreditsScreen(t, l))
                 .set(
                   Y.ScreenType.Options,
-                  new Le.OptionsScreen(t, l, v, this.localPrefs, this.fullScreen, !1, !!G.Engine.rfs),
+                  new Le.OptionsScreen(t, l, v, this.localPrefs, this.fullScreen, !1, !!G.Engine.rfs, b, void 0),
                 )
                 .set(Y.ScreenType.OptionsSound, new De.SoundOptsScreen(t, l, b, void 0, this.localPrefs))
                 .set(Y.ScreenType.OptionsKeyboard, new Fe.KeyboardScreen(t, l, m))
@@ -804,7 +804,7 @@ System.register(
                 .set(Q.ScreenType.Diplo, new Ge.DiploScreen(t, l, i, g, U, S))
                 .set(Q.ScreenType.ConnectionInfo, new Ve.ConnectionInfoScreen(t, l))
                 .set(Q.ScreenType.QuitConfirm, new We.QuitConfirmScreen(t))
-                .set(Q.ScreenType.Options, new Le.OptionsScreen(t, l, v, this.localPrefs, this.fullScreen, !0, !1))
+                .set(Q.ScreenType.Options, new Le.OptionsScreen(t, l, v, this.localPrefs, this.fullScreen, !0, !1, b, I))
                 .set(Q.ScreenType.OptionsSound, new De.SoundOptsScreen(t, l, b, I, this.localPrefs))
                 .set(Q.ScreenType.OptionsKeyboard, new Fe.KeyboardScreen(t, l, m))),
                 (g = new ze.LoadingScreenApiFactory(D, t, a, l, s, k)),

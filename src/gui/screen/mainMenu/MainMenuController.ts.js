@@ -39,12 +39,14 @@ System.register(
             (this.setMainComponent(), this.mainMenu.setSidebarTitle(""), await super.pushScreen(t, i));
             t = this.screens.get(t);
             (t.title && this.mainMenu.setSidebarTitle(t.title),
+              t.backgroundImageName && this.mainMenu.setBackgroundImageName(t.backgroundImageName),
               void 0 !== t.musicType && (await this.music?.play(t.musicType)));
           }
           async popScreen(e) {
             (this.setMainComponent(), this.mainMenu.setSidebarTitle(""), await super.popScreen(e));
             var t = this.getCurrentScreen();
-            t?.title && this.mainMenu.setSidebarTitle(t.title);
+            (t?.title && this.mainMenu.setSidebarTitle(t.title),
+              t?.backgroundImageName && this.mainMenu.setBackgroundImageName(t.backgroundImageName));
           }
           setSidebarButtons(e, t = !1) {
             this.mainMenu.setButtons(e, t);

@@ -134,6 +134,9 @@ System.register(
                 this.localPrefs.setItem(u.StorageKey.LastSortMap, e);
               }));
           }
+          get backgroundImageName() {
+            return "mnscrnlcustomizebattle.shp";
+          }
           onEnter({ gameOpts: t, usedSlots: e, lobbyType: i }) {
             (this.updateMapsAndModes(),
               (this.selectedGameMode = this.availableGameModes.find((e) => e.id === t.gameMode)),

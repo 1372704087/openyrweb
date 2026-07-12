@@ -80,6 +80,8 @@ System.register(
               (this.sidebarButtons = []),
               (this.sidebarButtonConfigs = []),
               (this.sidebarCollapsed = !0),
+              (this.defaultBackgroundImageName = "mnscrnl.shp"),
+              (this.backgroundImageName = this.defaultBackgroundImageName),
               (this._onSidebarToggle = new l.EventDispatcher()),
               this.create3DObject());
           }
@@ -199,6 +201,27 @@ System.register(
             if (!t) throw new Error(`Missing image "${e}"`);
             return t;
           }
+          setBackgroundImageName(e) {
+            if (this.backgroundImageName === e) return;
+            this.backgroundOverlay.setVisible(!1);
+            if (e === this.defaultBackgroundImageName) return void (this.backgroundImageName = e);
+            try {
+              var t = e.replace(/\.shp$/i, ".pal"),
+                i = this.getImage(e),
+                [r] = this.jsxRenderer.render(n.jsx("sprite", { image: i, palette: t, zIndex: 1 }));
+              this.mainContainer.remove(this.backgroundOverlay),
+                this.backgroundOverlay.destroy(),
+                this.mainContainer.add(r),
+                (this.backgroundOverlay = r),
+                (this.backgroundImageName = e),
+                this.backgroundOverlay.setVisible(!0);
+            } catch (r) {
+              console.error("Failed to load background image " + e, r);
+              this.mainContainer.remove(this.backgroundOverlay);
+              this.backgroundOverlay.destroy();
+              this.backgroundImageName = this.defaultBackgroundImageName;
+            }
+          }
           create3DObject() {
             var e, t, i, r, s;
             (super.create3DObject(),
@@ -216,7 +239,14 @@ System.register(
                     n.jsx(
                       "container",
                       { width: e.width, height: e.height, ref: (e) => (this.mainContainer = e) },
-                      n.jsx("sprite", { image: e, palette: "shell.pal" }),
+                      n.jsx("sprite", { image: e, palette: "shell.pal", ref: (e) => (this.backgroundSprite = e) }),
+                      n.jsx("sprite", {
+                        image: e,
+                        palette: "shell.pal",
+                        hidden: !0,
+                        zIndex: 1,
+                        ref: (e) => (this.backgroundOverlay = e),
+                      }),
                       n.jsx(h.HtmlView, {
                         component: a.MenuVideo,
                         props: { src: this.videoSrc },
