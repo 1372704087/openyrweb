@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: engine/gameRes/GameResImporter ===
+// === Reconstructed SystemJS module: engine/gameRes/GameResImporter ===
 // deps: ["data/MixFile","engine/Engine","engine/EngineType","util/time","engine/gameRes/importError/ChecksumError","engine/gameRes/importError/FileNotFoundError","engine/gameRes/importError/ArchiveExtractionError","data/vfs/VirtualFile","engine/mixDatabase","data/Palette","data/ShpFile","engine/gfx/ImageUtils","util/string","engine/gameRes/VideoConverter","engine/gameRes/importError/InvalidArchiveError","data/vfs/FileNotFoundError","data/vfs/IOError","data/vfs/RealFileSystemDir","engine/gameRes/importError/NoWebAssemblyError","network/HttpRequest","engine/gameRes/importError/ArchiveDownloadError"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 

@@ -305,13 +305,14 @@ System.register(
                 this.lastPanicked !== n ||
                 this.lastHarvesting !== hv ||
                 this.lastCarrying !== cv ||
+                void 0 === this.lastStance ||
+                this.lastStance !== r ||
                 this.disguiseChanged
               ) {
                 var p = this.disguiseChanged,
                   m = void 0 !== this.lastFiring && this.lastFiring !== a;
                 if (
-                  (void 0 === this.lastStance && (this.lastStance = r),
-                    (this.lastMoving = s),
+                  ((this.lastMoving = s),
                     (this.lastFiring = a),
                     (this.lastZone = i),
                     (this.lastPanicked = n),
@@ -348,14 +349,16 @@ System.register(
                     (this.computedDirection = this.directionFromFacingNo(this.currentSequenceParams.onlyFacing)),
                   (p = this.sequenceQueue.shift()),
                   this.setAnimParams(p, t, !m),
-                  p === S.SequenceType.Paradrop
-                    ? ((p = this.rules.audioVisual.parachute),
-                      (this.paradropAnim = this.renderableManager.createAnim(p, void 0, !0)),
-                      this.paradropAnim.remapColor(o.color),
-                      this.paradropAnim.create3DObject(),
-                      (this.paradropAnim.get3DObject().position.y = f.Coords.tileHeightToWorld(1)),
-                      this.paradropAnim.get3DObject().updateMatrix(),
-                      this.posWrap.add(this.paradropAnim.get3DObject()))
+                  r === b.StanceType.Paradrop
+                    ? this.paradropAnim ||
+                      ((p = this.rules.audioVisual.parachute)
+                        ? ((this.paradropAnim = this.renderableManager.createAnim(p, void 0, !0)),
+                          this.paradropAnim.remapColor(o.color),
+                          this.paradropAnim.create3DObject(),
+                          (this.paradropAnim.get3DObject().position.y = f.Coords.tileHeightToWorld(1)),
+                          this.paradropAnim.get3DObject().updateMatrix(),
+                          this.posWrap.add(this.paradropAnim.get3DObject()))
+                        : console.warn(`Parachute anim name missing for infantry "${this.gameObject.name}"`))
                     : this.paradropAnim &&
                       (this.paradropAnim.endAnimationLoop(),
                       this.blobShadow &&
