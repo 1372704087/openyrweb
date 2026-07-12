@@ -708,6 +708,12 @@ System.register(
                           if (prod) { prod.maxTechLevel = 99; prod.addStolenTech(0); prod.addStolenTech(1); prod.addStolenTech(2); prod.cheatsBypassPrereqs = true; _cheatState.allTech = true; }
                           _destroyCheatMenu(); _createCheatMenu();
                         });
+                        addSeparator();
+                        // [CHEAT] 设置选中单位为一星 / 三星
+                        // 后续删除作弊功能时，同步删除 CombatantUi.ts.js 中的 setSelectedVeteranLevel 方法
+                        addBtn("选中单位一星", () => { rv.cheatsEnabled.value = true; _gs.playerUi.setSelectedVeteranLevel(1); });
+                        addBtn("选中单位三星", () => { rv.cheatsEnabled.value = true; _gs.playerUi.setSelectedVeteranLevel(2); });
+                        // [CHEAT] 结束
                         const hint = document.createElement("div");
                         hint.textContent = "按 F10 关闭菜单";
                         hint.style.cssText = "text-align:center;font-size:11px;color:#666;margin-top:12px;";

@@ -806,6 +806,15 @@ System.register(
                 } else i.selectGroup(t);
               else i.createGroup(t);
             }
+            // [CHEAT] 调试作弊：设置选中单位为一星/三星，供 F10 作弊菜单调用
+            // 后续删除作弊功能时，连同 GameScreen.ts.js 中 F10 菜单的对应按钮一起删除
+            setSelectedVeteranLevel(e) {
+              const selection = this.game?.getUnitSelection?.();
+              if (!selection) return;
+              for (let t of selection.getSelectedUnits())
+                t.veteranTrait && (t.veteranTrait.setVeteranLevel(e), t.veteranTrait.handlePromotion(t, this.game));
+            }
+            // [CHEAT] 结束
             handleInvalidCommand(e) {
               (this.sound.play(m.SoundKey.ScoldSound, f.ChannelType.Ui), this.messageList.addUiFeedbackMessage(e));
             }

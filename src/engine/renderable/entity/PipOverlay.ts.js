@@ -696,7 +696,7 @@ System.register(
               }
               createVeteranIndicator(t) {
                 if (t.veteranLevel) {
-                  var i = R.pipsFile.getImage(13 + t.veteranLevel - 1),
+                  var i = R.pipsFile.getImage(14 + t.veteranLevel - 1),
                     i = R.geometries.get(i);
                   let e = this.useSpriteBatching
                     ? new v.BatchedMesh(i, R.material, v.BatchMode.Merging)
@@ -861,7 +861,7 @@ System.register(
                     (this.rootObj.add(this.veteranIndicator),
                     (t = p.Coords.screenDistanceToWorld(
                       Math.floor(R.pipBrdFile.getImage(e.isInfantry() ? 1 : 0).width / 2) -
-                        Math.floor(R.pipsFile.getImage(13).width / 2),
+                        Math.floor(R.pipsFile.getImage(14).width / 2),
                       0,
                     )),
                     (this.veteranIndicator.position.x = t.x),
