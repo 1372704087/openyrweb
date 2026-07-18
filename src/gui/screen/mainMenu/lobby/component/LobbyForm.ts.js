@@ -86,9 +86,13 @@ System.register(
           constructor() {
             (super(...arguments),
               (this.onPlayerSelect = (e, t) => {
-                let i, r;
-                (e.match(/^\d+$/) ? (i = Number(e)) : ((i = c.SlotOccupation.Occupied), (r = g.AiDifficulty[e])),
-                  this.props.onSlotChange(i, t, r));
+                if (e === "player") {
+                  this.props.onSlotChange("player", t);
+                } else {
+                  let i, r;
+                  (e.match(/^\d+$/) ? (i = Number(e)) : ((i = c.SlotOccupation.Occupied), (r = g.AiDifficulty[e])),
+                    this.props.onSlotChange(i, t, r));
+                }
               }));
           }
           render() {
@@ -473,27 +477,31 @@ System.register(
           renderPlayerSelect(i, t, e) {
             let r = e === c.LobbyType.Singleplayer;
             var s = r || e === c.LobbyType.MultiplayerHost;
-            if (t === this.props.activeSlotIndex || (s && 0 === t))
-              return l.default.createElement("input", {
-                type: "text",
-                className: "player-name",
-                value: i.name,
-                readOnly: !0,
-              });
             let a = this.props.strings,
-              n = new Map()
-                .set(c.SlotOccupation.Occupied, i.name || "")
-                .set(c.SlotOccupation.Open, a.get(i.type === c.SlotType.Observer ? "GUI:OpenObserver" : "GUI:Open"))
-                .set(c.SlotOccupation.Closed, r ? a.get("GUI:None") : a.get("GUI:Closed")),
-              o = i.occupation;
-            return (
-              i.occupation === c.SlotOccupation.Occupied &&
-                i.type === c.SlotType.Ai &&
-                (n.delete(c.SlotOccupation.Occupied), (o = g.AiDifficulty[i.aiDifficulty])),
-              i.type !== c.SlotType.Observer &&
-                this.props.availableAiNames.forEach((e, t) => {
-                  n.set(g.AiDifficulty[t], a.get(e));
-                }),
+              n = new Map(),
+              o;
+            if (t === 0 && r) {
+              n.set("player", a.get("GUI:Player") + ": " + (i.name || ""));
+            }
+            n.set(c.SlotOccupation.Occupied, i.name || "");
+            n.set(c.SlotOccupation.Open, a.get(i.type === c.SlotType.Observer ? "GUI:OpenObserver" : "GUI:Open"));
+            (t !== 0 || !r) && n.set(c.SlotOccupation.Closed, r ? a.get("GUI:None") : a.get("GUI:Closed"));
+            n.set(c.SlotOccupation.Observer, a.get("GUI:Observer"));
+            o = i.occupation;
+            i.occupation === c.SlotOccupation.Occupied &&
+              i.type === c.SlotType.Ai &&
+              (n.delete(c.SlotOccupation.Occupied), (o = g.AiDifficulty[i.aiDifficulty]));
+            if (t === 0 && r && i.type === c.SlotType.Player && i.occupation !== c.SlotOccupation.Observer) {
+              n.delete(c.SlotOccupation.Occupied);
+              o = "player";
+            }
+            i.type !== c.SlotType.Observer &&
+              this.props.availableAiNames.forEach((e, t) => {
+                n.set(g.AiDifficulty[t], a.get(e));
+              });
+            return l.default.createElement(
+              l.default.Fragment,
+              null,
               l.default.createElement(
                 y.Select,
                 {
@@ -506,7 +514,8 @@ System.register(
                 [...n]
                   .map(([t, e]) =>
                     (t === c.SlotOccupation.Occupied && i.occupation !== c.SlotOccupation.Occupied) ||
-                    (t === c.SlotOccupation.Open && r)
+                    (t === c.SlotOccupation.Open && r) ||
+                    (t === c.SlotOccupation.Observer && !r)
                       ? null
                       : l.default.createElement(T.Option, {
                           key: t,
@@ -527,7 +536,8 @@ System.register(
                         }),
                   )
                   .filter(v.isNotNullOrUndefined),
-              )
+              ),
+              null,
             );
           }
         }),

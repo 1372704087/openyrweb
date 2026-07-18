@@ -19,6 +19,7 @@ System.register("gui/screen/mainMenu/lobby/component/viewmodel/lobby", [], funct
         ((t = a || i("SlotOccupation", (a = {})))[(t.Open = 1)] = "Open"),
         (t[(t.Closed = 2)] = "Closed"),
         (t[(t.Occupied = 3)] = "Occupied"),
+        (t[(t.Observer = 4)] = "Observer"),
         ((t = n || i("PlayerStatus", (n = {})))[(t.NotReady = 1)] = "NotReady"),
         (t[(t.Ready = 2)] = "Ready"),
         (t[(t.Host = 3)] = "Host"));

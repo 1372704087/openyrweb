@@ -181,6 +181,7 @@ System.register(
               o = this.game.rules.general.purifierBonus;
             return (
               (a += n * Math.floor(e * o)),
+              (this.target.owner.isAi && (a = this.target.owner.aiDifficulty === 0 ? Math.floor(a * 2) : this.target.owner.aiDifficulty === 1 ? Math.floor(a * 1.5) : a)),
               (this.target.owner.credits += a),
               (this.target.owner.creditsGained += a),
               s.empty(),

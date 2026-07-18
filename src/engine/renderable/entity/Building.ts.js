@@ -191,6 +191,8 @@ System.register(
                   (this.repairStartRequested = !1),
                   (this.highlightAnimRunner = new k.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new B.InvulnerableAnimRunner(this.gameSpeed)),
+                  (this.drainAnim = void 0),
+                  (this.drainLastDiscPos = void 0),
                   (this.plugins = []),
                   (this.objectArt = e.art),
                   (this.objectRules = e.rules),
@@ -494,6 +496,7 @@ System.register(
                       this.currentAnimType === M.AnimationType.IDLE &&
                       (this.setAnimation(M.AnimationType.SPECIAL_REPAIR_START, i), (this.repairStartRequested = !1)),
                     this.muzzleAnims && this.updateMuzzleAnims(i),
+                    this.updateDrainAnim(i),
                     n ||
                       (this.animations.forEach((e, t) => {
                         switch (e.getState()) {
@@ -611,6 +614,54 @@ System.register(
                     e.isAnimFinished() && (this.spriteWrap.remove(e.get3DObject()), e.dispose(), r.push(e)));
                 }),
                   r.forEach((e) => i.splice(i.indexOf(e), 1)));
+              }
+              updateDrainAnim(e) {
+                if (this.gameObject.isDestroyed) return this.clearDrainAnim();
+
+                // OpenYRWeb: Y offset below the disc so the animation sits just beneath
+                // the flying disc's model rather than at its exact center.
+                const DRAIN_ANIM_Y_OFFSET = 0;
+
+                // If the animation is in its finishing state (drain ended, playing to
+                // completion), keep updating its position and wait for it to stop.
+                if (this.drainAnim && this.drainAnimFinishing) {
+                  if (this.drainLastDiscPos) {
+                    this.drainAnim.setPosition(this.drainLastDiscPos);
+                  }
+                  if (this.drainAnim.isAnimFinished()) this.clearDrainAnim();
+                  return;
+                }
+
+                var t = this.rules.combatDamage.drainAnimationType;
+                var disc = this.gameObject.drainedBy;
+                if (disc && t && !disc.isDisposed && !disc.isDestroyed && this.renderableManager) {
+                  if (!this.drainAnim) {
+                    this.drainAnim = this.renderableManager.createAnim(t, (e) => {
+                      var t = disc.position.worldPosition.clone();
+                      (t.y += DRAIN_ANIM_Y_OFFSET), e.setPosition(t);
+                    });
+                    // Render behind the disc so the animation doesn't cover it.
+                    this.drainAnim.setRenderOrder(-999995);
+                    this.drainAnim.create3DObject();
+                  }
+                  // Keep the animation positioned just below the disc every frame so it
+                  // follows the disc as it moves.
+                  var pos = disc.position.worldPosition.clone();
+                  (pos.y += DRAIN_ANIM_Y_OFFSET), this.drainAnim.setPosition(pos);
+                  // Save the last known disc position so the finishing state can use it.
+                  this.drainLastDiscPos = pos;
+                } else if (this.drainAnim && !this.drainAnimFinishing) {
+                  // Drain ended — let the animation play 4 full loops then stop.
+                  (this.drainAnimFinishing = !0), this.drainAnim.playRemainingLoops(4);
+                }
+              }
+              clearDrainAnim() {
+                (this.drainAnimFinishing = !1),
+                  (this.drainLastDiscPos = void 0),
+                  this.drainAnim &&
+                    (this.renderableManager?.container.remove(this.drainAnim),
+                    this.drainAnim.dispose(),
+                    (this.drainAnim = void 0));
               }
               getNormalizedAnimType(e) {
                 let t = 0,
@@ -1292,7 +1343,8 @@ System.register(
               }
               onRemove(t) {
                 if (
-                  ((this.renderableManager = void 0),
+                  (this.clearDrainAnim(),
+                  (this.renderableManager = void 0),
                   this.plugins.forEach((e) => e.onRemove(t)),
                   this.animSounds.forEach((e) => e.stop()),
                   this.ambientSound?.stop(),

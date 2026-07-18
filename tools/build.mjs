@@ -154,7 +154,7 @@ function stepIndex() {
   );
 
   // Point at OUR bundle filenames (no upstream .min naming, no cache-bust query).
-  html = html.replace(/src="dist\/ra2web\.min\.js\?v=[^"]*"/i, 'src="dist/ra2web.js"');
+  html = html.replace(/src="dist\/ra2web\.min\.js\?v=[^"]*"/i, 'src="dist/ra2web.js?v=' + VERSION + '"');
   html = html.replace(/src="dist\/vendor\.bundle\.min\.js\?v=[^"]*"/i, 'src="dist/vendor.bundle.js"');
 
   // SystemJS path aliases: keep the engine's internal alias namespace, drop the

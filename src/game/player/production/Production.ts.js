@@ -126,7 +126,7 @@ System.register(
               }
               isAvailableForProduction(e) {
                 return (
-                  -1 !== e.techLevel &&
+                  (this.cheatsBypassPrereqs || -1 !== e.techLevel) &&
                   e.techLevel <= this.maxTechLevel &&
                   !(0 === e.buildLimit && !this.player.isAi) &&
                   !(

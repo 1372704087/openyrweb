@@ -15,7 +15,8 @@ System.register("game/order/OrderFeedbackType", [], function (t, e) {
         (e[(e.Attack = 2)] = "Attack"),
         (e[(e.Enter = 3)] = "Enter"),
         (e[(e.Capture = 4)] = "Capture"),
-        (e[(e.SpecialAttack = 5)] = "SpecialAttack"));
+        (e[(e.SpecialAttack = 5)] = "SpecialAttack"),
+        (e[(e.SecondaryWeaponAttack = 6)] = "SecondaryWeaponAttack"));
     },
   };
 });

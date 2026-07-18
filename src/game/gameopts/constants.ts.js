@@ -21,7 +21,7 @@ System.register("game/gameopts/constants", ["game/gameopts/GameOpts"], function 
         e("OBS_COLOR_ID", -2),
         e("RANDOM_COUNTRY_NAME", "Random"),
         e("OBS_COUNTRY_NAME", "Observer"),
-        e("aiUiNames", new Map().set(i.AiDifficulty.Easy, "GUI:AIDummy").set(i.AiDifficulty.Medium, "NOSTR:伊拉克AI")),
+        e("aiUiNames", new Map().set(i.AiDifficulty.Easy, "GUI:AIDummy").set(i.AiDifficulty.Medium, "NOSTR:伊拉克AI").set(i.AiDifficulty.Brutal, "NOSTR:Custom AI")),
         e("aiUiTooltips", new Map()),
         e("RANDOM_COUNTRY_UI_NAME", "GUI:RandomEx"),
         e("RANDOM_COUNTRY_UI_TOOLTIP", "STT:PlayerSideRandom"),

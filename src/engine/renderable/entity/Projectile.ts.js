@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: engine/renderable/entity/Projectile ===
-// deps: ["engine/renderable/WithPosition","engine/renderable/ShpRenderable","game/gameobject/Projectile","game/Coords","engine/renderable/fx/LaserFx","game/WeaponType","engine/renderable/fx/TeslaFx","game/GameSpeed","engine/renderable/fx/LineTrailFx","engine/renderable/fx/SparkFx","engine/renderable/fx/RadBeamFx","engine/renderable/entity/unit/BlobShadow","engine/gfx/lighting/NukeLightingFx","engine/gfx/batch/BatchedMesh","game/rules/ObjectRules","game/math/geometry","engine/type/PaletteType"]
+// deps: ["engine/renderable/WithPosition","engine/renderable/ShpRenderable","game/gameobject/Projectile","game/Coords","engine/renderable/fx/LaserFx","game/WeaponType","engine/renderable/fx/TeslaFx","game/GameSpeed","engine/renderable/fx/LineTrailFx","engine/renderable/fx/SparkFx","engine/renderable/fx/RadBeamFx","engine/renderable/fx/DiskLaserFx","engine/renderable/entity/unit/BlobShadow","engine/gfx/lighting/NukeLightingFx","engine/gfx/batch/BatchedMesh","game/rules/ObjectRules","game/math/geometry","engine/type/PaletteType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -16,6 +16,7 @@ System.register(
     "engine/renderable/fx/LineTrailFx",
     "engine/renderable/fx/SparkFx",
     "engine/renderable/fx/RadBeamFx",
+    "engine/renderable/fx/DiskLaserFx",
     "engine/renderable/entity/unit/BlobShadow",
     "engine/gfx/lighting/NukeLightingFx",
     "engine/gfx/batch/BatchedMesh",
@@ -25,7 +26,7 @@ System.register(
   ],
   function (e, t) {
     "use strict";
-    var y, o, s, u, d, g, p, m, f, T, v, l, a, c, h, n, b, S;
+    var y, o, s, u, d, g, p, m, f, T, v, l, a, c, h, n, b, S, I;
     t && t.id;
     return {
       setters: [
@@ -63,6 +64,9 @@ System.register(
           v = e;
         },
         function (e) {
+          I = e;
+        },
+        function (e) {
           l = e;
         },
         function (e) {
@@ -85,7 +89,7 @@ System.register(
         e(
           "Projectile",
           (S = class S {
-            constructor(e, t, i, r, s, a, n, o, l, c, h, u, d, g, p) {
+            constructor(e, t, i, r, s, a, n, o, l, c, h, u, d, g, p, w) {
               var m, f;
               ((this.gameObject = e),
                 (this.rules = t),
@@ -102,6 +106,7 @@ System.register(
                 (this.vxlBuilderFactory = d),
                 (this.useSpriteBatching = g),
                 (this.useMeshInstancing = p),
+                (this.worldSound = w),
                 (this.plugins = []),
                 (this.objectArt = e.art),
                 (this.label = "projectile_" + e.rules.name),
@@ -184,6 +189,7 @@ System.register(
                 this.gameObject.state !== this.lastState &&
                   ((this.lastState = this.gameObject.state),
                   this.gameObject.state === s.ProjectileState.Impact &&
+                    !this.gameObject.fromWeapon.rules.isDiskLaser &&
                     ((this.target.visible = !1),
                     this.renderableManager.createTransientAnim(this.gameObject.impactAnim, (e) => {
                       e.setPosition(this.withPosition.getPosition());
@@ -339,6 +345,78 @@ System.register(
                   : new THREE.Color(...this.rules.radiation.radColor.map((e) => e / 255))),
                 (e = 1 / this.gameSpeed.value),
                 (e = new v.RadBeamFx(this.camera, c, h, i, e, 1)),
+                r.addEffect(e)),
+              // OpenYRWeb: DiskLaser ring-laser charge + beam effect (Floating Disc primary weapon).
+              // Vanilla YR disk laser draws a circle of LaserInnerColor/LaserOuterColor or
+              // IsHouseColor around the firing point, charges CW+CCW arcs, then fires beam.
+              s.isDiskLaser &&
+                ((c = this.gameObject.position.worldPosition.clone()),
+                // Apply FLH offset: use FlhCoords.vertical directly (world units),
+                // not PixelOffset which may be empty for units like DISK.
+                ((t = new THREE.Vector3()),
+                (function () {
+                  var flh = this.gameObject.fromWeapon.type === g.WeaponType.Primary
+                    ? this.gameObject.fromObject?.art?.primaryFireFlh
+                    : this.gameObject.fromObject?.art?.secondaryFireFlh;
+                  if (flh && flh.vertical) t.y = flh.vertical;
+                }.call(this)),
+                c.add(t)),
+                (h = this.gameObject.target.getWorldCoords().clone()),
+                (i = s.laserDuration / m.GameSpeed.BASE_TICKS_PER_SECOND / this.gameSpeed.value),
+                // OpenYRWeb: track the firer so the ring follows the moving disc during charge.
+                (this._diskFirer = this.gameObject.fromObject),
+                (this._diskFlhOffset = t.clone()),
+                (e = {
+                  innerColor: s.laserInnerColor,
+                  outerColor: s.laserOuterColor,
+                  outerSpread: s.laserOuterSpread,
+                  radius: s.diskLaserRadius,
+                  durationSeconds: Math.max(0.1, i),
+                  isHouseColor: s.isHouseColor,
+                  houseColor: s.isHouseColor
+                    ? new THREE.Color(this.gameObject.fromPlayer.color.asHex())
+                    : void 0,
+                  getSourcePos: this._diskFirer
+                    ? function () {
+                        var f = this._diskFirer;
+                        return f && !f.isDestroyed
+                          ? f.position.worldPosition.clone().add(this._diskFlhOffset)
+                          : null;
+                      }.bind(this)
+                    : null,
+                  getTargetPos: this._diskFirer
+                    ? function () {
+                        var tgt = this.gameObject.target;
+                        return tgt && !tgt.isDestroyed
+                          ? tgt.getWorldCoords().clone()
+                          : null;
+                      }.bind(this)
+                    : null,
+                  // Sound callbacks: charge sound at ring start, Report at beam start
+                  onChargeStart: this.worldSound
+                    ? function () {
+                        this.worldSound.playEffect(
+                          "FloatingDiscChargeUp",
+                          this.gameObject.position.worldPosition,
+                          this.gameObject.fromPlayer,
+                        );
+                      }.bind(this)
+                    : null,
+                  onBeamStart: this.worldSound
+                    ? function () {
+                        var report = s.report;
+                        if (report && report.length) {
+                          var idx = Math.floor(Math.random() * report.length);
+                          this.worldSound.playEffect(
+                            report[idx],
+                            this.gameObject.position.worldPosition,
+                            this.gameObject.fromPlayer,
+                          );
+                        }
+                      }.bind(this)
+                    : null,
+                }),
+                (e = new I.DiskLaserFx(c, h, this.camera, e)),
                 r.addEffect(e)),
               // OpenYRWeb: Magnetron beam rendering is handled by MagnetronBeamPlugin,
               // which provides a continuous beam for both vehicle dragging and building attacks.

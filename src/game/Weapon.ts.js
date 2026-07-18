@@ -79,6 +79,7 @@ System.register(
                 if (!e.spawner) throw new Error(`Weapon "${e.name} can't use "Special" warhead without Spawner=yes`);
                 if (t.rules.spawns === i.general.v3Rocket.type) r = i.combatDamage.v3Warhead;
                 else if (t.rules.spawns === i.general.dMisl.type) r = i.combatDamage.dMislWarhead;
+                else if (t.rules.spawns === i.general.cMisl.type) r = i.combatDamage.cMislWarhead;
                 else {
                   if (!t.rules.spawns)
                     throw new Error(`Can't use "Special" warhead on unit type "${t.name}" without "Spawns"`);
@@ -246,7 +247,9 @@ System.register(
                 return (
                   (t =
                     !e.isInfantry() && !e.isAircraft() && (e.isBuilding() || e.isVehicle()) && e.turretTrait
-                      ? e.turretTrait.facing
+                      ? e.rules.turretSpins
+                        ? e.direction
+                        : e.turretTrait.facing
                       : e.direction),
                   t
                 );

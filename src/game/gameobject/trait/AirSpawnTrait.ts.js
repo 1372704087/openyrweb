@@ -150,17 +150,26 @@ System.register(
               }
             } else this.nextReloadTicks = void 0;
             for (let l of this.missileLaunches.slice()) {
+              if (l.missile.limboData && r.submergibleTrait && 0 < r.submergibleTrait.getSurfaceProgress()) continue;
+              l.missile.limboData && s.unlimboObject(l.missile, l.missile.position.tile);
               var n = s.rules.general.getMissileRules(l.missile.name);
               if (
                 (l.pauseFrames ?? (l.pauseFrames = n.pauseFrames),
                 0 < l.pauseFrames && l.pauseFrames--,
                 l.pauseFrames <= 0)
               ) {
-                var o = 90 * n.pitchFinal,
-                  n = (90 * (n.pitchFinal - n.pitchInitial)) / n.tiltFrames;
                 let i = l.missile;
-                if (i.pitch < o) i.pitch = Math.min(o, i.pitch + n);
-                else {
+                var finalPitch = 90 * n.pitchFinal,
+                  raiseRate = n.raiseRate || 0;
+                if (
+                  (l.tiltFramesRemaining ?? (l.tiltFramesRemaining = n.tiltFrames),
+                  0 < l.tiltFramesRemaining)
+                ) {
+                  var pitchDelta = (90 * (n.pitchFinal - n.pitchInitial)) / n.tiltFrames;
+                  (i.pitch = Math.min(finalPitch, i.pitch + pitchDelta)),
+                    raiseRate && (i.position.worldPosition.y += raiseRate),
+                    l.tiltFramesRemaining--;
+                } else {
                   i.unitOrderTrait.addTask(
                     new p.TaskGroup(
                       new d.MoveTask(s, l.targetTile, !!l.targetBridge),
@@ -214,6 +223,8 @@ System.register(
             }
           }
           prepareLaunch(r, s, a) {
+            if ((r.submergibleTrait?.emerge(r, a), r.submergibleTrait && 0 < r.submergibleTrait.getSurfaceProgress()))
+              return;
             if (this.storage.length) {
               let i = this.storage[0];
               if (!i.ammo) return;
@@ -224,12 +235,13 @@ System.register(
                 if (r.rules.spawns === o.general.v3Rocket.type)
                   ((e = n ? o.combatDamage.v3EliteWarhead : o.combatDamage.v3Warhead),
                     (t = n ? o.general.v3Rocket.eliteDamage : o.general.v3Rocket.damage));
-                else {
-                  if (r.rules.spawns !== o.general.dMisl.type)
-                    throw new Error(`Unhandled missile type "${r.rules.spawns}"`);
+                else if (r.rules.spawns === o.general.dMisl.type)
                   ((e = n ? o.combatDamage.dMislEliteWarhead : o.combatDamage.dMislWarhead),
                     (t = n ? o.general.dMisl.eliteDamage : o.general.dMisl.damage));
-                }
+                else if (r.rules.spawns === o.general.cMisl.type)
+                  ((e = n ? o.combatDamage.cMislEliteWarhead : o.combatDamage.cMislWarhead),
+                    (t = n ? o.general.cMisl.eliteDamage : o.general.cMisl.damage));
+                else throw new Error(`Unhandled missile type "${r.rules.spawns}"`);
                 o = new l.Warhead(a.rules.getWarhead(e));
                 (i.missileSpawnTrait.setDamage(t).setWarhead(o).setLauncher(r),
                   this.missileLaunches.push({

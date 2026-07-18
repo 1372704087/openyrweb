@@ -137,12 +137,11 @@ System.register(
               if (0 < e && t.isTechno() && t.invulnerableTrait.isActive()) return 0;
               if (t.isAircraft() && t.missileSpawnTrait && t.zone !== k.ZoneType.Air) return 0;
               if (!i.gameOpts.destroyableBridges && t.isOverlay() && t.bridgeTrait) return 0;
-              // OpenYRWeb (2026-06-30, REVERSED): a building currently being drained by a
-              // DrainWeapon unit takes no damage from that drain weapon (vanilla: a drained
-              // building is never destroyed — DrainWeapon siphons power/money, dealing 0 damage).
-              // The DrainTrait sets target.drainedBy while actively siphoning; suppress damage to
-              // the drained building so it survives the disc's attack. RE: DrainWeapon @ yrmd.exe.
-              if (0 < e && t.isBuilding && t.isBuilding() && t.drainedBy && t.rules.drainable) return 0;
+              // OpenYRWeb: DrainWeapon damage suppression is handled in detonate() using
+              // T.rules.drainWeapon (weapon-level). It is NOT done here in computeDamage
+              // because WarheadRules does not have a drainWeapon property (drainWeapon is
+              // a weapon-level flag in vanilla YR). See the detonate() method where the
+              // drain weapon skips computeDamage entirely for Drainable=yes buildings.
               if (
                 (this.rules.radiation ||
                   this.rules.temporal ||
@@ -341,15 +340,28 @@ System.register(
                     this._dragVehicleTo(m, r, v);
                     continue;
                   }
-                  let i = this.computeDamage(e, m, r, w);
+                  // OpenYRWeb: DrainWeapon trigger. When a DrainWeapon=yes warhead strikes a
+                  // Drainable=yes building, start (or refresh) the drain on the attacker's
+                  // DrainTrait instead of dealing normal damage. T.rules.drainWeapon (weapon-level,
+                  // WeaponRules) is used here — this.rules.drainWeapon (warhead-level, WarheadRules)
+                  // does NOT exist because drainWeapon is a weapon-level flag in vanilla YR.
+                  // The drain is attached before computeDamage so it fires even when the building
+                  // is already being drained (subsequent projectiles deal zero damage).
+                  let i;
+                  if (T.rules.drainWeapon && m.isBuilding() && m.rules.drainable) {
+                    v && v.drainTrait && v.drainTrait.startDrain(v, m, r);
+                    i = 0;
+                  } else {
+                    i = this.computeDamage(e, m, r, w);
+                  }
                   if (
-                    (0 < e &&
-                      !this.rules.affectsAllies &&
-                      m.isTechno() &&
-                      b &&
-                      (r.alliances.areAllied(m.owner, b) || m.owner === b) &&
-                      (i = 0),
-                    i)
+                    0 < e &&
+                    !this.rules.affectsAllies &&
+                    m.isTechno() &&
+                    b &&
+                    (r.alliances.areAllied(m.owner, b) || m.owner === b) &&
+                    (i = 0),
+                    i
                   )
                     for (var I of O.get(m)) {
                       let t = i;
@@ -396,6 +408,9 @@ System.register(
               T = T.rules.radLevel;
               T && E && r.mapRadiationTrait.createRadSite(t, T, E + 1);
               T = d ? void 0 : R ? r.rules.audioVisual.weaponNullifyAnim : this.pickExplodeAnim(e, P, a, r, w);
+              // OpenYRWeb: DiskLaser weapons have their own ring-laser visual effect;
+              // suppress the standard warhead impact explosion anim.
+              l?.weapon?.rules?.isDiskLaser && (T = void 0);
               if (!R && a === k.ZoneType.Ground) {
                 let e = new U.AnimTerrainEffect();
                 (T && e.destroyOre(T, t, r), h && e.spawnSmudges(h, t, r), T && e.spawnSmudges(T, t, r));

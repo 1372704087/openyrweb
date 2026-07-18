@@ -26,11 +26,12 @@ System.register("game/gameobject/trait/PoweredTrait", ["game/player/trait/PowerT
             return !!this.obj.isBuilding() && !!this.obj.overpoweredTrait?.hasChargersToPowerOn();
           }
           isPoweredOn(e = !1) {
-            // OpenYRWeb: a building being drained by a Floating Disc (drainedBy set) is treated
-            // as unpowered while the disc is attached — vanilla disables drained base defenses
-            // and powered structures. The disc clears drainedBy when it retargets/dies.
-            if (this.obj && this.obj.drainedBy) return !1;
-            return (
+              // OpenYRWeb: a building being drained by a Floating Disc (drainedBy set) is treated
+              // as unpowered while the disc is attached — vanilla disables drained base defenses
+              // and power plants. Refineries / slave miners keep working (they only lose money).
+              // The disc clears drainedBy when it retargets/dies.
+              if (this.obj && this.obj.drainedBy && !this.obj.rules.refinery) return !1;
+              return (
               !(!this.obj || !this.turnedOn) &&
               (!(e || !this.isCharged()) ||
                 (!this.obj.rules.power && this.obj.rules.needsEngineer

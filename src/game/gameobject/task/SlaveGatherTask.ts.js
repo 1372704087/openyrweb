@@ -501,6 +501,7 @@ System.register(
                 if (purifierCount && bonusRate) total += purifierCount * Math.floor(base * bonusRate);
               } catch (err) {}
               if (0 < total && this.miner && this.miner.owner) {
+                this.miner.owner.isAi && (total = this.miner.owner.aiDifficulty === 0 ? Math.floor(total * 2) : this.miner.owner.aiDifficulty === 1 ? Math.floor(total * 1.5) : total);
                 this.miner.owner.credits += total;
                 this.miner.owner.creditsGained += total;
               }

@@ -67,7 +67,9 @@ System.register(
                       (e, t, i, r, s) =>
                         !((!r && !s) || !e?.isBuilding() || !e.overpoweredTrait || e.owner !== this.gameObject.owner),
                     )
-                  : this.weaponRules.damage < 0
+                  : this.weaponRules.drainWeapon
+                    ? this.targetChecks.push((e, t, i) => !!(e?.isBuilding() && e.rules?.drainable && !i.areFriendly(e, this.gameObject) && (!e.drainedBy || e.drainedBy === this.gameObject)))
+                    : this.weaponRules.damage < 0
                     ? this.targetChecks.push(
                         (e, t, i) =>
                           !!(
@@ -184,6 +186,7 @@ System.register(
                     ? r === l.WeaponType.Secondary
                     : r === l.WeaponType.Primary;
                 case n.NavalTargeting.NavalAll:
+                case n.NavalTargeting.NavalAllEquivalent:
                   return !0;
                 case n.NavalTargeting.NavalNone:
                   return !1;

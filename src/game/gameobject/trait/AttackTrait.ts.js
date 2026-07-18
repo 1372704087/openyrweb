@@ -190,6 +190,11 @@ System.register(
                 !(n && t?.isAircraft() && t.missileSpawnTrait && t.zone !== h.ZoneType.Air))
               ) {
                 var l = t?.isTechno() ? t.rules.armor : void 0;
+                if (t?.isBuilding() && t.rules.drainable) {
+                  var d = r.find((e) => e.rules.drainWeapon);
+                  if (d && d.targeting.canTarget(t, i, s, a, n) && (void 0 === l || this.checkArmor(d.warhead.rules, l, n)))
+                    return d;
+                }
                 for (const c of r)
                   if (c.targeting.canTarget(t, i, s, a, n) && (void 0 === l || this.checkArmor(c.warhead.rules, l, n)))
                     return c;
@@ -226,7 +231,7 @@ System.register(
                         : e.isBuilding() && e.overpoweredTrait
                           ? [e.overpoweredTrait.getWeapon()]
                           : i || t
-                            ? [e.primaryWeapon, !i && t && e.secondaryWeapon ? e.secondaryWeapon : void 0]
+                            ? [e.primaryWeapon, e.secondaryWeapon && (e.secondaryWeapon.rules.spawner || (!i && t)) ? e.secondaryWeapon : void 0]
                             : [e.primaryWeapon, e.secondaryWeapon]),
                 r.filter((e) => e && !e.rules.neverUse)
               );

@@ -424,7 +424,13 @@ System.register(
                       ((this.collisionType = i),
                         this.isNuke
                           ? ((this.state = D.Impact), (this.detonationTimer = 2.5 * I.GameSpeed.BASE_TICKS_PER_SECOND))
-                          : this.detonate(o, i));
+                          : this.fromWeapon.rules.isDiskLaser && !this.isHoming() && !this.rules.inaccurate
+                            ? ((this.state = D.Impact),
+                              (this.detonationTimer = Math.max(
+                                1,
+                                Math.floor(this.fromWeapon.rules.laserDuration * 0.7),
+                              )))
+                            : this.detonate(o, i));
                     }
                   }
                   let e = this.fromWeapon.warhead;

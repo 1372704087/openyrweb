@@ -103,7 +103,49 @@ System.register(
                   ).getNextTile();
                 s && this.rangeHelper.tileDistance(e, s) > Math.SQRT2 && this.updateTarget(s, !1);
               }
-              ((this.bomberInitialLock = this.isCloseEnoughToDest(i, i.tile)), super.onStart(i));
+              ((this.bomberInitialLock = this.isCloseEnoughToDest(i, i.tile)),
+              // OpenYRWeb: For balloonHover units (e.g. Floating Disc), redirect destination
+              // to within weapon range so the disc stops at range, not on the target's head.
+              (this.weapon.rules.isDiskLaser || this.weapon.rules.drainWeapon || this.weapon.range > 0) &&
+                i.rules.balloonHover &&
+                !i.rules.hoverAttack &&
+                !this.isCloseEnoughToDest(i, i.tile) ||
+                // NOTE: The && (C && D) below is short-circuited by the || chain above
+                // when isCloseEnoughToDest returns true (disc already in weapon range).
+                // DrainWeapon specifically requires the disc to be over the building's
+                // centerTile (enforced in AttackTask's Firing state). The redirect is
+                // moved into a standalone check below so it runs unconditionally.
+                !1,
+              // OpenYRWeb: DrainWeapon on a building — always redirect to centerTile.
+              // The disc must hover exactly above the building's center for the drain
+              // weapon to fire (enforced in AttackTask's Firing state). This runs
+              // unconditionally (not in the || chain above) because the || short-circuits
+              // when the disc is already within weapon range (adjacent tile), preventing
+              // the centerTile redirect from ever being evaluated.
+              (this.weapon.rules.drainWeapon &&
+                e instanceof n.GameObject &&
+                e.isBuilding() &&
+                (i.tile.rx !== e.centerTile.rx || i.tile.ry !== e.centerTile.ry) &&
+                (this.updateTarget(e.centerTile, e instanceof n.GameObject && !!e.onBridge),
+                !0)) ||
+                !1,
+              super.onStart(i));
+            }
+            findRangeApproachTile(e, t) {
+              let i = t.rx - e.rx,
+                r = t.ry - e.ry,
+                s = Math.sqrt(i * i + r * r);
+              if (s <= this.weapon.range || s <= 0) return null;
+              // Use (range - 1) as approach distance so the disc's tile is well within
+              // weapon range.  The exact range boundary can fail due to integer rounding
+              // (e.g. an approach tile at distance 7.07 when range=7 → isInWeaponRange
+              // returns false and the disc keeps chasing the target).
+              let approachRange = Math.max(1, this.weapon.range - 1),
+                a = approachRange / s,
+                n = Math.round(t.rx - i * a),
+                h = Math.round(t.ry - r * a);
+              var o = this.game.map.tiles[n] && this.game.map.tiles[n][h];
+              return o && this.game.map.isWithinBounds(o) ? o : null;
             }
             cancel() {
               this.bomberManeuverTile ? (this.cancelRequested = !0) : super.cancel();
@@ -168,8 +210,30 @@ System.register(
               );
             }
             isCloseEnoughToDest(e, t) {
-              if (e.rules.balloonHover && !e.rules.hoverAttack)
+              if (e.rules.balloonHover && !e.rules.hoverAttack) {
+                // OpenYRWeb: Use pure tile distance (not isInWeaponRange) for balloonHover
+                // units. Tile distance is simple Euclidean distance between tile centers,
+                // without sub-cell offsets or elevation modifiers that can cause the disc
+                // to stop short. Subtract 1 from the threshold so the disc moves one tile
+                // closer than the max range, ensuring the weapon can always fire (the firing
+                // check uses isInWeaponRange which may return false at the exact range edge).
+                if (this.weapon && (this.weapon.rules.isDiskLaser || this.weapon.rules.drainWeapon || this.weapon.range > 0)) {
+                  var dist = this.rangeHelper.tileDistance(t, this.target);
+                  var closeEnough = dist <= this.weapon.range - 1;
+                  // OpenYRWeb: DrainWeapon on a building — the disc is NOT "close
+                  // enough" unless it is on the building's centerTile. The AttackTask
+                  // enforces this in the Firing state; if we report "close enough"
+                  // from an adjacent tile, hasReachedDestination → canStopAtTile
+                  // returns true immediately, the MoveInWeaponRangeTask ends without
+                  // moving, and we loop back to CheckRange → Firing → centerTile
+                  // check fail → CheckRange → … forever.
+                  if (closeEnough && this.weapon.rules.drainWeapon && this.target?.isBuilding?.()) {
+                    closeEnough = t.rx === this.target.centerTile.rx && t.ry === this.target.centerTile.ry;
+                  }
+                  return closeEnough && this.losHelper.hasLineOfSight(t, this.target, this.weapon);
+                }
                 return this.rangeHelper.isInTileRange(t, this.target, 0, 0);
+              }
               if (this.weapon.rules.cellRangefinding || !e.isInfantry())
                 return (
                   this.rangeHelper.isInWeaponRange(e, this.target, this.weapon, this.game.rules, t) &&
@@ -280,6 +344,35 @@ System.register(
                     (this.recalcMinRange = !0),
                     (this.bomberQueuedTargetTile = void 0))),
                 this.cancelRequested && (this.bomberManeuverTile || ((this.cancelRequested = !1), this.cancel())),
+                // OpenYRWeb: Mid-flight range check — balloonHover units (e.g.
+                // Floating Disc) stop as soon as weapon range is reached, even
+                // if the approach-tile waypoint hasn't been reached yet.
+                // Uses raw tileDistance instead of isInWeaponRange/isCloseEnoughToDest
+                // to avoid edge cases where the complex range calculation returns
+                // true slightly outside the nominal weapon range (e.g. when the
+                // target is a moving unit with sub-tile offsets).
+                // DrainWeapon is excluded — it must reach the building center tile
+                // (set via e.centerTile in onStart) for the drain to work.
+                !(
+                  s.moveTrait &&
+                  s.moveTrait.moveState === r.MoveState.Moving &&
+                  s.rules.balloonHover &&
+                  !s.rules.hoverAttack &&
+                  this.weapon &&
+                  !this.weapon.rules.drainWeapon &&
+                  this.rangeHelper.tileDistance(
+                    s.tile,
+                    this.target instanceof n.GameObject
+                      ? this.target.isBuilding()
+                        ? this.target.centerTile
+                        : this.target.tile
+                      : this.target,
+                  ) <= this.weapon.range
+                ) ||
+                  (s.moveTrait.velocity.set(0, 0, 0),
+                  (s.moveTrait.currentWaypoint = void 0),
+                  (s.moveTrait.moveState = r.MoveState.ReachedNextWaypoint),
+                  (this.path.length = 0)),
                 !!(this.isBombingRun(s) && this.isCancelling() && this.forceCancel(s)) || super.onTick(s)
               );
             }

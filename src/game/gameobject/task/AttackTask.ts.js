@@ -293,6 +293,16 @@ System.register(
                   return (this.cancel(), this.onTick(r));
                 if (n) {
                   var o = this.target.obj || this.target.tile;
+                  // OpenYRWeb: DrainWeapon — the disc must be parked directly over the
+                  // building's center tile before firing. If not, go back to CheckRange
+                  // to re-position (MoveInWeaponRangeTask.onStart targets centerTile for
+                  // drainWeapon + balloonHover units). This matches vanilla YR behavior.
+                  if (
+                    this.weapon.rules.drainWeapon &&
+                    this.target.obj?.isBuilding() &&
+                    !(r.tile.rx === this.target.obj.centerTile.rx && r.tile.ry === this.target.obj.centerTile.ry)
+                  )
+                    return ((s.attackState = T.AttackState.CheckRange), this.onTick(r));
                   if (
                     !this.game.isValidTarget(this.target.obj) ||
                     this.shouldDropTarget(this.target.obj) ||
@@ -367,9 +377,17 @@ System.register(
                   s.attackState = T.AttackState.JustFired;
                   return !1;
                 }
+                // OpenYRWeb: FireWhileMoving=no — the unit must be fully stationary to fire
+                // this weapon (vanilla: DiskDrain on the Floating Disc, ROF=50 drain ticks).
+                // If the unit is still moving, keep waiting in Firing state without consuming
+                // the shot. Mirrors yrmd.exe's FireWhileMoving gate on the firing check.
+                if (!this.weapon.rules.fireWhileMoving && r.moveTrait && r.moveTrait.isMoving()) return !1;
+                // OpenYRWeb: powered buildings (base defenses) cannot fire while unpowered
+                // (drained by Floating Disc or Low Power blackout).
+                if (r.isBuilding() && r.poweredTrait && !r.poweredTrait.isPoweredOn()) return !1;
                 return (this.weapon.fire(this.target, this.game, e), i)
                   ? !0
-                  : !!this.weapon.rules.fireOnce ||
+                  : (!!this.weapon.rules.fireOnce && !this.weapon.rules.drainWeapon) ||
                       !(!this.options.passive || !r.rules.distributedFire) ||
                       ((s.attackState = T.AttackState.JustFired), !1);
               }
@@ -436,12 +454,26 @@ System.register(
                 } else {
                   inRange = this.rangeHelper.isInWeaponRange(r, e, this.weapon, this.game.rules);
                 }
+                // OpenYRWeb: DrainWeapon on a building — the disc must be parked
+                // exactly over the centerTile to fire (enforced in Firing state).
+                // Even if the weapon's Range covers the current tile, force the disc
+                // to reposition so the Firing check doesn't send us back to CheckRange,
+                // creating an infinite loop.
+                if (inRange && this.weapon.rules.drainWeapon && this.target.obj?.isBuilding()) {
+                  var ct = this.target.obj.centerTile;
+                  var wasInRange = inRange;
+                  inRange = r.tile.rx === ct.rx && r.tile.ry === ct.ry;
+                  if (!inRange) console.log("[AttackTask] CheckRange drainWeapon: was inRange=" + wasInRange + " but disc NOT on centerTile. disc=" + r.tile.rx + "," + r.tile.ry + " center=" + ct.rx + "," + ct.ry);
+                }
                 if (
                   !inRange ||
                   !this.losHelper.hasLineOfSight(r, e, this.weapon) ||
                   (r.isUnit() &&
                     r.rules.balloonHover &&
                     !r.rules.hoverAttack &&
+                    // OpenYRWeb: BalloonHover units (e.g. Floating Disc) use actual Range;
+                    // exempt from same-tile rule so they stop at weapon range and fire.
+                    !(this.weapon.rules.isDiskLaser || this.weapon.rules.drainWeapon || this.weapon.range > 0) &&
                     !a &&
                     r.tile !== c &&
                     !this.options.holdGround) ||
@@ -506,6 +538,7 @@ System.register(
                     if (this.moveAttempts > P) return !0;
                     0 < this.moveAttempts && this.children.push(new d.WaitMinutesTask(1 / 60));
                     ((h = e), (u = t && !i ? this.lastValidTargetPosition.onBridge : this.target.getBridge()));
+                    console.log("[AttackTask] CheckRange CREATING MoveInWeaponRangeTask. disc=" + r.name + " target=" + (h?.name || h) + " targetTile=" + (h instanceof v.GameObject ? h.centerTile?.rx + "," + h.centerTile?.ry : "N/A"));
                     return (
                       (a = new p.MoveInWeaponRangeTask(this.game, h, !!u, this.weapon)),
                       (a.blocking = !1),
@@ -567,7 +600,7 @@ System.register(
                 var h = new M.Vector3().copy(u).sub(h),
                   e = m.FacingUtil.fromMapCoords(new R.Vector2(h.x, h.z)),
                   h = this.weapon.projectileRules.rot ? k : I;
-                if ((r.isVehicle() || r.isBuilding()) && r.turretTrait) {
+                if ((r.isVehicle() || r.isBuilding()) && r.turretTrait && !r.rules.turretSpins) {
                   if (((r.turretTrait.desiredFacing = e), Math.abs(e - r.turretTrait.facing) >= h)) return !1;
                 } else if (Math.abs(e - r.direction) >= h) {
                   if (r.isAircraft())

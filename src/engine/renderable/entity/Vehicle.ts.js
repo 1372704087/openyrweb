@@ -259,16 +259,21 @@ System.register(
                 var c = this.gameObject.cloakableTrait?.isCloaked(),
                   h = c !== this.lastCloaked;
                 this.lastCloaked = c;
-                let u = this.gameObject.submergibleTrait?.isSubmerged();
+                let submergeTrait = this.gameObject.submergibleTrait,
+                  submergeProgress = submergeTrait ? submergeTrait.getSurfaceProgress() : 0,
+                  u = submergeProgress > 0.5;
                 e = u !== this.lastSubmerged;
-                if (((this.lastSubmerged = u), l || h || e)) {
-                  let t = o || c || u ? 0.5 : 1;
+                if (((this.lastSubmerged = u), l || h || e || submergeTrait)) {
+                  let t = o || c ? 0.5 : 1 - 0.5 * submergeProgress;
                   (this.shpRenderable?.setOpacity(t),
-                    this.shpRenderable?.setFlat(!!u),
+                    this.shpRenderable?.setFlat(u),
                     this.vxlBuilders.forEach((e) => {
                       (e.setOpacity(t), e.setShadow(!u));
                     }),
-                    this.placeholder?.setOpacity(t));
+                    this.placeholder?.setOpacity(t),
+                    this.posObj &&
+                      ((this.posObj.position.y = -8 * S.Coords.ISO_WORLD_SCALE * submergeProgress),
+                      this.posObj.updateMatrix()));
                 }
                 if (
                   ((t || a || s || n) &&
@@ -382,10 +387,12 @@ System.register(
               updateVxlRotation(e, t) {
                 var i,
                   r = this.gameObject.tilterTrait?.tilt ?? { yaw: 0, pitch: 0 };
-                ((this.lastTilt && r.pitch === this.lastTilt.pitch && r.yaw === this.lastTilt.yaw && !t) ||
-                  ((this.lastTilt = r),
+                var crashPitch = this.gameObject.crashPitch ?? 0,
+                  combinedPitch = r.pitch + crashPitch;
+                ((this.lastTilt && combinedPitch === this.lastTilt.pitch && r.yaw === this.lastTilt.yaw && !t) ||
+                  ((this.lastTilt = { pitch: combinedPitch, yaw: r.yaw }),
                   (this.tiltObj.rotation.y = THREE.Math.degToRad(r.yaw)),
-                  (this.tiltObj.rotation.x = THREE.Math.degToRad(r.pitch)),
+                  (this.tiltObj.rotation.x = THREE.Math.degToRad(combinedPitch)),
                   this.tiltObj.updateMatrix(),
                   (this.dirWrapObj.rotation.y = THREE.Math.degToRad(e - r.yaw)),
                   this.dirWrapObj.updateMatrix()),

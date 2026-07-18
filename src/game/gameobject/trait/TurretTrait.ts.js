@@ -28,19 +28,23 @@ System.register(
       execute: function () {
         ((a = class {
           constructor() {
-            ((this.facing = 0), (this.desiredFacing = 0));
+            ((this.facing = 0), (this.desiredFacing = 0), (this.spinAngle = 0));
           }
           isRotating() {
             return this.facing !== this.desiredFacing;
           }
           [s.NotifySpawn.onSpawn](e) {
-            e.isUnit() && (this.facing = this.desiredFacing = e.direction);
+            e.isUnit() && ((this.facing = this.desiredFacing = e.direction), (this.spinAngle = e.direction));
           }
           [r.NotifyTick.onTick](e) {
             var t;
-            this.desiredFacing !== this.facing &&
-              ((t = e.rules.rot),
-              (this.facing = i.FacingUtil.tick(this.facing, this.desiredFacing, t || Number.POSITIVE_INFINITY).facing));
+            e.rules.turretSpins
+              ? ((this.spinAngle = (this.spinAngle - 12 + 360) % 360),
+                (this.facing = this.spinAngle),
+                (this.desiredFacing = this.facing))
+              : this.desiredFacing !== this.facing &&
+                ((t = e.rules.rot),
+                (this.facing = i.FacingUtil.tick(this.facing, this.desiredFacing, t || Number.POSITIVE_INFINITY).facing));
           }
         }),
           e("TurretTrait", a));

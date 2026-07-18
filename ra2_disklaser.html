@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RA2 镭射幽浮 - 圆形激光特效 (Three.js)</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #111; font-family: 'Microsoft YaHei', sans-serif; }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: #fff; z-index: 10;
+            background: rgba(0,0,0,0.6); padding: 12px 16px; border-radius: 8px;
+            font-size: 14px; line-height: 1.6; pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #controls {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: flex; gap: 10px;
+        }
+        button {
+            padding: 10px 24px; font-size: 14px; cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 6px;
+            font-family: 'Microsoft YaHei', sans-serif; transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
+        #canvas-container { width: 100vw; height: 100vh; }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="info">
+        <strong>RA2 镭射幽浮 - 圆形激光特效</strong><br>
+        状态: <span id="status">待机</span><br>
+        圆环半径: 240 leptons (3.75格)<br>
+        <span style="color:#ff88ff">●</span> 充能: 从对面点双向绘制至最近点<br>
+        <span style="color:#ff0088">●</span> 发射: 从最近点向目标发射激光束
+    </div>
+    <div id="controls">
+        <button id="btnCharge">开始充能</button>
+        <button id="btnReset">重置场景</button>
+    </div>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // 场景设置
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a15);
+        scene.fog = new THREE.FogExp2(0x0a0a15, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(15, 12, 15);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // 后期处理 - Bloom 发光
+        const composer = new EffectComposer(renderer);
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5, 0.4, 0.85
+        );
+        bloomPass.threshold = 0;
+        bloomPass.strength = 2.0;
+        bloomPass.radius = 0.5;
+        composer.addPass(bloomPass);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 2, 0);
+
+        // 灯光
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        // 地面网格
+        const gridHelper = new THREE.GridHelper(40, 40, 0x333355, 0x222233);
+        scene.add(gridHelper);
+        const planeGeo = new THREE.PlaneGeometry(40, 40);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x151520, roughness: 0.8 });
+        const plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.y = -0.01;
+        scene.add(plane);
+
+        // === 镭射幽浮 (Floating Disc) ===
+        const discGroup = new THREE.Group();
+        discGroup.position.set(0, 6, 0);
+        scene.add(discGroup);
+
+        // 主体 - 圆盘
+        const discBodyGeo = new THREE.CylinderGeometry(2, 2.2, 0.6, 32);
+        const discBodyMat = new THREE.MeshStandardMaterial({
+            color: 0x663399, metalness: 0.8, roughness: 0.2
+        });
+        const discBody = new THREE.Mesh(discBodyGeo, discBodyMat);
+        discGroup.add(discBody);
+
+        // 顶部半球
+        const discTopGeo = new THREE.SphereGeometry(1.8, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+        const discTop = new THREE.Mesh(discTopGeo, discBodyMat);
+        discTop.position.y = 0.3;
+        discGroup.add(discTop);
+
+        // 底部发光环
+        const ringGeo = new THREE.TorusGeometry(1.5, 0.1, 16, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+        const discRing = new THREE.Mesh(ringGeo, ringMat);
+        discRing.rotation.x = Math.PI / 2;
+        discRing.position.y = -0.3;
+        discGroup.add(discRing);
+
+        // 幽浮底部发光点
+        const discLight = new THREE.PointLight(0xff00ff, 2, 10);
+        discLight.position.y = -1;
+        discGroup.add(discLight);
+
+        // === 目标单位 (Target) ===
+        const targetGroup = new THREE.Group();
+        targetGroup.position.set(8, 0, 6);
+        scene.add(targetGroup);
+
+        // 目标坦克（简化）
+        const tankBodyGeo = new THREE.BoxGeometry(1.5, 0.8, 2.2);
+        const tankMat = new THREE.MeshStandardMaterial({ color: 0x888899, metalness: 0.6, roughness: 0.4 });
+        const tankBody = new THREE.Mesh(tankBodyGeo, tankMat);
+        tankBody.position.y = 0.6;
+        targetGroup.add(tankBody);
+
+        const tankTurretGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 16);
+        const tankTurret = new THREE.Mesh(tankTurretGeo, tankMat);
+        tankTurret.position.y = 1.3;
+        targetGroup.add(tankTurret);
+
+        const tankBarrelGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 8);
+        const tankBarrel = new THREE.Mesh(tankBarrelGeo, tankMat);
+        tankBarrel.rotation.x = Math.PI / 2;
+        tankBarrel.position.set(0, 1.3, 1);
+        targetGroup.add(tankBarrel);
+
+        // 目标发光指示
+        const targetLight = new THREE.PointLight(0xff3333, 1, 5);
+        targetLight.position.y = 2;
+        targetGroup.add(targetLight);
+
+        // === 激光特效系统 ===
+        const LASER_RADIUS = 3.75;
+        const LASER_HEIGHT = 5.5;
+        const CHARGE_DURATION = 2000;
+        const FIRE_DURATION = 800;
+
+        let animationState = 'idle';
+        let chargeStartTime = 0;
+        let fireStartTime = 0;
+
+        const discCenter = new THREE.Vector3(0, LASER_HEIGHT, 0);
+        const targetPos = new THREE.Vector3(8, 1, 6);
+
+        function getNearestPoint() {
+            const dir = new THREE.Vector3().subVectors(targetPos, discCenter);
+            dir.y = 0;
+            dir.normalize();
+            return new THREE.Vector3().copy(discCenter).add(dir.multiplyScalar(LASER_RADIUS));
+        }
+
+        function getOppositePoint() {
+            const nearest = getNearestPoint();
+            return new THREE.Vector3(
+                discCenter.x * 2 - nearest.x,
+                discCenter.y,
+                discCenter.z * 2 - nearest.z
+            );
+        }
+
+        function getPointOnCircle(angle) {
+            return new THREE.Vector3(
+                discCenter.x + LASER_RADIUS * Math.cos(angle),
+                discCenter.y,
+                discCenter.z + LASER_RADIUS * Math.sin(angle)
+            );
+        }
+
+        function getAngleRange() {
+            const nearest = getNearestPoint();
+            const opposite = getOppositePoint();
+            const nearestAngle = Math.atan2(nearest.z - discCenter.z, nearest.x - discCenter.x);
+            const oppositeAngle = Math.atan2(opposite.z - discCenter.z, opposite.x - discCenter.x);
+            return { nearestAngle, oppositeAngle };
+        }
+
+        // === 充能圆环 - 两条独立弧线 ===
+        const MAX_POINTS = 200;
+
+        // 顺时针弧
+        const cwGeometry = new THREE.BufferGeometry();
+        const cwPositions = new Float32Array(MAX_POINTS * 3);
+        cwGeometry.setAttribute('position', new THREE.BufferAttribute(cwPositions, 3));
+        const cwMaterial = new THREE.LineBasicMaterial({
+            color: 0xff44ff,
+            linewidth: 3,
+            transparent: true,
+            opacity: 0.9
+        });
+        const chargeLineCW = new THREE.Line(cwGeometry, cwMaterial);
+        chargeLineCW.frustumCulled = false;
+        scene.add(chargeLineCW);
+
+        const cwOuterGeometry = new THREE.BufferGeometry();
+        const cwOuterPositions = new Float32Array(MAX_POINTS * 3);
+        cwOuterGeometry.setAttribute('position', new THREE.BufferAttribute(cwOuterPositions, 3));
+        const cwOuterMaterial = new THREE.LineBasicMaterial({
+            color: 0xff0088,
+            linewidth: 6,
+            transparent: true,
+            opacity: 0.4
+        });
+        const chargeOuterLineCW = new THREE.Line(cwOuterGeometry, cwOuterMaterial);
+        chargeOuterLineCW.frustumCulled = false;
+        scene.add(chargeOuterLineCW);
+
+        // 逆时针弧
+        const ccwGeometry = new THREE.BufferGeometry();
+        const ccwPositions = new Float32Array(MAX_POINTS * 3);
+        ccwGeometry.setAttribute('position', new THREE.BufferAttribute(ccwPositions, 3));
+        const ccwMaterial = new THREE.LineBasicMaterial({
+            color: 0xff44ff,
+            linewidth: 3,
+            transparent: true,
+            opacity: 0.9
+        });
+        const chargeLineCCW = new THREE.Line(ccwGeometry, ccwMaterial);
+        chargeLineCCW.frustumCulled = false;
+        scene.add(chargeLineCCW);
+
+        const ccwOuterGeometry = new THREE.BufferGeometry();
+        const ccwOuterPositions = new Float32Array(MAX_POINTS * 3);
+        ccwOuterGeometry.setAttribute('position', new THREE.BufferAttribute(ccwOuterPositions, 3));
+        const ccwOuterMaterial = new THREE.LineBasicMaterial({
+            color: 0xff0088,
+            linewidth: 6,
+            transparent: true,
+            opacity: 0.4
+        });
+        const chargeOuterLineCCW = new THREE.Line(ccwOuterGeometry, ccwOuterMaterial);
+        chargeOuterLineCCW.frustumCulled = false;
+        scene.add(chargeOuterLineCCW);
+
+        // === 发射激光束 ===
+        const beamGeometry = new THREE.BufferGeometry();
+        const beamPositions = new Float32Array(6);
+        beamGeometry.setAttribute('position', new THREE.BufferAttribute(beamPositions, 3));
+        const beamMaterial = new THREE.LineBasicMaterial({
+            color: 0xff88ff,
+            linewidth: 4,
+            transparent: true,
+            opacity: 0
+        });
+        const beamLine = new THREE.Line(beamGeometry, beamMaterial);
+        beamLine.frustumCulled = false;
+        scene.add(beamLine);
+
+        const beamCoreGeometry = new THREE.BufferGeometry();
+        const beamCorePositions = new Float32Array(6);
+        beamCoreGeometry.setAttribute('position', new THREE.BufferAttribute(beamCorePositions, 3));
+        const beamCoreMaterial = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            linewidth: 2,
+            transparent: true,
+            opacity: 0
+        });
+        const beamCoreLine = new THREE.Line(beamCoreGeometry, beamCoreMaterial);
+        beamCoreLine.frustumCulled = false;
+        scene.add(beamCoreLine);
+
+        // 击中点粒子效果
+        const hitParticles = [];
+        const HIT_PARTICLE_COUNT = 30;
+        for (let i = 0; i < HIT_PARTICLE_COUNT; i++) {
+            const pGeo = new THREE.SphereGeometry(0.05 + Math.random() * 0.1, 6, 6);
+            const pMat = new THREE.MeshBasicMaterial({
+                color: Math.random() > 0.5 ? 0xff88ff : 0xff0088,
+                transparent: true,
+                opacity: 0
+            });
+            const p = new THREE.Mesh(pGeo, pMat);
+            p.userData = {
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.2,
+                    Math.random() * 0.2,
+                    (Math.random() - 0.5) * 0.2
+                ),
+                life: 0,
+                maxLife: 20 + Math.random() * 20
+            };
+            scene.add(p);
+            hitParticles.push(p);
+        }
+
+        // 更新充能圆环 - 两条独立弧
+        function updateChargeRing(progress) {
+            const { nearestAngle, oppositeAngle } = getAngleRange();
+            const totalArc = Math.PI;
+            const currentArc = progress * totalArc;
+
+            // 顺时针点集
+            const cwPoints = [];
+            const cwOuterPoints = [];
+            const segments = 100;
+            for (let i = 0; i <= segments * progress; i++) {
+                const t = i / segments;
+                const angle = oppositeAngle + t * totalArc;
+                if (angle <= oppositeAngle + currentArc + 0.01) {
+                    cwPoints.push(getPointOnCircle(angle));
+                    const outerP = getPointOnCircle(angle);
+                    outerP.y += 0.02;
+                    cwOuterPoints.push(outerP);
+                }
+            }
+
+            // 逆时针点集
+            const ccwPoints = [];
+            const ccwOuterPoints = [];
+            for (let i = 0; i <= segments * progress; i++) {
+                const t = i / segments;
+                const angle = oppositeAngle - t * totalArc;
+                if (angle >= oppositeAngle - currentArc - 0.01) {
+                    ccwPoints.push(getPointOnCircle(angle));
+                    const outerP = getPointOnCircle(angle);
+                    outerP.y += 0.02;
+                    ccwOuterPoints.push(outerP);
+                }
+            }
+
+            // 更新顺时针线条
+            const cwPos = chargeLineCW.geometry.attributes.position.array;
+            for (let i = 0; i < MAX_POINTS; i++) {
+                if (i < cwPoints.length) {
+                    cwPos[i*3] = cwPoints[i].x;
+                    cwPos[i*3+1] = cwPoints[i].y;
+                    cwPos[i*3+2] = cwPoints[i].z;
+                } else {
+                    const last = cwPoints[cwPoints.length-1] || new THREE.Vector3(0,0,0);
+                    cwPos[i*3] = last.x;
+                    cwPos[i*3+1] = last.y;
+                    cwPos[i*3+2] = last.z;
+                }
+            }
+            chargeLineCW.geometry.setDrawRange(0, cwPoints.length);
+            chargeLineCW.geometry.attributes.position.needsUpdate = true;
+
+            const cwOuterPos = chargeOuterLineCW.geometry.attributes.position.array;
+            for (let i = 0; i < MAX_POINTS; i++) {
+                if (i < cwOuterPoints.length) {
+                    cwOuterPos[i*3] = cwOuterPoints[i].x;
+                    cwOuterPos[i*3+1] = cwOuterPoints[i].y;
+                    cwOuterPos[i*3+2] = cwOuterPoints[i].z;
+                } else {
+                    const last = cwOuterPoints[cwOuterPoints.length-1] || new THREE.Vector3(0,0,0);
+                    cwOuterPos[i*3] = last.x;
+                    cwOuterPos[i*3+1] = last.y;
+                    cwOuterPos[i*3+2] = last.z;
+                }
+            }
+            chargeOuterLineCW.geometry.setDrawRange(0, cwOuterPoints.length);
+            chargeOuterLineCW.geometry.attributes.position.needsUpdate = true;
+
+            // 更新逆时针线条
+            const ccwPos = chargeLineCCW.geometry.attributes.position.array;
+            for (let i = 0; i < MAX_POINTS; i++) {
+                if (i < ccwPoints.length) {
+                    ccwPos[i*3] = ccwPoints[i].x;
+                    ccwPos[i*3+1] = ccwPoints[i].y;
+                    ccwPos[i*3+2] = ccwPoints[i].z;
+                } else {
+                    const last = ccwPoints[ccwPoints.length-1] || new THREE.Vector3(0,0,0);
+                    ccwPos[i*3] = last.x;
+                    ccwPos[i*3+1] = last.y;
+                    ccwPos[i*3+2] = last.z;
+                }
+            }
+            chargeLineCCW.geometry.setDrawRange(0, ccwPoints.length);
+            chargeLineCCW.geometry.attributes.position.needsUpdate = true;
+
+            const ccwOuterPos = chargeOuterLineCCW.geometry.attributes.position.array;
+            for (let i = 0; i < MAX_POINTS; i++) {
+                if (i < ccwOuterPoints.length) {
+                    ccwOuterPos[i*3] = ccwOuterPoints[i].x;
+                    ccwOuterPos[i*3+1] = ccwOuterPoints[i].y;
+                    ccwOuterPos[i*3+2] = ccwOuterPoints[i].z;
+                } else {
+                    const last = ccwOuterPoints[ccwOuterPoints.length-1] || new THREE.Vector3(0,0,0);
+                    ccwOuterPos[i*3] = last.x;
+                    ccwOuterPos[i*3+1] = last.y;
+                    ccwOuterPos[i*3+2] = last.z;
+                }
+            }
+            chargeOuterLineCCW.geometry.setDrawRange(0, ccwOuterPoints.length);
+            chargeOuterLineCCW.geometry.attributes.position.needsUpdate = true;
+
+            // 动态颜色和透明度（充能阶段）
+            const intensity = 0.5 + progress * 0.5;
+            chargeLineCW.material.opacity = intensity;
+            chargeOuterLineCW.material.opacity = intensity * 0.5;
+            chargeLineCCW.material.opacity = intensity;
+            chargeOuterLineCCW.material.opacity = intensity * 0.5;
+
+            if (progress > 0.95) {
+                const flash = Math.sin(Date.now() * 0.05) * 0.3 + 0.7;
+                const color = new THREE.Color().setHSL(0.9, 1, flash);
+                chargeLineCW.material.color.copy(color);
+                chargeLineCCW.material.color.copy(color);
+            } else {
+                const color = new THREE.Color().setHSL(0.9, 1, 0.6 + progress * 0.4);
+                chargeLineCW.material.color.copy(color);
+                chargeLineCCW.material.color.copy(color);
+            }
+        }
+
+        // 设置充能环透明度（用于发射阶段淡出）
+        function setChargeRingOpacity(opacity) {
+            chargeLineCW.material.opacity = opacity;
+            chargeOuterLineCW.material.opacity = opacity * 0.5;
+            chargeLineCCW.material.opacity = opacity;
+            chargeOuterLineCCW.material.opacity = opacity * 0.5;
+        }
+
+        function updateBeam(progress) {
+            const startPoint = getNearestPoint();
+            const endPoint = targetPos.clone();
+
+            const pos = beamLine.geometry.attributes.position.array;
+            const corePos = beamCoreLine.geometry.attributes.position.array;
+
+            pos[0] = startPoint.x; pos[1] = startPoint.y; pos[2] = startPoint.z;
+            corePos[0] = startPoint.x; corePos[1] = startPoint.y; corePos[2] = startPoint.z;
+
+            const jitter = (1 - progress) * 0.1;
+            endPoint.x += (Math.random() - 0.5) * jitter;
+            endPoint.y += (Math.random() - 0.5) * jitter;
+            endPoint.z += (Math.random() - 0.5) * jitter;
+
+            pos[3] = endPoint.x; pos[4] = endPoint.y; pos[5] = endPoint.z;
+            corePos[3] = endPoint.x; corePos[4] = endPoint.y; corePos[5] = endPoint.z;
+
+            beamLine.geometry.attributes.position.needsUpdate = true;
+            beamCoreLine.geometry.attributes.position.needsUpdate = true;
+
+            // 激光透明度：从0到1
+            const beamOpacity = progress < 0.2 ? progress / 0.2 : (progress > 0.8 ? 1 : 1);
+            beamMaterial.opacity = beamOpacity;
+            beamCoreMaterial.opacity = beamOpacity * 0.8;
+
+            // 充能环透明度：从1到0（与激光同步）
+            const ringOpacity = 1 - progress;
+            setChargeRingOpacity(ringOpacity);
+
+            // 粒子
+            if (progress > 0.1 && progress < 0.9) {
+                hitParticles.forEach(p => {
+                    if (p.userData.life <= 0 && Math.random() > 0.7) {
+                        p.position.copy(endPoint);
+                        p.userData.life = p.userData.maxLife;
+                        p.material.opacity = 1;
+                    }
+                });
+            }
+        }
+
+        function updateParticles() {
+            hitParticles.forEach(p => {
+                if (p.userData.life > 0) {
+                    p.userData.life--;
+                    p.position.add(p.userData.velocity);
+                    p.userData.velocity.y += 0.005;
+                    p.material.opacity = p.userData.life / p.userData.maxLife;
+                    p.scale.setScalar(p.userData.life / p.userData.maxLife);
+                } else {
+                    p.material.opacity = 0;
+                }
+            });
+        }
+
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const now = Date.now();
+
+            discGroup.position.y = 6 + Math.sin(now * 0.002) * 0.2;
+            discGroup.rotation.y += 0.005;
+            discRing.rotation.z = now * 0.001;
+
+            if (animationState === 'charging') {
+                const elapsed = now - chargeStartTime;
+                const progress = Math.min(elapsed / CHARGE_DURATION, 1);
+                updateChargeRing(progress);
+
+                if (progress >= 1) {
+                    animationState = 'firing';
+                    fireStartTime = now;
+                    // 保持环完全可见，进入发射阶段后由updateBeam控制淡出
+                }
+
+                document.getElementById('status').textContent = `充能中... ${Math.floor(progress * 100)}%`;
+                document.getElementById('status').style.color = '#ff88ff';
+
+            } else if (animationState === 'firing') {
+                const elapsed = now - fireStartTime;
+                const progress = Math.min(elapsed / FIRE_DURATION, 1);
+                updateBeam(progress);
+
+                if (progress >= 1) {
+                    animationState = 'cooling';
+                    // 隐藏激光和环
+                    beamMaterial.opacity = 0;
+                    beamCoreMaterial.opacity = 0;
+                    setChargeRingOpacity(0);
+                    setTimeout(() => {
+                        animationState = 'idle';
+                        document.getElementById('btnCharge').disabled = false;
+                        document.getElementById('status').textContent = '待机';
+                        document.getElementById('status').style.color = '#fff';
+                        // 恢复待机半透明环
+                        updateChargeRing(1);
+                        setChargeRingOpacity(0.15);
+                        chargeLineCW.material.color.setHSL(0.9, 1, 0.3);
+                        chargeLineCCW.material.color.setHSL(0.9, 1, 0.3);
+                    }, 1000);
+                }
+
+                document.getElementById('status').textContent = '发射激光!';
+                document.getElementById('status').style.color = '#ff0088';
+
+            } else if (animationState === 'idle') {
+                // 待机状态，环已由重置或冷却设置
+            }
+
+            updateParticles();
+            controls.update();
+            composer.render();
+        }
+
+        // 按钮事件
+        document.getElementById('btnCharge').addEventListener('click', () => {
+            if (animationState === 'idle') {
+                animationState = 'charging';
+                chargeStartTime = Date.now();
+                document.getElementById('btnCharge').disabled = true;
+                // 重置充能环透明度为初始值
+                updateChargeRing(0); // 从0开始
+                setChargeRingOpacity(0.9);
+            }
+        });
+
+        document.getElementById('btnReset').addEventListener('click', () => {
+            animationState = 'idle';
+            beamMaterial.opacity = 0;
+            beamCoreMaterial.opacity = 0;
+            // 恢复待机圆环
+            updateChargeRing(1);
+            setChargeRingOpacity(0.15);
+            chargeLineCW.material.color.setHSL(0.9, 1, 0.3);
+            chargeLineCCW.material.color.setHSL(0.9, 1, 0.3);
+            document.getElementById('btnCharge').disabled = false;
+            document.getElementById('status').textContent = '待机';
+            document.getElementById('status').style.color = '#fff';
+        });
+
+        // 窗口调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // 启动动画，初始显示待机圆环
+        updateChargeRing(1);
+        setChargeRingOpacity(0.15);
+        chargeLineCW.material.color.setHSL(0.9, 1, 0.3);
+        chargeLineCCW.material.color.setHSL(0.9, 1, 0.3);
+
+        animate();
+    </script>
+</body>
+</html>

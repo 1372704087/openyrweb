@@ -87,12 +87,17 @@ System.register(
                 isCombatant: t.isCombatant(),
                 credits: t.credits,
                 power: {
-                  total: t.powerTrait?.power ?? 0,
+                  total: t.powerTrait?.getDisplayPower() ?? 0,
                   drain: t.powerTrait?.drain ?? 0,
                   isLowPower: t.powerTrait?.level === i.PowerLevel.Low,
                 },
                 radarDisabled: !!t.radarTrait?.isDisabled(),
               };
+            }
+            addPlayerCredits(e, t) {
+              var i = __classPrivateFieldGet(this, n, "f").getPlayerByName(e);
+              if (!i) throw new Error(`Player "${e}" doesn't exist`);
+              i.credits += t;
             }
             getAllTerrainObjects() {
               return __classPrivateFieldGet(this, n, "f")

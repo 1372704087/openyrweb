@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1236,
+  "moduleCount": 1293,
   "modules": [
     {
       "name": "data/IniSection",
@@ -898,6 +898,14 @@
       "bytes": 801
     },
     {
+      "name": "game/rules/general/CMislRules",
+      "file": "game/rules/general/CMislRules.ts.js",
+      "deps": [
+        "game/rules/general/MissileRules"
+      ],
+      "bytes": 801
+    },
+    {
       "name": "game/rules/general/HoverRules",
       "file": "game/rules/general/HoverRules.ts.js",
       "deps": [],
@@ -917,6 +925,7 @@
         "game/rules/general/LightningStormRules",
         "game/rules/general/V3RocketRules",
         "game/rules/general/DMislRules",
+        "game/rules/general/CMislRules",
         "game/rules/general/HoverRules",
         "util/math"
       ],
@@ -5385,8 +5394,11 @@
     {
       "name": "game/bot/BotsLib",
       "file": "game/bot/BotsLib.ts.js",
-      "deps": [],
-      "bytes": 114
+      "deps": [
+        "game/bot/iraq/IraqBot",
+        "game/bot/custom-ai/CustomAiBot"
+      ],
+      "bytes": 158
     },
     {
       "name": "game/bot/DummyBot",
@@ -5402,9 +5414,11 @@
       "file": "game/bot/BotFactory.ts.js",
       "deps": [
         "game/gameopts/GameOpts",
-        "game/bot/DummyBot"
+        "game/bot/DummyBot",
+        "game/bot/iraq/IraqBot",
+        "game/bot/custom-ai/CustomAiBot"
       ],
-      "bytes": 612
+      "bytes": 780
     },
     {
       "name": "game/BotManager",
@@ -7787,6 +7801,15 @@
       "bytes": 6200
     },
     {
+      "name": "engine/renderable/fx/DiskLaserFx",
+      "file": "engine/renderable/fx/DiskLaserFx.ts.js",
+      "deps": [
+        "three.meshline",
+        "game/Coords"
+      ],
+      "bytes": 6200
+    },
+    {
       "name": "engine/gfx/lighting/LightingFx",
       "file": "engine/gfx/lighting/LightingFx.ts.js",
       "deps": [
@@ -7823,6 +7846,7 @@
         "engine/renderable/fx/LineTrailFx",
         "engine/renderable/fx/SparkFx",
         "engine/renderable/fx/RadBeamFx",
+        "engine/renderable/fx/DiskLaserFx",
         "engine/renderable/entity/unit/BlobShadow",
         "engine/gfx/lighting/NukeLightingFx",
         "engine/gfx/batch/BatchedMesh",
@@ -12872,6 +12896,696 @@
       "file": "network/ladder/PlayerMatchHistoryEntry.ts.js",
       "deps": [],
       "bytes": 137
+    },
+    {
+      "name": "vendor/quadtree",
+      "file": "vendor/quadtree.ts.js",
+      "deps": [],
+      "bytes": 2100
+    },
+    {
+      "name": "vendor/priority-queue",
+      "file": "vendor/priority-queue.ts.js",
+      "deps": [],
+      "bytes": 1400
+    },
+    {
+      "name": "game/bot/custom-ai/CustomAiBot",
+      "file": "game/bot/custom-ai/CustomAiBot.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/map/sector",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/building/queueController",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils"
+      ],
+      "bytes": 4500
+    },
+    {
+      "name": "game/bot/custom-ai/logic/common/utils",
+      "file": "game/bot/custom-ai/logic/common/utils.ts.js",
+      "deps": [
+        "game/api/index"
+      ],
+      "bytes": 3200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/common/rulesCache",
+      "file": "game/bot/custom-ai/logic/common/rulesCache.ts.js",
+      "deps": [
+        "game/api/index"
+      ],
+      "bytes": 1400
+    },
+    {
+      "name": "game/bot/custom-ai/logic/common/navalUtils",
+      "file": "game/bot/custom-ai/logic/common/navalUtils.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 2200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/common/scout",
+      "file": "game/bot/custom-ai/logic/common/scout.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/map/sector",
+        "game/bot/custom-ai/logic/common/utils",
+        "vendor/priority-queue"
+      ],
+      "bytes": 6200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/map/map",
+      "file": "game/bot/custom-ai/logic/map/map.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/common/utils"
+      ],
+      "bytes": 5800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/map/pathfinding",
+      "file": "game/bot/custom-ai/logic/map/pathfinding.ts.js",
+      "deps": [
+        "game/api/index"
+      ],
+      "bytes": 2500
+    },
+    {
+      "name": "game/bot/custom-ai/logic/map/sector",
+      "file": "game/bot/custom-ai/logic/map/sector.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/map/map"
+      ],
+      "bytes": 6500
+    },
+    {
+      "name": "game/bot/custom-ai/logic/threat/threat",
+      "file": "game/bot/custom-ai/logic/threat/threat.ts.js",
+      "deps": [],
+      "bytes": 600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/threat/threatCalculator",
+      "file": "game/bot/custom-ai/logic/threat/threatCalculator.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/bot/custom-ai/logic/common/rulesCache"
+      ],
+      "bytes": 7800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/common",
+      "file": "game/bot/custom-ai/logic/composition/common.ts.js",
+      "deps": [],
+      "bytes": 200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/alliedCompositions",
+      "file": "game/bot/custom-ai/logic/composition/alliedCompositions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/composition/common"
+      ],
+      "bytes": 2800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/alliedNavalCompositions",
+      "file": "game/bot/custom-ai/logic/composition/alliedNavalCompositions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/composition/common"
+      ],
+      "bytes": 2200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/sovietCompositions",
+      "file": "game/bot/custom-ai/logic/composition/sovietCompositions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/composition/common"
+      ],
+      "bytes": 4600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/sovietNavalCompositions",
+      "file": "game/bot/custom-ai/logic/composition/sovietNavalCompositions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/composition/common"
+      ],
+      "bytes": 2800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/yuriNavalCompositions",
+      "file": "game/bot/custom-ai/logic/composition/yuriNavalCompositions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/composition/common"
+      ],
+      "bytes": 2800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/basicBuilding",
+      "file": "game/bot/custom-ai/logic/building/basicBuilding.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/basicGroundUnit",
+      "file": "game/bot/custom-ai/logic/building/basicGroundUnit.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2400
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/basicAirUnit",
+      "file": "game/bot/custom-ai/logic/building/basicAirUnit.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2400
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/basicNavalUnit",
+      "file": "game/bot/custom-ai/logic/building/basicNavalUnit.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2400
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/powerPlant",
+      "file": "game/bot/custom-ai/logic/building/powerPlant.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/resourceCollectionBuilding",
+      "file": "game/bot/custom-ai/logic/building/resourceCollectionBuilding.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/basicBuilding",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/math/Vector2"
+      ],
+      "bytes": 2800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/harvester",
+      "file": "game/bot/custom-ai/logic/building/harvester.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/basicGroundUnit",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/antiAirStaticDefence",
+      "file": "game/bot/custom-ai/logic/building/antiAirStaticDefence.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/building/common"
+      ],
+      "bytes": 3000
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/antiGroundStaticDefence",
+      "file": "game/bot/custom-ai/logic/building/antiGroundStaticDefence.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/building/common"
+      ],
+      "bytes": 3200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/artilleryUnit",
+      "file": "game/bot/custom-ai/logic/building/artilleryUnit.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/navalYard",
+      "file": "game/bot/custom-ai/logic/building/navalYard.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/basicBuilding",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/threat/threat"
+      ],
+      "bytes": 2600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/common",
+      "file": "game/bot/custom-ai/logic/building/common.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/map/map"
+      ],
+      "bytes": 1800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/queueController",
+      "file": "game/bot/custom-ai/logic/building/queueController.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/bot/custom-ai/logic/building/buildingRules",
+        "game/bot/custom-ai/logic/common/utils"
+      ],
+      "bytes": 8200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/building/buildingRules",
+      "file": "game/bot/custom-ai/logic/building/buildingRules.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/bot/custom-ai/logic/building/antiGroundStaticDefence",
+        "game/bot/custom-ai/logic/building/artilleryUnit",
+        "game/bot/custom-ai/logic/building/basicAirUnit",
+        "game/bot/custom-ai/logic/building/basicBuilding",
+        "game/bot/custom-ai/logic/building/basicGroundUnit",
+        "game/bot/custom-ai/logic/building/powerPlant",
+        "game/bot/custom-ai/logic/building/resourceCollectionBuilding",
+        "game/bot/custom-ai/logic/building/harvester",
+        "game/bot/custom-ai/logic/building/antiAirStaticDefence",
+        "game/bot/custom-ai/logic/building/navalYard",
+        "game/bot/custom-ai/logic/building/basicNavalUnit",
+        "game/bot/custom-ai/logic/common/utils"
+      ],
+      "bytes": 8200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/awareness",
+      "file": "game/bot/custom-ai/logic/awareness.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/map/sector",
+        "game/bot/custom-ai/logic/threat/threat",
+        "game/bot/custom-ai/logic/threat/threatCalculator",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/common/scout",
+        "vendor/quadtree"
+      ],
+      "bytes": 6200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/actionBatcher",
+      "file": "game/bot/custom-ai/logic/mission/actionBatcher.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/common/utils"
+      ],
+      "bytes": 3600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/mission",
+      "file": "game/bot/custom-ai/logic/mission/mission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/common/rulesCache"
+      ],
+      "bytes": 8200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missionActions",
+      "file": "game/bot/custom-ai/logic/mission/missionActions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission"
+      ],
+      "bytes": 800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missionController",
+      "file": "game/bot/custom-ai/logic/mission/missionController.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/missions/squads/squad"
+      ],
+      "bytes": 9800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missionFactories",
+      "file": "game/bot/custom-ai/logic/mission/missionFactories.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/missions/expansionMission",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missions/scoutingMission",
+        "game/bot/custom-ai/logic/mission/missions/attackMission",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/mission/missions/defenceMission",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/missions/engineerMission",
+        "game/bot/custom-ai/logic/mission/missions/spyMission",
+        "game/bot/custom-ai/logic/mission/missions/airRaidMission",
+        "game/bot/custom-ai/logic/mission/missions/navalAssaultMission",
+        "game/bot/custom-ai/logic/mission/missions/navalScoutingMission",
+        "game/bot/custom-ai/logic/mission/missions/amphibiousScoutingMission",
+        "game/bot/custom-ai/logic/mission/missions/antiShipyardMission",
+        "game/bot/custom-ai/logic/mission/missions/antiCoastShipMission",
+        "game/bot/custom-ai/logic/mission/missions/antiSubMission",
+        "game/bot/custom-ai/logic/mission/missions/reserveRhinoMission",
+        "game/bot/custom-ai/logic/mission/missions/dreadEscortMission"
+      ],
+      "bytes": 4600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/amphibiousScoutingMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/amphibiousScoutingMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/common/scout",
+        "game/bot/custom-ai/logic/map/map"
+      ],
+      "bytes": 4200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/antiCoastShipMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/antiCoastShipMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/common/navalUtils",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/missionController"
+      ],
+      "bytes": 3800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/antiShipyardMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/antiShipyardMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/missionController"
+      ],
+      "bytes": 3800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/antiSubMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/antiSubMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/common/navalUtils",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/missionController"
+      ],
+      "bytes": 4200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/attackMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/attackMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/missions/squads/combatSquad",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/mission/missions/retreatMission",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/composition/sovietCompositions",
+        "game/bot/custom-ai/logic/composition/alliedCompositions",
+        "game/bot/custom-ai/logic/composition/common",
+        "game/bot/custom-ai/logic/mission/missions/squads/common",
+        "game/bot/custom-ai/logic/map/pathfinding",
+        "game/bot/custom-ai/logic/composition/sovietNavalCompositions",
+        "game/bot/custom-ai/logic/composition/alliedNavalCompositions",
+        "game/bot/custom-ai/logic/composition/yuriNavalCompositions",
+        "game/bot/custom-ai/logic/mission/missions/airRaidMission",
+        "game/bot/custom-ai/logic/mission/missions/navalAssaultMission"
+      ],
+      "bytes": 7200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/airRaidMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/airRaidMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 5400
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/navalAssaultMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/navalAssaultMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/composition/sovietNavalCompositions",
+        "game/bot/custom-ai/logic/composition/alliedNavalCompositions",
+        "game/bot/custom-ai/logic/composition/yuriNavalCompositions"
+      ],
+      "bytes": 6200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/defenceMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/defenceMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/missions/squads/combatSquad",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 4200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/dreadEscortMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/dreadEscortMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/navalUtils"
+      ],
+      "bytes": 3600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/engineerMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/engineerMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 3600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/spyMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/spyMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 4800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/expansionMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/expansionMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 4200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/navalScoutingMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/navalScoutingMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/common/scout",
+        "game/bot/custom-ai/logic/map/map"
+      ],
+      "bytes": 3800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/reserveRhinoMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/reserveRhinoMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/mission/missionController"
+      ],
+      "bytes": 3200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/retreatMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/retreatMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/awareness"
+      ],
+      "bytes": 3200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/scoutingMission",
+      "file": "game/bot/custom-ai/logic/mission/missions/scoutingMission.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/missionFactories",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/mission/missions/attackMission",
+        "game/bot/custom-ai/logic/mission/missionController",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/common/scout"
+      ],
+      "bytes": 4600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/squads/squad",
+      "file": "game/bot/custom-ai/logic/mission/missions/squads/squad.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/mission/mission",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/common/utils"
+      ],
+      "bytes": 3200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/squads/combatSquad",
+      "file": "game/bot/custom-ai/logic/mission/missions/squads/combatSquad.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/mission/missions/squads/common",
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/mission/actionBatcher",
+        "game/bot/custom-ai/logic/mission/missions/squads/squad",
+        "game/bot/custom-ai/logic/mission/mission"
+      ],
+      "bytes": 6600
+    },
+    {
+      "name": "game/bot/custom-ai/logic/mission/missions/squads/common",
+      "file": "game/bot/custom-ai/logic/mission/missions/squads/common.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/map/map",
+        "game/bot/custom-ai/logic/mission/actionBatcher"
+      ],
+      "bytes": 5400
     }
   ]
 }

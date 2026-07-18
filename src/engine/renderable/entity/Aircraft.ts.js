@@ -236,20 +236,20 @@ System.register(
               var e = this.objectArt.imageName.toLowerCase(),
                 t = e + ".vxl",
                 i = this.voxels.get(t);
-              if (!i)
-                return (
-                  console.warn(`VXL missing for aircraft ${this.objectRules.name}. Vxl file ${t} not found. `),
-                  (this.placeholder = new m.DebugRenderable(
-                    { width: 0.5, height: 0.5 },
-                    this.objectArt.height,
-                    this.palette,
-                    { centerFoundation: !0 },
-                  )),
+              if (!i) {
+                console.warn(`VXL missing for aircraft ${this.objectRules.name}. Vxl file ${t} not found. `);
+                (this.placeholder = new m.DebugRenderable(
+                  { width: 0.5, height: 0.5 },
+                  this.objectArt.height,
+                  this.palette,
+                  { centerFoundation: !0 },
+                )),
                   this.placeholder.setBatched(this.useSpriteBatching),
                   this.useSpriteBatching && this.placeholder.setBatchPalettes(this.paletteRemaps),
-                  this.placeholder.create3DObject(),
-                  this.placeholder.get3DObject()
-                );
+                  this.placeholder.create3DObject();
+                let e = this.placeholder.get3DObject();
+                return e;
+              }
               ((t = this.objectArt.noHva ? void 0 : this.voxelAnims.get(e + ".hva")),
                 (e = [...this.rules.colors.values()].map((e) => this.palette.clone().remap(e))));
               let r = this.vxlBuilderFactory.create(i, t, e, this.palette);

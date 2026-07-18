@@ -46,6 +46,7 @@ System.register(
                   (this.drain = 0),
                   (this.level = a.Normal),
                   (this.blackoutFrames = 0),
+                  (this.drainPowerOverride = 0),
                   (this.powerByObject = new Map()));
               }
               isLowPower() {
@@ -63,19 +64,26 @@ System.register(
               }
               updateFrom(t, i, r) {
                 var s = t.rules.power;
+                // OpenYRWeb debug: drain power override state
+                if (s > 0 && this.drainPowerOverride > 0) {
+                  console.log("[DrainPower] updateFrom:", i, "building=" + t.name, "s=" + s, "drainedBy=" + !!t.drainedBy, "override=" + this.drainPowerOverride, "powerBefore=" + this.power, "drainBefore=" + this.drain);
+                }
                 if (s) {
                   if (s < 0) ("add" !== i && "remove" !== i) || (this.drain += "add" === i ? -s : s);
                   else {
                     let e = 0;
+                    // OpenYRWeb: a drained power plant contributes zero power so the owner's
+                    // total drops and Low Power is triggered.
+                    var effectiveS = t.drainedBy ? 0 : s;
                     if ("add" === i) {
-                      var a = Math.ceil((s * t.healthTrait.health) / 100);
+                      var a = Math.ceil((effectiveS * t.healthTrait.health) / 100);
                       (this.powerByObject.set(t, a), (e = a));
                     } else if ("update" === i || "remove" === i) {
                       a = this.powerByObject.get(t);
                       if (void 0 === a) throw new Error("Cannot update power before add.");
                       e =
                         "update" === i
-                          ? ((s = Math.ceil((s * t.healthTrait.health) / 100)), this.powerByObject.set(t, s), s - a)
+                          ? ((effectiveS = Math.ceil((effectiveS * t.healthTrait.health) / 100)), this.powerByObject.set(t, effectiveS), effectiveS - a)
                           : (this.powerByObject.delete(t), -a);
                     }
                     this.power += e;
@@ -84,14 +92,19 @@ System.register(
                     r.traits.filter(o.NotifyPower).forEach((e) => {
                       e[o.NotifyPower.onPowerChange](this.player, r);
                     }),
-                    r.events.dispatch(new n.PowerChangeEvent(this.player, this.power, this.drain)));
+                    r.events.dispatch(new n.PowerChangeEvent(this.player, this.getDisplayPower(), this.drain)));
                 }
               }
+              getDisplayPower() {
+                return 0 < this.drainPowerOverride ? 0 : this.power;
+              }
               updateLevel(t) {
-                var e = this.level;
-                ((this.level = this.power >= this.drain && !this.blackoutFrames ? a.Normal : a.Low),
+                var e = this.level,
+                  dp = this.getDisplayPower();
+                ((this.level = dp >= this.drain && !this.blackoutFrames ? a.Normal : a.Low),
                   this.level !== e &&
-                    (e === a.Normal &&
+                    (console.log("[DrainPower] updateLevel: from=" + (e === a.Normal ? "Normal" : "Low") + " to=" + (this.level === a.Normal ? "Normal" : "Low") + " dp=" + dp + " drain=" + this.drain + " override=" + this.drainPowerOverride),
+                    e === a.Normal &&
                       this.level === a.Low &&
                       (t.traits.filter(o.NotifyPower).forEach((e) => {
                         e[o.NotifyPower.onPowerLow](this.player, t);
@@ -108,7 +121,7 @@ System.register(
                 return s.fnv32a([this.power, this.drain]);
               }
               debugGetState() {
-                return { power: this.power, drain: this.drain };
+                return { power: this.getDisplayPower(), drain: this.drain };
               }
               dispose() {
                 ((this.player = void 0), this.powerByObject.clear());

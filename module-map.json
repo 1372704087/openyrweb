@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1236,
+  "moduleCount": 1237,
   "modules": [
     {
       "name": "data/IniSection",
@@ -898,6 +898,14 @@
       "bytes": 801
     },
     {
+      "name": "game/rules/general/CMislRules",
+      "file": "game/rules/general/CMislRules.ts.js",
+      "deps": [
+        "game/rules/general/MissileRules"
+      ],
+      "bytes": 801
+    },
+    {
       "name": "game/rules/general/HoverRules",
       "file": "game/rules/general/HoverRules.ts.js",
       "deps": [],
@@ -917,6 +925,7 @@
         "game/rules/general/LightningStormRules",
         "game/rules/general/V3RocketRules",
         "game/rules/general/DMislRules",
+        "game/rules/general/CMislRules",
         "game/rules/general/HoverRules",
         "util/math"
       ],

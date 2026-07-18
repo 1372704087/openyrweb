@@ -34,7 +34,7 @@ System.register(
                 if (this.gameObject.isAircraft()) {
                   let e;
                   (this.gameObject.rules.missileSpawn
-                    ? (e = this.art.getAnimation("V3TRAIL"))
+                    ? (e = this.art.getAnimation(this.gameObject.art.trailer || "V3TRAIL"))
                     : this.gameObject.isCrashing && (e = this.art.getAnimation("SGRYSMK1")),
                     e &&
                       ((i = this.imageFinder.findByObjectArt(e)),

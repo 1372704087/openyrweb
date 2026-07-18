@@ -215,7 +215,7 @@ System.register(
                     this.game.events.dispatch(new c.DeployNotAllowedEvent(r)),
                   t.singleSelectionRequired && 1 < s.length)
                 ))
-                  if (t.isValid() && t.isAllowed()) {
+                  if ((this.target || t.targetOptional) && t.isValid() && t.isAllowed()) {
                     let e = this.orderFactory.create(this.orderType, i);
                     (e.set(r, this.target), a.push(e));
                   } else {

@@ -443,6 +443,7 @@ System.register(
                   this.vxlBuilderFactory,
                   this.useSpriteBatching,
                   this.useMeshInstancing,
+                  this.worldSound,
                 );
                 return (r.forEach((e) => t.registerPlugin(e)), t);
               }

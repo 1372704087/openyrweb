@@ -26,6 +26,7 @@ System.register("LocalPrefs", [], function (t, e) {
         (e.LastQueueRanked = "_r_lastRanked"),
         (e.LastQueueType = "_r_lastQueueType"),
         (e.LastBots = "_r_lastBots"),
+        (e.LastHostObserver = "_r_lastHostObserver"),
         (e.PreferredGameOpts = "_r_hostOpts"),
         (e.LastConnection = "_r_lastCon"),
         (e.PreferredServerRegion = "_r_region"),

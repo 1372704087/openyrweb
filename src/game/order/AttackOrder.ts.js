@@ -139,6 +139,13 @@ System.register(
               this.game,
               this.forceAttack,
             );
+            // OpenYRWeb: if the selected weapon is the secondary weapon and the unit
+            // has VoiceSecondaryWeaponAttack configured, use the dedicated feedback
+            // type so the sound handler plays the correct voice line.
+            t &&
+              t === this.sourceObject.secondaryWeapon &&
+              this.sourceObject.rules.voiceSecondaryWeaponAttack &&
+              (this.feedbackType = o.OrderFeedbackType.SecondaryWeaponAttack);
             return (
               !!t &&
               !(!this.ivanBombAllowed && t.warhead.rules.ivanBomb) &&

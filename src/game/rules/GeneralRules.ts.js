@@ -1,5 +1,5 @@
 ﻿﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
-// deps: ["game/rules/general/RadarRules","game/rules/general/RepairRules","game/rules/general/VeteranRules","game/rules/general/CrewRules","game/rules/general/PrismRules","game/rules/general/ThreatRules","game/rules/general/ParadropRules","game/rules/general/LightningStormRules","game/rules/general/V3RocketRules","game/rules/general/DMislRules","game/rules/general/HoverRules","util/math"]
+// deps: ["game/rules/general/RadarRules","game/rules/general/RepairRules","game/rules/general/VeteranRules","game/rules/general/CrewRules","game/rules/general/PrismRules","game/rules/general/ThreatRules","game/rules/general/ParadropRules","game/rules/general/LightningStormRules","game/rules/general/V3RocketRules","game/rules/general/DMislRules","game/rules/general/CMislRules","game/rules/general/HoverRules","util/math"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -15,12 +15,13 @@ System.register(
     "game/rules/general/LightningStormRules",
     "game/rules/general/V3RocketRules",
     "game/rules/general/DMislRules",
+    "game/rules/general/CMislRules",
     "game/rules/general/HoverRules",
     "util/math",
   ],
   function (t, e) {
     "use strict";
-    var i, r, s, a, n, o, l, c, h, u, d, g, p, m, f;
+    var i, r, s, a, n, o, l, c, h, u, v, d, g, p, m, f;
     e && e.id;
     return {
       setters: [
@@ -53,6 +54,9 @@ System.register(
         },
         function (e) {
           u = e;
+        },
+        function (e) {
+          v = e;
         },
         function (e) {
           d = e;
@@ -101,6 +105,7 @@ System.register(
                   (this.crew = new a.CrewRules().readIni(e)),
                   (this.defaultMirageDisguises = e.getArray("DefaultMirageDisguises")),
                   (this.dMisl = new u.DMislRules().readIni(e)),
+                  (this.cMisl = new v.CMislRules().readIni(e)),
                   (this.dropPodWeapon = e.getString("DropPodWeapon")),
                   (this.engineer = e.getString("Engineer")),
                   (this.engineerCaptureLevel = e.getFixed("EngineerCaptureLevel", 0.25)),
@@ -168,6 +173,8 @@ System.register(
                     return this.v3Rocket;
                   case this.dMisl.type:
                     return this.dMisl;
+                  case this.cMisl.type:
+                    return this.cMisl;
                   default:
                     throw new Error(`Unsupported missile type "${e}"`);
                 }

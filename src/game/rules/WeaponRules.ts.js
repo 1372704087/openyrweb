@@ -33,6 +33,10 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.drainWeapon = this.rules.getBool("DrainWeapon")),
               (this.decloakToFire = this.rules.getBool("DecloakToFire", !0)),
               (this.fireOnce = this.rules.getBool("FireOnce")),
+              // OpenYRWeb: FireWhileMoving (vanilla YR weapon flag). When=no, the unit must be
+              // fully stationary to fire this weapon (vanilla: DiskDrain on the Floating Disc).
+              // Default=yes — most weapons can fire while moving.
+              (this.fireWhileMoving = this.rules.getBool("FireWhileMoving", !0)),
               (this.isAlternateColor = this.rules.getBool("IsAlternateColor")),
               (this.isElectricBolt = this.rules.getBool("IsElectricBolt")),
               (this.isHouseColor = this.rules.getBool("IsHouseColor")),
@@ -75,6 +79,22 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.magnaBeamEndAnim = this.rules.getString("MagnaBeamEndAnim") || void 0),
               (this.magnaBeamAnimScale = this.rules.getNumber("MagnaBeamAnimScale", 1.0)),
               (this.isLaser = this.rules.getBool("IsLaser")),
+              // OpenYRWeb: DiskLaser=yes enables the Floating Disc ring-laser charge effect.
+              // Draws a circle of radius 240 leptons centred at the FLH position, with two
+              // arcs charging CW+CCW from the opposite point toward the point nearest the
+              // target. When charge completes, a beam fires from the nearest point to target.
+              // Vanilla sources: WeaponTypeClass::ReadINI in yrmd.exe, ModEnc DiskLaser page.
+              (this.isDiskLaser = this.rules.getBool("DiskLaser")),
+              // OpenYRWeb: Phobos extension. Customisable ring radius in leptons.
+              // Default 240 matches vanilla YR hardcoded radius.
+              (this.diskLaserRadius = this.rules.getNumber("DiskLaser.Radius", 240)),
+              // DiskLaser inner beam colour. Vanilla default (216,0,184) — magenta.
+              (this.laserInnerColor = this.rules.getNumberArray("LaserInnerColor", /,\s*/, [216, 0, 184])),
+              // DiskLaser outer glow colour. Vanilla default (80,0,88) — dark magenta.
+              (this.laserOuterColor = this.rules.getNumberArray("LaserOuterColor", /,\s*/, [80, 0, 88])),
+              // LaserOuterSpread controls how far the outer glow spreads beyond the inner beam.
+              // Triple value (R,G,B). Vanilla default (0,0,0) = no outer glow.
+              (this.laserOuterSpread = this.rules.getNumberArray("LaserOuterSpread", /,\s*/, [0, 0, 0])),
               (this.isRadBeam = this.rules.getBool("IsRadBeam")),
               (this.isSonic = this.rules.getBool("IsSonic")),
               (this.laserDuration = this.rules.getNumber("LaserDuration")),

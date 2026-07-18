@@ -30,6 +30,8 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               (this.fallingDamageMultiplier = e.getNumber("FallingDamageMultiplier", 1)),
               (this.currentStrengthDamage = e.getBool("CurrentStrengthDamage", !0)),
               (this.deathWeapon = e.getString("DeathWeapon")),
+              (this.cMislEliteWarhead = e.getString("CMislEliteWarhead")),
+              (this.cMislWarhead = e.getString("CMislWarhead")),
               (this.dMislEliteWarhead = e.getString("DMislEliteWarhead")),
               (this.dMislWarhead = e.getString("DMislWarhead")),
               // OpenYRWeb: Floating Disc (DISCUS) drain config (vanilla YR, yrmd.exe strings).

@@ -344,6 +344,13 @@ System.register(
                   this.mapShroudTrait.init(this),
                   this.crateGeneratorTrait.init(this),
                   this.playerList.getAll().forEach((e) => (e.credits = this.gameOpts.credits)),
+                  this.playerList.getAll().forEach((e) => {
+                    if (e.isAi) {
+                      if (e.aiDifficulty === a.AiDifficulty.Brutal) e.credits += 10000;
+                      else if (e.aiDifficulty === a.AiDifficulty.Medium) e.credits += 5000;
+                      else if (e.aiDifficulty === a.AiDifficulty.Easy) e.credits += 2000;
+                    }
+                  }),
                   this.rules.mpDialogSettings.alliesAllowed && this.createInitialTeams(),
                   this.botManager.init(this),
                   this.triggers.init(this));

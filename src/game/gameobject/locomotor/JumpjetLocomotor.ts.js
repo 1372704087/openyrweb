@@ -102,7 +102,25 @@ System.register(
             }
             static tickCrash(e, t, i) {
               var r = 2 * e.rules.jumpjetCrash;
-              return ((e.direction = (e.direction - 6 + 360) % 360), new P.Vector3(0, -r, 0));
+              e.direction = (e.direction - 6 + 360) % 360;
+              if (e.rules.tiltCrashJumpjet) {
+                i.crashTick ??= 0;
+                i.crashTick++;
+                var maxTilt = 45, tiltProgress = Math.min(1, i.crashTick / 20);
+                e.crashPitch = maxTilt * tiltProgress;
+                i.orbitCenter ??= { x: e.position.worldPosition.x, z: e.position.worldPosition.z };
+                i.orbitRadius ??= 3 * r;
+                i.orbitAngle ??= 0;
+                i.orbitAngle += 8;
+                var orbitRad = (i.orbitAngle * Math.PI) / 180;
+                var omega = (8 * Math.PI) / 180;
+                var vx = -i.orbitRadius * omega * Math.sin(orbitRad);
+                var vz = i.orbitRadius * omega * Math.cos(orbitRad);
+                var crashVelocity = new P.Vector3(vx, -r, vz);
+                e.moveTrait && e.moveTrait.velocity.copy(crashVelocity);
+                return crashVelocity;
+              }
+              return new P.Vector3(0, -r, 0);
             }
             constructor(e) {
               ((this.game = e),

@@ -72,7 +72,7 @@ System.register(
             .set("Germans", "mplsg.pal")
             .set("British", "mplsuk.pal")
             .set("Russians", "mplsr.pal")
-            .set("Confederation", "mplsc.apl")
+            .set("Confederation", "mplsc.pal")
             .set("Africans", "mplsl.pal")
             .set("Arabs", "mplsi.pal")
             .set("Alliance", "mplsk.pal")
@@ -105,7 +105,15 @@ System.register(
                     ? (this.bgHtmlImg = e.getCdnBaseUrl() + "ls/" + o.replace(".shp", ".png"))
                     : ((this.bgSpriteImg = o),
                       // OpenYRWeb: YR-only — loading-screen palette always sourced from m.get(a).
-                      (this.bgSpritePal = m.get(a)))
+                      (this.bgSpritePal = m.get(a)),
+                      // OpenYRWeb: graceful fallback if the country-specific palette is absent
+                      // (e.g. Confederation's mplsc.apl may be missing from some user YR installs).
+                      this.bgSpritePal &&
+                        !e.isCdn() &&
+                        d.Engine.vfs &&
+                        !d.Engine.vfs.fileExists(this.bgSpritePal) &&
+                        (console.warn('Loading screen palette "' + this.bgSpritePal + '" not in VFS — falling back to US palette.'),
+                        (this.bgSpritePal = m.get("Americans"))))
                   : console.warn("Missing loading image for country " + a),
                 r
               );

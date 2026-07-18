@@ -36,10 +36,13 @@ System.register(
       execute: function () {
         ((o = class {
           constructor() {
-            this.isActive = !1;
+            (this.isActive = !1), (this.surfaceProgress = 0), (this.targetSurfaceProgress = 0);
           }
           isSubmerged() {
             return this.isActive;
+          }
+          getSurfaceProgress() {
+            return this.surfaceProgress;
           }
           setCooldown(e) {
             this.cooldownTicks = e;
@@ -54,7 +57,18 @@ System.register(
                     60 * t.rules.general.cloakDelay * r.GameSpeed.BASE_TICKS_PER_SECOND,
                   ))),
               0 < this.cooldownTicks && this.cooldownTicks--,
-              this.cooldownTicks <= 0 && ((this.isActive = !0), t.events.dispatch(new i.ShipSubmergeChangeEvent(e))));
+              this.cooldownTicks <= 0 &&
+                ((this.isActive = !0),
+                (this.targetSurfaceProgress = 1),
+                t.events.dispatch(new i.ShipSubmergeChangeEvent(e)))),
+              this.updateSurfaceProgress();
+          }
+          updateSurfaceProgress() {
+            var e = 1 / 30;
+            this.surfaceProgress < this.targetSurfaceProgress
+              ? (this.surfaceProgress = Math.min(1, this.surfaceProgress + e))
+              : this.surfaceProgress > this.targetSurfaceProgress &&
+                (this.surfaceProgress = Math.max(0, this.surfaceProgress - e));
           }
           [a.NotifyDamage.onDamage](e, t) {
             this.emerge(e, t);
@@ -62,7 +76,11 @@ System.register(
           emerge(e, t) {
             this.isActive &&
               ((this.isActive = !1),
-              (this.cooldownTicks = void 0),
+              (this.cooldownTicks = Math.max(
+                this.cooldownTicks ?? 0,
+                5 * r.GameSpeed.BASE_TICKS_PER_SECOND,
+              )),
+              (this.targetSurfaceProgress = 0),
               t.events.dispatch(new i.ShipSubmergeChangeEvent(e)));
           }
         }),

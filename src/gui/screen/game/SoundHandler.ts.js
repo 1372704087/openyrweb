@@ -1,4 +1,4 @@
-﻿﻿// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
+// === Reconstructed SystemJS module: gui/screen/game/SoundHandler ===
 // deps: ["game/order/OrderType","engine/sound/SoundKey","engine/sound/ChannelType","util/disposable/CompositeDisposable","game/event/EventType","util/math","gui/screen/game/worldInteraction/UnitSelectionHandler","util/typeGuard","game/gameobject/Building","game/rules/TechnoRules","util/array","game/rules/general/RadarRules","game/player/production/ProductionQueue","engine/type/ObjectType","game/Coords","game/event/AllianceChangeEvent","game/gameobject/unit/VeteranLevel","game/order/OrderFeedbackType","game/gameopts/constants","game/gameobject/common/DeathType","game/WeaponType","game/gameobject/unit/ZoneType","game/type/SuperWeaponType","game/gameobject/infantry/StanceType","game/type/PowerupType","game/gameobject/unit/HealthLevel","game/trait/StalemateDetectTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -216,6 +216,17 @@ System.register(
                     // The continuous beam visual is handled by MagnetronBeamPlugin; pulsing fire sounds
                     // every ROF feel wrong.
                     if (s.magnetronDragging) break;
+                    // OpenYRWeb: Spawner weapons (CruiseLauncher, V3Launcher, DredLauncher) don't
+                    // play Report at fire time. The spawned missile (CMISL, V3Rocket, DMISL) plays
+                    // AuxSound1 via ObjectLiftOffEvent when it actually lifts off, keeping the
+                    // sound synced with the visual and avoiding Sound.ts.js limit collisions.
+                    if (i.rules.spawner) break;
+                    // OpenYRWeb: DiskLaser weapons fire their Report sound when the beam phase
+                    // begins (after ring charging), not at WeaponFire time.
+                    if (i.rules.isDiskLaser) break;
+                    // OpenYRWeb: DrainWeapon (e.g. DiskDrain) suppresses Report to avoid
+                    // overlapping with the DISKRAY animation's StartSound=FloatingDiscStealLoop.
+                    if (i.rules.drainWeapon) break;
                     var a = i.rules.report;
                     if (a.length) {
                       // OpenYRWeb: 原版不会在这里打断前一个武器音效，
@@ -631,6 +642,9 @@ System.register(
                         break;
                       case n.OrderFeedbackType.SpecialAttack:
                         e = t.rules.voiceSpecialAttack;
+                        break;
+                      case n.OrderFeedbackType.SecondaryWeaponAttack:
+                        e = t.rules.voiceSecondaryWeaponAttack || t.rules.voiceAttack;
                         break;
                       case n.OrderFeedbackType.Enter:
                         e = t.rules.voiceEnter ?? t.rules.voiceMove;

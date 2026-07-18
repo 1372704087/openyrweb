@@ -126,6 +126,8 @@ System.register(
               (this.title = this.strings.get("GUI:SkirmishGame")),
               (this.musicType = E.MusicType.Intro),
               (this.playerName = "Player 1"),
+              (this.hostObserver = !1),
+              (this.savedHostCountryId = void 0),
               (this.disposables = new h.CompositeDisposable()));
           }
           get backgroundImageName() {
@@ -202,7 +204,8 @@ System.register(
               s = this.localPrefs.getItem(b.StorageKey.LastPlayerTeam),
               a = this.localPrefs.getItem(b.StorageKey.LastMap),
               n = this.localPrefs.getItem(b.StorageKey.LastMode),
-              o = this.localPrefs.getItem(b.StorageKey.LastBots);
+              o = this.localPrefs.getItem(b.StorageKey.LastBots),
+              P = this.localPrefs.getItem(b.StorageKey.LastHostObserver);
             let l = a ? this.mapList.getByName(a) : void 0,
               c = l && n && this.gameModes.hasId(Number(n)) ? Number(n) : 1,
               h = this.gameModes.getById(c),
@@ -255,8 +258,8 @@ System.register(
                 ],
                 aiPlayers: [
                   ...new Array(8).fill(void 0).map((e, t) => {
-                    if (t && !(t > u.maxSlots - 1)) {
-                      var i = 1 < t || f ? f?.[t]?.difficulty : m;
+                    if (!(t > u.maxSlots - 1)) {
+                      var i = t === 1 ? (f ? f[1]?.difficulty : m) : f?.[t]?.difficulty;
                       if (void 0 !== i)
                         return {
                           countryId: f?.[t]?.countryId ?? v.RANDOM_COUNTRY_ID,
@@ -280,11 +283,45 @@ System.register(
                 ...this.gameOpts.aiPlayers
                   .slice(1)
                   .map((e) => (e ? { type: y.SlotType.Ai, difficulty: e.difficulty } : { type: y.SlotType.Closed })),
-              ]));
+              ]),
+              (this.savedHostCountryId = this.gameOpts.humanPlayers[0].countryId));
+            (P === "ai" || this.gameOpts.aiPlayers[0]) && P !== "player"
+              ? ((this.hostObserver = !0),
+                this.gameOpts.aiPlayers[0] ??
+                  (this.gameOpts.aiPlayers[0] = {
+                    difficulty: T.AiDifficulty.Medium,
+                    countryId: v.RANDOM_COUNTRY_ID,
+                    colorId: v.RANDOM_COLOR_ID,
+                    startPos: v.RANDOM_START_POS,
+                    teamId: p.mustAlly ? 3 : v.NO_TEAM_ID,
+                  }),
+                (this.savedHostCountryId =
+                  this.gameOpts.humanPlayers[0].countryId !== v.OBS_COUNTRY_ID
+                    ? this.gameOpts.humanPlayers[0].countryId
+                    : this.savedHostCountryId !== v.OBS_COUNTRY_ID
+                      ? this.savedHostCountryId
+                      : v.RANDOM_COUNTRY_ID),
+                (this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID),
+                (this.slotsInfo[0] = {
+                  type: y.SlotType.Ai,
+                  difficulty: this.gameOpts.aiPlayers[0].difficulty,
+                }))
+              : P === "observer"
+                ? ((this.hostObserver = !0),
+                  (this.gameOpts.aiPlayers[0] = void 0),
+                  (this.savedHostCountryId =
+                    this.gameOpts.humanPlayers[0].countryId !== v.OBS_COUNTRY_ID
+                      ? this.gameOpts.humanPlayers[0].countryId
+                      : this.savedHostCountryId !== v.OBS_COUNTRY_ID
+                        ? this.savedHostCountryId
+                        : v.RANDOM_COUNTRY_ID),
+                  (this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID),
+                  (this.slotsInfo[0].observer = !0))
+                : ((this.hostObserver = !1), (this.gameOpts.aiPlayers[0] = void 0));
           }
           sanitizeLastBotSettings(e, t, i, r, s) {
             let a = 0;
-            for (let c = 0; c < e.length; ++c) e[c] && (a++, a > r - 1 && (e[c] = void 0));
+            for (let c = 0; c < e.length; ++c) e[c] && (a++, a > (e[0] ? r : r - 1) && (e[c] = void 0));
             let n = void 0 !== t ? [Number(t)] : [],
               o = void 0 !== i ? [Number(i)] : [];
             for (var l of e)
@@ -424,6 +461,12 @@ System.register(
               onChangeGameSpeed: (t) => this.applyGameOption((e) => (e.gameSpeed = t)),
               onChangeCredits: (t) => this.applyGameOption((e) => (e.credits = t)),
               onChangeUnitCount: (t) => this.applyGameOption((e) => (e.unitCount = t)),
+              onPlayerNameChange: (e, t) => {
+                (this.playerName = e),
+                  this.gameOpts.humanPlayers[0] && (this.gameOpts.humanPlayers[0].name = e),
+                  this.slotsInfo[0] && (this.slotsInfo[0].name = e),
+                  this.updateFormModel();
+              },
               activeSlotIndex: 0,
               teamsAllowed: !0,
               teamsRequired: !1,
@@ -455,12 +498,53 @@ System.register(
           }
           changeSlotType(e, t, i) {
             var r;
-            if (0 === t) throw new Error("Change slot type of host");
+            if (e === "player" && 0 === t) {
+              this.hostObserver = !1;
+              this.slotsInfo[0].type = y.SlotType.Player;
+              delete this.slotsInfo[0].difficulty;
+              delete this.slotsInfo[0].observer;
+              this.gameOpts.aiPlayers[0] = void 0;
+              this.gameOpts.humanPlayers[0].countryId = this.savedHostCountryId ?? v.RANDOM_COUNTRY_ID;
+              this.localPrefs.setItem(b.StorageKey.LastHostObserver, "player");
+              this.localPrefs.setItem(b.StorageKey.LastPlayerCountry, String(this.gameOpts.humanPlayers[0].countryId));
+              this.updateFormModel();
+              this.refreshSidebarButtons();
+              return;
+            }
+            if (e === n.SlotOccupation.Observer) {
+              if (0 === t) {
+                this.hostObserver = !0;
+                this.savedHostCountryId = this.gameOpts.humanPlayers[0].countryId;
+                this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID;
+                (this.slotsInfo[0].type = y.SlotType.Player),
+                  delete this.slotsInfo[0].difficulty,
+                  delete this.slotsInfo[0].observer,
+                  (this.gameOpts.aiPlayers[0] = void 0);
+                this.localPrefs.setItem(b.StorageKey.LastHostObserver, "observer");
+                this.localPrefs.setItem(b.StorageKey.LastPlayerCountry, String(this.savedHostCountryId));
+                this.updateFormModel();
+                this.refreshSidebarButtons();
+                return;
+              }
+              this.slotsInfo[t].type = y.SlotType.Closed;
+              this.slotsInfo[t].observer = !0;
+              this.gameOpts.aiPlayers[t] = void 0;
+              this.updateFormModel();
+              return;
+            }
+            if (0 === t && !(e === n.SlotOccupation.Occupied && void 0 !== i))
+              throw new Error("Cannot change slot type of host to non-player/observer");
             if (e === n.SlotOccupation.Occupied && void 0 !== i) {
               var s = this.gameModes.getById(this.gameOpts.gameMode).mpDialogSettings;
-              let e = this.slotsInfo[t];
-              ((e.type = y.SlotType.Ai),
-                (e.difficulty = i),
+              let a = this.slotsInfo[t];
+              if (0 === t) {
+                this.hostObserver || (this.savedHostCountryId = this.gameOpts.humanPlayers[0].countryId);
+                (this.hostObserver = !0),
+                  (this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID),
+                  delete a.observer;
+              }
+              ((a.type = y.SlotType.Ai),
+                (a.difficulty = i),
                 (r = this.gameOpts.aiPlayers)[t] ??
                   (r[t] = {
                     difficulty: i,
@@ -470,9 +554,16 @@ System.register(
                     teamId: s.mustAlly ? 3 : v.NO_TEAM_ID,
                   }),
                 (this.gameOpts.aiPlayers[t].difficulty = i));
+              if (0 === t) {
+                this.localPrefs.setItem(b.StorageKey.LastHostObserver, "ai");
+                this.localPrefs.setItem(b.StorageKey.LastPlayerCountry, String(this.savedHostCountryId));
+                return this.updateFormModel(), this.refreshSidebarButtons();
+              }
             }
             (e === n.SlotOccupation.Closed &&
-              ((this.slotsInfo[t].type = y.SlotType.Closed), (this.gameOpts.aiPlayers[t] = void 0)),
+              ((this.slotsInfo[t].type = y.SlotType.Closed),
+                delete this.slotsInfo[t].observer,
+                (this.gameOpts.aiPlayers[t] = void 0)),
               this.updateFormModel());
           }
           saveBotSettings() {
@@ -574,11 +665,13 @@ System.register(
               this.slotsInfo.forEach((t, i) => {
                 if (this.formModel.playerSlots[i]) {
                   let e = this.formModel.playerSlots[i];
-                  (t.type === y.SlotType.Closed
-                    ? (e.occupation = n.SlotOccupation.Closed)
-                    : t.type === y.SlotType.Open || t.type === y.SlotType.OpenObserver
-                      ? (e.occupation = n.SlotOccupation.Open)
-                      : (e.occupation = n.SlotOccupation.Occupied),
+                  (t.observer
+                    ? (e.occupation = n.SlotOccupation.Observer)
+                    : t.type === y.SlotType.Closed
+                      ? (e.occupation = n.SlotOccupation.Closed)
+                      : t.type === y.SlotType.Open || t.type === y.SlotType.OpenObserver
+                        ? (e.occupation = n.SlotOccupation.Open)
+                        : (e.occupation = n.SlotOccupation.Occupied),
                     t.type === y.SlotType.Ai
                       ? ((e.aiDifficulty = t.difficulty), (e.type = n.SlotType.Ai))
                       : t.type === y.SlotType.Player && ((e.name = t.name), (e.type = n.SlotType.Player)),
@@ -714,8 +807,8 @@ System.register(
             let e = [...this.gameOpts.humanPlayers, ...this.gameOpts.aiPlayers]
                 .filter(g.isNotNullOrUndefined)
                 .filter((e) => e.countryId !== v.OBS_COUNTRY_ID),
-              t = e[0].teamId;
-            return t === v.NO_TEAM_ID || e.some((e) => e.teamId !== t);
+              t = e[0]?.teamId;
+            return e.length < 2 || t === v.NO_TEAM_ID || e.some((e) => e.teamId !== t);
           }
           refreshSidebarMpText() {
             this.controller?.setSidebarMpContent({
