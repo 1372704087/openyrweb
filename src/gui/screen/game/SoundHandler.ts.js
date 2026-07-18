@@ -239,7 +239,15 @@ System.register(
                         s.owner,
                         n,
                       );
-                      h && (s.__weaponFireSound = h);
+                      // Gattling weapons can fire fast enough that multiple Report instances overlap.
+                      // Track them in an array so GattlingTrait can stop ALL previous stage sounds
+                      // when the stage changes, instead of only the latest handle.
+                      // Filter out naturally-finished handles first to keep the array small.
+                      h &&
+                        (s.gattlingTrait &&
+                          ((s.__weaponFireSounds || (s.__weaponFireSounds = [])).push(h),
+                          (s.__weaponFireSounds = s.__weaponFireSounds.filter((e) => e.isPlaying()))),
+                        (s.__weaponFireSound = h));
                     }
                     break;
                   case L.EventType.InflictDamage:

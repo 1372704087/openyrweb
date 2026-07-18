@@ -220,3 +220,34 @@ feat(全局): 新增DiskLaserFx视觉特效、CustomAiBot高级AI系统及电力
 3. 测试 Brutal 难度 AI 初始资金、采矿倍率及海军编队行为。  
 4. 检查三方海军编队配置差异及目标优先级顺序。  
 5. 验证 `addPlayerCredits` API 正确增加玩家资金。
+
+feat(gattling): 重构加特林武器系统，还原原版YR计时器逻辑
+
+- 🔄 **GattlingTrait 完全重写**  
+  将加特林阶段推进机制从“基于射击次数”改为“基于计时器”的渐进式系统。攻击时 timer 累加 `rateUp`，空闲时递减 `rateDown`，根据 `stageThresholds` 计算当前阶段，实现平滑升级与降级，更贴近原版《红色警戒 2》行为。
+
+- ⚙️ **配置系统扩展**  
+  新增 `IsGattling` 标志及 `weaponStages`、`stageThresholds`、`eliteStageThresholds`、`rateUp`、`rateDown` 等参数，支持自定义阶段数量、升级/衰减速度和精英单位独立阈值。
+
+- 🎯 **武器选择逻辑优化**  
+  `ArmedTrait` 新增 `selectGattlingStage(stage, elite)` 方法，按原版 YR 布局成对选择 AG（`stage*2`）和 AA（`stage*2+1`）武器。Gattling 单位武器范围取 `primaryWeapon.range` 与 `secondaryWeapon.range` 的最大值。
+
+- 🔊 **音频系统修复**  
+  修复加特林高射速场景下武器声音重叠的 bug。`SoundHandler` 为 gattling 单位维护声音数组，`AttackTask` 在攻击停止时清理所有累积声音句柄，阶段切换时立即停止旧阶段音效。
+
+- 🎯 **目标选择优化**  
+  Gattling 单位（加特林坦克）在有空中目标时优先攻击空中单位，匹配原版 YR 的对空优先行为。
+
+- 🧹 **代码清理**  
+  移除 `PowerTrait` 和 `AttackTask` 中的调试日志语句。
+
+### ⚠️ 破坏性变更
+- 旧 Mod 若依赖 `weaponCount > 1` 自动启用加特林逻辑，需手动添加 `IsGattling=yes` 配置。  
+- `GattlingTrait` 构造函数签名变更（新增 `gameObject` 参数）。
+
+### 🧪 测试建议
+1. 验证加特林单位攻击时 timer 累加、空闲时递减，阶段切换平滑。  
+2. 测试精英单位使用 `eliteStageThresholds` 独立阈值。  
+3. 快速连续射击时检查声音无重叠，阶段切换时旧音效立即停止。  
+4. 验证 Gattling 单位优先攻击空中目标，地面目标不被忽略。  
+5. 单位销毁时所有声音立即停止，无残留循环。

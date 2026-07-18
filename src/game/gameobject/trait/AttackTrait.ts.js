@@ -483,6 +483,10 @@ System.register(
                 (n += (i.warhead.rules.verses.get(e.rules.armor) ?? 0) * s.myEffectivenessCoefficientDefault),
                 (n += (e.healthTrait.health / 100) * s.targetStrengthCoefficientDefault),
                 (n += r * s.targetDistanceCoefficientDefault),
+                // OpenYRWeb: Gattling units (Gattling tank, Gattling cannon) passively prefer
+                // air targets over ground targets, matching vanilla YR AA behavior. The bonus is
+                // gated behind t.gattlingTrait so other units are unaffected.
+                (n += t.gattlingTrait && e.isAircraft() ? 5e5 : 0),
                 (n += 1e5),
                 t.rules.vhpScan !== T.VhpScan.None &&
                   ((a = e.healthTrait.getProjectedHitPoints()),

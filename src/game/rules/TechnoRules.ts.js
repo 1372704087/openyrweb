@@ -211,6 +211,17 @@ System.register(
                 (this.elitePrimary = this.parseWeaponName(this.ini.getString("ElitePrimary"))),
                 (this.eliteSecondary = this.parseWeaponName(this.ini.getString("EliteSecondary"))),
                 (this.weaponCount = this.ini.getNumber("WeaponCount")),
+                // OpenYRWeb: Gattling weapon system parameters (vanilla YR). IsGattling enables
+                // the stage-based weapon pair system; WeaponStages defines how many phases exist;
+                // StageX/EliteStageX are timer thresholds; RateUp/RateDown control spin-up/down.
+                // Keep these as expressions (not statements) so the minified comma-expression in
+                // parse() stays syntactically valid.
+                (this.isGattling = this.ini.getBool("IsGattling")),
+                (this.weaponStages = this.ini.getNumber("WeaponStages", 1)),
+                (this.stageThresholds = Array.from({ length: this.weaponStages }, (e, t) => this.ini.getNumber("Stage" + (t + 1), Number.POSITIVE_INFINITY))),
+                (this.eliteStageThresholds = Array.from({ length: this.weaponStages }, (e, t) => this.ini.getNumber("EliteStage" + (t + 1), Number.POSITIVE_INFINITY))),
+                (this.rateUp = this.ini.getNumber("RateUp", 1)),
+                (this.rateDown = this.ini.getNumber("RateDown", 1)),
                 (this.deathWeapon = this.parseWeaponName(this.ini.getString("DeathWeapon"))),
                 (this.deathWeaponDamageModifier = this.ini.getNumber("DeathWeaponDamageModifier", 1)),
                 (this.occupyWeapon = this.parseWeaponName(this.ini.getString("OccupyWeapon"))),

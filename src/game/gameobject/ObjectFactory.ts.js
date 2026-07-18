@@ -327,13 +327,14 @@ System.register(
                 n.isTechno() &&
                   ((n.rules.primary || n.rules.secondary || n.rules.weaponCount || n.rules.explodes || (n.garrisonTrait && !n.bioReactorPowerTrait)) &&
                     ((n.armedTrait = new k.ArmedTrait(n, i)), n.traits.add(n.armedTrait)),
-                  // OpenYRWeb: Gattling escalation. Technos with WeaponCount>1 that are NOT gunners
-                  // (IFV turret swap) advance weapon stage while firing. Gunners use GunnerTrait
-                  // (driven by transported passenger ifvMode) instead.
-                  n.rules.weaponCount > 1 &&
+                  // OpenYRWeb: Gattling escalation. Technos with IsGattling=yes (and WeaponCount>1)
+                  // that are NOT gunners (IFV turret swap) advance weapon stage while firing. Gunners
+                  // use GunnerTrait (driven by transported passenger ifvMode) instead.
+                  n.rules.isGattling &&
+                    n.rules.weaponCount > 1 &&
                     !n.rules.gunner &&
                     n.armedTrait &&
-                    ((n.gattlingTrait = new GT.GattlingTrait()), n.traits.add(n.gattlingTrait)),
+                    ((n.gattlingTrait = new GT.GattlingTrait(n)), n.traits.add(n.gattlingTrait)),
                   // OpenYRWeb: Floating Disc (DISCUS) drain. Harvester units that are also armed
                   // (vanilla: the Yuri Floating Disc) get a DrainTrait so attacking a Drainable
                   // OpenYRWeb (2026-06-30, REVERSED): attach DrainTrait to any unit whose primary

@@ -256,7 +256,14 @@ System.register(
               // playing after the unit stops firing otherwise — the only prior stop site was the
               // GattlingTrait stage-reset (gated behind a 200-tick spin-down). Stopping it here
               // matches vanilla YR (sound ends with the attack) and fixes the residual-loop bug.
+              // For gattling units, multiple Report instances can be active simultaneously, so
+              // stop every tracked handle rather than only the latest one.
               try {
+                if (e.gattlingTrait && e.__weaponFireSounds && e.__weaponFireSounds.length) {
+                  for (var gattlingSoundIdx = 0; gattlingSoundIdx < e.__weaponFireSounds.length; gattlingSoundIdx++)
+                    e.__weaponFireSounds[gattlingSoundIdx].isPlaying() && e.__weaponFireSounds[gattlingSoundIdx].stop();
+                  e.__weaponFireSounds.length = 0;
+                }
                 e.__weaponFireSound && e.__weaponFireSound.isPlaying() && (e.__weaponFireSound.stop(), (e.__weaponFireSound = void 0));
               } catch (err) {}
             }
@@ -463,7 +470,6 @@ System.register(
                   var ct = this.target.obj.centerTile;
                   var wasInRange = inRange;
                   inRange = r.tile.rx === ct.rx && r.tile.ry === ct.ry;
-                  if (!inRange) console.log("[AttackTask] CheckRange drainWeapon: was inRange=" + wasInRange + " but disc NOT on centerTile. disc=" + r.tile.rx + "," + r.tile.ry + " center=" + ct.rx + "," + ct.ry);
                 }
                 if (
                   !inRange ||
@@ -538,7 +544,6 @@ System.register(
                     if (this.moveAttempts > P) return !0;
                     0 < this.moveAttempts && this.children.push(new d.WaitMinutesTask(1 / 60));
                     ((h = e), (u = t && !i ? this.lastValidTargetPosition.onBridge : this.target.getBridge()));
-                    console.log("[AttackTask] CheckRange CREATING MoveInWeaponRangeTask. disc=" + r.name + " target=" + (h?.name || h) + " targetTile=" + (h instanceof v.GameObject ? h.centerTile?.rx + "," + h.centerTile?.ry : "N/A"));
                     return (
                       (a = new p.MoveInWeaponRangeTask(this.game, h, !!u, this.weapon)),
                       (a.blocking = !1),

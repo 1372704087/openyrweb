@@ -48,7 +48,10 @@ System.register(
             this._specialWeaponCache = new Map();
             var i = e.veteranLevel === s.VeteranLevel.Elite;
             e.rules.weaponCount
-              ? (this.selectSpecialWeapon(0, i), (this.guardWeaponRangeOverride = this.primaryWeapon?.range))
+              ? e.rules.isGattling
+                ? (this.selectGattlingStage(0, i),
+                  (this.guardWeaponRangeOverride = Math.max(this.primaryWeapon?.range || 0, this.secondaryWeapon?.range || 0)))
+                : (this.selectSpecialWeapon(0, i), (this.guardWeaponRangeOverride = this.primaryWeapon?.range))
               : this.selectStandardWeapons(i);
           }
           selectStandardWeapons(e = !1) {
@@ -72,36 +75,26 @@ System.register(
                   this.rules.combatDamage.deathWeapon),
                 (this.deathWeapon = a.Weapon.factory(r, n.WeaponType.DeathWeapon, t, this.rules))));
           }
-          selectSpecialWeapon(e, t = !1) {
+          _getCachedSpecialWeapon(e, t = !1) {
             let i = this.gameObject;
             var r = i.rules.weaponCount;
             if (r < 1) throw new Error(`Object "${i.name}" doesn't support special weapons`);
             if (r - 1 < e) throw new RangeError(`Weapon index ${e} out of bounds (max ${r}) for object ` + i.name);
-            // OpenYRWeb: reuse a cached Weapon for this (stage, elite) so re-selecting an
+            // OpenYRWeb: reuse a cached Weapon for this (index, elite) so re-selecting an
             // already-built stage (e.g. Gattling stage oscillation) does NOT reset its cooldown
-            // or burst state. First selection of a stage builds & caches; later ones restore.
-            var cacheKey = e + "_" + (t ? 1 : 0);
-            var cached = this._specialWeaponCache.get(cacheKey);
-            if (cached && cached.name) {
-              this.primaryWeapon = cached.weapon;
-              this.secondaryWeapon = void 0;
-              this.specialWeaponIndex = e;
-              this.deathWeapon =
-                cached.weapon.rules.suicide
-                  ? a.Weapon.factory(
-                      i.rules.deathWeapon || cached.weapon.name,
-                      n.WeaponType.DeathWeapon,
-                      i,
-                      this.rules,
-                    )
-                  : void 0;
-              return;
-            }
-            var s = (t && i.rules.getEliteWeaponAtIndex(e)) || i.rules.getWeaponAtIndex(e);
-            if (!s) throw new Error(`Missing weapon at index ${e} for object "${i.name}"`);
+            // or burst state. First selection builds & caches; later ones restore.
+            var s = e + "_" + (t ? 1 : 0),
+              o = this._specialWeaponCache.get(s);
+            if (o && o.name) return o.weapon;
+            var l = (t && i.rules.getEliteWeaponAtIndex(e)) || i.rules.getWeaponAtIndex(e);
+            if (!l) throw new Error(`Missing weapon at index ${e} for object "${i.name}"`);
             r = i.art.getSpecialWeaponFlh(e);
-            var built = a.Weapon.factory(s, n.WeaponType.Primary, i, this.rules, r);
-            ((this.primaryWeapon = built),
+            var c = a.Weapon.factory(l, n.WeaponType.Primary, i, this.rules, r);
+            return this._specialWeaponCache.set(s, { name: l, weapon: c }), c;
+          }
+          selectSpecialWeapon(e, t = !1) {
+            let i = this.gameObject;
+            (this.primaryWeapon = this._getCachedSpecialWeapon(e, t)),
               (this.secondaryWeapon = void 0),
               (this.specialWeaponIndex = e),
               (this.deathWeapon = this.primaryWeapon.rules.suicide
@@ -111,12 +104,36 @@ System.register(
                     i,
                     this.rules,
                   )
-                : void 0),
-              this._specialWeaponCache.set(cacheKey, { name: s, weapon: built }));
+                : void 0);
+          }
+          selectGattlingStage(e, t = !1) {
+            let i = this.gameObject,
+              r = i.rules.weaponCount;
+            if (r < 2) throw new Error(`Object "${i.name}" doesn't support gattling weapons`);
+            // Vanilla YR gattling layout: each stage has an AG weapon at (stage*2)
+            // and an AA weapon at (stage*2+1).
+            var s = 2 * e,
+              o = s + 1;
+            if (r - 1 < o)
+              throw new RangeError(`Gattling stage ${e} weapon pair exceeds available weapons (max ${r}) for object ` + i.name);
+            (this.specialWeaponIndex = e),
+              (this.primaryWeapon = this._getCachedSpecialWeapon(s, t)),
+              (this.secondaryWeapon = this._getCachedSpecialWeapon(o, t)),
+              (this.deathWeapon =
+                this.primaryWeapon.rules.suicide || this.secondaryWeapon.rules.suicide
+                  ? a.Weapon.factory(
+                      i.rules.deathWeapon || this.primaryWeapon.rules.name || this.secondaryWeapon.rules.name,
+                      n.WeaponType.DeathWeapon,
+                      i,
+                      this.rules,
+                    )
+                  : void 0);
           }
           toggleEliteWeapons(e) {
             this.gameObject.rules.weaponCount
-              ? this.selectSpecialWeapon(this.specialWeaponIndex, e)
+              ? this.gameObject.rules.isGattling
+                ? this.selectGattlingStage(this.specialWeaponIndex, e)
+                : this.selectSpecialWeapon(this.specialWeaponIndex, e)
               : this.selectStandardWeapons(e);
           }
           getSpecialWeaponIndex() {

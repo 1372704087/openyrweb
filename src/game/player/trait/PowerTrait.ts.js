@@ -64,10 +64,6 @@ System.register(
               }
               updateFrom(t, i, r) {
                 var s = t.rules.power;
-                // OpenYRWeb debug: drain power override state
-                if (s > 0 && this.drainPowerOverride > 0) {
-                  console.log("[DrainPower] updateFrom:", i, "building=" + t.name, "s=" + s, "drainedBy=" + !!t.drainedBy, "override=" + this.drainPowerOverride, "powerBefore=" + this.power, "drainBefore=" + this.drain);
-                }
                 if (s) {
                   if (s < 0) ("add" !== i && "remove" !== i) || (this.drain += "add" === i ? -s : s);
                   else {
@@ -103,8 +99,7 @@ System.register(
                   dp = this.getDisplayPower();
                 ((this.level = dp >= this.drain && !this.blackoutFrames ? a.Normal : a.Low),
                   this.level !== e &&
-                    (console.log("[DrainPower] updateLevel: from=" + (e === a.Normal ? "Normal" : "Low") + " to=" + (this.level === a.Normal ? "Normal" : "Low") + " dp=" + dp + " drain=" + this.drain + " override=" + this.drainPowerOverride),
-                    e === a.Normal &&
+                    (e === a.Normal &&
                       this.level === a.Low &&
                       (t.traits.filter(o.NotifyPower).forEach((e) => {
                         e[o.NotifyPower.onPowerLow](this.player, t);
