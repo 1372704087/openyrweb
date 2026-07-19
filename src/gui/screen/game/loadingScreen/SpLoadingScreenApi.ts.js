@@ -89,6 +89,7 @@ System.register(
                   mapName: this.mapName,
                   playerInfos: this.createExtendedLoadingInfos(0),
                   gameResConfig: this.gameResConfig,
+                  mapPreviewUrl: this.mapPreviewUrl,
                 }),
               );
               (this.uiScene.add(e), this.disposables.add(e, () => this.uiScene.remove(e)));

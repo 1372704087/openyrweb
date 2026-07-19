@@ -147,6 +147,7 @@ System.register(
                     color: this.color,
                     playerInfos: this.props.playerInfos,
                     bgImageSrc: this.bgHtmlImg,
+                    mapPreviewUrl: this.props.mapPreviewUrl,
                   },
                 }),
               );

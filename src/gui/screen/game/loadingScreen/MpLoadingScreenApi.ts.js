@@ -105,6 +105,7 @@ System.register(
                   mapName: this.mapName,
                   playerInfos: this.createExtendedLoadingInfos(e),
                   gameResConfig: this.gameResConfig,
+                  mapPreviewUrl: this.mapPreviewUrl,
                 }),
               );
               (this.uiScene.add(t),

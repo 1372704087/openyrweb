@@ -86,6 +86,17 @@ System.register(
                   this.props.strings.get(this.props.countryUiNames.get(t) || t),
                 ),
                 o.default.createElement("div", { style: { color: i }, className: "map-name" }, this.props.mapName),
+                this.props.mapPreviewUrl
+                  ? o.default.createElement("div", {
+                      className: "map-preview",
+                      style: this.getMapPreviewStyle(),
+                    },
+                    o.default.createElement("img", {
+                      src: this.props.mapPreviewUrl,
+                      style: { width: "100%", height: "100%", objectFit: "contain" },
+                    }),
+                  )
+                  : null,
               );
             }
             renderStatus(e, t) {
@@ -114,6 +125,17 @@ System.register(
                 position: "absolute",
                 left: t.x,
                 top: t.y,
+              };
+            }
+            getMapPreviewStyle() {
+              var t = this.props.viewport;
+              return {
+                position: "absolute",
+                left: Math.round(t.width * 0.625) + "px",
+                top: Math.round(t.height * 0.632) + "px",
+                width: Math.round(t.width * 0.27) + "px",
+                height: Math.round(t.height * 0.27) + "px",
+                overflow: "hidden",
               };
             }
           }),

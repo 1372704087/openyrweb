@@ -78,6 +78,12 @@ System.register(
     "gui/chat/ChatMessageFormat",
     "gui/screen/game/MedianPing",
     "gui/screen/game/PingMonitor",
+    "data/ShpFile",
+    "data/Palette",
+    "engine/gfx/ImageUtils",
+    "engine/IsoCoords",
+    "game/Coords",
+    "game/gameopts/GameOptRandomGen",
   ],
   function (e, t) {
     "use strict";
@@ -154,7 +160,13 @@ System.register(
       Te,
       ve,
       be,
-      Se;
+      Se,
+      _ShpFileMod,
+      _PaletteMod,
+      _ImageUtilsMod,
+      _IsoCoords,
+      _Coords,
+      _GameOptRandomGen;
     t && t.id;
     return {
       setters: [
@@ -377,6 +389,24 @@ System.register(
         function (e) {
           be = e;
         },
+        function (e) {
+          _ShpFileMod = e;
+        },
+        function (e) {
+          _PaletteMod = e;
+        },
+        function (e) {
+          _ImageUtilsMod = e;
+        },
+        function (e) {
+          _IsoCoords = e;
+        },
+        function (e) {
+          _Coords = e;
+        },
+        function (e) {
+          _GameOptRandomGen = e;
+        },
       ],
       execute: function () {
         ((Se = class extends ae.RootScreen {
@@ -533,6 +563,144 @@ System.register(
               this.disposables.add(() => this.gameLoader.clearStaticCaches()),
               !i.isCancelled())
             ) {
+              // OpenYRWeb: decode map preview for loading screen
+              try {
+                var pg = t.decodePreviewImage();
+                var pv = document.createElement("canvas");
+                pv.width = pg ? pg.width : 160;
+                pv.height = pg ? pg.height : 120;
+                var px = pv.getContext("2d");
+                if (px && pg) {
+                  // Draw map preview image
+                  var pi = px.createImageData(pg.width, pg.height),
+                    pd = pi.data,
+                    sd = pg.data,
+                    si = 0,
+                    di = 0;
+                  for (; si < sd.length; si += 3) {
+                    (pd[di] = sd[si]), (pd[di + 1] = sd[si + 1]), (pd[di + 2] = sd[si + 2]), (pd[di + 3] = 255);
+                    di += 4;
+                  }
+                  px.putImageData(pi, 0, 0);
+                  // Draw player start dots
+                  try {
+                    var pdColors = f.rules ? [...f.rules.getMultiplayerColors().values()] : null,
+                      pdSlots = new Map(),
+                      pdAddSlot = function(e) { if (e && e.startPos >= 0) pdSlots.set(e.startPos, e); };
+                    g.humanPlayers && g.humanPlayers.forEach(pdAddSlot);
+                    g.aiPlayers && g.aiPlayers.forEach(pdAddSlot);
+                    // Resolve random positions using GameOptRandomGen
+                    try {
+                      var pdRng = _GameOptRandomGen.GameOptRandomGen.factory(d.gameId, d.timestamp);
+                      var pdLocsArr = t.startingLocations;
+                      // Must consume same PRNG state as GameFactory.create: colors → countries → startLocations
+                      var pdColorMap = pdRng.generateColors(g);
+                      pdRng.generateCountries(g, f.rules);
+                      var pdResolved = pdRng.generateStartLocations(g, pdLocsArr);
+                      pdResolved.forEach(function(posIdx, player) {
+                        if (player && posIdx >= 0 && !pdSlots.has(posIdx)) pdSlots.set(posIdx, player);
+                      });
+                      // Resolve random colors using the color map
+                      var pdResolveColorId = function(player) {
+                        if (!player) return -1;
+                        if (player.colorId >= 0) return player.colorId;
+                        if (pdColorMap && pdColorMap.has(player)) return pdColorMap.get(player);
+                        return -1;
+                      };
+                    } catch (e) { console.warn("[MapPrev] Failed to resolve random positions", e); }
+                    var pdLocs = t.startingLocations,
+                      pdClen = pdColors ? pdColors.length : 0;
+                    var pdScale = pv.width / 160;
+                    var pdMmpbScale = Math.max(0.5, 0.8 * pdScale);
+                    var pdDotSize = Math.max(3, 4 * pdScale);
+                    // Load mmpb.shp + unitdes.pal for player position markers
+                    var pdShp = new _ShpFileMod.ShpFile(A.Engine.vfs.openFile("mmpb.shp")),
+                      pdPal = new _PaletteMod.Palette(A.Engine.vfs.openFile("unitdes.pal")),
+                      pdShpImg = pdShp.getImage(0),
+                      pdShpCanvas = null,
+                      pdShpRefData = null;
+                    if (pdShpImg) {
+                      pdShpCanvas = document.createElement("canvas");
+                      pdShpCanvas.width = pdShpImg.width; pdShpCanvas.height = pdShpImg.height;
+                      var pdShpCtx = pdShpCanvas.getContext("2d");
+                      if (pdShpCtx) {
+                        var pdShpData = pdShpCtx.createImageData(pdShpImg.width, pdShpImg.height),
+                          pdShpPix = pdShpData.data, pdShpSrc = pdShpImg.imageData;
+                        for (var pdShpI = 0; pdShpI < pdShpSrc.length; pdShpI++) {
+                          var pdShpC = pdPal.getColor(pdShpSrc[pdShpI]);
+                          pdShpPix[pdShpI*4] = pdShpC.r; pdShpPix[pdShpI*4+1] = pdShpC.g; pdShpPix[pdShpI*4+2] = pdShpC.b;
+                          pdShpPix[pdShpI*4+3] = pdShpSrc[pdShpI] ? 255 : 0;
+                        }
+                        pdShpCtx.putImageData(pdShpData, 0, 0);
+                        pdShpRefData = pdShpCtx.getImageData(0, 0, pdShpImg.width, pdShpImg.height);
+                      }
+                    }
+                    // Cache tinted mmpb canvases per colorId
+                    var pdTintedCache = new Map();
+                    var pdGetTintedMmpb = function(colorObj) {
+                      if (!pdShpRefData || !colorObj) return pdShpCanvas;
+                      var key = colorObj.asHexString();
+                      if (pdTintedCache.has(key)) return pdTintedCache.get(key);
+                      var c = document.createElement("canvas");
+                      c.width = pdShpRefData.width; c.height = pdShpRefData.height;
+                      var ctx = c.getContext("2d");
+                      if (!ctx) return pdShpCanvas;
+                      var imgData = ctx.createImageData(pdShpRefData.width, pdShpRefData.height),
+                        src = pdShpRefData.data, dst = imgData.data,
+                        pr = colorObj.r, pg = colorObj.g, pb = colorObj.b;
+                      for (var i = 0; i < src.length; i += 4) {
+                        var a = src[i+3];
+                        if (a > 0) {
+                          var lum = Math.min(1, (src[i] + src[i+1] + src[i+2]) / (3 * 255) * 3);
+                          dst[i] = pr * lum; dst[i+1] = pg * lum; dst[i+2] = pb * lum; dst[i+3] = 255;
+                        }
+                      }
+                      ctx.putImageData(imgData, 0, 0);
+                      pdTintedCache.set(key, c);
+                      return c;
+                    };
+                    // Initialize IsoCoords with a temporary origin (save/restore global state)
+                    var pdOldOrigin = _IsoCoords.IsoCoords.worldOrigin;
+                    _IsoCoords.IsoCoords.init({ x: 0, y: (t.fullSize.width * _Coords.Coords.getWorldTileSize()) / 2 });
+                    var pdOrigin = _IsoCoords.IsoCoords.worldToScreen(0, 0),
+                      pdOriginSt = _IsoCoords.IsoCoords.screenToScreenTile(pdOrigin.x, pdOrigin.y);
+                    for (var pdi = 0; pdi < pdLocs.length; pdi++) {
+                      var pdl = pdLocs[pdi], pdp = pdSlots.get(pdi),
+                        pdScreen = _IsoCoords.IsoCoords.tileToScreen(pdl.x, pdl.y),
+                        pdSt = _IsoCoords.IsoCoords.screenToScreenTile(pdScreen.x, pdScreen.y);
+                      pdSt.x += pdOriginSt.x;
+                      pdSt.y += pdOriginSt.y;
+                      var pdLocal = t.localSize,
+                        pdSx = pv.width / (2 * pdLocal.width),
+                        pdSy = pv.height / pdLocal.height / 2,
+                        pdcx = (pdSt.x - 2 * pdLocal.x) * pdSx,
+                        pdcy = (pdSt.y - 2 * pdLocal.y) * pdSy;
+                      var pdIdx = pdp ? (typeof pdResolveColorId === "function" ? pdResolveColorId(pdp) : (pdp.colorId >= 0 ? pdp.colorId : -1)) : -1;
+                      var pdColor = pdIdx >= 0 && pdColors && pdIdx < pdClen ? pdColors[pdIdx] : null;
+                      var pdTargetCanvas = pdGetTintedMmpb(pdColor);
+                      if (pdp && pdTargetCanvas) {
+                        // Draw mmpb.shp tinted to player's color, centered on position
+                        px.drawImage(pdTargetCanvas,
+                          Math.round(pdcx - pdTargetCanvas.width * pdMmpbScale / 2),
+                          Math.round(pdcy - pdTargetCanvas.height * pdMmpbScale / 2),
+                          Math.round(pdTargetCanvas.width * pdMmpbScale),
+                          Math.round(pdTargetCanvas.height * pdMmpbScale));
+                      } else {
+                        // Empty slot: black dot
+                        var pdR = (pdDotSize + 0.5) * 0.75;
+                        px.fillStyle = "rgb(0,0,0)";
+                        px.fillRect(Math.round(pdcx - pdR) + 1, Math.round(pdcy - pdR), Math.round(pdR * 2), Math.round(pdR * 2));
+                      }
+                    }
+                    if (pdOldOrigin !== void 0) _IsoCoords.IsoCoords.worldOrigin = pdOldOrigin;
+                  } catch (e) {
+                    console.warn("[MapPrev] Failed to draw start dots", e);
+                  }
+                }
+                if (!f.mapPreviewUrl) f.mapPreviewUrl = pv.toDataURL();
+              } catch (e) {
+                console.warn("Failed to create map preview for loading screen", e);
+              }
               let u;
               try {
                 u = await this.gameLoader.load(d.gameId, d.timestamp, g, t, p, this.isSinglePlayer, f, i);
