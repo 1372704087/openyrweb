@@ -251,3 +251,49 @@ feat(gattling): 重构加特林武器系统，还原原版YR计时器逻辑
 3. 快速连续射击时检查声音无重叠，阶段切换时旧音效立即停止。  
 4. 验证 Gattling 单位优先攻击空中目标，地面目标不被忽略。  
 5. 单位销毁时所有声音立即停止，无残留循环。
+
+feat(mindcontrol): 重构精神控制系统，引入超载机制与 Verses 检查
+
+- 🔥 **移除自定义 YURIX 英雄单位**  
+  删除 `rulescd.ini` 中 YURIX 单位及其相关武器/Warhead 定义，将建筑控制逻辑迁移至原生 `ControllerBuilding` 武器。
+
+- ⚙️ **精神控制机制重构**  
+  - 武器 `Damage` 值现作为“安全容量”，`InfiniteMindControl` 标志启用超载模式。  
+  - `MindControllerTrait` 构造参数从 `mindControlCap/overload` 改为 `damage/overloadEnabled`。  
+  - 非超载模式：容量满时释放最旧目标（FIFO）；超载模式：允许多于容量目标，每帧计算分级自伤（`OverloadCount`/`Damage`/`Frames`），并触发寄生虫式摇晃特效。
+
+- 🎯 **Verses 机制修复**  
+  移除精神控制 Warhead 对 Verses 的绕过，现在 `Controller` 武器对建筑护甲 0% 伤害（不能控制建筑），`ControllerBuilding` 武器 100% 伤害（可以控制建筑），与 YR 原版一致。
+
+- 🎨 **视觉反馈升级**  
+  - 新增 `PipScale.MindControl` 类型，Pip 显示绿色（安全）或红色（超载）点，数量为当前控制目标数。  
+  - `MindControlLinkPlugin` 双向链接：控制器视角显示到所有目标的连线，被控单位视角显示回指控制器的连线。  
+  - `MindControlLinkFx` 增加正弦弧线、端点圆点（面向相机）及颜色呼吸动画。
+
+- 🎵 **音效反馈完善**  
+  - 超载死亡时播放 `MasterMindOverloadDeathSound`。  
+  - 目标被释放时播放 `MindClearedSound`。
+
+- 🔧 **规则系统扩展**  
+  - `CombatDamageRules` 新增超载配置数组（`OverloadCount/Damage/Frames`）及控制动画类型。  
+  - `WeaponRules` 新增 `InfiniteMindControl` 标志。  
+  - `TechnoRules` 移除 `MindControlCap`，保留 `MindControlOverload` 用于回退。  
+  - `PipScale` 枚举移至独立模块。
+
+- 🛡️ **防御性改进**  
+  - `TransportTrait` 增加 null 检查。  
+  - `Strings` 去重缺失警告，避免控制台刷屏。  
+  - `ParasiteSparkFxHandler` 允许在控制器自身触发（用于超载自伤反馈）。
+
+### ⚠️ 破坏性变更
+- 自定义 YURIX 单位不再可用（原功能由 `ControllerBuilding` 武器替代）。  
+- `MindControllerTrait` 构造函数签名变更（参数从 `cap, overload` 改为 `damage, overloadEnabled`）。  
+- `TechnoRules.mindControlCap` 已移除，现有 Mod 需使用武器 `Damage` 控制容量。  
+- Verses 检查生效，`Controller` 武器不能控制建筑（需改用 `ControllerBuilding`）。
+
+### 🧪 测试建议
+1. **容量行为**：Yuri Clone 控制第 2 单位时释放第 1 个；Mastermind 控制超 3 单位后自伤并显示红色 Pip。  
+2. **超载自伤**：验证分级伤害、摇晃效果及超载死亡音效。  
+3. **视觉链接**：选中控制器时显示连线；选中被控单位时显示回指连线。  
+4. **Verses 检查**：Yuri Clone/Mastermind 无法控制建筑；带 `ControllerBuilding` 弹头的武器可控制。  
+5. **边界情况**：控制器被 Chrono/铁幕时释放所有目标；被控单位死亡时从列表移除；重复控制同一单位仅保留一次。

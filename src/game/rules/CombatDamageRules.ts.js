@@ -63,6 +63,14 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               (this.ivanIconFlickerRate = e.getNumber("IvanIconFlickerRate")),
               (this.ivanTimedDelay = e.getNumber("IvanTimedDelay")),
               (this.ivanWarhead = e.getString("IvanWarhead")),
+              // OpenYRWeb: Mastermind overload tiers (vanilla YR [CombatDamage]).
+              (this.overloadCount = e.getArray("OverloadCount")),
+              (this.overloadDamage = e.getArray("OverloadDamage")),
+              (this.overloadFrames = e.getArray("OverloadFrames")),
+              // OpenYRWeb: mind-control visual feedback (vanilla YR [CombatDamage]).
+              (this.controlledAnimationType = e.getString("ControlledAnimationType")),
+              (this.permaControlledAnimationType = e.getString("PermaControlledAnimationType")),
+              (this.mindControlAttackLineFrames = e.getNumber("MindControlAttackLineFrames", 20)),
               (this.splashList = e.getArray("SplashList")),
               (this.v3EliteWarhead = e.getString("V3EliteWarhead")),
               (this.v3Warhead = e.getString("V3Warhead")));

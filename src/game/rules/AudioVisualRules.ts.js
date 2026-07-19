@@ -56,6 +56,9 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.dominatorFirstAnim = e.getString("DominatorFirstAnim")),
               (this.dominatorSecondAnim = e.getString("DominatorSecondAnim")),
               (this.dominatorFireAtPercentage = e.getNumber("DominatorFireAtPercentage", 100)),
+              // OpenYRWeb: Mastermind overload death + mind-control release sounds.
+              (this.masterMindOverloadDeathSound = e.getString("MasterMindOverloadDeathSound")),
+              (this.mindClearedSound = e.getString("MindClearedSound")),
               (this.ironCurtainInvokeAnim = e.getString("IronCurtainInvokeAnim")),
               (this.messageDuration = e.getNumber("MessageDuration", 10)),
               (this.metallicDebris = e.getArray("MetallicDebris")),

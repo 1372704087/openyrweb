@@ -260,14 +260,12 @@ System.register(
               return !0;
             }
             checkArmor(e, t, i) {
-              // OpenYRWeb (2026-06-30, REVERSED): a mindControl warhead must be selectable against
-              // ANY techno regardless of its Verses (vanilla Yuri Prime's Controller warhead uses
-              // all-0% Verses yet must target buildings to mind-control them). Without this bypass
-              // a 0%-Verses mindControl warhead is rejected by checkArmor for None-armored targets
-              // (buildings default to Armor=None), so Yuri X can never fire at — hence never
-              // mind-control — a building. Mind-control does no damage; Verses is irrelevant.
+              // OpenYRWeb: mind-control warheads follow their Verses just like normal weapons.
+              // Controller (Yuri Clone/Mastermind) has 0% against building armors -> cannot target
+              // buildings. ControllerBuilding (Yuri X) has 100% against all armors -> can target
+              // buildings. IvanBomb/bombDisarm/nukeMaker still bypass verses.
               var r =
-                e.ivanBomb || e.bombDisarm || e.nukeMaker || e.mindControl ? 1 : e.verses.get(t);
+                e.ivanBomb || e.bombDisarm || e.nukeMaker ? 1 : e.verses.get(t);
               return void 0 === r
                 ? (console.warn(`Unhandled ArmorType ${s.ArmorType[t]} in warhead ${e.name} verses`), !1)
                 : !(100 * r <= (i ? 1 : 0));

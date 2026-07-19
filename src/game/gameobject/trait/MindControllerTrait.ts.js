@@ -2,11 +2,11 @@
 // deps: ["game/gameobject/trait/interface/NotifyUnspawn","game/gameobject/trait/interface/NotifyTick"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Mind controller (Yuri Mastermind / Yuri X). Holds up to `maxCapacity`
-// controlled targets. Vanilla YR Mastermind: capacity 3 (hardcoded; we expose via
-// MindControlCap=, default 3 here to match the cookgreen OpenRA mod `mind: Capacity: 3`),
-// and does NOT evict on overflow — instead the controller takes escalating self-damage
-// ("brain overload") when controlling more than its safe cap.
+// OpenYRWeb: Mind controller (Yuri Clone / Yuri X / Mastermind). Holds `maxCapacity` as the
+// "safe" cap. Vanilla YR Mastermind: no hard cap — it can exceed `maxCapacity` but takes
+// escalating self-damage ("brain overload") when over cap. Normal cap-1 controllers
+// (Yuri Clone / Yuri X) release the oldest controlled target and take the new one when
+// ordered to switch.
 //
 // Overload self-damage aligns with the cookgreen OpenRA mod:
 //   `SelfHealing@Overload: PercentageStep: -5` => the controller loses 5% of its MAX HP
@@ -18,15 +18,19 @@
 // chrono'd (Temporal/warped-out), OR is iron-curtained (invulnerable). All three release
 // the controlled targets back to their previous owner.
 //
-// `overloadEnabled` gates the self-damage loop so normal Yuri infantry (cap 1, no
-// MindControlOverload=yes) are unaffected even if their cap were exceeded.
+// `overloadEnabled` gates the self-damage loop and blocks target switching so Mastermind
+// overloads instead of replacing controlled units.
 
 System.register(
   "game/gameobject/trait/MindControllerTrait",
-  ["game/gameobject/trait/interface/NotifyUnspawn", "game/gameobject/trait/interface/NotifyTick"],
+  [
+    "game/gameobject/trait/interface/NotifyUnspawn",
+    "game/gameobject/trait/interface/NotifyTick",
+    "game/GameSpeed",
+  ],
   function (e, t) {
     "use strict";
-    var i, k;
+    var i, k, GS;
     t && t.id;
     return {
       setters: [
@@ -35,6 +39,9 @@ System.register(
         },
         function (e) {
           k = e;
+        },
+        function (e) {
+          GS = e;
         },
       ],
       execute: function () {
@@ -54,21 +61,32 @@ System.register(
               return 0 < this.targets.length;
             }
             isAtCapacity() {
-              // OpenYRWeb: `>=` (not `===`). Once over cap, the AI must STILL stop acquiring so
-              // overload damage can ramp; with `===` an over-cap controller resumed firing and
-              // stacked targets indefinitely. Vanilla blocks acquisition while count >= cap.
+              // OpenYRWeb: overload-enabled controllers (Mastermind) have no hard cap;
+              // they can always acquire more targets beyond maxCapacity (but take self-damage).
+              if (this.overloadEnabled) return !1;
               return this.targets.length >= this.maxCapacity;
             }
             getTargets() {
               return this.targets;
             }
-            // OpenYRWeb: do NOT evict on overflow. Beyond-capacity is handled by the
-            // brain-overload self-damage in NotifyTick below (vanilla YR behaviour).
             control(e, t) {
               if (!this.gameObject) throw new Error("Trait already disposed");
               if (!e.mindControllableTrait) throw new Error(`Target "${e.name}" cannot be mind controlled`);
               if (e.isDisposed) throw new Error(`Target "${e.name}" is disposed`);
+              // OpenYRWeb: overload-enabled controllers (Mastermind) have no hard cap;
+              // they can exceed maxCapacity but take self-damage via onTick.
+              if (!this.overloadEnabled && this.targets.length >= this.maxCapacity) {
+                // OpenYRWeb: vanilla YR cap-1 controllers (Yuri Clone / Yuri X) release the
+                // oldest controlled target and take the new one when ordered to switch.
+                var i = this.targets.shift();
+                i && i.mindControllableTrait && i.mindControllableTrait.restore(t);
+              }
               ((e.mindControllableTrait.controlBy(this.gameObject, t), this.targets.push(e)));
+              // OpenYRWeb: draw the mind-control attack line for MindControlAttackLineFrames
+              // regardless of selection state (vanilla YR [CombatDamage]).
+              var frames = t.rules.combatDamage.mindControlAttackLineFrames;
+              frames > 0 &&
+                (e._mindControlAttackLineEnd = performance.now() + (frames * 1000) / GS.GameSpeed.BASE_TICKS_PER_SECOND);
             }
             cleanTarget(e) {
               var t = this.targets.indexOf(e);
@@ -96,19 +114,33 @@ System.register(
                 } catch (err) {}
               }
               if (!this.overloadEnabled) return;
-              var n = this.targets.length;
-              if (n <= this.maxCapacity) {
+              var n = this.targets.length,
+                o = t.rules.combatDamage,
+                l = o.overloadCount,
+                c = 0;
+              for (; c < l.length && !(n <= l[c]); c++);
+              c >= l.length && (c = l.length - 1);
+              var d = o.overloadDamage[c] || 0,
+                f = o.overloadFrames[c] || 1;
+              if (d <= 0) {
                 this._overloadTicks = 0;
                 return;
               }
-              // OpenYRWeb: cookgreen alignment — -5% of MAX HP every tick while over cap.
+              this._overloadTicks = (this._overloadTicks || 0) + 1;
+              if (this._overloadTicks < f) return;
+              this._overloadTicks = 0;
               var h = this.gameObject.healthTrait;
               if (h) {
-                var dmg = Math.max(1, Math.round(h.maxHitPoints * 0.05));
-                // attackerInfo = { obj: void 0 } => no enemy credited (self-overload).
-                h.inflictDamage(dmg, { obj: void 0 }, t);
+                // OpenYRWeb: inflictDamage dispatches InflictDamageEvent which triggers parasite
+                // white sparks (via ParasiteSparkFxHandler) and other damage visuals.
+                h.inflictDamage(d, { obj: this.gameObject }, t);
+                // OpenYRWeb: parasite-style rocking (Terror Drone shaking effect).
+                typeof this.gameObject.applyRocking === "function" &&
+                  this.gameObject.applyRocking(90 * (t.generateRandom() < 0.5 ? 1 : -1), 1);
                 if (h.getHitPoints() <= 0 && !this.gameObject.isDestroyed) {
                   // destroyObject(undefined attacker) skips score bookkeeping (!i branch).
+                  // OpenYRWeb: flag so SoundHandler can play MasterMindOverloadDeathSound.
+                  this.gameObject._mindOverloadDeath = !0;
                   t.destroyObject(this.gameObject, void 0);
                 }
               }

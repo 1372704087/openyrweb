@@ -12,6 +12,7 @@ System.register(
     "engine/gfx/TextureUtils",
     "game/gameobject/selection/SelectionLevel",
     "game/type/PipColor",
+    "game/type/PipScale",
     "util/disposable/CompositeDisposable",
     "engine/gfx/OverlayUtils",
     "engine/renderable/fx/RallyPointFx",
@@ -29,7 +30,7 @@ System.register(
   ],
   function (e, t) {
     "use strict";
-    var i, g, d, p, m, a, u, f, r, s, n, o, y, T, v, b, l, S, w, c, h, E, C, x, O, A, M, R;
+    var i, g, d, p, m, a, u, ps, f, r, s, n, o, y, T, v, b, l, S, w, c, h, E, C, x, O, A, M, R;
     t && t.id;
     return {
       setters: [
@@ -53,6 +54,9 @@ System.register(
         },
         function (e) {
           u = e;
+        },
+        function (e) {
+          ps = e;
         },
         function (e) {
           f = e;
@@ -473,35 +477,52 @@ System.register(
                 return (this.disposables.add(i, t), new THREE.LineSegments(i, t));
               }
               createBuildingOccupationInfo(r) {
-                var isBioReactor = !!r.bioReactorPowerTrait;
+                var isInfantryAbsorb = r.rules.infantryAbsorb,
+                  isMindControl = r.rules.pipScale === ps.PipScale.MindControl;
                 // Bio reactor shows pips even when empty (only to owner/allies).
                 // Standard garrison only shows when occupied.
-                if ((isBioReactor || r.garrisonTrait?.units.length) && !this.objectIsOpaqueToViewer()) {
-                  var s = r.garrisonTrait?.units?.length || 0,
+                // MindControl shows pips even when empty, green for occupied, red for overload.
+                if (
+                  (isInfantryAbsorb || isMindControl || r.garrisonTrait?.units.length) &&
+                  !this.objectIsOpaqueToViewer()
+                ) {
+                  var s, a, o, l;
+                  if (isMindControl) {
+                    s = r.mindControllerTrait?.getTargets().length || 0;
+                    a = r.mindControllerTrait?.maxCapacity || 3;
+                    o = R.pipsFile.getImage(0); // empty frame
+                    l = R.pipsFile.getImage(1); // green frame
+                  } else if (isInfantryAbsorb) {
+                    // InfantryAbsorb=yes: use pips.shp frames 0/3 (white bar style), capacity from Passengers=
+                    s = r.garrisonTrait?.units?.length || 0;
+                    a = r.rules.passengers || 1;
+                    o = R.pipsFile.getImage(0);
+                    l = R.pipsFile.getImage(3);
+                  } else {
+                    s = r.garrisonTrait?.units?.length || 0;
                     a = r.rules.maxNumberOccupants;
-                  var n = 4 * p.Coords.ISO_WORLD_SCALE,
-                    o = R.pipsFile.getImage(isBioReactor ? 0 : 6),
-                    l = R.pipsFile.getImage(isBioReactor ? 3 : 7);
-                  if (!isBioReactor) {
-                    // Standard garrison: soldier pips, single material
-                    let t = [];
-                    for (let i = 1; i <= a; i++) {
-                      var c = i <= s ? l : o;
-                      let e = R.geometries.get(c).clone();
-                      c = n * i + n / 2;
-                      (e.applyMatrix(
-                        new THREE.Matrix4().makeTranslation(c, 0, r.art.foundation.height * p.Coords.getWorldTileSize()),
-                      ),
-                        t.push(e));
-                    }
-                    var h = y.BufferGeometryUtils.mergeBufferGeometries(t);
-                    let e = this.useSpriteBatching
-                      ? new v.BatchedMesh(h, R.material, v.BatchMode.Merging)
-                      : new THREE.Mesh(h, R.material);
-                    return ((e.matrixAutoUpdate = !1), (e.renderOrder = 999999), e);
+                    o = R.pips2File.getImage(6);
+                    l = R.pips2File.getImage(7);
                   }
-                  // Bio Reactor: frame 3 = white health-bar pip (SHP preset), frame 0 = empty.
-                  // Same single-material approach as standard garrison.
+                  var n = 4 * p.Coords.ISO_WORLD_SCALE;
+                  // MindControl uses different per-pip color (green/red); Bio/standard use same material.
+                  if (isMindControl) {
+                    var mindPips = [];
+                    for (let pi = 1; pi <= a; pi++) {
+                      let ge = R.geometries.get(pi <= s ? l : o).clone();
+                      var px = n * pi + n / 2;
+                      ge.applyMatrix(
+                        new THREE.Matrix4().makeTranslation(px, 0, r.art.foundation.height * p.Coords.getWorldTileSize()),
+                      );
+                      mindPips.push(ge);
+                    }
+                    var merged = y.BufferGeometryUtils.mergeBufferGeometries(mindPips);
+                    let me = this.useSpriteBatching
+                      ? new v.BatchedMesh(merged, R.material, v.BatchMode.Merging)
+                      : new THREE.Mesh(merged, R.material);
+                    return ((me.matrixAutoUpdate = !1), (me.renderOrder = 999999), me);
+                  }
+                  // All building pips: single-material approach
                   let t = [];
                   for (let i = 1; i <= a; i++) {
                     var c = i <= s ? l : o;
@@ -532,11 +553,13 @@ System.register(
                     if (r < s.length) {
                       var h = s[r];
                       let e = a ? n : 3;
-                      (h === u.PipColor.Blue
-                        ? (e = 5)
-                        : h === u.PipColor.Red
-                          ? (e = 4)
-                          : h === u.PipColor.Yellow && (e = 2),
+                      (h === u.PipColor.Green
+                        ? (e = 1)
+                        : h === u.PipColor.Blue
+                          ? (e = 5)
+                          : h === u.PipColor.Red
+                            ? (e = 4)
+                            : h === u.PipColor.Yellow && (e = 2),
                         (t = R.pips2File.getImage(e)));
                     } else t = c;
                     let e = R.geometries.get(t).clone();
@@ -929,6 +952,19 @@ System.register(
                   let i = [],
                     e = void 0;
                   var s, a;
+                  // OpenYRWeb: PipScale=MindControl — green/red pips for controlled targets.
+                  if (t.rules.pipScale === ps.PipScale.MindControl) {
+                    var total = t.mindControllerTrait.getTargets().length,
+                      safe = t.mindControllerTrait.maxCapacity,
+                      pipCount = Math.max(safe, total);
+                    for (let p = 0; p < pipCount; p++) {
+                      if (p < total)
+                        i.push(p < safe ? u.PipColor.Green : u.PipColor.Red);
+                      // else leave empty (no pip → show blank slot)
+                    }
+                    e = pipCount;
+                    r = this.createPipsSprite(i, e);
+                  } else
                   (t.harvesterTrait && 0 < t.rules.storage
                     ? ((e = 5),
                       (a = t.rules.storage),
@@ -973,13 +1009,19 @@ System.register(
                 let t = void 0;
                 return (
                   e.isBuilding()
-                    ? (t = e.garrisonTrait?.units.length)
+                    ? (t = e.rules.pipScale === ps.PipScale.MindControl
+                      ? (e.mindControllerTrait?.getTargets().length || 0) + "_" + (e.mindControllerTrait?.maxCapacity || 3)
+                      : e.rules.infantryAbsorb
+                        ? (e.garrisonTrait?.units?.length || 0) + "_" + (e.rules.passengers || 0)
+                        : e.garrisonTrait?.units.length)
                       : e.isVehicle()
-                        ? e.harvesterTrait
-                          ? (t = e.harvesterTrait.ore + "_" + e.harvesterTrait.gems)
-                          : e.transportTrait
-                            ? (t = e.transportTrait.units.length)
-                            : e.airSpawnTrait && (t = e.airSpawnTrait.availableSpawns)
+                        ? e.mindControllerTrait
+                          ? (t = e.mindControllerTrait.getTargets().length + "_" + e.mindControllerTrait.maxCapacity)
+                          : e.harvesterTrait
+                            ? (t = e.harvesterTrait.ore + "_" + e.harvesterTrait.gems)
+                            : e.transportTrait
+                              ? (t = e.transportTrait.units.length)
+                              : e.airSpawnTrait && (t = e.airSpawnTrait.availableSpawns)
                         : e.isInfantry() && e.harvesterTrait
                           ? (t = e.harvesterTrait.ore + "_" + e.harvesterTrait.gems)
                           : e.isAircraft() && (t = e.ammo),

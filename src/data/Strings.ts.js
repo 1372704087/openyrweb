@@ -20,7 +20,9 @@ System.register("data/Strings", ["sprintf-js", "data/CsfFile"], function (e, t) 
         "Strings",
         (s = class {
           constructor(e) {
-            ((this.data = {}), e instanceof i.CsfFile ? this.fromCsf(e) : "object" == typeof e && this.fromJson(e));
+            ((this.data = {}),
+              (this.warnedKeys = new Set()),
+              e instanceof i.CsfFile ? this.fromCsf(e) : "object" == typeof e && this.fromJson(e));
           }
           fromCsf(e) {
             this.fromJson(e.data);
@@ -45,7 +47,9 @@ System.register("data/Strings", ["sprintf-js", "data/CsfFile"], function (e, t) 
                 : (t.length && (i = r.sprintf(i, ...t)), i)
               : e.match(/^NOSTR:/i)
                 ? e.replace(/^NOSTR:/i, "")
-                : (console.warn(`String with name "${e}" not found"`), e);
+                : (this.warnedKeys.has(e.toLowerCase()) ||
+                    (this.warnedKeys.add(e.toLowerCase()), console.warn(`String with name "${e}" not found"`)),
+                  e);
           }
         }),
       );

@@ -380,9 +380,15 @@ System.register(
                     ((n.tntChargeTrait = new F.TntChargeTrait()), n.traits.add(n.tntChargeTrait)),
                   n.rules.immuneToPsionics ||
                     ((n.mindControllableTrait = new _.MindControllableTrait(n)), n.traits.add(n.mindControllableTrait)),
-                  [n.primaryWeapon, n.secondaryWeapon].some((e) => e?.warhead.rules.mindControl) &&
-                    ((n.mindControllerTrait = new U.MindControllerTrait(n, n.rules.mindControlCap, n.rules.mindControlOverload)),
-                    n.traits.add(n.mindControllerTrait)),
+                  ((e) => {
+                    if (e) {
+                      // OpenYRWeb: use weapon-level InfiniteMindControl=yes flag for overload
+                      // behavior; falls back to unit-level MindControlOverload INI field.
+                      var _overload = n.rules.mindControlOverload || e.rules.infiniteMindControl;
+                      n.mindControllerTrait = new U.MindControllerTrait(n, e.rules.damage, _overload);
+                      n.traits.add(n.mindControllerTrait);
+                    }
+                  })([n.primaryWeapon, n.secondaryWeapon].find((e) => e?.warhead.rules.mindControl)),
                   n.rules.spawns && ((n.airSpawnTrait = new V.AirSpawnTrait()), n.traits.add(n.airSpawnTrait)),
                   n.rules.maxDebris && n.traits.add(new W.SpawnDebrisTrait())),
                 n.isTechno() || n.isOverlay() || n.isTerrain())

@@ -47,7 +47,7 @@ System.register(
             ((this.obj = e), (this.units = []), (this.loadQueue = []));
           }
           unitFitsInside(e) {
-            return e.rules.size <= this.obj.rules.sizeLimit && e.rules.size <= this.getAvailableCapacity();
+            return !!e && e.rules.size <= this.obj.rules.sizeLimit && e.rules.size <= this.getAvailableCapacity();
           }
           getOccupiedCapacity() {
             return this.units.reduce((e, t) => e + t.rules.size, 0);

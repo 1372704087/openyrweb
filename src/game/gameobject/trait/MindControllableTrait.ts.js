@@ -42,6 +42,8 @@ System.register(
           restore(t) {
             if (this.prevOwner) {
               let e = this.prevOwner;
+              // OpenYRWeb: flag so SoundHandler can play MindClearedSound on owner restore.
+              this.gameObject._mindCleared = !0;
               (this.prevOwner.defeated && (e = t.getCivilianPlayer()),
                 t.changeObjectOwner(this.gameObject, e),
                 (this.prevOwner = void 0),

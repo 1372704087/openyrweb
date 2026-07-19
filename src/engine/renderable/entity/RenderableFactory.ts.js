@@ -235,7 +235,7 @@ System.register(
                     this.worldSound &&
                     r.push(new b.MoveSoundFxPlugin(e, n, this.worldSound))),
                   r.push(new w.ChronoSparkleFxPlugin(e, this.rules.audioVisual.chronoSparkle1)),
-                  e.mindControllerTrait && r.push(new C.MindControlLinkPlugin(e, s, this.alliances, this.localPlayer)),
+                  (e.mindControllerTrait || e.mindControllableTrait) && r.push(new C.MindControlLinkPlugin(e, s, this.alliances, this.localPlayer, this.camera)),
                   // OpenYRWeb: continuous Magnetron tractor beam while dragging a target.
                   e.isUnit() && r.push(new Mb.MagnetronBeamPlugin(e)));
                 let t;

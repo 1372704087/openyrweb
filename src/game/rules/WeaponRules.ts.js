@@ -103,6 +103,11 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.name = this.rules.name),
               (this.neverUse = this.rules.getBool("NeverUse")),
               (this.omniFire = this.rules.getBool("OmniFire")),
+              // OpenYRWeb: InfiniteMindControl=yes marks a mind-control weapon that has no hard
+              // capacity cap — the controller can acquire unlimited targets, but takes escalating
+              // overload self-damage when exceeding its safe capacity (weapon Damage). Vanilla YR
+              // Mastermind (MIND) uses this behavior; Yuri Clone / Yuri X do not.
+              (this.infiniteMindControl = this.rules.getBool("InfiniteMindControl")),
               (this.projectile = this.rules.getString("Projectile")),
               (this.radLevel = this.rules.getNumber("RadLevel")),
               (this.range = this.rules.getNumber("Range")),

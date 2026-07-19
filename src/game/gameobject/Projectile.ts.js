@@ -595,17 +595,10 @@ System.register(
                     !o.areFriendly(n, this.fromObject) &&
                     r.canDamage(n, l, s) &&
                     !n.invulnerableTrait.isActive() &&
-                    // OpenYRWeb (2026-06-30, REVERSED @ yrmd.exe): vanilla has NO "BuildingMindControl"
-                    // flag (the string is absent from the binary; only ImmuneToPsionics gates the
-                    // TARGET). Any MindControl=yes warhead controls any non-immune techno, buildings
-                    // included — Yuri Prime (and regular Yuri) mind-control buildings by default.
-                    // The earlier `(!n.isBuilding() || r.rules.buildingMindControl)` gate was a
-                    // reconstruction artifact: it blocked building control for every warhead that
-                    // lacked the non-vanilla BuildingMindControl=yes key, so a MindControl weapon
-                    // could be SELECTED against a building (via the checkArmor Verses bypass) yet
-                    // never take effect — exactly the reported "can attack, no result" symptom.
-                    // Removed so building control follows vanilla (ImmuneToPsionics still blocks via
-                    // the mindControllableTrait attachment check in ObjectFactory).
+                    // OpenYRWeb: mind control respects Verses. Controller has 0% against building
+                    // armors (Yuri Clone/Mastermind cannot control buildings); ControllerBuilding
+                    // has 100% (Yuri X can control buildings).
+                    0 < r.rules.verses.get(n.rules.armor) &&
                     this.fromObject.mindControllerTrait.control(n, o)),
                 r.rules.temporal &&
                   ((h = !1),

@@ -46,7 +46,7 @@ System.register(
                     (t.target.isVehicle() || t.target.isAircraft()) &&
                     t.attacker?.obj &&
                     !t.attacker.obj.rules.organic &&
-                    t.target.parasiteableTrait?.getParasite() === t.attacker.obj &&
+                    (t.target.parasiteableTrait?.getParasite() === t.attacker.obj || t.target === t.attacker.obj) &&
                     0 < t.target.healthTrait.health
                   ) {
                     let e = t.target.position.worldPosition.clone();

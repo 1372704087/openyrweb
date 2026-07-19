@@ -5306,6 +5306,12 @@
       "bytes": 252
     },
     {
+      "name": "game/type/PipScale",
+      "file": "game/type/PipScale.ts.js",
+      "deps": [],
+      "bytes": 435
+    },
+    {
       "name": "game/api/index",
       "file": "game/api/index.ts.js",
       "deps": [

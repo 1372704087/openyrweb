@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/rules/TechnoRules ===
-// deps: ["engine/type/ObjectType","game/SideType","game/type/SpeedType","game/type/PipColor","game/type/LocomotorType","game/type/MovementZone","game/type/ArmorType","game/type/LandTargeting","game/type/NavalTargeting","game/rules/ObjectRules","game/WeaponType","game/gameobject/unit/VeteranAbility","game/type/VhpScan","game/math/Vector3"]
+// deps: ["engine/type/ObjectType","game/SideType","game/type/SpeedType","game/type/PipColor","game/type/PipScale","game/type/LocomotorType","game/type/MovementZone","game/type/ArmorType","game/type/LandTargeting","game/type/NavalTargeting","game/rules/ObjectRules","game/WeaponType","game/gameobject/unit/VeteranAbility","game/type/VhpScan","game/math/Vector3"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -9,6 +9,7 @@ System.register(
     "game/SideType",
     "game/type/SpeedType",
     "game/type/PipColor",
+    "game/type/PipScale",
     "game/type/LocomotorType",
     "game/type/MovementZone",
     "game/type/ArmorType",
@@ -22,7 +23,7 @@ System.register(
   ],
   function (t, e) {
     "use strict";
-    var s, a, n, o, l, c, h, u, d, g, p, m, f, y, T, v, b;
+    var s, a, n, o, P, l, c, h, u, d, g, p, m, f, y, T, v, b;
     e && e.id;
     return {
       setters: [
@@ -37,6 +38,9 @@ System.register(
         },
         function (e) {
           o = e;
+        },
+        function (e) {
+          P = e;
         },
         function (e) {
           l = e;
@@ -239,11 +243,8 @@ System.register(
                 (this.immune = this.ini.getBool("Immune")),
                 (this.immuneToRadiation = this.ini.getBool("ImmuneToRadiation")),
                 (this.immuneToPsionics = this.ini.getBool("ImmuneToPsionics")),
-                // OpenYRWeb: MindControlCap — how many units a mind-controller (e.g. Yuri Mastermind)
-                // can hold simultaneously. Default 3 to match vanilla YR Mastermind and the cookgreen
-                // OpenRA mod (`mind: MindController: Capacity: 3`). Over-capacity does NOT evict —
-                // the controller takes escalating overload self-damage instead (see MindControllerTrait).
-                (this.mindControlCap = this.ini.getNumber("MindControlCap", 3)),
+                // OpenYRWeb: MindControlOverload — enables infinite mind control with self-damage
+                // when exceeding the weapon's Damage (safe capacity). Used by Mastermind (MIND).
                 (this.mindControlOverload = this.ini.getBool("MindControlOverload", !1)),
                 (this.typeImmune = this.ini.getBool("TypeImmune")),
                 (this.damageSelf = this.ini.getBool("DamageSelf")),
@@ -333,6 +334,8 @@ System.register(
                 (this.burstDelay = this.parseBurstDelay()),
                 (this.vhpScan = this.ini.getEnum("VHPScan", f.VhpScan, f.VhpScan.None, !0)),
                 (this.pip = this.ini.getEnum("Pip", o.PipColor, o.PipColor.Green, !0)),
+                // OpenYRWeb: PipScale — determines the type of pips shown below units.
+                (this.pipScale = this.ini.getEnum("PipScale", P.PipScale, P.PipScale.None, !0)),
                 (this.passengers = this.ini.getNumber("Passengers")),
                 (this.gunner = this.ini.getBool("Gunner")),
                 (this.ammo = this.ini.getNumber("Ammo", -1)),

@@ -358,6 +358,8 @@ System.register(
                                       ? (i = N.SoundKey.BombAttachSound)
                                       : t.fromWeapon.warhead.rules.mindControl &&
                                         (i = N.SoundKey.YuriMindControlSound)),
+                        // OpenYRWeb: Mastermind that died from brain overload uses its special sound.
+                        t._mindOverloadDeath && (i = this.game.rules.audioVisual.masterMindOverloadDeathSound || i),
                         i)
                       ) {
                         let e;
@@ -388,6 +390,17 @@ System.register(
                       if (e._slavesLiberated) {
                         var freeSound = this.game.rules.general.slavesFreeSound;
                         freeSound && this.worldSound.playEffect(freeSound, e, e.owner);
+                      }
+                    }
+                    break;
+                  case L.EventType.ObjectOwnerChange:
+                    {
+                      let e = r.target;
+                      // OpenYRWeb: play MindClearedSound when a mind-controlled unit is released.
+                      if (e._mindCleared) {
+                        e._mindCleared = !1;
+                        var clearedSound = this.game.rules.audioVisual.mindClearedSound;
+                        clearedSound && this.worldSound.playEffect(clearedSound, e, e.owner);
                       }
                     }
                     break;
