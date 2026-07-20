@@ -53,7 +53,7 @@ System.register(
               (super(t), (this.player = e), (this.rules = t.rules));
             }
             computePurchaseCost(e) {
-              return this.game.sellTrait.computePurchaseValue(e, this.player);
+              return Math.round(e.cost * this.player.production.getCostBonusMultiplier(e.type));
             }
             updateAvailableObjects(t) {
               if (!this.player.production) throw new Error("Player is not a combatant");
@@ -134,7 +134,7 @@ System.register(
               let r = e.target.rules,
                 s = [...this.player.buildings],
                 a = !1;
-              if (Number.isFinite(r.buildLimit)) {
+              if (!this.player.production.cheatsBypassBuildLimits && Number.isFinite(r.buildLimit)) {
                 let e;
                 ((e =
                   0 <= r.buildLimit

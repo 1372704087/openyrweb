@@ -553,11 +553,7 @@ System.register(
                     (c || d || g) && this.updateImage(h),
                     d &&
                       this.currentAnimType === M.AnimationType.IDLE &&
-                      (this.setActiveAnimationVisible(),
-                        this.setAnimationVisibility(
-                          M.AnimationType.IDLE,
-                          !this.gameObject.bioReactorPowerTrait,
-                        )),
+                      (this.setActiveAnimationVisible(), this.setIdleAnimationVisible()),
                     g &&
                       h === p.DamageType.DESTROYED &&
                       this.objectRules.explosion.length &&
@@ -1158,10 +1154,24 @@ System.register(
                     }
                   }));
               }
+              setIdleAnimationVisible() {
+                let e = this.animArtProps.getByType(M.AnimationType.IDLE);
+                e.forEach(({ showWhenUnpowered: show }, t) => {
+                  let i = this.powered || show;
+                  if (this.gameObject.bioReactorPowerTrait) {
+                    i = i && !this.gameObject.garrisonTrait?.isOccupied();
+                  }
+                  try {
+                    this.setAnimationVisibility(M.AnimationType.IDLE, i, t);
+                  } catch (e) {
+                    if (!(e instanceof RangeError)) throw e;
+                  }
+                });
+              }
               setPowered(r) {
                 if (
                   ((this.powered = r),
-                  this.currentAnimType === M.AnimationType.IDLE && this.setActiveAnimationVisible(),
+                  this.currentAnimType === M.AnimationType.IDLE && (this.setActiveAnimationVisible(), this.setIdleAnimationVisible()),
                   this.objectRules.superWeapon && this.hasAnimation(M.AnimationType.SUPER))
                 ) {
                   var [t, i] = this.getNormalizedAnimType(M.AnimationType.SUPER_CHARGE_LOOP),
@@ -1171,7 +1181,7 @@ System.register(
                   i = s[i];
                   let e = this.animations.get(i);
                   r ? e.unpause() : e.pause();
-                } else
+                } else {
                   this.animObjects.get(M.AnimationType.ACTIVE).forEach((e, t) => {
                     let i = this.animations.get(e);
                     i &&
@@ -1179,6 +1189,14 @@ System.register(
                         ? i.pause()
                         : i.unpause());
                   });
+                  this.animObjects.get(M.AnimationType.IDLE).forEach((e, t) => {
+                    let i = this.animations.get(e);
+                    i &&
+                      (!r && this.animArtProps.getByType(M.AnimationType.IDLE)[t].pauseWhenUnpowered
+                        ? i.pause()
+                        : i.unpause());
+                  });
+                }
               }
               hasAnimation(e) {
                 return (
@@ -1300,7 +1318,9 @@ System.register(
                           this.gameObject.slaveMinerTrait &&
                             this.animObjects.get(M.AnimationType.IDLE).forEach((e) => {
                               e.setShadowVisible(!1);
-                            })));
+                            }),
+                          // Sync power state after IDLE becomes visible: if already unpowered, pause IdleAnim now.
+                          this.setPowered(this.powered)));
                 }
               }
               doWithAnimation(e, i) {

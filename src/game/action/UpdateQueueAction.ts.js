@@ -97,14 +97,16 @@ System.register(
                 ) {
                   let t;
                   var a = e.reduce((e, t) => e + t.quantity, 0);
-                  if (Number.isFinite(r.buildLimit)) {
+                  if (i.production.cheatsBypassBuildLimits || !Number.isFinite(r.buildLimit)) {
+                    t = Number.POSITIVE_INFINITY;
+                  } else {
                     let e;
                     ((e =
                       0 <= r.buildLimit
                         ? i.getOwnedObjectsByType(r.type, !0).filter((e) => e.name === r.name).length
                         : i.getLimitedUnitsBuilt(r.name)),
                       (t = Math.max(0, Math.abs(r.buildLimit) - (e + a))));
-                  } else t = Number.POSITIVE_INFINITY;
+                  }
                   t &&
                     i.production.isAvailableForProduction(r) &&
                     ((n = Math.min(s.maxSize - s.currentSize, s.maxItemQuantity - a, t)),

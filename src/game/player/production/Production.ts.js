@@ -12,10 +12,11 @@ System.register(
     "game/rules/GeneralRules",
     "game/SideType",
     "game/type/SuperWeaponType",
+    "game/gameobject/Building",
   ],
   function (e, t) {
     "use strict";
-    var n, r, i, a, s, o, u, l, c;
+    var n, r, i, a, s, o, u, d, l, c;
     t && t.id;
     return {
       setters: [
@@ -39,6 +40,9 @@ System.register(
         },
         function (e) {
           u = e;
+        },
+        function (e) {
+          d = e;
         },
       ],
       execute: function () {
@@ -79,7 +83,9 @@ System.register(
                   (this.veteranTypes = new Set()),
                   (this.stolenTech = new Set()),
                   // [CHEAT] 作弊调试用：为true时跳过工厂和前置建筑检查，使所有建筑/单位可建造。后续删除作弊时一并移除
-                  (this.cheatsBypassPrereqs = false));
+                  (this.cheatsBypassPrereqs = false),
+                  // [CHEAT] 作弊调试用：为true时突破建造数量限制。后续删除作弊时一并移除
+                  (this.cheatsBypassBuildLimits = false));
               }
               get onQueueUpdate() {
                 return this._onQueueUpdate.asEvent();
@@ -128,7 +134,7 @@ System.register(
                 return (
                   (this.cheatsBypassPrereqs || -1 !== e.techLevel) &&
                   e.techLevel <= this.maxTechLevel &&
-                  !(0 === e.buildLimit && !this.player.isAi) &&
+                  (this.cheatsBypassBuildLimits || !(0 === e.buildLimit && !this.player.isAi)) &&
                   !(
                     e.superWeapon &&
                     this.rules.getSuperWeapon(e.superWeapon).disableableFromShell &&
@@ -216,16 +222,20 @@ System.register(
               }
               // OpenYRWeb: Industrial Plant (NAINDP) cost bonus. Scans the player's buildings
               // for cost-bonus fields (UnitsCostBonus, InfantryCostBonus, etc.) and returns the
-              // best (lowest = cheapest) multiplier for the given object type. Returns 1 when no
-              // discount applies. Mirrors vanilla YR where each owned Industrial Plant reduces
-              // vehicle production cost by its UnitsCostBonus factor.
+              // product of all applicable multipliers for the given object type. Returns 1 when no
+              // discount applies.
+              // DESIGN NOTE: Multiple cost-bonus buildings intentionally stack multiplicatively
+              // (e.g. 0.75 * 0.75 = 0.5625), rather than taking the single best discount as in
+              // vanilla YR. This was requested explicitly; revert to Math.min() if balance needs
+              // to match original behavior.
               getCostBonusMultiplier(e) {
                 var t = e === i.ObjectType.Infantry ? "infantryCostBonus" : e === i.ObjectType.Vehicle ? "unitsCostBonus" : e === i.ObjectType.Aircraft ? "aircraftCostBonus" : e === i.ObjectType.Building ? "buildingsCostBonus" : null;
                 if (!t) return 1;
                 var r = 1;
                 for (var s of this.player.buildings) {
+                  if (s.buildStatus !== d.BuildStatus.Ready) continue;
                   var a = s.rules[t];
-                  void 0 !== a && a < r && (r = a);
+                  void 0 !== a && (r *= a);
                 }
                 return r;
               }

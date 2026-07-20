@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingAnimArtProps ===
+// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingAnimArtProps ===
 // deps: ["engine/renderable/entity/building/AnimationType","data/IniSection","engine/renderable/entity/building/BuildingAnimData","engine/type/ObjectType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -65,6 +65,8 @@ System.register(
                           o === u.AnimationType.UNBUILD && t.set("Reverse", "yes"));
                       else if (!t) throw new Error(`Missing building anim section "${a}"`);
                       ((e.art = t),
+                        // Vanilla defaults: ActiveAnim/IdleAnim pause on low power (Powered=yes required),
+                        // and remain visible unless PoweredLight=yes. INI can override via *Powered/*PoweredLight.
                         (e.pauseWhenUnpowered = c.getBool(s + "Powered", !0)),
                         (e.showWhenUnpowered = !c.getBool(s + "PoweredLight", !1)));
                       var n = c.getString(s + "Damaged");

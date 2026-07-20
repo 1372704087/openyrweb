@@ -793,7 +793,7 @@ System.register(
                     this.disposables.add(() => w.DevToolsApi.unregisterVar("cheats")),
                     (() => {
                       let _cheatMenu = null, _cheatInfMoneyTimer = null;
-                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, mapRevealed: false };
+                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, mapRevealed: false, bypassBuildLimit: false };
                       const _gs = this;
                       function _destroyCheatMenu() {
                         if (_cheatMenu) { _cheatMenu.remove(); _cheatMenu = null; }
@@ -848,6 +848,12 @@ System.register(
                         });
                         // [CHEAT] 秒建造：设置speedCheat为true，建造速度变为极快
                         addToggle("秒建造", () => _cheatState.fastBuild, () => { _cheatState.fastBuild = !_cheatState.fastBuild; sc.value = _cheatState.fastBuild; });
+                        // [CHEAT] 突破建造限制：允许超过单位的buildLimit数量限制
+                        addToggle("突破建造限制", () => _cheatState.bypassBuildLimit, () => {
+                          _cheatState.bypassBuildLimit = !_cheatState.bypassBuildLimit;
+                          const prod = lp.production;
+                          if (prod) prod.cheatsBypassBuildLimits = _cheatState.bypassBuildLimit;
+                        });
                         addSeparator();
                         // [CHEAT] 一次性增加10万金钱
                         addBtn("增加 100,000 金钱", () => { lp.credits += 100000; });
@@ -873,7 +879,14 @@ System.register(
                           if (!_cheatState.fastBuild) { _cheatState.fastBuild = true; sc.value = true; }
                           g.mapShroudTrait.revealMap(lp, g); _cheatState.mapRevealed = true;
                           const prod = lp.production;
-                          if (prod) { prod.maxTechLevel = 99; prod.addStolenTech(0); prod.addStolenTech(1); prod.addStolenTech(2); prod.cheatsBypassPrereqs = true; _cheatState.allTech = true; }
+                          if (prod) {
+                            prod.maxTechLevel = 99;
+                            prod.addStolenTech(0); prod.addStolenTech(1); prod.addStolenTech(2);
+                            prod.cheatsBypassPrereqs = true;
+                            prod.cheatsBypassBuildLimits = true;
+                            _cheatState.allTech = true;
+                            _cheatState.bypassBuildLimit = true;
+                          }
                           _destroyCheatMenu(); _createCheatMenu();
                         });
                         addSeparator();

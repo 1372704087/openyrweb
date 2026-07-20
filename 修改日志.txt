@@ -320,3 +320,35 @@ feat(loading): 实现游戏加载界面地图预览功能
 
 ### ⚠️ 依赖变更
 - 需确保游戏资源包含 `mmpb.shp`、`unitdes.pal`、`startbut.shp`、`shell.pal` 及地图的 `preview.bmp` 文件。
+
+feat(building): 重构建筑动画电源管理，新增成本加成累乘与作弊功能
+
+- 🎯 **建筑空闲动画电源控制重构**  
+  `Building.ts.js` 新增 `setIdleAnimationVisible()` 方法，精细控制空闲动画显示：基础规则为供电或 `showWhenUnpowered` 时显示；生物反应堆供电时，若建筑被驻守则隐藏空闲动画。同时增强 `setPowered()` 方法，同步控制空闲动画的暂停/播放（基于 `pauseWhenUnpowered` 配置），确保低电量时正确暂停、恢复供电时正确播放。
+
+- 📝 **动画属性配置注释完善**  
+  `BuildingAnimArtProps.ts.js` 移除 UTF-8 BOM，添加原版默认行为说明：`ActiveAnim/IdleAnim` 默认低电量暂停（`Powered=yes` 必需），除非 `PoweredLight=yes` 覆盖。
+
+- 🎮 **新增“突破建造限制”作弊功能**  
+  - `Production.cheatsBypassBuildLimits` 标志控制跳过单位数量上限。  
+  - F10 作弊菜单新增“突破建造限制”开关，启用后 `UpdateQueueAction` 和 `CombatantSidebarModel` 跳过 `buildLimit` 检查。  
+  - “全科技”作弊自动同时启用本功能。
+
+- 💰 **成本加成计算从“取最小值”改为“累乘”**  
+  `Production.getCostBonusMultiplier()` 重构：遍历玩家就绪建筑（`BuildStatus.Ready`），将所有 `infantryCostBonus`/`unitsCostBonus`/`aircraftCostBonus`/`buildingsCostBonus` 累乘，而非取最小值。例如两个工业设施（0.8 和 0.9）从 20% 折扣变为 28% 折扣。`CombatantSidebarModel` 同步适配。
+
+- 🔧 **代码清理与防御性增强**  
+  - `setIdleAnimationVisible()` 添加 `RangeError` 捕获，提高健壮性。  
+  - `Production.ts.js` 新增 `game/gameobject/Building` 依赖，用于检查建筑就绪状态。  
+  - 作弊功能标记 `[CHEAT]` 并附带清理注释。
+
+### ⚠️ 破坏性变更
+- **成本加成计算**：从取最小值改为累乘，拥有多个工业设施时折扣率更高，可能影响游戏平衡。  
+- **生物反应堆空闲动画**：供电且驻守时空闲动画隐藏（原版为始终显示），视觉行为改变。
+
+### 🧪 测试建议
+1. 生物反应堆供电时，驻守前后空闲动画显示/隐藏切换正确。  
+2. 断电/恢复供电时，空闲动画和激活动画暂停/播放同步。  
+3. 建造多个工业设施，验证成本折扣为累乘效果。  
+4. 启用作弊后，可超 `buildLimit` 建造单位。  
+5. “全科技”自动启用突破建造限制。
