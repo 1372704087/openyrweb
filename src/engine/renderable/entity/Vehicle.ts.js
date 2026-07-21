@@ -282,6 +282,13 @@ System.register(
                     (m = this.lighting.getAmbientIntensity()),
                     M.ExtraLightHelper.multiplyVxl(this.vxlExtraLight, this.baseVxlExtraLight, m, y),
                     M.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, y)),
+                  // OpenYRWeb: Robot Tank paralysis darkening. Set extraLight to a strong
+                  // negative value when paralyzed; restore to base value when recovered.
+                  this.gameObject.robotControlTrait?.isParalyzed()
+                    ? (this.vxlExtraLight.set(-0.35, -0.35, -0.35),
+                      this.shpExtraLight.set(-0.35, -0.35, -0.35))
+                    : (this.vxlExtraLight.copy(this.baseVxlExtraLight),
+                      this.shpExtraLight.copy(this.baseShpExtraLight)),
                   this.gameObject.isDestroyed && this.resolveObjectRemove)
                 ) {
                   if (
@@ -382,6 +389,13 @@ System.register(
                         this.updateActiveTurret(this.currentTurretIdx),
                       this.updateSquidGrab(i, b, f, p, e, T, v))
                     : this.shpAnimRunner && (this.shpAnimRunner.tick(i), this.updateShapeFrame(e, y, d));
+                  // OpenYRWeb: Re-apply extraLight to VXL/SHP every frame — the values
+                  // are updated by highlight, invulnerable, and paralysis darkening code
+                  // in the comma expression above, but setExtraLight is only called once
+                  // during create3DObject(). Without this, extraLight changes (darkening
+                  // on Robot Tank paralysis) would have no visible effect.
+                  this.vxlBuilders.forEach((e) => e.setExtraLight(this.vxlExtraLight));
+                  this.shpRenderable?.setExtraLight(this.shpExtraLight);
                 }
               }
               updateVxlRotation(e, t) {

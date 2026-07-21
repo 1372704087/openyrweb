@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1237,
+  "moduleCount": 1239,
   "modules": [
     {
       "name": "data/IniSection",
@@ -136,6 +136,25 @@
         "data/vfs/VirtualFile"
       ],
       "bytes": 696
+    },
+    {
+      "name": "engine/renderable/entity/plugin/RobotControlPlugin",
+      "file": "engine/renderable/entity/plugin/RobotControlPlugin.ts.js",
+      "deps": [
+        "engine/renderable/fx/SparkFx",
+        "game/Coords"
+      ],
+      "bytes": 2393
+    },
+    {
+      "name": "game/gameobject/trait/RobotControlTrait",
+      "file": "game/gameobject/trait/RobotControlTrait.ts.js",
+      "deps": [
+        "game/gameobject/trait/interface/NotifyTick",
+        "game/gameobject/common/DeathType",
+        "game/gameobject/unit/ZoneType"
+      ],
+      "bytes": 4544
     },
     {
       "name": "util/Base64",
@@ -2364,7 +2383,8 @@
         "game/type/LocomotorType",
         "game/gameobject/trait/HoverBobTrait",
         "game/gameobject/unit/CrateBonuses",
-        "game/gameobject/trait/TilterTrait"
+        "game/gameobject/trait/TilterTrait",
+        "game/gameobject/trait/RobotControlTrait"
       ],
       "bytes": 3069
     },
@@ -8086,7 +8106,8 @@
         "engine/renderable/entity/Debris",
         "engine/renderable/builder/ShpAggregator",
         "game/type/MovementZone",
-        "engine/renderable/entity/plugin/ForcedDisguisePlugin"
+        "engine/renderable/entity/plugin/ForcedDisguisePlugin",
+        "engine/renderable/entity/plugin/RobotControlPlugin"
       ],
       "bytes": 18558
     },

@@ -641,6 +641,35 @@ System.register(
                   case L.EventType.TriggerText:
                     k = r.label;
                     this.messageList.addSystemMessage(this.strings.get(k), this.player ?? "grey");
+                    break;
+                  // OpenYRWeb: Robot Tank (ROBOT) power state change — play ActivateSound/DeactivateSound + EVA announcement.
+                  case L.EventType.RobotPowerStateChange: {
+                    var robo = r.gameObject;
+                    if (robo && !robo.isDestroyed) {
+                      // Per-unit sound (ActivateSound / DeactivateSound).
+                      var roboSound = r.activated ? robo.rules.activateSound : robo.rules.deactivateSound;
+                      roboSound && this.worldSound.playEffect(roboSound, robo, robo.owner);
+                      // EVA global announcement: only on FIRST offline / LAST back online.
+                      var roboOwner = robo.owner;
+                      if (roboOwner) {
+                        var roboObjects = roboOwner.getOwnedObjects();
+                        if (r.activated) {
+                          // Just restored — check if any other unit is still paralyzed.
+                          var anyStillOffline = roboObjects.some(function(u) {
+                            return u.robotControlTrait && u.robotControlTrait.isParalyzed() && !u.isDestroyed;
+                          });
+                          anyStillOffline || this.eva.play("EVA_RobotTanksBackOnline");
+                        } else {
+                          // Just paralyzed — check if this is the first one.
+                          var anyOtherOffline = roboObjects.some(function(u) {
+                            return u !== robo && !u.isDestroyed && u.robotControlTrait && u.robotControlTrait.isParalyzed();
+                          });
+                          anyOtherOffline || this.eva.play("EVA_RobotTanksOffline");
+                        }
+                      }
+                    }
+                    break;
+                  }
                 }
               }
               handleOrderPushed(t, i, r) {
@@ -682,7 +711,13 @@ System.register(
                     t = !this.lastFeedbackTime || 250 <= e - this.lastFeedbackTime;
                   if ((t && (this.lastFeedbackTime = e), r)) {
                     if (t) {
-                      let e = i.map((e) => e.rules.voiceSelect).filter(c.isNotNullOrUndefined),
+                      // OpenYRWeb: Support VoiceSelectDeactivated for paralyzed units.
+                      let e = i.map((e) => {
+                        var paralyzed = e.robotControlTrait?.isParalyzed();
+                        return paralyzed && e.rules.voiceSelectDeactivated
+                          ? e.rules.voiceSelectDeactivated
+                          : e.rules.voiceSelect;
+                      }).filter(c.isNotNullOrUndefined),
                         t = new Map();
                       (e.forEach((e) => t.set(e, (t.get(e) ?? 0) + 1)),
                         t.forEach((t, i) => {
@@ -746,8 +781,13 @@ System.register(
                       t && this.messageList.addUiFeedbackMessage(t);
                     } else this.messageList.addUiFeedbackMessage(this.strings.get("Msg:NothingSelected"));
                   } else
+                    // OpenYRWeb: also respect VoiceSelectDeactivated for single-click selection.
                     !t ||
-                      ((t = i.find((e) => e.rules.voiceSelect)?.rules.voiceSelect) &&
+                      ((t = i.find((e) => {
+                        var paralyzed = e.robotControlTrait?.isParalyzed();
+                        return paralyzed ? !!e.rules.voiceSelectDeactivated : !!e.rules.voiceSelect;
+                      })) &&
+                        (t = t.robotControlTrait?.isParalyzed() ? t.rules.voiceSelectDeactivated : t.rules.voiceSelect) &&
                         this.sound.play(t, j.ChannelType.Effect));
                 }
               }

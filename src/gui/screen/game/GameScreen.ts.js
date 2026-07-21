@@ -792,8 +792,8 @@ System.register(
                     w.DevToolsApi.registerVar("cheats", this.runtimeVars.cheatsEnabled),
                     this.disposables.add(() => w.DevToolsApi.unregisterVar("cheats")),
                     (() => {
-                      let _cheatMenu = null, _cheatInfMoneyTimer = null;
-                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, mapRevealed: false, bypassBuildLimit: false };
+                      let _cheatMenu = null, _cheatInfMoneyTimer = null, _cheatInfSuperWeaponTimer = null;
+                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, mapRevealed: false, bypassBuildLimit: false, infSuperWeapon: false };
                       const _gs = this;
                       function _destroyCheatMenu() {
                         if (_cheatMenu) { _cheatMenu.remove(); _cheatMenu = null; }
@@ -854,6 +854,22 @@ System.register(
                           const prod = lp.production;
                           if (prod) prod.cheatsBypassBuildLimits = _cheatState.bypassBuildLimit;
                         });
+                        // [CHEAT] 无限超级武器：所有超级武器瞬间冷却，可无限使用
+                        addToggle("无限超级武器", () => _cheatState.infSuperWeapon, () => {
+                          _cheatState.infSuperWeapon = !_cheatState.infSuperWeapon;
+                          if (_cheatState.infSuperWeapon) {
+                            if (!_cheatInfSuperWeaponTimer) _cheatInfSuperWeaponTimer = setInterval(() => {
+                              if (g.status === 1 && lp.superWeaponsTrait) {
+                                for (const sw of lp.superWeaponsTrait.getAll()) {
+                                  sw.chargeTicks = 0;
+                                  sw.status = 2; // SuperWeaponStatus.Ready
+                                }
+                              }
+                            }, 100);
+                          } else {
+                            if (_cheatInfSuperWeaponTimer) { clearInterval(_cheatInfSuperWeaponTimer); _cheatInfSuperWeaponTimer = null; }
+                          }
+                        });
                         addSeparator();
                         // [CHEAT] 一次性增加10万金钱
                         addBtn("增加 100,000 金钱", () => { lp.credits += 100000; });
@@ -887,6 +903,7 @@ System.register(
                             _cheatState.allTech = true;
                             _cheatState.bypassBuildLimit = true;
                           }
+                          if (!_cheatState.infSuperWeapon) { _cheatState.infSuperWeapon = true; if (!_cheatInfSuperWeaponTimer) _cheatInfSuperWeaponTimer = setInterval(() => { if (g.status === 1 && lp.superWeaponsTrait) { for (const sw of lp.superWeaponsTrait.getAll()) { sw.chargeTicks = 0; sw.status = 2; } } }, 100); }
                           _destroyCheatMenu(); _createCheatMenu();
                         });
                         addSeparator();
@@ -904,7 +921,7 @@ System.register(
                       const _onF10Key = (ev) => { if (ev.key === "F10") { ev.preventDefault(); _createCheatMenu(); } };
                       document.addEventListener("keydown", _onF10Key);
                       this.disposables.add(
-                        () => { document.removeEventListener("keydown", _onF10Key); _destroyCheatMenu(); if (_cheatInfMoneyTimer) { clearInterval(_cheatInfMoneyTimer); _cheatInfMoneyTimer = null; } }
+                        () => { document.removeEventListener("keydown", _onF10Key); _destroyCheatMenu(); if (_cheatInfMoneyTimer) { clearInterval(_cheatInfMoneyTimer); _cheatInfMoneyTimer = null; } if (_cheatInfSuperWeaponTimer) { clearInterval(_cheatInfSuperWeaponTimer); _cheatInfSuperWeaponTimer = null; } }
                       );
                     }).call(this));
                     // ============ [CHEAT] 调试作弊系统 结束 ============

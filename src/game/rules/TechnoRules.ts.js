@@ -108,6 +108,17 @@ System.register(
                 // and pushes it through the player's PowerTrait whenever garrison changes.
                 (this.extraPower = this.ini.getNumber("ExtraPower")),
                 (this.powered = this.ini.getBool("Powered")),
+                // OpenYRWeb: PoweredUnit=yes — YR tag for units (vehicles/infantry) that require
+                // their prerequisite building to have power. Unlike Powered (buildings), this is
+                // not about the power grid — the unit is paralyzed when its prereq building loses
+                // power or is destroyed. Used by Robot Tank (ROBOT) via RobotControlTrait.
+                (this.poweredUnit = this.ini.getBool("PoweredUnit")),
+                // OpenYRWeb: PowersUnit= — building tag (YR exe hardcoded) specifying which
+                // unit type this building provides operational power to. Used with PoweredUnit=yes
+                // on the unit side. E.g. GAROBO has PowersUnit=ROBO, ROBO has PoweredUnit=yes.
+                // RobotControlTrait scans owner buildings for a powered building whose powersUnit
+                // matches the unit's name to determine if the unit is operational.
+                (this.powersUnit = this.ini.getString("PowersUnit")),
                 (this.prerequisite = this.ini.getArray("Prerequisite")),
                 (this.prerequisiteOverride = this.ini.getArray("PrerequisiteOverride")),
                 (this.soylent = this.ini.getNumber("Soylent")),
@@ -426,6 +437,7 @@ System.register(
                 (this.undeploySound = this.ini.getString("UndeploySound") || void 0),
                 (this.packupSound = this.ini.getString("PackupSound") || void 0),
                 (this.voiceSelect = this.ini.getString("VoiceSelect") || void 0),
+                (this.voiceSelectDeactivated = this.ini.getString("VoiceSelectDeactivated") || void 0),
                 (this.voiceMove = this.ini.getString("VoiceMove") || void 0),
                 (this.voiceAttack = this.ini.getString("VoiceAttack") || void 0),
                 (this.voiceFeedback = this.ini.getString("VoiceFeedback") || void 0),
@@ -439,6 +451,8 @@ System.register(
                 (this.auxSound1 = this.ini.getString("AuxSound1") || void 0),
                 (this.auxSound2 = this.ini.getString("AuxSound2") || void 0),
                 (this.dieSound = this.ini.getString("DieSound") || void 0),
+                (this.activateSound = this.ini.getString("ActivateSound") || void 0),
+                (this.deactivateSound = this.ini.getString("DeactivateSound") || void 0),
                 (this.moveSound = this.ini.getString("MoveSound") || void 0),
                 (this.enterWaterSound = this.ini.getString("EnterWaterSound") || void 0),
                 (this.leaveWaterSound = this.ini.getString("LeaveWaterSound") || void 0),

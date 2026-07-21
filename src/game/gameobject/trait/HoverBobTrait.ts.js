@@ -40,7 +40,7 @@ System.register(
       execute: function () {
         ((l = class {
           constructor() {
-            ((this.prevHoverBobLeptons = 0), (this.spawnTick = 0));
+            ((this.prevHoverBobLeptons = 0), (this.spawnTick = 0), (this.disabled = false));
           }
           [s.NotifySpawn.onSpawn](e, t) {
             (this.setBaseElevation(e, t), (this.spawnTick = t.currentTick));
@@ -49,11 +49,19 @@ System.register(
             r && ((this.prevHoverBobLeptons = 0), this.setBaseElevation(e, t));
           }
           setBaseElevation(e, t) {
+            if (this.disabled) return;
             e.position.tileElevation =
               (e.onBridge ? (t.map.tileOccupation.getBridgeOnTile(e.tile)?.tileElevation ?? 0) : 0) +
               a.Coords.worldToTileHeight(t.rules.general.hover.height);
           }
           [i.NotifyTick.onTick](e, t) {
+            // OpenYRWeb: When disabled (e.g. Robot Tank paralyzed), stay at ground level.
+            if (this.disabled) {
+              var hbGround =
+                e.onBridge ? (t.map.tileOccupation.getBridgeOnTile(e.tile)?.tileElevation ?? 0) : 0;
+              e.position.tileElevation = hbGround;
+              return;
+            }
             var i = this.computeHoverBobLeptons(t.currentTick, t.rules.general.hover),
               r = i - this.prevHoverBobLeptons;
             this.prevHoverBobLeptons = i;

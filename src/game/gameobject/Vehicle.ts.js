@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/Vehicle ===
-// deps: ["engine/type/ObjectType","game/gameobject/trait/HarvesterTrait","game/gameobject/trait/TransportTrait","game/gameobject/trait/MoveTrait","game/gameobject/trait/TurretTrait","game/gameobject/unit/ZoneType","game/gameobject/trait/DockableTrait","game/gameobject/Techno","game/gameobject/trait/CrewedTrait","game/gameobject/trait/GunnerTrait","game/gameobject/trait/ParasiteableTrait","game/gameobject/trait/CrashableTrait","game/gameobject/trait/SubmergibleTrait","game/type/LocomotorType","game/gameobject/trait/HoverBobTrait","game/gameobject/unit/CrateBonuses","game/gameobject/trait/TilterTrait"]
+// deps: ["engine/type/ObjectType","game/gameobject/trait/HarvesterTrait","game/gameobject/trait/TransportTrait","game/gameobject/trait/MoveTrait","game/gameobject/trait/TurretTrait","game/gameobject/unit/ZoneType","game/gameobject/trait/DockableTrait","game/gameobject/Techno","game/gameobject/trait/CrewedTrait","game/gameobject/trait/GunnerTrait","game/gameobject/trait/ParasiteableTrait","game/gameobject/trait/CrashableTrait","game/gameobject/trait/SubmergibleTrait","game/type/LocomotorType","game/gameobject/trait/HoverBobTrait","game/gameobject/unit/CrateBonuses","game/gameobject/trait/TilterTrait","game/gameobject/trait/RobotControlTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -22,10 +22,11 @@ System.register(
     "game/gameobject/trait/HoverBobTrait",
     "game/gameobject/unit/CrateBonuses",
     "game/gameobject/trait/TilterTrait",
+    "game/gameobject/trait/RobotControlTrait",
   ],
   function (e, t) {
     "use strict";
-    var r, n, o, l, c, s, h, i, u, d, g, p, m, f, y, a, T, v;
+    var r, n, o, l, c, s, h, i, u, d, g, p, m, f, y, a, T, v, R;
     t && t.id;
     return {
       setters: [
@@ -80,6 +81,9 @@ System.register(
         function (e) {
           T = e;
         },
+        function (e) {
+          R = e;
+        },
       ],
       execute: function () {
         (e("ROCKING_TICKS", 34),
@@ -111,6 +115,16 @@ System.register(
                 [f.LocomotorType.Vehicle, f.LocomotorType.Chrono].includes(t.locomotor) &&
                   i.isVoxel &&
                   ((a.tilterTrait = new T.TilterTrait()), a.traits.add(a.tilterTrait)),
+                // OpenYRWeb: Robot Control Center (GACSPH) / Robot Tank (ROBOT) symbiosis.
+                // Units with Powered=yes or PoweredUnit=yes (e.g. ROBOT) get a RobotControlTrait
+                // that paralyzes them when their prerequisite control-center building is
+                // offline/destroyed. The trait scans owner.buildings each tick for an operational
+                // prerequisite building (Ready + powered). If none, move/attack are disabled;
+                // if on water, the unit sinks. See RobotControlTrait for full details.
+                (t.powered || t.poweredUnit) &&
+                  t.prerequisite &&
+                  t.prerequisite.length &&
+                  ((a.robotControlTrait = new R.RobotControlTrait(a)), a.traits.add(a.robotControlTrait)),
                 a
               );
             }

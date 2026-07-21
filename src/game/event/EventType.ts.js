@@ -74,7 +74,8 @@ System.register("game/event/EventType", [], function (t, e) {
         (e[(e.TriggerEva = 61)] = "TriggerEva"),
         (e[(e.TriggerAnim = 62)] = "TriggerAnim"),
         (e[(e.TriggerText = 63)] = "TriggerText"),
-        (e[(e.TimerExpire = 64)] = "TimerExpire"));
+        (e[(e.TimerExpire = 64)] = "TimerExpire"),
+        (e[(e.RobotPowerStateChange = 65)] = "RobotPowerStateChange"));
     },
   };
 });
