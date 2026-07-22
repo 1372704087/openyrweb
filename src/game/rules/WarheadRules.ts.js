@@ -50,7 +50,10 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
               (this.parasite = this.rules.getBool("Parasite")),
               (this.percentAtMax = this.rules.getNumber("PercentAtMax", 1)),
               (this.proneDamage = this.rules.getFixed("ProneDamage", 1)),
-              (this.psychicDamage = this.rules.getBool("PsychicDamage")),
+              // OpenYRWeb: vanilla YR uses "Psychedelic" as the INI key for the chaos/berserk
+              // effect (Chaos Drone gas). We read both "Psychedelic" (vanilla) and "PsychicDamage"
+              // (legacy fallback) for compatibility.
+              (this.psychicDamage = this.rules.getBool("Psychedelic") || this.rules.getBool("PsychicDamage")),
               (this.radiation = this.rules.getBool("Radiation")),
               (this.rocker = this.rules.getBool("Rocker")),
               (this.sonic = this.rules.getBool("Sonic")),

@@ -73,7 +73,11 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               (this.mindControlAttackLineFrames = e.getNumber("MindControlAttackLineFrames", 20)),
               (this.splashList = e.getArray("SplashList")),
               (this.v3EliteWarhead = e.getString("V3EliteWarhead")),
-              (this.v3Warhead = e.getString("V3Warhead")));
+              (this.v3Warhead = e.getString("V3Warhead")),
+              // OpenYRWeb: berserk fire-rate multiplier (vanilla YR [CombatDamage] BerserkROFMultiplier).
+              // When a unit is berserk (hit by Psychedelic=yes warhead), its ROF is multiplied by this value.
+              // Default 0.5 = 2x fire rate (fires twice as fast). Ares docs confirm default 0.5.
+              (this.berserkROFMultiplier = e.getNumber("BerserkROFMultiplier", 0.5)));
           }
         }),
       );

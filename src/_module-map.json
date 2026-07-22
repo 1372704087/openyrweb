@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1302,
+  "moduleCount": 1303,
   "modules": [
     {
       "name": "data/IniSection",
@@ -1739,7 +1739,8 @@
         "game/gameobject/common/AnimTerrainEffect",
         "game/event/ObjectAttackedEvent",
         "game/SpecialWarheadType",
-        "game/gameobject/task/MagnetronDragTask"
+        "game/gameobject/task/MagnetronDragTask",
+        "game/gameobject/trait/BerserkTrait"
       ],
       "bytes": 7809
     },
@@ -3799,7 +3800,8 @@
         "game/gameobject/trait/GattlingTrait",
         "game/gameobject/trait/BioReactorPowerTrait",
         "game/gameobject/trait/DrainTrait",
-        "game/gameobject/trait/SlaveMinerVehicleTrait"
+        "game/gameobject/trait/SlaveMinerVehicleTrait",
+        "game/gameobject/trait/BerserkTrait"
       ],
       "bytes": 6601
     },
@@ -3890,6 +3892,16 @@
         "game/gameobject/trait/TiberiumTrait"
       ],
       "bytes": 3400
+    },
+    {
+      "name": "game/gameobject/trait/BerserkTrait",
+      "file": "game/gameobject/trait/BerserkTrait.ts.js",
+      "deps": [
+        "game/gameobject/trait/interface/NotifyTick",
+        "game/gameobject/trait/interface/NotifyOwnerChange",
+        "game/gameobject/trait/interface/NotifyUnspawn"
+      ],
+      "bytes": 1067
     },
     {
       "name": "game/PlayerList",

@@ -150,7 +150,11 @@ System.register(
           }
           getDeployFireWeapon() {
             if (this.gameObject.rules.deployFire)
-              return this.gameObject.rules.deployFireWeapon === n.WeaponType.Primary
+              // OpenYRWeb: if DeployFireWeapon points to the secondary but the secondary
+              // is a virtual scanner (NeverUse=yes), fall back to the primary weapon.
+              // This fixes the Chaos Drone where Primary=ChaosAttack (gas weapon) but
+              // Secondary=VirtualScanner and DeployFireWeapon defaults to 1 (Secondary).
+              return this.gameObject.rules.deployFireWeapon === n.WeaponType.Primary || this.secondaryWeapon?.rules.neverUse
                 ? this.primaryWeapon
                 : this.secondaryWeapon;
           }

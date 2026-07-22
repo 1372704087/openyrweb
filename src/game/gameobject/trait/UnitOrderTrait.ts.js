@@ -56,6 +56,13 @@ System.register(
           }
           [s.NotifyTick.onTick](i, e) {
             if (i.isSpawned) {
+              // OpenYRWeb: berserk units ignore all player orders. Their auto-attack
+              // behavior is handled by AttackTrait's tick handler (passive berserk scan).
+              // Continue to process tasks (added by AttackTrait via addTask) so the
+              // berserk AttackTask actually executes.
+              if (i.berserkTrait?.isBerserk()) {
+                this.clearOrders();
+              }
               var r = this.hasTasks(),
                 t = this.tasks.find((e) => !e.isCancelling());
               if ((r && this.taskRunner.tick(this.tasks, i), i.isSpawned)) {
@@ -119,6 +126,8 @@ System.register(
             i && !r && (this.clearOrders(), (this.tasks.length = 0));
           }
           addOrder(t, e = !1) {
+            // OpenYRWeb: berserk units cannot receive orders.
+            if (this.gameObject.berserkTrait?.isBerserk()) return;
             !1 !== t.onAdd(this.tasks, e)
               ? (e ||
                   (this.clearOrders(),

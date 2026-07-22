@@ -18,6 +18,10 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.ambientChangeStep = e.getNumber("AmbientChangeStep")),
               (this.behind = e.getString("Behind")),
               (this.benderOfSpoons = e.getString("BenderOfSpoons") || void 0),
+              // OpenYRWeb: berserk unit tint color (vanilla YR [AudioVisual] BerserkColor).
+              // Applied as a remap tint to units affected by Psychedelic=yes warhead (Chaos Drone gas).
+              // Default is a reddish-purple (255,0,255 in vanilla YR). Format: r,g,b (0-255).
+              (this.berserkColor = e.getNumberArray("BerserkColor")),
               (this.bridgeExplosions = e.getArray("BridgeExplosions")),
               (this.chronoBeamColor = e.getNumberArray("ChronoBeamColor")),
               (this.chronoBlast = e.getString("ChronoBlast")),

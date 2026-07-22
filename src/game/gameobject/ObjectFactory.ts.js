@@ -50,6 +50,7 @@ System.register(
     "game/gameobject/trait/BioReactorPowerTrait",
     "game/gameobject/trait/DrainTrait",
     "game/gameobject/trait/SlaveMinerVehicleTrait",
+    "game/gameobject/trait/BerserkTrait",
   ],
   function (e, t) {
     "use strict";
@@ -98,7 +99,8 @@ System.register(
       GT,
       BP,
       DT,
-      SV;
+      SV,
+      BK;
     t && t.id;
     return {
       setters: [
@@ -236,6 +238,9 @@ System.register(
         },
         function (e) {
           SV = e;
+        },
+        function (e) {
+          BK = e;
         },
       ],
       execute: function () {
@@ -390,7 +395,13 @@ System.register(
                     }
                   })([n.primaryWeapon, n.secondaryWeapon].find((e) => e?.warhead.rules.mindControl)),
                   n.rules.spawns && ((n.airSpawnTrait = new V.AirSpawnTrait()), n.traits.add(n.airSpawnTrait)),
-                  n.rules.maxDebris && n.traits.add(new W.SpawnDebrisTrait())),
+                  n.rules.maxDebris && n.traits.add(new W.SpawnDebrisTrait()),
+                  // OpenYRWeb: BerserkTrait — attached to all techno units so they can
+                  // be affected by Psychedelic=yes warheads (Chaos Drone gas).
+                  !n.rules.immuneToPsionics &&
+                    ((n.berserkTrait = new BK.BerserkTrait(n)), n.traits.add(n.berserkTrait)),
+                  // OpenYRWeb: Chaos Drone releases nerve gas on death.
+                  n.name === "CAOS" && n.armedTrait && n.armedTrait.primaryWeapon && (n.armedTrait.deathWeapon = n.armedTrait.primaryWeapon)),
                 n.isTechno() || n.isOverlay() || n.isTerrain())
               ) {
                 var l = n.isOverlay() && O.BridgeOverlayTypes.isBridge(i.getOverlayId(n.name));

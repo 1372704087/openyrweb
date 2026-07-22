@@ -124,7 +124,10 @@ System.register(
               let t = [e.primaryWeapon, e.secondaryWeapon],
                 i = e.armedTrait?.getDeployFireWeapon();
               return (
-                i?.rules.areaFire && !i.rules.fireOnce && (t = t.filter((e) => e !== i)),
+                // OpenYRWeb: only exclude the area-fire deploy weapon when actually
+                // deployed (DeployerTrait handles cooldown). When not deployed, the
+                // weapon fires through AttackTask and its cooldown must be respected.
+                i?.rules.areaFire && !i.rules.fireOnce && e.deployerTrait?.isDeployed() && (t = t.filter((e) => e !== i)),
                 t.some((e) => 0 < (e?.getCooldownTicks() ?? 0))
               );
             }
@@ -148,7 +151,7 @@ System.register(
                   ? t && !t.rules.areaFire
                     ? t
                     : void 0
-                  : [e.primaryWeapon, e.secondaryWeapon].find((e) => e !== t);
+                  : [e.primaryWeapon, e.secondaryWeapon].find((e) => e !== t && !e?.rules.neverUse) ?? e.primaryWeapon;
               } else if (e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()) {
                 // OpenYRWeb: garrisoned buildings use all occupants' weapons
                 // Return the first available weapon from any occupant
@@ -214,7 +217,7 @@ System.register(
                             : s
                           : s === e.secondaryWeapon
                             ? e.primaryWeapon
-                            : e.secondaryWeapon,
+                            : e.secondaryWeapon?.rules.neverUse ? e.primaryWeapon : e.secondaryWeapon,
                       ])
                     : e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()
                       ? // OpenYRWeb: garrisoned buildings use all occupants' weapons
@@ -275,6 +278,27 @@ System.register(
             }
             [d.NotifyTick.onTick](a, n) {
               if (!this.isDisabled()) {
+                // OpenYRWeb: berserk auto-attack. Berserk units continuously scan for
+                // any nearby techno (including allies) and attack it. They ignore
+                // normal opportunity-fire, retaliate, and guard-mode logic.
+                if (a.berserkTrait?.isBerserk()) {
+                  if (0 < this.passiveScanCooldownTicks) {
+                    this.passiveScanCooldownTicks--;
+                  } else {
+                    this.passiveScanCooldownTicks = n.rules.general.normalTargetingDelay;
+                    var wpn = this.selectDefaultWeapon(a);
+                    if (wpn && !a.unitOrderTrait.hasTasks()) {
+                      var scan = this.scanForTarget(a, wpn, n, void 0, void 0, !1);
+                      if (scan.target) {
+                        var atk = this.createAttackTask(n, scan.target, scan.target.tile, scan.weapon, {
+                          passive: !0,
+                        });
+                        a.unitOrderTrait.addTask(atk);
+                      }
+                    }
+                  }
+                  return;
+                }
                 if (
                   (this.opportunityFireTask &&
                     (!a.unitOrderTrait.hasTasks() ||
@@ -396,6 +420,18 @@ System.register(
               return !0;
             }
             shouldRetaliate(e, t, i, r, s) {
+              // OpenYRWeb: berserk units always retaliate (they treat everyone as hostile).
+              if (e.berserkTrait?.isBerserk()) {
+                if (i < 1 || !e.rules.canRetaliate || !e.primaryWeapon ||
+                    (e.ammoTrait && !e.ammoTrait.ammo && e.rules.manualReload) ||
+                    s.rules.temporal || r.rules.missileSpawn ||
+                    !t.isValidTarget(r) || e.mindControllerTrait?.isAtCapacity())
+                  return !1;
+                var a = this.selectWeaponVersus(e, r, t, !1);
+                return !(!a || (e.isBuilding() || r.isBuilding()
+                  ? this.rangeHelper.tileDistance(e, r)
+                  : this.rangeHelper.distance2(e, r) / y.Coords.LEPTONS_PER_TILE) > Math.max(a.range, e.sight));
+              }
               if (
                 i < 1 ||
                 t.areFriendly(e, r) ||
@@ -421,6 +457,8 @@ System.register(
             scanForTarget(e, t, i, r, s, a = !1) {
               // OpenYRWeb: unit being dragged by Magnetron cannot attack.
               if (e.magnetronDraggedBy) return {};
+              // OpenYRWeb: berserk units target ALL nearby technos (including allies).
+              if (e.berserkTrait?.isBerserk()) return this.scanForBerserkTarget(e, t, i, r, s, a);
               let n = {},
                 o = Number.NEGATIVE_INFINITY;
               var l = this.getAvailableWeapons(e, !0, !1),
@@ -467,6 +505,57 @@ System.register(
                   e.rules.harvester ||
                   e.name === t.rules.general.paradrop.paradropPlane)
               );
+            }
+            // OpenYRWeb: Berserk unit target acquisition. A berserk unit will attack ANY
+            // nearby enemy unit (including allies), ignoring normal targeting rules. It does
+            // NOT attack buildings — vanilla YR behavior.
+            // It cannot target itself, or invulnerable units.
+            canBerserkAcquire(e, t) {
+              return (
+                e !== t &&
+                !e.isDestroyed &&
+                !e.isCrashing &&
+                !e.isBuilding() &&
+                !e.invulnerableTrait.isActive() &&
+                !e.warpedOutTrait.isInvulnerable() &&
+                // OpenYRWeb: berserk units do not attack the source unit (Chaos Drone) that caused the berserk
+                e !== t.berserkTrait?.berserkSource
+              );
+            }
+            scanForBerserkTarget(e, t, i, r, s, a = !1) {
+              let n = {},
+                o = Number.NEGATIVE_INFINITY;
+              var l = this.getAvailableWeapons(e, !0, !1),
+                c =
+                  r ??
+                  (e.rules.guardRange || t.range) +
+                    1 +
+                    3 +
+                    i.rules.elevationModel.bonusCap +
+                    (t.projectileRules.isAntiAir ? e.rules.airRangeBonus : 0);
+              for (const d of this.scanTechnosAround(e, c, i)) {
+                if (!this.canBerserkAcquire(d, e)) continue;
+                var h,
+                  // OpenYRWeb: berserk bypasses weapon targeting (canTarget) to allow
+                  // attacking all units including friendlies. Pick the first weapon from
+                  // the available list that can damage the target (armor check only).
+                  u = l.find((w) => w && this.checkArmor(w.warhead.rules, d.isTechno() ? d.rules.armor : void 0, !0));
+                u &&
+                  i.isValidTarget(d) &&
+                  (r
+                    ? this.rangeHelper.isInRange(e, d, u.minRange, r, u.rules.cellRangefinding) &&
+                      (!s || this.rangeHelper.isInRange2(s, d, 0, r))
+                    : this.rangeHelper.isInWeaponRange(e, d, u, i.rules)) &&
+                  (a || this.losHelper.hasLineOfSight(e, d, u)) &&
+                  ((h = this.rangeHelper.distance3(e, d) / y.Coords.LEPTONS_PER_TILE),
+                  (h = this.computeThreat(d, e, u, h, i.rules.general.threat)),
+                  // OpenYRWeb: berserk units prioritize attacking friendly (ally) units
+                  i.areFriendly(e, d) && (h += 1e7),
+                  // OpenYRWeb: add random jitter so berserk units spread targets instead of focusing one
+                  h += i.generateRandomInt(0, 9999),
+                  h > o && ((n = { target: d, weapon: u }), (o = h)));
+              }
+              return n;
             }
             computeThreat(e, t, i, r, s) {
               var a;

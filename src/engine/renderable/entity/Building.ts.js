@@ -684,13 +684,12 @@ System.register(
                       : e > 100 * this.rules.audioVisual.conditionRed
                         ? p.DamageType.CONDITION_YELLOW
                         : p.DamageType.CONDITION_RED),
-                  // OpenYRWeb: civilian buildings (non-military, non-bio reactor) use normal model
-                  // at yellow and only show damage at red (only 2 frames: 0=normal, 1=damaged).
+                  // Civilian buildings (non-military, non-bio reactor) have only 2 frames:
+                  // 0=normal, 1=damaged. Both yellow and red health show the damaged frame.
                   !this.gameObject.bioReactorPowerTrait &&
                     !this.objectRules.isBaseDefense &&
-                    (t === p.DamageType.CONDITION_YELLOW
-                      ? (t = p.DamageType.NORMAL)
-                      : t === p.DamageType.CONDITION_RED && (t = p.DamageType.CONDITION_YELLOW)),
+                    t === p.DamageType.CONDITION_RED &&
+                    (t = p.DamageType.CONDITION_YELLOW),
                   t
                 );
               }
@@ -747,8 +746,8 @@ System.register(
                 if (e && !this.gameObject.bioReactorPowerTrait) {
                   i = t === p.DamageType.NORMAL ? 2 : 3;
                 } else if (!this.gameObject.bioReactorPowerTrait && this.objectRules.isBaseDefense) {
-                  // Unoccupied military building: CONDITION_RED maps to same damaged frame as CONDITION_YELLOW
-                  i = t === p.DamageType.CONDITION_RED ? p.DamageType.CONDITION_YELLOW : t;
+                  // Unoccupied military building: use damage type directly as frame index (0=normal, 1=yellow, 2=red)
+                  i = t;
                 } else {
                   i = t;
                 }

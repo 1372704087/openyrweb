@@ -132,6 +132,8 @@ System.register(
                 let e = this.rules.rof;
                 return (
                   this.gameObject.veteranTrait && (e *= this.gameObject.veteranTrait.getVeteranRofMultiplier()),
+                  // OpenYRWeb: berserk units fire faster (BerserkROFMultiplier, default 0.5 = 2x speed).
+                  this.gameObject.berserkTrait?.isBerserk() && (e *= S.berserkROFMultiplier),
                   Math.floor(e)
                 );
               }
@@ -256,7 +258,10 @@ System.register(
               }
             }),
           ),
-          (S.NUKE_PAYLOAD_NAME = "NukePayload"));
+          (S.NUKE_PAYLOAD_NAME = "NukePayload"),
+          // OpenYRWeb: berserk fire-rate multiplier (vanilla YR [CombatDamage] BerserkROFMultiplier=0.5).
+          // Set from CombatDamageRules during game initialization. Default 0.5 = 2x fire rate.
+          (S.berserkROFMultiplier = 0.5));
       },
     };
   },

@@ -178,7 +178,10 @@ System.register(
           }
           process() {
             if (this.isC4) return [new h.PlantC4Task(this.game, this.target.obj)];
-            var e = this.sourceObject.attackTrait.selectWeaponVersus(
+            // OpenYRWeb: deploy-fire units undeploy before attacking
+            var src = this.sourceObject;
+            src.isUnit() && src.deployerTrait?.isDeployed() && src.deployerTrait.setDeployed(!1);
+            var e = src.attackTrait.selectWeaponVersus(
               this.sourceObject,
               this.target,
               this.game,

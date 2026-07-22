@@ -161,6 +161,8 @@ System.register(
           }
           process() {
             const e = this.sourceObject;
+            // OpenYRWeb: deploy-fire units undeploy before moving
+            e.isUnit() && e.deployerTrait?.isDeployed() && e.deployerTrait.setDeployed(!1);
             if (!e.isBuilding() || !e.rallyTrait?.getRallyPoint()) {
               var t = this.game.rules.general.closeEnough;
               return e.isBuilding() && e.rules.undeploysInto

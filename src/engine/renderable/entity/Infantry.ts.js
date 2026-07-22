@@ -138,6 +138,18 @@ System.register(
                 (this.label = "infantry_" + e.rules.name),
                 (this.paletteRemaps = [...this.rules.colors.values()].map((e) => this.palette.clone().remap(e))),
                 (this.palette = this.palette.remap(this.gameObject.owner.color)),
+                // OpenYRWeb: pre-add full red-tinted berserk palette
+                (() => {
+                  this.__berserkPalette = this.palette.clone();
+                  for (var _i = 0; _i < this.__berserkPalette.colors.length; _i++) {
+                    var _c = this.__berserkPalette.colors[_i];
+                    _c.r = 255;
+                    _c.g = Math.max(0, _c.g - 20);
+                    _c.b = Math.max(0, _c.b - 20);
+                  }
+                  this.__berserkPalette._hash = this.__berserkPalette.computeHash(this.__berserkPalette.colors);
+                  this.paletteRemaps.push(this.__berserkPalette);
+                })(),
                 (this.withPosition = new m.WithPosition()),
                 this.updateBaseLight(),
                 (this.extraLight = new THREE.Vector3().copy(this.baseExtraLight)));
@@ -223,6 +235,15 @@ System.register(
                     this.baseExtraLight,
                     this.highlightAnimRunner.getValue(),
                   )));
+              // OpenYRWeb: berserk palette switch — use full red-tinted palette.
+              (() => {
+                var _bs = !!this.gameObject.berserkTrait?.isBerserk();
+                if (_bs !== this.__wasBerserk) {
+                  this.__wasBerserk = _bs;
+                  var _p = _bs ? this.__berserkPalette : this.palette;
+                  (this.shpRenderable ?? this.placeholder)?.setPalette(_p);
+                }
+              })();
               var h = this.disguise?.owner ?? o;
               this.lastOwnerColor !== h.color &&
                 (this.palette.remap(h.color),

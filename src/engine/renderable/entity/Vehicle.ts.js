@@ -160,6 +160,19 @@ System.register(
                   (this.label = "vehicle_" + this.objectRules.name),
                   (this.paletteRemaps = [...this.rules.colors.values()].map((e) => this.palette.clone().remap(e))),
                   this.palette.remap(this.gameObject.owner.color),
+                  // OpenYRWeb: pre-add full red-tinted berserk palette (all 256 colors,
+                  // not just player-color remap range) so VXL batched builders can find it.
+                  (() => {
+                    this.__berserkPalette = this.palette.clone();
+                    for (var _i = 0; _i < this.__berserkPalette.colors.length; _i++) {
+                      var _c = this.__berserkPalette.colors[_i];
+                      _c.r = 255;
+                      _c.g = Math.max(0, _c.g - 20);
+                      _c.b = Math.max(0, _c.b - 20);
+                    }
+                    this.__berserkPalette._hash = this.__berserkPalette.computeHash(this.__berserkPalette.colors);
+                    this.paletteRemaps.push(this.__berserkPalette);
+                  })(),
                   (this.lastOwnerColor = this.gameObject.owner.color),
                   this.updateBaseLight(),
                   (this.vxlExtraLight = new THREE.Vector3().copy(this.baseVxlExtraLight)),
@@ -289,6 +302,17 @@ System.register(
                       this.shpExtraLight.set(-0.35, -0.35, -0.35))
                     : (this.vxlExtraLight.copy(this.baseVxlExtraLight),
                       this.shpExtraLight.copy(this.baseShpExtraLight)),
+                  // OpenYRWeb: berserk palette switch — use full red-tinted palette.
+                  (() => {
+                    var _bs = !!this.gameObject.berserkTrait?.isBerserk();
+                    if (_bs !== this.__wasBerserk) {
+                      this.__wasBerserk = _bs;
+                      var _p = _bs ? this.__berserkPalette : this.palette;
+                      this.vxlBuilders.forEach((e) => e.setPalette(_p));
+                      this.shpRenderable?.setPalette(_p);
+                      this.placeholder?.setPalette(_p);
+                    }
+                  })(),
                   this.gameObject.isDestroyed && this.resolveObjectRemove)
                 ) {
                   if (

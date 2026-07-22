@@ -314,6 +314,9 @@ System.register(
                     !this.game.isValidTarget(this.target.obj) ||
                     this.shouldDropTarget(this.target.obj) ||
                     (!magDragging &&
+                      // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
+                      // can attack all units including friendlies.
+                      !r.berserkTrait?.isBerserk() &&
                       !this.weapon.targeting.canTarget(
                         this.target.obj,
                         this.target.tile,
@@ -392,7 +395,11 @@ System.register(
                 // OpenYRWeb: powered buildings (base defenses) cannot fire while unpowered
                 // (drained by Floating Disc or Low Power blackout).
                 if (r.isBuilding() && r.poweredTrait && !r.poweredTrait.isPoweredOn()) return !1;
-                return (this.weapon.fire(this.target, this.game, e), i)
+                // OpenYRWeb: AreaFire=yes weapons fire at the shooter's own tile so the gas
+                // effect spreads from the unit's position (e.g. Chaos Drone), matching the
+                // deployed area-fire behavior.
+                var areaFireTarget = this.weapon.rules.areaFire ? this.game.createTarget(void 0, r.position.tile) : this.target;
+                return (this.weapon.fire(areaFireTarget, this.game, e), i)
                   ? !0
                   : (!!this.weapon.rules.fireOnce && !this.weapon.rules.drainWeapon) ||
                       !(!this.options.passive || !r.rules.distributedFire) ||
@@ -414,7 +421,10 @@ System.register(
                   this.onTargetChange(r)));
               let i = this.game.isValidTarget(t) && !this.shouldDropTarget(t);
               if (i && !magDragging) {
-                let e = this.weapon.targeting.canTarget(
+                // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
+                // can attack all units including friendlies.
+                let e = r.berserkTrait?.isBerserk() ||
+                  this.weapon.targeting.canTarget(
                   t,
                   this.target.tile,
                   this.game,

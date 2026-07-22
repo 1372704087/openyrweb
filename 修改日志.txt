@@ -391,3 +391,47 @@ feat(robot-tank): 实现机器人坦克依赖控制中心的核心机制
 6. 瘫痪单位选择时播放 `VoiceSelectDeactivated`。  
 7. 工厂建造中的单位不受瘫痪影响。  
 8. “无限超级武器”开关使所有超武瞬间就绪。
+
+feat(chaos-drone): 实现精神突击车神经毒气 Berserk 混乱状态系统
+
+- 🧠 **BerserkTrait 核心组件**  
+  新增 `BerserkTrait` 管理单位混乱状态：`berserkFrames` 计时器递减、`berserkSource` 记录来源。`setBerserk(duration, source)` 首次应用时取消所有当前任务并清除玩家指令。单位易主或消亡时自动清理状态。
+
+- 🔴 **渲染系统红色调色板**  
+  步兵、车辆、飞行器在 `init()` 中预生成红色调色板（R 分量最大，G/B 各减 20），`update()` 中根据 `isBerserk()` 状态动态切换 VXL/SHP 调色板，状态变化时一次性切换避免每帧开销。
+
+- ☣️ **PsychicDamage 弹头处理**  
+  Warhead 支持 `Psychedelic` 键（兼容原版 YR），对非己方、非盟友的步兵/车辆单位应用 Berserk 状态。持续时间 = 武器 Damage × Verses 护甲倍率 × 距离衰减，不造成实际伤害。阵营保护：毒气不伤害同阵营和友军单位。
+
+- 🎯 **Berserk AI 行为重写**  
+  - `AttackTrait.scanForBerserkTarget()`：绕过 `canTarget` 限制，优先攻击友军（威胁值 +1e6），添加随机抖动分散目标，不攻击建筑，不攻击 Berserk 来源。  
+  - `AttackTask` 目标检查优先返回 true。  
+  - `UnitOrderTrait` 拒绝接收玩家指令，`onTick` 清除所有待处理指令。  
+  - `shouldRetaliate()` 始终返回 true，强制反击。
+
+- ⚡ **射速倍增**  
+  Berserk 状态下 `Weapon.getROF()` 乘以 `CombatDamageRules.BerserkROFMultiplier`（默认 0.5 = 2 倍射速）。
+
+- 🔧 **工厂与配置扩展**  
+  - `ObjectFactory` 为所有非 `ImmuneToPsionics` 单位附加 `BerserkTrait`。  
+  - Chaos Drone 死亡时释放主武器毒气（`deathWeapon = primaryWeapon`）。  
+  - `ArmedTrait` 修复 Deploy Fire 武器选择，支持 `NeverUse=yes` 排除。  
+  - `AttackOrder`/`MoveOrder` 在移动/攻击前自动取消部署状态。
+
+- 🎨 **建筑损坏帧修复**  
+  平民建筑黄血/红血共用损坏帧（2 帧布局），避免越界显示驻军帧。
+
+- 📦 **模块注册更新**  
+  新增 `BerserkTrait` 模块，`module-map.json` 1239→1240，`src/_module-map.json` 1302→1303。
+
+### ⚠️ 破坏性变更
+- `Psychedelic=yes` 弹头从造成伤害改为应用 Berserk 状态（兼容原版 YR 行为）。  
+- 新增 `PsychicDamage` 键作为后备支持。
+
+### 🧪 测试建议
+1. Chaos Drone 攻击敌方单位，验证 Berserk 状态、红染、攻击友军行为。  
+2. 同阵营/盟友单位不受毒气影响。  
+3. Chaos Drone 被摧毁时释放死亡毒气。  
+4. Berserk 单位不攻击建筑、不攻击毒气来源，玩家指令被忽略。  
+5. `ImmuneToPsionics=yes` 单位免疫 Berserk。  
+6. 持续时间受 Verses 护甲倍率和距离衰减影响。

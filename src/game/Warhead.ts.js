@@ -29,10 +29,11 @@ System.register(
     "game/event/ObjectAttackedEvent",
     "game/SpecialWarheadType",
     "game/gameobject/task/MagnetronDragTask",
+    "game/gameobject/trait/BerserkTrait",
   ],
   function (e, t) {
     "use strict";
-    var n, o, k, i, r, l, c, h, B, N, j, L, D, F, s, _, a, u, d, g, U, p, H, Md, m;
+    var n, o, k, i, r, l, c, h, B, N, j, L, D, F, s, _, a, u, d, g, U, p, H, Md, m, Bk;
     t && t.id;
     return {
       setters: [
@@ -107,6 +108,9 @@ System.register(
         },
         function (e) {
           Md = e;
+        },
+        function (e) {
+          Bk = e;
         },
       ],
       execute: function () {
@@ -331,6 +335,36 @@ System.register(
                   }
               let R = !1,
                 P;
+              // OpenYRWeb: Psychedelic (Chaos Drone gas) warhead — apply berserk instead of damage.
+              // The weapon's Damage value is the berserk duration in frames (e.g. 600 = ~10 game seconds).
+              // Verses armor multiplier scales the duration. ImmuneToPsionics units are skipped by canDamage().
+              if (this.rules.psychicDamage) {
+                for (m of x)
+                  // OpenYRWeb: Chaos Drone gas only affects enemy units, not own faction or allies
+                  if (!m.isDestroyed && !m.isCrashing && m.isTechno() && m.berserkTrait &&
+                      b && m.owner !== b && !r.alliances.areAllied(m.owner, b)) {
+                    // Base berserk duration = weapon Damage value (e.g. 600 frames).
+                    var beserkDuration = e;
+                    // Apply Verses armor multiplier.
+                    if (m.isTechno()) {
+                      var armorType = m.isTerrain() ? h.ArmorType.Wood : m.rules.armor;
+                      beserkDuration *= this.rules.verses.get(armorType) ?? 0;
+                    }
+                    // Apply CellSpread distance falloff (same formula as damage loop).
+                    if (E && O.has(m)) {
+                      for (var dist of O.get(m)) {
+                        var falloffDuration = beserkDuration;
+                        0 < E && Number.isFinite(falloffDuration) &&
+                          (falloffDuration = D.lerp(falloffDuration, C * falloffDuration, dist / E));
+                        falloffDuration = 0 < falloffDuration ? Math.floor(falloffDuration) : Math.ceil(falloffDuration);
+                        0 < falloffDuration && m.berserkTrait.setBerserk(falloffDuration, v);
+                      }
+                    } else {
+                      beserkDuration = 0 < beserkDuration ? Math.floor(beserkDuration) : Math.ceil(beserkDuration);
+                      0 < beserkDuration && m.berserkTrait.setBerserk(beserkDuration, v);
+                    }
+                  }
+              } else
               for (m of x)
                 if (!m.isDestroyed && !m.isCrashing) {
                   // OpenYRWeb: Magnetron locomotor beam. Delegated to a helper method because
