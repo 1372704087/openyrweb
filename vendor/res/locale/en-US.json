@@ -3,7 +3,29 @@
     "txt_copyright": "© 2000 ELECTRONIC ARTS INC. ALL RIGHTS RESERVED",
     "gui:wwbrand": "WESTWOOD STUDIOS™ IS AN ELECTRONIC ARTS™ BRAND",
     "gui:loadingex": "Loading...",
-    "ts:disclaimer": "DISCLAIMER:\n\"Chrono Divide\" is a non-profit fan project and is in no way affiliated with Electronic Arts Inc.\nNo copyright infringement is intended. All rights are held by their respective owners.",
+    "ts:disclaimer": "DISCLAIMER:\nOpenYRWeb is a non-profit fan project and is in no way affiliated with Electronic Arts Inc.\nNo copyright infringement is intended. All rights are held by their respective owners.",
+
+    "ts:gameres_locate_title": "Locate your Red Alert 2 game files",
+    "ts:gameres_import_desc": "This project does not distribute copyrighted game data, so there is no automatic download.\n\nProvide your own copy of the game: click \"Browse for folder\" and select an installed Red Alert 2 / Yuri's Revenge folder, or click \"Browse for archive\" and choose a .zip/.7z/.rar that contains the six .mix files.",
+    "ts:gameres_oneclick_desc": "Don't have the files handy? Download both Red Alert 2 and Yuri's Revenge installers and the required .mix files will be extracted automatically. (Uses your own legitimately obtained copies.)",
+    "ts:gameres_oneclick_button": "One-click download & extract",
+
+    "gui:importmodunsupportedwarn": "The mod you are trying to install may not be fully compatible with this engine. You may still install it, but it may not work correctly. Proceed at your own risk!",
+
+    "gui:demo": "Skirmish",
+    "stt:demo": "Play a singleplayer skirmish against computer opponents",
+
+    "gui:custommatch": "Multiplayer Lobby",
+    "ts:multilobbytip": "Enter the multiplayer game lobby",
+    "ts:multilobbymsg": "The multiplayer lobby is coming soon.\nOnline play is not yet supported.",
+
+    "GUI:ClearGameData": "Clear All Data",
+    "TS:ConfirmClearGameData": "Are you sure you want to clear all game data?\n\nThis will delete ALL imported game files and you will need to re-import your RA2 / YR game files to play again.\n\nReplays, mods, maps, and cached data will also be removed.",
+    "TS:GameDataCleared": "Game data cleared. Reloading...",
+    "TS:ClearGameDataFailed": "Failed to clear game data. Please try again.",
+
+    "ts:reportbugtt": "Report any bugs to the project maintainers",
+    "ts:reportbugdesc": "You can submit a bug report by following the link below:",
 
     "ts:downloading": "Downloading...",
     "ts:downloadingpg": "Downloading... (%.1f%%)",
@@ -11,8 +33,6 @@
     "ts:downloadingpgunkn": "Downloading %.1f MiB...",
     "ts:downloadfailed": "A remote resource could not be downloaded.",
 
-    "ts:gameres_locate_title": "Locate original game assets",
-    "ts:gameres_import_desc": "If you have a copy of RA2 already installed, you can import it below. You can also choose to import an archive containing *.mix files from the local filesystem or a web URL.",
     "ts:gameres_drop_desc": "Drop the required game files here",
     "ts:gameres_or": "OR",
     "ts:gameres_browse_folder": "Select folder...",
@@ -49,8 +69,8 @@
     "ts:warning": "Warning",
     "ts:preloading": "Prefetching assets...",
     "ts:reportbug": "Report a Bug",
-    "ts:reportbugtt": "You can report any bugs you find on our Discord server",
-    "ts:reportbugdesc": "You can submit a bug on our dedicated Discord server channel by following the link below:",
+    "ts:reportbugtt": "Report any bugs to the project maintainers",
+    "ts:reportbugdesc": "You can submit a bug report by following the link below:",
     "ts:patchnotes": "Patch Notes",
     "stt:patchnotes": "Displays the change log for each version of the game client",
     "ts:infoandcredits": "Info & Credits",
@@ -122,8 +142,8 @@
     "ts:serveroffline": "Offline",
     "ts:serveronline": "Online",
 
-    "gui:demo": "Demo Mode",
-    "stt:demo": "Play a singleplayer match against a training dummy",
+    "gui:demo": "Skirmish",
+    "stt:demo": "Play a singleplayer skirmish against computer opponents",
     "gui:aidummy": "Training Dummy",
     "gui:aieasybeta": "Easy Enemy (BETA)",
 
@@ -271,7 +291,7 @@
     "gui:importmodfolderbadname": "The name may only contain alphanumeric characters, dash (-) and underscore (_).",
     "gui:importmodfolderexists": "A mod with that name already exists. Please choose a different name.",
     "gui:importmodbadarchive": "The provided archive doesn't appear to contain a valid mod.",
-    "gui:importmodunsupportedwarn": "The mod you are trying to install was not updated for the Chrono Divide game engine. You may still install any vanilla RA2 mod, but it may not work correctly. Proceed at your own risk!",
+    "gui:importmodunsupportedwarn": "The mod you are trying to install may not be fully compatible with this engine. You may still install it, but it may not work correctly. Proceed at your own risk!",
     "gui:importduplicatemoderror": "This mod is already installed.",
     "gui:installmoddownloadprompt": "The mod will now be downloaded from the server. The estimated download size is %d MiB. Do you wish to continue?",
     "gui:modupdateavail": "An update is available.",

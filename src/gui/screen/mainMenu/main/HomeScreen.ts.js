@@ -87,6 +87,13 @@ System.register(
                 },
               },
               {
+                label: e.get("TS:PatchNotes"),
+                tooltip: e.get("STT:PatchNotes"),
+                onClick: () => {
+                  this.controller?.pushScreen(i.ScreenType.PatchNotes);
+                },
+              },
+              {
                 label: e.get("GUI:Fullscreen", s.getHumanReadableKey(r.FullScreen.hotKey)),
                 tooltip: e.get("STT:Fullscreen"),
                 isBottom: !0,

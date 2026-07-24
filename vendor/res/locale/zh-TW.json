@@ -350,7 +350,7 @@
     "ts:storage_quota_warning": "警告：新重播可能無法保存，因為瀏覽器存儲已滿（已使用 %d 的 %d MiB）。請檢查您的瀏覽器存儲配額，確保您有足夠的磁碟空間，並且不是在私密模式下瀏覽。",
 
     "gui:storage": "存儲",
-    "gui:storageused": "%s 的 %s 已使用",
+    "gui:storageused": "已使用 %s / %s",
     "gui:uploading": "上傳 \"%s\"...",
     "gui:uploadfinished": "上傳完成。",
     "gui:uploadfailed": "上傳失敗。",

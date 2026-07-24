@@ -197,6 +197,10 @@ function stepAssets() {
   writeOut("res/favicon.svg", defaultFavicon());
   logv("res/favicon.svg");
 
+  // Changelog (local HTML file, served at /res/changelog.html).
+  copyFileSync(join(ROOT, "res", "changelog.html"), join(BUILD, "res", "changelog.html"));
+  logv("res/changelog.html");
+
   // Locales: localized en-US/zh-CN/zh-TW; copy the other stubs verbatim.
   localizeStrings("en-US.json", EN_LOCALE);
   localizeStrings("zh-CN.json", ZH_CN_LOCALE);
@@ -213,6 +217,7 @@ function stepAssets() {
   css = css.replace(/(#loader-logo\s*\{[^}]*?)background:[^;]+;/s, "$1background: none;");
   css = css.replace(/#3498db/gi, "#888888").replace(/#e74c3c/gi, "#888888").replace(/#f9c922/gi, "#aaaaaa");
   css += IMPORT_PAGE_CSS;
+  css += FILE_EXPLORER_RA2_CSS;
   writeOut("style.css", css);
   logv("style.css (loader logo/colors neutralized)");
 
@@ -310,6 +315,10 @@ const EN_LOCALE = {
   "gui:custommatch": "Multiplayer Lobby",
   "ts:multilobbytip": "Enter the multiplayer game lobby",
   "ts:multilobbymsg": "The multiplayer lobby is coming soon.\nOnline play is not yet supported.",
+  "GUI:ClearGameData": "Clear All Data",
+  "TS:ConfirmClearGameData": "Are you sure you want to clear all game data?\n\nThis will delete ALL imported game files and you will need to re-import your RA2 / YR game files to play again.\n\nReplays, mods, maps, and cached data will also be removed.",
+  "TS:GameDataCleared": "Game data cleared. Reloading...",
+  "TS:ClearGameDataFailed": "Failed to clear game data. Please try again.",
 };
 const ZH_CN_LOCALE = {
   "ts:disclaimer":
@@ -332,6 +341,10 @@ const ZH_CN_LOCALE = {
   "gui:custommatch": "多人大厅",
   "ts:multilobbytip": "进入多人连线游戏大厅",
   "ts:multilobbymsg": "多人大厅功能敬请期待。\n目前暂不支援连线对战。",
+  "GUI:ClearGameData": "清除所有数据",
+  "TS:ConfirmClearGameData": "确定要清除所有游戏数据吗？\n\n这将删除所有已导入的游戏文件，您需要重新导入 RA2 / YR 游戏文件才能继续游玩。\n\n录像、模组、地图和缓存数据也将被删除。",
+  "TS:GameDataCleared": "游戏数据已清除，正在重新加载……",
+  "TS:ClearGameDataFailed": "清除游戏数据失败，请重试。",
 };
 const ZH_TW_LOCALE = {
   "ts:disclaimer":
@@ -354,6 +367,10 @@ const ZH_TW_LOCALE = {
   "gui:custommatch": "多人大廳",
   "ts:multilobbytip": "進入多人連線遊戲大廳",
   "ts:multilobbymsg": "多人大廳功能敬請期待。\n目前暫不支援連線對戰。",
+  "GUI:ClearGameData": "清除所有資料",
+  "TS:ConfirmClearGameData": "確定要清除所有遊戲資料嗎？\n\n這將刪除所有已匯入的遊戲檔案，您需要重新匯入 RA2 / YR 遊戲檔案才能繼續遊玩。\n\n錄影、模組、地圖和快取資料也將被刪除。",
+  "TS:GameDataCleared": "遊戲資料已清除，正在重新載入……",
+  "TS:ClearGameDataFailed": "清除遊戲資料失敗，請重試。",
 };
 function localizeStrings(file, table) {
   const obj = JSON.parse(readFileSync(join(VENDOR, "res", "locale", file), "utf8"));
@@ -365,6 +382,184 @@ function localizeStrings(file, table) {
   writeOut("res/locale/" + file, JSON.stringify(obj, null, 4));
   logv("res/locale/" + file + " (" + n + " keys set)");
 }
+
+// RA2-themed overrides for the file-explorer widget (Storage screen).
+// Matches the game's dark military UI: black backgrounds, yellow text, red borders.
+const FILE_EXPLORER_RA2_CSS = `
+#ra2web-root .fe_fileexplorer_wrap,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap {
+  background: transparent !important;
+  border: 1px solid #800 !important;
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap.fe_fileexplorer_inner_wrap_focused {
+  border-color: #c00 !important;
+}
+/* Kill white borders in the top toolbar area */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_path_wrap {
+  border: 1px solid #800 !important;
+}
+/* Path segments hover/focus — no blue */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_path_segment_wrap:hover,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_path_segment_wrap:focus,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_path_segment_wrap.fe_fileexplorer_path_segment_wrap_focus {
+  background: #480000 !important;
+  border-color: #800 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_folder_tools_scroll_wrap {
+  border-right: 1px solid #800 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap button,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_toolbar button {
+  color: #ff0 !important;
+  border-radius: 0 !important;
+  font-family: 'Fira Sans Condensed', Arial, sans-serif !important;
+  font-size: 13px !important;
+}
+/* Sprite nav buttons: keep transparent bg so sprite shows */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_navtools button {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_navtools button:hover,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_navtools button:focus {
+  background: transparent !important;
+  border: none !important;
+}
+/* Folder tools sidebar buttons — dark bg, red border */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_folder_tools button {
+  background: #222 !important;
+  border: 1px solid #800 !important;
+  margin-bottom: 0.3em !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_folder_tools button:hover,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_folder_tools button:focus {
+  background: #480000 !important;
+  border-color: #c00 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_toolbar {
+  background: transparent !important;
+  border-bottom: 1px solid #800 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_view {
+  background: transparent !important;
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_view .fe_fileexplorer_selected {
+  background: #480000 !important;
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_view .fe_fileexplorer_hover {
+  background: #333 !important;
+}
+/* Status bar */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_statusbar_wrap {
+  color: #aa0 !important;
+  font-size: 0.75em !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_statusbar_text_segment_wrap {
+  border-right-color: #800 !important;
+}
+/* Action progress area */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_action_wrap {
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_action_progress_cancel_wrap::after {
+  color: #c00 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_action_progress_cancel_wrap:hover::after,
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_action_progress_cancel_wrap:focus::after {
+  color: #ff0000 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap input,
+#ra2web-root .fe_fileexplorer_wrap select {
+  background: rgba(0,0,0,0.5) !important;
+  border: 1px solid #800 !important;
+  color: #ff0 !important;
+  border-radius: 0 !important;
+  font-family: 'Fira Sans Condensed', Arial, sans-serif !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_context_menu {
+  background: rgba(0,0,0,0.9) !important;
+  border: 1px solid #c00 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_context_menu .fe_fileexplorer_context_menu_item:hover {
+  background: #480000 !important;
+}
+/* Dropdown/popup menus */
+#ra2web-root .fe_fileexplorer_popup_wrap {
+  background: rgba(10,0,0,0.95) !important;
+  border: 1px solid #800 !important;
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_popup_wrap .fe_fileexplorer_popup_item_wrap {
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_popup_wrap .fe_fileexplorer_popup_item_wrap:focus {
+  background-color: #480000 !important;
+}
+#ra2web-root .fe_fileexplorer_popup_wrap .fe_fileexplorer_popup_item_split {
+  border-top-color: #800 !important;
+}
+#ra2web-root .fe_fileexplorer_popup_wrap .fe_fileexplorer_popup_item_text {
+  color: #ff0 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_popup_item_wrap.fe_fileexplorer_popup_item_disabled .fe_fileexplorer_popup_item_text {
+  color: #666 !important;
+}
+/* File item hover */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_item_wrap_inner:hover {
+  background-color: #480000 !important;
+  border-color: #800 !important;
+}
+/* File item selected (not focused) */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap:not(.fe_fileexplorer_inner_wrap_focused) .fe_fileexplorer_item_selected .fe_fileexplorer_item_wrap_inner {
+  background-color: #300 !important;
+  border-color: #600 !important;
+}
+/* File item selected (focused) */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap.fe_fileexplorer_inner_wrap_focused .fe_fileexplorer_items_wrap.fe_fileexplorer_items_focus .fe_fileexplorer_item_selected .fe_fileexplorer_item_wrap_inner {
+  background-color: #480000 !important;
+  border-color: #c00 !important;
+}
+/* File item selected + hover */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap.fe_fileexplorer_inner_wrap_focused .fe_fileexplorer_items_wrap.fe_fileexplorer_items_focus .fe_fileexplorer_item_selected .fe_fileexplorer_item_wrap_inner:hover {
+  border-color: #c00 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap:not(.fe_fileexplorer_inner_wrap_focused) .fe_fileexplorer_item_selected .fe_fileexplorer_item_wrap_inner:hover {
+  background-color: #480000 !important;
+  border-color: #800 !important;
+}
+/* Drag hover */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap .fe_fileexplorer_items_wrap .fe_fileexplorer_item_wrap.fe_fileexplorer_drag_hover .fe_fileexplorer_item_wrap_inner {
+  background-color: #480000 !important;
+  border-color: #c00 !important;
+}
+/* Item focused */
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_inner_wrap.fe_fileexplorer_inner_wrap_focused .fe_fileexplorer_items_wrap.fe_fileexplorer_items_focus .fe_fileexplorer_item_focused .fe_fileexplorer_item_wrap_inner {
+  border-color: #c00 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_breadcrumbs {
+  background: transparent !important;
+  border-bottom: 1px solid #800 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_breadcrumbs .fe_fileexplorer_breadcrumb_hover {
+  background: #480000 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_view .fe_fileexplorer_column_header {
+  background: transparent !important;
+  border-bottom: 1px solid #c00 !important;
+  color: #c00 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_progress_wrap {
+  background: rgba(0,0,0,0.7) !important;
+  border: 1px solid #800 !important;
+}
+#ra2web-root .fe_fileexplorer_wrap .fe_fileexplorer_progress_wrap .fe_fileexplorer_progress_bar {
+  background: #800 !important;
+}
+`;
 
 // Polished, readable import-page styles (replaces the old one-click layout).
 const IMPORT_PAGE_CSS = `

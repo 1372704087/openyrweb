@@ -42,6 +42,31 @@ System.register(
           onEnter(e) {
             (this.controller.setSidebarButtons([
               {
+                label: this.strings.get("GUI:ClearGameData"),
+                onClick: async () => {
+                  if (
+                    await this.messageBoxApi.confirm(
+                      this.strings.get("TS:ConfirmClearGameData"),
+                      this.strings.get("GUI:Ok"),
+                      this.strings.get("GUI:Cancel"),
+                    )
+                  ) {
+                    try {
+                      let t = this.rfs.getRootDirectoryHandle();
+                      for await (var i of t.keys()) await t.removeEntry(i, { recursive: !0 });
+                      this.messageBoxApi.show(this.strings.get("TS:GameDataCleared"));
+                      setTimeout(() => location.reload(), 1500);
+                    } catch (e) {
+                      console.error("Failed to clear game data", e);
+                      this.messageBoxApi.show(
+                        this.strings.get("TS:ClearGameDataFailed"),
+                        this.strings.get("GUI:Ok"),
+                      );
+                    }
+                  }
+                },
+              },
+              {
                 label: this.strings.get("GUI:Back"),
                 isBottom: !0,
                 onClick: () => {

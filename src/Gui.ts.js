@@ -747,8 +747,7 @@ System.register(
                     this.sentry,
                   ),
                 ),
-                this.config.patchNotesUrl &&
-                  F.set(Y.ScreenType.PatchNotes, new Ue.PatchNotesScreen(t, l, this.config.patchNotesUrl)),
+                F.set(Y.ScreenType.PatchNotes, new Ue.PatchNotesScreen(t, l, this.config.patchNotesUrl || "res/changelog.html")),
                 this.config.ladderRulesUrl &&
                   F.set(Y.ScreenType.LadderRules, new Je.LadderRulesScreen(t, l, this.config.ladderRulesUrl)));
               ((p = await this.getMainMenuVideoUrl(s, N)),
