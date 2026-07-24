@@ -94,6 +94,10 @@ System.register(
           }
           getPointerType(e) {
             let t = this.isAllowed();
+            // OpenYRWeb: bunkered vehicles show default arrow cursor instead of NoMove/NoAction
+            if (!t && this.sourceObject.bunkeredAt) {
+              return o.PointerType.Default;
+            }
             var i, r, s, a, n;
             return (
               !t ||

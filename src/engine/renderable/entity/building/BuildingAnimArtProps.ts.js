@@ -74,6 +74,10 @@ System.register(
                         h.hasObject(n, p.ObjectType.Animation) &&
                         (e.damagedArt = h.getObject(n, p.ObjectType.Animation).art),
                         (e.offset = { x: c.getNumber(s + "X"), y: c.getNumber(s + "Y") }));
+                      // OpenYRWeb: read *YSort for isometric depth offset (e.g. SpecialAnimYSort=750).
+                      // Positive YSort shifts the animation later in the draw order (on top),
+                      // negative shifts it earlier (behind).
+                      (e.ySort = c.getNumber(s + "YSort", 0));
                       let r = t.getString("Image");
                       ((r = r || a),
                         (e.image = r),

@@ -118,12 +118,20 @@ System.register(
                 return this.rules.minimumRange;
               }
               get range() {
-                return this.gameObject.isBuilding() &&
+                let baseRange = this.gameObject.isBuilding() &&
                   !this.gameObject.overpoweredTrait &&
                   this.type === r.WeaponType.Secondary &&
                   this.gameObject.primaryWeapon
                   ? Math.min(this.gameObject.primaryWeapon.rules.range, this.rules.range)
                   : this.rules.range;
+                // OpenYRWeb: Tank Bunker weapon range bonus (BunkerWeaponRangeBonus, default 0).
+                // The bonus is in tiles (from [CombatDamage]BunkerWeaponRangeBonus), same unit as
+                // rules.range. Do NOT multiply by LEPTONS_PER_TILE — range comparisons divide
+                // distance by LEPTONS_PER_TILE, so range values must stay in tile units.
+                if (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait) {
+                  baseRange += S.bunkerWeaponRangeBonus;
+                }
+                return baseRange;
               }
               get speed() {
                 return S.computeSpeed(this.rules, this.projectileRules);
@@ -134,6 +142,9 @@ System.register(
                   this.gameObject.veteranTrait && (e *= this.gameObject.veteranTrait.getVeteranRofMultiplier()),
                   // OpenYRWeb: berserk units fire faster (BerserkROFMultiplier, default 0.5 = 2x speed).
                   this.gameObject.berserkTrait?.isBerserk() && (e *= S.berserkROFMultiplier),
+                  // OpenYRWeb: Tank Bunker ROF multiplier (BunkerROFMultiplier, default 1).
+                  // Divide so values > 1 INCREASE fire rate (matching YR docs: larger = faster).
+                  this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait && (e /= S.bunkerROFMultiplier),
                   Math.floor(e)
                 );
               }
@@ -206,7 +217,10 @@ System.register(
                   let i = t ?? a.createProjectile(this.projectileRules.name, this.gameObject, this, s, !1);
                   i.isAircraft() ||
                     (i.baseDamageMultiplier =
-                      e * (this.gameObject.isUnit() ? this.gameObject.crateBonuses.firepower : 1));
+                      e * (this.gameObject.isUnit() ? this.gameObject.crateBonuses.firepower : 1) *
+                      // OpenYRWeb: Tank Bunker damage multiplier (BunkerDamageMultiplier, default 1).
+                      // Multiplies weapon damage when the vehicle is inside a Tank Bunker.
+                      (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait ? S.bunkerDamageMultiplier : 1));
                   let r = this.flh.clone();
                   r.lateral *= this.lateralMuzzleMult;
                   var l = n.position.getMapPosition();
@@ -261,7 +275,12 @@ System.register(
           (S.NUKE_PAYLOAD_NAME = "NukePayload"),
           // OpenYRWeb: berserk fire-rate multiplier (vanilla YR [CombatDamage] BerserkROFMultiplier=0.5).
           // Set from CombatDamageRules during game initialization. Default 0.5 = 2x fire rate.
-          (S.berserkROFMultiplier = 0.5));
+          (S.berserkROFMultiplier = 0.5),
+          // OpenYRWeb: Tank Bunker weapon bonus multipliers (vanilla YR [CombatDamage]).
+          // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
+          (S.bunkerDamageMultiplier = 1),
+          (S.bunkerROFMultiplier = 1),
+          (S.bunkerWeaponRangeBonus = 0));
       },
     };
   },

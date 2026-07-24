@@ -340,6 +340,10 @@ System.register(
               var e = this.ini.getSection("CombatDamage");
               if (!e) throw new Error("Missing [CombatDamage] section");
               this.combatDamage.readIni(e);
+              // OpenYRWeb: Propagate Tank Bunker weapon bonus multipliers to the Weapon module.
+              C.Weapon.bunkerDamageMultiplier = this.combatDamage.bunkerDamageMultiplier;
+              C.Weapon.bunkerROFMultiplier = this.combatDamage.bunkerROFMultiplier;
+              C.Weapon.bunkerWeaponRangeBonus = this.combatDamage.bunkerWeaponRangeBonus;
             }
             readRadiation() {
               var e = this.ini.getSection("Radiation");

@@ -116,10 +116,7 @@ System.register(
               }
               if (this.dockingStatus === d.MoveToDock) {
                 var r = this.target.dockTrait.getReservedDockForUnit(e),
-                  i = this.target.dockTrait.getDockTile(r),
-                  r = h.Coords.vecWorldToGround(this.target.dockTrait.getDockOffset(r))
-                    .add(this.target.position.getMapPosition())
-                    .sub(new u.Vector2(i.rx, i.ry).multiplyScalar(h.Coords.LEPTONS_PER_TILE));
+                  i = this.target.dockTrait.getDockTile(r);
                 if (e.tile !== i)
                   return (
                     this.children.push(

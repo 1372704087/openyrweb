@@ -435,3 +435,53 @@ feat(chaos-drone): 实现精神突击车神经毒气 Berserk 混乱状态系统
 4. Berserk 单位不攻击建筑、不攻击毒气来源，玩家指令被忽略。  
 5. `ImmuneToPsionics=yes` 单位免疫 Berserk。  
 6. 持续时间受 Verses 护甲倍率和距离衰减影响。
+
+feat(tank-bunker): 实现完整坦克掩体功能，车辆可进入建筑获得保护与战斗增益
+
+- 🏗️ **核心模块新增**  
+  新增 `TankBunkerTrait`（掩体特性）和 `EnterTankBunkerTask`（进入任务）。  
+  - `TankBunkerTrait`：管理掩体内车辆状态，提供进入验证（地面车辆、有炮塔/OmniFire、有主武器、非无人机/运输车/寄生/心控），生命期钩子（onTick/onDestroy/onSell）处理车辆弹出/摧毁。  
+  - `EnterTankBunkerTask`：四阶段进入流程（移动到入口 → 车体旋转 180° → 等待转向完成 → 炮塔回正并注册），完成后禁用车辆移动并清除任务。
+
+- ⚔️ **战斗系统增强**  
+  - **伤害重定向**：`Warhead` 中，攻击掩体内车辆且弹头无 `PenetratesBunker=yes` 时，伤害重定向到掩体建筑。  
+  - **武器加成**：掩体内车辆获得 `BunkerDamageMultiplier`（伤害）、`BunkerROFMultiplier`（射速，值越大越快）、`BunkerWeaponRangeBonus`（射程，以地块为单位）。  
+  - **寄生虫免疫**：`Projectile` 中寄生虫弹头无法攻击掩体内车辆。
+
+- 🎨 **渲染系统升级**  
+  - 新增 `SPECIAL_UNDOCKING` 动画类型（车辆离开时墙体下降）。  
+  - 墙体动画逻辑：根据掩体状态播放 `BunkerWallsUpSound`/`BunkerWallsDownSound`，显示前墙/后墙帧（索引 0/2 和 1/3）。  
+  - 后墙深度控制：偶数索引帧禁用深度测试和写入，使其渲染在建筑主体之上，但车辆仍可通过深度缓冲显示在后墙之后。  
+  - 支持 `SpecialAnimYSort` 等距深度偏移参数。
+
+- 📋 **规则配置扩展**  
+  | 规则文件 | 新增配置 | 类型 | 默认值 | 描述 |
+  |----------|----------|------|--------|------|
+  | `TechnoRules` | `Bunker` | bool | false | 建筑为坦克掩体 |
+  | `TechnoRules` | `Bunkerable` | bool | true | 车辆可进入掩体 |
+  | `WarheadRules` | `PenetratesBunker` | bool | false | 弹头穿透掩体 |
+  | `CombatDamageRules` | `BunkerDamageMultiplier` | number | 1 | 伤害倍率 |
+  | `CombatDamageRules` | `BunkerROFMultiplier` | number | 1 | 射速倍率 |
+  | `CombatDamageRules` | `BunkerWeaponRangeBonus` | number | 0 | 射程加成 |
+  | `AudioVisualRules` | `BunkerWallsUpSound` | string | - | 墙升起音效 |
+  | `AudioVisualRules` | `BunkerWallsDownSound` | string | - | 墙下降音效 |
+
+- 🚪 **指令与任务系统**  
+  - `DockOrder`：对掩体建筑生成 `EnterTankBunkerTask`，容量检查直接查询 `TankBunkerTrait`。  
+  - `DeployOrder`：掩体内车辆按 D 键离开，流程为清除停靠状态 → 启用移动 → 取消当前任务 → 向南移动一格 → 向西移动两格。  
+  - `MoveOrder`：掩体内车辆移动指令显示默认光标而非 `NoMove/NoAction`。  
+  - `DockTrait`：为掩体修正 `DockTile` 位置，委托 `TankBunkerTrait.canVehicleEnter()` 验证。
+
+- 🧹 **代码清理**  
+  - `MoveToDockTask` 移除未使用的偏移量计算代码。  
+  - `rulescd.ini` 修正医院（CAHOSP）配置格式（空白符清理）。
+
+### ⚠️ 破坏性变更
+- 无破坏性变更，纯新增功能，不影响现有行为。
+
+### 🧪 测试建议
+1. 进入掩体：验证符合条件的车辆进入、不符合条件被拒绝、动画流畅。  
+2. 战斗测试：伤害/射程/射速加成生效；普通攻击伤害被掩体吸收；`PenetratesBunker=yes` 直接伤害车辆；寄生虫无法攻击掩体内车辆。  
+3. 离开掩体：按 D 键正确离开，墙体下降动画播放，移动功能恢复。  
+4. 边缘情况：掩体被摧毁/出售时车辆正确处理；被心控车辆无法进入；掩体已满时拒绝新车辆。  
+5. 渲染测试：后墙深度正确，YSort 参数生效，墙体音效播放正常。

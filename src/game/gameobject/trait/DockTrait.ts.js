@@ -175,6 +175,16 @@ System.register(
               throw new RangeError(`Index ${e} exceeds available docks (${this.numberOfDocks})`);
             var t = this.building.position.getMapPosition(),
               i = this.getDockOffset(e);
+            // OpenYRWeb: Tank Bunker DockingOffset fix. The original artmd.ini stores
+            // DockingOffset as an unused placeholder at -1,-1,0 in TILE units.
+            // Override with an offset that targets the rightmost column of the foundation
+            // (the entrance side), which is passable due to NumberImpassableRows.
+            if (this.building.tankBunkerTrait) {
+              var f = this.building.getFoundation();
+              i = i.clone();
+              i.x = (f.width - 1) * n.Coords.LEPTONS_PER_TILE / 2;
+              i.z = (1 - f.height) * n.Coords.LEPTONS_PER_TILE / 2;
+            }
             return this.tiles.getByMapCoords(
               Math.floor((t.x + i.x) / n.Coords.LEPTONS_PER_TILE),
               Math.floor((t.y + i.z) / n.Coords.LEPTONS_PER_TILE),
@@ -182,12 +192,15 @@ System.register(
           }
           isValidUnitForDock(e) {
             return (
-              ((this.building.unitRepairTrait &&
+              // OpenYRWeb: Tank Bunker — vehicles with Bunkerable=yes can dock at Bunker=yes buildings.
+              // Validation (locomotor, turret, weapon, size, parasite) is delegated to TankBunkerTrait.
+              (this.building.tankBunkerTrait && e.isVehicle() && this.building.tankBunkerTrait.canVehicleEnter(e)) ||
+              (((this.building.unitRepairTrait &&
                 e.isVehicle() &&
                 !this.building.helipadTrait &&
                 (!e.rules.consideredAircraft || e.rules.landable)) ||
                 (e.rules.dock.includes(this.building.name) && !(e.isAircraft() && !this.building.helipadTrait))) &&
-              this.building.rules.naval === e.rules.naval
+              this.building.rules.naval === e.rules.naval)
             );
           }
           dockUnitAt(e, t) {

@@ -57,7 +57,12 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
               (this.radiation = this.rules.getBool("Radiation")),
               (this.rocker = this.rules.getBool("Rocker")),
               (this.sonic = this.rules.getBool("Sonic")),
-              (this.temporal = this.rules.getBool("Temporal")));
+              (this.temporal = this.rules.getBool("Temporal")),
+              // OpenYRWeb: PenetratesBunker=yes (Warheads, default no) — when a warhead with this
+              // flag hits a vehicle inside a Tank Bunker, the damage affects the vehicle directly
+              // instead of being absorbed by the bunker. Usually set on aircraft weapons.
+              // See ModEnc/PenetratesBunker.
+              (this.penetratesBunker = this.rules.getBool("PenetratesBunker")));
             let e = this.rules.getFixedArray("Verses");
             (e.forEach((e, t) => this.verses.set(t, e)),
               (this.wallAbsoluteDestroyer = this.rules.getBool("WallAbsoluteDestroyer")),

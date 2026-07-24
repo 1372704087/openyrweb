@@ -2923,6 +2923,20 @@
       "bytes": 6063
     },
     {
+      "name": "game/gameobject/trait/TankBunkerTrait",
+      "file": "game/gameobject/trait/TankBunkerTrait.ts.js",
+      "deps": [
+        "game/gameobject/trait/interface/NotifyTick",
+        "game/gameobject/trait/interface/NotifyDestroy",
+        "game/gameobject/trait/interface/NotifyDamage",
+        "game/gameobject/trait/interface/NotifySell",
+        "game/type/LocomotorType",
+        "game/type/SpeedType",
+        "util/math"
+      ],
+      "bytes": 5280
+    },
+    {
       "name": "game/event/FactoryProduceUnitEvent",
       "file": "game/event/FactoryProduceUnitEvent.ts.js",
       "deps": [
@@ -3251,7 +3265,8 @@
         "game/math/Vector2",
         "game/gameobject/trait/DelayedKillTrait",
         "game/gameobject/trait/interface/NotifyBuildStatus",
-        "game/gameobject/trait/SecureProgressTrait"
+        "game/gameobject/trait/SecureProgressTrait",
+        "game/gameobject/trait/TankBunkerTrait"
       ],
       "bytes": 5200
     },
@@ -4590,6 +4605,18 @@
       "bytes": 265
     },
     {
+      "name": "game/gameobject/task/EnterTankBunkerTask",
+      "file": "game/gameobject/task/EnterTankBunkerTask.ts.js",
+      "deps": [
+        "game/gameobject/task/system/Task",
+        "game/gameobject/task/move/MoveTask",
+        "game/gameobject/task/TurnTask",
+        "game/Coords",
+        "game/math/Vector2"
+      ],
+      "bytes": 1500
+    },
+    {
       "name": "game/gameobject/task/EnterRecyclerTask",
       "file": "game/gameobject/task/EnterRecyclerTask.ts.js",
       "deps": [
@@ -4720,7 +4747,8 @@
         "game/gameobject/Building",
         "game/gameobject/task/harvester/ReturnOreTask",
         "game/order/OrderFeedbackType",
-        "game/gameobject/task/MoveToDockTask"
+        "game/gameobject/task/MoveToDockTask",
+        "game/gameobject/task/EnterTankBunkerTask"
       ],
       "bytes": 1837
     },

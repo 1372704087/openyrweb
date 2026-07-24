@@ -560,7 +560,7 @@ System.register(
               (o.destroyObject(this), (this.state = D.Detonation));
               let n = this.target.obj,
                 c = !1;
-              if (r.rules.parasite && n?.isUnit() && l === n.tile && r.canDamage(n, l, s))
+              if (r.rules.parasite && n?.isUnit() && l === n.tile && r.canDamage(n, l, s) && !n.bunkeredAt)
                 if (n.isInfantry()) a = Number.POSITIVE_INFINITY;
                 else if (n.parasiteableTrait && this.fromObject?.isUnit()) {
                   if (!(this.fromWeapon instanceof T.Weapon))

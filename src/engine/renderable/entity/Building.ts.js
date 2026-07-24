@@ -145,7 +145,9 @@ System.register(
           .set(M.AnimationType.SUPER_CHARGE_LOOP, M.AnimationType.SUPER_CHARGE_END)
           .set(M.AnimationType.SUPER_CHARGE_END, M.AnimationType.IDLE)
           .set(M.AnimationType.FACTORY_DEPLOYING, M.AnimationType.IDLE)
-          .set(M.AnimationType.FACTORY_ROOF_DEPLOYING, M.AnimationType.IDLE)),
+          .set(M.AnimationType.FACTORY_ROOF_DEPLOYING, M.AnimationType.IDLE)
+          // OpenYRWeb: Tank Bunker exit animation → back to IDLE when done.
+          .set(M.AnimationType.SPECIAL_UNDOCKING, M.AnimationType.IDLE)),
           (l = new Map()
             .set(M.AnimationType.SUPER_CHARGE_START, [M.AnimationType.SUPER, 1])
             .set(M.AnimationType.SUPER_CHARGE_LOOP, [M.AnimationType.SUPER, 2])
@@ -155,6 +157,8 @@ System.register(
             .set(M.AnimationType.SPECIAL_REPAIR_END, [M.AnimationType.SPECIAL, 2])
             .set(M.AnimationType.SPECIAL_DOCKING, [M.AnimationType.SPECIAL, 0])
             .set(M.AnimationType.SPECIAL_SHOOT, [M.AnimationType.SPECIAL, 0])
+            // OpenYRWeb: Tank Bunker exit — maps to SpecialAnimThree (NATBNK_A2, reverse/going-down).
+            .set(M.AnimationType.SPECIAL_UNDOCKING, [M.AnimationType.SPECIAL, 2])
             .set(M.AnimationType.FACTORY_DEPLOYING, [M.AnimationType.FACTORY_DEPLOYING, 0])
             .set(M.AnimationType.FACTORY_UNDER_DOOR, [M.AnimationType.FACTORY_DEPLOYING, 1])
             .set(M.AnimationType.FACTORY_ROOF_DEPLOYING, [M.AnimationType.FACTORY_ROOF_DEPLOYING, 0])
@@ -194,6 +198,7 @@ System.register(
                   (this.drainAnim = void 0),
                   (this.drainLastDiscPos = void 0),
                   (this.plugins = []),
+                  (this._prevBunkerVehicle = !1),
                   (this.objectArt = e.art),
                   (this.objectRules = e.rules),
                   (this.type = this.objectRules.name),
@@ -558,6 +563,45 @@ System.register(
                       h === p.DamageType.DESTROYED &&
                       this.objectRules.explosion.length &&
                       this.createExplosionAnims(this.renderableManager)),
+                    // OpenYRWeb: Tank Bunker — track bunkered vehicle changes.
+                    // Must be outside the (c||d||g) guard because the bunker has no wallTrait/garrisonTrait
+                    // and the guard short-circuits after the first frame.
+                    (function(t, self) {
+                      var hasV = !!t?.bunkeredVehicle;
+                      if (hasV !== self._prevBunkerVehicle) {
+                        self._prevBunkerVehicle = hasV;
+                        // Play wall up/down sound
+                        var soundName = hasV ? self.rules.audioVisual.bunkerWallsUpSound : self.rules.audioVisual.bunkerWallsDownSound;
+                        if (soundName) self.worldSound?.playEffect(soundName, self.gameObject, self.gameObject.owner);
+                        if (self.hasAnimation(M.AnimationType.SPECIAL)) {
+                          self.setAnimationVisibility(M.AnimationType.SPECIAL, !1);
+                          var specAnimObjs = self.animObjects.get(M.AnimationType.SPECIAL);
+                          var specData = self.animArtProps.getByType(M.AnimationType.SPECIAL);
+                          // Front wall (index 0 or 2)
+                          var frontIdx = hasV ? 0 : 2;
+                          self.setAnimationVisibility(M.AnimationType.SPECIAL, !0, frontIdx);
+                          var frontAnim = specAnimObjs[frontIdx];
+                          self.animations.get(frontAnim).start(i);
+                          var frontC3d = frontAnim.get3DObject().children[0];
+                          var frontYSort = specData[frontIdx].ySort || 0;
+                          if (frontC3d && frontYSort !== 0) {
+                            A.MathUtils.translateTowardsCamera(frontC3d, self.camera, frontYSort * (256 / 30));
+                            frontC3d.updateMatrix();
+                          }
+                          // Rear wall (index 1 or 3): depthTest=false set at creation time
+                          var rearIdx = hasV ? 1 : 3;
+                          self.setAnimationVisibility(M.AnimationType.SPECIAL, !0, rearIdx);
+                          var rearAnim = specAnimObjs[rearIdx];
+                          self.animations.get(rearAnim).start(i);
+                          var rearC3d = rearAnim.get3DObject().children[0];
+                          var rearYSort = specData[rearIdx].ySort || 0;
+                          if (rearC3d && rearYSort !== 0) {
+                            A.MathUtils.translateTowardsCamera(rearC3d, self.camera, rearYSort * (256 / 30));
+                            rearC3d.updateMatrix();
+                          }
+                        }
+                      }
+                    })(this.gameObject.tankBunkerTrait, this),
                     this.gameObject.turretTrait &&
                       ((h = this.gameObject.turretTrait.facing) !== this.lastTurretFacing &&
                         ((this.lastTurretFacing = h),
@@ -992,6 +1036,8 @@ System.register(
                   ((o = n.shadow ? t.numImages / 2 : t.numImages),
                   (n.rate = o / (60 * this.rules.general.buildupTime)));
                 var o = { x: i.x + e.offset.x, y: i.y + e.offset.y };
+                var isTankBunkerRear = e.type === M.AnimationType.SPECIAL && this.gameObject.tankBunkerTrait && r % 2 === 0;
+                let depthOffset = isTankBunkerRear ? 0 : r;
                 let l = T.ShpRenderable.factory(
                   this.aggregatedImageData.file,
                   this.palette,
@@ -1000,7 +1046,7 @@ System.register(
                   n.shadow,
                   0,
                   !e.flat,
-                  r,
+                  depthOffset,
                   s && !e.flat,
                 );
                 return (
@@ -1008,9 +1054,14 @@ System.register(
                   l.setFrameOffset(this.aggregatedImageData.imageIndexes.get(t)),
                   l.setBatched(this.useSpriteBatching),
                   this.useSpriteBatching && l.setBatchPalettes(this.paletteRemaps),
+                  // Tank Bunker rear wall: must render independently so we can control depthTest/renderOrder
+                  isTankBunkerRear && (l.setBatched(!1), l.setPalette(this.palette)),
                   l.setFlat(e.flat),
                   (e.translucent || 0 < e.translucency) && l.setForceTransparent(!0),
                   l.create3DObject(),
+                  // Rear wall: disable depthTest + depthWrite so it renders on top of building body
+                  // but the tank (separate Object3D) can still render on top via depth buffer.
+                  isTankBunkerRear && l.getShapeMesh() && (l.getShapeMesh().material.depthTest = !1) && (l.getShapeMesh().material.depthWrite = !1),
                   this.animations.set(l, new f.Animation(n, this.gameSpeed)),
                   l
                 );

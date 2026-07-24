@@ -77,7 +77,15 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               // OpenYRWeb: berserk fire-rate multiplier (vanilla YR [CombatDamage] BerserkROFMultiplier).
               // When a unit is berserk (hit by Psychedelic=yes warhead), its ROF is multiplied by this value.
               // Default 0.5 = 2x fire rate (fires twice as fast). Ares docs confirm default 0.5.
-              (this.berserkROFMultiplier = e.getNumber("BerserkROFMultiplier", 0.5)));
+              (this.berserkROFMultiplier = e.getNumber("BerserkROFMultiplier", 0.5)),
+              // OpenYRWeb: Tank Bunker weapon bonus multipliers (vanilla YR [CombatDamage]).
+              // BunkerDamageMultiplier: global multiplier to weapon Damage when fired from inside a Tank Bunker.
+              // BunkerROFMultiplier: global multiplier to weapon ROF (rate of fire) when inside a Tank Bunker.
+              // BunkerWeaponRangeBonus: bonus tiles added to weapon Range when inside a Tank Bunker.
+              // See ModEnc/BunkerDamageMultiplier, ModEnc/Bunkers.
+              (this.bunkerDamageMultiplier = e.getNumber("BunkerDamageMultiplier", 1)),
+              (this.bunkerROFMultiplier = e.getNumber("BunkerROFMultiplier", 1)),
+              (this.bunkerWeaponRangeBonus = e.getNumber("BunkerWeaponRangeBonus", 0)));
           }
         }),
       );

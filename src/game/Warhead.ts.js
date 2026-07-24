@@ -177,6 +177,13 @@ System.register(
               );
             }
             inflictDamage(e, t, i, r, s = !1) {
+              // OpenYRWeb: Tank Bunker damage redirection. If the target is a vehicle
+              // docked inside a Tank Bunker and the warhead doesn't have
+              // PenetratesBunker=yes, redirect the damage to the bunker building.
+              // The bunker absorbs the hit instead of the vehicle (ModEnc/PenetratesBunker).
+              if (t.isVehicle && t.isVehicle() && t.bunkeredAt && t.bunkeredAt.tankBunkerTrait && !this.rules.penetratesBunker) {
+                t = t.bunkeredAt;
+              }
               let a = t.healthTrait;
               return (
                 e === Number.POSITIVE_INFINITY && (e = a.getHitPoints()),

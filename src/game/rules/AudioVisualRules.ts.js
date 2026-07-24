@@ -63,6 +63,8 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               // OpenYRWeb: Mastermind overload death + mind-control release sounds.
               (this.masterMindOverloadDeathSound = e.getString("MasterMindOverloadDeathSound")),
               (this.mindClearedSound = e.getString("MindClearedSound")),
+              (this.bunkerWallsUpSound = e.getString("BunkerWallsUpSound") || void 0),
+              (this.bunkerWallsDownSound = e.getString("BunkerWallsDownSound") || void 0),
               (this.ironCurtainInvokeAnim = e.getString("IronCurtainInvokeAnim")),
               (this.messageDuration = e.getNumber("MessageDuration", 10)),
               (this.metallicDebris = e.getArray("MetallicDebris")),

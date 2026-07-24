@@ -29,7 +29,9 @@ System.register("engine/renderable/entity/building/AnimationType", [], function 
         (e[(e.SPECIAL_REPAIR_END = 16)] = "SPECIAL_REPAIR_END"),
         (e[(e.SPECIAL_SHOOT = 17)] = "SPECIAL_SHOOT"),
         (e[(e.FACTORY_UNDER_DOOR = 18)] = "FACTORY_UNDER_DOOR"),
-        (e[(e.FACTORY_UNDER_ROOF_DOOR = 19)] = "FACTORY_UNDER_ROOF_DOOR"));
+        (e[(e.FACTORY_UNDER_ROOF_DOOR = 19)] = "FACTORY_UNDER_ROOF_DOOR"),
+        // OpenYRWeb: Tank Bunker — exit animation (walls going down, SpecialAnimThree).
+        (e[(e.SPECIAL_UNDOCKING = 20)] = "SPECIAL_UNDOCKING"));
     },
   };
 });

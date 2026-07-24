@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/order/DockOrder ===
-// deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/gameobject/Building","game/gameobject/task/harvester/ReturnOreTask","game/order/OrderFeedbackType","game/gameobject/task/MoveToDockTask"]
+// deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/gameobject/Building","game/gameobject/task/harvester/ReturnOreTask","game/order/OrderFeedbackType","game/gameobject/task/MoveToDockTask","game/gameobject/task/EnterTankBunkerTask"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -12,10 +12,11 @@ System.register(
     "game/gameobject/task/harvester/ReturnOreTask",
     "game/order/OrderFeedbackType",
     "game/gameobject/task/MoveToDockTask",
+    "game/gameobject/task/EnterTankBunkerTask",
   ],
   function (e, t) {
     "use strict";
-    var i, r, s, a, n, o, l, c;
+    var i, r, s, a, n, o, l, c, h;
     t && t.id;
     return {
       setters: [
@@ -39,6 +40,9 @@ System.register(
         },
         function (e) {
           l = e;
+        },
+        function (e) {
+          h = e;
         },
       ],
       execute: function () {
@@ -80,19 +84,28 @@ System.register(
               ) &&
               (!e ||
                 0 < (this.target.obj.dockTrait.getAvailableDockCount() ?? 0) ||
-                this.target.obj.dockTrait.hasReservedDockForUnit(this.sourceObject))
+                this.target.obj.dockTrait.hasReservedDockForUnit(this.sourceObject) ||
+                // Tank Bunker: use TankBunkerTrait capacity check (DockTrait doesn't track bunkered state)
+                !!(this.target.obj.tankBunkerTrait && this.target.obj.tankBunkerTrait.canVehicleEnter(this.sourceObject)))
             );
           }
           isAllowed() {
+            // Tank Bunker: check TankBunkerTrait capacity directly (DockTrait is bypassed)
+            if (this.target?.obj?.tankBunkerTrait) {
+              return !this.target.obj.tankBunkerTrait.bunkeredVehicle;
+            }
             return !0;
           }
           process() {
+            if (!this.isAllowed()) return [];
             var e = this.target.obj;
             return e.rules.refinery && this.sourceObject.isVehicle() && this.sourceObject.harvesterTrait
               ? [new n.ReturnOreTask(this.game, e, !0, !0)]
               : e.unitRepairTrait || this.sourceObject.rules.dock.includes(e.name)
                 ? [new l.MoveToDockTask(this.game, e)]
-                : [];
+                : e.tankBunkerTrait
+                    ? [new h.EnterTankBunkerTask(this.game, e)]
+                    : [];
           }
         }),
           e("DockOrder", c));

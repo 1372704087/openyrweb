@@ -308,6 +308,13 @@ System.register(
                 (this.isHuman = !this.ini.getBool("NotHuman")),
                 (this.organic = this.type === s.ObjectType.Infantry || this.ini.getBool("Organic")),
                 (this.occupier = this.ini.getBool("Occupier")),
+                // OpenYRWeb: Bunker=yes (BuildingTypes) — marks this building as a Tank Bunker that
+                // allows VehicleTypes to enter for protection. YR-only flag. See ModEnc/Bunker.
+                (this.bunker = this.ini.getBool("Bunker")),
+                // OpenYRWeb: Bunkerable=yes/no (VehicleTypes, default yes) — determines whether this
+                // vehicle can enter a Tank Bunker. Vehicles with Locomotor=Hover or Fly default to no.
+                // Also requires a turret or OmniFire=yes weapon. See ModEnc/Bunkerable.
+                (this.bunkerable = this.ini.getBool("Bunkerable", !0)),
                 (this.engineer = this.ini.getBool("Engineer")),
                 (this.ivan = this.ini.getBool("Ivan")),
                 (this.civilian = this.ini.getBool("Civilian")),
