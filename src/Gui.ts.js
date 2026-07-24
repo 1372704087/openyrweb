@@ -771,6 +771,7 @@ System.register(
                   _.clear(),
                   _.clearStorage().catch((e) => console.warn("Couldn't clear VXL geocache", [e])));
               });
+              F.get(Y.ScreenType.OptionsStorage).setVxlGeometryPool(_);
               ((L = new pe.BoxedVar(!1)),
                 (w = new Map()),
                 (N = ae.AppLogger.get("action")),

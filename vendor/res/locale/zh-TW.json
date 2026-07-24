@@ -400,5 +400,9 @@
     "GUI:PartyLeft": "你已離開派對。",
     "GUI:PartyInvitePreventionEnabled": "已對 %s 啟用派對邀請限制。",
     "GUI:WaitingForTeammate": "等待隊友準備...",
-    "GUI:TeammateWantsToStart": "你的隊友想要開始搜尋。請點擊閃爍的「開始」按鈕。"
+    "GUI:TeammateWantsToStart": "你的隊友想要開始搜尋。請點擊閃爍的「開始」按鈕。",
+
+    "GUI:ClearVxlCache": "清除 VXL 快取",
+    "TS:VxlCacheCleared": "VXL 幾何快取已清除。",
+    "TS:ClearVxlCacheFailed": "清除 VXL 快取失敗。"
 }

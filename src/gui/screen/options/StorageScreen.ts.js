@@ -37,10 +37,14 @@ System.register(
               (this.jsxRenderer = t),
               (this.messageBoxApi = i),
               (this.rfs = r),
+              (this.vxlGeometryPool = void 0),
               (this.title = this.strings.get("GUI:Storage")));
           }
+          setVxlGeometryPool(e) {
+            this.vxlGeometryPool = e;
+          }
           onEnter(e) {
-            (this.controller.setSidebarButtons([
+            var t = [
               {
                 label: this.strings.get("GUI:ClearGameData"),
                 onClick: async () => {
@@ -67,14 +71,33 @@ System.register(
                 },
               },
               {
+                label: this.strings.get("GUI:ClearVxlCache"),
+                onClick: async () => {
+                  if (this.vxlGeometryPool) {
+                    try {
+                      await this.vxlGeometryPool.clearStorage();
+                      this.vxlGeometryPool.clear();
+                      this.messageBoxApi.show(this.strings.get("TS:VxlCacheCleared"), this.strings.get("GUI:Ok"));
+                    } catch (e) {
+                      console.error("Failed to clear VXL cache", e);
+                      this.messageBoxApi.show(
+                        this.strings.get("TS:ClearVxlCacheFailed"),
+                        this.strings.get("GUI:Ok"),
+                      );
+                    }
+                  }
+                },
+              },
+              {
                 label: this.strings.get("GUI:Back"),
                 isBottom: !0,
                 onClick: () => {
                   this.controller?.leaveCurrentScreen();
                 },
               },
-            ]),
-              this.controller.showSidebarButtons());
+            ];
+              this.controller.setSidebarButtons(t);
+              this.controller.showSidebarButtons();
             var [t] = this.jsxRenderer.render(
               i.jsx(r.HtmlView, {
                 width: "100%",

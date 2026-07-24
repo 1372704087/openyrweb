@@ -24,6 +24,10 @@
     "TS:GameDataCleared": "Game data cleared. Reloading...",
     "TS:ClearGameDataFailed": "Failed to clear game data. Please try again.",
 
+    "GUI:ClearVxlCache": "Clear VXL Cache",
+    "TS:VxlCacheCleared": "VXL geometry cache cleared.",
+    "TS:ClearVxlCacheFailed": "Failed to clear VXL cache.",
+
     "ts:reportbugtt": "Report any bugs to the project maintainers",
     "ts:reportbugdesc": "You can submit a bug report by following the link below:",
 

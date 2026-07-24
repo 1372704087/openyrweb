@@ -400,5 +400,9 @@
     "GUI:PartyLeft": "你已离开派对。",
     "GUI:PartyInvitePreventionEnabled": "已对 %s 启用派对邀请限制。",
     "GUI:WaitingForTeammate": "等待队友准备...",
-    "GUI:TeammateWantsToStart": "你的队友想要开始搜索。请点击闪烁的「开始」按钮。"
+    "GUI:TeammateWantsToStart": "你的队友想要开始搜索。请点击闪烁的「开始」按钮。",
+
+    "GUI:ClearVxlCache": "清除 VXL 缓存",
+    "TS:VxlCacheCleared": "VXL 几何缓存已清除。",
+    "TS:ClearVxlCacheFailed": "清除 VXL 缓存失败。"
 }

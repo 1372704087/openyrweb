@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: engine/gfx/geometry/VxlGeometryCache ===
-// deps: ["data/DataStream","data/vfs/VirtualFile","engine/gfx/geometry/BufferGeometrySerializer","data/vfs/FileNotFoundError"]
+// deps: ["data/DataStream","data/vfs/VirtualFile","engine/gfx/geometry/BufferGeometrySerializer","data/vfs/FileNotFoundError","engine/gfx/BufferGeometryUtils"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -9,10 +9,11 @@ System.register(
     "data/vfs/VirtualFile",
     "engine/gfx/geometry/BufferGeometrySerializer",
     "data/vfs/FileNotFoundError",
+    "engine/gfx/BufferGeometryUtils",
   ],
   function (e, t) {
     "use strict";
-    var r, s, n, o, a;
+    var r, s, n, o, a, l;
     t && t.id;
     return {
       setters: [
@@ -28,6 +29,9 @@ System.register(
         function (e) {
           o = e;
         },
+        function (e) {
+          l = e;
+        },
       ],
       execute: function () {
         (e(
@@ -35,6 +39,10 @@ System.register(
           (a = class a {
             constructor(e, t) {
               ((this.cacheDir = e), (this.activeMod = t), (this.geometries = new Map()));
+            }
+            static _postProcessGeometry(e) {
+              var t = l.BufferGeometryUtils.mergeVertices(e);
+              return t.getAttribute("normal") || t.computeVertexNormals(), t.computeBoundingBox(), t;
             }
             async loadFromStorage(t, i) {
               let r = this.geometries.get(t);
@@ -44,7 +52,7 @@ System.register(
                   var s = this.getCacheFileName(i, t.name);
                   try {
                     var a = await e.openFile(s);
-                    ((r = new n.BufferGeometrySerializer().unserialize(a.stream)), this.set(t, r));
+                    ((r = this.constructor._postProcessGeometry(new n.BufferGeometrySerializer().unserialize(a.stream))), this.set(t, r));
                   } catch (e) {
                     e instanceof o.FileNotFoundError ||
                       console.error(`Failed to load buffer geometry from cache file "${s}"`, e);
@@ -54,7 +62,7 @@ System.register(
               return r;
             }
             async persistToStorage(e, t, i) {
-              (this.geometries.has(e) || this.set(e, new n.BufferGeometrySerializer().unserialize(new r.DataStream(i))),
+              (this.geometries.has(e) || this.set(e, this.constructor._postProcessGeometry(new n.BufferGeometrySerializer().unserialize(new r.DataStream(i)))),
                 await this.cacheDir?.writeFile(
                   new s.VirtualFile(new r.DataStream(i), this.getCacheFileName(t, e.name)),
                 ));

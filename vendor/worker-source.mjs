@@ -534,36 +534,29 @@ function serializeGeometry(positions, normals, colors, indices) {
 // =============================================================================
 
 // 6 face definitions for a unit cube [0, 1]^3
-// Each face: [faceAxis, faceSign, [4 corner offsets relative to voxel min], normal]
 // Corner offsets are [dx, dy, dz] offsets from voxel minimum corner
 const FACE_DEFS = [
   { // -X
-    n: [-1, 0, 0],
     corners: [[0,0,0],[0,0,1],[0,1,1],[0,1,0]],
     neighborCheck: (x,y,z) => [x-1,y,z],
   },
   { // +X
-    n: [1, 0, 0],
     corners: [[1,0,0],[1,1,0],[1,1,1],[1,0,1]],
     neighborCheck: (x,y,z) => [x+1,y,z],
   },
   { // -Y
-    n: [0, -1, 0],
     corners: [[0,0,0],[1,0,0],[1,0,1],[0,0,1]],
     neighborCheck: (x,y,z) => [x,y-1,z],
   },
   { // +Y
-    n: [0, 1, 0],
     corners: [[0,1,0],[0,1,1],[1,1,1],[1,1,0]],
     neighborCheck: (x,y,z) => [x,y+1,z],
   },
   { // -Z
-    n: [0, 0, -1],
     corners: [[0,0,0],[0,1,0],[1,1,0],[1,0,0]],
     neighborCheck: (x,y,z) => [x,y,z-1],
   },
   { // +Z
-    n: [0, 0, 1],
     corners: [[0,0,1],[1,0,1],[1,1,1],[0,1,1]],
     neighborCheck: (x,y,z) => [x,y,z+1],
   },
@@ -572,12 +565,7 @@ const FACE_DEFS = [
 /**
  * Build voxel geometry using face-culled cube-per-voxel approach.
  *
- * Produces the same face layout as VxlGeometryNaiveBuilder but WITHOUT
- * THREE.js dependency. Returns serialized buffer geometry bytes.
- *
- * @param {Object} section - plain VXL section object
- * @param {boolean} useColorOnly - if true, skip normals
- * @returns {Uint8Array} serialized geometry bytes
+ * Returns serialized buffer geometry bytes matching BufferGeometrySerializer format.
  */
 function buildVxlGeometry(section, useColorOnly) {
   const { sizeX, sizeY, sizeZ, minBounds: mb, maxBounds: xb, spans, normalsMode } = section;
@@ -590,7 +578,6 @@ function buildVxlGeometry(section, useColorOnly) {
     }
   }
 
-  // Scale per axis
   const spanX = xb[0] - mb[0];
   const spanY = xb[1] - mb[1];
   const spanZ = xb[2] - mb[2];
@@ -601,7 +588,6 @@ function buildVxlGeometry(section, useColorOnly) {
   const norms = getNormals(normalsMode);
   const minX = mb[0], minY = mb[1], minZ = mb[2];
 
-  // Collect geometry data
   const posBuf = [];
   const normBuf = useColorOnly ? null : [];
   const colBuf = [];
@@ -613,30 +599,29 @@ function buildVxlGeometry(section, useColorOnly) {
     for (const voxel of span.voxels) {
       const vx = voxel.x, vy = voxel.y, vz = voxel.z;
       const colorIdx = voxel.colorIndex / 255;
-      let normalVec = null;
-      if (!useColorOnly) {
-        const ni = Math.min(voxel.normalIndex, norms.length - 1);
-        normalVec = norms[ni];
-      }
 
       for (const face of FACE_DEFS) {
         const [nx, ny, nz] = face.neighborCheck(vx, vy, vz);
         const neighbor = field.get(nx, ny, nz);
-        if (neighbor) continue; // face hidden
+        if (neighbor) continue;
 
-        // Emit 4 vertices for this face
-        for (const corner of face.corners) {
-          const px = minX + (vx + corner[0]) * scaleX;
-          const py = minY + (vy + corner[1]) * scaleY;
-          const pz = minZ + (vz + corner[2]) * scaleZ;
-          posBuf.push(px, py, pz);
-          colBuf.push(colorIdx, 0, 0);
-          if (normBuf) {
-            normBuf.push(face.n[0], face.n[1], face.n[2]);
-          }
+        // Use voxel's actual normal from normals table (like the original builder)
+        let fn = null;
+        if (!useColorOnly) {
+          const ni = Math.min(voxel.normalIndex, norms.length - 1);
+          fn = norms[ni];
         }
 
-        // 2 triangles for this quad
+        for (const corner of face.corners) {
+          posBuf.push(
+            minX + (vx + corner[0]) * scaleX,
+            minY + (vy + corner[1]) * scaleY,
+            minZ + (vz + corner[2]) * scaleZ,
+          );
+          colBuf.push(colorIdx, 0, 0);
+          if (fn) normBuf.push(fn.x, fn.y, fn.z);
+        }
+
         idxBuf.push(
           vertexCount, vertexCount + 1, vertexCount + 2,
           vertexCount, vertexCount + 2, vertexCount + 3,
@@ -647,15 +632,14 @@ function buildVxlGeometry(section, useColorOnly) {
   }
 
   if (vertexCount === 0) {
-    // Empty geometry — write a minimal valid buffer
-    const emptyWriter = new BinaryWriter(1 + 22 + 1);
+    const emptyWriter = new BinaryWriter(29);
     emptyWriter.writeUint8(1);
     emptyWriter.writeCString("position", 20);
     emptyWriter.writeUint8(3);
     emptyWriter.writeUint8(0);
     emptyWriter.writeUint32(0);
-    emptyWriter.writeUint8(0); // Float32
-    emptyWriter.writeUint8(0); // no index
+    emptyWriter.writeUint8(0);
+    emptyWriter.writeUint8(0);
     return emptyWriter.bytes;
   }
 
@@ -682,19 +666,14 @@ async function decodeWav(buffer) {
 // generateVxlGeometry — build voxel geometry in worker, return serialized bytes
 // =============================================================================
 async function generateVxlGeometry(vxlPlain, options) {
-  // options: ModelQuality enum — 0=Low (with normals?), 1=High (color only?)
-  // Mapping from how VxlGeometryMonotoneBuilder.build() uses it:
-  //   truthy  = useColorOnly = true  (no normals)
-  //   falsy   = useColorOnly = false (with normals)
-  const useColorOnly = !!options;
-
+  // options = ModelQuality (0=Low, 1=High). For High quality, generate normals (useColorOnly=false).
+  const useColorOnly = options === 0;  // ModelQuality.Low
   return vxlPlain.sections.map((section) => {
     try {
       return buildVxlGeometry(section, useColorOnly);
     } catch (e) {
       console.error("[worker] Failed to build VXL geometry for section", section.name, e);
-      // Return minimal valid geometry
-      const writer = new BinaryWriter(1 + 22 + 1);
+      const writer = new BinaryWriter(29);
       writer.writeUint8(1);
       writer.writeCString("position", 20);
       writer.writeUint8(3);
