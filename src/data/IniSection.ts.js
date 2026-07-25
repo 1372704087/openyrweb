@@ -59,6 +59,8 @@ System.register("data/IniSection", [], function (e, t) {
           }
           parseNumber(e) {
             let t;
+            // Normalize decimal separator: accept both "0.01" and "0,01"
+            e = e.replace(",", ".");
             if (((t = e.match(/%$/) ? Number(e.replace("%", "")) / 100 : Number(e)), !isNaN(t))) return t;
           }
           getFixed(e, t = 0) {

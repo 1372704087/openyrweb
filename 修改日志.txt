@@ -514,3 +514,36 @@ feat(storage): 新增“清除所有数据”功能及文件浏览器中文本�
 4. 检查 RA2 主题样式是否正确应用（黄字、红边、黑底）。  
 5. 测试 Worker 处理 WAV/VXL/压缩任务，对比主线程阻塞情况。  
 6. 验证繁体中文存储用量格式显示正常。
+
+chore(config): 清理 rulescd.ini 冗余覆盖配置，增强 INI 数字解析兼容性
+
+- 🗑️ **移除 rulescd.ini 中冗余的 YR 覆盖规则**  
+  删除约 60 行已在基础 `rulesmd.ini` 中定义的配置，避免重复覆盖，包括：  
+  - `[MultiplayerDialogSettings]` 多人游戏默认选项。  
+  - 医院滥用修复（`LegalTarget=yes`）。  
+  - 废墟帧修复（`LeaveRubble=no`）。  
+  - 核弹井自伤修复（`DamageSelf=yes`）。  
+  - 灯光着色值修复（`LightGreenTint=0.01`，原为无效值 `0,01`）。  
+  - Soylent 倒卖防护（TANY/CLEG/SPY/PTROOP/E1/SNIPE）。  
+  - 动画修复（`AnimList=MININUKE`）。  
+  - Yuri 阵营覆盖配置（已在 `rulesmd.ini` 中定义，删除无影响）。  
+  - 错误的 OverlayType 定义（`GAGATE_A` 从 BuildingTypes 移除）。
+
+- 🔧 **INI 数字解析增强**  
+  `IniSection.parseNumber()` 新增 `e = e.replace(",", ".")` 逻辑，支持欧洲格式逗号分隔符（如 `0,01` → `0.01`），提升配置兼容性。
+
+- 📂 **Git 忽略规则更新**  
+  `.gitignore` 新增 `/尤里复仇配置文件` 规则，忽略本地尤里复仇配置目录。
+
+- 🧹 **本地化文件格式化**  
+  `en-US.json` 空白行标准化，无实际内容变更。
+
+### ⚠️ 破坏性变更
+- 删除的配置项可能在 `rulesmd.ini` 中已存在，需确认基础配置文件已包含这些修复，否则相关 Bug 可能复现。  
+- `GAGATE_A` 从 BuildingTypes 移除，需确认其在 OverlayTypes 中正确定义。
+
+### 🧪 测试建议
+1. 验证包含逗号分隔符的数字值（如 `0,01`）能正确解析为 `0.01`。  
+2. 测试多人游戏默认选项是否正常。  
+3. 确认医院滥用、核弹自伤等已修复问题未复现（因 `rulesmd.ini` 已有定义）。  
+4. 验证 `GAGATE_A` 作为 OverlayType 正常工作。
