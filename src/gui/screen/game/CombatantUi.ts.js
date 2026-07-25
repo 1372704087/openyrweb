@@ -544,6 +544,7 @@ System.register(
                 this.superWeaponFxHandler,
                 this.pointer,
                 this.eva,
+                this.player,
               ));
               (e.onExecute.subscribe(({ tile: t, tile2: i }) => {
                 this.pushAction(p.ActionType.ActivateSuperWeapon, (e) => {

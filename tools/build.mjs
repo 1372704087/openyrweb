@@ -147,7 +147,7 @@ function stepIndex() {
   html = html.replace(/\s*<script type="text\/javascript" src="lib\/poll\.js[^"]*"[^>]*><\/script>/gi, "");
 
   // Title + description.
-  html = html.replace(/<title>[^<]*<\/title>/i, "<title>OpenYRWeb — Red Alert 2: Yuri's Revenge</title>");
+  html = html.replace(/<title>[^<]*<\/title>/i, "<title>Red Alert 2: Yuri's Revenge</title>");
   html = html.replace(
     /<meta name="description"[^>]*>/i,
     '<meta name="description" content="OpenYRWeb: a self-hostable, open-source web port of Red Alert 2: Yuri\'s Revenge.">'

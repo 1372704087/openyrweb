@@ -339,6 +339,17 @@ System.register(
             readCombatDamage() {
               var e = this.ini.getSection("CombatDamage");
               if (!e) throw new Error("Missing [CombatDamage] section");
+              // OpenYRWeb (2026-07-25): Force Shield parameters live in [General] in vanilla YR's
+              // rulesmd.ini (ForceShieldRadius, ForceShieldDuration, ForceShieldBlackoutDuration),
+              // but the code reads them from [CombatDamage]. Patch them across so they're not lost.
+              var genSec = this.ini.getSection("General");
+              if (genSec) {
+                var _fsKeys = ["ForceShieldDuration", "ForceShieldRadius", "ForceShieldBlackoutDuration", "ForceShieldPlayFadeSoundTime"];
+                for (var _k of _fsKeys) {
+                  var _v = genSec.getString(_k);
+                  if (_v) e.set(_k, _v);
+                }
+              }
               this.combatDamage.readIni(e);
               // OpenYRWeb: Propagate Tank Bunker weapon bonus multipliers to the Weapon module.
               C.Weapon.bunkerDamageMultiplier = this.combatDamage.bunkerDamageMultiplier;

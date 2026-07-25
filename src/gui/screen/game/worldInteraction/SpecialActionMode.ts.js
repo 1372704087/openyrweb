@@ -33,7 +33,10 @@ System.register(
           // OpenYRWeb: YR superweapons. No dedicated cursor art shipped; Default keeps targeting
           // functional. Both are single-click targeted (no tile2 two-click flow).
           .set(s.SuperWeaponType.PsychicDominator, r.PointerType.Default)
-          .set(s.SuperWeaponType.GeneticMutator, r.PointerType.Default)),
+          .set(s.SuperWeaponType.GeneticMutator, r.PointerType.Default)
+          // OpenYRWeb (2026-07-25): Force Shield — uses the ForceField pointer (dedicated
+          // shield/force-field cursor, PointerType.ForceField=450). Single-click targeted.
+          .set(s.SuperWeaponType.ForceShield, r.PointerType.ForceField)),
           e(
             "SpecialActionMode",
             (i = class {
@@ -43,15 +46,16 @@ System.register(
               get superWeaponType() {
                 return this.superWeaponRules.type;
               }
-              static factory(e, t, i, r, s) {
-                return new this(e, t, i, r, s);
+              static factory(e, t, i, r, s, n) {
+                return new this(e, t, i, r, s, n);
               }
-              constructor(e, t, i, r, s) {
+              constructor(e, t, i, r, s, n) {
                 ((this.allSuperWeaponRules = e),
                   (this.superWeaponRules = t),
                   (this.superWeaponFxHandler = i),
                   (this.pointer = r),
                   (this.eva = s),
+                  (this.player = n),
                   (this._onExecute = new a.EventDispatcher()),
                   (this.isPostClick = !1),
                   (this.pointerSwType = this.superWeaponRules.type));
@@ -60,13 +64,30 @@ System.register(
                 this.eva.play("EVA_SelectTarget");
               }
               hover(e) {
-                var t = e?.tile,
-                  i = n.get(this.pointerSwType);
-                this.pointer.setPointerType(t && void 0 !== i ? i : r.PointerType.Default);
+                var tile = e?.tile,
+                  ptr = n.get(this.pointerSwType);
+                // OpenYRWeb: Force Shield only targets friendly buildings — show NoForceField on non-building or enemy tiles.
+                if (tile && this.superWeaponRules.type === s.SuperWeaponType.ForceShield) {
+                  var bld = this.superWeaponFxHandler.game.map
+                    .getObjectsOnTile(tile)
+                    .find(function (o) { return o.isBuilding(); });
+                  var friendly = bld && (bld.owner === this.player || this.superWeaponFxHandler.game.alliances.areAllied(bld.owner, this.player));
+                  this.pointer.setPointerType(friendly ? r.PointerType.ForceField : r.PointerType.NoForceField);
+                } else {
+                  this.pointer.setPointerType(tile && void 0 !== ptr ? ptr : r.PointerType.Default);
+                }
               }
               execute(e) {
                 var t = e?.tile;
                 if (!t) return !1;
+                // OpenYRWeb: Force Shield only targets friendly buildings — prevent deployment on enemy or non-building tiles.
+                if (this.superWeaponRules.type === s.SuperWeaponType.ForceShield) {
+                  var bld = this.superWeaponFxHandler.game.map
+                    .getObjectsOnTile(t)
+                    .find(function (o) { return o.isBuilding(); });
+                  if (!bld) return !1;
+                  if (bld.owner !== this.player && !this.superWeaponFxHandler.game.alliances.areAllied(bld.owner, this.player)) return !1;
+                }
                 if (
                   (this.superWeaponRules.type !== s.SuperWeaponType.ChronoSphere ||
                     this.isPostClick ||

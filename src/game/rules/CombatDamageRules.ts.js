@@ -47,13 +47,17 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               // OpenYRWeb (2026-06-30, REVERSED): Force Shield super-weapon config (vanilla keys
               // in [General], REVERSED from yrmd.exe: ForceShieldDuration @ 0x0083bc4c,
               // ForceShieldRadius @ 0x0083bc60, ForceShieldBlackoutDuration @ 0x0083bc30).
-              // ForceShield: when activated, buildings within ForceShieldRadius (leptons) of the
+              // ForceShield: when activated, buildings within ForceShieldRadius (cells) of the
               // activation tile gain temporary invulnerability for ForceShieldDuration frames;
               // the activating player's power is blacked out (low-power) for
               // ForceShieldBlackoutDuration frames as the cost. Co-located with IronCurtainDuration.
+              // NOTE: ForceShieldRadius value is in CELLS (vanilla YR INI spec "in cells").
               (this.forceShieldDuration = e.getNumber("ForceShieldDuration", 0)),
               (this.forceShieldRadius = e.getNumber("ForceShieldRadius", 0)),
               (this.forceShieldBlackoutDuration = e.getNumber("ForceShieldBlackoutDuration", 0)),
+              // OpenYRWeb: frames before expiry to play the ForceShieldFading sound.
+              // Vanilla YR [General] ForceShieldPlayFadeSoundTime=75.
+              (this.forceShieldPlayFadeSoundTime = e.getNumber("ForceShieldPlayFadeSoundTime", 0)),
               // OpenYRWeb (2026-06-30, REVERSED): PsychicReveal super-weapon radius (vanilla key
               // in [CombatDamage], REVERSED from yrmd.exe). Yuri's Psychic Reveal mini-superweapon
               // (unlocked by the Psychic Sensor / YAGGNT) permanently reveals a circular area of

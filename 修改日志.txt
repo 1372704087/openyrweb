@@ -547,3 +547,47 @@ chore(config): 清理 rulescd.ini 冗余覆盖配置，增强 INI 数字解析�
 2. 测试多人游戏默认选项是否正常。  
 3. 确认医院滥用、核弹自伤等已修复问题未复现（因 `rulesmd.ini` 已有定义）。  
 4. 验证 `GAGATE_A` 作为 OverlayType 正常工作。
+
+feat(force-shield): 完整实现力场盾超级武器系统，修复文件系统稳定性与电力同步
+
+- 🛡️ **力场盾超级武器核心机制**  
+  - `ForceShieldEffect`：半径单位从 `leptons` 修正为 `cells`（符合尤里复仇规范），使用 `RadialTileFinder` 遍历半径内友军建筑，为每个建筑应用力场盾无敌状态（`invulnerableTrait.setForceShieldActiveFor()`）并触发电力中断（`PowerTrait.setBlackoutFor()`）。  
+  - `InvulnerableTrait` 新增 `isForceShield`、`fsTimer`、`_fsVersion` 属性，支持铁幕与力场盾独立计时器及版本追踪。  
+  - 目标选择：`SpecialActionMode` 验证目标为友军建筑，有效时显示 `ForceField` 光标，无效时显示 `NoForceField` 光标。  
+  - 工程师捕获防护：`CaptureBuildingTask` 在任务开始和进入时双重检查 `!isForceShieldActive()`，阻止捕获被力场盾保护的建筑。
+
+- 🎨 **视觉渲染增强**  
+  - 力场盾激活/过期时播放白色闪光效果（从 `(2,2,2)` 衰减至正常亮度），蓝色调色板（`(0,0,255)`）与铁幕的暗色区分。  
+  - 独立闪光计时器：`_invulnFlashTimer`（激活）、`_fsEndFlashEndTimer`（过期），支持铁幕与力场盾重叠场景。  
+  - 版本追踪机制：通过 `_version`/`_fsVersion` 检测状态变化，触发新的闪光效果。  
+  - `SuperWeaponFxHandler` 新增 `ForceShieldInvokeAnim` 激活动画（`FORCSHLD`）。  
+  - `Building.updateLights()` 版本检测逻辑同步适配。
+
+- 🔊 **音频与配置系统**  
+  - `AudioVisualRules` 新增 `ForceShieldInvokeAnim`、`ForceShieldColor`。  
+  - `SuperWeaponRules` 新增 `StartSound`（启动音效）、`SpecialSound`（淡出音效）。  
+  - `SoundHandler` 处理超级武器激活事件，播放 `StartSound`。  
+  - `CombatDamageRules` 明确 `ForceShieldRadius` 单位为 `cells`，注释更新。  
+  - `Rules` 从 `[General]` 复制力场盾参数到 `[CombatDamage]` 节。
+
+- ⚡ **电力系统优化**  
+  - `PowerTrait.setBlackoutFor()`/`updateBlackout()` 派发 `PowerChangeEvent`，停电期间 `drainPowerOverride = 1` 强制 UI 显示电力为 0，停电结束后清除覆盖并同步状态。
+
+- 🔄 **文件系统稳定性修复**  
+  - `RealFileSystemDir.openFile()` 增加三级错误处理：对 `NotReadableError` 重试最多 3 次（500ms × 重试次数），重试耗尽后删除损坏文件并抛出异常。  
+  - `GameRes.loadFromStorage()` 捕获 `IOError` 时清除整个存储根目录（`_clearStorageRoot()`），`checkMixesIntegrity()` 同步应用重试逻辑。
+
+- 🧹 **构建与配置清理**  
+  - 网页标题简化为 `Red Alert 2: Yuri's Revenge`。  
+
+### ⚠️ 破坏性变更
+- **力场盾半径单位**：从 `leptons` 改为 `cells`，需更新 `rulesmd.ini` 中的 `ForceShieldRadius` 值（原 leptons 值需除以 256）。  
+- **损坏文件自动删除**：读取失败的文件会被自动删除，需重新导入相关资源。
+
+### 🧪 测试建议
+1. 力场盾仅保护友军建筑，敌方建筑不受影响；有效/无效目标光标正确切换。  
+2. 铁幕与力场盾重叠时视觉效果（闪光/色调）独立且正确。  
+3. 电力中断期间 UI 显示电力为 0，中断结束后状态同步。  
+4. 工程师无法捕获被力场盾保护的建筑。  
+5. 文件读取失败时重试 3 次，重试耗尽后删除损坏文件并记录警告。  
+6. `ForceShieldInvokeAnim` 激活动画正常播放，`StartSound`/`SpecialSound` 音效正确触发。

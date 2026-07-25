@@ -63,10 +63,14 @@ System.register(
               !this.target.isDestroyed &&
               this.target.buildStatus !== i.BuildStatus.BuildDown &&
               !this.target.secureProgressTrait?.isActiveFrom(e.owner) &&
-              !this.game.areFriendly(e, this.target)
+              !this.game.areFriendly(e, this.target) &&
+              // OpenYRWeb: cannot capture Force Shield invulnerable buildings.
+              !this.target.invulnerableTrait?.isForceShieldActive()
             );
           }
           onEnter(t) {
+            // OpenYRWeb: abort capture if building is under Force Shield during approach.
+            if (this.target.invulnerableTrait?.isForceShieldActive()) return;
             if ((this.game.unspawnObject(t), this.game.gameOpts.multiEngineer)) {
               var i = this.game.rules.general;
               if (

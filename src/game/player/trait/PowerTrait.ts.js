@@ -55,9 +55,22 @@ System.register(
               setBlackoutFor(e, t) {
                 var i = 0 < this.blackoutFrames;
                 ((this.blackoutFrames = e), i || this.updateLevel(t));
+                // OpenYRWeb: force display power to 0 during blackout so the sidebar updates.
+                this.drainPowerOverride = e > 0 ? 1 : 0;
+                t.traits.filter(o.NotifyPower).forEach((e) => {
+                  e[o.NotifyPower.onPowerChange](this.player, t);
+                });
+                t.events.dispatch(new n.PowerChangeEvent(this.player, this.getDisplayPower(), this.drain));
               }
               updateBlackout(e) {
                 0 < this.blackoutFrames && (this.blackoutFrames--, this.blackoutFrames <= 0 && this.updateLevel(e));
+                // OpenYRWeb: clear drainPowerOverride when blackout expires.
+                0 >= this.blackoutFrames && (this.drainPowerOverride = 0);
+                // OpenYRWeb: always dispatch PowerChangeEvent so the sidebar HUD updates.
+                e.traits.filter(o.NotifyPower).forEach((t) => {
+                  t[o.NotifyPower.onPowerChange](this.player, e);
+                });
+                e.events.dispatch(new n.PowerChangeEvent(this.player, this.getDisplayPower(), this.drain));
               }
               getBlackoutDuration() {
                 return this.blackoutFrames;

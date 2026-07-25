@@ -389,6 +389,60 @@ System.register(
                   var r = this.highlightAnimRunner.shouldUpdate(),
                     s = this.gameObject.invulnerableTrait.isActive(),
                     t = s !== this.lastInvulnerable;
+                  // OpenYRWeb: start flash for ANY new invulnerability application (IC or FS) via version counter.
+                  void 0 === this._invulnFlashTimer && (this._invulnFlashTimer = (this._invulnFlashPlayed = 0, 0));
+                  var _vNow = this.gameObject.invulnerableTrait._version;
+                  void 0 === this._lastInvulnV && (this._lastInvulnV = _vNow);
+                  if (_vNow !== this._lastInvulnV && s) {
+                    this._invulnFlashTimer = 180;
+                    // Interrupt any ongoing FS end flash — new application takes priority.
+                    this._fsEndFlashEndTimer = 0;
+                  }
+                  this._lastInvulnV = _vNow;
+                  // OpenYRWeb: FS end flash — independent of invulnerability state (for IC overlap).
+                  var _fsNow = this.gameObject.invulnerableTrait.isForceShieldActive();
+                  void 0 === this._lastFSActive && (this._lastFSActive = _fsNow);
+                  if (!_fsNow && this._lastFSActive) {
+                    !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
+                  }
+                  this._lastFSActive = _fsNow;
+                  // OpenYRWeb: generic end flash when invulnerability expires (IC and FS).
+                  if (t && !s) {
+                    !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
+                  }
+                  var _endFTimer = this._fsEndFlashEndTimer || 0;
+                  if (_endFTimer > 0) {
+                    this._fsEndFlashEndTimer = --_endFTimer;
+                    this.lastInvulnerable = s;
+                    // Start at full white, decay to normal.
+                    var _e2Bright = new THREE.Vector3(2, 2, 2);
+                    var _eLerpT = 1 - Math.pow(_endFTimer / 180, 2);
+                    this.vxlExtraLight.lerpVectors(_e2Bright, this.baseVxlExtraLight, _eLerpT);
+                    this.shpExtraLight.lerpVectors(_e2Bright, this.baseShpExtraLight, _eLerpT);
+                  } else if (this._invulnFlashTimer > 0) {
+                    this._invulnFlashTimer--;
+                    this.lastInvulnerable = s;
+                    t && this.invulnAnimRunner.animate();
+                    this.invulnAnimRunner.shouldUpdate() && this.invulnAnimRunner.tick(i);
+                    var _ivVal = s ? this.invulnAnimRunner.getValue() : 0;
+                    var _nV = (r ? this.highlightAnimRunner.getValue() : 0) || _ivVal;
+                    var _amb_f = this.lighting.getAmbientIntensity();
+                    var _tgtVxl = this.baseVxlExtraLight.clone();
+                    var _tgtShp = this.baseShpExtraLight.clone();
+                    x.ExtraLightHelper.multiplyVxl(_tgtVxl, this.baseVxlExtraLight, _amb_f, _nV);
+                    x.ExtraLightHelper.multiplyShp(_tgtShp, this.baseShpExtraLight, _nV);
+                    // OpenYRWeb: FS blue glow for start flash target.
+                    if (this.gameObject.invulnerableTrait.isForceShieldActive()) {
+                      var _fsTint = new THREE.Vector3(0, 0, 255);
+                      _tgtVxl.lerp(_fsTint, 0.2);
+                      _tgtShp.lerp(_fsTint, 0.2);
+                    }
+                    // Start at full white, decay to darkening (no ramp-up).
+                    var _flashColor = new THREE.Vector3(2, 2, 2);
+                    var _lerpT = 1 - Math.pow(this._invulnFlashTimer / 180, 2);
+                    this.vxlExtraLight.lerpVectors(_flashColor, _tgtVxl, _lerpT);
+                    this.shpExtraLight.lerpVectors(_flashColor, _tgtShp, _lerpT);
+                  } else
                   ((this.lastInvulnerable = s) && t && this.invulnAnimRunner.animate(),
                     this.invulnAnimRunner.shouldUpdate() && this.invulnAnimRunner.tick(i),
                     (r || t || s) &&
@@ -397,7 +451,11 @@ System.register(
                       (n = (r ? this.highlightAnimRunner.getValue() : 0) || s),
                       (s = this.lighting.getAmbientIntensity()),
                       x.ExtraLightHelper.multiplyVxl(this.vxlExtraLight, this.baseVxlExtraLight, s, n),
-                      x.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, n)));
+                      x.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, n),
+                      // OpenYRWeb: FS blue glow during pulsing.
+                      this.gameObject.invulnerableTrait.isForceShieldActive() &&
+                        (this.vxlExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2),
+                        this.shpExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2))));
                   var a,
                     n = this.gameObject.warpedOutTrait.isActive();
                   if (n !== this.lastWarpedOut) {

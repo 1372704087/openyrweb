@@ -119,8 +119,33 @@ System.register(
               return i ? new File([s], s.name, { type: i }) : s;
             }
             async openFile(e, t = !1) {
-              var i = await this.getRawFile(e, t);
-              return r.VirtualFile.fromRealFile(i);
+              var s = 3;
+              for (var a = 0; a < s; a++) {
+                try {
+                  var i = await this.getRawFile(e, t);
+                  return await r.VirtualFile.fromRealFile(i);
+                } catch (n) {
+                  if (a === s - 1) {
+                    // All retries exhausted — file is corrupted/unreadable in storage.
+                    // Delete it so the next page load detects the absence and triggers
+                    // a clean re-import instead of failing again.
+                    try {
+                      var h = t ? e : await this.fixEntryCase(e);
+                      await this.handle.removeEntry(h);
+                      console.warn('RealFileSystemDir: deleted corrupted file "' + e + '"');
+                    } catch (d) {
+                      // ignore delete errors
+                    }
+                    throw n;
+                  }
+                  if (n instanceof o.IOError && n.cause instanceof DOMException && "NotReadableError" === n.cause.name) {
+                    console.warn('RealFileSystemDir: NotReadableError reading "' + e + '", retrying (' + (a + 1) + "/" + s + ")...");
+                    await new Promise(function(t) { return setTimeout(t, 500 * (a + 1)); });
+                    continue;
+                  }
+                  throw n;
+                }
+              }
             }
             async writeFile(i, e) {
               var r = e ?? (i instanceof File ? i.name : i.filename);

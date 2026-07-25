@@ -33,6 +33,10 @@ System.register("game/rules/SuperWeaponRules", ["game/type/SuperWeaponType"], fu
               (this.type = e.getEnum("Type", i.SuperWeaponType, void 0)),
               (this.uiName = e.getString("UIName")),
               (this.weaponType = e.getString("WeaponType") || void 0),
+              // OpenYRWeb (2026-07-25): Force Shield and Psychic Dominator use StartSound/SpecialSound
+              // for activation/fading cues (vanilla YR [ForceShieldSpecial]).
+              (this.startSound = e.getString("StartSound") || void 0),
+              (this.specialSound = e.getString("SpecialSound") || void 0),
               this
             );
           }

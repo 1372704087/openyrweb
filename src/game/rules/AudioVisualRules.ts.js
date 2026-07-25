@@ -66,6 +66,12 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.bunkerWallsUpSound = e.getString("BunkerWallsUpSound") || void 0),
               (this.bunkerWallsDownSound = e.getString("BunkerWallsDownSound") || void 0),
               (this.ironCurtainInvokeAnim = e.getString("IronCurtainInvokeAnim")),
+              // OpenYRWeb (2026-07-25): Force Shield invoke animation (vanilla YR [AudioVisual]).
+              // Played at the activation tile when Force Shield is deployed. Default FORCSHLD.
+              (this.forceShieldInvokeAnim = e.getString("ForceShieldInvokeAnim")),
+              // OpenYRWeb (2026-07-25): Force Shield invulnerability color (palette index).
+              // Vanilla YR [AudioVisual] ForceShieldColor=6 (blue/cyan tint).
+              (this.forceShieldColor = e.getNumber("ForceShieldColor", 6)),
               (this.messageDuration = e.getNumber("MessageDuration", 10)),
               (this.metallicDebris = e.getArray("MetallicDebris")),
               (this.nukeTakeOff = e.getString("NukeTakeOff")),

@@ -78,6 +78,14 @@ System.register(
                         e.setPosition(t);
                       },
                     );
+                  else if (e === o.SuperWeaponType.ForceShield)
+                    this.renderableManager.createTransientAnim(
+                      this.game.rules.audioVisual.forceShieldInvokeAnim,
+                      (e) => {
+                        var t = l.Coords.tile3dToWorld(r.atTile.rx + 0.5, r.atTile.ry + 0.5, r.atTile.z);
+                        e.setPosition(t);
+                      },
+                    );
                   else if (e === o.SuperWeaponType.ChronoSphere) {
                     this.disposeChronoSphereAnim();
                     var s = this.game.map.tileOccupation.getBridgeOnTile(r.atTile)?.tileElevation ?? 0;

@@ -219,6 +219,9 @@ System.register(
                     console.error(e),
                     this.splashScreen.setLoadingText(""),
                     this.splashScreen.setBackgroundImage(""),
+                    e instanceof B.IOError && h &&
+                      (console.warn("GameRes: clearing all files from storage due to persistent IOError..."),
+                      await this._clearStorageRoot(h)),
                     await r(e, this.strings));
                 }
               }
@@ -295,10 +298,34 @@ System.register(
                     console.error(e),
                     this.splashScreen.setLoadingText(""),
                     this.splashScreen.setBackgroundImage(""),
+                    // Persistent IOError (NotReadableError) means the storage
+                    // backend itself is corrupted — deleting individual files
+                    // isn't enough. Clear the entire storage so the next
+                    // import writes to a clean slate.
+                    e instanceof B.IOError && h &&
+                      (console.warn("GameRes: clearing all files from storage due to persistent IOError..."),
+                      await this._clearStorageRoot(h)),
                     await r(e, this.strings));
                 }
               }
               return (o && URL.revokeObjectURL(o), { configToPersist: n ? i : void 0, cdnResLoader: d });
+            }
+            async _clearStorageRoot(t) {
+              // Delete every entry in the storage root directory. This cleans up
+              // corrupted OPFS state so the next import writes to fresh pages.
+              try {
+                for await (var e of t.keys()) {
+                  try {
+                    await t.removeEntry(e, { recursive: !0 });
+                    console.debug('_clearStorageRoot: removed "' + e + '"');
+                  } catch (e) {
+                    // individual delete errors are non-fatal
+                  }
+                }
+                console.warn("_clearStorageRoot: all files cleared from storage");
+              } catch (e) {
+                console.warn("_clearStorageRoot: failed to clear storage", e);
+              }
             }
             async loadMod(e, t) {
               let i = this.modName,
@@ -434,14 +461,34 @@ System.register(
                 ["multimd.mix", ["743DA541"]],
                 ["expandmd01.mix", ["F3D92D6C"]],
               ]);
+              var u = this.strings;
               for (var [s, a] of e.entries()) {
                 let e, t;
-                try {
-                  ((e = await r.getRawFile(s, !0)), (t = await e.arrayBuffer()));
-                } catch (e) {
-                  if (e instanceof k.FileNotFoundError) throw new g.FileNotFoundError(s);
-                  if (e instanceof DOMException) throw new B.IOError(`Failed to read file (${e.name})`, { cause: e });
-                  throw e;
+                var l = 3;
+                for (var c = 0; c < l; c++) {
+                  try {
+                    ((e = await r.getRawFile(s, !0)), (t = await e.arrayBuffer()));
+                    break;
+                  } catch (e) {
+                    if (e instanceof k.FileNotFoundError) throw new g.FileNotFoundError(s);
+                    if (e instanceof DOMException && "NotReadableError" === e.name) {
+                      if (c < l - 1) {
+                        console.warn('checkMixesIntegrity: NotReadableError reading "' + s + '", retrying (' + (c + 1) + "/" + l + ")...");
+                        await new Promise(function(t) { return setTimeout(t, 500 * (c + 1)); });
+                        continue;
+                      }
+                      // All retries exhausted — delete corrupted file so next page load
+                      // triggers a clean re-import.
+                      try {
+                        await r.removeEntry(s);
+                        console.warn('checkMixesIntegrity: deleted corrupted file "' + s + '"');
+                      } catch (d) {
+                        // ignore delete errors
+                      }
+                    }
+                    if (e instanceof DOMException) throw new B.IOError(`Failed to read file (${e.name})`, { cause: e });
+                    throw e;
+                  }
                 }
                 let i = p.Crc32.calculateCrc(new Uint8Array(t));
                 if (!a.includes(i.toString(16).toUpperCase()))

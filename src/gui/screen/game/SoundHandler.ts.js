@@ -306,6 +306,12 @@ System.register(
                       ((l = J.get(h)) && this.eva.play(l, !0),
                       (c = ee.get(h)) &&
                         ((l = r.atTile), this.worldSound.playEffect(c, H.Coords.tile3dToWorld(l.rx, l.ry, l.z), u)));
+                    // OpenYRWeb: Play StartSound from the super weapon's rules (e.g. ForceShieldStarting).
+                    if (void 0 !== h) {
+                      var _fsStartRules = [...this.game.rules.superWeaponRules.values()].find(function (r) { return r.type === h; });
+                      _fsStartRules && _fsStartRules.startSound &&
+                        ((l = r.atTile), this.worldSound.playEffect(_fsStartRules.startSound, H.Coords.tile3dToWorld(l.rx, l.ry, l.z), u));
+                    }
                     h = te.get(h);
                     h && this.messageList.addSystemMessage(this.strings.get(h), this.player ?? "grey");
                     break;
