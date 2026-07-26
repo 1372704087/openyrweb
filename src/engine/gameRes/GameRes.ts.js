@@ -220,8 +220,11 @@ System.register(
                     this.splashScreen.setLoadingText(""),
                     this.splashScreen.setBackgroundImage(""),
                     e instanceof B.IOError && h &&
-                      (console.warn("GameRes: clearing all files from storage due to persistent IOError..."),
-                      await this._clearStorageRoot(h)),
+                      ("1" === this.localPrefs.getItem("opfs_unreliable")
+                        ? (console.warn("GameRes: OPFS unreliable — reloading to switch to IndexedDB"),
+                          location.reload(), await new Promise(() => {}))
+                        : (console.warn("GameRes: clearing all files from storage due to persistent IOError..."),
+                          await this._clearStorageRoot(h))),
                     await r(e, this.strings));
                 }
               }
@@ -298,13 +301,12 @@ System.register(
                     console.error(e),
                     this.splashScreen.setLoadingText(""),
                     this.splashScreen.setBackgroundImage(""),
-                    // Persistent IOError (NotReadableError) means the storage
-                    // backend itself is corrupted — deleting individual files
-                    // isn't enough. Clear the entire storage so the next
-                    // import writes to a clean slate.
                     e instanceof B.IOError && h &&
-                      (console.warn("GameRes: clearing all files from storage due to persistent IOError..."),
-                      await this._clearStorageRoot(h)),
+                      ("1" === this.localPrefs.getItem("opfs_unreliable")
+                        ? (console.warn("GameRes: OPFS unreliable — reloading to switch to IndexedDB"),
+                          location.reload(), await new Promise(() => {}))
+                        : (console.warn("GameRes: clearing all files from storage due to persistent IOError..."),
+                          await this._clearStorageRoot(h))),
                     await r(e, this.strings));
                 }
               }
@@ -485,6 +487,8 @@ System.register(
                       } catch (d) {
                         // ignore delete errors
                       }
+                      this.localPrefs.setItem("opfs_unreliable", "1");
+                      console.warn('checkMixesIntegrity: OPFS marked unreliable — will use IndexedDB on next boot');
                     }
                     if (e instanceof DOMException) throw new B.IOError(`Failed to read file (${e.name})`, { cause: e });
                     throw e;
@@ -646,9 +650,10 @@ System.register(
             async getBrowserFsHandle(e) {
               let t = [];
               var i;
+              var opfsUnreliable = "1" === this.localPrefs.getItem("opfs_unreliable");
               for (
-                "fallback" !== e && l.support.adapter.native && t.push({ name: "native", module: void 0 }),
-                  "native" !== e &&
+                "fallback" !== e && l.support.adapter.native && !opfsUnreliable && t.push({ name: "native", module: void 0 }),
+                  ("native" !== e || opfsUnreliable) &&
                     (t.push({ name: "indexeddb", module: r.default }),
                     l.support.adapter.cache && t.push({ name: "cache", module: s.default }));
                 (i = t.shift());
