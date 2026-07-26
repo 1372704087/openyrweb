@@ -135,10 +135,10 @@ System.register(
               color: t,
               ...{
                 fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: "500",
-                paddingTop: 6,
-                height: 20,
+                paddingTop: 5,
+                height: 22,
                 backgroundColor: "rgba(0, 0, 0, .75)",
                 textAlign: "right",
               },

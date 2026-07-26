@@ -633,11 +633,11 @@ System.register(
                   borderColor: e.asHexString(),
                   backgroundColor: "#000",
                   fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: "500",
-                  paddingTop: 5,
-                  paddingBottom: 5,
-                  paddingLeft: 2,
+                  paddingTop: 3,
+                  paddingBottom: 3,
+                  paddingLeft: 4,
                   paddingRight: 4,
                 });
                 let i = new THREE.Texture(t);

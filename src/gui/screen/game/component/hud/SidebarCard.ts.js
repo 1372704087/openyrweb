@@ -311,12 +311,12 @@ System.register(
                 color: t,
                 backgroundColor: "rgba(0, 0, 0, .5)",
                 fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: "500",
-                paddingTop: 5,
-                paddingBottom: 5,
+                paddingTop: 6,
+                paddingBottom: 6,
                 paddingLeft: 2,
-                paddingRight: 4,
+                paddingRight: 2,
                 ...i,
               });
             }

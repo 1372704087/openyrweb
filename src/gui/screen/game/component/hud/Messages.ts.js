@@ -166,9 +166,9 @@ System.register(
               color: t,
               ...{
                 fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: "500",
-                paddingTop: 5,
+                paddingTop: 4,
                 height: 20,
                 backgroundColor: "rgba(0, 0, 0, .75)",
               },

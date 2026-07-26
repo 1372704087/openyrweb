@@ -195,6 +195,12 @@ System.register(
                   (this.repairStartRequested = !1),
                   (this.highlightAnimRunner = new k.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new B.InvulnerableAnimRunner(this.gameSpeed)),
+                  // OpenYRWeb: must init lastInvulnerable=false to prevent false "invuln ended" flash on newly constructed buildings (undefined !== false triggers t=true).
+                  (this.lastInvulnerable = !1),
+                  (this._fsEndFlashEndTimer = 0),
+                  (this._invulnFlashTimer = 0),
+                  (this._lastInvulnV = 0),
+                  (this._lastFSActive = !1),
                   (this.drainAnim = void 0),
                   (this.drainLastDiscPos = void 0),
                   (this.plugins = []),

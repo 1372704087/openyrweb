@@ -54,10 +54,10 @@ System.register(
               a = c.CanvasUtils.drawText(r, a, 0, s, {
                 color: t,
                 fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: "500",
-                paddingTop: 5,
-                paddingBottom: 5,
+                paddingTop: 6,
+                paddingBottom: 6,
                 paddingLeft: 2,
                 paddingRight: 4,
                 autoEnlargeCanvas: !0,

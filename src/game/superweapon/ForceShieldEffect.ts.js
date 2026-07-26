@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/superweapon/ForceShieldEffect ===
-// deps: ["game/map/tileFinder/RadialTileFinder","game/Coords","game/superweapon/SuperWeaponEffect","game/type/SuperWeaponType","game/event/TriggerSoundFxEvent"]
+// deps: ["game/map/tileFinder/RadialTileFinder","game/superweapon/SuperWeaponEffect","game/event/TriggerSoundFxEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
 // OpenYRWeb (2026-07-25, FIXED): Force Shield super-weapon effect.
