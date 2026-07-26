@@ -164,12 +164,7 @@ System.register(
                 return { distance: new d.Vector3(n.x, 0, n.y), done: !n.length() || !!this.carryOverDistance };
               }
               pointTurretToTarget(t, i) {
-                if (t.turretTrait) {
-                  t.attackTrait?.currentTarget?.obj && (i = t.attackTrait.currentTarget.obj.position.getMapPosition());
-                  var r = t.position.getMapPosition();
-                  let e = new u.Vector2().copy(i).sub(r);
-                  e.length() && ((r = c.FacingUtil.fromMapCoords(e)), (t.turretTrait.desiredFacing = r));
-                }
+                c.FacingUtil.pointTurretToTarget(t, i);
               }
               applyAcceleration(e, t, i, r) {
                 if (this.currentWaypointType === m.Single) return i / 2;

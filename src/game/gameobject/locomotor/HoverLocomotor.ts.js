@@ -80,9 +80,11 @@ System.register(
                 a = 60 * this.hoverRules.brake * n.GameSpeed.BASE_TICKS_PER_SECOND;
                 this.deceleration = s / a;
               }
-              tick(e, t) {
-                var i = e.position.getMapPosition();
-                let r = t.clone().sub(i);
+              tick(e, t, i) {
+                var pos = e.position.getMapPosition();
+                let r = t.clone().sub(pos);
+                // OpenYRWeb: point turret toward final destination while moving (like DriveLocomotor does)
+                g.FacingUtil.pointTurretToTarget(e, i);
                 var s = r.length(),
                   i = this.maxSpeed;
                 this.currentWaypointType === f.Single
