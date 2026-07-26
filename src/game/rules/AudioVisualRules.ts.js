@@ -60,6 +60,11 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.dominatorFirstAnim = e.getString("DominatorFirstAnim")),
               (this.dominatorSecondAnim = e.getString("DominatorSecondAnim")),
               (this.dominatorFireAtPercentage = e.getNumber("DominatorFireAtPercentage", 100)),
+              // OpenYRWeb: Genetic Mutator warhead names (vanilla YR [AudioVisual]).
+              // MutateWarhead is used when [General] MutateExplosion=no (3x3 cell area);
+              // MutateExplosionWarhead is used when MutateExplosion=yes (CellSpread area).
+              (this.mutateWarhead = e.getString("MutateWarhead")),
+              (this.mutateExplosionWarhead = e.getString("MutateExplosionWarhead")),
               // OpenYRWeb: Mastermind overload death + mind-control release sounds.
               (this.masterMindOverloadDeathSound = e.getString("MasterMindOverloadDeathSound")),
               (this.mindClearedSound = e.getString("MindClearedSound")),

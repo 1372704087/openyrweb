@@ -197,10 +197,10 @@ System.register(
                   t.push(new Dm.DominatorEffect(o, i, s));
                   break;
                 case g.SuperWeaponType.GeneticMutator:
-                  // OpenYRWeb: pass the SuperWeapon's WeaponType (carries the Mutate warhead with
-                  // InfDeath=9) so the effect can detonate it over the target area and let the
-                  // normal damage+MakeInfantry path transform infantry, matching vanilla YR.
-                  t.push(new Gm.GeneticMutatorEffect(o, i, s, e.weaponType));
+                  // OpenYRWeb: Genetic Mutator resolves its warhead from [AudioVisual]
+                  // MutateWarhead/MutateExplosionWarhead based on [General] MutateExplosion.
+                  // No WeaponType parameter needed — effect reads AudioVisual rules directly.
+                  t.push(new Gm.GeneticMutatorEffect(o, i, s));
                   break;
                 // OpenYRWeb (2026-06-30, REVERSED): Force Shield — shields buildings within
                 // ForceShieldRadius for ForceShieldDuration frames (invulnerability, same mechanism

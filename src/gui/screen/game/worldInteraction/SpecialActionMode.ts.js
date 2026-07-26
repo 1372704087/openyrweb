@@ -30,10 +30,9 @@ System.register(
           .set(s.SuperWeaponType.ChronoWarp, r.PointerType.Chrono)
           .set(s.SuperWeaponType.AmerParaDrop, r.PointerType.Para)
           .set(s.SuperWeaponType.ParaDrop, r.PointerType.Para)
-          // OpenYRWeb: YR superweapons. No dedicated cursor art shipped; Default keeps targeting
-          // functional. Both are single-click targeted (no tile2 two-click flow).
-          .set(s.SuperWeaponType.PsychicDominator, r.PointerType.Default)
-          .set(s.SuperWeaponType.GeneticMutator, r.PointerType.Default)
+          // OpenYRWeb: YR superweapons. Both are single-click targeted (no tile2 two-click flow).
+          .set(s.SuperWeaponType.PsychicDominator, r.PointerType.Dominate)
+          .set(s.SuperWeaponType.GeneticMutator, r.PointerType.Mutate)
           // OpenYRWeb (2026-07-25): Force Shield — uses the ForceField pointer (dedicated
           // shield/force-field cursor, PointerType.ForceField=450). Single-click targeted.
           .set(s.SuperWeaponType.ForceShield, r.PointerType.ForceField)),

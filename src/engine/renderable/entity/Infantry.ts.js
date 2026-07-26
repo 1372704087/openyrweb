@@ -577,6 +577,10 @@ System.register(
                   let i = this.art.getAnimation(r);
                   if (
                     ((this.deathAnimRenderable = t.createAnim(r, void 0, !0)),
+                    // OpenYRWeb: GENDEATH (InfantryMutate) uses unit palette (unitsno/unittem/uniturb)
+                    // rather than the default animation palette (anim.pal). Override the death
+                    // anim's palette with the infantry's unit palette for correct colors.
+                    9 === this.gameObject.infDeathType && (this.deathAnimRenderable.palette = this.palette),
                     this.deathAnimRenderable.create3DObject(),
                     this.create3DObject(),
                     this.posWrap.add(this.deathAnimRenderable.get3DObject()),
@@ -592,7 +596,15 @@ System.register(
                   (this.renderableManager = t),
                   new Promise((e) => {
                     this.deathPromiseResolve = () => {
-                      ((this.renderableManager = void 0), e());
+                      // OpenYRWeb: signal Genetic Mutator effect that this infantry's
+                      // GENDEATH death animation (infDeathType=Mutate) has finished.
+                      if (this.gameObject && 9 === this.gameObject.infDeathType) {
+                        this.gameObject._genDeathAnimDone = !0;
+                        // Fire immediate callback so the Brute spawns on the same frame
+                        // the animation finishes, avoiding a visible gap.
+                        try { this.gameObject._cbOnGenDeathDone?.(); } catch (e) {}
+                      }
+                      (this.renderableManager = void 0), e();
                     };
                   })
                 );

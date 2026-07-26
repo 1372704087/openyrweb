@@ -615,3 +615,34 @@ fix(core): 修复飞机停靠与生产队列容量计算，增强移动任务防
 3. 移动任务取消时 `targetOffset` 处理不崩溃。  
 4. 停机位满时生产按钮正确禁用。  
 5. 单位销毁后延迟伤害/治疗事件不触发空指针。
+
+feat(genetic-mutator): 重构基因突变超级武器，基于死亡动画完成回调实现异步转换
+
+- 🧬 **GeneticMutatorEffect 核心重构**  
+  移除双阶段 Warhead 引爆 + 回退直接转换逻辑，改为单阶段异步机制：`onStart()` 扫描目标步兵，设置 `infDeathType=9` 后销毁单位，将对象加入 `_pending` 待转换列表；`onTick()` 每帧检查 `_genDeathAnimDone` 标志，动画完成后在原位置生成 BRUTE 单位，超时（120 帧）自动清理。所有步兵（包括友军）均会被转换，符合原版 YR 行为。
+
+- 🎨 **步兵 GENDEATH 动画调色板修复**  
+  `Infantry.ts.js` 中，当 `infDeathType=9`（Mutate）时，强制死亡动画使用单位自身调色板（而非默认动画调色板），确保变异动画颜色正确。动画结束时设置 `_genDeathAnimDone=true` 并触发回调，通知效果层生成 Brute。
+
+- 📐 **规则配置扩展**  
+  `AudioVisualRules` 新增 `MutateWarhead`（`MutateExplosion=no` 时使用，3x3 区域）和 `MutateExplosionWarhead`（`MutateExplosion=yes` 时使用，基于 CellSpread 爆炸区域）。`GeneralRules` 新增 `MutateExplosion` 布尔标志，控制 Warhead 选择模式。
+
+- ⚙️ **SuperWeaponsTrait 接口简化**  
+  GeneticMutatorEffect 实例创建移除 `weaponType` 参数，效果层直接从 AudioVisual 规则读取 Warhead 配置，无需通过 WeaponType 间接获取。
+
+- 🖱️ **专用鼠标指针**  
+  `SpecialActionMode` 为基因突变和精神控制支配者超级武器添加专用指针类型：`PointerType.Mutate` 和 `PointerType.Dominate`，提升操作直观性。
+
+### ⚠️ 破坏性变更
+- **GeneticMutatorEffect 构造函数**：移除第 4 个参数 `weaponType`，调用方需同步更新。  
+- **转换时机**：从即时转换改为异步等待死亡动画完成（约几帧延迟），依赖即时生成逻辑的代码需适配。  
+- **友军转换**：旧实现回退阶段跳过友军，新实现所有步兵（含友军）均被转换，符合原版 YR 行为。
+
+### 🧪 测试建议
+1. 基因突变武器命中敌方步兵，验证 BRUTE 在 GENDEATH 动画结束后生成。  
+2. 友军步兵被命中时同样转换为 BRUTE。  
+3. 非人类步兵（`NotHuman=yes`）被直接杀死，不转换。  
+4. 动画颜色正确（使用单位调色板）。  
+5. `MutateExplosion` 标志正确切换 `MutateWarhead`/`MutateExplosionWarhead`。  
+6. 动画卡顿时 120 帧超时自动清理待转换列表。  
+7. 鼠标指针显示为 Mutate/Dominate 类型。

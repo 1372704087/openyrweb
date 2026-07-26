@@ -1,4 +1,4 @@
-﻿﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
+﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
 // deps: ["game/rules/general/RadarRules","game/rules/general/RepairRules","game/rules/general/VeteranRules","game/rules/general/CrewRules","game/rules/general/PrismRules","game/rules/general/ThreatRules","game/rules/general/ParadropRules","game/rules/general/LightningStormRules","game/rules/general/V3RocketRules","game/rules/general/DMislRules","game/rules/general/CMislRules","game/rules/general/HoverRules","util/math"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -132,6 +132,10 @@ System.register(
                   (this.lowPowerPenaltyModifier = e.getNumber("LowPowerPenaltyModifier", 1)),
                   (this.minLowPowerProductionSpeed = e.getFixed("MinLowPowerProductionSpeed", 0.5)),
                   (this.maxLowPowerProductionSpeed = e.getFixed("MaxLowPowerProductionSpeed", 1)),
+                  // OpenYRWeb: Genetic Mutator mode flag (vanilla YR [General] MutateExplosion=yes).
+                  // When true, the Genetic Mutator uses the MutateExplosionWarhead (with CellSpread);
+                  // when false, it uses the 3x3-cell MutateWarhead.
+                  (this.mutateExplosion = e.getBool("MutateExplosion")),
                   (this.maximumCheerRate = e.getNumber("MaximumCheerRate")),
                   (this.maximumQueuedObjects = e.getNumber("MaximumQueuedObjects")),
                   (this.maxWaypointPathLength = e.getNumber("MaxWaypointPathLength")),
