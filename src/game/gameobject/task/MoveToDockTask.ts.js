@@ -121,7 +121,7 @@ System.register(
                   return (
                     this.children.push(
                       new s.MoveTask(this.game, i, !1, {
-                        targetOffset: e.isAircraft() ? r : void 0,
+                        targetOffset: void 0,
                         closeEnoughTiles: 0,
                         strictCloseEnough: !0,
                       }),

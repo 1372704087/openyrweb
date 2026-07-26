@@ -90,6 +90,7 @@ System.register(
             (this.applyHitPoints(e - t, r),
               e !== this.hitPoints &&
                 0 < t &&
+                this.gameObject &&
                 (this.gameObject.traits.filter(a.NotifyDamage).forEach((e) => {
                   e[a.NotifyDamage.onDamage](this.gameObject, r, t, i);
                 }),
@@ -101,9 +102,10 @@ System.register(
               var s = this.hitPoints;
               (this.applyHitPoints(this.hitPoints + e, r), (this.projectedHitPoints = this.hitPoints));
               let t = this.hitPoints - s;
-              this.gameObject.traits.filter(o.NotifyHeal).forEach((e) => {
-                e[o.NotifyHeal.onHeal]?.(this.gameObject, r, t, i);
-              });
+              this.gameObject &&
+                this.gameObject.traits.filter(o.NotifyHeal).forEach((e) => {
+                  e[o.NotifyHeal.onHeal]?.(this.gameObject, r, t, i);
+                });
             }
           }
           healToFull(i, r) {
@@ -111,15 +113,17 @@ System.register(
               var e = this.hitPoints;
               (this.applyHitPoints(this.maxHitPoints, r), (this.projectedHitPoints = this.hitPoints));
               let t = this.hitPoints - e;
-              this.gameObject.traits.filter(o.NotifyHeal).forEach((e) => {
-                e[o.NotifyHeal.onHeal]?.(this.gameObject, r, t, i);
-              });
+              this.gameObject &&
+                this.gameObject.traits.filter(o.NotifyHeal).forEach((e) => {
+                  e[o.NotifyHeal.onHeal]?.(this.gameObject, r, t, i);
+                });
             }
           }
           applyHitPoints(e, t) {
             let i = this.health;
             (this.setHitPoints(e),
               i !== this.health &&
+                this.gameObject &&
                 (t.traits.filter(r.NotifyHealthChange).forEach((e) => {
                   e[r.NotifyHealthChange.onChange](this.gameObject, t, i);
                 }),

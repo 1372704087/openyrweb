@@ -128,7 +128,7 @@ System.register(
             updateTabFlashing(e) {
               e.flashing = e.items.some((e) => e.status === d.SidebarItemStatus.Ready);
             }
-            updateSidebarTechnoItem(e, t, i) {
+            updateSidebarTechnoItem(e, t, p) {
               if (e.target.type === d.SidebarItemTargetType.Special)
                 throw new Error("Sidebar item must be of type Techno");
               let r = e.target.rules,
@@ -144,23 +144,16 @@ System.register(
                     : this.player.getLimitedUnitsBuilt(r.name)),
                   (a = e >= Math.abs(r.buildLimit)));
               }
-              this.rules.general.padAircraft.includes(r.name) &&
-                ((o = s
-                  .filter((e) => e.factoryTrait?.type === c.FactoryType.AircraftType && e.helipadTrait)
-                  .reduce((e, t) => e + (t.traits.find(u.DockTrait)?.numberOfDocks ?? 0), 0)),
-                (a =
-                  a ||
-                  [...this.player.getOwnedObjectsByType(h.ObjectType.Aircraft, !0)].filter((e) =>
-                    this.rules.general.padAircraft.includes(e.name),
-                  ).length >= o));
-              let n = i.getFactoryTypeForQueueType(t.type);
+              t.type === i.QueueType.Aircrafts &&
+                (a = a || t.maxSize <= 0);
+              let n = p.getFactoryTypeForQueueType(t.type);
               var o = s.filter((e) => e.factoryTrait?.type === n && !e.warpedOutTrait.isActive());
               let l = t.find(r);
               ((e.progress = l.length ? l[0].progress : 0),
                 (e.quantity = l.reduce((e, t) => e + t.quantity, 0)),
                 (e.status = this.computeStatus(t, l[0])),
                 (e.disabled =
-                  (1 === t.maxSize && l[0] !== t.getFirst()) ||
+                  (1 === t.maxSize && 0 < l.length && l[0] !== t.getFirst()) ||
                   a ||
                   (!o.length && (!t.currentSize || l[0] !== t.getFirst()))));
             }

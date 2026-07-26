@@ -591,3 +591,27 @@ feat(force-shield): 完整实现力场盾超级武器系统，修复文件系统
 4. 工程师无法捕获被力场盾保护的建筑。  
 5. 文件读取失败时重试 3 次，重试耗尽后删除损坏文件并记录警告。  
 6. `ForceShieldInvokeAnim` 激活动画正常播放，`StartSound`/`SpecialSound` 音效正确触发。
+
+fix(core): 修复飞机停靠与生产队列容量计算，增强移动任务防御性
+
+- 🛩️ **停靠系统 Bug 修复**  
+  `DockTrait.onTick()` 新增 `isDestroyed`/`isDisposed` 检查，销毁单位自动取消停靠，避免空指针与内存泄漏。`dockUnitAt()` 允许无 `DockableTrait` 的单位（如间谍飞机）停靠，`undockUnitAt()` 使用 `find()` 安全获取特性。
+
+- 🚀 **移动任务防御性增强**  
+  `MoveTask.onEnd()` 添加可选链 `?.` 和类型检查，防止 `targetOffset` 为 `undefined` 时调用 `equals()` 崩溃。`forceCancel()` 仅在 `targetOffset` 有效时赋值。移除 `MoveToDockTask` 中飞机的特殊 `targetOffset` 处理，统一为 `void 0`。
+
+- 🏭 **生产队列容量计算重构**  
+  移除 `padAircraft` 白名单过滤，所有飞机均计入停机位占用。`updateAircraftQueueMaxSize()` 直接设置 `q._maxSize`（避免截断副作用）并调用 `q.notifyUpdated()` 实时更新侧边栏。`CombatantSidebarModel` 改用 `maxSize <= 0` 判断禁用状态，逻辑简化。
+
+- 🛡️ **防御性空值检查**  
+  `HealthTrait` 的 `takeDamage()`/`heal()`/`healToFull()`/`applyHitPoints()` 添加 `this.gameObject` 空值检查，防止已销毁对象触发事件时崩溃。`PowerTrait.onChange()` 添加 `e?.isTechno()` 可选链。
+
+### ⚠️ 破坏性变更
+- 移除 `padAircraft` 白名单：所有飞机均占用停机位，Mod 中依赖白名单过滤的行为需适配。
+
+### 🧪 测试建议
+1. 飞机停靠后摧毁，验证停机位正确释放。  
+2. 间谍飞机（无 DockableTrait）停靠/离开正常。  
+3. 移动任务取消时 `targetOffset` 处理不崩溃。  
+4. 停机位满时生产按钮正确禁用。  
+5. 单位销毁后延迟伤害/治疗事件不触发空指针。

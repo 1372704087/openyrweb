@@ -90,10 +90,7 @@ System.register(
                 (e.owner.production.getPrimaryFactory(i) || e.owner.production.setPrimaryFactory(e),
                 e.owner.production.incrementFactoryCount(i),
                 i === a.FactoryType.AircraftType && this.updateAircraftQueueMaxSize(e.owner, t))
-              : e.isAircraft() &&
-                e.owner.production &&
-                this.rules.general.padAircraft.includes(e.name) &&
-                this.updateAircraftQueueMaxSize(e.owner, t);
+              : e.isAircraft() && e.owner.production && this.updateAircraftQueueMaxSize(e.owner, t);
           }
           [r.NotifyUnspawn.onUnspawn](e, t) {
             var i;
@@ -110,10 +107,7 @@ System.register(
                   (e.owner.production.getPrimaryFactory(i) === e && e.owner.production.crownPrimaryFactoryHeir(i),
                   e.owner.production.decrementFactoryCount(i),
                   i === a.FactoryType.AircraftType && this.updateAircraftQueueMaxSize(e.owner, t)))
-              : e.isAircraft() &&
-                e.owner.production &&
-                this.rules.general.padAircraft.includes(e.name) &&
-                this.updateAircraftQueueMaxSize(e.owner, t);
+              : e.isAircraft() && e.owner.production && this.updateAircraftQueueMaxSize(e.owner, t);
           }
           [s.NotifyOwnerChange.onChange](e, t, i) {
             var r;
@@ -128,9 +122,7 @@ System.register(
                   e.owner.production?.incrementFactoryCount(r),
                   r === a.FactoryType.AircraftType &&
                     (this.updateAircraftQueueMaxSize(e.owner, i), this.updateAircraftQueueMaxSize(t, i))))
-              : e.isAircraft() &&
-                this.rules.general.padAircraft.includes(e.name) &&
-                (this.updateAircraftQueueMaxSize(e.owner, i), this.updateAircraftQueueMaxSize(t, i));
+              : e.isAircraft() && (this.updateAircraftQueueMaxSize(e.owner, i), this.updateAircraftQueueMaxSize(t, i));
           }
           [o.NotifyPower.onPowerLow](e) {
             e.production &&
@@ -158,15 +150,23 @@ System.register(
           }
           updateAircraftQueueMaxSize(i, r) {
             i.production &&
-              r.afterTick(() => {
+              (() => {
                 var e = [...i.buildings]
                     .filter((e) => e.helipadTrait)
                     .reduce((e, t) => e + t.dockTrait.numberOfDocks, 0),
-                  t = i
-                    .getOwnedObjectsByType(g.ObjectType.Aircraft, !0)
-                    .filter((e) => r.rules.general.padAircraft.includes(e.name)).length;
-                i.production.getQueueForFactory(a.FactoryType.AircraftType).maxSize = Math.max(0, e - t);
-              });
+                  t = i.getOwnedObjectsByType(g.ObjectType.Aircraft, !0);
+                /* OpenYRWeb: count all owned aircraft. */
+                var n = t.length;
+                /* OpenYRWeb: set _maxSize directly to avoid the setter's
+                   side-effect of truncating the items array. Do NOT touch
+                   q.size — push/remove manage it. */
+                var q = i.production.getQueueForFactory(a.FactoryType.AircraftType);
+                q._maxSize = Math.max(0, e - n);
+                /* OpenYRWeb: notify the queue after _maxSize changes so the
+                   sidebar (CombatantSidebarModel) picks up the new value and
+                   re-enables/disables the production button accordingly. */
+                q.notifyUpdated();
+              })();
           }
           tickQueue(i, r, s) {
             if (i.status === h.QueueStatus.Active) {

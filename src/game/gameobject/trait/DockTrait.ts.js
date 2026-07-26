@@ -90,7 +90,9 @@ System.register(
           [o.NotifyTick.onTick]() {
             for (let t = 0; t < this.numberOfDocks; t++) {
               var e = this.unitsByDockNumber[t];
-              e && e.tile !== this.getDockTile(t) && this.undockUnit(e);
+              /* OpenYRWeb: undock units without DockableTrait (e.g. SPYP) that
+                 are destroyed — the DockableTrait.onUnspawn cleanup is missing. */
+              e && (e.isDestroyed || e.isDisposed || e.tile !== this.getDockTile(t)) && this.undockUnit(e);
             }
           }
           [i.NotifyDestroy.onDestroy](e, t, i, r) {
@@ -207,15 +209,17 @@ System.register(
             if (t > this.numberOfDocks - 1)
               throw new RangeError(`Index ${t} exceeds available docks (${this.numberOfDocks})`);
             if (this.unitsByDockNumber[t]) throw new Error("Another unit is already docked at dock #" + t);
+            /* OpenYRWeb: some aircraft (e.g. spy plane) may lack DockableTrait;
+               occupy the dock slot anyway and skip the back-reference. */
             let i = e.traits.find(a.DockableTrait);
-            if (!i) throw new Error(`Unit "${e.name}" cannot be docked to ` + this.building.name);
-            ((this.unitsByDockNumber[t] = e), (i.dock = this.building));
+            (this.unitsByDockNumber[t] = e), i && (i.dock = this.building);
           }
           undockUnitAt(e) {
             if (e > this.numberOfDocks - 1)
               throw new RangeError(`Index ${e} exceeds available docks (${this.numberOfDocks})`);
             let t = this.unitsByDockNumber[e];
-            t && ((this.unitsByDockNumber[e] = void 0), (t.traits.get(a.DockableTrait).dock = void 0));
+            /* OpenYRWeb: guard against units without DockableTrait. */
+            t && ((this.unitsByDockNumber[e] = void 0), (d => d && (d.dock = void 0))(t.traits.find(a.DockableTrait)));
           }
           undockUnit(e) {
             var t = this.unitsByDockNumber.indexOf(e);

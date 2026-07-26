@@ -65,7 +65,7 @@ System.register(
               e.owner.powerTrait?.updateFrom(e, "remove", t);
           }
           [r.NotifyHealthChange.onChange](e, t) {
-            e.isTechno() &&
+            e?.isTechno() &&
               e.rules.power &&
               !e.warpedOutTrait.isActive() &&
               !this._ownedByBioReactor(e) &&

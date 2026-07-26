@@ -369,8 +369,9 @@ System.register(
             onEnd(e) {
               ((e.moveTrait.collisionState = w.CollisionState.Resolved),
                 (e.moveTrait.currentWaypoint = void 0),
-                this.targetOffset.equals(this.computeTargetOffset(e)) ||
-                  (e.moveTrait.lastTargetOffset = this.targetOffset));
+                this.targetOffset?.equals?.(this.computeTargetOffset(e)) ||
+                  (typeof this.targetOffset?.equals === "function" &&
+                    (e.moveTrait.lastTargetOffset = this.targetOffset)));
             }
             forceCancel(e) {
               return (
@@ -380,7 +381,8 @@ System.register(
                   (e.moveTrait.unreservePathNodes(),
                   (e.moveTrait.lastMoveResult = w.MoveResult.Cancel),
                   this.onEnd(e),
-                  (e.moveTrait.lastTargetOffset = this.targetOffset),
+                  (e.moveTrait.lastTargetOffset =
+                    typeof this.targetOffset?.equals === "function" ? this.targetOffset : void 0),
                   (e.moveTrait.lastVelocity = e.moveTrait.velocity.clone())),
                 (this.status = r.TaskStatus.Cancelled),
                 !0)
