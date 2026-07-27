@@ -2,12 +2,12 @@
 System.register("game/bot/custom-ai/logic/composition/sovietCompositions", ["game/api/index", "game/bot/custom-ai/logic/awareness", "game/bot/custom-ai/logic/composition/common"], function (e, t) {
   "use strict";
   t && t.id;
-  var GameApi, PlayerData;
+  var GameApi, PlayerData, adjustCompositionByEnemy;
   return {
     setters: [
       function (x) { GameApi = x.GameApi; PlayerData = x.PlayerData; },
       function (x) { },
-      function (x) { }
+      function (x) { adjustCompositionByEnemy = x.adjustCompositionByEnemy; }
     ],
     execute: function () {
       var getSovietComposition = function (gameApi, playerData, matchAwareness) {
@@ -21,24 +21,11 @@ System.register("game/bot/custom-ai/logic/composition/sovietCompositions", ["gam
         if (hasWarFactory) { result.HTNK = 4; result.HTK = 2; result.V3 = 2; }
         if (hasRadar) { result.APOC = 1; }
         if (hasBattleLab) { result.APOC = 2; result.V3 = 3; }
+        // 根据敌方主力护甲动态调整配比（兵种克制）
+        result = adjustCompositionByEnemy(gameApi, playerData, result);
         return result;
       };
       e("getSovietComposition", getSovietComposition);
-
-      var getYuriComposition = function (gameApi, playerData, matchAwareness) {
-        var hasWarFactory = gameApi.getVisibleUnits(playerData.name, "self", function (r) { return r.name === "YAWEAP"; }).length > 0;
-        var hasRadar = gameApi.getVisibleUnits(playerData.name, "self", function (r) { return r.name === "NAPSIS"; }).length > 0;
-        var hasBattleLab = gameApi.getVisibleUnits(playerData.name, "self", function (r) { return r.name === "YATECH"; }).length > 0;
-
-        var includeInfantry = !hasBattleLab;
-        var result = {};
-        if (includeInfantry) { result.INIT = 4; result.BRUTE = 4; }
-        if (hasWarFactory) { result.LTNK = 6; result.YTNK = 2; }
-        if (hasRadar) { result.TELE = 2; }
-        if (hasBattleLab) { result.MIND = 2; }
-        return result;
-      };
-      e("getYuriComposition", getYuriComposition);
     },
   };
 });

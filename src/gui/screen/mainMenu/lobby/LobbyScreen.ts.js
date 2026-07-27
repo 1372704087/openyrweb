@@ -784,7 +784,7 @@ System.register(
                 availablePlayerCountries: [d.RANDOM_COUNTRY_NAME].concat(this.getAvailablePlayerCountries()),
                 availablePlayerColors: this.getSelectablePlayerColors(),
                 availableAiNames: this.botsEnabled
-                  ? new Map([...d.aiUiNames.entries()].filter(([e]) => e !== i.AiDifficulty.Easy))
+                  ? new Map([...d.aiUiNames.entries()].filter(([e]) => e !== i.AiDifficulty.Easy && e !== i.AiDifficulty.Easy_Ori))
                   : new Map(),
                 availableStartPositions: this.getSelectableStartPositions(),
                 maxTeams: 4,

@@ -85,6 +85,10 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
       var DEFENCE_CHECK_TICKS = 30;
       var DEFENCE_STARTING_RADIUS = 10;
       var DEFENCE_RADIUS_INCREASE_PER_GAME_TICK = 0.001;
+      // 多区域防御：每个防御区域独立形成任务，最多同时 8 个区域
+      var MAX_DEFENCE_ZONES = 8;
+      // 同一区域内的防御任务去重半径
+      var DEFENCE_ZONE_MIN_DISTANCE = 10;
 
       var DefenceMissionFactory = /** @class */ (function () {
         function DefenceMissionFactory() { this.lastDefenceCheckAt = 0; }
@@ -93,13 +97,57 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
           if (gameApi.getCurrentTick() < this.lastDefenceCheckAt + DEFENCE_CHECK_TICKS) return;
           this.lastDefenceCheckAt = gameApi.getCurrentTick();
           var defendableRadius = DEFENCE_STARTING_RADIUS + DEFENCE_RADIUS_INCREASE_PER_GAME_TICK * gameApi.getCurrentTick();
-          var enemiesNearSpawn = matchAwareness
-            .getHostilesNearPoint2d(playerData.startLocation, defendableRadius)
-            .map(function (unit) { return gameApi.getUnitData(unit.unitId); })
-            .filter(function (unit) { return !isOwnedByNeutral(unit); });
-          if (enemiesNearSpawn.length > 0) {
-            logger("Starting defence mission, " + enemiesNearSpawn.length + " found in radius " + defendableRadius + " (tick " + gameApi.getCurrentTick() + ")");
-            missionController.addMission(new DefenceMission("globalDefence", 10, matchAwareness.getMainRallyPoint(), playerData.startLocation, defendableRadius * 1.2, logger));
+
+          // 收集需要防御的关键位置：起始基地 + 可见的资源建筑
+          var defencePoints = [{ x: playerData.startLocation.x, y: playerData.startLocation.y, label: "base" }];
+          try {
+            var refinaryIds = gameApi.getVisibleUnits(playerData.name, "self", function (r) {
+              return r.name === "GAREFN" || r.name === "NAREFN" || r.name === "YAREFN";
+            });
+            refinaryIds.forEach(function (rid) {
+              var unit = gameApi.getUnitData(rid);
+              if (unit && unit.tile) {
+                defencePoints.push({ x: unit.tile.rx, y: unit.tile.ry, label: "refinery" });
+              }
+            });
+          } catch (_) {}
+
+          // 统计当前已有的防御任务
+          var existingDefenceMissions = missionController.getMissions().filter(function (m) {
+            return m.getUniqueName().indexOf("defence-") === 0;
+          });
+          if (existingDefenceMissions.length >= MAX_DEFENCE_ZONES) return;
+
+          // 对每个防御点检查附近是否有敌人
+          for (var pi = 0; pi < defencePoints.length; pi++) {
+            if (existingDefenceMissions.length >= MAX_DEFENCE_ZONES) break;
+            var dp = defencePoints[pi];
+
+            // 检查是否已有防御任务覆盖此区域
+            var alreadyCovered = existingDefenceMissions.some(function (m) {
+              var defenceArea = m.defenceArea;
+              if (!defenceArea) return false;
+              var dx = defenceArea.x - dp.x;
+              var dy = defenceArea.y - dp.y;
+              return dx * dx + dy * dy < DEFENCE_ZONE_MIN_DISTANCE * DEFENCE_ZONE_MIN_DISTANCE;
+            });
+            if (alreadyCovered) continue;
+
+            var enemiesNear = matchAwareness
+              .getHostilesNearPoint2d(new Vector2(dp.x, dp.y), defendableRadius)
+              .map(function (unit) { return gameApi.getUnitData(unit.unitId); })
+              .filter(function (unit) { return !isOwnedByNeutral(unit); });
+
+            if (enemiesNear.length > 0) {
+              var missionName = "defence-" + dp.label + "-" + gameApi.getCurrentTick();
+              logger("[MULTI_DEFENCE] 启动区域防御任务 " + missionName + " 于(" + dp.x + "," + dp.y + ") 发现 " + enemiesNear.length + " 敌人");
+              var added = missionController.addMission(
+                new DefenceMission(missionName, 10, matchAwareness.getMainRallyPoint(), new Vector2(dp.x, dp.y), defendableRadius * 1.2, logger)
+              );
+              if (added) {
+                existingDefenceMissions.push(added);
+              }
+            }
           }
         };
         DefenceMissionFactory.prototype.onMissionFailed = function () {};

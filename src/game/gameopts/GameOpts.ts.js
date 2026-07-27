@@ -13,7 +13,10 @@ System.register("game/gameopts/GameOpts", [], function (t, e) {
       (t("isHumanPlayerInfo", (e) => "name" in e),
         ((e = i || t("AiDifficulty", (i = {})))[(e.Brutal = 0)] = "Brutal"),
         (e[(e.Medium = 1)] = "Medium"),
-        (e[(e.Easy = 2)] = "Easy"));
+        (e[(e.Easy = 2)] = "Easy"),
+        (e[(e.Brutal_Ori = 3)] = "Brutal_Ori"),
+        (e[(e.Medium_Ori = 4)] = "Medium_Ori"),
+        (e[(e.Easy_Ori = 5)] = "Easy_Ori"));
     },
   };
 });

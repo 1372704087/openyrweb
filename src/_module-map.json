@@ -5487,6 +5487,42 @@
       "bytes": 780
     },
     {
+      "name": "game/ai/AiData",
+      "file": "game/ai/AiData.ts.js",
+      "deps": [
+        "game/api/index"
+      ],
+      "bytes": 10800
+    },
+    {
+      "name": "game/ai/AiEngine",
+      "file": "game/ai/AiEngine.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/ai/AiData"
+      ],
+      "bytes": 12800
+    },
+    {
+      "name": "game/ai/AiApi",
+      "file": "game/ai/AiApi.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/ai/AiEngine",
+        "game/ai/AiData"
+      ],
+      "bytes": 12800
+    },
+    {
+      "name": "game/bot/original/OriginalAiBot",
+      "file": "game/bot/original/OriginalAiBot.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/ai/AiApi"
+      ],
+      "bytes": 12800
+    },
+    {
       "name": "game/BotManager",
       "file": "game/BotManager.ts.js",
       "deps": [
@@ -12986,9 +13022,25 @@
         "game/bot/custom-ai/logic/mission/missionController",
         "game/bot/custom-ai/logic/building/queueController",
         "game/bot/custom-ai/logic/awareness",
-        "game/bot/custom-ai/logic/common/utils"
+        "game/bot/custom-ai/logic/common/utils",
+        "game/bot/custom-ai/logic/chatBotEngine",
+        "game/bot/custom-ai/logic/chatLines"
       ],
-      "bytes": 4500
+      "bytes": 9200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/chatBotEngine",
+      "file": "game/bot/custom-ai/logic/chatBotEngine.ts.js",
+      "deps": [
+        "game/bot/custom-ai/logic/chatLines"
+      ],
+      "bytes": 7200
+    },
+    {
+      "name": "game/bot/custom-ai/logic/chatLines",
+      "file": "game/bot/custom-ai/logic/chatLines.ts.js",
+      "deps": [],
+      "bytes": 8600
     },
     {
       "name": "game/bot/custom-ai/logic/common/utils",
@@ -13071,8 +13123,11 @@
     {
       "name": "game/bot/custom-ai/logic/composition/common",
       "file": "game/bot/custom-ai/logic/composition/common.ts.js",
-      "deps": [],
-      "bytes": 200
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/common/rulesCache"
+      ],
+      "bytes": 3600
     },
     {
       "name": "game/bot/custom-ai/logic/composition/alliedCompositions",
@@ -13123,6 +13178,16 @@
         "game/bot/custom-ai/logic/composition/common"
       ],
       "bytes": 2800
+    },
+    {
+      "name": "game/bot/custom-ai/logic/composition/yuriCompositions",
+      "file": "game/bot/custom-ai/logic/composition/yuriCompositions.ts.js",
+      "deps": [
+        "game/api/index",
+        "game/bot/custom-ai/logic/awareness",
+        "game/bot/custom-ai/logic/composition/common"
+      ],
+      "bytes": 1200
     },
     {
       "name": "game/bot/custom-ai/logic/building/basicBuilding",
@@ -13444,6 +13509,7 @@
         "game/bot/custom-ai/logic/common/utils",
         "game/bot/custom-ai/logic/mission/actionBatcher",
         "game/bot/custom-ai/logic/composition/sovietCompositions",
+        "game/bot/custom-ai/logic/composition/yuriCompositions",
         "game/bot/custom-ai/logic/composition/alliedCompositions",
         "game/bot/custom-ai/logic/composition/common",
         "game/bot/custom-ai/logic/mission/missions/squads/common",

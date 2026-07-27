@@ -176,7 +176,7 @@ System.register(
                         g.default.createElement(
                           "td",
                           { className: "player-name", "data-r-tooltip": n.get("STT:MPScoreLabelPlayer") },
-                          t.isAi ? n.get(u.aiUiNames.get(t.aiDifficulty)) : t.name,
+                          t.displayName || (t.isAi ? n.get(u.aiUiNames.get(t.aiDifficulty)) : t.name),
                         ),
                         l &&
                           g.default.createElement(

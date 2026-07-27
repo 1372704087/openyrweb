@@ -31,7 +31,7 @@ System.register("game/bot/Bot", [], function (e, t) {
             return this.context?.logger;
           }
           constructor(e, t) {
-            ((this.name = e), (this.country = t), i.set(this, !1));
+            ((this.name = e), (this.country = t), (this.nickname = ""), i.set(this, !1));
           }
           setContext(e) {
             ((this.context = e), this.context.logger.setDebugLevel(__classPrivateFieldGet(this, i, "f")));
@@ -50,6 +50,9 @@ System.register("game/bot/Bot", [], function (e, t) {
           onGameStart(e) {}
           onGameTick(e) {}
           onGameEvent(e, t) {}
+          // 聊天消息钩子：当收到玩家聊天时由BotManager调用
+          // senderName: 发送者名称, message: 消息文本
+          onChatMessage(senderName, message, gameApi) {}
         }),
       ),
         (i = new WeakMap()));

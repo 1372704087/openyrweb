@@ -100,9 +100,9 @@ System.register(
                     if (e.type === i.SlotType.Open) return "@Open@";
                     if (e.type === i.SlotType.OpenObserver) return "@OpenObserver@";
                     if (e.type === i.SlotType.Ai) {
-                      if (e.difficulty === r.AiDifficulty.Easy) return "@EasyAI@";
-                      if (e.difficulty === r.AiDifficulty.Medium) return "@MediumAI@";
-                      if (e.difficulty === r.AiDifficulty.Brutal) return "@HardAI@";
+                      if (e.difficulty === r.AiDifficulty.Easy || e.difficulty === r.AiDifficulty.Easy_Ori) return "@EasyAI@";
+                      if (e.difficulty === r.AiDifficulty.Medium || e.difficulty === r.AiDifficulty.Medium_Ori) return "@MediumAI@";
+                      if (e.difficulty === r.AiDifficulty.Brutal || e.difficulty === r.AiDifficulty.Brutal_Ori) return "@HardAI@";
                     } else if (e.type === i.SlotType.Player) return e.name;
                     throw new Error("Unexpected slot info with type " + i.SlotType[e.type]);
                   })

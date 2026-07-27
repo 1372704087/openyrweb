@@ -178,7 +178,43 @@ System.register(
               dispose() {
                 this.disposables.dispose();
               }
+              // 查找AI玩家的昵称（来自BotManager设置的 aiPlayerNicknames 映射）
+              _lookupNickname(playerName) {
+                try {
+                  if (this.game.aiPlayerNicknames && this.game.aiPlayerNicknames[playerName]) {
+                    return this.game.aiPlayerNicknames[playerName];
+                  }
+                } catch (_) {}
+                return null;
+              }
               handleGameEvent(r) {
+                // 显示AI聊天消息（单机模式，使用玩家颜色）
+                if (this.game.aiChatMessages && this.game.aiChatMessages.length > 0) {
+                  var aiMsgs = this.game.aiChatMessages;
+                  this.game.aiChatMessages = [];
+                  for (var ami = 0; ami < aiMsgs.length; ami++) {
+                    var displayName = aiMsgs[ami].nickname || aiMsgs[ami].playerName;
+                    var color = "orange";
+                    try {
+                      var player = this.game.getPlayerByName(aiMsgs[ami].playerName);
+                      if (player) {
+                        // 优先用 player.color（网络模式有），其次用 colorId + rules 查（单机模式）
+                        if (player.color && player.color.asHexString) {
+                          color = player.color.asHexString();
+                        } else if (player.colorId >= 0) {
+                          var colorArr = this.game.rules.getMultiplayerColors();
+                          if (colorArr) {
+                            var colorList = [...colorArr.values()];
+                            if (colorList[player.colorId]) {
+                              color = colorList[player.colorId].asHexString();
+                            }
+                          }
+                        }
+                      }
+                    } catch (_) {}
+                    this.messageList.addSystemMessage(displayName + ": " + aiMsgs[ami].text, color);
+                  }
+                }
                 switch (r.type) {
                   case L.EventType.Cheer:
                     this.sound.play(N.SoundKey.CheerSound, j.ChannelType.Effect);
@@ -498,6 +534,8 @@ System.register(
                     (S === this.player && !this.player.isObserver) ||
                       S.resigned ||
                       ((w = S.isAi ? this.strings.get(W.aiUiNames.get(S.aiDifficulty)) : S.name),
+                      // 替换为昵称
+                      w = this._lookupNickname(S.name) || w,
                       this.eva.play(S !== this.player ? "EVA_PlayerDefeated" : "EVA_YouHaveLost"),
                       this.messageList.addSystemMessage(this.strings.get("TXT_PLAYER_DEFEATED", w), S));
                     break;
@@ -505,6 +543,7 @@ System.register(
                     this.eva.play("EVA_PlayerResigned");
                     var w = r.target,
                       S = w.isAi ? this.strings.get(W.aiUiNames.get(w.aiDifficulty)) : w.name;
+                    S = this._lookupNickname(w.name) || S;
                     (this.messageList.addSystemMessage(
                       w.isObserver ? this.strings.get("TXT_PLAYER_DEFEATED", S) : this.strings.get("TXT_LEFT_GAME", S),
                       w,

@@ -1,10 +1,12 @@
 // === Reconstructed SystemJS module: game/bot/BotFactory ===
-// OpenYRWeb: Easy → DummyBot；Medium → IraqBot（竞技级伊拉克 1v1 AI，内置于主 bundle）。
-// Brutal → CustomAiBot（基于 ra2web-custom-ai 的多任务 AI，支持生产/任务/海军/侦查）。
-// deps: ["game/gameopts/GameOpts","game/bot/DummyBot","game/bot/iraq/IraqBot","game/bot/custom-ai/CustomAiBot"]
-System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/DummyBot", "game/bot/iraq/IraqBot", "game/bot/custom-ai/CustomAiBot"], function (e, t) {
+// OpenYRWeb: 3 个难度 × 2 种 AI = 6 个选项
+//   简单 → DummyBot / 原版AI(Easy)
+//   普通 → IraqBot / 原版AI(Medium)
+//   困难 → CustomAiBot / 原版AI(Brutal)
+// deps: ["game/gameopts/GameOpts","game/bot/DummyBot","game/bot/iraq/IraqBot","game/bot/custom-ai/CustomAiBot","game/bot/original/OriginalAiBot"]
+System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/DummyBot", "game/bot/iraq/IraqBot", "game/bot/custom-ai/CustomAiBot", "game/bot/original/OriginalAiBot"], function (e, t) {
   "use strict";
-  var i, r, s, c;
+  var i, r, s, c, o;
   t && t.id;
   return {
     setters: [
@@ -20,6 +22,9 @@ System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/Dumm
       function (e) {
         c = e;
       },
+      function (e) {
+        o = e;
+      },
     ],
     execute: function () {
       e(
@@ -33,12 +38,16 @@ System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/Dumm
             switch (e.aiDifficulty) {
               case i.AiDifficulty.Easy:
                 return new r.DummyBot(e.name, e.country.name);
+              case i.AiDifficulty.Easy_Ori:
+                return new o.OriginalAiBot(e.name, e.country.name, "Easy");
               case i.AiDifficulty.Medium:
-                // IraqBot — 竞技级伊拉克纯犀牛流 AI
                 return new s.IraqBot(e.name, e.country.name);
+              case i.AiDifficulty.Medium_Ori:
+                return new o.OriginalAiBot(e.name, e.country.name, "Medium");
               case i.AiDifficulty.Brutal:
-                // CustomAiBot — 多任务 AI（支持建筑队列/任务系统/海军/侦查）
                 return new c.RA2WEBCustomBot(e.name, e.country.name);
+              case i.AiDifficulty.Brutal_Ori:
+                return new o.OriginalAiBot(e.name, e.country.name, "Brutal");
               default:
                 throw new Error(`Unsupported AI difficulty "${e.aiDifficulty}"`);
             }

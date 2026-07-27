@@ -289,7 +289,9 @@ System.register(
                   (this.nextObjectId = d),
                   (this.objectFactory = g),
                   (this.botManager = p),
-                  (this.triggers = new G.TriggerManager()));
+                  (this.triggers = new G.TriggerManager()),
+                  // AI聊天消息队列（单机模式用，由BotManager填充，GUI层消费）
+                  (this.aiChatMessages = []));
               }
               addPlayer(e) {
                 (this.playerList.addPlayer(e), this.constructionWorkers.set(e, this.createConstructionWorker(e)));
@@ -346,9 +348,9 @@ System.register(
                   this.playerList.getAll().forEach((e) => (e.credits = this.gameOpts.credits)),
                   this.playerList.getAll().forEach((e) => {
                     if (e.isAi) {
-                      if (e.aiDifficulty === a.AiDifficulty.Brutal) e.credits += 10000;
-                      else if (e.aiDifficulty === a.AiDifficulty.Medium) e.credits += 5000;
-                      else if (e.aiDifficulty === a.AiDifficulty.Easy) e.credits += 2000;
+                      if (e.aiDifficulty === a.AiDifficulty.Brutal || e.aiDifficulty === a.AiDifficulty.Brutal_Ori) e.credits += 10000;
+                      else if (e.aiDifficulty === a.AiDifficulty.Medium || e.aiDifficulty === a.AiDifficulty.Medium_Ori) e.credits += 5000;
+                      else if (e.aiDifficulty === a.AiDifficulty.Easy || e.aiDifficulty === a.AiDifficulty.Easy_Ori) e.credits += 2000;
                     }
                   }),
                   this.rules.mpDialogSettings.alliesAllowed && this.createInitialTeams(),

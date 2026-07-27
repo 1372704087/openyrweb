@@ -113,7 +113,7 @@ System.register(
                           void 0 !== (y = u?.find((e) => e.name === r.name)?.ping) &&
                             b.default.createElement(O.PingIndicator, { ping: y, strings: i }),
                         ),
-                        b.default.createElement("td", { className: "player-name" }, r.name),
+                        b.default.createElement("td", { className: "player-name" }, r.displayName || r.name),
                         b.default.createElement("td", null),
                         !s && b.default.createElement("td", null),
                         b.default.createElement("td", null, !r.isObserver || r.defeated ? r.getUnitsKilled() : void 0),
@@ -141,7 +141,7 @@ System.register(
                         b.default.createElement(
                           "td",
                           { className: "player-name" },
-                          t.player.isAi ? i.get(w.aiUiNames.get(t.player.aiDifficulty)) : t.player.name,
+                          t.player.displayName || (t.player.isAi ? i.get(w.aiUiNames.get(t.player.aiDifficulty)) : t.player.name),
                         ),
                         b.default.createElement(
                           "td",

@@ -85,6 +85,15 @@ System.register(
             }
             submitMessage(e, t) {
               var i;
+              // 单机模式：无网络连接时，将玩家消息转发给AI Bot
+              if (!this.gservCon.isOpen() && !this.wolCon.isOpen()) {
+                if (this.game && this.game.botManager && this.game.botManager.dispatchChatMessage) {
+                  this.game.botManager.dispatchChatMessage(this.localPlayer.name, e);
+                }
+                // 同时在本地显示玩家自己的消息
+                this.messageList.addSystemMessage(this.localPlayer.name + ": " + e, this.localPlayer.color.asHexString());
+                return;
+              }
               this.gservCon.isOpen()
                 ? t.type === h.ChatRecipientType.Channel && t.name === u.RECIPIENT_ALL
                   ? e.startsWith("/")
