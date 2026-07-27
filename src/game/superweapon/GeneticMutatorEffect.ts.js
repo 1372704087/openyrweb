@@ -74,7 +74,6 @@ System.register(
                     (u.tile.rx - this.tile.rx) ** 2 + (u.tile.ry - this.tile.ry) ** 2,
                   );
                   if (dist > cellSpread) continue;
-                  if (u.rules.immuneToPsionics) continue;
                   if (u.rules.isHuman && hasBrute) {
                     // Store everything needed for spawning before destroy
                     this._pending.push({

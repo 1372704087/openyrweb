@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
+﻿﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
 // deps: ["game/rules/general/RadarRules","game/rules/general/RepairRules","game/rules/general/VeteranRules","game/rules/general/CrewRules","game/rules/general/PrismRules","game/rules/general/ThreatRules","game/rules/general/ParadropRules","game/rules/general/LightningStormRules","game/rules/general/V3RocketRules","game/rules/general/DMislRules","game/rules/general/CMislRules","game/rules/general/HoverRules","util/math"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
