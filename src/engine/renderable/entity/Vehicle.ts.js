@@ -154,6 +154,12 @@ System.register(
                   (this.vxlBuilders = []),
                   (this.highlightAnimRunner = new T.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new v.InvulnerableAnimRunner(this.gameSpeed)),
+                  // OpenYRWeb: invulnerable visual state tracking (version counter, flash, FS).
+                  (this._invulnFlashTimer = 0),
+                  (this._lastInvulnV = 0),
+                  (this._lastFSActive = !1),
+                  (this._fsEndFlashEndTimer = 0),
+                  (this.lastInvulnerable = !1),
                   (this.plugins = []),
                   (this.objectRules = e.rules),
                   (this.objectArt = e.art),
@@ -261,6 +267,26 @@ System.register(
                   ((this.lastElevation = e), this.updateBaseLight(), this.updateClippingPlanes(this.gameObject.tile.z));
                 var s = this.gameObject.invulnerableTrait.isActive(),
                   a = s !== this.lastInvulnerable;
+                // OpenYRWeb: version counter for invulnerability re-application detection.
+                void 0 === this._invulnFlashTimer && (this._invulnFlashTimer = (this._invulnFlashPlayed = 0, 0));
+                var _vNow = this.gameObject.invulnerableTrait._version;
+                void 0 === this._lastInvulnV && (this._lastInvulnV = _vNow);
+                if (_vNow !== this._lastInvulnV && s) {
+                  this._invulnFlashTimer = 180;
+                  this._fsEndFlashEndTimer = 0;
+                }
+                this._lastInvulnV = _vNow;
+                // OpenYRWeb: FS end flash detection.
+                var _fsNow = this.gameObject.invulnerableTrait.isForceShieldActive();
+                void 0 === this._lastFSActive && (this._lastFSActive = _fsNow);
+                if (!_fsNow && this._lastFSActive) {
+                  !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
+                }
+                this._lastFSActive = _fsNow;
+                // OpenYRWeb: generic end flash when invulnerability expires.
+                if (a && !s) {
+                  !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
+                }
                 this.lastInvulnerable = s;
                 var n = this.highlightAnimRunner.shouldUpdate();
                 (n && this.highlightAnimRunner.tick(i),
@@ -289,19 +315,51 @@ System.register(
                       this.posObj.updateMatrix()));
                 }
                 if (
-                  ((t || a || s || n) &&
-                    ((p = s ? this.invulnAnimRunner.getValue() : 0),
-                    (y = (n ? this.highlightAnimRunner.getValue() : 0) || p),
-                    (m = this.lighting.getAmbientIntensity()),
-                    M.ExtraLightHelper.multiplyVxl(this.vxlExtraLight, this.baseVxlExtraLight, m, y),
-                    M.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, y)),
-                  // OpenYRWeb: Robot Tank paralysis darkening. Set extraLight to a strong
-                  // negative value when paralyzed; restore to base value when recovered.
+                  // OpenYRWeb: fix invulnerable visual — reset base FIRST, then apply effects on top.
+                  // 1. Reset to base (or paralysis dark) as starting point (was overwriting invuln after apply).
                   this.gameObject.robotControlTrait?.isParalyzed()
                     ? (this.vxlExtraLight.set(-0.35, -0.35, -0.35),
                       this.shpExtraLight.set(-0.35, -0.35, -0.35))
                     : (this.vxlExtraLight.copy(this.baseVxlExtraLight),
                       this.shpExtraLight.copy(this.baseShpExtraLight)),
+                  // 2. Apply invulnerable/highlight effects on top with flash & FS tint.
+                  (function() {
+                    var _endFTimer = this._fsEndFlashEndTimer | 0;
+                    if (_endFTimer > 0) {
+                      this._fsEndFlashEndTimer = --_endFTimer;
+                      var _e2B = new THREE.Vector3(2, 2, 2);
+                      var _eLT = 1 - Math.pow(_endFTimer / 180, 2);
+                      this.vxlExtraLight.lerpVectors(_e2B, this.baseVxlExtraLight, _eLT);
+                      this.shpExtraLight.lerpVectors(_e2B, this.baseShpExtraLight, _eLT);
+                    } else if (this._invulnFlashTimer > 0) {
+                      this._invulnFlashTimer--;
+                      var _iv = s ? this.invulnAnimRunner.getValue() : 0;
+                      var _af = this.lighting.getAmbientIntensity();
+                      var _tV = this.baseVxlExtraLight.clone();
+                      var _tS = this.baseShpExtraLight.clone();
+                      M.ExtraLightHelper.multiplyVxl(_tV, this.baseVxlExtraLight, _af, _iv);
+                      M.ExtraLightHelper.multiplyShp(_tS, this.baseShpExtraLight, _iv);
+                      if (this.gameObject.invulnerableTrait.isForceShieldActive()) {
+                        _tV.lerp(new THREE.Vector3(0, 0, 255), 0.2);
+                        _tS.lerp(new THREE.Vector3(0, 0, 255), 0.2);
+                      }
+                      var _fC = new THREE.Vector3(2, 2, 2);
+                      var _lT = 1 - Math.pow(this._invulnFlashTimer / 180, 2);
+                      this.vxlExtraLight.lerpVectors(_fC, _tV, _lT);
+                      this.shpExtraLight.lerpVectors(_fC, _tS, _lT);
+                    } else {
+                      var _hv = (n ? this.highlightAnimRunner.getValue() : 0) || (s ? this.invulnAnimRunner.getValue() : 0);
+                      if (_hv) {
+                        var _a2 = this.lighting.getAmbientIntensity();
+                        M.ExtraLightHelper.multiplyVxl(this.vxlExtraLight, this.baseVxlExtraLight, _a2, _hv);
+                        M.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, _hv);
+                        this.gameObject.invulnerableTrait.isForceShieldActive() && (
+                          this.vxlExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2),
+                          this.shpExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2)
+                        );
+                      }
+                    }
+                  }).call(this),
                   // OpenYRWeb: berserk palette switch — use full red-tinted palette.
                   (() => {
                     var _bs = !!this.gameObject.berserkTrait?.isBerserk();
@@ -314,7 +372,7 @@ System.register(
                     }
                   })(),
                   this.gameObject.isDestroyed && this.resolveObjectRemove)
-                ) {
+                {
                   if (
                     (this.squidGrabAnim &&
                       (this.posObj?.remove(this.squidGrabAnim.get3DObject()),
