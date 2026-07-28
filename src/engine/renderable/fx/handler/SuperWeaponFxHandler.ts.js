@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: engine/renderable/fx/handler/SuperWeaponFxHandler ===
-// deps: ["game/event/EventType","util/disposable/CompositeDisposable","util/math","engine/gfx/lighting/LightningStormFx","game/GameSpeed","game/type/SuperWeaponType","game/Coords"]
+// deps: ["game/event/EventType","util/disposable/CompositeDisposable","util/math","engine/gfx/lighting/LightningStormFx","engine/gfx/lighting/DominatorLightingFx","game/GameSpeed","game/type/SuperWeaponType","game/Coords"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -9,13 +9,14 @@ System.register(
     "util/disposable/CompositeDisposable",
     "util/math",
     "engine/gfx/lighting/LightningStormFx",
+    "engine/gfx/lighting/DominatorLightingFx",
     "game/GameSpeed",
     "game/type/SuperWeaponType",
     "game/Coords",
   ],
   function (e, t) {
     "use strict";
-    var i, r, s, a, n, o, l, c;
+    var i, r, s, a, d, n, o, l, c;
     t && t.id;
     return {
       setters: [
@@ -30,6 +31,9 @@ System.register(
         },
         function (e) {
           a = e;
+        },
+        function (e) {
+          d = e;
         },
         function (e) {
           n = e;
@@ -86,6 +90,25 @@ System.register(
                         e.setPosition(t);
                       },
                     );
+                  // OpenYRWeb: Psychic Dominator — show red screen tint FIRST, then play the
+                  // giant Yuri head animation (FirstAnim) at a moderate sky height (flightLevel).
+                  // The SecondAnim (ground ring) and actual damage/capture are triggered later
+                  // by DominatorEffect when its onTick reaches DominatorFireAtPercentage.
+                  else if (e === o.SuperWeaponType.PsychicDominator) {
+                    // Start red background light effect immediately
+                    this.lightingDirector.addEffect(new d.DominatorLightingFx());
+                    // Play the giant Yuri head animation at vanilla YR height:
+                    // 750 leptons above ground (~7.5 tile elevations).
+                    var av = this.game.rules.audioVisual;
+                    av.dominatorFirstAnim &&
+                      this.renderableManager.createTransientAnim(av.dominatorFirstAnim, (e) => {
+                        var t = l.Coords.tile3dToWorld(
+                          r.atTile.rx + 0.5, r.atTile.ry + 0.5, r.atTile.z,
+                        );
+                        t.y += 750;
+                        e.setPosition(t);
+                      });
+                  }
                   else if (e === o.SuperWeaponType.ChronoSphere) {
                     this.disposeChronoSphereAnim();
                     var s = this.game.map.tileOccupation.getBridgeOnTile(r.atTile)?.tileElevation ?? 0;

@@ -646,3 +646,41 @@ feat(genetic-mutator): 重构基因突变超级武器，基于死亡动画完成
 5. `MutateExplosion` 标志正确切换 `MutateWarhead`/`MutateExplosionWarhead`。  
 6. 动画卡顿时 120 帧超时自动清理待转换列表。  
 7. 鼠标指针显示为 Mutate/Dominate 类型。
+
+feat(dominator): 实现心灵控制器完整动画序列、红色光效与音效系统
+
+- 🎨 **红色屏幕光效系统**  
+  新增 `DominatorLightingFx`（继承 `LightingFx`），实现三阶段红色色调效果：淡入 0.3s → 保持 5s → 淡出 1.5s（通过降低绿/蓝通道至 0.35 实现），覆盖 FirstAnim 播放、触发延迟和 SecondAnim 播放全程。
+
+- ⚙️ **DominatorEffect 时序重构**  
+  - `onStart()`：根据 `DominatorFirstAnim` 帧率和 `DominatorFireAtPercentage` 配置计算触发延迟 tick 数。  
+  - `onTick()`：实现倒计时机制，延迟触发 Warhead 伤害和单位捕获，与 FirstAnim 进度同步。  
+  - 新增 `DominatorSecondAnim` 地面光环动画触发，移除手动遍历区域单位进行伤害的旧逻辑（改用 Warhead 自身机制）。  
+  - API 修正：使用 `alliances.areAllied()` 替代废弃的 `areFriendly()`。
+
+- 🎬 **SuperWeaponFxHandler 特效支持**  
+  为 `PsychicDominator` 添加专属分支：立即添加 `DominatorLightingFx` 红色光效，并在目标位置上方 750 勒普顿处播放 FirstAnim（尤里头部动画）。
+
+- 🔊 **音效与 EVA 语音系统完善**  
+  - 新增 EVA 语音映射：`EVA_PsychicDominatorDetected`、`EVA_PsychicDominatorReady`、`EVA_PsychicDominatorActivated`，以及 `EVA_ForceShieldReady`/`Activated`。  
+  - 超级武器发射时播放 `PsychicDominatorActivateSound` 激活音效。  
+  - 修复玩家资产分配消息中的变量引用错误（`w.name` → `S.name`）。
+
+- 🎛️ **引擎配置增强**  
+  - `Engine.getSoundIni()` 从 rules 文件（`rules.ini` 及自定义规则）的 `[AudioVisual]` 节读取声音配置，自动合并到声音 INI，支持模组在 rules 中自定义声音而无需修改 `soundmd.ini`。  
+  - `AudioVisualRules` 新增 `PsychicDominatorActivateSound` 配置项读取。
+
+- 📦 **模块注册更新**  
+  新增 `DominatorLightingFx` 模块（900 字节），更新 `SuperWeaponFxHandler` 和 `DominatorEffect` 依赖。
+
+### ⚠️ 破坏性变更
+- 伤害与捕获从“立即触发”改为“延迟触发”，延迟由 `DominatorFireAtPercentage` 控制（默认 100%），依赖即时效果的模组需适配。  
+- `DominatorEffect` 内部使用 `alliances.areAllied()` API，需确保版本兼容。
+
+### 🧪 测试建议
+1. 验证 FirstAnim → 延迟 → SecondAnim 时序与原版一致。  
+2. 测试不同 `DominatorFireAtPercentage` 值下的触发延迟准确性。  
+3. 确认红色光效三阶段（淡入/保持/淡出）流畅无闪烁。  
+4. 验证 `PsychicDominatorActivateSound` 在 rules 中配置后正常播放。  
+5. 测试 EVA 语音在检测/准备/激活三种场景下正确触发。  
+6. `DominatorFirstAnim` 为空或缺失时的降级处理。

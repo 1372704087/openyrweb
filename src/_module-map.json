@@ -5118,9 +5118,12 @@
       "deps": [
         "game/map/tileFinder/RadialTileFinder",
         "game/Warhead",
-        "game/superweapon/SuperWeaponEffect"
+        "game/superweapon/SuperWeaponEffect",
+        "game/event/TriggerAnimEvent",
+        "game/GameSpeed",
+        "game/Coords"
       ],
-      "bytes": 1900
+      "bytes": 2400
     },
     {
       "name": "game/superweapon/GeneticMutatorEffect",
@@ -7932,6 +7935,14 @@
         "engine/gfx/lighting/LightingFx"
       ],
       "bytes": 661
+    },
+    {
+      "name": "engine/gfx/lighting/DominatorLightingFx",
+      "file": "engine/gfx/lighting/DominatorLightingFx.ts.js",
+      "deps": [
+        "engine/gfx/lighting/LightingFx"
+      ],
+      "bytes": 900
     },
     {
       "name": "engine/renderable/entity/Projectile",
@@ -11141,11 +11152,12 @@
         "util/disposable/CompositeDisposable",
         "util/math",
         "engine/gfx/lighting/LightningStormFx",
+        "engine/gfx/lighting/DominatorLightingFx",
         "game/GameSpeed",
         "game/type/SuperWeaponType",
         "game/Coords"
       ],
-      "bytes": 2541
+      "bytes": 2600
     },
     {
       "name": "gui/screen/game/worldInteraction/SpecialActionMode",

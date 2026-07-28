@@ -240,6 +240,7 @@ System.register(
                     "DominatorFirstAnim",
                     "DominatorSecondAnim",
                     "DominatorFireAtPercentage",
+                    "PsychicDominatorActivateSound",
                     "ChronoPlacement",
                     "ChronoBeam",
                     "ChronoBlast",
@@ -265,7 +266,7 @@ System.register(
                     "DropZoneAnim",
                     "EMPulseSparkles",
                   ])
-                    e?.set(r, t.getString(r));
+                    t.has(r) && e?.set(r, t.getString(r));
                 }
               }
               return i;
@@ -322,7 +323,35 @@ System.register(
             static getSoundIni() {
               var e = this.getIni("soundcd.ini");
               const t = this.getIni(this.getFileNameVariant("sound.ini"));
-              return t.clone().mergeWith(e);
+              var s = t.clone().mergeWith(e);
+              // OpenYRWeb: also merge sound sections referenced by [AudioVisual] fields from
+              // the rules files. Some mods define new sound sections (e.g. [PsychicDominatorActivate]
+              // with Sounds=$spsydom) directly in rulesmd.ini without adding them to soundmd.ini's
+              // [SoundList]. We directly look up known [AudioVisual] fields, get the sound section
+              // name, and merge that section from the rules INI into the sound INI.
+              var soundFields = ["PsychicDominatorActivateSound"];
+              try {
+                var rulesFiles = [
+                  this.getFileNameVariant("rules.ini"),
+                  this.customRulesFileName,
+                ];
+                for (var fname of rulesFiles) {
+                  var rf = this.iniFiles.get(fname);
+                  if (rf) {
+                    var av = rf.getSection("AudioVisual");
+                    if (av) {
+                      for (var fld of soundFields) {
+                        var sndName = av.getString(fld);
+                        if (sndName && !s.getSection(sndName)) {
+                          var sec = rf.getSection(sndName);
+                          if (sec) s.sections.set(sndName, sec.clone());
+                        }
+                      }
+                    }
+                  }
+                }
+              } catch (_) {}
+              return s;
             }
             static getUiIni() {
               var e = this.getFileNameVariant("ui.ini");

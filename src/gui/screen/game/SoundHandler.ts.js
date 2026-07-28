@@ -35,7 +35,7 @@ System.register(
   ],
   function (e, t) {
     "use strict";
-    var a, N, j, l, L, D, o, c, F, _, i, U, r, s, H, G, V, n, W, z, K, q, h, $, Q, u, Y, Z, X, J, ee, te, ie, re, d;
+    var a, N, j, l, L, D, o, c, F, _, i, U, r, s, H, G, V, n, W, z, K, q, h, $, Q, u, Y, Z, X, J, ee, te, ie, re, d, _ST;
     t && t.id;
     return {
       setters: [
@@ -126,19 +126,27 @@ System.register(
           .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearSiloDetected")
           .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainDetected")
           .set(h.SuperWeaponType.ChronoSphere, "EVA_ChronosphereDetected")
-          .set(h.SuperWeaponType.LightningStorm, "EVA_WeatherDeviceReady")),
+          .set(h.SuperWeaponType.LightningStorm, "EVA_WeatherDeviceReady")
+          // OpenYRWeb: YR superweapon EVA — Psychic Dominator detection.
+          .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorDetected")),
           (X = new Map()
             .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearMissileReady")
             .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainReady")
             .set(h.SuperWeaponType.ChronoSphere, "EVA_ChronosphereReady")
             .set(h.SuperWeaponType.LightningStorm, "EVA_LightningStormReady")
             .set(h.SuperWeaponType.ParaDrop, "EVA_ReinforcementsReady")
-            .set(h.SuperWeaponType.AmerParaDrop, "EVA_ReinforcementsReady")),
+            .set(h.SuperWeaponType.AmerParaDrop, "EVA_ReinforcementsReady")
+            // OpenYRWeb: YR superweapon EVA — Psychic Dominator + Force Shield ready.
+            .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorReady")
+            .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldReady")),
           (J = new Map()
             .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearMissileLaunched")
             .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainActivated")
             .set(h.SuperWeaponType.ChronoSphere, "EVA_ChronosphereActivated")
-            .set(h.SuperWeaponType.LightningStorm, "EVA_LightningStormCreated")),
+            .set(h.SuperWeaponType.LightningStorm, "EVA_LightningStormCreated")
+            // OpenYRWeb: YR superweapon EVA — Psychic Dominator + Force Shield activated.
+            .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorActivated")
+            .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldActivated")),
           (ee = new Map().set(h.SuperWeaponType.MultiMissile, N.SoundKey.DigSound)),
           (te = new Map().set(h.SuperWeaponType.LightningStorm, "TXT_LIGHTNING_STORM_APPROACHING")),
           (ie = new Map([
@@ -155,6 +163,8 @@ System.register(
             [Q.PowerupType.Firepower, "EVA_UnitFirePowerUpgraded"],
             [Q.PowerupType.Speed, "EVA_UnitSpeedUpgraded"],
           ])),
+          // OpenYRWeb: capture SuperWeaponType enum before the class shadows the module-level `h`.
+          _ST = h,
           e(
             "SoundHandler",
             (d = class {
@@ -347,6 +357,12 @@ System.register(
                       var _fsStartRules = [...this.game.rules.superWeaponRules.values()].find(function (r) { return r.type === h; });
                       _fsStartRules && _fsStartRules.startSound &&
                         ((l = r.atTile), this.worldSound.playEffect(_fsStartRules.startSound, H.Coords.tile3dToWorld(l.rx, l.ry, l.z), u));
+                    }
+                    // OpenYRWeb: Play Psychic Dominator activation sound directly from AudioVisual
+                    // config (PsychicDominatorActivateSound=).
+                    if (h === _ST.SuperWeaponType.PsychicDominator) {
+                      var _domSnd = this.game.rules.audioVisual.dominatorActivateSound;
+                      _domSnd && ((l = r.atTile), this.worldSound.playEffect(_domSnd, H.Coords.tile3dToWorld(l.rx, l.ry, l.z), u));
                     }
                     h = te.get(h);
                     h && this.messageList.addSystemMessage(this.strings.get(h), this.player ?? "grey");
@@ -549,7 +565,7 @@ System.register(
                       w,
                     ),
                       r.assetsRedistributed &&
-                        this.messageList.addSystemMessage(this.strings.get("TS:PlayerAssetsSplit", w.name), w));
+                        this.messageList.addSystemMessage(this.strings.get("TS:PlayerAssetsSplit", S.name), w));
                     break;
                   case L.EventType.PlayerDropped:
                     var E = r.target;

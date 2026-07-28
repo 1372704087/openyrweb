@@ -60,6 +60,9 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.dominatorFirstAnim = e.getString("DominatorFirstAnim")),
               (this.dominatorSecondAnim = e.getString("DominatorSecondAnim")),
               (this.dominatorFireAtPercentage = e.getNumber("DominatorFireAtPercentage", 100)),
+              // OpenYRWeb: activation sound for the Psychic Dominator (played when the super
+              // weapon fires). Configured via [AudioVisual] DominatorActivateSound= in INI.
+              (this.dominatorActivateSound = e.getString("PsychicDominatorActivateSound") || void 0),
               // OpenYRWeb: Genetic Mutator warhead names (vanilla YR [AudioVisual]).
               // MutateWarhead is used when [General] MutateExplosion=no (3x3 cell area);
               // MutateExplosionWarhead is used when MutateExplosion=yes (CellSpread area).
