@@ -133,6 +133,7 @@ System.register(
                 bestEffort: o = !0,
                 excludeTiles: l,
                 ignoredBlockers: c = [],
+                bidirectional: _bidirectional = !0,
               } = {},
             ) {
               let h = this.computePassabilityGraph(s, a);
@@ -176,6 +177,7 @@ System.register(
                   excludedNodes: l,
                   distance: E,
                   heuristic: C,
+                  bidirectional: _bidirectional,
                 }),
                 b = v
                   .find(this.getNodeId(e, t), this.getNodeId(i, r))

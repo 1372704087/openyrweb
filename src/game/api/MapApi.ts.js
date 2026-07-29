@@ -85,6 +85,7 @@ System.register(
                     ? (e) => s.excludeNodes({ tile: e.tile, onBridge: !!e.onBridge })
                     : void 0,
                   maxExpandedNodes: s?.maxExpandedNodes,
+                  bidirectional: s?.bidirectional,
                 },
               );
               return a.map((e) => ({ tile: e.tile, onBridge: !!e.onBridge }));
