@@ -123,19 +123,28 @@ System.register(
                     r = C.Coords.tileHeightToWorld(t) + c;
                   }
                   t = s.position.worldPosition.y;
-                  r !== t
-                    ? ((c = Math.abs(r - t)),
-                      (t = Math.sign(r - t) * Math.min(30, c)),
-                      (c = s.tileElevation),
-                      s.position.moveByLeptons3(new P.Vector3(0, t, 0)),
-                      s.moveTrait.handleElevationChange(c, a))
-                    : e &&
-                      ((s.zone = M.ZoneType.Ground),
-                      i ? i.airSpawnTrait.storeAircraft(s, a) : (s.onBridge = !!n),
-                      a.events.dispatch(new h.ObjectLandEvent(s)),
-                      (n = a.map.tileOccupation
-                        .getGroundObjectsOnTile(s.tile)
-                        .find((e) => e.isOverlay() && e.rules.crate)) && a.crateGeneratorTrait.pickupCrate(s, n, a));
+                  // OpenYRWeb: keep the attitude consistent while stationary — the nose
+                  // pitches with the vertical speed (climb/dive) and the wings level out,
+                  // matching vanilla YR instead of freezing the last bank angle.
+                  var vert = r !== t ? Math.sign(r - t) * Math.min(30, Math.abs(r - t)) : 0,
+                    _pitchTarget = s.rules.pitchAngle ? (vert / 30) * s.rules.pitchAngle : 0,
+                    _pitchRate = Math.max(1, (s.rules.pitchSpeed || 0.25) * 8);
+                  s.pitch += Math.max(-_pitchRate, Math.min(_pitchRate, _pitchTarget - s.pitch));
+                  s.roll += Math.max(-4, Math.min(4, -s.roll));
+                  if (r !== t) {
+                    c = Math.abs(r - t);
+                    t = Math.sign(r - t) * Math.min(30, c);
+                    c = s.tileElevation;
+                    s.position.moveByLeptons3(new P.Vector3(0, t, 0));
+                    s.moveTrait.handleElevationChange(c, a);
+                  } else if (e) {
+                    s.zone = M.ZoneType.Ground;
+                    i ? i.airSpawnTrait.storeAircraft(s, a) : (s.onBridge = !!n);
+                    a.events.dispatch(new h.ObjectLandEvent(s));
+                    (n = a.map.tileOccupation
+                      .getGroundObjectsOnTile(s.tile)
+                      .find((e) => e.isOverlay() && e.rules.crate)) && a.crateGeneratorTrait.pickupCrate(s, n, a);
+                  }
                 }
               }
               static tickCrash(e, t, i) {
@@ -208,7 +217,22 @@ System.register(
                     throw new Error('Unknown maneuver type "' + this.maneuverType);
                 }
                 var { facing: g, delta: p } = x.FacingUtil.tick(t.direction, d, t.rules.rot);
-                ((t.direction = g), (t.roll = Math.sign(p) * t.rules.pitchAngle));
+                // OpenYRWeb: bank into turns (vanilla YR behaviour). The target bank angle
+                // is derived from the size of the remaining turn (big turn → deep bank,
+                // small turn → slight bank) and is independent of PitchAngle, so every
+                // fixed-wing plane banks on both large and small turns. The cap is the
+                // original deep-bank constant dbl_B44310 ≈ 29.75°. The current roll
+                // approaches the target at a fixed rate, so banking in and leveling out
+                // are smooth instead of snapping.
+                t.direction = g;
+                var targetRoll = Math.sign(p) * Math.max(10, Math.min((((d - g + 540) % 360) - 180) * 0.5, 29.75));
+                t.roll += Math.max(-4, Math.min(4, targetRoll - t.roll));
+                // OpenYRWeb: wing sway (vanilla sub_4CF830) — a gentle roll oscillation
+                // while in motion: sin(frame%20 × 0.314) × 1.5, applied on top of the
+                // bank so the wings rock slightly even during level cruise.
+                if (this.currentHorizSpeed > 0) {
+                  t.roll += Math.sin((this.game.currentTick % 20) * 0.3141592653589793) * 1.5;
+                }
                 let m;
                 switch (this.maneuverType) {
                   case B.HoverStrafe:
@@ -231,7 +255,16 @@ System.register(
                   y = 0,
                   T = 0;
                 let v = !0;
+                // OpenYRWeb: no dive — the plane keeps its cruise altitude through
+                // the whole approach and attack; only the terrain-following vertical
+                // adjustment runs (vanilla YR FlyLocomotion, PitchAngle=0 stays level).
                 h !== o && ((S = Math.abs(h - o)), (y = Math.sign(h - o) * Math.min(30, S)), (v = S <= 30));
+                // OpenYRWeb: nose pitch from vertical speed (vanilla YR behaviour) — climb
+                // raises the nose, dive lowers it, capped at PitchAngle and smoothed by
+                // PitchSpeed. Planes that configure PitchAngle=0 (e.g. the MiG) stay level.
+                var targetPitch = t.rules.pitchAngle ? (y / 30) * t.rules.pitchAngle : 0;
+                var pitchRate = Math.max(1, (t.rules.pitchSpeed || 0.25) * 8);
+                t.pitch += Math.max(-pitchRate, Math.min(pitchRate, targetPitch - t.pitch));
                 let b = t.rules.speed;
                 (n <= C.Coords.LEPTONS_PER_TILE &&
                   this.maneuverType !== B.CircleStrafe &&

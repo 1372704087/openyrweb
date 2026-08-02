@@ -116,6 +116,11 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.revealOnFire = this.rules.getBool("RevealOnFire", !0)),
               (this.rof = this.rules.getNumber("ROF")),
               (this.sabotageCursor = this.rules.getBool("SabotageCursor")),
+              // OpenYRWeb: MigAttackCursor=yes marks Boris's Flare weapon. When this weapon
+              // targets a building, the cursor changes to AirStrike and an AirstrikeAttackTask
+              // is created instead of a normal AttackTask. Vanilla YR uses this flag on Boris's
+              // secondary weapon to trigger MiG airstrike calls.
+              (this.migAttackCursor = this.rules.getBool("MigAttackCursor")),
               (this.spawner = this.rules.getBool("Spawner")));
             var e = this.rules.getNumber("Speed");
             ((this.iniSpeed = e),

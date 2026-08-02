@@ -684,3 +684,69 @@ feat(dominator): 实现心灵控制器完整动画序列、红色光效与音效
 4. 验证 `PsychicDominatorActivateSound` 在 rules 中配置后正常播放。  
 5. 测试 EVA 语音在检测/准备/激活三种场景下正确触发。  
 6. `DominatorFirstAnim` 为空或缺失时的降级处理。
+
+feat(boris): 实现鲍里斯激光指示器与 MiG 空中打击完整功能
+
+- 🎯 **AirstrikeTrait 空中打击状态机（新增）**  
+  管理 Boris 空袭的完整生命周期：`execute()` 在地图边缘生成 MiG 编队，`changeTarget()` 重定向未投弹飞机，`spawnMiGs()` 创建飞机并附加清理特性。支持普通/精英等级独立配置（`AirstrikeTeam`/`EliteAirstrikeTeam`、`AirstrikeRechargeTime`/`EliteAirstrikeRechargeTime`）。引导中断时自动召回或重定向。
+
+- 🛩️ **AirstrikeAttackTask 信号弹发射任务（新增）**  
+  处理 Boris 进入射程并发射信号弹的过程：使用 `MoveInWeaponRangeTask` 移动到射程边缘，进入射程后调用 `airstrikeTrait.update()` 并播放 "MiG's on the way" 语音。检测 `MigAttackCursor` 武器标记，与 `AttackOrder` 集成。
+
+- 🎨 **AirstrikeLaserPlugin 激光指引插件（新增）**  
+  从 Boris 到目标建筑渲染持续红色激光束。使用 `SecondaryFireFLH`（回退 `PrimaryFireFLH`/胸部高度）计算源位置，目标位置为建筑世界坐标 + 垂直偏移 50。每帧更新光束位置，目标被摧毁或引导中断时自动隐藏。
+
+- ✨ **DesignatorLaserFx 激光束特效（新增）**  
+  使用 `three.meshline` 渲染动态激光束，包含：椭圆摆动（3 秒周期）、微震颤（多重正弦波手抖效果）、亮度闪烁（2Hz，RGB 190→255 振荡）、目标点抖动合成。`additive` 混合模式实现发光效果。
+
+- 🛩️ **WingedLocomotor 飞行物理增强**  
+  - 倾斜转弯：根据转弯幅度动态计算目标 Roll 角（最大 29.75°），平滑逼近。  
+  - 机翼摇摆：持续微小震荡（`sin(frame%20 × 0.314) × 1.5`）。  
+  - 俯仰控制：根据垂直速度计算俯仰角，受 `PitchAngle` 限制，平滑过渡。  
+  - 修复 `PitchAngle` 读取（此前错误从 `PitchSpeed` 推导）。
+
+- 🛩️ **MoveInWeaponRangeTask Z 字形扫射路径**  
+  战斗机进近时使用正弦波横向摆动，幅度随距离递减。每架飞机有独立随机偏移和相位。新增 `completeRun()` 方法：投弹后重定向到出口瓦片或目标后方返回点，移动中转弯不悬停。
+
+- 🔫 **武器系统 Burst 连射修复**  
+  战斗机不再强制单发，遵循配置的 `Burst` 值（如 MiG 的 2 发 Maverick3）。突发射击之间无延迟（`cooldownTicks = 0`），ROF 仅在所有弹发射后应用，实现快速连射。
+
+- 🎨 **建筑红色脉冲标记**  
+  被激光标记的建筑应用红色脉冲效果：`InvulnerableAnimRunner` 控制亮度（周期 6 秒），`vxlExtraLight`/`shpExtraLight` 向红色 `(255,0,0)` 插值 40%，持续闪烁直到打击结束。
+
+- ⚙️ **规则配置扩展**  
+  | 规则文件 | 新增字段 | 描述 |
+  |----------|----------|------|
+  | `TechnoRules` | `AirstrikeTeam`/`EliteAirstrikeTeam` | 普通/精英 MiG 数量 |
+  | `TechnoRules` | `AirstrikeTeamType`/`EliteAirstrikeTeamType` | 普通/精英飞机类型 |
+  | `TechnoRules` | `AirstrikeRechargeTime`/`EliteAirstrikeRechargeTime` | 普通/精英冷却时间 |
+  | `WeaponRules` | `MigAttackCursor` | 标记 Flare 武器，触发空袭任务 |
+  | `WarheadRules` | `Airstrike` | 标记触发空袭的弹头 |
+  | `AudioVisualRules` | `AirstrikeAttackVoice`/`AirstrikeTargetAcquiredSound`/`AirstrikeDeathSound`/`AirstrikeAbortSound` | 空袭音效 |
+
+- 🎬 **Infantry 渲染增强**  
+  Boris 发射信号弹时播放 `SecondaryFire` 动画（`SequenceType.SecondaryFire`），替代默认攻击动画。
+
+- 🐛 **关键 Bug 修复**  
+  - `TileCollection` 负坐标边界检查：负坐标不再 wrap 到正索引，防止飞机从左侧出界时瞬移到右侧。  
+  - `ProductionTrait` 区分生产/召唤飞机：召唤飞机（airstrike MiGs、空投等）不占用空军指挥中心容量。  
+  - `FactoryTrait` 标记工厂生产的飞机（`isProducedAircraft = true`）。  
+  - `AttackTask` 战斗机投弹后调用 `completeRun()` 完成扫射而非立即取消移动；目标被摧毁时立即取消攻击。
+
+- 🖱️ **AttackOrder 集成**  
+  检测 `MigAttackCursor` 和 `AirstrikeTrait`，创建 `AirstrikeAttackTask`，显示 `AirStrike` 鼠标指针。新增 `selectAirstrikeWeapon()` 方法选择信号弹武器。
+
+### ⚠️ 破坏性变更
+- 战斗机 `Burst` 行为变更：从强制单发改为遵循配置值，可能影响平衡性。  
+- `PitchAngle` 读取方式修正：此前 `PitchSpeed >= 1` 导致 `PitchAngle=0` 的飞机错误应用俯仰，现已修复。  
+- 负坐标边界检查可能暴露边缘飞行 Bug，需测试地图边缘飞机行为。
+
+### 🧪 测试建议
+1. Boris 攻击建筑：激光出现 → MiG 从边缘生成 → Z 字形扫射 → 投弹后撤离。  
+2. Boris 在射程外攻击：步行进入射程后再发射信号弹。  
+3. Boris 移动/死亡：激光中断，MiG 返回或被召回。  
+4. 切换目标：未投弹 MiG 重定向，已投弹 MiG 继续撤离。  
+5. 精英 Boris：使用 `EliteAirstrikeTeam` 配置（数量/冷却/飞机类型）。  
+6. 多架 MiG 同时扫射：性能稳定，路径不重叠。  
+7. 地图边缘目标：出生点和退出点正确计算。  
+8. 目标被摧毁：MiG 立即飞向出口。

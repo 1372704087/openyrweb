@@ -296,6 +296,12 @@ System.register(
               var s = r.getFirstAvailableDockNumber();
               if (void 0 === s) return !1;
               let a = i.createUnitForPlayer(t.rules, e.owner);
+              /* OpenYRWeb: mark aircraft that leave the production queue so the
+                 aircraft production capacity (updateAircraftQueueMaxSize) can
+                 tell "produced" aircraft from "summoned" ones (airstrike MiGs,
+                 paradrop planes, carrier planes). Even a Spawned=yes type built
+                 via cheats counts, because it really came out of the factory. */
+              a.isProducedAircraft = !0;
               t.rules.trainable &&
                 e.owner.canProduceVeteran(a.rules) &&
                 a.veteranTrait?.setVeteranLevel(T.VeteranLevel.Veteran);

@@ -195,6 +195,12 @@ System.register(
                   (this.repairStartRequested = !1),
                   (this.highlightAnimRunner = new k.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new B.InvulnerableAnimRunner(this.gameSpeed)),
+                  // OpenYRWeb: laser-target red pulse runner — mirrors the Force
+                  // Shield pulse. Produces a sine value in [-0.5, -0.1] which is
+                  // used to modulate brightness; the red tint is lerped on top.
+                  // steps=60, rate=10 → 60 frames per cycle at 10 fps = 6s period.
+                  (this.laserTargetAnimRunner = new B.InvulnerableAnimRunner(this.gameSpeed, -0.5, -0.1, 60, 10)),
+                  (this._wasLaserTarget = !1),
                   // OpenYRWeb: must init lastInvulnerable=false to prevent false "invuln ended" flash on newly constructed buildings (undefined !== false triggers t=true).
                   (this.lastInvulnerable = !1),
                   (this._fsEndFlashEndTimer = 0),
@@ -462,6 +468,29 @@ System.register(
                       this.gameObject.invulnerableTrait.isForceShieldActive() &&
                         (this.vxlExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2),
                         this.shpExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2))));
+                  // OpenYRWeb: red pulsing tint while being laser-designated by a
+                  // Boris airstrike. Mirrors the Force Shield pulse: the runner's
+                  // sine value darkens/brightens the building, then a red tint is
+                  // lerped on top so the building visibly pulses red.
+                  if (this.gameObject.airstrikeLaserTarget) {
+                    if (!this._wasLaserTarget) {
+                      this._wasLaserTarget = !0;
+                      this.laserTargetAnimRunner.animate();
+                    }
+                    this.laserTargetAnimRunner.shouldUpdate() && this.laserTargetAnimRunner.tick(i);
+                    var _lV = this.laserTargetAnimRunner.getValue();
+                    var _lAmb = this.lighting.getAmbientIntensity();
+                    x.ExtraLightHelper.multiplyVxl(this.vxlExtraLight, this.baseVxlExtraLight, _lAmb, _lV);
+                    x.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, _lV);
+                    this.vxlExtraLight.lerp(new THREE.Vector3(255, 0, 0), 0.4);
+                    this.shpExtraLight.lerp(new THREE.Vector3(255, 0, 0), 0.4);
+                  } else if (this._wasLaserTarget) {
+                    // Laser target just cleared — restore the base extra light
+                    // so the building returns to its normal color.
+                    this._wasLaserTarget = !1;
+                    this.vxlExtraLight.copy(this.baseVxlExtraLight);
+                    this.shpExtraLight.copy(this.baseShpExtraLight);
+                  } else this._wasLaserTarget = !1;
                   var a,
                     n = this.gameObject.warpedOutTrait.isActive();
                   if (n !== this.lastWarpedOut) {

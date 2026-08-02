@@ -51,6 +51,7 @@ System.register(
     "game/gameobject/trait/DrainTrait",
     "game/gameobject/trait/SlaveMinerVehicleTrait",
     "game/gameobject/trait/BerserkTrait",
+    "game/gameobject/trait/AirstrikeTrait",
   ],
   function (e, t) {
     "use strict";
@@ -100,7 +101,8 @@ System.register(
       BP,
       DT,
       SV,
-      BK;
+      BK,
+      AST;
     t && t.id;
     return {
       setters: [
@@ -241,6 +243,9 @@ System.register(
         },
         function (e) {
           BK = e;
+        },
+        function (e) {
+          AST = e;
         },
       ],
       execute: function () {
@@ -395,6 +400,11 @@ System.register(
                     }
                   })([n.primaryWeapon, n.secondaryWeapon].find((e) => e?.warhead.rules.mindControl)),
                   n.rules.spawns && ((n.airSpawnTrait = new V.AirSpawnTrait()), n.traits.add(n.airSpawnTrait)),
+                  // OpenYRWeb: AirstrikeTrait — attached to units with AirstrikeTeam > 0 (vanilla
+                  // Boris). Manages MiG plane spawning, laser designator state, and airstrike
+                  // cooldown. Boris calls MiGs via his secondary weapon (Flare) on buildings.
+                  n.rules.airstrikeTeam > 0 && n.rules.airstrikeTeamType &&
+                    ((n.airstrikeTrait = new AST.AirstrikeTrait()), n.traits.add(n.airstrikeTrait)),
                   n.rules.maxDebris && n.traits.add(new W.SpawnDebrisTrait()),
                   // OpenYRWeb: BerserkTrait — attached to all techno units so they can
                   // be affected by Psychedelic=yes warheads (Chaos Drone gas).

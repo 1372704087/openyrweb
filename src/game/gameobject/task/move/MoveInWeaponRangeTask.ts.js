@@ -80,6 +80,10 @@ System.register(
                 (this.weapon = r),
                 (this.recalcMinRange = !0),
                 (this.cancelRequested = !1),
+                // OpenYRWeb: set when the plane has fired its last weapon — the
+                // endless fighter strafing retarget is stopped so the current
+                // pass can finish and the run completes on its own.
+                (this.runCompleted = !1),
                 (this.bomberInitialLock = !1),
                 (this.rangeHelper = new s.RangeHelper(e.map.tileOccupation)),
                 (this.losHelper = new a.LosHelper(e.map.tiles, e.map.tileOccupation)));
@@ -183,6 +187,13 @@ System.register(
               return e.getNextTile();
             }
             hasReachedDestination(e) {
+              // OpenYRWeb: a fighter still weaving toward its target (bombs not yet
+              // dropped) must not "arrive" mid-run — if the move child finishes
+              // early, the AttackTask's ammo=0 path has no move task to redirect
+              // (a is null), so the plane would return to the exit in a straight
+              // line instead of the weave-back. Once the run completes, normal
+              // arrival applies so fighters can finish and return to base.
+              if (this.shouldAirStrafe(e) && !this.runCompleted && (e.ammo || 0) > 0) return !1;
               return super.hasReachedDestination(e) || this.canStopAtTile(e, e.tile, e.onBridge);
             }
             canStopAtTile(t, e, i) {
@@ -210,6 +221,11 @@ System.register(
               );
             }
             isCloseEnoughToDest(e, t) {
+              // OpenYRWeb: the fighter's run is over (it already fired) — it only
+              // needs to reach its destination tile; weapon-range checks no longer
+              // apply. Bombers keep their own bombing-run logic.
+              if (this.runCompleted && !this.isBombingRun(e))
+                return this.rangeHelper.tileDistance(t, this.targetTile) <= 1;
               if (e.rules.balloonHover && !e.rules.hoverAttack) {
                 // OpenYRWeb: Use pure tile distance (not isInWeaponRange) for balloonHover
                 // units. Tile distance is simple Euclidean distance between tile centers,
@@ -287,6 +303,48 @@ System.register(
                 this.options ?? (this.options = {}),
                 (this.options.pathFinderIgnoredBlockers = e instanceof n.GameObject ? [e] : void 0));
             }
+            completeRun(e, target, exitTile) {
+              // OpenYRWeb: the fighter already fired its weapon mid-run. Stop the endless
+              // strafing retarget and turn toward the plane's next destination WHILE still
+              // moving (the WingedLocomotor banks at speed), so it does not decelerate to a
+              // stop right after firing and then make an abrupt turn:
+              //  - airstrike MiGs are redirected to their exit tile and fly straight off;
+              //  - other fighters bank around to a point behind the target and head back.
+              if (this.runCompleted) return;
+              (this.runCompleted = !0);
+              // Suppress the min-range relocation on the next tick — it would otherwise
+              // re-aim the plane back into weapon range, undoing the exit/return redirect.
+              this.recalcMinRange = !1;
+              // Fighter with a bombing-style weapon (projectile ROT<=1) manages its own
+              // bombing-run maneuver — leave its destination alone.
+              if (this.isBombingRun(e)) return;
+              this.options = this.options || {};
+              if (exitTile) {
+                this.options.allowOutOfBoundsTarget = !0;
+                this.updateTarget(exitTile, !1);
+                return;
+              }
+              let a = target instanceof n.GameObject ? (target.isBuilding() ? target.centerTile : target.tile) : target,
+                t = e.position.getMapPosition(),
+                dir = new m.Vector2(a.rx + 0.5, a.ry + 0.5)
+                  .clone()
+                  .multiplyScalar(o.Coords.LEPTONS_PER_TILE)
+                  .sub(t),
+                len = dir.length();
+              // Point just behind the target (opposite the direction of travel): the plane
+              // banks around it at speed and heads back towards its base.
+              if (len) dir.setLength(o.Coords.LEPTONS_PER_TILE);
+              else dir.copy(p.FacingUtil.toMapCoords(e.direction)).multiplyScalar(-o.Coords.LEPTONS_PER_TILE);
+              let dest = new m.Vector2(a.rx + 0.5, a.ry + 0.5)
+                  .clone()
+                  .multiplyScalar(o.Coords.LEPTONS_PER_TILE)
+                  .sub(dir),
+                size = this.game.map.tiles.getMapSize();
+              dest.x = Math.max(0, Math.min(Math.floor(dest.x / o.Coords.LEPTONS_PER_TILE), size.width - 1));
+              dest.y = Math.max(0, Math.min(Math.floor(dest.y / o.Coords.LEPTONS_PER_TILE), size.height - 1));
+              let tile = this.game.map.tiles.getByMapCoords(dest.x, dest.y) ?? this.game.map.tiles.getPlaceholderTile(dest.x, dest.y);
+              this.updateTarget(tile, !1);
+            }
             onTick(s) {
               if (this.recalcMinRange) {
                 this.recalcMinRange = !1;
@@ -296,23 +354,65 @@ System.register(
                   this.updateTarget(e, !!e.onBridgeLandType);
                 }
               }
+              // OpenYRWeb: vanilla-style weaving approach — the plane does not fly
+              // a single straight line at the target. Its destination is the
+              // target point plus a lateral (perpendicular) sine-wave offset whose
+              // amplitude shrinks as the plane closes in, so the approach weaves
+              // like a Z-wave — repeatedly adjusting direction, banking side to
+              // side — and homes in on the target without circling. After the
+              // bombs drop the plane returns STRAIGHT to the exit behind the base.
+              if (this.shouldAirStrafe(s) && !this.isCancelling() && !this.runCompleted && (s.ammo || 0) > 0) {
+                var strafeTarget =
+                  this.target instanceof n.GameObject
+                    ? this.target.isBuilding()
+                      ? this.target.centerTile
+                      : this.target.tile
+                    : this.target;
+                var planePos = s.position.getMapPosition();
+                var tgtPos = new m.Vector2(
+                  (strafeTarget.rx + 0.5) * o.Coords.LEPTONS_PER_TILE,
+                  (strafeTarget.ry + 0.5) * o.Coords.LEPTONS_PER_TILE,
+                );
+                // Each plane aims at its own point near the target — a per-plane
+                // random lateral offset and its own random weave phase — so a
+                // two-plane strike does not converge onto the same spot and fly in
+                // formation; each MiG approaches the building from its own side.
+                if (void 0 === this._strafeTargetOffset) {
+                  var offsetAngle = Math.random() * Math.PI * 2;
+                  var offsetDist = (1 + Math.random() * 2) * o.Coords.LEPTONS_PER_TILE;
+                  this._strafeTargetOffset = new m.Vector2(Math.cos(offsetAngle), Math.sin(offsetAngle)).multiplyScalar(
+                    offsetDist,
+                  );
+                  this._strafePhase = Math.random() * Math.PI * 2;
+                }
+                var weaveCenter = tgtPos.clone().add(this._strafeTargetOffset);
+                var weaveDiff = weaveCenter.sub(planePos);
+                var weaveDist = weaveDiff.length();
+                if (1 < weaveDist) {
+                  this._strafePhase += 0.08;
+                  var weaveLateral = new m.Vector2(-weaveDiff.y, weaveDiff.x)
+                    .normalize()
+                    .multiplyScalar(
+                      Math.sin(this._strafePhase) *
+                        Math.min(2.5, weaveDist * 0.35) *
+                        o.Coords.LEPTONS_PER_TILE,
+                    );
+                  var weaveDest = tgtPos.clone().add(this._strafeTargetOffset).add(weaveLateral);
+                  var weaveTile =
+                    this.game.map.tiles.getByMapCoords(
+                      Math.floor(weaveDest.x / o.Coords.LEPTONS_PER_TILE),
+                      Math.floor(weaveDest.y / o.Coords.LEPTONS_PER_TILE),
+                    ) || strafeTarget;
+                  this.updateTarget(weaveTile, !1);
+                } else {
+                  this.updateTarget(strafeTarget, !1);
+                }
+              }
               if (
-                (this.shouldAirStrafe(s) &&
-                  !this.isCancelling() &&
-                  (this.updateTarget(
-                    this.target instanceof n.GameObject
-                      ? this.target.isBuilding()
-                        ? this.target.centerTile
-                        : this.target.tile
-                      : this.target,
-                    !1,
-                  ),
-                  !this.isAirStrafeCloseEnough(s) ||
-                    ((a = this.findStrafeDestination(s, this.targetTile)) && this.updateTarget(a, !1))),
                 this.isBombingRun(s) &&
                   !this.isCancelling() &&
                   (!s.ammo || this.weapon.getBurstsFired() || this.bomberInitialLock) &&
-                  !this.bomberManeuverTile)
+                  !this.bomberManeuverTile
               ) {
                 this.bomberInitialLock = !1;
                 let e = s.position.getMapPosition();

@@ -337,8 +337,20 @@ System.register(
                 (this.reselectIfLimboed = this.ini.getBool("ReselectIfLimboed")),
                 (this.rejoinTeamIfLimboed = this.ini.getBool("RejoinTeamIfLimboed")),
                 (this.weight = this.ini.getNumber("Weight")),
-                (this.accelerates = this.ini.getBool("Accelerates", !0)),
+                (this.accelerates = this.ini.getBool("Accelerates")),
                 (this.accelerationFactor = this.ini.getNumber("AccelerationFactor", 0.03)),
+                // OpenYRWeb: Boris airstrike team parameters (vanilla YR). When Boris uses
+                // his secondary weapon (Flare) on a building, MiG planes are summoned from the
+                // map edge to bomb the target. AirstrikeTeam/EliteAirstrikeTeam control how many
+                // planes; AirstrikeTeamType/EliteAirstrikeTeamType specify the aircraft type;
+                // AirstrikeRechargeTime/EliteAirstrikeRechargeTime are cooldown ticks after the
+                // airstrike completes before Boris can call another one.
+                (this.airstrikeTeam = this.ini.getNumber("AirstrikeTeam", 0)),
+                (this.eliteAirstrikeTeam = this.ini.getNumber("EliteAirstrikeTeam", 0)),
+                (this.airstrikeTeamType = this.ini.getString("AirstrikeTeamType") || void 0),
+                (this.eliteAirstrikeTeamType = this.ini.getString("EliteAirstrikeTeamType") || void 0),
+                (this.airstrikeRechargeTime = this.ini.getNumber("AirstrikeRechargeTime", 100)),
+                (this.eliteAirstrikeRechargeTime = this.ini.getNumber("EliteAirstrikeRechargeTime", 50)),
                 (this.teleporter = this.ini.getBool("Teleporter")),
                 (this.canDisguise = this.ini.getBool("CanDisguise")),
                 (this.disguiseWhenStill = this.ini.getBool("DisguiseWhenStill")),
@@ -424,7 +436,10 @@ System.register(
                 (this.jumpjetTurnRate = g.ObjectRules.iniRotToDegsPerTick(this.ini.getNumber("JumpJetTurnRate", 4))),
                 (this.jumpjetWobbles = this.ini.getNumber("JumpjetWobbles", 0.15)),
                 (this.pitchSpeed = this.ini.getNumber("PitchSpeed", 0.25)),
-                (this.pitchAngle = 1 <= this.pitchSpeed ? 0 : 20),
+                // OpenYRWeb: PitchAngle is read straight from INI (vanilla default 20).
+                // It used to be derived from PitchSpeed (`PitchSpeed >= 1 → 0`), which
+                // wrongly zeroed it for fighters like the Black Eagle (PitchSpeed=1.1).
+                (this.pitchAngle = this.ini.getNumber("PitchAngle", 20)),
                 (this.damageParticleSystems = this.ini.getArray("DamageParticleSystems")));
               i = this.ini.getNumberArray("DamageSmokeOffset", void 0, [0, 0, 0]);
               ((this.damageSmokeOffset = new y.Vector3(i[0], i[2] / Math.SQRT2, i[1])),

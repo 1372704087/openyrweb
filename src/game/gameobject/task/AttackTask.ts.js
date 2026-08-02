@@ -211,7 +211,7 @@ System.register(
                     t.isUnit() &&
                     t.rules.movementZone === O.MovementZone.Fly &&
                     t.zone !== x.ZoneType.Air &&
-                    (t.rules.hoverAttack || t.isAircraft()) &&
+                    (t.rules.hoverAttack || (t.isAircraft() && !t.rules.fighter)) &&
                     this.children.push(new A.MoveTask(this.game, t.tile, !1).setCancellable(!1)));
               } else this.cancel();
             }
@@ -357,7 +357,20 @@ System.register(
                   this.weapon.rules.spawner && (r.isVehicle() || r.isAircraft()) && r.parasiteableTrait?.isParalyzed())
                 )
                   return !0;
-                if (0 === r.ammo) return (r.isAircraft() && (r.rules.fighter || r.rules.spawned) && a?.cancel(), !0);
+                if (0 === r.ammo) {
+                  // OpenYRWeb: fighter fired its last weapon while still on its strafing
+                  // run — do NOT cancel the move task here (that stops the aircraft dead
+                  // in the air: it hovers, then turns around). Instead finish the pass:
+                  // completeRun redirects the run to fly past the target; the TaskRunner
+                  // keeps this attack task alive until the move task completes on its own.
+                  // Non-fighter aircraft keep the vanilla deferred cancel (bombers fly
+                  // their maneuver tile before cancelling).
+                  if (r.rules.fighter && a) {
+                    a.completeRun(r, this.target.obj ?? this.target.tile, this.options.airstrikeExitTile);
+                    return !0;
+                  }
+                  return (a?.cancel(), !0);
+                }
                 let i = !1;
                 if (this.weapon.rules.limboLaunch) {
                   let t = a;
@@ -419,6 +432,12 @@ System.register(
                   (this.target = l),
                   (t = t.replacedBy),
                   this.onTargetChange(r)));
+              // OpenYRWeb: the target was destroyed mid-approach — stop chasing its
+              // old position (previously the plane flew all the way to the destroyed
+              // building and only turned around after reaching it). Abort the attack
+              // so the unit moves on (airstrike planes then head straight for their
+              // random exit).
+              if (t && t.isDestroyed) return (this.cancel(), this.onTick(r));
               let i = this.game.isValidTarget(t) && !this.shouldDropTarget(t);
               if (i && !magDragging) {
                 // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
@@ -493,7 +512,7 @@ System.register(
                     !a &&
                     r.tile !== c &&
                     !this.options.holdGround) ||
-                  (r.isAircraft() && this.weapon.projectileRules.iniRot <= 1 && !a)
+                  (r.isAircraft() && !a && (this.weapon.projectileRules.iniRot <= 1 || r.rules.fighter))
                 ) {
                   if (r.isUnit() && !this.options.holdGround && this.game.map.isWithinBounds(c)) {
                     if (a) {

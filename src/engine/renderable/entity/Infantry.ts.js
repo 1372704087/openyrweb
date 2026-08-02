@@ -441,6 +441,13 @@ System.register(
                 this.posWrap.add(this.deadBodyAnimRenderable.get3DObject()));
             }
             findSequenceBy(e, t, i, r, s) {
+              // Boris firing his secondary weapon (the Flare, which calls the
+              // airstrike) uses the dedicated SecondaryFire hand-raise sequence
+              // from artmd.ini (e.g. "SecondaryFire=401,1,1") instead of the
+              // generic primary FireUp.
+              if (r && this.gameObject.isFiringSecondary && this.objectArt.sequences.has(S.SequenceType.SecondaryFire)) {
+                return S.SequenceType.SecondaryFire;
+              }
               var a = T.findSequence(e, t, i, r, s, [...this.objectArt.sequences.keys()]);
               if (void 0 !== a) return a;
               console.warn(

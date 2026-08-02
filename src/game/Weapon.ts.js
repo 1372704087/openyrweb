@@ -19,7 +19,7 @@ System.register(
   ],
   function (e, t) {
     "use strict";
-    var h, u, d, g, i, p, a, m, r, f, y, s, T, v, b, S;
+    var h, u, d, g, i, p, a, m, r, f, y, s, S;
     t && t.id;
     return {
       setters: [
@@ -59,9 +59,6 @@ System.register(
       ],
       execute: function () {
         ((s = 50),
-          (T = 5),
-          (v = 2),
-          (b = 1),
           e(
             "Weapon",
             (S = class S {
@@ -187,16 +184,21 @@ System.register(
                       (this.burstIndex = 0),
                       t
                         ? (this.burstsLeft = o)
+                        // OpenYRWeb: aircraft honour the config Burst too (vanilla YR).
+                        // This used to be hardcoded per category (fighter=1 shot), which
+                        // made the MiG fire only one of its two Maverick3 missiles.
                         : this.gameObject.isAircraft()
-                          ? (this.burstsLeft =
-                              this.projectileRules.iniRot <= 1 ? T - 1 : this.gameObject.rules.fighter ? b - 1 : v - 1)
+                          ? (this.burstsLeft = this.rules.burst - 1)
                           : ((this.burstsLeft = this.rules.burst - 1), (this.useBurstDelay = !0)),
                       (this.lateralMuzzleMult = 1)),
                     0 < this.burstsLeft &&
                       (t && 0 < o
                         ? (this.cooldownTicks = this.rules.iniSpeed)
                         : this.gameObject.isAircraft()
-                          ? (this.cooldownTicks = this.rules.rof)
+                          ? // OpenYRWeb: aircraft burst shots fire back-to-back (a volley,
+                            // one per tick) instead of waiting a full ROF between missiles.
+                            // The ROF still applies after the volley (resetBursts).
+                            (this.cooldownTicks = 0)
                           : (this.cooldownTicks =
                               this.useBurstDelay && void 0 !== this.gameObject.rules.burstDelay[this.burstIndex]
                                 ? this.gameObject.rules.burstDelay[this.burstIndex]

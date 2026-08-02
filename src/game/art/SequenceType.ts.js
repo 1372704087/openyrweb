@@ -46,7 +46,8 @@ System.register("game/art/SequenceType", [], function (t, e) {
         (e[(e.Cheer = 33)] = "Cheer"),
         (e[(e.Panic = 34)] = "Panic"),
         (e[(e.Shovel = 35)] = "Shovel"),
-        (e[(e.Carry = 36)] = "Carry"));
+        (e[(e.Carry = 36)] = "Carry"),
+        (e[(e.SecondaryFire = 37)] = "SecondaryFire"));
     },
   };
 });

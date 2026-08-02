@@ -155,8 +155,14 @@ System.register(
                     .filter((e) => e.helipadTrait)
                     .reduce((e, t) => e + t.dockTrait.numberOfDocks, 0),
                   t = i.getOwnedObjectsByType(g.ObjectType.Aircraft, !0);
-                /* OpenYRWeb: count all owned aircraft. */
-                var n = t.length;
+                /* OpenYRWeb: count owned aircraft that consume Airforce Command
+                   production capacity: anything that came out of the factory
+                   (isProducedAircraft — this includes Spawned=yes types built
+                   via cheats), plus non-spawned types (e.g. starting aircraft).
+                   Summoned planes (airstrike MiGs, paradrop planes, carrier
+                   planes) are Spawned=yes and were never produced, so they must
+                   not consume the aircraft production capacity. */
+                var n = t.filter((e) => e.isProducedAircraft || !e.rules.spawned).length;
                 /* OpenYRWeb: set _maxSize directly to avoid the setter's
                    side-effect of truncating the items array. Do NOT touch
                    q.size — push/remove manage it. */

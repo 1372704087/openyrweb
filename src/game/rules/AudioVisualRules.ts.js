@@ -80,6 +80,15 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               // OpenYRWeb (2026-07-25): Force Shield invulnerability color (palette index).
               // Vanilla YR [AudioVisual] ForceShieldColor=6 (blue/cyan tint).
               (this.forceShieldColor = e.getNumber("ForceShieldColor", 6)),
+              // OpenYRWeb: Boris airstrike voice lines (vanilla YR [AudioVisual]).
+              // AirstrikeAttackVoice — "MiG's on the way" (when MiGs spawn; Boris's line).
+              // AirstrikeTargetAcquiredSound — "Target acquired!" (when a MiG opens fire).
+              // AirstrikeDeathSound — "I'm going down!" / "I won't make it!" (shot down).
+              // AirstrikeAbortSound — "Mission Aborted" (airstrike interrupted/cancelled).
+              (this.airstrikeAttackVoice = e.getString("AirstrikeAttackVoice") || void 0),
+              (this.airstrikeTargetAcquiredSound = e.getString("AirstrikeTargetAcquiredSound") || void 0),
+              (this.airstrikeDeathSound = e.getString("AirstrikeDeathSound") || void 0),
+              (this.airstrikeAbortSound = e.getString("AirstrikeAbortSound") || void 0),
               (this.messageDuration = e.getNumber("MessageDuration", 10)),
               (this.metallicDebris = e.getArray("MetallicDebris")),
               (this.nukeTakeOff = e.getString("NukeTakeOff")),

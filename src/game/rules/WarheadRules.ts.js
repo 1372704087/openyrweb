@@ -67,7 +67,12 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
             (e.forEach((e, t) => this.verses.set(t, e)),
               (this.wallAbsoluteDestroyer = this.rules.getBool("WallAbsoluteDestroyer")),
               (this.wall = this.rules.getBool("Wall")),
-              (this.wood = this.rules.getBool("Wood")));
+              (this.wood = this.rules.getBool("Wood")),
+              // OpenYRWeb: Airstrike=yes marks the warhead used by Boris's Flare weapon
+              // (AirstrikeFlare). When this warhead hits a building, it triggers the MiG
+              // airstrike sequence instead of dealing normal damage. Vanilla YR uses this
+              // flag on Boris's secondary weapon (Flare → Warhead=AirstrikeFlare).
+              (this.airstrike = this.rules.getBool("Airstrike")));
           }
         }),
       );

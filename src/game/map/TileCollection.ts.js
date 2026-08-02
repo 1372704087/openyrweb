@@ -187,12 +187,19 @@ System.register(
                 }
               }
               getByDisplayCoords(e, t) {
-                if (!(e >= this.dSize.width || t >= this.dSize.height))
-                  return this.tilesByDxy[e + t * this.dSize.width];
+                if (e < 0 || t < 0 || e >= this.dSize.width || t >= this.dSize.height)
+                  return void 0;
+                return this.tilesByDxy[e + t * this.dSize.width];
               }
               getByMapCoords(e, t) {
-                if (!(e >= this.rSize.width || t >= this.rSize.height))
-                  return this.tilesByRxy[e + t * this.rSize.width];
+                // Negative coordinates must return undefined — the flat array index
+                // e + t*width would otherwise wrap a negative rx into a *positive*
+                // index pointing at a real tile on the opposite map edge (a plane
+                // flying off the left edge would teleport to the right edge and
+                // never register as out-of-bounds).
+                if (e < 0 || t < 0 || e >= this.rSize.width || t >= this.rSize.height)
+                  return void 0;
+                return this.tilesByRxy[e + t * this.rSize.width];
               }
               getMapSize() {
                 return this.rSize;

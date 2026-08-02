@@ -1,6 +1,5 @@
 // === Reconstructed SystemJS module: game/order/AttackOrder ===
-// deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/gameobject/task/AttackTask","game/gameobject/unit/RangeHelper","game/order/OrderFeedbackType","game/gameobject/unit/LosHelper","game/type/ArmorType","game/gameobject/task/PlantC4Task","game/gameobject/unit/ZoneType","game/gameobject/task/move/MoveTask","game/type/MovementZone","game/type/LocomotorType"]
-// Note: variable/type names are minified approximations of the original TypeScript.
+// deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/gameobject/task/AttackTask","game/gameobject/unit/RangeHelper","game/order/OrderFeedbackType","game/gameobject/unit/LosHelper","game/type/ArmorType","game/gameobject/task/PlantC4Task","game/gameobject/unit/ZoneType","game/gameobject/task/move/MoveTask","game/type/MovementZone","game/type/LocomotorType","game/gameobject/task/AirstrikeAttackTask"]
 
 System.register(
   "game/order/AttackOrder",
@@ -18,10 +17,11 @@ System.register(
     "game/gameobject/task/move/MoveTask",
     "game/type/MovementZone",
     "game/type/LocomotorType",
+    "game/gameobject/task/AirstrikeAttackTask",
   ],
   function (e, t) {
     "use strict";
-    var i, r, s, a, n, o, l, c, h, u, d, g, p, m;
+    var i, r, s, a, n, o, l, c, h, u, d, g, p, m, AST;
     t && t.id;
     return {
       setters: [
@@ -64,6 +64,9 @@ System.register(
         function (e) {
           p = e;
         },
+        function (e) {
+          AST = e;
+        },
       ],
       execute: function () {
         ((m = class extends i.Order {
@@ -81,12 +84,16 @@ System.register(
           getPointerType(e, t) {
             if (!this.isAllowed()) return e ? s.PointerType.NoActionMini : s.PointerType.NoAction;
             if (this.isC4) return s.PointerType.C4;
-            var i = this.sourceObject.attackTrait?.selectWeaponVersus(
+            // OpenYRWeb: Boris airstrike cursor — when the selected weapon has MigAttackCursor=yes
+            // and the target is a building (valid airstrike target), show the AirStrike pointer.
+            var i = this.selectAirstrikeWeapon(this.sourceObject, this.target);
+            if (!i) i = this.sourceObject.attackTrait?.selectWeaponVersus(
               this.sourceObject,
               this.target,
               this.game,
               this.forceAttack,
             );
+            if (i?.rules.migAttackCursor && this.target.obj?.isBuilding()) return s.PointerType.AirStrike;
             if (i?.rules.sabotageCursor) return s.PointerType.C4;
             if (this.ivanBombAllowed && this.sourceObject.rules.ivan && i?.warhead.rules.ivanBomb)
               return s.PointerType.Dynamite;
@@ -133,6 +140,20 @@ System.register(
             ))
               return !1;
             if (e === this.sourceObject) return !1;
+            // OpenYRWeb: Boris airstrike — check if the unit has AirstrikeTrait and the target
+            // is a building. If so, check if the airstrike is ready (cooldown, etc.).
+            var airstrikeWeapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
+            if (airstrikeWeapon && e?.isBuilding() && this.sourceObject.airstrikeTrait) {
+              // OpenYRWeb: the airstrike is for enemy buildings — friendly buildings can
+              // only be targeted with a force-attack (Ctrl), while bridge repair huts
+              // (cab huts) are never targetable, matching the normal weapon behaviour.
+              if (e.cabHutTrait || (!this.forceAttack && this.game.areFriendly(e, this.sourceObject))) return false;
+              if (!this.sourceObject.airstrikeTrait.isReady(this.sourceObject)) return false;
+              // No voice at order time — the airstrike voice plays when the MiGs
+              // spawn (see AirstrikeTrait.spawnMiGs), matching vanilla YR.
+              this.feedbackType = o.OrderFeedbackType.None;
+              return true;
+            }
             t = this.sourceObject.attackTrait.selectWeaponVersus(
               this.sourceObject,
               this.target,
@@ -178,6 +199,15 @@ System.register(
           }
           process() {
             if (this.isC4) return [new h.PlantC4Task(this.game, this.target.obj)];
+            // OpenYRWeb: Boris airstrike — if the unit has AirstrikeTrait and the target is a
+            // building, create an AirstrikeAttackTask instead of a normal AttackTask. This
+            // makes Boris point his laser designator at the building and spawn MiG planes.
+            var airstrikeWeapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
+            if (airstrikeWeapon && this.target.obj?.isBuilding() && this.sourceObject.airstrikeTrait) {
+              // Note: vanilla YR has no "Airstrike confirmed" sound — the airstrike
+              // voice ("MiG's on the way") plays later when the MiGs spawn.
+              return [new AST.AirstrikeAttackTask(this.game, this.target, airstrikeWeapon, { force: this.forceAttack })];
+            }
             // OpenYRWeb: deploy-fire units undeploy before attacking
             var src = this.sourceObject;
             src.isUnit() && src.deployerTrait?.isDeployed() && src.deployerTrait.setDeployed(!1);
@@ -188,6 +218,16 @@ System.register(
               this.forceAttack,
             );
             return [new a.AttackTask(this.game, this.target, e, { force: this.forceAttack })];
+          }
+          // OpenYRWeb: selectAirstrikeWeapon — returns the unit's secondary weapon if it has
+          // MigAttackCursor=yes and the unit has AirstrikeTrait (Boris). Returns null if not
+          // applicable. This is used to intercept building attacks and redirect to AirstrikeAttackTask.
+          selectAirstrikeWeapon(unit, target) {
+            if (!unit.airstrikeTrait) return null;
+            if (!unit.secondaryWeapon) return null;
+            if (!unit.secondaryWeapon.rules.migAttackCursor) return null;
+            if (!target.obj?.isBuilding()) return null;
+            return unit.secondaryWeapon;
           }
           onAdd(t, e) {
             let i = this.sourceObject;

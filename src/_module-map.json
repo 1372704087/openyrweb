@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1303,
+  "moduleCount": 1307,
   "modules": [
     {
       "name": "data/IniSection",
@@ -3716,6 +3716,43 @@
       "bytes": 1914
     },
     {
+      "name": "game/gameobject/trait/AirstrikeTrait",
+      "file": "game/gameobject/trait/AirstrikeTrait.ts.js",
+      "deps": [
+        "game/gameobject/unit/VeteranLevel",
+        "engine/type/ObjectType",
+        "game/gameobject/unit/ZoneType",
+        "game/gameobject/unit/FacingUtil",
+        "game/gameobject/task/move/MoveTask",
+        "game/gameobject/task/AttackTask",
+        "game/gameobject/task/system/TaskGroup",
+        "game/gameobject/task/system/CallbackTask",
+        "game/Coords",
+        "game/math/Vector2",
+        "game/gameobject/trait/interface/NotifyTick",
+        "game/gameobject/trait/interface/NotifyDestroy",
+        "game/rules/TechnoRules"
+      ],
+      "bytes": 5800
+    },
+    {
+      "name": "game/gameobject/task/AirstrikeAttackTask",
+      "file": "game/gameobject/task/AirstrikeAttackTask.ts.js",
+      "deps": [
+        "game/gameobject/task/system/Task",
+        "game/gameobject/task/system/TaskStatus",
+        "game/gameobject/unit/RangeHelper",
+        "game/gameobject/task/move/MoveInWeaponRangeTask",
+        "game/gameobject/unit/FacingUtil",
+        "game/gameobject/task/TurnTask",
+        "game/GameSpeed",
+        "game/Coords",
+        "game/math/Vector2",
+        "game/math/Vector3"
+      ],
+      "bytes": 5200
+    },
+    {
       "name": "game/gameobject/trait/AirSpawnTrait",
       "file": "game/gameobject/trait/AirSpawnTrait.ts.js",
       "deps": [
@@ -3816,7 +3853,8 @@
         "game/gameobject/trait/BioReactorPowerTrait",
         "game/gameobject/trait/DrainTrait",
         "game/gameobject/trait/SlaveMinerVehicleTrait",
-        "game/gameobject/trait/BerserkTrait"
+        "game/gameobject/trait/BerserkTrait",
+        "game/gameobject/trait/AirstrikeTrait"
       ],
       "bytes": 6601
     },
@@ -4698,7 +4736,8 @@
         "game/gameobject/unit/ZoneType",
         "game/gameobject/task/move/MoveTask",
         "game/type/MovementZone",
-        "game/type/LocomotorType"
+        "game/type/LocomotorType",
+        "game/gameobject/task/AirstrikeAttackTask"
       ],
       "bytes": 5087
     },
@@ -8087,6 +8126,14 @@
       "bytes": 3267
     },
     {
+      "name": "engine/renderable/entity/plugin/AirstrikeLaserPlugin",
+      "file": "engine/renderable/entity/plugin/AirstrikeLaserPlugin.ts.js",
+      "deps": [
+        "engine/renderable/fx/DesignatorLaserFx"
+      ],
+      "bytes": 2500
+    },
+    {
       "name": "engine/renderable/entity/plugin/ChronoSparkleFxPlugin",
       "file": "engine/renderable/entity/plugin/ChronoSparkleFxPlugin.ts.js",
       "deps": [
@@ -8134,6 +8181,15 @@
         "engine/type/ObjectType"
       ],
       "bytes": 1334
+    },
+    {
+      "name": "engine/renderable/fx/DesignatorLaserFx",
+      "file": "engine/renderable/fx/DesignatorLaserFx.ts.js",
+      "deps": [
+        "three.meshline",
+        "game/Coords"
+      ],
+      "bytes": 3200
     },
     {
       "name": "engine/renderable/fx/DetectionLineFx",
@@ -8269,7 +8325,8 @@
         "engine/renderable/builder/ShpAggregator",
         "game/type/MovementZone",
         "engine/renderable/entity/plugin/ForcedDisguisePlugin",
-        "engine/renderable/entity/plugin/RobotControlPlugin"
+        "engine/renderable/entity/plugin/RobotControlPlugin",
+        "engine/renderable/entity/plugin/AirstrikeLaserPlugin"
       ],
       "bytes": 18558
     },

@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: engine/renderable/entity/RenderableFactory ===
-// deps: ["engine/renderable/entity/Building","engine/renderable/entity/Vehicle","engine/renderable/entity/Terrain","engine/renderable/entity/Overlay","engine/renderable/entity/Smudge","engine/renderable/entity/building/AnimationType","engine/renderable/entity/Infantry","engine/renderable/entity/PipOverlay","engine/renderable/entity/Aircraft","engine/renderable/entity/TransientAnim","engine/renderable/entity/Projectile","engine/type/ObjectType","engine/renderable/entity/plugin/HarvesterPlugin","engine/renderable/entity/Anim","engine/renderable/entity/plugin/MoveSoundFxPlugin","engine/renderable/entity/plugin/VehicleDisguisePlugin","engine/renderable/entity/plugin/ChronoSparkleFxPlugin","engine/renderable/entity/plugin/TntFxPlugin","engine/renderable/entity/plugin/MindControlLinkPlugin","engine/renderable/entity/plugin/MagnetronBeamPlugin","engine/renderable/entity/plugin/RobotControlPlugin","engine/renderable/entity/plugin/InfantryDisguisePlugin","engine/renderable/entity/building/PsychicDetectPlugin","engine/renderable/entity/plugin/TrailerSmokePlugin","engine/renderable/entity/plugin/DamageSmokePlugin","game/type/LocomotorType","engine/renderable/entity/plugin/ShipWakeTrailPlugin","engine/renderable/entity/plugin/ObjectCloakPlugin","engine/renderable/entity/Debris","engine/renderable/builder/ShpAggregator","game/type/MovementZone","engine/renderable/entity/plugin/ForcedDisguisePlugin"]
+// deps: ["engine/renderable/entity/Building","engine/renderable/entity/Vehicle","engine/renderable/entity/Terrain","engine/renderable/entity/Overlay","engine/renderable/entity/Smudge","engine/renderable/entity/building/AnimationType","engine/renderable/entity/Infantry","engine/renderable/entity/PipOverlay","engine/renderable/entity/Aircraft","engine/renderable/entity/TransientAnim","engine/renderable/entity/Projectile","engine/type/ObjectType","engine/renderable/entity/plugin/HarvesterPlugin","engine/renderable/entity/Anim","engine/renderable/entity/plugin/MoveSoundFxPlugin","engine/renderable/entity/plugin/VehicleDisguisePlugin","engine/renderable/entity/plugin/ChronoSparkleFxPlugin","engine/renderable/entity/plugin/TntFxPlugin","engine/renderable/entity/plugin/MindControlLinkPlugin","engine/renderable/entity/plugin/MagnetronBeamPlugin","engine/renderable/entity/plugin/RobotControlPlugin","engine/renderable/entity/plugin/InfantryDisguisePlugin","engine/renderable/entity/building/PsychicDetectPlugin","engine/renderable/entity/plugin/TrailerSmokePlugin","engine/renderable/entity/plugin/DamageSmokePlugin","game/type/LocomotorType","engine/renderable/entity/plugin/ShipWakeTrailPlugin","engine/renderable/entity/plugin/ObjectCloakPlugin","engine/renderable/entity/Debris","engine/renderable/builder/ShpAggregator","game/type/MovementZone","engine/renderable/entity/plugin/ForcedDisguisePlugin","engine/renderable/entity/plugin/AirstrikeLaserPlugin"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -37,10 +37,11 @@ System.register(
     "engine/renderable/builder/ShpAggregator",
     "game/type/MovementZone",
     "engine/renderable/entity/plugin/ForcedDisguisePlugin",
+    "engine/renderable/entity/plugin/AirstrikeLaserPlugin",
   ],
   function (e, t) {
     "use strict";
-    var l, c, h, u, d, g, p, m, f, r, y, T, v, i, b, S, w, E, C, x, O, A, M, R, P, I, k, B, N, j, s, Mb, Rcp;
+    var l, c, h, u, d, g, p, m, f, r, y, T, v, i, b, S, w, E, C, x, O, A, M, R, P, I, k, B, N, j, s, Mb, Rcp, Al;    
     t && t.id;
     return {
       setters: [
@@ -139,6 +140,9 @@ System.register(
         },
         function (e) {
           j = e;
+        },
+        function (e) {
+          Al = e;
         },
       ],
       execute: function () {
@@ -241,7 +245,10 @@ System.register(
                   r.push(new w.ChronoSparkleFxPlugin(e, this.rules.audioVisual.chronoSparkle1)),
                   (e.mindControllerTrait || e.mindControllableTrait) && r.push(new C.MindControlLinkPlugin(e, s, this.alliances, this.localPlayer, this.camera)),
                   // OpenYRWeb: continuous Magnetron tractor beam while dragging a target.
-                  e.isUnit() && r.push(new Mb.MagnetronBeamPlugin(e)));
+                  e.isUnit() && r.push(new Mb.MagnetronBeamPlugin(e)),
+                  // OpenYRWeb: Boris airstrike designator laser — plugin checks
+                  // airstrikeTrait.targetObject and renders a persistent red beam.
+                  e.isInfantry() && r.push(new Al.AirstrikeLaserPlugin(e)));
                 let t;
                 if (e.isBuilding()) {
                   var n = this.theater.animPalette,
