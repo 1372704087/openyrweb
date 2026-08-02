@@ -133,9 +133,16 @@ System.register(
                 bestEffort: o = !0,
                 excludeTiles: l,
                 ignoredBlockers: c = [],
-                bidirectional: _bidirectional = !0,
+                bidirectional: _bidirectional,
               } = {},
             ) {
+              // 短距离寻路用单向 A*（固定开销更小、路径更稳），长距离才启用双向
+              let _useBidirectional = _bidirectional;
+              if (void 0 === _useBidirectional) {
+                let _dx = Math.abs(e - i),
+                  _dy = Math.abs(t - r);
+                _useBidirectional = 16 <= _dx + _dy + (Math.SQRT2 - 2) * Math.min(_dx, _dy);
+              }
               let h = this.computePassabilityGraph(s, a);
               var u = c
                 .map((e) => this.tileOccupation.calculateTilesForGameObject(e.tile, e))
@@ -177,7 +184,7 @@ System.register(
                   excludedNodes: l,
                   distance: E,
                   heuristic: C,
-                  bidirectional: _bidirectional,
+                  bidirectional: _useBidirectional,
                 }),
                 b = v
                   .find(this.getNodeId(e, t), this.getNodeId(i, r))
