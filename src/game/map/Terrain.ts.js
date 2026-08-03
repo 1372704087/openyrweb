@@ -111,8 +111,8 @@ System.register(
                     this.tiberiumMayChangePassability.add(o);
               }
             }
-            getGraphKey(e, t) {
-              return e + "_" + Number(t);
+            getGraphKey(e, t, cm = "") {
+              return e + "_" + Number(t) + (cm ? "_" + cm : "");
             }
             invalidateTiles(i) {
               i.length &&
@@ -134,6 +134,7 @@ System.register(
                 excludeTiles: l,
                 ignoredBlockers: c = [],
                 bidirectional: _bidirectional,
+                mover,
               } = {},
             ) {
               // 短距离寻路用单向 A*（固定开销更小、路径更稳），长距离才启用双向
@@ -143,23 +144,28 @@ System.register(
                   _dy = Math.abs(t - r);
                 _useBidirectional = 16 <= _dx + _dy + (Math.SQRT2 - 2) * Math.min(_dx, _dy);
               }
-              let h = this.computePassabilityGraph(s, a);
+              // OpenYRWeb: an OmniCrusher (e.g. Battle Fortress) paths THROUGH the objects it
+              // can crush (vehicles, etc.) instead of routing around them, matching vanilla YR.
+              // The passability graph is cached per crush mode so other units keep the
+              // normal behavior.
+              let _cm = mover?.crusher && mover.omniCrusher ? "omni" : "";
+              let h = this.computePassabilityGraph(s, a, _cm);
               var u = c
                 .map((e) => this.tileOccupation.calculateTilesForGameObject(e.tile, e))
                 .reduce((e, t) => e.concat(t), []);
-              u.length && this.updatePassability(u, s, a, h, c);
+              u.length && this.updatePassability(u, s, a, h, c, void 0, _cm);
               var d = this.getNodeId(e, t),
                 g = !!h.hasNode(d);
-              g || this.updatePassability([e], s, a, h, c, 1);
+              g || this.updatePassability([e], s, a, h, c, 1, _cm);
               var p = this.getNodeId(i, r),
                 m = !!h.hasNode(p);
               let f;
               var y = g && !u.length;
               if (y) {
-                let i = this.getIslandIdMap(s, a),
+                let i = this.getIslandIdMap(s, a, _cm),
                   r = i.get(e, t);
                 f = (e, t) => i.get(e, t) === r;
-              } else f = (e, t) => 0 < this.getPassableSpeed(e, s, a, t, c);
+              } else f = (e, t) => 0 < this.getPassableSpeed(e, s, a, t, c, !1, void 0, _cm);
               if (!m || !f(i, r)) {
                 var T = o
                   ? new w.RadialTileFinder(
@@ -174,7 +180,7 @@ System.register(
                   : void 0;
                 if (T) ((i = T), (r = !1));
                 else {
-                  if (y) return (u.length && this.updatePassability(u, s, a, h), []);
+                  if (y) return (u.length && this.updatePassability(u, s, a, h, void 0, void 0, _cm), []);
                   (h.addNode(p, { tile: i, onBridge: void 0 }), (n = Math.min(n, 500)));
                 }
               }
@@ -192,9 +198,9 @@ System.register(
               return (
                 (b.length < 2 || (l && b.length && ((!o && b[0].tile !== i) || b[b.length - 1].tile !== e))) &&
                   (b = []),
-                g || (h.removeNode(d), this.updatePassability([e], s, a, h)),
+                g || (h.removeNode(d), this.updatePassability([e], s, a, h, void 0, void 0, _cm)),
                 m || h.removeNode(p),
-                u.length && this.updatePassability(u, s, a, h),
+                u.length && this.updatePassability(u, s, a, h, void 0, void 0, _cm),
                 b
               );
             }
@@ -206,22 +212,22 @@ System.register(
                   (this.computePassabilityGraph(t, !1), this.computePassabilityGraph(t, !0));
               });
             }
-            computePassabilityGraph(t, i) {
-              var r = this.getGraphKey(t, i);
+            computePassabilityGraph(t, i, cm = "") {
+              var r = this.getGraphKey(t, i, cm);
               let s = this.passabilityGraphs.get(r);
               if (s) {
                 let e = this.invalidatedTiles.get(r);
-                e?.size && (this.updatePassability([...e], t, i, s), e.clear(), this.computeIslandIds(s));
+                e?.size && (this.updatePassability([...e], t, i, s, [], void 0, cm), e.clear(), this.computeIslandIds(s));
               } else
                 ((s = new a.Graph()),
                   this.passabilityGraphs.set(r, s),
                   this.tiles.forEach((e) => {
-                    this.computePassability(e, t, i, s);
+                    this.computePassability(e, t, i, s, [], void 0, cm);
                   }),
                   this.computeIslandIds(s));
               return s;
             }
-            updatePassability(t, i, r, s, a = [], n) {
+            updatePassability(t, i, r, s, a = [], n, cm = "") {
               let o = new Set();
               t.forEach((e) => {
                 [
@@ -241,30 +247,30 @@ System.register(
                   t && (l.set(t.id, t.data.islandId), s.removeNode(t.id));
               }),
                 o.forEach((e) => {
-                  this.computePassability(e, i, r, s, a, n && t.includes(e) ? n : void 0);
+                  this.computePassability(e, i, r, s, a, n && t.includes(e) ? n : void 0, cm);
                 }),
                 l.forEach((e, t) => {
                   let i = s.getNode(t);
                   i && (i.data.islandId = e);
                 }));
             }
-            computePassability(e, t, i, r, s = [], a) {
+            computePassability(e, t, i, r, s = [], a, cm = "") {
               var n = [u.TileDirection.Left, u.TileDirection.TopLeft, u.TileDirection.Top, u.TileDirection.TopRight];
-              if (a || this.getPassableSpeed(e, t, i, !1, s)) {
+              if (a || this.getPassableSpeed(e, t, i, !1, s, !1, void 0, cm)) {
                 var o,
                   l = this.getNodeId(e, !1);
                 r.hasNode(l) || r.addNode(l, { tile: e, onBridge: void 0, forceLandSpeed: a });
-                for (o of n) this.connectTiles(e, void 0, o, t, i, r, s);
+                for (o of n) this.connectTiles(e, void 0, o, t, i, r, s, cm);
               }
               var c = this.tileOccupation.getBridgeOnTile(e);
-              if (c && (a || this.getPassableSpeed(e, t, i, !0, s))) {
+              if (c && (a || this.getPassableSpeed(e, t, i, !0, s, !1, void 0, cm))) {
                 var h,
                   l = this.getNodeId(e, !0);
                 r.hasNode(l) || r.addNode(l, { tile: e, onBridge: c, forceLandSpeed: a });
-                for (h of n) this.connectTiles(e, c, h, t, i, r, s);
+                for (h of n) this.connectTiles(e, c, h, t, i, r, s, cm);
               }
             }
-            connectTiles(i, r, e, s, a, n, o = []) {
+            connectTiles(i, r, e, s, a, n, o = [], cm = "") {
               var l = this.tiles.getNeighbourTile(i, e);
               if (l) {
                 let e = this.tileOccupation.getBridgeOnTile(l);
@@ -280,7 +286,7 @@ System.register(
                 }
                 c = this.getNodeId(l, !!e);
                 let t = n.getNode(c);
-                this.getPassableSpeed(l, s, a, !!e, o, void 0, t?.data.forceLandSpeed) &&
+                this.getPassableSpeed(l, s, a, !!e, o, void 0, t?.data.forceLandSpeed, cm) &&
                   ((t = t ?? n.addNode(c, { tile: l, onBridge: e })),
                   (l = this.getNodeId(i, !!r)),
                   n.getNode(l).addLink(t));
@@ -306,8 +312,8 @@ System.register(
                 for (var r of e.neighbors) r.data.islandId || i.push(r);
               }
             }
-            getIslandIdMap(e, t) {
-              let r = this.computePassabilityGraph(e, t);
+            getIslandIdMap(e, t, cm = "") {
+              let r = this.computePassabilityGraph(e, t, cm);
               return {
                 get: (e, t) => {
                   var i = this.getNodeId(e, t);
@@ -315,7 +321,7 @@ System.register(
                 },
               };
             }
-            getPassableSpeed(e, t, i, r, s = [], a = !1, n) {
+            getPassableSpeed(e, t, i, r, s = [], a = !1, n, mover) {
               if (!this.mapBounds.isWithinBounds(e)) return 0;
               let o = r ? e.onBridgeLandType : e.landType;
               if (void 0 === o) return 0;
@@ -326,11 +332,24 @@ System.register(
               if (!h) return 0;
               if (!a)
                 for (c of this.tileOccupation.getObjectsOnTile(e))
-                  if (this.isBlockerObject(c, e, r, t, i) && !s.includes(c)) return 0;
+                  if (this.isBlockerObject(c, e, r, t, i, mover) && !s.includes(c)) return 0;
               return h;
             }
-            isBlockerObject(t, i, e, r, s) {
+            isBlockerObject(t, i, e, r, s, mover) {
               if (t.rules.crushable && [d.SpeedType.Track, d.SpeedType.Hover].includes(r)) return !1;
+              // OpenYRWeb: an OmniCrusher (e.g. Battle Fortress) can drive over objects it
+              // would crush that aren't normally crushable (vehicles), unless the object is
+              // OmniCrushResistant. Vanilla YR: OmniCrusher trumps Crushable=no, and
+              // OmniCrushResistant trumps OmniCrusher. `mover` may be the unit itself or the
+              // passability-graph crush mode string ("omni") used when building the cached
+              // graph for OmniCrushers. Reuses Techno.canCrushObject so non-wall buildings
+              // are never treated as drive-over targets.
+              if (
+                [d.SpeedType.Track, d.SpeedType.Hover].includes(r) &&
+                ("omni" === mover || (mover?.crusher && mover.omniCrusher)) &&
+                this.isOmniCrushTarget(t)
+              )
+                return !1;
               if (t.isTerrain()) return !s || t.rules.getOccupationBits(this.theaterType) === o.OccupationBits.All;
               if (t.isBuilding()) {
                 if (t.rules.invisibleInGame) return !1;
@@ -360,6 +379,14 @@ System.register(
                     t.isBridgePlaceholder()))
               );
             }
+            // OpenYRWeb: vanilla YR OmniCrusher target test. An OmniCrusher can drive over
+            // infantry/walls (already crushable) and vehicles; OmniCrushResistant objects
+            // and regular (non-wall) buildings are NOT crushable by an OmniCrusher.
+            isOmniCrushTarget(t) {
+              if (t?.isBuilding?.() && !t.rules.wall) return !1;
+              if (t.rules.omniCrushResistant) return !1;
+              return t.isVehicle() || t.isInfantry() || (t.isOverlay() && t.rules.wall);
+            }
             findObstacles(t, e) {
               var i,
                 r,
@@ -368,13 +395,17 @@ System.register(
               let n = [];
               for (i of this.tileOccupation.getGroundObjectsOnTile(t.tile))
                 i !== e &&
-                  ((r = this.isBlockerObject(i, t.tile, !!t.onBridge, s, a)) ||
+                  ((r = this.isBlockerObject(i, t.tile, !!t.onBridge, s, a, e)) ||
                     (i.isUnit() &&
                       ((i.tile === t.tile && i.onBridge === !!t.onBridge) ||
                         i.moveTrait.reservedPathNodes.find(
                           (e) => e.tile === t.tile && !!e.onBridge == !!t.onBridge,
                         ))) ||
-                    ([d.SpeedType.Track, d.SpeedType.Hover].includes(s) && i.rules.crushable) ||
+                    // OpenYRWeb: a Track/Hover mover treats everything it can actually crush
+                    // (incl. OmniCrusher targets) as a pass-through obstacle, so MoveTask can
+                    // crush it instead of being blocked.
+                    ([d.SpeedType.Track, d.SpeedType.Hover].includes(s) &&
+                      (i.rules.crushable || e?.canCrushObject?.(i))) ||
                     (a && i.isTerrain()) ||
                     (i.isBuilding() && i.rules.gate)) &&
                   ((r = { obj: i, static: r }),

@@ -72,12 +72,24 @@ System.register(
       execute: function () {
         (e("STRAFE_CLOSE_ENOUGH", 2),
           (f = class extends i.MoveTask {
-            constructor(e, t, i, r) {
+            constructor(e, t, i, r, crushMode = !1) {
               (super(e, t instanceof n.GameObject ? (t.isBuilding() ? t.centerTile : t.tile) : t, i, {
+                // OpenYRWeb: crush-on-attack drives onto the crushable target's OWN tile,
+                // so the target must be ignored as a blocker by the move path-validation
+                // too — it reads options.ignoredBlockers, NOT pathFinderIgnoredBlockers.
+                // Without this, the wall's tile fails the passability check on the final
+                // approach, the move re-plans forever and the crusher parks adjacent,
+                // neither crushing nor firing. Normal attacks stop at weapon range, so
+                // they never hit this, but crushMode must reach the target tile itself.
+                ignoredBlockers: crushMode && t instanceof n.GameObject && 0 < r.range ? [t] : void 0,
                 pathFinderIgnoredBlockers: t instanceof n.GameObject && 0 < r.range ? [t] : void 0,
               }),
                 (this.target = t),
                 (this.weapon = r),
+                // OpenYRWeb: crush-on-attack — the crusher must drive ONTO the victim's
+                // tile (adjacent/same tile) rather than stopping at weapon range, so the
+                // MoveTrait crush kicks in.
+                (this.crushMode = crushMode),
                 (this.recalcMinRange = !0),
                 (this.cancelRequested = !1),
                 // OpenYRWeb: set when the plane has fired its last weapon — the
@@ -91,7 +103,11 @@ System.register(
             onStart(i) {
               let e = this.target,
                 r = this.game.map;
-              if (e instanceof n.GameObject && e.isBuilding() && i.rules.movementZone !== c.MovementZone.Fly) {
+              // OpenYRWeb: crush-on-attack (crushMode) must drive ONTO the crushable
+              // building's own tile so the MoveTrait crush fires — never redirect the
+              // destination to a tile near the building (that is what parked the crusher
+              // adjacent to a wall, neither crushing nor firing).
+              if (e instanceof n.GameObject && e.isBuilding() && i.rules.movementZone !== c.MovementZone.Fly && !this.crushMode) {
                 let t = e.tile;
                 var s = e instanceof n.GameObject ? e.getFoundation() : { width: 1, height: 1 },
                   s = new l.RadialTileFinder(
@@ -200,6 +216,9 @@ System.register(
               if (
                 t.zone !== h.ZoneType.Air &&
                 this.target instanceof n.GameObject &&
+                // OpenYRWeb: a crusher (Battle Fortress) may stop ON a crushable target —
+                // it drives onto the victim and crushes it instead of stopping short.
+                !t.canCrushObject(this.target) &&
                 this.game.map.tileOccupation.isTileOccupiedBy(e, this.target) &&
                 (!this.target.isUnit() ||
                   (this.target.tile === e &&
@@ -221,6 +240,10 @@ System.register(
               );
             }
             isCloseEnoughToDest(e, t) {
+              // OpenYRWeb: crush-on-attack — only "close enough" once the crusher is on
+              // the victim's tile (the MoveTrait crushes on tile entry), not merely in
+              // weapon range.
+              if (this.crushMode) return this.rangeHelper.tileDistance(t, this.targetTile) <= 0.5;
               // OpenYRWeb: the fighter's run is over (it already fired) — it only
               // needs to reach its destination tile; weapon-range checks no longer
               // apply. Bombers keep their own bombing-run logic.
@@ -346,7 +369,9 @@ System.register(
               this.updateTarget(tile, !1);
             }
             onTick(s) {
-              if (this.recalcMinRange) {
+              // OpenYRWeb: crushMode drives straight onto the victim — no min-range
+              // repositioning that could pull the crusher off the crushable target.
+              if (this.recalcMinRange && !this.crushMode) {
                 this.recalcMinRange = !1;
                 var e = this.findMinRangeRelocationTile(s, this.targetTile);
                 if (e !== this.targetTile) {

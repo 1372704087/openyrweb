@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/trait/MoveTrait ===
-// deps: ["game/gameobject/task/move/MoveTask","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/unit/ZoneType","game/gameobject/infantry/InfDeathType","game/event/ObjectTeleportEvent","game/gameobject/common/DeathType","game/gameobject/trait/interface/NotifyTeleport","game/type/LocomotorType","game/gameobject/locomotor/JumpjetLocomotor","game/type/SpeedType","game/gameobject/locomotor/WingedLocomotor","game/gameobject/infantry/StanceType","game/trait/interface/NotifyTileChange","game/gameobject/trait/interface/NotifyTileChange","game/event/EnterTileEvent","game/math/Vector3","game/trait/interface/NotifyElevationChange"]
+// deps: ["game/gameobject/task/move/MoveTask","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/unit/ZoneType","game/gameobject/infantry/InfDeathType","game/event/ObjectTeleportEvent","game/gameobject/common/DeathType","game/gameobject/trait/interface/NotifyTeleport","game/type/LocomotorType","game/gameobject/locomotor/JumpjetLocomotor","game/type/SpeedType","game/gameobject/locomotor/WingedLocomotor","game/gameobject/infantry/StanceType","game/trait/interface/NotifyTileChange","game/gameobject/trait/interface/NotifyTileChange","game/event/EnterTileEvent","game/math/Vector3","game/trait/interface/NotifyElevationChange","game/Warhead","game/event/WarheadDetonateEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -23,10 +23,12 @@ System.register(
     "game/event/EnterTileEvent",
     "game/math/Vector3",
     "game/trait/interface/NotifyElevationChange",
+    "game/Warhead",
+    "game/event/WarheadDetonateEvent",
   ],
   function (t, e) {
     "use strict";
-    var i, r, s, h, u, o, d, l, a, n, g, c, p, m, f, y, T, v, b, S, w, E, C;
+    var i, r, s, h, u, o, d, l, a, n, g, c, p, m, f, y, T, v, WH, WD, b, S, w, E, C;
     e && e.id;
     return {
       setters: [
@@ -84,6 +86,12 @@ System.register(
         function (e) {
           v = e;
         },
+        function (e) {
+          WH = e;
+        },
+        function (e) {
+          WD = e;
+        },
       ],
       execute: function () {
         var e;
@@ -139,7 +147,14 @@ System.register(
             }
             [r.NotifyTick.onTick](e, t) {
               var i;
-              (this.moveState !== b.Idle &&
+              // OpenYRWeb: crush-tilt — ease crushTilt toward crushTiltTarget every tick.
+              // The target stays 20° just long enough for the nose to rise (fresh crushes
+              // refresh it), then drops to 0 right after the crushed unit is destroyed so
+              // the settle follows immediately, with the same smooth transition as the rise.
+              (0 < e.crushTiltTimer ? e.crushTiltTimer-- : (e.crushTiltTarget = 0),
+                (e.crushTilt += (e.crushTiltTarget - e.crushTilt) * 0.3),
+                Math.abs(e.crushTilt) < 0.5 && (e.crushTilt = 0),
+                this.moveState !== b.Idle &&
                 this.collisionState === w.Resolved &&
                 (((i = e.unitOrderTrait.getCurrentTask()) && E(i)) ||
                   (this.velocity.set(0, 0, 0),
@@ -213,15 +228,59 @@ System.register(
                     .filter(
                       (e) =>
                         (!e.isUnit() || e.onBridge === a.onBridge) &&
-                        e.rules.crushable &&
+                        // OpenYRWeb: use the full vanilla crush decision (Crusher/Crushable/
+                        // OmniCrusher/OmniCrushResistant) instead of Crushable alone, so
+                        // OmniCrushers (e.g. Battle Fortress) can crush vehicles too.
+                        a.canCrushObject(e) &&
                         !(e.isInfantry() && e.stance === p.StanceType.Paradrop) &&
-                        (!(e.isTechno() && !i) || !r.areFriendly(e, a)),
+                        // OpenYRWeb: force-attacked friendly crushable targets (walls/units)
+                        // are driven over and crushed — vanilla YR force-attacking a
+                        // friendly wall or unit crushes it.
+                        (!(e.isTechno() && !i) ||
+                          !r.areFriendly(e, a) ||
+                          (a.isForceAttacking && e === a.currentAttackTarget)),
                     ))
                     c.isDestroyed ||
                       (c.isInfantry() && (c.infDeathType = u.InfDeathType.None),
-                      a.isVehicle() && c.isOverlay() && c.rules.wall && a.applyRocking(0, 0.5),
+                      // OpenYRWeb: vanilla YR "TiltsWhenCrushes" (=IsTilter): while crushing a
+                      // vehicle or a wall the crusher body pitches up (front lifts). Positive
+                      // pitch on mainObj's local X axis = nose up. Sets the TARGET angle; the
+                      // actual crushTilt eases toward it every tick in onTick. The hold is
+                      // only long enough for the nose to rise — once the crushed unit is
+                      // destroyed (this frame) the tilt starts easing back down.
+                      // Player-built walls are Building objects (not Overlay), so the tilt
+                      // must accept both wall representations.
+                      a.isVehicle() &&
+                        a.rules.isTilter &&
+                        ((c.isOverlay() || c.isBuilding()) && c.rules.wall || c.isVehicle()) &&
+                        ((a.crushTiltTarget = 20), (a.crushTiltTimer = 8)),
                       (c.deathType = d.DeathType.Crush),
-                      r.destroyObject(c, { player: a.owner, obj: a }));
+                      // OpenYRWeb: 车辆被碾压走 [CombatDamage] CrushWarhead 绝对伤害
+                      // （vanilla YR: Crush = "absolute damage", 无视护甲/HP 直接判定摧毁）。
+                      // 目标 HP 归零后由 Warhead 走正常死亡/爆炸流程，同时按弹头 AnimList
+                      // 在目标位置播放爆炸动画（与 detonate 同链路，经 WarheadDetonateFxHandler）。
+                      // 围墙不适用该链路（Crush 弹头对 Wall 护甲 Verses 为 0，见
+                      // Warhead.computeDamage），保持直接强制销毁（语义等价 Crush 的绝对摧毁）。
+                      c.isVehicle() && c.healthTrait
+                        ? (() => {
+                            try {
+                              var cd = r.rules.combatDamage,
+                                wn = (cd && cd.crushWarhead) || "Crush",
+                                wr = r.rules.getWarhead(wn);
+                              if (wr) {
+                                var w = new WH.Warhead(wr),
+                                  dmg = w.computeDamage(c.healthTrait.maxHitPoints, c, r),
+                                  pos = c.position.worldPosition.clone(),
+                                  animName = w.pickExplodeAnim(dmg, c, h.ZoneType.Ground, r, !1);
+                                animName &&
+                                  r.events.dispatch(new WD.WarheadDetonateEvent(w, pos, animName, !1));
+                                w.inflictDamage(dmg, c, { obj: a, player: a.owner }, r);
+                              }
+                            } catch (err) {}
+                            // 绝对伤害兜底：即使 veteran/装甲修正导致未归零也强制摧毁。
+                            c.isDestroyed || r.destroyObject(c, { player: a.owner, obj: a });
+                          })()
+                        : r.destroyObject(c, { player: a.owner, obj: a }));
                 a.onBridge ||
                   ((n = r.map.tileOccupation
                     .getGroundObjectsOnTile(a.tile)

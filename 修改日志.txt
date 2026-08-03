@@ -750,3 +750,45 @@ feat(boris): 实现鲍里斯激光指示器与 MiG 空中打击完整功能
 6. 多架 MiG 同时扫射：性能稳定，路径不重叠。  
 7. 地图边缘目标：出生点和退出点正确计算。  
 8. 目标被摧毁：MiG 立即飞向出口。
+
+feat(crusher): 实现战斗要塞全能碾压系统（OmniCrusher）及攻击-碾压协同机制
+
+- 🚛 **OmniCrusher 碾压决策系统**  
+  `Techno.canCrushObject()` 实现完整 YR 碾压判定：`Crusher=yes` 可碾压 `Crushable=yes` 对象（步兵、墙体建筑）；`OmniCrusher=yes`（需配合 `Crusher=yes`）额外碾压非 `OmniCrushResistant` 的车辆等对象。普通建筑（非墙体）永远不可碾压。
+
+- ⚔️ **攻击-碾压协同模式**  
+  `AttackTask` 检测碾压目标时创建 `MoveInWeaponRangeTask(crushMode=true)`，碾压者驶向目标所在格（`ignoredBlockers=[目标]`），移动过程中持续开火（不取消移动任务）。添加防卡死机制：40 tick 停滞检测后自动切换到远程攻击，失败回退保障流畅体验。
+
+- 🎬 **碾压倾斜视觉效果**  
+  `MoveTrait` 检测到碾压时设置 `crushTiltTarget=20°`，每 tick 平滑插值（系数 0.3），保持 8 tick。`Vehicle.ts.js` 将倾斜角度应用到 `mainObj.rotation.x`，实现车头上扬动画。
+
+- 💥 **CrushWarhead 伤害系统**  
+  碾压执行时获取 `CrushWarhead`（默认 "Crush"），通过 `Warhead.computeDamage()` 计算基于目标最大 HP 的绝对伤害，播放爆炸动画（`WarheadDetonateEvent`），强制摧毁兜底确保目标必死。
+
+- 🗺️ **路径系统增强**  
+  `Terrain.getPassableSpeed()` 新增 `mover` 参数，OmniCrusher 使用独立 passability graph 缓存（`getGraphKey` 包含 `cm="omni"`）。`isBlockerObject()` 支持 OmniCrusher 可碾压目标不计为阻挡，实现路径穿越车辆。
+
+- 🎯 **强制攻击友方碾压**  
+  `isForceAttacking=true` 时强制攻击友方墙体/单位可直接碾压，而非推开。`AttackOrder` 支持 `Crush` 鼠标指针。
+
+- 🔧 **视线修复**  
+  `LosHelper` 跳过目标自身瓦片的墙体阻挡检查，修复墙体建筑无法被锁定的问题。
+
+- ⚙️ **规则配置扩展**  
+  | 规则文件 | 新增字段 | 描述 |
+  |----------|----------|------|
+  | `ObjectRules` | `OmniCrushResistant` | 抵抗全能碾压 |
+  | `TechnoRules` | `OmniCrusher` | 全能碾压者（需 `Crusher=yes`） |
+
+### ⚠️ 破坏性变更
+- 战斗要塞等 OmniCrusher 单位现在能碾压车辆，行为更贴近原版 YR，可能影响现有 mod 平衡性。
+- 碾压使用独立 passability graph 缓存，路径计算与普通单位隔离。
+
+### 🧪 测试建议
+1. 战斗要塞碾压敌方坦克，验证车辆被摧毁并播放爆炸动画。  
+2. 强制攻击友方墙体，验证可直接碾压而非被阻挡。  
+3. 战斗要塞攻击目标时驶向目标格并持续开火。  
+4. 碾压时车头平滑上抬（倾斜动画）。  
+5. OmniCrusher 路径规划可穿越车辆。  
+6. 被不可碾压目标阻挡时 40 tick 后切换到远程攻击。  
+7. 墙体建筑可被正常锁定攻击。

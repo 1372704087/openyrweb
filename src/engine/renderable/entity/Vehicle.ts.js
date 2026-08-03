@@ -484,6 +484,11 @@ System.register(
                 var i,
                   r = this.gameObject.tilterTrait?.tilt ?? { yaw: 0, pitch: 0 };
                 var crashPitch = this.gameObject.crashPitch ?? 0,
+                  // OpenYRWeb: crush-tilt (vanilla YR TiltsWhenCrushes). Degrees; POSITIVE =
+                  // nose up on mainObj's local X axis (in-engine verified; the VXL local
+                  // axis is inverted vs. yrmd's -0.1 rad). Applied on mainObj's LOCAL axis
+                  // so the nose pitches up no matter which way the unit is facing.
+                  crushTilt = this.gameObject.crushTilt ?? 0,
                   combinedPitch = r.pitch + crashPitch;
                 ((this.lastTilt && combinedPitch === this.lastTilt.pitch && r.yaw === this.lastTilt.yaw && !t) ||
                   ((this.lastTilt = { pitch: combinedPitch, yaw: r.yaw }),
@@ -492,6 +497,9 @@ System.register(
                   this.tiltObj.updateMatrix(),
                   (this.dirWrapObj.rotation.y = THREE.Math.degToRad(e - r.yaw)),
                   this.dirWrapObj.updateMatrix()),
+                  this.mainObj &&
+                    ((this.mainObj.rotation.x = THREE.Math.degToRad(crushTilt)),
+                    this.mainObj.updateMatrix()),
                   this.turret &&
                     ((r = (i = Math.floor(this.gameObject.turretTrait.facing)) !== this.lastTurretFacing),
                     (this.lastTurretFacing = i),

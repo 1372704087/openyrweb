@@ -117,6 +117,15 @@ System.register(
                 (this.options = r),
                 (this.moveExecuted = !1),
                 (this.moveAttempts = 0),
+                // OpenYRWeb: set when the crush-on-attack approach fails (target unreachable)
+                // so the unit falls back to firing instead of looping forever.
+                (this.crushApproachFailed = !1),
+                // OpenYRWeb: crush-approach progress guard — tracks whether the crush move
+                // task is actually closing the gap on a crushable target (wall). If it
+                // stalls (unit parked adjacent and never driving onto the target), the
+                // approach is abandoned and the unit falls back to ranged fire.
+                (this.crushApproachStallTicks = 0),
+                (this.lastCrushApproachDistance = void 0),
                 (this.rangeCheckCooldown = 0),
                 (this.lastInRangeTargetPosition = new M.Vector3()),
                 (this.lastInRangeSelfPosition = new M.Vector3()),
@@ -240,7 +249,11 @@ System.register(
               return { reachable: u.getNextTile(), fallback: h };
             }
             onEnd(e) {
-              (e.isVehicle() && e.turretTrait && (e.turretTrait.desiredFacing = e.direction),
+              // OpenYRWeb: clear the force-attack crush state so the crusher no longer
+              // runs over friendly targets after the force-attack ends.
+              ((e.isForceAttacking = !1),
+              (e.currentAttackTarget = void 0),
+              e.isVehicle() && e.turretTrait && (e.turretTrait.desiredFacing = e.direction),
                 (e.attackTrait.attackState = T.AttackState.Idle),
                 (e.attackTrait.currentTarget = void 0));
               var t = this.game.rules.general.prism.type;
@@ -484,6 +497,26 @@ System.register(
                 // dragging; the victim is being pulled in, not kept at distance) but still
                 // enforces maximum range so that if the target is teleported away, the
                 // attack task will chase (and the drag will naturally follow) or end.
+                // OpenYRWeb: vanilla YR "attack-to-crush" (yrmd sub_7414E0): a Crusher
+                // drives onto a crushable ground target instead of stopping at weapon
+                // range to fire (Battle Fortress walks over infantry/tanks/walls). Zone
+                // Air is excluded — aircraft can never be driven over. Walls (overlay)
+                // qualify too: force-attacking a (friendly) wall drives over and crushes
+                // it. OmniCrushers (BFRT) crush at any distance; plain Crushers (Grizzly
+                // etc.) only crush an adjacent target, otherwise they keep firing.
+                // Record the force-attack state so the crush logic can run over friendly
+                // targets that are being force-attacked.
+                (r.isForceAttacking = !!this.options.force),
+                (r.currentAttackTarget = this.options.force ? this.target.obj : void 0);
+                var crushTarget = !!(
+                  t &&
+                  (!t.isBuilding() || t.rules.wall) &&
+                  (!t.isUnit() || t.zone !== x.ZoneType.Air) &&
+                  r.isUnit() &&
+                  r.canCrushObject(t) &&
+                  !this.crushApproachFailed &&
+                  (r.omniCrusher || this.rangeHelper.tileDistance(r, t) <= 1)
+                );
                 var inRange;
                 if (magDragging) {
                   inRange = this.rangeHelper.isInRange(r, e, 0, this.weapon.range, !1);
@@ -501,18 +534,25 @@ System.register(
                   inRange = r.tile.rx === ct.rx && r.tile.ry === ct.ry;
                 }
                 if (
-                  !inRange ||
-                  !this.losHelper.hasLineOfSight(r, e, this.weapon) ||
-                  (r.isUnit() &&
-                    r.rules.balloonHover &&
-                    !r.rules.hoverAttack &&
-                    // OpenYRWeb: BalloonHover units (e.g. Floating Disc) use actual Range;
-                    // exempt from same-tile rule so they stop at weapon range and fire.
-                    !(this.weapon.rules.isDiskLaser || this.weapon.rules.drainWeapon || this.weapon.range > 0) &&
-                    !a &&
-                    r.tile !== c &&
-                    !this.options.holdGround) ||
-                  (r.isAircraft() && !a && (this.weapon.projectileRules.iniRot <= 1 || r.rules.fighter))
+                  // OpenYRWeb: crush-on-attack — always keep closing in (create the move
+                  // task once), but once in weapon range with LOS the unit FIRES while the
+                  // move task keeps driving it onto the target (vanilla YR attacks and
+                  // crushes simultaneously). The `!a` guard ensures the first approach move
+                  // task is still created even when already in range.
+                  crushTarget
+                    ? !inRange || !this.losHelper.hasLineOfSight(r, e, this.weapon) || !a
+                    : (!inRange ||
+                        !this.losHelper.hasLineOfSight(r, e, this.weapon) ||
+                        (r.isUnit() &&
+                          r.rules.balloonHover &&
+                          !r.rules.hoverAttack &&
+                          // OpenYRWeb: BalloonHover units (e.g. Floating Disc) use actual Range;
+                          // exempt from same-tile rule so they stop at weapon range and fire.
+                          !(this.weapon.rules.isDiskLaser || this.weapon.rules.drainWeapon || this.weapon.range > 0) &&
+                          !a &&
+                          r.tile !== c &&
+                          !this.options.holdGround) ||
+                        (r.isAircraft() && !a && (this.weapon.projectileRules.iniRot <= 1 || r.rules.fighter)))
                 ) {
                   if (r.isUnit() && !this.options.holdGround && this.game.map.isWithinBounds(c)) {
                     if (a) {
@@ -520,13 +560,23 @@ System.register(
                         if (
                           i &&
                           this.target.obj &&
-                          this.rangeHelper.tileDistance(this.target.obj, this.lastSelfMoveTargetTile) >
-                            this.weapon.range
-                        )
+                          // OpenYRWeb: crush-on-attack retargets as soon as the crushable
+                          // target MOVES, so the crusher chases its current tile instead of
+                          // driving to the stale coordinate first, then turning, then
+                          // pursuing. Non-crush attacks keep the original range-based chase.
+                          (crushTarget
+                            ? this.target.obj.tile !== this.lastSelfMoveTargetTile
+                            : this.rangeHelper.tileDistance(this.target.obj, this.lastSelfMoveTargetTile) >
+                              this.weapon.range)
+                        ) {
                           (a.retarget(this.target.obj, !!this.target.getBridge()),
                             (this.lastSelfTileBeforeMove = r.tile),
                             (this.lastSelfMoveTargetTile = this.target.obj?.tile ?? this.target.tile));
-                        else {
+                          // OpenYRWeb: crush-on-attack — the existing move task was just
+                          // retargeted onto the crushable victim; wait for it instead of
+                          // spawning a duplicate move task this tick.
+                          if (crushTarget) return !1;
+                        } else {
                           if (
                             void 0 !== this.options.leashTiles &&
                             this.rangeHelper.tileDistance(this.initialSelfPosition.tile, r.tile) >
@@ -539,6 +589,26 @@ System.register(
                                 ((r.moveTrait.baseSpeed + h) / w.Coords.LEPTONS_PER_TILE),
                             );
                           0 < u && (this.rangeCheckCooldown = Math.min(S.GameSpeed.BASE_TICKS_PER_SECOND, u));
+                          // OpenYRWeb: crush-on-attack already has a move task homing onto
+                          // the crushable target — wait for it instead of spawning a
+                          // duplicate MoveInWeaponRangeTask every tick. Without this the
+                          // BFRT (in weapon range, so the cooldown above stays 0) would
+                          // rebuild the move task on every CheckRange and never reach
+                          // PrepareToFire (it stands still, neither moving nor firing).
+                          // OpenYRWeb: crush-approach progress guard — if the crush move
+                          // task never closes the gap on the crushable target (unit parked
+                          // adjacent to a wall it cannot drive onto), give up on the crush
+                          // and let the normal moveAttempts fallback switch to ranged fire.
+                          var _d = this.rangeHelper.tileDistance(r, e);
+                          if (void 0 === this.lastCrushApproachDistance || _d < this.lastCrushApproachDistance) {
+                            (this.lastCrushApproachDistance = _d), (this.crushApproachStallTicks = 0);
+                          } else if (40 < ++this.crushApproachStallTicks) {
+                            (a.cancel(),
+                              (this.lastCrushApproachDistance = void 0),
+                              (this.crushApproachStallTicks = 0),
+                              (this.moveAttempts = P + 1));
+                          }
+                          if (crushTarget) return !1;
                         }
                       else {
                         let e;
@@ -570,11 +640,20 @@ System.register(
                         this.rangeHelper.isInRange(r, t, 0, r.armedTrait.computeGuardScanRange(this.weapon), !0))
                     )
                       return !0;
-                    if (this.moveAttempts > P) return !0;
+                    if (this.moveAttempts > P) {
+                      // OpenYRWeb: crush-on-attack could not reach the target — fall back to
+                      // normal ranged fire on subsequent checks. Do NOT abort the attack
+                      // (previously `return !0` ended the task, so a crusher parked next to
+                      // a wall it could not drive onto neither fired nor crushed). Reset
+                      // moveAttempts so the check does not re-trigger and block the normal
+                      // move-to-range fallback on the next tick.
+                      (this.crushApproachFailed = !0), (this.moveAttempts = 0);
+                      return !1;
+                    }
                     0 < this.moveAttempts && this.children.push(new d.WaitMinutesTask(1 / 60));
                     ((h = e), (u = t && !i ? this.lastValidTargetPosition.onBridge : this.target.getBridge()));
                     return (
-                      (a = new p.MoveInWeaponRangeTask(this.game, h, !!u, this.weapon)),
+                      (a = new p.MoveInWeaponRangeTask(this.game, h, !!u, this.weapon, crushTarget)),
                       (a.blocking = !1),
                       this.children.push(a),
                       (this.moveExecuted = !0),
@@ -599,7 +678,10 @@ System.register(
                           this.weapon.minRange,
                           this.weapon.range - 1,
                         )) ||
-                      a.cancel()),
+                      // OpenYRWeb: crush-on-attack keeps the move task alive so the weapon
+                      // fires while the crusher keeps closing in to crush (vanilla YR does
+                      // both simultaneously).
+                      (!crushTarget && a.cancel())),
                   a && (r.isInfantry() || this.weapon.rules.spawner))
                 )
                   return !1;
@@ -618,12 +700,18 @@ System.register(
               if (s.attackState !== T.AttackState.PrepareToFire) return !1;
               if (!i || s.isDisabled()) return (a?.cancel(), !0);
               ((u = this.target.getWorldCoords()), (h = r.position.worldPosition));
-              if (!(
-                this.lastInRangeTargetPosition.length() &&
-                this.lastInRangeTargetPosition.equals(u) &&
-                this.lastInRangeSelfPosition.length() &&
-                this.lastInRangeSelfPosition.equals(h)
-              ))
+              if (
+                // OpenYRWeb: crush-on-attack fires ON THE MOVE (the move task is closing
+                // in to crush), so the "must be stationary" re-check is skipped — vanilla
+                // YR fires and crushes simultaneously.
+                !crushTarget &&
+                !(
+                  this.lastInRangeTargetPosition.length() &&
+                  this.lastInRangeTargetPosition.equals(u) &&
+                  this.lastInRangeSelfPosition.length() &&
+                  this.lastInRangeSelfPosition.equals(h)
+                )
+              )
                 return (
                   this.lastInRangeTargetPosition.copy(u),
                   this.lastInRangeSelfPosition.copy(h),

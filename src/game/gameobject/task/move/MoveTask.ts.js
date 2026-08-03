@@ -237,7 +237,10 @@ System.register(
                 ((e = t.moveTrait.currentWaypoint.tile), (i = t.moveTrait.currentWaypoint.onBridge));
               let r = { path: [], ignoredBlockers: [], blockedPathNodes: [] };
               const s = this.game.map.getObjectsOnTile(e).find((e) => e.isBuilding());
-              if (s && !this.game.map.terrain.getPassableSpeed(e, t.rules.speedType, t.isInfantry(), !1)) {
+              if (
+                s &&
+                !this.game.map.terrain.getPassableSpeed(e, t.rules.speedType, t.isInfantry(), !1, void 0, void 0, void 0, t)
+              ) {
                 var a = this.options?.ignoredBlockers?.includes(s);
                 if ((a || r.ignoredBlockers.push(s), !a && s.dockTrait)) {
                   let t = new Set(s.dockTrait?.getAllDockTiles()),
@@ -279,6 +282,9 @@ System.register(
                     this.allObstaclesAreBlockers || l.length
                       ? (e) => this.nodeIsBlockedForPathfinding(e, t, o, l)
                       : void 0,
+                  // OpenYRWeb: pass the mover so OmniCrushers (Battle Fortress) path
+                  // through the vehicles they can crush, like vanilla YR.
+                  mover: t,
                 },
               );
               return ((r.path = n), r);
@@ -502,6 +508,9 @@ System.register(
                         s.isInfantry(),
                         !!o.onBridge,
                         this.options?.ignoredBlockers,
+                        void 0,
+                        void 0,
+                        s,
                       )
                     )
                       return this.options?.stopOnBlocker &&
@@ -537,11 +546,19 @@ System.register(
                           (s.moveTrait.moveState = w.MoveState.ReachedNextWaypoint),
                           this.onTick(s)
                         );
-                      if (l.obj.rules.crushable) {
+                      // OpenYRWeb: use the full vanilla crush decision so OmniCrushers
+                      // (Battle Fortress) can also path through/crush vehicles, while
+                      // OmniCrushResistant targets still block them. The inner check keeps
+                      // the original Crusher=yes requirement for actually passing through.
+                      if (s.canCrushObject(l.obj) || l.obj.rules.crushable) {
                         if (
                           [S.SpeedType.Track, S.SpeedType.Hover].includes(s.rules.speedType) &&
                           s.crusher &&
-                          (!l.obj.isTechno() || !this.game.areFriendly(l.obj, s))
+                          // OpenYRWeb: force-attacking a friendly crushable target (wall or
+                          // unit) — drive straight over it instead of pushing it aside.
+                          (!l.obj.isTechno() ||
+                            !this.game.areFriendly(l.obj, s) ||
+                            (s.isForceAttacking && l.obj === s.currentAttackTarget))
                         )
                           continue;
                         if (!l.obj.isTechno())
@@ -667,6 +684,7 @@ System.register(
                                             .findObstacles(e, s)
                                             .filter((e) => !this.options?.ignoredBlockers?.includes(e.obj)).length,
                                         ignoredBlockers: this.options?.ignoredBlockers,
+                                        mover: s,
                                       },
                                     ))
                                   : []),
@@ -770,6 +788,7 @@ System.register(
                                     excludeTiles: (t) =>
                                       !!i.terrain.findObstacles(t, s).length ||
                                       this.path.findIndex((e) => e.tile === t.tile && e.onBridge === t.onBridge) > e,
+                                    mover: s,
                                   },
                                 )));
                               if (d.length)
@@ -806,7 +825,9 @@ System.register(
                           (e) =>
                             e.isUnit() &&
                             e.onBridge === !!t.onBridge &&
-                            e.rules.crushable &&
+                            // OpenYRWeb: scatter only from units this crusher can actually
+                            // crush (SCATTER veterans flee real threats, incl. OmniCrushers).
+                            s.canCrushObject(e) &&
                             e.veteranTrait?.hasVeteranAbility(I.VeteranAbility.SCATTER) &&
                             !this.game.areFriendly(e, s),
                         ))
@@ -916,8 +937,12 @@ System.register(
               } else {
                 let e =
                     !this.options?.ignoredBlockers?.length &&
-                    l.terrain.getPassableSpeed(o.tile, o.rules.speedType, o.isInfantry(), o.onBridge)
-                      ? this.game.map.terrain.getIslandIdMap(o.rules.speedType, o.isInfantry())
+                    l.terrain.getPassableSpeed(o.tile, o.rules.speedType, o.isInfantry(), o.onBridge, void 0, void 0, void 0, o)
+                      ? this.game.map.terrain.getIslandIdMap(
+                          o.rules.speedType,
+                          o.isInfantry(),
+                          o.crusher && o.omniCrusher ? "omni" : "",
+                        )
                       : void 0,
                   r = e?.get(o.tile, o.onBridge),
                   s = new c.MovePositionHelper(l),

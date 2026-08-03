@@ -265,6 +265,10 @@ System.register(
                 (this.idleRate = this.ini.getNumber("IdleRate", 0)),
                 (this.noSpawnAlt = this.ini.getBool("NoSpawnAlt")),
                 (this.crusher = this.ini.getBool("Crusher")),
+                // OpenYRWeb: OmniCrusher (vanilla YR). Requires Crusher=yes to take effect.
+                // Lets the unit crush objects that are not normally crushable (Crushable=no),
+                // such as vehicles. Battle Fortress (BFRT) uses Crusher=yes + OmniCrusher=yes.
+                (this.omniCrusher = this.ini.getBool("OmniCrusher")),
                 (this.consideredAircraft = this.ini.getBool("ConsideredAircraft")),
                 (this.crashable = this.ini.getBool("Crashable")));
               var i = this.ini.getBool("Landable");

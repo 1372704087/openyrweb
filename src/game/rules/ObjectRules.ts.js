@@ -29,6 +29,10 @@ System.register("game/rules/ObjectRules", ["engine/type/ObjectType"], function (
             ((this.alphaImage = this.ini.getString("AlphaImage") || void 0),
               (this.alternateArcticArt = this.ini.getBool("AlternateArcticArt")),
               (this.crushable = this.ini.getBool("Crushable", this.type === i.ObjectType.Infantry)),
+              // OpenYRWeb: OmniCrushResistant (vanilla YR). When yes, the object cannot be
+              // crushed by units with OmniCrusher=yes (OmniCrushResistant trumps OmniCrusher).
+              // It does NOT protect against regular Crusher=yes units when Crushable=yes.
+              (this.omniCrushResistant = this.ini.getBool("OmniCrushResistant")),
               (this.crushSound = this.ini.getString("CrushSound") || void 0),
               (this.dontScore = this.ini.getBool("DontScore")),
               (this.insignificant = this.ini.getBool("Insignificant")),
