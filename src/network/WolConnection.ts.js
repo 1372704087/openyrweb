@@ -160,6 +160,7 @@ System.register(
                   (this._onGameReport = new i.EventDispatcher()),
                   (this._onPartyUpdate = new i.EventDispatcher()),
                   (this.handleMessage = (t) => {
+                    try { console.log("[WoL-recv]", typeof t === "string" ? t : "<binary>"); } catch (_) {}
                     if ("string" == typeof t) {
                       let e = t.split(" ");
                       var i, r;

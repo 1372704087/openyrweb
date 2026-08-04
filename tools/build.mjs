@@ -227,6 +227,10 @@ function stepAssets() {
   copyFileSync(SERVER_CFG, join(BUILD, "config.ini"));
   logv("config.ini (offline)");
 
+  // servers.ini: multiplayer server list (WoL/GServ endpoints for the C++ server).
+  copyFileSync(join(ROOT, "server", "config", "servers.ini"), join(BUILD, "servers.ini"));
+  logv("servers.ini");
+
   // Empty breaking-news.html.
   writeOut("breaking-news.html", "<!doctype html><html><body></body></html>\n");
   logv("breaking-news.html (empty)");

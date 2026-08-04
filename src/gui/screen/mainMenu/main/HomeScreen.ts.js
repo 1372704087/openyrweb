@@ -1,9 +1,9 @@
 // === Reconstructed SystemJS module: gui/screen/mainMenu/main/HomeScreen ===
-// deps: ["gui/screen/mainMenu/ScreenType","gui/FullScreen","engine/sound/Music","gui/screen/options/component/getHumanReadableKey","gui/component/MessageBoxApi","gui/screen/mainMenu/MainMenuScreen"]
+// deps: ["gui/screen/mainMenu/ScreenType","gui/FullScreen","engine/sound/Music","gui/screen/options/component/getHumanReadableKey","gui/component/MessageBoxApi","gui/screen/mainMenu/MainMenuScreen","gui/screen/mainMenu/MainMenuRoute"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb 主菜单大修：移除 Quick Match / Mods / Info & Credits（无服务器 / 离线部署）。
-// Custom Match → 多人大廳（占位弹框，不连服务器）。Demo → 遭遇戰（沿用原 Skirmish 路径）。
+// OpenYRWeb 主菜单：Custom Match → 多人大廳（登录 → 大厅 → 建房/加入，连接 WoL 服务器）。
+// Demo → 遭遇戰（沿用原 Skirmish 路径）。Quick Match / Mods 保持移除（C++ 服务端暂未实现匹配队列）。
 
 System.register(
   "gui/screen/mainMenu/main/HomeScreen",
@@ -14,10 +14,11 @@ System.register(
     "gui/screen/options/component/getHumanReadableKey",
     "gui/component/MessageBoxApi",
     "gui/screen/mainMenu/MainMenuScreen",
+    "gui/screen/mainMenu/MainMenuRoute",
   ],
   function (e, t) {
     "use strict";
-    var i, r, a, s, c, n, l;
+    var i, r, a, s, c, n, o, l;
     t && t.id;
     return {
       setters: [
@@ -39,6 +40,9 @@ System.register(
         function (e) {
           n = e;
         },
+        function (e) {
+          o = e;
+        },
       ],
       execute: function () {
         ((l = class extends n.MainMenuScreen {
@@ -57,11 +61,13 @@ System.register(
             let e = this.strings;
             (this.controller.setSidebarButtons([
               {
-                // 多人大廳：占位弹框（无服务器，不进 Login/CustomGame 流程）
+                // 多人大廳：登录 → 大厅（连接 WoL 服务器，进 Login/CustomGame 流程）
                 label: e.get("GUI:CustomMatch"),
                 tooltip: e.get("TS:MultiLobbyTip"),
                 onClick: () => {
-                  this.messageBoxApi?.alert(e.get("TS:MultiLobbyMsg"), e.get("GUI:Ok"));
+                  this.controller?.goToScreen(i.ScreenType.Login, {
+                    afterLogin: (m) => new o.MainMenuRoute(i.ScreenType.CustomGame, { messages: m }),
+                  });
                 },
               },
               {
