@@ -138,7 +138,9 @@ System.register(
             .set(h.SuperWeaponType.AmerParaDrop, "EVA_ReinforcementsReady")
             // OpenYRWeb: YR superweapon EVA — Psychic Dominator + Force Shield ready.
             .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorReady")
-            .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldReady")),
+            .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldReady")
+            // OpenYRWeb: Psychic Reveal EVA ready sound.
+            .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")),
           (J = new Map()
             .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearMissileLaunched")
             .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainActivated")
@@ -146,7 +148,10 @@ System.register(
             .set(h.SuperWeaponType.LightningStorm, "EVA_LightningStormCreated")
             // OpenYRWeb: YR superweapon EVA — Psychic Dominator + Force Shield activated.
             .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorActivated")
-            .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldActivated")),
+            .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldActivated")
+            // OpenYRWeb: Psychic Reveal — vanilla YR has no separate "activated" EVA (the event was
+            // added too late), so the Ready sfx (spsyread) is reused at activation, per evamd.ini.
+            .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")),
           (ee = new Map().set(h.SuperWeaponType.MultiMissile, N.SoundKey.DigSound)),
           (te = new Map().set(h.SuperWeaponType.LightningStorm, "TXT_LIGHTNING_STORM_APPROACHING")),
           (ie = new Map([

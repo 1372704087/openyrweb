@@ -792,3 +792,17 @@ feat(crusher): 实现战斗要塞全能碾压系统（OmniCrusher）及攻击-�
 5. OmniCrusher 路径规划可穿越车辆。  
 6. 被不可碾压目标阻挡时 40 tick 后切换到远程攻击。  
 7. 墙体建筑可被正常锁定攻击。
+
+feat(psychic-reveal): 为精神揭示超级武器添加 EVA 语音与鼠标指针支持
+
+- 🔊 **音效映射增强**  
+  `SoundHandler` 中 `SW_Ready_Map` 新增 `PsychicReveal → EVA_PsychicRevealReady` 就绪语音映射；`SW_Activated_Map` 新增激活语音映射，复用 `EVA_PsychicRevealReady`（原版 YR 该超武无独立激活语音，与 `evamd.ini` 一致）。
+
+- 🖱️ **鼠标指针配置**  
+  `SpecialActionMode` 的超级武器指针映射表中新增 `PsychicReveal → PointerType.PsychicReveal`（指针 ID: 496），确保选择该超武时显示专用指针。
+
+### 🧪 测试建议
+1. PsychicReveal 准备就绪时播放 `EVA_PsychicRevealReady` 语音。  
+2. 激活时播放相同语音（符合原版 YR 行为）。  
+3. 选择该超武后鼠标指针正确切换为 ID 496 样式。  
+4. 揭示迷雾功能及冷却机制正常。

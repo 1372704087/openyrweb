@@ -35,7 +35,9 @@ System.register(
           .set(s.SuperWeaponType.GeneticMutator, r.PointerType.Mutate)
           // OpenYRWeb (2026-07-25): Force Shield — uses the ForceField pointer (dedicated
           // shield/force-field cursor, PointerType.ForceField=450). Single-click targeted.
-          .set(s.SuperWeaponType.ForceShield, r.PointerType.ForceField)),
+          .set(s.SuperWeaponType.ForceShield, r.PointerType.ForceField)
+          // OpenYRWeb: Psychic Reveal — Yuri's map-reveal mini-superweapon, uses the PsychicReveal pointer (496).
+          .set(s.SuperWeaponType.PsychicReveal, r.PointerType.PsychicReveal)),
           e(
             "SpecialActionMode",
             (i = class {
