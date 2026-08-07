@@ -140,7 +140,9 @@ System.register(
             .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorReady")
             .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldReady")
             // OpenYRWeb: Psychic Reveal EVA ready sound.
-            .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")),
+            .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")
+            // OpenYRWeb: Spy Plane ready EVA (Soviet Radar Tower support power).
+            .set(h.SuperWeaponType.SpyPlane, "EVA_SpyPlaneReady")),
           (J = new Map()
             .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearMissileLaunched")
             .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainActivated")
@@ -151,7 +153,9 @@ System.register(
             .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldActivated")
             // OpenYRWeb: Psychic Reveal — vanilla YR has no separate "activated" EVA (the event was
             // added too late), so the Ready sfx (spsyread) is reused at activation, per evamd.ini.
-            .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")),
+            .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")
+            // OpenYRWeb: Spy Plane activated EVA — "Spy plane en route" (evamd.ini EVA_SpyPlaneEnRoute).
+            .set(h.SuperWeaponType.SpyPlane, "EVA_SpyPlaneEnRoute")),
           (ee = new Map().set(h.SuperWeaponType.MultiMissile, N.SoundKey.DigSound)),
           (te = new Map().set(h.SuperWeaponType.LightningStorm, "TXT_LIGHTNING_STORM_APPROACHING")),
           (ie = new Map([

@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/trait/SuperWeaponsTrait ===
-// deps: ["game/trait/interface/NotifyWarpChange","game/SuperWeapon","game/superweapon/SuperWeaponEffect","game/trait/interface/NotifyPower","game/trait/interface/NotifyTick","game/type/SuperWeaponType","game/trait/interface/NotifySuperWeaponActivate","game/event/SuperWeaponActivateEvent","game/superweapon/ParadropEffect","game/superweapon/NukeEffect","game/superweapon/LightningStormEffect","game/superweapon/IronCurtainEffect","game/superweapon/ChronoSphereEffect","game/superweapon/DominatorEffect","game/superweapon/GeneticMutatorEffect","game/superweapon/ForceShieldEffect","game/superweapon/PsychicRevealEffect","game/trait/interface/NotifySuperWeaponDeactivate","engine/type/ObjectType"]
+// deps: ["game/trait/interface/NotifyWarpChange","game/SuperWeapon","game/superweapon/SuperWeaponEffect","game/trait/interface/NotifyPower","game/trait/interface/NotifyTick","game/type/SuperWeaponType","game/trait/interface/NotifySuperWeaponActivate","game/event/SuperWeaponActivateEvent","game/superweapon/ParadropEffect","game/superweapon/NukeEffect","game/superweapon/LightningStormEffect","game/superweapon/IronCurtainEffect","game/superweapon/ChronoSphereEffect","game/superweapon/DominatorEffect","game/superweapon/GeneticMutatorEffect","game/superweapon/ForceShieldEffect","game/superweapon/PsychicRevealEffect","game/superweapon/SpyPlaneEffect","game/trait/interface/NotifySuperWeaponDeactivate","engine/type/ObjectType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -22,12 +22,13 @@ System.register(
     "game/superweapon/GeneticMutatorEffect",
     "game/superweapon/ForceShieldEffect",
     "game/superweapon/PsychicRevealEffect",
+    "game/superweapon/SpyPlaneEffect",
     "game/trait/interface/NotifySuperWeaponDeactivate",
     "engine/type/ObjectType",
   ],
   function (e, t) {
     "use strict";
-    var i, o, s, r, a, g, p, m, f, y, T, v, b, Dm, Gm, Fs, Pr, n, S, l;
+    var i, o, s, r, a, g, p, m, f, y, T, v, b, Dm, Gm, Fs, Pr, Sp, n, S, l;
     t && t.id;
     return {
       setters: [
@@ -81,6 +82,9 @@ System.register(
         },
         function (e) {
           Pr = e;
+        },
+        function (e) {
+          Sp = e;
         },
         function (e) {
           n = e;
@@ -214,6 +218,13 @@ System.register(
                 // player. Single-click targeted (no tile2). Unlocked by the Psychic Sensor (YAGGNT).
                 case g.SuperWeaponType.PsychicReveal:
                   t.push(new Pr.PsychicRevealEffect(o, i, s));
+                  break;
+                // OpenYRWeb (2026-08-08): Spy Plane — Soviet Radar Tower (NARADR)
+                // support power. A recon plane (SPYP) flies in from a random map
+                // edge, photographs the area around the target (revealing shroud),
+                // and exits the opposite side. Single-click targeted (no tile2).
+                case g.SuperWeaponType.SpyPlane:
+                  t.push(new Sp.SpyPlaneEffect(o, i, s));
                   break;
               }
               for (var d of t) this.addEffect(d);

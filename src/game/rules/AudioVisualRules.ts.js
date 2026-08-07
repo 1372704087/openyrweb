@@ -89,6 +89,12 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.airstrikeTargetAcquiredSound = e.getString("AirstrikeTargetAcquiredSound") || void 0),
               (this.airstrikeDeathSound = e.getString("AirstrikeDeathSound") || void 0),
               (this.airstrikeAbortSound = e.getString("AirstrikeAbortSound") || void 0),
+              // OpenYRWeb (2026-08-08): Spy Plane camera sound + cadence (vanilla YR
+              // [AudioVisual]). SpyPlaneCamera is played each time the plane takes a
+              // picture; SpyPlaneCameraFrames is how often (in ticks) it does so while
+              // in the process of photographing the target area.
+              (this.spyPlaneCamera = e.getString("SpyPlaneCamera") || void 0),
+              (this.spyPlaneCameraFrames = e.getNumber("SpyPlaneCameraFrames", 16)),
               (this.messageDuration = e.getNumber("MessageDuration", 10)),
               (this.metallicDebris = e.getArray("MetallicDebris")),
               (this.nukeTakeOff = e.getString("NukeTakeOff")),

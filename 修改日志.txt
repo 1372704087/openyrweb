@@ -806,3 +806,31 @@ feat(psychic-reveal): 为精神揭示超级武器添加 EVA 语音与鼠标指�
 2. 激活时播放相同语音（符合原版 YR 行为）。  
 3. 选择该超武后鼠标指针正确切换为 ID 496 样式。  
 4. 揭示迷雾功能及冷却机制正常。
+
+feat(spy-plane): 实现苏联雷达塔侦察机超级武器
+
+- 🛩️ **SpyPlaneEffect** — 侦察机效果完整实现
+  苏联雷达塔（NARADR）的支援技能 `[SpyPlaneSpecial]`（SuperWeaponType.SpyPlane=8）此前在 `SuperWeaponsTrait.activateEffect` 的 switch 中缺少 case，激活时无任何效果。新增 `SpyPlaneEffect`：
+  - 从随机地图边缘（offset=1）生成 SPYP 侦察机，单段 MoveTask 直飞对侧出口（exitOffset=12），FlyBy 不减速，确保飞机经过目标点。
+  - 侦察机进入相机射程（`SpyCameraWeapon` Range=20 格）后，每 `SpyPlaneCameraFrames`（默认 16）tick 拍摄一张照片：以 `SpyCameraWeapon` Damage（默认 6）为半径永久揭示飞机模型当前位置周围迷雾，并播放 `SpyPlaneCamera`（默认 `SpyPlaneSnapshot`）音效。多个揭示圆随飞机移动分布，形成跟随飞行路径的揭示条带。
+  - 飞机离场后自动销毁，效果结束。揭示区域为永久（与 PsychicReveal 一致）。
+
+- 🔊 **EVA 语音映射**
+  `SoundHandler` 中 `SW_Ready_Map` 新增 `SpyPlane → EVA_SpyPlaneReady`；`SW_Activated_Map` 新增 `SpyPlane → EVA_SpyPlaneEnRoute`（"侦察机途中"），与 evamd.ini 一致。
+
+- 🖱️ **鼠标指针**
+  `SpecialActionMode` 指针映射表新增 `SpyPlane → PointerType.SpyPlane`（ID 504）。
+
+- ⚙️ **INI 配置读取**
+  `AudioVisualRules` 新增读取 `[AudioVisual] SpyPlaneCamera` 和 `SpyPlaneCameraFrames`（默认 16）。揭示半径与相机射程从 SPYP 单位主武器 `SpyCameraWeapon` 的 Damage/Range 动态读取。
+
+- 🔧 **音效大小写修复**
+  `SoundSpecs.getSpec` 新增大小写不敏感回退查找。原版 INI 中 `SpyPlaneCamera=SpyPlaneSnapshot`（小写 s）与 soundmd.ini 中 `[SpyPlaneSnapShot]`（大写 S）大小写不一致，导致音效无法播放。新增 `specsLower` 映射表，精确查找失败后自动按小写回退。
+
+### 🧪 测试建议
+1. 建造苏联雷达塔，等待超武就绪（冷却 4 分钟），EVA 播报 `EVA_SpyPlaneReady`。
+2. 选择超武后鼠标指针切换为 ID 504（侦察机）样式。
+3. 点击目标区域，EVA 播报 `EVA_SpyPlaneEnRoute`，侦察机从随机方向飞入。
+4. 侦察机飞越目标时每 16 tick 播放 `SpyPlaneSnapshot` 音效并逐步揭示周围迷雾。
+5. 侦察机飞离地图后销毁，冷却重新计时。
+6. 被击落的侦察机正常坠落（CrashingSound 正常播放）。

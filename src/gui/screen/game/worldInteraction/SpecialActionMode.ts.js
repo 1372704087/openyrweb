@@ -37,7 +37,9 @@ System.register(
           // shield/force-field cursor, PointerType.ForceField=450). Single-click targeted.
           .set(s.SuperWeaponType.ForceShield, r.PointerType.ForceField)
           // OpenYRWeb: Psychic Reveal — Yuri's map-reveal mini-superweapon, uses the PsychicReveal pointer (496).
-          .set(s.SuperWeaponType.PsychicReveal, r.PointerType.PsychicReveal)),
+          .set(s.SuperWeaponType.PsychicReveal, r.PointerType.PsychicReveal)
+          // OpenYRWeb: Spy Plane — Soviet Radar Tower support power, uses the SpyPlane pointer (504).
+          .set(s.SuperWeaponType.SpyPlane, r.PointerType.SpyPlane)),
           e(
             "SpecialActionMode",
             (i = class {

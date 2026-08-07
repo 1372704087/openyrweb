@@ -38,7 +38,7 @@ System.register("engine/sound/SoundSpecs", ["engine/sound/SoundSpec"], function 
           "SoundSpecs",
           (r = class {
             constructor(e) {
-              ((this.ini = e), (this.specs = new Map()), this.parse());
+              ((this.ini = e), (this.specs = new Map()), (this.specsLower = new Map()), this.parse());
             }
             parse() {
               let t = this.ini.getSection("Defaults");
@@ -57,13 +57,18 @@ System.register("engine/sound/SoundSpecs", ["engine/sound/SoundSpec"], function 
                   for (i of new Set(e.entries.values()))
                     i &&
                       ((r = this.ini.getSection(i))
-                        ? this.specs.set(i, new s.SoundSpec().read(r, this.defaults))
+                        ? (this.specs.set(i, new s.SoundSpec().read(r, this.defaults)),
+                          this.specsLower.set(i.toLowerCase(), i))
                         : console.warn(`Missing sound section [${i}]`));
                 else console.warn("Missing sound [SoundList] section. Sounds will not be played.");
               } else console.warn("Missing sound [Defaults] section. Sounds will not be played.");
             }
             getSpec(e) {
-              return this.specs.get(e);
+              var spec = this.specs.get(e);
+              if (spec) return spec;
+              // Case-insensitive fallback (original YR INI is case-insensitive)
+              var key = this.specsLower.get(("" + e).toLowerCase());
+              return key ? this.specs.get(key) : void 0;
             }
             getAll() {
               return [...this.specs.values()];

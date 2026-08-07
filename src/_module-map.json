@@ -5194,6 +5194,22 @@
       "bytes": 1600
     },
     {
+      "name": "game/superweapon/SpyPlaneEffect",
+      "file": "game/superweapon/SpyPlaneEffect.ts.js",
+      "deps": [
+        "game/superweapon/SuperWeaponEffect",
+        "engine/type/ObjectType",
+        "game/gameobject/unit/ZoneType",
+        "game/gameobject/unit/FacingUtil",
+        "game/gameobject/task/move/MoveTask",
+        "game/gameobject/task/system/CallbackTask",
+        "game/math/Vector2",
+        "game/Coords",
+        "game/event/TriggerSoundFxEvent"
+      ],
+      "bytes": 5200
+    },
+    {
       "name": "game/trait/SuperWeaponsTrait",
       "file": "game/trait/SuperWeaponsTrait.ts.js",
       "deps": [
@@ -5214,6 +5230,7 @@
         "game/superweapon/GeneticMutatorEffect",
         "game/superweapon/ForceShieldEffect",
         "game/superweapon/PsychicRevealEffect",
+        "game/superweapon/SpyPlaneEffect",
         "game/trait/interface/NotifySuperWeaponDeactivate",
         "engine/type/ObjectType"
       ],
