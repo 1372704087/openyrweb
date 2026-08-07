@@ -156,7 +156,9 @@ System.register(
                           `Waited ${Math.round(e - this.commsLagStartTime)}ms ` + "for other clients to catch up.",
                         ),
                       this.handleCommsLag(!1, e),
-                      !this.passiveMode && this.currentNetworkTurn >= this.receivedNetworkTurn && this.sendActions(),
+                      // 修复：被动玩家（后台标签页）也照常发送本回合动作（无输入则 NoAction），
+                      // 否则服务器锁步永远等不齐玩家，整局卡死在等待广播。
+                      this.currentNetworkTurn >= this.receivedNetworkTurn && this.sendActions(),
                       2 <= this.currentNetworkTurn &&
                         ((i = this.receivedActions.get(this.currentNetworkTurn - 2)),
                         this.replayRecorder.recordActions(this.game.currentTick, i),

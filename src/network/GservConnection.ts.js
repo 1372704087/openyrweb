@@ -142,8 +142,8 @@ System.register(
                               : e[1] === "" + c.RPL_GAME_DESYNC
                                 ? this._onGameDesync.dispatch(this)
                                 : e[1] === "" + c.RPL_NET_RATE
-                                  ? (([i, r] = e[3].slice(1).split(",")),
-                                    this._onRateChange.dispatch(this, { rate: Number(i), turnNo: Number(r) }))
+                  ? (([i, r] = e[3].slice(1).split(",")),
+                    this._onRateChange.dispatch(this, { rate: Number(i), turnNo: Number(r) }))
                                   : e[1] === "" + c.RPL_TAUNT
                                     ? this._onTaunt.dispatch(this, {
                                         from: e[0].replace(/^:/, ""),
