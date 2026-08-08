@@ -274,6 +274,12 @@ System.register(
                 // Passengers gain OpenToppedRangeBonus (+2 tiles) and OpenToppedDamageMultiplier
                 // (x1.2) from [CombatDamage]. The transport's own weapon fires independently.
                 (this.openTopped = this.ini.getBool("OpenTopped")),
+                // OpenYRWeb: OpenTransportWeapon (vanilla YR). Selects which weapon a
+                // passenger uses while inside an OpenTopped transport (e.g. Battle
+                // Fortress). 0=Primary, 1=Secondary, -1=decide normally (Primary).
+                // Guardian GI (GGI) uses OpenTransportWeapon=1 so it fires its
+                // MissileLauncher (anti-armour/AA) from the BF instead of its M60 MG.
+                (this.openTransportWeapon = this.ini.getNumber("OpenTransportWeapon", -1)),
                 (this.consideredAircraft = this.ini.getBool("ConsideredAircraft")),
                 (this.crashable = this.ini.getBool("Crashable")));
               var i = this.ini.getBool("Landable");

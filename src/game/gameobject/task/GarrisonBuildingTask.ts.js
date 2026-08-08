@@ -127,6 +127,10 @@ System.register(
               this.game.events.dispatch(new i.BuildingGarrisonEvent(this.target));
             }
             t.units.push(e);
+            // OpenYRWeb: back-reference so the occupant's weapon can apply garrison bonuses
+            // (OccupyWeaponRange / OccupyDamageMultiplier / OccupyROFMultiplier) while inside
+            // (see Weapon.get range / get rof / fire). Cleared on evacuation/destruction.
+            (e.garrisonedAt = this.target);
             if (this.target.rules.infantryAbsorb) this.target.garrisonTrait.onUnitEnteredBio(this);
           }
           onEnd(e) {

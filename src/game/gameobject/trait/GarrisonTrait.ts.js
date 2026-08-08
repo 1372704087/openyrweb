@@ -55,7 +55,9 @@ System.register(
           [r.NotifyDamage.onDamage]() {}
           [i.NotifyDestroy.onDestroy](e, t, i, r) {
             if (r) {
-              for (var s of this.units) ((s.deathType = e.deathType), t.destroyObject(s, i, !0));
+              for (var s of this.units) {
+                ((s.deathType = e.deathType), (s.garrisonedAt = void 0), t.destroyObject(s, i, !0));
+              }
               this.units = [];
             } else this.evacuate(t);
           }
@@ -94,10 +96,11 @@ System.register(
                   h
                     ? (o.splice(u, 1),
                       r.unlimboObject(c, h),
+                      (c.garrisonedAt = void 0),
                       (c.onBridge = r.map.tileOccupation.getBridgeOnTile(h)?.isLowBridge() ?? !1),
                       (c.position.tileElevation = 0),
                       c.unitOrderTrait.addTask(new a.ScatterTask(r)))
-                    : s || (r.destroyObject(c, { player: c.owner }), o.splice(u, 1));
+                    : s || (r.destroyObject(c, { player: c.owner }), (c.garrisonedAt = void 0), o.splice(u, 1));
                 }
               }
               var f = n.owner;

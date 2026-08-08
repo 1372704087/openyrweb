@@ -69,15 +69,20 @@ System.register(
               (this.feedbackType = t ? o.OrderFeedbackType.Move : o.OrderFeedbackType.None));
           }
           isValid() {
+            var e = this.sourceObject;
             return (
-              this.sourceObject.isUnit() &&
-              (!!this.targetOptional || !this.sourceObject.moveTrait.isDisabled()) &&
+              // OpenYRWeb: garrisoned buildings (bunkers/huts) can receive Guard too — they
+              // have no unit moveTrait, but a selected garrisoned building should be able to
+              // cancel its current attack and hold ground (vanilla YR behaviour). Plain
+              // buildings without a garrison still reject Guard.
+              (e.isUnit() || (e.isBuilding() && !!e.garrisonTrait)) &&
+              (!!this.targetOptional || !e.moveTrait?.isDisabled()) &&
               !(
                 this.target &&
                 this.game.mapShroudTrait
-                  .getPlayerShroud(this.sourceObject.owner)
+                  .getPlayerShroud(e.owner)
                   ?.isShrouded(this.target.tile, this.target.obj?.tileElevation) &&
-                !this.sourceObject.rules.moveToShroud
+                !e.rules.moveToShroud
               )
             );
           }
@@ -89,7 +94,10 @@ System.register(
             const e = this.sourceObject;
             let i = [];
             return (
+              // OpenYRWeb: only units move to the guard-area tile — buildings (incl.
+              // garrisoned ones) cannot move, they just hold ground where they are.
               t &&
+                e.isUnit() &&
                 i.push(
                   new n.MoveTask(this.game, t, !!this.target.getBridge(), {
                     closeEnoughTiles: this.game.rules.general.closeEnough,
@@ -105,6 +113,7 @@ System.register(
                 : i.push(
                     new a.CallbackTask((e) => {
                       (t &&
+                        this.sourceObject.isUnit() &&
                         ![l.MoveResult.Success, l.MoveResult.CloseEnough].includes(
                           this.sourceObject.moveTrait?.lastMoveResult,
                         )) ||

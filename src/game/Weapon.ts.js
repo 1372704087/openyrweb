@@ -135,6 +135,15 @@ System.register(
                 if (this.gameObject.transport && this.gameObject.transport.rules.openTopped) {
                   baseRange += S.openToppedRangeBonus;
                 }
+                // OpenYRWeb: OccupyWeaponRange (vanilla YR [CombatDamage], default 5) overrides
+                // the range of any weapon fired by an infantry with Occupier=yes while occupying
+                // a building (ModEnc). A fixed value is needed because two different occupants
+                // may have different weapon ranges — the short-range guy would otherwise make
+                // the building stop shooting. The occupant's gameObject.garrisonedAt back-ref is
+                // set in GarrisonBuildingTask.onEnter and cleared on evacuation/destruction.
+                if (this.gameObject.garrisonedAt) {
+                  baseRange = S.occupyWeaponRange;
+                }
                 return baseRange;
               }
               get speed() {
@@ -149,6 +158,10 @@ System.register(
                   // OpenYRWeb: Tank Bunker ROF multiplier (BunkerROFMultiplier, default 1).
                   // Divide so values > 1 INCREASE fire rate (matching YR docs: larger = faster).
                   this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait && (e /= S.bunkerROFMultiplier),
+                  // OpenYRWeb: OccupyROFMultiplier (vanilla YR [CombatDamage], default 1.2) —
+                  // multiplier to ROF of any weapon fired by an infantry while occupying a
+                  // building (ModEnc). Divide so values > 1 INCREASE fire rate.
+                  this.gameObject.garrisonedAt && (e /= S.occupyROFMultiplier),
                   Math.floor(e)
                 );
               }
@@ -181,7 +194,10 @@ System.register(
                   // OpenYRWeb: when a passenger fires from an OpenTopped transport (e.g.
                   // Battle Fortress), use the transport's position/direction/tile as the
                   // fire origin — the passenger is limboed and its own position is stale.
-                  fireOrigin = (n.transport && n.transport.rules.openTopped) ? n.transport : n,
+                  // Same for a garrisoned infantry (Occupier=yes, e.g. inside a Battle
+                  // Bunker): the soldier is limboed, so fire from the building instead of
+                  // the tile it entered from.
+                  fireOrigin = n.transport && n.transport.rules.openTopped ? n.transport : n.garrisonedAt ? n.garrisonedAt : n,
                   t,
                   o = 0;
                 if (
@@ -236,7 +252,10 @@ System.register(
                       (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait ? S.bunkerDamageMultiplier : 1) *
                       // OpenYRWeb: OpenTopped damage multiplier (OpenToppedDamageMultiplier, default 1.2).
                       // Multiplies passenger weapon damage when firing from an OpenTopped transport.
-                      (this.gameObject.transport && this.gameObject.transport.rules.openTopped ? S.openToppedDamageMultiplier : 1));
+                      (this.gameObject.transport && this.gameObject.transport.rules.openTopped ? S.openToppedDamageMultiplier : 1) *
+                      // OpenYRWeb: OccupyDamageMultiplier (vanilla YR [CombatDamage], default 1.2).
+                      // Multiplies weapon damage while the infantry is occupying a building.
+                      (this.gameObject.garrisonedAt ? S.occupyDamageMultiplier : 1));
                   let r = this.flh.clone();
                   // OpenYRWeb: when a passenger fires from an OpenTopped transport, use the
                   // transport's AlternateFLH (gun-port positions) instead of the passenger's
@@ -288,8 +307,9 @@ System.register(
                 let e = this.gameObject,
                   // OpenYRWeb: when firing from an OpenTopped transport, use the transport's
                   // facing (and turret if it has one) so the muzzle direction follows the
-                  // vehicle's orientation as it moves and turns.
-                  origin = (e.transport && e.transport.rules.openTopped) ? e.transport : e,
+                  // vehicle's orientation as it moves and turns. A garrisoned infantry uses
+                  // the building's facing (buildings cannot turn — vanilla YR behaviour).
+                  origin = e.transport && e.transport.rules.openTopped ? e.transport : e.garrisonedAt ? e.garrisonedAt : e,
                   t;
                 return (
                   (t =
@@ -315,7 +335,14 @@ System.register(
           // OpenYRWeb: OpenTopped (Battle Fortress) passenger firing bonuses (vanilla YR [CombatDamage]).
           // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
           (S.openToppedRangeBonus = 2),
-          (S.openToppedDamageMultiplier = 1.2));
+          (S.openToppedDamageMultiplier = 1.2),
+          // OpenYRWeb: garrisoned-infantry firing bonuses (vanilla YR [CombatDamage]).
+          // OccupyWeaponRange overrides the range while occupying a building (default 5);
+          // OccupyDamageMultiplier / OccupyROFMultiplier scale damage / ROF (default 1.2).
+          // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
+          (S.occupyWeaponRange = 5),
+          (S.occupyDamageMultiplier = 1.2),
+          (S.occupyROFMultiplier = 1.2));
       },
     };
   },

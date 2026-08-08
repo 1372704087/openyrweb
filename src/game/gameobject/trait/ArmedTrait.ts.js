@@ -61,6 +61,19 @@ System.register(
               ? ((s = e ? t.art.elitePrimaryFireFlh : t.art.primaryFireFlh),
                 (this.primaryWeapon = a.Weapon.factory(i, n.WeaponType.Primary, t, this.rules, s)))
               : (this.primaryWeapon = void 0);
+            // OpenYRWeb: OccupyWeapon/EliteOccupyWeapon (vanilla YR) — the weapon an
+            // infantry uses while garrisoning a building (Occupier=yes). Defaults to
+            // Primary if unset (ModEnc). Rebuilt on elite toggle like primary/secondary.
+            var occupyName = (e && t.rules.eliteOccupyWeapon) || t.rules.occupyWeapon;
+            this.occupyWeapon = occupyName
+              ? a.Weapon.factory(
+                  occupyName,
+                  n.WeaponType.Primary,
+                  t,
+                  this.rules,
+                  e ? t.art.elitePrimaryFireFlh : t.art.primaryFireFlh,
+                )
+              : void 0;
             var r,
               s = (e && t.rules.eliteSecondary) || t.rules.secondary;
             (s
@@ -141,12 +154,37 @@ System.register(
           }
           computeGuardScanRange(t) {
             var e =
-                this.guardWeaponRangeOverride ??
-                [this.primaryWeapon, this.secondaryWeapon]
-                  .filter((e) => e === t || e?.rules.neverUse)
-                  .reduce((e, t) => Math.max(e, t.range), 0),
-              e = Math.max(e, this.gameObject.rules.guardRange);
+              this.guardWeaponRangeOverride ??
+              [this.primaryWeapon, this.secondaryWeapon]
+                .filter((e) => e === t || e?.rules.neverUse)
+                .reduce((e, t) => Math.max(e, t.range), 0);
+            // OpenYRWeb: garrisoned buildings (no own weapon) derive the guard scan radius
+            // from their occupants' weapons — vanilla YR guard-mode huts scan out to the
+            // garrison's weapon range.
+            if (!e && this.gameObject.isBuilding() && this.gameObject.garrisonTrait?.isOccupied()) {
+              for (var occ of this.gameObject.garrisonTrait.units) {
+                var occWeapon = occ.armedTrait?.getGarrisonWeapon();
+                if (occWeapon && occWeapon.range > e) e = occWeapon.range;
+              }
+            }
+            (e = Math.max(e, this.gameObject.rules.guardRange));
             return Math.min(15, 2 * e - 1);
+          }
+          // OpenYRWeb: OpenTransportWeapon (vanilla YR) — the weapon a passenger uses
+          // while riding inside an OpenTopped transport (e.g. Battle Fortress).
+          // 0=Primary, 1=Secondary, -1=decide normally (Primary). Guardian GI (GGI)
+          // has OpenTransportWeapon=1 so it fires its MissileLauncher (anti-armour/AA)
+          // from the BF instead of its M60 MG.
+          getOpenToppedWeapon() {
+            if (this.gameObject.rules.openTransportWeapon > 0 && this.secondaryWeapon) return this.secondaryWeapon;
+            return this.primaryWeapon;
+          }
+          // OpenYRWeb: OccupyWeapon (vanilla YR) — the weapon an infantry uses while
+          // garrisoning a building (Occupier=yes). OccupyWeapon is set per-unit in
+          // rulesmd.ini (e.g. GI uses UCPara when occupying); defaults to Primary if
+          // unset. Elite units get EliteOccupyWeapon (rebuilt in selectStandardWeapons).
+          getGarrisonWeapon() {
+            return this.occupyWeapon || this.primaryWeapon;
           }
           getDeployFireWeapon() {
             if (this.gameObject.rules.deployFire)
@@ -164,14 +202,14 @@ System.register(
             var g = this.gameObject;
             if (g && g.garrisonTrait && g.garrisonTrait.isOccupied()) {
               for (var u of g.garrisonTrait.units) {
-                if (u.primaryWeapon === e || u.secondaryWeapon === e) return !0;
+                if (u.armedTrait?.getGarrisonWeapon() === e) return !0;
               }
             }
             // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) — passengers' weapons
             // are also considered equipped so target-line / range checks include them.
             if (g && g.transportTrait && g.rules.openTopped && g.transportTrait.units.length) {
               for (var passenger of g.transportTrait.units) {
-                if (passenger.primaryWeapon === e || passenger.secondaryWeapon === e) return !0;
+                if (passenger.armedTrait?.getOpenToppedWeapon() === e) return !0;
               }
             }
             return !1;
@@ -182,19 +220,21 @@ System.register(
           [i.NotifyTick.onTick]() {
             (this.primaryWeapon && this.primaryWeapon.tick(), this.secondaryWeapon && this.secondaryWeapon.tick());
             // OpenYRWeb: tick weapons of garrisoned units so their cooldowns expire.
+            // Only the OccupyWeapon-selected weapon is ticked (e.g. GI's UCPara).
             var g = this.gameObject;
             if (g && g.garrisonTrait && g.garrisonTrait.isOccupied()) {
               for (var u of g.garrisonTrait.units) {
-                u.primaryWeapon && u.primaryWeapon.tick();
-                u.secondaryWeapon && u.secondaryWeapon.tick();
+                var garrisonWeapon = u.armedTrait?.getGarrisonWeapon();
+                garrisonWeapon && garrisonWeapon.tick();
               }
             }
             // OpenYRWeb: tick weapons of passengers inside an OpenTopped transport
-            // (e.g. Battle Fortress) so their cooldowns expire while riding.
+            // (e.g. Battle Fortress) so their cooldowns expire while riding. Only the
+            // weapon selected by OpenTransportWeapon is ticked (GGI fires its missile).
             if (g && g.transportTrait && g.rules.openTopped && g.transportTrait.units.length) {
               for (var passenger of g.transportTrait.units) {
-                passenger.primaryWeapon && passenger.primaryWeapon.tick();
-                passenger.secondaryWeapon && passenger.secondaryWeapon.tick();
+                var openToppedWeapon = passenger.armedTrait?.getOpenToppedWeapon();
+                openToppedWeapon && openToppedWeapon.tick();
               }
             }
           }
@@ -209,6 +249,7 @@ System.register(
             ((this.gameObject = void 0),
               (this.primaryWeapon = void 0),
               (this.secondaryWeapon = void 0),
+              (this.occupyWeapon = void 0),
               (this.deathWeapon = void 0));
           }
         }),

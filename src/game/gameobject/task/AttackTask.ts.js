@@ -404,7 +404,9 @@ System.register(
                 // with their own weapon and own ROF, not divided by occupant count.
                 if (r.isBuilding() && r.garrisonTrait && r.garrisonTrait.isOccupied()) {
                   for (var occ of r.garrisonTrait.units) {
-                    var wp = occ.primaryWeapon;
+                    // OpenYRWeb: each occupant fires its OccupyWeapon (vanilla YR: GI
+                    // fires its UCPara weapon while occupying; defaults to Primary).
+                    var wp = occ.armedTrait?.getGarrisonWeapon();
                     if (wp && 0 === wp.getCooldownTicks() &&
                         wp.targeting.canTarget(this.target.obj, this.target.tile, this.game, !!this.options.force, !!this.options.passive)) {
                       wp.fire(this.target, this.game, 1);
@@ -423,7 +425,9 @@ System.register(
                 if (r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
                   var openToppedTarget = this.target.obj || this.target.tile;
                   for (var passenger of r.transportTrait.units) {
-                    var passengerWeapon = passenger.primaryWeapon;
+                    // OpenYRWeb: use OpenTransportWeapon (GGI fires its MissileLauncher
+                    // from the BF, not the M60 MG).
+                    var passengerWeapon = passenger.armedTrait?.getOpenToppedWeapon();
                     if (
                       passengerWeapon &&
                       0 === passengerWeapon.getCooldownTicks() &&
@@ -446,7 +450,7 @@ System.register(
                   // already fired above — skip the normal fire path to avoid double-firing.
                   // (This happens when the vehicle's own weapon can't target, e.g. BFRT MG
                   // vs aircraft — a Guardian GI's AA missile is selected instead.)
-                  if (r.transportTrait.units.some((p) => p.primaryWeapon === this.weapon)) {
+                  if (r.transportTrait.units.some((p) => p.armedTrait?.getOpenToppedWeapon() === this.weapon)) {
                     s.attackState = T.AttackState.JustFired;
                     return !1;
                   }
@@ -530,7 +534,9 @@ System.register(
                 // it would mean passengers never shoot while the vehicle is moving.
                 if (i && !magDragging && r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
                   for (var approachPassenger of r.transportTrait.units) {
-                    var approachPassengerWeapon = approachPassenger.primaryWeapon;
+                    // OpenYRWeb: use OpenTransportWeapon (GGI fires its MissileLauncher
+                    // from the BF, not the M60 MG).
+                    var approachPassengerWeapon = approachPassenger.armedTrait?.getOpenToppedWeapon();
                     if (
                       approachPassengerWeapon &&
                       0 === approachPassengerWeapon.getCooldownTicks() &&
@@ -734,10 +740,11 @@ System.register(
                   // task completes as normal.
                   if (r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
                     for (var holdPassenger of r.transportTrait.units) {
+                      var holdPassengerWeapon = holdPassenger.armedTrait?.getOpenToppedWeapon();
                       if (
-                        holdPassenger.primaryWeapon &&
-                        this.rangeHelper.isInWeaponRange(r, e, holdPassenger.primaryWeapon, this.game.rules) &&
-                        this.losHelper.hasLineOfSight(r, e, holdPassenger.primaryWeapon)
+                        holdPassengerWeapon &&
+                        this.rangeHelper.isInWeaponRange(r, e, holdPassengerWeapon, this.game.rules) &&
+                        this.losHelper.hasLineOfSight(r, e, holdPassengerWeapon)
                       )
                         return !1;
                     }

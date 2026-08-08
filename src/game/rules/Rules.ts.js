@@ -358,6 +358,10 @@ System.register(
               // OpenYRWeb: Propagate OpenTopped (Battle Fortress) passenger firing bonuses.
               C.Weapon.openToppedRangeBonus = this.combatDamage.openToppedRangeBonus;
               C.Weapon.openToppedDamageMultiplier = this.combatDamage.openToppedDamageMultiplier;
+              // OpenYRWeb: Propagate garrisoned-infantry firing bonuses (OccupyWeapon/EliteOccupyWeapon).
+              C.Weapon.occupyWeaponRange = this.combatDamage.occupyWeaponRange;
+              C.Weapon.occupyDamageMultiplier = this.combatDamage.occupyDamageMultiplier;
+              C.Weapon.occupyROFMultiplier = this.combatDamage.occupyROFMultiplier;
             }
             readRadiation() {
               var e = this.ini.getSection("Radiation");

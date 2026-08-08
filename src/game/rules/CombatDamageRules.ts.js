@@ -98,7 +98,17 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               //   a Chrono Legionnaire's phased target, the temporal link breaks (default 7).
               (this.openToppedRangeBonus = e.getNumber("OpenToppedRangeBonus", 2)),
               (this.openToppedDamageMultiplier = e.getNumber("OpenToppedDamageMultiplier", 1.2)),
-              (this.openToppedWarpDistance = e.getNumber("OpenToppedWarpDistance", 7)));
+              (this.openToppedWarpDistance = e.getNumber("OpenToppedWarpDistance", 7)),
+              // OpenYRWeb: garrisoned-infantry firing bonuses (vanilla YR [CombatDamage]).
+              // OccupyWeaponRange: overrides the Range of any weapon fired by an infantry with
+              //   Occupier=yes while occupying a building (default 5). A fixed value is needed
+              //   because two different occupants may have different weapon ranges — the short
+              //   range guy would otherwise make the building stop shooting.
+              // OccupyDamageMultiplier: multiplier to weapon Damage while occupying (default 1.2).
+              // OccupyROFMultiplier: multiplier to weapon ROF while occupying (default 1.2, larger=faster).
+              (this.occupyWeaponRange = e.getNumber("OccupyWeaponRange", 5)),
+              (this.occupyDamageMultiplier = e.getNumber("OccupyDamageMultiplier", 1.2)),
+              (this.occupyROFMultiplier = e.getNumber("OccupyROFMultiplier", 1.2)));
           }
         }),
       );

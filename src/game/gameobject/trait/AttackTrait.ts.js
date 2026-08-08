@@ -153,15 +153,12 @@ System.register(
                     : void 0
                   : [e.primaryWeapon, e.secondaryWeapon].find((e) => e !== t && !e?.rules.neverUse) ?? e.primaryWeapon;
               } else if (e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()) {
-                // OpenYRWeb: garrisoned buildings use all occupants' weapons
-                // Return the first available weapon from any occupant
+                // OpenYRWeb: garrisoned buildings use occupants' OccupyWeapon (vanilla YR:
+                // GI fires its UCPara weapon while occupying). Defaults to Primary if unset.
+                // Return the first available weapon from any occupant.
                 for (var occupant of e.garrisonTrait.units) {
-                  if (occupant.primaryWeapon) {
-                    i = occupant.primaryWeapon;
-                    break;
-                  }
-                  if (occupant.secondaryWeapon) {
-                    i = occupant.secondaryWeapon;
+                  if (occupant.armedTrait?.getGarrisonWeapon()) {
+                    i = occupant.armedTrait.getGarrisonWeapon();
                     break;
                   }
                 }
@@ -220,12 +217,13 @@ System.register(
                             : e.secondaryWeapon?.rules.neverUse ? e.primaryWeapon : e.secondaryWeapon,
                       ])
                     : e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()
-                      ? // OpenYRWeb: garrisoned buildings use all occupants' weapons
+                      ? // OpenYRWeb: garrisoned buildings use each occupant's OccupyWeapon
+                        // (vanilla YR: GI fires its UCPara weapon while occupying).
                         (() => {
                           var weapons = [];
                           for (var occupant of e.garrisonTrait.units) {
-                            if (occupant.primaryWeapon) weapons.push(occupant.primaryWeapon);
-                            if (occupant.secondaryWeapon) weapons.push(occupant.secondaryWeapon);
+                            var garrisonWeapon = occupant.armedTrait?.getGarrisonWeapon();
+                            if (garrisonWeapon) weapons.push(garrisonWeapon);
                           }
                           return weapons;
                         })()
@@ -235,15 +233,17 @@ System.register(
                           ? [e.overpoweredTrait.getWeapon()]
                           : e.isVehicle() && e.rules.openTopped && e.transportTrait && e.transportTrait.units.length
                             ? // OpenYRWeb: OpenTopped transport (e.g. Battle Fortress) — the
-                              // vehicle's own weapons PLUS all passenger weapons, so
+                              // vehicle's own weapons PLUS each passenger's
+                              // OpenTransportWeapon (vanilla YR: Guardian GI fires its
+                              // MissileLauncher from the BF instead of the M60 MG), so
                               // selectWeaponVersus can pick the right one for any target
                               // (e.g. Guardian GI's AA missile for aircraft). The vehicle's
                               // own weapon is listed first so it is preferred when it can hit.
                               (() => {
                                 var weapons = [e.primaryWeapon, e.secondaryWeapon];
                                 for (var passenger of e.transportTrait.units) {
-                                  if (passenger.primaryWeapon) weapons.push(passenger.primaryWeapon);
-                                  if (passenger.secondaryWeapon) weapons.push(passenger.secondaryWeapon);
+                                  var openWeapon = passenger.armedTrait?.getOpenToppedWeapon();
+                                  if (openWeapon) weapons.push(openWeapon);
                                 }
                                 return weapons;
                               })()
@@ -418,10 +418,15 @@ System.register(
                 (this.opportunityFireTask = void 0));
             }
             shouldPassiveAcquire(e) {
+              // OpenYRWeb: garrisoned buildings (e.g. a civilian hut with infantry inside)
+              // count their occupants' weapons as their own for passive target acquisition
+              // — vanilla YR buildings auto-fire at enemies with the garrison's weapons even
+              // though the building itself has no Primary/Secondary weapon.
+              var garrisoned = e.isBuilding() && e.garrisonTrait?.isOccupied();
               if (
                 (!e.owner.isCombatant() && e.rules.needsEngineer) ||
                 !e.rules.canPassiveAquire ||
-                !e.primaryWeapon ||
+                (!e.primaryWeapon && !garrisoned) ||
                 (e.ammoTrait && !e.ammoTrait.ammo && e.rules.manualReload)
               )
                 return !1;
@@ -442,9 +447,12 @@ System.register(
               return !0;
             }
             shouldRetaliate(e, t, i, r, s) {
+              // OpenYRWeb: garrisoned buildings count their occupants' weapons as their own
+              // for retaliation, matching vanilla YR (a hut with infantry fights back).
+              var garrisoned = e.isBuilding() && e.garrisonTrait?.isOccupied();
               // OpenYRWeb: berserk units always retaliate (they treat everyone as hostile).
               if (e.berserkTrait?.isBerserk()) {
-                if (i < 1 || !e.rules.canRetaliate || !e.primaryWeapon ||
+                if (i < 1 || !e.rules.canRetaliate || (!e.primaryWeapon && !garrisoned) ||
                     (e.ammoTrait && !e.ammoTrait.ammo && e.rules.manualReload) ||
                     s.rules.temporal || r.rules.missileSpawn ||
                     !t.isValidTarget(r) || e.mindControllerTrait?.isAtCapacity())
@@ -458,7 +466,7 @@ System.register(
                 i < 1 ||
                 t.areFriendly(e, r) ||
                 !e.rules.canRetaliate ||
-                !e.primaryWeapon ||
+                (!e.primaryWeapon && !garrisoned) ||
                 (e.ammoTrait && !e.ammoTrait.ammo && e.rules.manualReload) ||
                 s.rules.temporal ||
                 r.rules.missileSpawn ||
@@ -517,15 +525,19 @@ System.register(
                 e.transportTrait.units.length
               ) {
                 var passengerScanRadius = 0;
-                for (var psg of e.transportTrait.units)
-                  if (psg.primaryWeapon && psg.primaryWeapon.range > passengerScanRadius)
-                    passengerScanRadius = psg.primaryWeapon.range;
+                for (var psg of e.transportTrait.units) {
+                  var psgRadiusWeapon = psg.armedTrait?.getOpenToppedWeapon();
+                  if (psgRadiusWeapon && psgRadiusWeapon.range > passengerScanRadius)
+                    passengerScanRadius = psgRadiusWeapon.range;
+                }
                 passengerScanRadius += 1 + 3 + i.rules.elevationModel.bonusCap;
                 for (const d of this.scanTechnosAround(e, passengerScanRadius, i)) {
                   if (!this.canPassiveAcquire(d, i) || !i.isValidTarget(d)) continue;
                   var psgArmor = d.isTechno() ? d.rules.armor : void 0;
                   for (var psg2 of e.transportTrait.units) {
-                    var psgWeapon = psg2.primaryWeapon;
+                    // OpenYRWeb: use OpenTransportWeapon (GGI fires its MissileLauncher
+                    // from the BF, not the M60 MG).
+                    var psgWeapon = psg2.armedTrait?.getOpenToppedWeapon();
                     if (
                       psgWeapon &&
                       psgWeapon.targeting.canTarget(d, d.tile, i, !1, !0) &&

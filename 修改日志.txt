@@ -1,4 +1,4 @@
-﻿﻿﻿- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
+﻿- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
   建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
 
 - 🎬 **建筑动画配置支持受损图片**  
@@ -863,4 +863,23 @@ feat(spy-plane): 实现苏联雷达塔侦察机超级武器
 4. 乘客射程不同（狙击手 vs 动员兵）：各自独立判断，远的先打、近的不空射。
 5. 炮口与转向：5 名乘客分别从 5 个 AlternateFLH 炮口射击，车辆转向时弹道跟随。
 6. 防空：车内重装大兵自动拦截飞机（自身机枪无法对空时由乘客武器开火）。
+
+- 🏢 **建筑驻军专用武器（OccupyWeapon / EliteOccupyWeapon）**
+  实现原版 YR 步兵驻军武器机制：步兵进入建筑（Occupier=yes，如美国大兵 GI）后使用独立的驻军武器开火，而非 OpenTransportWeapon（后者仅适用于 OpenTopped 运输车，原版建筑驻军走的是 OccupyWeapon 两条独立字段）。
+  - `ArmedTrait.selectStandardWeapons` 按精英状态创建 `occupyWeapon`（取 `EliteOccupyWeapon` 或 `OccupyWeapon`，未配置时回退主武器）；新增 `getGarrisonWeapon()`；`isEquippedWithWeapon` / `onTick` 的驻军分支改用 `getGarrisonWeapon()`。
+  - `AttackTrait.selectDefaultWeapon` / `getAvailableWeapons` 的驻军分支返回各驻军士兵的 `getGarrisonWeapon()`（建筑可瞄准仅驻军武器能打的敌人）。
+  - `AttackTask` Firing 驻军开火块改用 `getGarrisonWeapon()`（GI 驻军时打 UCPara/UCElitePara，而非 M60 机枪）。
+  - **驻军加成**（原版 `[CombatDamage]`）：解析 `OccupyWeaponRange=5`、`OccupyDamageMultiplier=1.2`、`OccupyROFMultiplier=1.2` 并传播到 Weapon 模块。
+    - `Weapon.get range`：驻军时射程固定为 `OccupyWeaponRange`（5），覆盖武器自身 Range（原版注释：大建筑自动给射程加成，且两名驻军武器射程不同时短射程者会拖累建筑停火，故用固定值）。
+    - `Weapon.get rof`：驻军时 ROF 除以 `OccupyROFMultiplier`（>1 加速，UCPara ROF 15 → 12）。
+    - `Weapon.fire`：驻军时伤害乘以 `OccupyDamageMultiplier`（30 → 36）。
+  - **反向引用**：`GarrisonBuildingTask.onEnter` 设置 `occupant.garrisonedAt = 建筑`（同 transport 模式），`GarrisonTrait.evacuate` / `onDestroy`、`EvacuateBioReactorTask` 卸载时清除，供 Weapon 层查询驻军状态。
+  - **Bug 修复：驻军建筑不会自动开火**。`AttackTrait.shouldPassiveAcquire` / `shouldRetaliate` 用 `!e.primaryWeapon` 判断攻击能力，而民房等驻军建筑自身无武器，导致敌人进入射程也永远不获取目标。修复：驻军建筑（`garrisonTrait.isOccupied()`）豁免该检查，用驻军士兵的 OccupyWeapon 参与被动扫描与反击；`ArmedTrait.computeGuardScanRange` 守卫模式扫描半径改为取驻军武器射程（此前为 0，守卫也扫不到目标）。生物反应炉（InfantryAbsorb + bioReactorPowerTrait）不挂 ArmedTrait/AttackTrait，不受影响、不会开火。
+  - **Bug 修复：战斗碉堡驻军开火位置**。驻军士兵被 limbo 后 `Weapon.fire` 仍以其自身位置（进入建筑前站的格子）作为弹道起点，子弹从碉堡外射出。修复：`Weapon.fire` / `getMuzzleFacing` 对 `garrisonedAt`（驻军士兵）改用建筑作为 fireOrigin（位置 + 建筑朝向，建筑不可转向），与 OpenTopped 运输车同模式；MuzzleFlash0-4 枪口闪光动画仍由建筑 renderable 在 JustFired 时按 artmd.ini 像素偏移播放。
+  - **Bug 修复：驻军建筑按 G 无法取消攻击**。`GuardAreaOrder.isValid` 要求 `sourceObject.isUnit()`，建筑（含驻军碉堡/民房）不满足 → Guard 命令被丢弃、任务继续执行。修复：驻军建筑（`garrisonTrait` 存在）放行 Guard；`process` 对建筑不创建 MoveTask（建筑不可移动，原地守卫），且 moveTrait 判空避免 TypeError。按 G 后建筑取消当前攻击并进入守卫模式（被动扫描仍会攻击范围内敌人）。
+
+### 🧪 测试建议
+1. 美国大兵进民房/进驻建筑：开火音效为 UCPara 的 AlliedOccupiedAttack（机枪音，非 M60），射程 5 格，伤害 30×1.2=36，ROF 15→12。
+2. 精英美国大兵（三级）进驻：使用 UCElitePara（伤害 40×1.2=48）。
+3. 建筑内混编不同射程士兵（如大兵+动员兵）：建筑按固定 5 格射程统一开火，短射程士兵不拖累。
 

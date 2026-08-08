@@ -73,11 +73,15 @@ System.register(
               var idx = gu.units.indexOf(unit);
               if (-1 !== idx) gu.units.splice(idx, 1);
             }
+            // OpenYRWeb: clear the garrison back-ref now that the unit is leaving
+            // (kept in sync with GarrisonBuildingTask.onEnter).
+            unit.garrisonedAt = void 0;
 
             var spawnTile = this._spawnTile;
             var exitTile = this._exitTile;
 
             if (!spawnTile || !exitTile) {
+              unit.garrisonedAt = void 0;
               g.destroyObject(unit, { player: unit.owner });
               this._ticksUntilNext = 30;
               return !1;
@@ -128,7 +132,9 @@ System.register(
           onEnd(e) {
             if (this._building && this._units.length) {
               var g = this.game;
-              for (var u of this._units) g.destroyObject(u, { player: u.owner });
+              for (var u of this._units) {
+                (u.garrisonedAt = void 0), g.destroyObject(u, { player: u.owner });
+              }
               this._units = [];
             }
             this._exitTile = null;
