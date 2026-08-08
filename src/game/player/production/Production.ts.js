@@ -85,7 +85,9 @@ System.register(
                   // [CHEAT] 作弊调试用：为true时跳过工厂和前置建筑检查，使所有建筑/单位可建造。后续删除作弊时一并移除
                   (this.cheatsBypassPrereqs = false),
                   // [CHEAT] 作弊调试用：为true时突破建造数量限制。后续删除作弊时一并移除
-                  (this.cheatsBypassBuildLimits = false));
+                  (this.cheatsBypassBuildLimits = false),
+                  // [CHEAT] 作弊调试用：为true时跳过科技等级限制，允许建造科技等级-1及以下（隐藏单位）的建筑/单位。后续删除作弊时一并移除
+                  (this.cheatsBypassTechLevel = false));
               }
               get onQueueUpdate() {
                 return this._onQueueUpdate.asEvent();
@@ -132,7 +134,9 @@ System.register(
               }
               isAvailableForProduction(e) {
                 return (
-                  (this.cheatsBypassPrereqs || -1 !== e.techLevel) &&
+                  // [CHEAT] 作弊调试用：cheatsBypassTechLevel为true时允许建造科技等级-1及以下（隐藏单位）。
+                  // 常规情况下仅科技等级 >= 0 的单位可建造。后续删除作弊时恢复为 0 <= e.techLevel
+                  (this.cheatsBypassTechLevel || 0 <= e.techLevel) &&
                   e.techLevel <= this.maxTechLevel &&
                   (this.cheatsBypassBuildLimits || !(0 === e.buildLimit && !this.player.isAi)) &&
                   !(

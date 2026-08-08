@@ -21,55 +21,55 @@ System.register(
   ],
   function (e, t) {
     "use strict";
-    var i, r, s, h, u, a, n, o, l, d, c, g, p, m;
+    var NotifyTick, NotifyUnspawn, NotifyOwnerChange, ProductionQueue, InsufficientFundsEvent, TechnoRules, NotifySpawn, NotifyPower, PowerTrait, MathUtil, GameSpeed, ObjectType, GameMath, ProductionTrait;
     t && t.id;
     return {
       setters: [
         function (e) {
-          i = e;
+          NotifyTick = e;
         },
         function (e) {
-          r = e;
+          NotifyUnspawn = e;
         },
         function (e) {
-          s = e;
+          NotifyOwnerChange = e;
         },
         function (e) {
-          h = e;
+          ProductionQueue = e;
         },
         function (e) {
-          u = e;
+          InsufficientFundsEvent = e;
         },
         function (e) {
-          a = e;
+          TechnoRules = e;
         },
         function (e) {
-          n = e;
+          NotifySpawn = e;
         },
         function (e) {
-          o = e;
+          NotifyPower = e;
         },
         function (e) {
-          l = e;
+          PowerTrait = e;
         },
         function (e) {
-          d = e;
+          MathUtil = e;
         },
         function (e) {
-          c = e;
+          GameSpeed = e;
         },
         function (e) {
-          g = e;
+          ObjectType = e;
         },
         function (e) {
-          p = e;
+          GameMath = e;
         },
       ],
       execute: function () {
-        ((m = class {
+        ((ProductionTrait = class {
           constructor(e, t) {
             ((this.rules = e), (this.speedCheat = t), (this.availableObjectRules = new Set()));
-            var i = 60 * e.general.buildSpeed * c.GameSpeed.BASE_TICKS_PER_SECOND;
+            var i = 60 * e.general.buildSpeed * GameSpeed.GameSpeed.BASE_TICKS_PER_SECOND;
             ((this.baseBuildSpeed = 1 / (i / 1e3)),
               [
                 ...e.buildingRules.values(),
@@ -80,19 +80,19 @@ System.register(
                 e.owner.length && this.availableObjectRules.add(e);
               }));
           }
-          [i.NotifyTick.onTick](e) {
+          [NotifyTick.NotifyTick.onTick](e) {
             for (var t of e.getCombatants()) for (var i of t.production.getAllQueues()) this.tickQueue(i, t, e);
           }
-          [n.NotifySpawn.onSpawn](e, t) {
+          [NotifySpawn.NotifySpawn.onSpawn](e, t) {
             var i;
             e.isBuilding() && e.owner.production
               ? (i = e.rules.factory) &&
                 (e.owner.production.getPrimaryFactory(i) || e.owner.production.setPrimaryFactory(e),
                 e.owner.production.incrementFactoryCount(i),
-                i === a.FactoryType.AircraftType && this.updateAircraftQueueMaxSize(e.owner, t))
+                i === TechnoRules.FactoryType.AircraftType && this.updateAircraftQueueMaxSize(e.owner, t))
               : e.isAircraft() && e.owner.production && this.updateAircraftQueueMaxSize(e.owner, t);
           }
-          [r.NotifyUnspawn.onUnspawn](e, t) {
+          [NotifyUnspawn.NotifyUnspawn.onUnspawn](e, t) {
             var i;
             e.isBuilding() && e.owner.production
               ? (
@@ -106,10 +106,10 @@ System.register(
                 (i = e.rules.factory) &&
                   (e.owner.production.getPrimaryFactory(i) === e && e.owner.production.crownPrimaryFactoryHeir(i),
                   e.owner.production.decrementFactoryCount(i),
-                  i === a.FactoryType.AircraftType && this.updateAircraftQueueMaxSize(e.owner, t)))
+                  i === TechnoRules.FactoryType.AircraftType && this.updateAircraftQueueMaxSize(e.owner, t)))
               : e.isAircraft() && e.owner.production && this.updateAircraftQueueMaxSize(e.owner, t);
           }
-          [s.NotifyOwnerChange.onChange](e, t, i) {
+          [NotifyOwnerChange.NotifyOwnerChange.onChange](e, t, i) {
             var r;
             e.isBuilding()
               ? (this.ensurePrerequisites(t),
@@ -120,22 +120,22 @@ System.register(
                     e.owner.production.setPrimaryFactory(e),
                   t.production?.decrementFactoryCount(r),
                   e.owner.production?.incrementFactoryCount(r),
-                  r === a.FactoryType.AircraftType &&
+                  r === TechnoRules.FactoryType.AircraftType &&
                     (this.updateAircraftQueueMaxSize(e.owner, i), this.updateAircraftQueueMaxSize(t, i))))
               : e.isAircraft() && (this.updateAircraftQueueMaxSize(e.owner, i), this.updateAircraftQueueMaxSize(t, i));
           }
-          [o.NotifyPower.onPowerLow](e) {
+          [NotifyPower.NotifyPower.onPowerLow](e) {
             e.production &&
               (e.production.buildSpeedModifier = this.computeLowPowerBuildSpeedModifier(
                 e.powerTrait.power,
                 e.powerTrait.drain,
               ));
           }
-          [o.NotifyPower.onPowerRestore](e) {
+          [NotifyPower.NotifyPower.onPowerRestore](e) {
             e.production && (e.production.buildSpeedModifier = 1);
           }
-          [o.NotifyPower.onPowerChange](e) {
-            e.powerTrait?.level === l.PowerLevel.Low &&
+          [NotifyPower.NotifyPower.onPowerChange](e) {
+            e.powerTrait?.level === PowerTrait.PowerLevel.Low &&
               e.production &&
               (e.production.buildSpeedModifier = this.computeLowPowerBuildSpeedModifier(
                 e.powerTrait.power,
@@ -146,7 +146,7 @@ System.register(
             var i = 1 - Math.min(1, e / t),
               r = this.rules.general,
               i = (0.3 * r.lowPowerPenaltyModifier * i) / 0.15;
-            return d.clamp(1 - i, r.minLowPowerProductionSpeed, r.maxLowPowerProductionSpeed);
+            return MathUtil.clamp(1 - i, r.minLowPowerProductionSpeed, r.maxLowPowerProductionSpeed);
           }
           updateAircraftQueueMaxSize(i, r) {
             i.production &&
@@ -154,7 +154,7 @@ System.register(
                 var e = [...i.buildings]
                     .filter((e) => e.helipadTrait)
                     .reduce((e, t) => e + t.dockTrait.numberOfDocks, 0),
-                  t = i.getOwnedObjectsByType(g.ObjectType.Aircraft, !0);
+                  t = i.getOwnedObjectsByType(ObjectType.ObjectType.Aircraft, !0);
                 /* OpenYRWeb: count owned aircraft that consume Airforce Command
                    production capacity: anything that came out of the factory
                    (isProducedAircraft — this includes Spawned=yes types built
@@ -166,7 +166,7 @@ System.register(
                 /* OpenYRWeb: set _maxSize directly to avoid the setter's
                    side-effect of truncating the items array. Do NOT touch
                    q.size — push/remove manage it. */
-                var q = i.production.getQueueForFactory(a.FactoryType.AircraftType);
+                var q = i.production.getQueueForFactory(TechnoRules.FactoryType.AircraftType);
                 q._maxSize = Math.max(0, e - n);
                 /* OpenYRWeb: notify the queue after _maxSize changes so the
                    sidebar (CombatantSidebarModel) picks up the new value and
@@ -175,19 +175,22 @@ System.register(
               })();
           }
           tickQueue(i, r, s) {
-            if (i.status === h.QueueStatus.Active) {
+            if (i.status === ProductionQueue.QueueStatus.Active) {
               let e = !1,
                 t = i.getFirst();
               var a,
                 n = r.production.getFactoryTypeForQueueType(i.type),
                 o = r.production.getFactoryCount(n),
                 l = r.production.buildSpeedModifier,
-                c = 1 / p.GameMath.pow(this.rules.general.multipleFactory, o - 1),
+                c = 1 / GameMath.GameMath.pow(this.rules.general.multipleFactory, o - 1),
                 n = t.rules.wall ? 1 / this.rules.general.wallBuildSpeedCoefficient : 1,
                 o = this.baseBuildSpeed * l * c * n,
                 l = t.creditsEach,
-                c = l && !this.speedCheat.value ? d.floorTo((l / o) * t.rules.buildTimeMultiplier, 54) : 54,
-                c = Math.max(54, c),
+                // OpenYRWeb: 秒建造作弊（speedCheat）开启时 1 tick 内完成建造，不再保留
+                // 54 tick（一个建造帧，约 3.6s）的最短计时；未开启时维持原版行为：
+                // 建造时间取整到 54 tick 的整数倍，且最短一个建造帧
+                c = this.speedCheat.value ? 1 : l ? MathUtil.floorTo((l / o) * t.rules.buildTimeMultiplier, 54) : 54,
+                c = Math.max(this.speedCheat.value ? 1 : 54, c),
                 n = r.credits,
                 o = t.creditsEach - t.creditsSpent,
                 o = Math.min(r.credits, l / c + t.creditsSpentLeftover, o);
@@ -197,8 +200,8 @@ System.register(
                   a &&
                     ((t.creditsSpent += a), (t.progress = t.creditsSpent / t.creditsEach), (r.credits -= a), (e = !0)))
                 : t.creditsEach || ((a = t.progress * c), (t.progress = Math.min(1, (1 + a) / c)), (e = !0)),
-                e && 1 === t.progress && (i.status = h.QueueStatus.Ready),
-                0 < n && !r.credits && s.events.dispatch(new u.InsufficientFundsEvent(r)),
+                e && 1 === t.progress && (i.status = ProductionQueue.QueueStatus.Ready),
+                0 < n && !r.credits && s.events.dispatch(new InsufficientFundsEvent.InsufficientFundsEvent(r)),
                 e && i.notifyUpdated());
             }
           }
@@ -217,7 +220,7 @@ System.register(
             return [...this.availableObjectRules];
           }
         }),
-          e("ProductionTrait", m));
+          e("ProductionTrait", ProductionTrait));
       },
     };
   },

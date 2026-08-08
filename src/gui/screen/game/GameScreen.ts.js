@@ -787,13 +787,13 @@ System.register(
                       () => w.DevToolsApi.unregisterVar("speed"),
                     ),
                     // ============ [CHEAT] 调试作弊系统 开始 ============
-                    // 按 F10 打开作弊菜单，提供无限金钱、秒建造、科技全开、地图全开等功能
+                    // 按 F10 打开作弊菜单，提供无限金钱、秒建造、科技全开、科技增强、地图全开等功能
                     // 后续删除作弊时，删除从本注释到 "[CHEAT] 调试作弊系统 结束" 之间的整块代码
                     w.DevToolsApi.registerVar("cheats", this.runtimeVars.cheatsEnabled),
                     this.disposables.add(() => w.DevToolsApi.unregisterVar("cheats")),
                     (() => {
                       let _cheatMenu = null, _cheatInfMoneyTimer = null, _cheatInfSuperWeaponTimer = null;
-                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, mapRevealed: false, bypassBuildLimit: false, infSuperWeapon: false };
+                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, techBoost: false, mapRevealed: false, bypassBuildLimit: false, infSuperWeapon: false };
                       const _gs = this;
                       function _destroyCheatMenu() {
                         if (_cheatMenu) { _cheatMenu.remove(); _cheatMenu = null; }
@@ -887,8 +887,17 @@ System.register(
                             _cheatState.allTech = true;
                           }
                         });
+                        // [CHEAT] 科技增强：允许建造科技等级-1及以下的隐藏单位（与科技全开相互独立，可单独开启）
+                        addToggle("科技增强", () => _cheatState.techBoost, () => {
+                          _cheatState.techBoost = !_cheatState.techBoost;
+                          const prod = lp.production;
+                          if (prod) prod.cheatsBypassTechLevel = _cheatState.techBoost;
+                          // 立即刷新侧边栏，使隐藏单位即时显示/隐藏
+                          const sm = _gs.sidebarModel;
+                          if (sm && "function" === typeof sm.updateAvailableObjects && g) sm.updateAvailableObjects(g.art);
+                        });
                         addSeparator();
-                        // [CHEAT] 一键全部开启：同时启用无限金钱、秒建造、地图全开、科技全开
+                        // [CHEAT] 一键全部开启：同时启用无限金钱、秒建造、地图全开、科技全开、科技增强
                         addBtn("一键全部开启", () => {
                           rv.cheatsEnabled.value = true;
                           if (!_cheatState.infMoney) { _cheatState.infMoney = true; if (!_cheatInfMoneyTimer) _cheatInfMoneyTimer = setInterval(() => { if (g.status === 1) lp.credits += 50000; }, 200); }
@@ -899,8 +908,10 @@ System.register(
                             prod.maxTechLevel = 99;
                             prod.addStolenTech(0); prod.addStolenTech(1); prod.addStolenTech(2);
                             prod.cheatsBypassPrereqs = true;
+                            prod.cheatsBypassTechLevel = true;
                             prod.cheatsBypassBuildLimits = true;
                             _cheatState.allTech = true;
+                            _cheatState.techBoost = true;
                             _cheatState.bypassBuildLimit = true;
                           }
                           if (!_cheatState.infSuperWeapon) { _cheatState.infSuperWeapon = true; if (!_cheatInfSuperWeaponTimer) _cheatInfSuperWeaponTimer = setInterval(() => { if (g.status === 1 && lp.superWeaponsTrait) { for (const sw of lp.superWeaponsTrait.getAll()) { sw.chargeTicks = 0; sw.status = 2; } } }, 100); }
