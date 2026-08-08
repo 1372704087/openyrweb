@@ -171,6 +171,9 @@ System.register(
                     this.game.events.dispatch(new a.EnterTransportEvent(this.target)),
                     this.game.events.dispatch(new d.EnterObjectEvent(this.target, n)),
                     this.target.transportTrait.units.push(n),
+                    // OpenYRWeb: back-reference so passenger weapons can query the transport
+                    // for OpenTopped range/damage bonuses (see Weapon.get range / fire).
+                    (n.transport = this.target),
                     !0))
               );
             }

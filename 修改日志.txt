@@ -1,4 +1,4 @@
-﻿- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
+﻿﻿﻿- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
   建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
 
 - 🎬 **建筑动画配置支持受损图片**  
@@ -834,3 +834,33 @@ feat(spy-plane): 实现苏联雷达塔侦察机超级武器
 4. 侦察机飞越目标时每 16 tick 播放 `SpyPlaneSnapshot` 音效并逐步揭示周围迷雾。
 5. 侦察机飞离地图后销毁，冷却重新计时。
 6. 被击落的侦察机正常坠落（CrashingSound 正常播放）。
+
+- 🚜 **战斗要塞乘客开火功能（OpenTopped）**
+  实现战斗要塞（BFRT）OpenTopped=yes 机制：车内最多 5 名步兵可从炮口独立开火，享受 +2 射程（OpenToppedRangeBonus）和 ×1.2 伤害加成（OpenToppedDamageMultiplier）。要塞自身武器（20mmRapid）同时开火，乘客在移动中也可射击（fire on the move）。
+  - `[CombatDamage]` 解析 OpenToppedRangeBonus=2、OpenToppedDamageMultiplier=1.2、OpenToppedWarpDistance=7。
+  - `TechnoRules` 新增 openTopped 字段。
+  - `Weapon.get range` / `Weapon.fire` 通过乘客的 transport 反向引用自动施加射程/伤害加成。
+  - `EnterTransportTask` 设置 passenger.transport 反向引用；`EvacuateTransportTask` / `TransportTrait.onDestroy` / `spawnSurvivors` 清除引用。
+  - `ArmedTrait.onTick` 为 OpenTopped 载具的乘客武器递减冷却；`isEquippedWithWeapon` 包含乘客武器。
+  - `AttackTrait.getAvailableWeapons` 为 OpenTopped 载具返回自身武器 + 全部乘客武器，使其可瞄准仅乘客能攻击的目标（如重装大兵防空）。
+  - `AttackTask` 开火阶段：全部乘客独立开火（各自 ROF/冷却），若 selectWeaponVersus 选中了乘客武器则跳过载具自身开火避免双重射击，否则载具自身武器继续走正常开火路径。
+  - 新增代码使用可读变量名（passenger、passengerWeapon 等），替代原有 abcd 风格混淆名。
+  - **开火位置跟随车辆**：`Weapon.fire` / `getMuzzleFacing` 在乘客位于 OpenTopped 运输车内时改用运输车（fireOrigin）的位置/朝向/炮塔偏移计算弹道，避免乘客被 limbo 后使用过期坐标（子弹从旧位置、旧朝向发出、不随车移动的问题）。
+  - **AlternateFLH 炮口位置**：`ObjectArt` 新增 `getAlternateFlh(index)` 解析 `AlternateFLH{index}`；`Weapon.fire` 按乘客在 `transportTrait.units` 中的槽位取运输车的 `AlternateFLH0-4` 作为开火偏移（随车方向旋转），替代乘客自身步兵 FLH（此前乘客用自己 PrimaryFireFLH 套在大车身上位置错误）。
+  - **独立射程/视线**：Firing 与 CheckRange 阶段每名乘客独立检查 canTarget / 射程（含 +2 加成）/ 视线（各武器弹头穿墙/穿崖属性），乘客1射程远可命中时乘客2射程近不会开火。
+  - **要塞按自身武器射程移动**：还原射程判定，要塞始终按自身机枪（20mmRapid，5.75 格）射程决定停止距离；接近途中乘客进入射程即提前开火（CheckRange 乘客开火块），不影响要塞继续接近。
+  - **闲置状态自动开火**：`AttackTrait.scanForTarget` 在原扫描（自身武器射程）未找到目标时追加乘客武器二次扫描（扫描半径扩展至乘客最大射程）；被动 AttackTask 使用 holdGround=true 原地持续开火。
+  - **移动中机会射击**：`shouldPassiveAcquire` 对 OpenTopped 载具（有乘客）放行，即使正在执行 MoveTask 也进行被动扫描；命中目标创建 opportunityFireTask（holdGround=true、disallowTurning=true），乘客开火而车辆继续按 MoveTask 移动；preventOpportunityFire=true 的任务（EnterTransport、MagnetronDrag 等）仍会取消机会射击。
+  - **Bug 修复**：
+    - Firing 阶段乘客射程/视线检查误用棱镜计数变量 e（数字），改用 openToppedTarget（this.target.obj ?? tile），此前乘客在 Firing 状态永远不开火。
+    - CheckRange 的 rangeCheckCooldown 在移动接近中被每 tick 重置（永远 >0），阻塞乘客开火块执行；乘客开火块前移到该检查之前。
+    - CheckRange 乘客开火块原先以"自身武器不在射程"为门控，被动扫描选中乘客武器时 inRange 为 true 被跳过，导致"只会瞄准不开火"（Firing 状态因目标移动永远进不去）；改为无条件检查乘客。
+
+### 🧪 测试建议
+1. 要塞装 5 名步兵（如 3 重装大兵 + 2 美国大兵），命令攻击远处目标：移动途中乘客提前开火、要塞不停，到达机枪射程后机枪与乘客齐射。
+2. 要塞闲置，敌人进入乘客射程（机枪射程外）：乘客原地自动开火，要塞不移动。
+3. 纯移动命令（MoveTask）途中经过敌人：乘客自动射击，要塞不转向、不停留。
+4. 乘客射程不同（狙击手 vs 动员兵）：各自独立判断，远的先打、近的不空射。
+5. 炮口与转向：5 名乘客分别从 5 个 AlternateFLH 炮口射击，车辆转向时弹道跟随。
+6. 防空：车内重装大兵自动拦截飞机（自身机枪无法对空时由乘客武器开火）。
+

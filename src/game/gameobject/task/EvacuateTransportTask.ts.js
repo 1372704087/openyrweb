@@ -111,17 +111,21 @@ System.register(
                 return (
                   !this.soft &&
                   ((e.position.tile = t.tile),
-                  (e.position.tileElevation = t.tileElevation),
-                  (e.onBridge = t.onBridge),
-                  (e.zone = t.zone),
-                  this.game.destroyObject(e, { player: e.owner }),
-                  !0)
+                    (e.position.tileElevation = t.tileElevation),
+                    (e.onBridge = t.onBridge),
+                    (e.zone = t.zone),
+                    // OpenYRWeb: clear transport back-reference on destructive evacuate.
+                    (e.transport = void 0),
+                    this.game.destroyObject(e, { player: e.owner }),
+                    !0)
                 );
               var { spawnNode: r, moveNode: s } = i;
               return (
                 (e.position.tileElevation = r.onBridge?.tileElevation ?? 0),
                 (e.onBridge = !!r.onBridge),
                 (e.zone = this.game.map.getTileZone(r.tile, !r.onBridge)),
+                // OpenYRWeb: clear transport back-reference on normal evacuate.
+                (e.transport = void 0),
                 this.game.unlimboObject(e, r.tile),
                 e.unitOrderTrait.unmarkNextQueuedOrder(),
                 s

@@ -128,6 +128,13 @@ System.register(
                 if (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait) {
                   baseRange += S.bunkerWeaponRangeBonus;
                 }
+                // OpenYRWeb: OpenTopped transport range bonus (OpenToppedRangeBonus, default 2).
+                // Passengers firing from an OpenTopped=yes transport (e.g. Battle Fortress) get
+                // a bonus to their weapon range. The passenger's gameObject.transport back-ref
+                // is set in EnterTransportTask and cleared on exit/destruction.
+                if (this.gameObject.transport && this.gameObject.transport.rules.openTopped) {
+                  baseRange += S.openToppedRangeBonus;
+                }
                 return baseRange;
               }
               get speed() {
@@ -171,6 +178,10 @@ System.register(
               }
               fire(s, a, e = 1) {
                 let n = this.gameObject,
+                  // OpenYRWeb: when a passenger fires from an OpenTopped transport (e.g.
+                  // Battle Fortress), use the transport's position/direction/tile as the
+                  // fire origin — the passenger is limboed and its own position is stale.
+                  fireOrigin = (n.transport && n.transport.rules.openTopped) ? n.transport : n,
                   t,
                   o = 0;
                 if (
@@ -222,26 +233,40 @@ System.register(
                       e * (this.gameObject.isUnit() ? this.gameObject.crateBonuses.firepower : 1) *
                       // OpenYRWeb: Tank Bunker damage multiplier (BunkerDamageMultiplier, default 1).
                       // Multiplies weapon damage when the vehicle is inside a Tank Bunker.
-                      (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait ? S.bunkerDamageMultiplier : 1));
+                      (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait ? S.bunkerDamageMultiplier : 1) *
+                      // OpenYRWeb: OpenTopped damage multiplier (OpenToppedDamageMultiplier, default 1.2).
+                      // Multiplies passenger weapon damage when firing from an OpenTopped transport.
+                      (this.gameObject.transport && this.gameObject.transport.rules.openTopped ? S.openToppedDamageMultiplier : 1));
                   let r = this.flh.clone();
+                  // OpenYRWeb: when a passenger fires from an OpenTopped transport, use the
+                  // transport's AlternateFLH (gun-port positions) instead of the passenger's
+                  // own FLH. Each passenger slot (0-4) maps to AlternateFLH0-4 on the transport
+                  // (e.g. BFRT: 0=(45,190,90), 1=(45,-190,90), ...). Falls back to (0,0,0)
+                  // (transport centre) if AlternateFLH is not defined for the slot.
+                  if (fireOrigin !== n && fireOrigin.transportTrait) {
+                    var passengerIndex = fireOrigin.transportTrait.units.indexOf(n);
+                    if (passengerIndex >= 0) {
+                      r = fireOrigin.art.getAlternateFlh(passengerIndex);
+                    }
+                  }
                   r.lateral *= this.lateralMuzzleMult;
-                  var l = n.position.getMapPosition();
+                  var l = fireOrigin.position.getMapPosition();
                   if (a.map.isWithinHardBounds(l)) {
-                    (i.position.moveToLeptons(l), (i.position.tileElevation = n.position.tileElevation));
+                    (i.position.moveToLeptons(l), (i.position.tileElevation = fireOrigin.position.tileElevation));
                     let e = new f.Vector2(r.lateral, r.forward);
                     var c = this.getMuzzleFacing() + this.distributedFireAngle;
                     e = g.rotateVec2(e, c);
-                    ((l = new f.Vector2(0, n.art.turretOffset)), (l = g.rotateVec2(l, n.direction)));
+                    ((l = new f.Vector2(0, fireOrigin.art.turretOffset)), (l = g.rotateVec2(l, fireOrigin.direction)));
                     (e.add(l),
                       n.rules.radialFireSegments &&
                         n.rules.distributedFire &&
                         ((l = Math.floor(180 / n.rules.radialFireSegments)),
                         (this.distributedFireAngle = ((this.distributedFireAngle + l + 90) % 180) - 90)),
                       (i.direction = c),
-                      n.isBuilding() &&
-                        n.rules.turretAnim &&
-                        ((h = p.Coords.screenDistanceToWorld(n.rules.turretAnimX, n.rules.turretAnimY)),
-                        (c = n.getFoundationCenterOffset()),
+                      fireOrigin.isBuilding() &&
+                        fireOrigin.rules.turretAnim &&
+                        ((h = p.Coords.screenDistanceToWorld(fireOrigin.rules.turretAnimX, fireOrigin.rules.turretAnimY)),
+                        (c = fireOrigin.getFoundationCenterOffset()),
                         i.position.moveByLeptons(-c.x + h.x, -c.y + h.y)));
                     let t = new y.Vector3(e.x, r.vertical, -e.y);
                     var h = t.clone().add(i.position.worldPosition);
@@ -252,7 +277,7 @@ System.register(
                       this.rules.revealOnFire && s.obj?.isTechno())
                     ) {
                       let e = a.mapShroudTrait.getPlayerShroud(s.obj.owner);
-                      e?.isShrouded(n.tile, n.tileElevation) && e.revealTemporarily(n);
+                      e?.isShrouded(fireOrigin.tile, fireOrigin.tileElevation) && e.revealTemporarily(fireOrigin);
                     }
                     (this.rules.decloakToFire && this.gameObject.cloakableTrait?.uncloak(a),
                       a.events.dispatch(new d.WeaponFireEvent(this, this.gameObject)));
@@ -261,14 +286,18 @@ System.register(
               }
               getMuzzleFacing() {
                 let e = this.gameObject,
+                  // OpenYRWeb: when firing from an OpenTopped transport, use the transport's
+                  // facing (and turret if it has one) so the muzzle direction follows the
+                  // vehicle's orientation as it moves and turns.
+                  origin = (e.transport && e.transport.rules.openTopped) ? e.transport : e,
                   t;
                 return (
                   (t =
-                    !e.isInfantry() && !e.isAircraft() && (e.isBuilding() || e.isVehicle()) && e.turretTrait
-                      ? e.rules.turretSpins
-                        ? e.direction
-                        : e.turretTrait.facing
-                      : e.direction),
+                    !origin.isInfantry() && !origin.isAircraft() && (origin.isBuilding() || origin.isVehicle()) && origin.turretTrait
+                      ? origin.rules.turretSpins
+                        ? origin.direction
+                        : origin.turretTrait.facing
+                      : origin.direction),
                   t
                 );
               }
@@ -282,7 +311,11 @@ System.register(
           // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
           (S.bunkerDamageMultiplier = 1),
           (S.bunkerROFMultiplier = 1),
-          (S.bunkerWeaponRangeBonus = 0));
+          (S.bunkerWeaponRangeBonus = 0),
+          // OpenYRWeb: OpenTopped (Battle Fortress) passenger firing bonuses (vanilla YR [CombatDamage]).
+          // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
+          (S.openToppedRangeBonus = 2),
+          (S.openToppedDamageMultiplier = 1.2));
       },
     };
   },

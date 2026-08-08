@@ -413,6 +413,44 @@ System.register(
                   s.attackState = T.AttackState.JustFired;
                   return !1;
                 }
+                // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) — each passenger
+                // fires their own weapon independently. Unlike garrisoned buildings, the
+                // vehicle's own weapon ALSO fires (we do NOT return false here — execution
+                // continues to the normal weapon-fire path below). Passengers can fire while
+                // the vehicle moves (fire on the move). The OpenToppedDamageMultiplier and
+                // OpenToppedRangeBonus are applied internally in Weapon.fire / Weapon.get range
+                // via the passenger's transport back-reference (set in EnterTransportTask).
+                if (r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
+                  var openToppedTarget = this.target.obj || this.target.tile;
+                  for (var passenger of r.transportTrait.units) {
+                    var passengerWeapon = passenger.primaryWeapon;
+                    if (
+                      passengerWeapon &&
+                      0 === passengerWeapon.getCooldownTicks() &&
+                      passengerWeapon.targeting.canTarget(
+                        this.target.obj,
+                        this.target.tile,
+                        this.game,
+                        !!this.options.force,
+                        !!this.options.passive,
+                      ) &&
+                      // Each passenger checks its own range and LOS independently —
+                      // passenger 1 (range 8+2) may hit when passenger 2 (range 3+2) cannot.
+                      this.rangeHelper.isInWeaponRange(r, openToppedTarget, passengerWeapon, this.game.rules) &&
+                      this.losHelper.hasLineOfSight(r, openToppedTarget, passengerWeapon)
+                    ) {
+                      passengerWeapon.fire(this.target, this.game, 1);
+                    }
+                  }
+                  // If selectWeaponVersus picked a passenger's weapon as this.weapon, it was
+                  // already fired above — skip the normal fire path to avoid double-firing.
+                  // (This happens when the vehicle's own weapon can't target, e.g. BFRT MG
+                  // vs aircraft — a Guardian GI's AA missile is selected instead.)
+                  if (r.transportTrait.units.some((p) => p.primaryWeapon === this.weapon)) {
+                    s.attackState = T.AttackState.JustFired;
+                    return !1;
+                  }
+                }
                 // OpenYRWeb: FireWhileMoving=no — the unit must be fully stationary to fire
                 // this weapon (vanilla: DiskDrain on the Floating Disc, ROF=50 drain ticks).
                 // If the unit is still moving, keep waiting in Firing state without consuming
@@ -483,8 +521,34 @@ System.register(
                 i || (this.targetLinesConfig.isAttack = !1),
                 s.attackState === T.AttackState.CheckRange)
               ) {
-                if (0 < this.rangeCheckCooldown) return (this.rangeCheckCooldown--, !1);
                 let e = this.target.obj ? (i ? this.target.obj : this.lastValidTargetPosition.tile) : this.target.tile;
+                // OpenYRWeb: OpenTopped transports — passengers fire independently every
+                // tick while the task is in CheckRange (idle, approaching, or moving).
+                // This runs BEFORE the rangeCheckCooldown early-return: that cooldown is
+                // re-armed on every CheckRange while the vehicle is still outside its own
+                // weapon's range (closing in on the target), so gating passenger fire on
+                // it would mean passengers never shoot while the vehicle is moving.
+                if (i && !magDragging && r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
+                  for (var approachPassenger of r.transportTrait.units) {
+                    var approachPassengerWeapon = approachPassenger.primaryWeapon;
+                    if (
+                      approachPassengerWeapon &&
+                      0 === approachPassengerWeapon.getCooldownTicks() &&
+                      approachPassengerWeapon.targeting.canTarget(
+                        this.target.obj,
+                        this.target.tile,
+                        this.game,
+                        !!this.options.force,
+                        !!this.options.passive,
+                      ) &&
+                      this.rangeHelper.isInWeaponRange(r, e, approachPassengerWeapon, this.game.rules) &&
+                      this.losHelper.hasLineOfSight(r, e, approachPassengerWeapon)
+                    ) {
+                      approachPassengerWeapon.fire(this.target, this.game, 1);
+                    }
+                  }
+                }
+                if (0 < this.rangeCheckCooldown) return (this.rangeCheckCooldown--, !1);
                 var c = this.target.obj
                   ? i
                     ? this.target.obj.isBuilding()
@@ -661,6 +725,22 @@ System.register(
                       (this.lastSelfMoveTargetTile = h instanceof v.GameObject ? h.tile : h),
                       this.onTick(r)
                     );
+                  }
+                  // OpenYRWeb: OpenTopped transport on holdGround — the vehicle's own
+                  // weapon is out of range and holdGround prevents approaching, but
+                  // passengers may still be in range. Don't complete the task (which
+                  // would end passive fire after one shot); stay in CheckRange so
+                  // passengers keep firing every tick. If no passenger can hit, the
+                  // task completes as normal.
+                  if (r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
+                    for (var holdPassenger of r.transportTrait.units) {
+                      if (
+                        holdPassenger.primaryWeapon &&
+                        this.rangeHelper.isInWeaponRange(r, e, holdPassenger.primaryWeapon, this.game.rules) &&
+                        this.losHelper.hasLineOfSight(r, e, holdPassenger.primaryWeapon)
+                      )
+                        return !1;
+                    }
                   }
                   return !0;
                 }

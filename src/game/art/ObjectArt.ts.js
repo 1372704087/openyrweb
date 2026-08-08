@@ -418,6 +418,13 @@ System.register(
             getSpecialWeaponFlh(e) {
               return new d.FlhCoords(this.art.getNumberArray(`Weapon${e + 1}FLH`));
             }
+            // OpenYRWeb: AlternateFLH{index} — gun-port firing positions for OpenTopped
+            // transports (e.g. Battle Fortress). Each passenger slot (0-based) maps to
+            // AlternateFLH0, AlternateFLH1, ... on the transport's art entry. Returns
+            // (0,0,0) if not defined (fires from transport centre).
+            getAlternateFlh(e) {
+              return new d.FlhCoords(this.art.getNumberArray(`AlternateFLH${e}`));
+            }
             get fireUp() {
               return this.art.getNumber("FireUp") || this.art.getNumber("DelayedFireDelay");
             }

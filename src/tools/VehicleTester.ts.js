@@ -337,6 +337,8 @@ System.register(
                       n.create(x.ObjectType.Infantry, "E1", this.rules, this.art),
                       n.create(x.ObjectType.Infantry, "CLEG", this.rules, this.art),
                     ),
+                // OpenYRWeb: set transport back-reference for OpenTopped bonus queries.
+                o.transportTrait?.units.forEach((passenger) => (passenger.transport = o)),
                 o.tilterTrait?.[q.NotifyTileChange.onTileChange](o));
               let l = (this.world = new F.World()),
                 c = new _.RenderableManager(l, this.worldScene, this.worldScene.camera, a);

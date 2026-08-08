@@ -89,7 +89,16 @@ System.register("game/rules/CombatDamageRules", [], function (e, t) {
               // See ModEnc/BunkerDamageMultiplier, ModEnc/Bunkers.
               (this.bunkerDamageMultiplier = e.getNumber("BunkerDamageMultiplier", 1)),
               (this.bunkerROFMultiplier = e.getNumber("BunkerROFMultiplier", 1)),
-              (this.bunkerWeaponRangeBonus = e.getNumber("BunkerWeaponRangeBonus", 0)));
+              (this.bunkerWeaponRangeBonus = e.getNumber("BunkerWeaponRangeBonus", 0)),
+              // OpenYRWeb: Battle Fortress OpenTopped passenger firing bonuses (vanilla YR [CombatDamage]).
+              // OpenToppedRangeBonus: bonus tiles added to each passenger's weapon Range when
+              //   firing from an OpenTopped=yes transport (e.g. Battle Fortress, default 2).
+              // OpenToppedDamageMultiplier: global multiplier to passenger weapon Damage (default 1.2 = +20%).
+              // OpenToppedWarpDistance: if an OpenTopped transport moves this many tiles away from
+              //   a Chrono Legionnaire's phased target, the temporal link breaks (default 7).
+              (this.openToppedRangeBonus = e.getNumber("OpenToppedRangeBonus", 2)),
+              (this.openToppedDamageMultiplier = e.getNumber("OpenToppedDamageMultiplier", 1.2)),
+              (this.openToppedWarpDistance = e.getNumber("OpenToppedWarpDistance", 7)));
           }
         }),
       );

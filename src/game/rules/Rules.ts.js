@@ -355,6 +355,9 @@ System.register(
               C.Weapon.bunkerDamageMultiplier = this.combatDamage.bunkerDamageMultiplier;
               C.Weapon.bunkerROFMultiplier = this.combatDamage.bunkerROFMultiplier;
               C.Weapon.bunkerWeaponRangeBonus = this.combatDamage.bunkerWeaponRangeBonus;
+              // OpenYRWeb: Propagate OpenTopped (Battle Fortress) passenger firing bonuses.
+              C.Weapon.openToppedRangeBonus = this.combatDamage.openToppedRangeBonus;
+              C.Weapon.openToppedDamageMultiplier = this.combatDamage.openToppedDamageMultiplier;
             }
             readRadiation() {
               var e = this.ini.getSection("Radiation");

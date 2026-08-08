@@ -233,9 +233,23 @@ System.register(
                         ? []
                         : e.isBuilding() && e.overpoweredTrait
                           ? [e.overpoweredTrait.getWeapon()]
-                          : i || t
-                            ? [e.primaryWeapon, e.secondaryWeapon && (e.secondaryWeapon.rules.spawner || (!i && t)) ? e.secondaryWeapon : void 0]
-                            : [e.primaryWeapon, e.secondaryWeapon]),
+                          : e.isVehicle() && e.rules.openTopped && e.transportTrait && e.transportTrait.units.length
+                            ? // OpenYRWeb: OpenTopped transport (e.g. Battle Fortress) — the
+                              // vehicle's own weapons PLUS all passenger weapons, so
+                              // selectWeaponVersus can pick the right one for any target
+                              // (e.g. Guardian GI's AA missile for aircraft). The vehicle's
+                              // own weapon is listed first so it is preferred when it can hit.
+                              (() => {
+                                var weapons = [e.primaryWeapon, e.secondaryWeapon];
+                                for (var passenger of e.transportTrait.units) {
+                                  if (passenger.primaryWeapon) weapons.push(passenger.primaryWeapon);
+                                  if (passenger.secondaryWeapon) weapons.push(passenger.secondaryWeapon);
+                                }
+                                return weapons;
+                              })()
+                            : i || t
+                              ? [e.primaryWeapon, e.secondaryWeapon && (e.secondaryWeapon.rules.spawner || (!i && t)) ? e.secondaryWeapon : void 0]
+                              : [e.primaryWeapon, e.secondaryWeapon]),
                 r.filter((e) => e && !e.rules.neverUse)
               );
             }
@@ -416,7 +430,15 @@ System.register(
                 e.rules.opportunityFire || (e.rules.balloonHover && e.unitOrderTrait.getCurrentTask()?.isAttackMove);
               if (e.isUnit() && t) {
                 if (e.unitOrderTrait.hasTasks() && e.unitOrderTrait.getTasks()[0].preventOpportunityFire) return !1;
-              } else if (e.unitOrderTrait.hasTasks()) return !1;
+              } else if (e.unitOrderTrait.hasTasks()) {
+                // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) keep passively
+                // scanning while executing other tasks (moving/guarding) so their
+                // passengers can fire on the move (vanilla YR: BF passengers shoot while
+                // the vehicle drives). The acquired target becomes an opportunityFireTask
+                // with holdGround=true, so the vehicle keeps moving and only passengers
+                // fire. Tasks with preventOpportunityFire=true still cancel it.
+                if (!(e.rules.openTopped && e.transportTrait && e.transportTrait.units.length)) return !1;
+              }
               return !0;
             }
             shouldRetaliate(e, t, i, r, s) {
@@ -483,6 +505,44 @@ System.register(
                   ((h = this.rangeHelper.distance3(e, d) / y.Coords.LEPTONS_PER_TILE),
                   (h = this.computeThreat(d, e, u, h, i.rules.general.threat)) > o &&
                     ((n = { target: d, weapon: u }), (o = h)));
+              }
+              // OpenYRWeb: OpenTopped transports — if the normal scan found no target
+              // (vehicle's own weapon out of range), scan again using passenger weapon
+              // ranges. A sniper (range 8+2=10) inside a BF (MG range 5.75) can passively
+              // acquire a target the MG cannot reach.
+              if (
+                !n.target &&
+                e.transportTrait &&
+                e.rules.openTopped &&
+                e.transportTrait.units.length
+              ) {
+                var passengerScanRadius = 0;
+                for (var psg of e.transportTrait.units)
+                  if (psg.primaryWeapon && psg.primaryWeapon.range > passengerScanRadius)
+                    passengerScanRadius = psg.primaryWeapon.range;
+                passengerScanRadius += 1 + 3 + i.rules.elevationModel.bonusCap;
+                for (const d of this.scanTechnosAround(e, passengerScanRadius, i)) {
+                  if (!this.canPassiveAcquire(d, i) || !i.isValidTarget(d)) continue;
+                  var psgArmor = d.isTechno() ? d.rules.armor : void 0;
+                  for (var psg2 of e.transportTrait.units) {
+                    var psgWeapon = psg2.primaryWeapon;
+                    if (
+                      psgWeapon &&
+                      psgWeapon.targeting.canTarget(d, d.tile, i, !1, !0) &&
+                      (void 0 === psgArmor || this.checkArmor(psgWeapon.warhead.rules, psgArmor, !0)) &&
+                      this.rangeHelper.isInWeaponRange(e, d, psgWeapon, i.rules) &&
+                      (a || this.losHelper.hasLineOfSight(e, d, psgWeapon))
+                    ) {
+                      var psgDist = this.rangeHelper.distance3(e, d) / y.Coords.LEPTONS_PER_TILE;
+                      var psgThreat = this.computeThreat(d, e, psgWeapon, psgDist, i.rules.general.threat);
+                      if (psgThreat > o) {
+                        n = { target: d, weapon: psgWeapon };
+                        o = psgThreat;
+                      }
+                      break;
+                    }
+                  }
+                }
               }
               return (n.target && e.rules.distributedFire && this.updateDistributedFireHistory(n), n);
             }

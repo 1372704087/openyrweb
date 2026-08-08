@@ -269,6 +269,11 @@ System.register(
                 // Lets the unit crush objects that are not normally crushable (Crushable=no),
                 // such as vehicles. Battle Fortress (BFRT) uses Crusher=yes + OmniCrusher=yes.
                 (this.omniCrusher = this.ini.getBool("OmniCrusher")),
+                // OpenYRWeb: OpenTopped (vanilla YR). Passengers inside this transport can fire
+                // their own weapons through gun ports. Battle Fortress (BFRT) uses OpenTopped=yes.
+                // Passengers gain OpenToppedRangeBonus (+2 tiles) and OpenToppedDamageMultiplier
+                // (x1.2) from [CombatDamage]. The transport's own weapon fires independently.
+                (this.openTopped = this.ini.getBool("OpenTopped")),
                 (this.consideredAircraft = this.ini.getBool("ConsideredAircraft")),
                 (this.crashable = this.ini.getBool("Crashable")));
               var i = this.ini.getBool("Landable");

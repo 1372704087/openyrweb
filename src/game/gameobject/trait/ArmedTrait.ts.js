@@ -167,6 +167,13 @@ System.register(
                 if (u.primaryWeapon === e || u.secondaryWeapon === e) return !0;
               }
             }
+            // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) — passengers' weapons
+            // are also considered equipped so target-line / range checks include them.
+            if (g && g.transportTrait && g.rules.openTopped && g.transportTrait.units.length) {
+              for (var passenger of g.transportTrait.units) {
+                if (passenger.primaryWeapon === e || passenger.secondaryWeapon === e) return !0;
+              }
+            }
             return !1;
           }
           getWeapons() {
@@ -180,6 +187,14 @@ System.register(
               for (var u of g.garrisonTrait.units) {
                 u.primaryWeapon && u.primaryWeapon.tick();
                 u.secondaryWeapon && u.secondaryWeapon.tick();
+              }
+            }
+            // OpenYRWeb: tick weapons of passengers inside an OpenTopped transport
+            // (e.g. Battle Fortress) so their cooldowns expire while riding.
+            if (g && g.transportTrait && g.rules.openTopped && g.transportTrait.units.length) {
+              for (var passenger of g.transportTrait.units) {
+                passenger.primaryWeapon && passenger.primaryWeapon.tick();
+                passenger.secondaryWeapon && passenger.secondaryWeapon.tick();
               }
             }
           }
