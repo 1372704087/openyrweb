@@ -134,7 +134,11 @@ System.register(
                       : t === o.InfDeathType.Virus
                         ? e.audioVisual.infantryVirus
                         : t === o.InfDeathType.Mutate
-                          ? e.audioVisual.infantryMutate
+                        ? e.audioVisual.infantryMutate
+                        : // OpenYRWeb: InfDeath=10 (vanilla BruteWH). Plays [AudioVisual]
+                          // InfantryBrute (BRUTDIE) — the victim is torn apart/flung by a Brute.
+                          t === o.InfDeathType.YuriDeath
+                          ? e.audioVisual.infantryBrute
                           : void 0,
           ),
           e("findSequence", (e, t, i, r, s, a) => {

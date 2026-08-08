@@ -892,3 +892,16 @@ feat(spy-plane): 实现苏联雷达塔侦察机超级武器
 - 🎨 **Bug 修复：基因突变转变动画颜色跟随施法方阵营**
   `GeneticMutatorEffect.onStart` 在设置 `infDeathType=9` 时记录施法玩家颜色（`u._mutateCasterColor`）；`Infantry` 渲染器播放 GENDEATH（InfantryMutate）转变动画时，用该颜色重映射单位调色板（`palette.clone().remap(...)`），替代之前使用的目标步兵自身阵营色，符合原版 YR 行为；未记录施法方颜色时回退到原步兵颜色。`clone()` 避免污染步兵本体调色板，仅替换阵营色区（索引 16-31）。
 
+fix(brute-death-anim): 修复狂兽人击杀步兵不播放死亡动画
+
+- 🐛 **问题根因**
+  原版 YR 中狂兽人的弹头 `BruteWH`（Punch/Smash 武器共用）配置 `InfDeath=10`，击杀步兵时播放 [AudioVisual] `InfantryBrute`（BRUTDIE）撕裂/击飞死亡动画。项目已正确解析 `infantryBrute` 配置（`AudioVisualRules.readIni` 读取 `[AudioVisual] InfantryBrute`，`Engine.patchAudioVisualRules` 从 `[General]` 同步），但 `sequenceMap.getDeathAnim` 缺少 `InfDeathType.YuriDeath`（10）分支：人类步兵被击杀时 `getDeathSequence` 返回 undefined（地面 + 人类 + 非 Gunfire/Explode），`getDeathAnim` 也返回 undefined，渲染层 `Infantry.onRemove` 无动画可播 → 步兵瞬间消失。
+
+- 🔧 **修复内容**
+  `game/gameobject/infantry/sequenceMap.ts.js` 的 `getDeathAnim` 新增 `InfDeathType.YuriDeath` → `e.audioVisual.infantryBrute`（BRUTDIE）映射。狂兽人击杀人类步兵时现在会播放原版撕裂/击飞死亡动画，与其他武器击杀的死亡表现区分开；非人类步兵（如军犬）仍走 Die1 正常死亡序列，不受影响。
+
+### 🧪 测试建议
+1. 狂兽人攻击敌方人类步兵并击杀，验证播放 BRUTDIE 撕裂/击飞死亡动画。  
+2. 普通武器（如机枪）击杀步兵仍播放原死亡动画，无回归。  
+3. 击杀非人类步兵（军犬/动物）仍播放 Die1 死亡序列。
+
