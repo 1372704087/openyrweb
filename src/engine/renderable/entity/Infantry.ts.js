@@ -586,8 +586,13 @@ System.register(
                     ((this.deathAnimRenderable = t.createAnim(r, void 0, !0)),
                     // OpenYRWeb: GENDEATH (InfantryMutate) uses unit palette (unitsno/unittem/uniturb)
                     // rather than the default animation palette (anim.pal). Override the death
-                    // anim's palette with the infantry's unit palette for correct colors.
-                    9 === this.gameObject.infDeathType && (this.deathAnimRenderable.palette = this.palette),
+                    // anim's palette with the unit palette remapped to the CASTER's player color
+                    // (recorded by GeneticMutatorEffect as _mutateCasterColor) so the transform
+                    // anim shows who launched the Genetic Mutator, matching vanilla YR behaviour.
+                    9 === this.gameObject.infDeathType &&
+                      (this.deathAnimRenderable.palette = this.palette
+                        .clone()
+                        .remap(this.gameObject._mutateCasterColor ?? this.gameObject.owner.color)),
                     this.deathAnimRenderable.create3DObject(),
                     this.create3DObject(),
                     this.posWrap.add(this.deathAnimRenderable.get3DObject()),

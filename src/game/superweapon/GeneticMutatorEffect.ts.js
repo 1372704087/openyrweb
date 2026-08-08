@@ -82,6 +82,11 @@ System.register(
                       subCell: u.position.subCell,
                     });
                     u.infDeathType = 9;
+                    // OpenYRWeb: record the caster's player color so the GENDEATH
+                    // (InfantryMutate) transform anim renders in the caster's faction color
+                    // instead of the victim's. Read by Infantry renderable onRemove
+                    // when infDeathType=9.
+                    u._mutateCasterColor = this.owner.color;
                     e.destroyObject(u, { player: this.owner }, void 0, !0);
                   } else {
                     e.destroyObject(u, { player: this.owner });

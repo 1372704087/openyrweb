@@ -889,3 +889,6 @@ feat(spy-plane): 实现苏联雷达塔侦察机超级武器
   - 修复：`AttackTask.onEnd` 的停止逻辑限定在 `gattlingTrait` 单位内（盖特 loop 音效仍随攻击结束停止，避免残留）；普通单位单发开火音效自然播放完，不再被截断。盖特阶段切换/销毁的停止仍由 `GattlingTrait._stopAllWeaponFireSounds` 负责。
   - 已从 `已知未修复问题.txt` 移除该条目。
 
+- 🎨 **Bug 修复：基因突变转变动画颜色跟随施法方阵营**
+  `GeneticMutatorEffect.onStart` 在设置 `infDeathType=9` 时记录施法玩家颜色（`u._mutateCasterColor`）；`Infantry` 渲染器播放 GENDEATH（InfantryMutate）转变动画时，用该颜色重映射单位调色板（`palette.clone().remap(...)`），替代之前使用的目标步兵自身阵营色，符合原版 YR 行为；未记录施法方颜色时回退到原步兵颜色。`clone()` 避免污染步兵本体调色板，仅替换阵营色区（索引 16-31）。
+
