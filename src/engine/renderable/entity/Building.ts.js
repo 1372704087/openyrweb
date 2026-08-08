@@ -203,6 +203,10 @@ System.register(
                   (this._wasLaserTarget = !1),
                   // OpenYRWeb: must init lastInvulnerable=false to prevent false "invuln ended" flash on newly constructed buildings (undefined !== false triggers t=true).
                   (this.lastInvulnerable = !1),
+                  // OpenYRWeb: init lastSuperWeaponAlmostCharged=false so the charge-anim
+                  // check after construction completes does not treat the initial state as
+                  // a change (which would endLoop the IDLE animation).
+                  (this.lastSuperWeaponAlmostCharged = !1),
                   (this._fsEndFlashEndTimer = 0),
                   (this._invulnFlashTimer = 0),
                   (this._lastInvulnV = 0),
@@ -579,9 +583,14 @@ System.register(
                             : this.endCurrentAnimation(),
                           (this.repairStartRequested = !1))));
                   let e = this.gameObject.superWeaponTrait?.getSuperWeapon(this.gameObject);
+                  // OpenYRWeb: only reflect the superweapon charge/ready animation once the
+                  // building is fully built — otherwise an instantly-ready superweapon
+                  // (e.g. "无限超武" cheat) would override the BUILDUP animation on the
+                  // first frame and skip the construction sequence.
                   (!e ||
                     !this.hasAnimation(M.AnimationType.SUPER_CHARGE_START) ||
                     this.gameObject.isDestroyed ||
+                    this.gameObject.buildStatus !== m.BuildStatus.Ready ||
                     ((g = e.getTimerSeconds() <= 60 * this.objectRules.chargedAnimTime) !==
                       this.lastSuperWeaponAlmostCharged &&
                       ((this.lastSuperWeaponAlmostCharged = g)

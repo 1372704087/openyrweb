@@ -905,3 +905,6 @@ fix(brute-death-anim): 修复狂兽人击杀步兵不播放死亡动画
 2. 普通武器（如机枪）击杀步兵仍播放原死亡动画，无回归。  
 3. 击杀非人类步兵（军犬/动物）仍播放 Die1 死亡序列。
 
+- 🐛 **Bug 修复：新建超级武器建筑跳过建造动画（无限超武作弊下）**  
+  `Building` 渲染实体在每帧更新时，会把“超武即将就绪”（`getTimerSeconds() <= 60 × ChargedAnimTime`）状态直接绑定到动画选择逻辑。开启“无限超武”作弊（每 100ms 将超武 `chargeTicks=0`、`status=Ready`）后，新放置的超武建筑首帧即命中该条件，`setAnimation(SUPER_CHARGE_START)` 覆盖了刚设置的 `BUILDUP` 动画，导致直接播放“就绪”动画、跳过建造过程。  
+  修复：超武充能/就绪动画仅在 `buildStatus === Ready` 时生效，建造期间（BuildUp）与拆除期间（BuildDown）不覆盖 BUILDUP/UNBUILD 动画；同时在构造函数初始化 `lastSuperWeaponAlmostCharged=false`，避免建成后首次检测把初始 undefined 误判为状态变化而 `endLoop` 空闲动画。  
