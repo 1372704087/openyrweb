@@ -1,4 +1,4 @@
-﻿- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
+- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
   建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
 
 - 🎬 **建筑动画配置支持受损图片**  
@@ -882,4 +882,10 @@ feat(spy-plane): 实现苏联雷达塔侦察机超级武器
 1. 美国大兵进民房/进驻建筑：开火音效为 UCPara 的 AlliedOccupiedAttack（机枪音，非 M60），射程 5 格，伤害 30×1.2=36，ROF 15→12。
 2. 精英美国大兵（三级）进驻：使用 UCElitePara（伤害 40×1.2=48）。
 3. 建筑内混编不同射程士兵（如大兵+动员兵）：建筑按固定 5 格射程统一开火，短射程士兵不拖累。
+
+- 🔊 **Bug 修复：武器开火音效被目标死亡音效截断**
+  `SoundHandler.WeaponFire` 对**所有**带 Report 的武器都会记录 `s.__weaponFireSound`（最近一次开火音效句柄），而 `AttackTask.onEnd` 在攻击结束时（含击杀目标后任务完成）无条件执行 `__weaponFireSound.stop()`，导致单发开火音效（如 GIAttack）在命中击杀瞬间被立即截断，听起来像被死亡音效覆盖；连射武器几乎听不到连续射击声。
+  - 根因：`__weaponFireSound` 停止逻辑本意是解决**盖特**（`[SoundList] Control=Loop`，如 `GattlingGunAttackLoop1-3`）loop 音效残留，但误伤了所有单位的单发音效。
+  - 修复：`AttackTask.onEnd` 的停止逻辑限定在 `gattlingTrait` 单位内（盖特 loop 音效仍随攻击结束停止，避免残留）；普通单位单发开火音效自然播放完，不再被截断。盖特阶段切换/销毁的停止仍由 `GattlingTrait._stopAllWeaponFireSounds` 负责。
+  - 已从 `已知未修复问题.txt` 移除该条目。
 

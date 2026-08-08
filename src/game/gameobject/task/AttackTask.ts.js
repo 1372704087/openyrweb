@@ -271,13 +271,20 @@ System.register(
               // matches vanilla YR (sound ends with the attack) and fixes the residual-loop bug.
               // For gattling units, multiple Report instances can be active simultaneously, so
               // stop every tracked handle rather than only the latest one.
+              // OpenYRWeb fix: this stop must ONLY apply to gattling units. __weaponFireSound is
+              // set for every weapon with a Report (see SoundHandler WeaponFire), so stopping it
+              // for all units truncated single-shot fire sounds (e.g. GIAttack) the moment the
+              // victim died and the task ended — it sounded like the death sound cut the fire
+              // sound off. Non-loop sounds finish on their own.
               try {
-                if (e.gattlingTrait && e.__weaponFireSounds && e.__weaponFireSounds.length) {
-                  for (var gattlingSoundIdx = 0; gattlingSoundIdx < e.__weaponFireSounds.length; gattlingSoundIdx++)
-                    e.__weaponFireSounds[gattlingSoundIdx].isPlaying() && e.__weaponFireSounds[gattlingSoundIdx].stop();
-                  e.__weaponFireSounds.length = 0;
+                if (e.gattlingTrait) {
+                  if (e.__weaponFireSounds && e.__weaponFireSounds.length) {
+                    for (var gattlingSoundIdx = 0; gattlingSoundIdx < e.__weaponFireSounds.length; gattlingSoundIdx++)
+                      e.__weaponFireSounds[gattlingSoundIdx].isPlaying() && e.__weaponFireSounds[gattlingSoundIdx].stop();
+                    e.__weaponFireSounds.length = 0;
+                  }
+                  e.__weaponFireSound && e.__weaponFireSound.isPlaying() && (e.__weaponFireSound.stop(), (e.__weaponFireSound = void 0));
                 }
-                e.__weaponFireSound && e.__weaponFireSound.isPlaying() && (e.__weaponFireSound.stop(), (e.__weaponFireSound = void 0));
               } catch (err) {}
             }
             forceCancel(t) {
