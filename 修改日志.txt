@@ -905,6 +905,42 @@ fix(brute-death-anim): 修复狂兽人击杀步兵不播放死亡动画
 2. 普通武器（如机枪）击杀步兵仍播放原死亡动画，无回归。  
 3. 击杀非人类步兵（军犬/动物）仍播放 Die1 死亡序列。
 
-- 🐛 **Bug 修复：新建超级武器建筑跳过建造动画（无限超武作弊下）**  
-  `Building` 渲染实体在每帧更新时，会把“超武即将就绪”（`getTimerSeconds() <= 60 × ChargedAnimTime`）状态直接绑定到动画选择逻辑。开启“无限超武”作弊（每 100ms 将超武 `chargeTicks=0`、`status=Ready`）后，新放置的超武建筑首帧即命中该条件，`setAnimation(SUPER_CHARGE_START)` 覆盖了刚设置的 `BUILDUP` 动画，导致直接播放“就绪”动画、跳过建造过程。  
-  修复：超武充能/就绪动画仅在 `buildStatus === Ready` 时生效，建造期间（BuildUp）与拆除期间（BuildDown）不覆盖 BUILDUP/UNBUILD 动画；同时在构造函数初始化 `lastSuperWeaponAlmostCharged=false`，避免建成后首次检测把初始 undefined 误判为状态变化而 `endLoop` 空闲动画。  
+- 🐛 **Bug 修复：新建超级武器建筑跳过建造动画（无限超武作弊下）**
+  `Building` 渲染实体在每帧更新时，会把“超武即将就绪”（`getTimerSeconds() <= 60 × ChargedAnimTime`）状态直接绑定到动画选择逻辑。开启“无限超武”作弊（每 100ms 将超武 `chargeTicks=0`、`status=Ready`）后，新放置的超武建筑首帧即命中该条件，`setAnimation(SUPER_CHARGE_START)` 覆盖了刚设置的 `BUILDUP` 动画，导致直接播放“就绪”动画、跳过建造过程。
+  修复：超武充能/就绪动画仅在 `buildStatus === Ready` 时生效，建造期间（BuildUp）与拆除期间（BuildDown）不覆盖 BUILDUP/UNBUILD 动画；同时在构造函数初始化 `lastSuperWeaponAlmostCharged=false`，避免建成后首次检测把初始 undefined 误判为状态变化而 `endLoop` 空闲动画。
+
+feat(bioreactor-transport): 生化反应炉进驻/退出复用战斗要塞运输机制并修复多项问题
+
+- 🔄 **进驻/退出完全复用战斗要塞运输机制（#22 修复）**  
+  `OccupyOrder` 将 InfantryAbsorb=yes 建筑路由到 `EnterTransportTask`（排队格 → 等待轮次 → 走入门 → limbo 吸收），与战斗要塞同一套进入流程，不再使用自定义集合点状态机。卸载走 `EvacuateTransportTask`（`UnloadAllOrder` 与 `garrisonTrait.evacuate` 均路由到它），LIFO 逐个走出、出生点由运输退出格搜索自动计算，无硬编码偏移。
+
+- 🆕 **InfantryAbsorbTrait 充当 transportTrait 容器**  
+  `Building.factory` 为 InfantryAbsorb 建筑挂载 `transportTrait = garrisonTrait`（共享同一 `units` 容器 + 独立 `loadQueue`），并实现 `TransportTrait` 容器接口（`unitFitsInside`/`addToLoadQueue`/`unitIsFirstInLoadQueue`/`removeFromLoadQueue`/`getMaxCapacity` 等）。移除自定义 FIFO 队列（`_entryQueue`/`_activeTask`/互斥锁）。
+
+- 🛠️ **EnterTransportTask / EvacuateTransportTask 支持静止建筑目标**  
+  建筑无 `moveTrait`，进入判定用 `moveTrait?.moveState ?? MoveState.Idle` 守卫；建筑卸载跳过 TurnTask（建筑不可转向）。对 InfantryAbsorb 建筑：进入时设置 `garrisonedAt` 并派发 `BuildingGarrisonEvent`（进入音效/帧刷新），卸载时清除 `garrisonedAt` 并派发 `BuildingEvacuateEvent`（离开音效）。
+
+- 🗑️ **删除冗余模块**  
+  删除 `EvacuateBioReactorTask`；`GarrisonBuildingTask` 剥离生化炉专用三阶段状态机，仅保留普通可驻军建筑（战斗碉堡/民房）逻辑。
+
+- 👥 **任意步兵可进驻（Occupier 豁免）**  
+  `OccupyOrder.isValid` 对 infantryAbsorb 建筑豁免 `Occupier=yes` 要求（`(rules.infantryAbsorb || sourceObject.rules.occupier)`）——原版 YR Absorb 不检查 Occupier，动员兵/尤里新兵等无该标签的步兵此前光标会变成"移动"而非"进驻"，右键变移动指令进不去。
+
+- 🎯 **生化反应炉不再被被动索敌攻击**  
+  `AttackTrait.canPassiveAcquire` 的"驻军建筑算威胁"分支排除 infantryAbsorb 建筑（`isOccupied() && !rules.infantryAbsorb`）——反应炉吸收士兵后不获得武器（ThreatPosed=0），原版仅在被明确命令时才会被攻击，不再被敌方守卫单位自动索敌。
+
+- 🧠 **允许被心灵控制的步兵进入**  
+  `OccupyOrder.isValid` / `EnterTransportTask.isAllowed` 对 infantryAbsorb 建筑豁免 `mindControllableTrait.isActive()` 拦截。进入时 `limboObject` 触发 `MindControllableTrait.onUnspawn` 自动释放控制器（腾出心控容量）并归还单位原主、播放 MindClearedSound。进入条件由"与 units[0] 同 owner"改为 `areFriendly`，避免归还原主后的"敌方占用者"阻断后续进入。
+
+### ⚠️ 破坏性变更
+- `EvacuateBioReactorTask` 已删除，生化反应炉卸载统一走 `EvacuateTransportTask`。
+- `InfantryAbsorbTrait` 移除自定义 FIFO 队列与互斥锁，改为 TransportTrait `loadQueue` 机制。
+- `GarrisonBuildingTask` 移除生化炉集合点状态机，仅服务普通可驻军建筑。
+- 生化反应炉进入条件从"与 units[0] 同 owner"改为"与建筑 owner 友好（areFriendly）"，以支持心控吸收与归还单位共存。
+
+### 🧪 测试建议
+1. **任意步兵进驻**：选中动员兵/尤里新兵（无 Occupier=yes）右键反应炉，光标显示"进驻"，步兵排队逐个走入，电力 +100/人。  
+2. **心控步兵**：尤里心控敌军步兵送入反应炉，进入后心控链接释放（可再控制其他单位）、MindClearedSound 播放；Ctrl+E 卸载时该步兵走出并回归原主阵营。  
+3. **疏散顺序**：Ctrl+E 或 D 键卸载，LIFO 逐个走出，LeaveBioReactorSound 正常播放。  
+4. **被动索敌**：敌方单位守卫/巡逻时不再自动攻击满编反应炉；右键指定攻击仍正常。  
+5. **普通驻军建筑回归**：战斗碉堡/民房仍要求 Occupier=yes、仍拦截心控单位、同 owner 占用规则不变。  

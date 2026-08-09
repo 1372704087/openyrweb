@@ -1,12 +1,11 @@
 // === Reconstructed SystemJS module: game/order/UnloadAllOrder ===
-// deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/order/OrderFeedbackType","game/gameobject/task/EvacuateBioReactorTask"]
+// deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/order/OrderFeedbackType","game/gameobject/task/EvacuateTransportTask"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
 // OpenYRWeb: Bio Reactor (YAPOWR) "Unload All" sidebar command. The player selects a friendly bio
 // reactor that has absorbed infantry inside, presses Ctrl+E, and the building drains everyone LIFO
-// (last in, first out). Each infantry unlimbos inside the building footprint and walks out through
-// the front entrance via MoveOutsideTask — the same animation EnterBuildingTask uses in reverse.
-// Only one infantry walks out at a time (serialized by task children).
+// (last in, first out) via the SAME EvacuateTransportTask the Battle Fortress uses — one infantry
+// at a time, spawned on an exit tile outside the footprint.
 
 System.register(
   "game/order/UnloadAllOrder",
@@ -15,7 +14,7 @@ System.register(
     "game/order/OrderType",
     "engine/type/PointerType",
     "game/order/OrderFeedbackType",
-    "game/gameobject/task/EvacuateBioReactorTask",
+    "game/gameobject/task/EvacuateTransportTask",
   ],
   function (e, t) {
     "use strict";
@@ -63,12 +62,13 @@ System.register(
           isAllowed() {
             return this.isValid();
           }
-          // Hand off the LIFO drain to a dedicated Task that runs on the building's update
-          // loop. Each onTick unlimbos one infantry inside the building, pushes MoveOutsideTask
-          // to walk it out to the front, and the next infantry waits until the current one
-          // finishes — serial queue matching the entry flow's "one at a time" behaviour.
+          // Hand off the LIFO drain to EvacuateTransportTask — the same task the Battle
+          // Fortress uses to unload passengers. It runs on the building's update loop
+          // (sourceObject = the building), spawning one infantry at a time on an exit tile
+          // outside the footprint. Soft mode: if the building is fully boxed in, units stay
+          // inside instead of being destroyed.
           process() {
-            return [new o.EvacuateBioReactorTask(this.game)];
+            return [new o.EvacuateTransportTask(this.game, !0)];
           }
           onAdd() {
             // Always allow re-triggering. If the building is empty, the task self-completes on

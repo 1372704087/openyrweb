@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/task/EvacuateTransportTask ===
-// deps: ["game/event/LeaveTransportEvent","game/gameobject/unit/FacingUtil","game/gameobject/unit/MovePositionHelper","game/gameobject/task/move/MoveTask","game/gameobject/task/ScatterTask","game/gameobject/task/system/Task","game/gameobject/task/TurnTask","game/gameobject/task/system/WaitMinutesTask","game/gameobject/unit/ZoneType","game/gameobject/task/system/CallbackTask","game/gameobject/task/system/WaitTicksTask","game/GameSpeed"]
+// deps: ["game/event/LeaveTransportEvent","game/gameobject/unit/FacingUtil","game/gameobject/unit/MovePositionHelper","game/gameobject/task/move/MoveTask","game/gameobject/task/ScatterTask","game/gameobject/task/system/Task","game/gameobject/task/TurnTask","game/gameobject/task/system/WaitMinutesTask","game/gameobject/unit/ZoneType","game/gameobject/task/system/CallbackTask","game/gameobject/task/system/WaitTicksTask","game/GameSpeed","game/event/BuildingEvacuateEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -17,10 +17,11 @@ System.register(
     "game/gameobject/task/system/CallbackTask",
     "game/gameobject/task/system/WaitTicksTask",
     "game/GameSpeed",
+    "game/event/BuildingEvacuateEvent",
   ],
   function (t, e) {
     "use strict";
-    var a, b, r, n, o, i, l, c, h, u, d, s, g, p, m;
+    var a, b, r, n, o, i, l, c, h, u, d, s, f, g, p, m;
     e && e.id;
     return {
       setters: [
@@ -60,6 +61,9 @@ System.register(
         function (e) {
           s = e;
         },
+        function (e) {
+          f = e;
+        },
       ],
       execute: function () {
         var e;
@@ -97,7 +101,9 @@ System.register(
               if (!t.length || (e.rules.gunner && 1 === t.length && this.evacState !== g.All)) return !0;
               var i = t[t.length - 1],
                 r = this.findValidEvacTarget(e, i);
-              if (r && !this.turnPerformed) {
+              // OpenYRWeb: buildings (InfantryAbsorb bio reactor) are stationary — never issue
+              // a TurnTask that would rotate the building; only turning units rotate.
+              if (r && !this.turnPerformed && e.moveTrait) {
                 this.turnPerformed = !0;
                 var s = (r.dir + 180) % 360;
                 if (e.direction !== s) return (this.children.push(new l.TurnTask(s)), !1);
@@ -107,6 +113,9 @@ System.register(
                 : !(++this.evacTries <= 3) || (this.children.push(new c.WaitMinutesTask(0.05)), !1);
             }
             evacuateUnit(e, t, i) {
+              // OpenYRWeb: InfantryAbsorb buildings (bio reactor) keep occupants in the garrison
+              // container (garrisonTrait.units) — track that so we clear the right back-ref.
+              var isAbsorb = t.rules?.infantryAbsorb;
               if (!i)
                 return (
                   !this.soft &&
@@ -116,6 +125,7 @@ System.register(
                     (e.zone = t.zone),
                     // OpenYRWeb: clear transport back-reference on destructive evacuate.
                     (e.transport = void 0),
+                    isAbsorb && (e.garrisonedAt = void 0),
                     this.game.destroyObject(e, { player: e.owner }),
                     !0)
                 );
@@ -126,6 +136,10 @@ System.register(
                 (e.zone = this.game.map.getTileZone(r.tile, !r.onBridge)),
                 // OpenYRWeb: clear transport back-reference on normal evacuate.
                 (e.transport = void 0),
+                // OpenYRWeb: InfantryAbsorb buildings (bio reactor) — clear the garrison
+                // back-ref and notify garrison listeners (leave sound) like a normal garrison
+                // building.
+                isAbsorb && ((e.garrisonedAt = void 0), this.game.events.dispatch(new f.BuildingEvacuateEvent(t))),
                 this.game.unlimboObject(e, r.tile),
                 e.unitOrderTrait.unmarkNextQueuedOrder(),
                 s

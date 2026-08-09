@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/task/EnterTransportTask ===
-// deps: ["game/gameobject/task/system/Task","game/gameobject/task/move/MoveOutsideTask","game/gameobject/task/move/MoveInsideTask","game/event/EnterTransportEvent","game/gameobject/unit/ZoneType","game/gameobject/trait/MoveTrait","game/map/tileFinder/RadialTileFinder","game/gameobject/unit/MovePositionHelper","game/gameobject/task/move/MoveTask","game/gameobject/task/system/CallbackTask","game/event/EnterObjectEvent"]
+// deps: ["game/gameobject/task/system/Task","game/gameobject/task/move/MoveOutsideTask","game/gameobject/task/move/MoveInsideTask","game/event/EnterTransportEvent","game/gameobject/unit/ZoneType","game/gameobject/trait/MoveTrait","game/map/tileFinder/RadialTileFinder","game/gameobject/unit/MovePositionHelper","game/gameobject/task/move/MoveTask","game/gameobject/task/system/CallbackTask","game/event/EnterObjectEvent","game/event/BuildingGarrisonEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -16,10 +16,11 @@ System.register(
     "game/gameobject/task/move/MoveTask",
     "game/gameobject/task/system/CallbackTask",
     "game/event/EnterObjectEvent",
+    "game/event/BuildingGarrisonEvent",
   ],
   function (t, e) {
     "use strict";
-    var i, r, s, a, n, o, l, c, h, u, d, g, p;
+    var i, r, s, a, n, o, l, c, h, u, d, f, g, p;
     e && e.id;
     return {
       setters: [
@@ -56,6 +57,9 @@ System.register(
         function (e) {
           d = e;
         },
+        function (e) {
+          f = e;
+        },
       ],
       execute: function () {
         var e;
@@ -73,6 +77,18 @@ System.register(
                 (this.preventOpportunityFire = !1));
             }
             isAllowed(e) {
+              // OpenYRWeb: InfantryAbsorb buildings (bio reactor) keep garrison-style entry
+              // criteria — the entering unit must be friendly to the building owner, capacity
+              // is via maxOccupants, and mind-controlled infantry ARE allowed in (vanilla YR
+              // Absorb: they get absorbed and their controller is freed on entry). Units that
+              // reverted to their original owner inside must not block new entries.
+              if (this.target.rules?.infantryAbsorb) {
+                var t = this.target;
+                if (t.isDestroyed || !t.garrisonTrait?.canBeOccupied()) return !1;
+                if (t.garrisonTrait.units.length >= t.garrisonTrait.maxOccupants) return !1;
+                if (!this.game.areFriendly(e, t)) return !1;
+                return !0;
+              }
               return (
                 !this.target.isDestroyed &&
                 !this.target.isCrashing &&
@@ -80,7 +96,9 @@ System.register(
                 e.zone !== n.ZoneType.Air &&
                 this.target.zone !== n.ZoneType.Air &&
                 this.target.transportTrait.unitFitsInside(e) &&
-                this.target.moveTrait.moveState === o.MoveState.Idle &&
+                // OpenYRWeb: stationary targets (InfantryAbsorb buildings) have no moveTrait —
+                // treat them as always idle, matching the building's fixed position.
+                (this.target.moveTrait?.moveState ?? o.MoveState.Idle) === o.MoveState.Idle &&
                 !this.target.warpedOutTrait.isActive() &&
                 !e.mindControllableTrait?.isActive() &&
                 !e.mindControllerTrait?.isActive()
@@ -103,7 +121,7 @@ System.register(
                 n.moveTrait.isDisabled()
               )
                 return !0;
-              if (this.target.tile !== this.initialTargetTile || this.target.moveTrait.moveState !== o.MoveState.Idle)
+              if (this.target.tile !== this.initialTargetTile || (this.target.moveTrait?.moveState ?? o.MoveState.Idle) !== o.MoveState.Idle)
                 return !0;
               if (this.state === g.MoveToQueueingTile) {
                 let r = new c.MovePositionHelper(this.game.map),
@@ -166,14 +184,21 @@ System.register(
                   : (this.game.limboObject(n, {
                       selected: !1,
                       controlGroup: this.game.getUnitSelection().getOrCreateSelectionModel(n).getControlGroupNumber(),
-                      inTransport: !0,
+                      inTransport: !this.target.rules?.infantryAbsorb,
                     }),
                     this.game.events.dispatch(new a.EnterTransportEvent(this.target)),
                     this.game.events.dispatch(new d.EnterObjectEvent(this.target, n)),
                     this.target.transportTrait.units.push(n),
-                    // OpenYRWeb: back-reference so passenger weapons can query the transport
-                    // for OpenTopped range/damage bonuses (see Weapon.get range / fire).
-                    (n.transport = this.target),
+                    // OpenYRWeb: InfantryAbsorb buildings (bio reactor) share the transport
+                    // container with the garrison system, so record the garrison back-ref and
+                    // notify garrison listeners (enter sound / building frame) like a normal
+                    // garrison building. Regular transports keep the passenger back-ref that
+                    // OpenTopped weapons query (see Weapon.get range / fire).
+                    this.target.rules?.infantryAbsorb
+                      ? ((n.garrisonedAt = this.target),
+                         this.game.events.dispatch(new f.BuildingGarrisonEvent(this.target)),
+                         !0)
+                      : ((n.transport = this.target), !0),
                     !0))
               );
             }

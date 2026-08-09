@@ -2781,7 +2781,7 @@
         "game/gameobject/trait/interface/NotifySell",
         "game/gameobject/trait/interface/NotifyTick",
         "game/gameobject/trait/interface/NotifyOwnerChange",
-        "game/gameobject/task/EvacuateBioReactorTask"
+        "game/gameobject/task/EvacuateTransportTask"
       ],
       "bytes": 5800
     },
@@ -4471,7 +4471,8 @@
         "game/gameobject/unit/ZoneType",
         "game/gameobject/task/system/CallbackTask",
         "game/gameobject/task/system/WaitTicksTask",
-        "game/GameSpeed"
+        "game/GameSpeed",
+        "game/event/BuildingEvacuateEvent"
       ],
       "bytes": 3595
     },
@@ -4613,24 +4614,11 @@
       "bytes": 2755
     },
     {
-      "name": "game/gameobject/task/EvacuateBioReactorTask",
-      "file": "game/gameobject/task/EvacuateBioReactorTask.ts.js",
-      "deps": [
-        "game/gameobject/task/system/Task",
-        "game/gameobject/task/move/MoveOutsideTask",
-        "game/gameobject/task/system/WaitMinutesTask",
-        "game/event/BuildingEvacuateEvent"
-      ],
-      "bytes": 3300
-    },
-    {
       "name": "game/gameobject/task/GarrisonBuildingTask",
       "file": "game/gameobject/task/GarrisonBuildingTask.ts.js",
       "deps": [
         "game/event/BuildingGarrisonEvent",
-        "game/gameobject/task/EnterBuildingTask",
-        "game/event/EnterObjectEvent",
-        "game/gameobject/task/move/MoveNextToTask"
+        "game/gameobject/task/EnterBuildingTask"
       ],
       "bytes": 4200
     },
@@ -4706,7 +4694,8 @@
         "game/type/LocomotorType",
         "game/gameobject/task/EnterRecyclerTask",
         "game/gameobject/task/InfiltrateBuildingTask",
-        "game/gameobject/task/EnterHospitalTask"
+        "game/gameobject/task/EnterHospitalTask",
+        "game/gameobject/task/EnterTransportTask"
       ],
       "bytes": 2941
     },
@@ -4910,7 +4899,8 @@
         "game/gameobject/unit/MovePositionHelper",
         "game/gameobject/task/move/MoveTask",
         "game/gameobject/task/system/CallbackTask",
-        "game/event/EnterObjectEvent"
+        "game/event/EnterObjectEvent",
+        "game/event/BuildingGarrisonEvent"
       ],
       "bytes": 4047
     },
@@ -4966,7 +4956,7 @@
         "game/order/OrderType",
         "engine/type/PointerType",
         "game/order/OrderFeedbackType",
-        "game/gameobject/task/EvacuateBioReactorTask"
+        "game/gameobject/task/EvacuateTransportTask"
       ],
       "bytes": 2400
     },

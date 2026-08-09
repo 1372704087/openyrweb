@@ -1,15 +1,18 @@
 // === Reconstructed SystemJS module: game/gameobject/trait/InfantryAbsorbTrait ===
-// deps: ["game/gameobject/trait/GarrisonTrait","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifySell","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyOwnerChange","game/gameobject/task/EvacuateBioReactorTask"]
+// deps: ["game/gameobject/trait/GarrisonTrait","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifySell","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyOwnerChange","game/gameobject/task/EvacuateTransportTask"]
 //
-// OpenYRWeb: Bio Reactor (YABIOP, Yuri faction) — FIFO queue + mutex + LIFO unload.
+// OpenYRWeb: Bio Reactor (YABIOP, Yuri faction) — InfantryAbsorb=yes buildings reuse
+// the SAME enter/exit mechanism as Battle Fortress (the transport system), instead of a
+// bespoke garrison queue. This trait doubles as the building's transportTrait: it
+// implements the TransportTrait container interface (loadQueue / unitFitsInside /
+// addToLoadQueue / unitIsFirstInLoadQueue / removeFromLoadQueue) over the same `units`
+// array the garrison system (pips, power, frames) reads.
 //
-// Entry: each infantry independently walks to the building's front queue point via
-// MoveNextToTask, then registers into a FIFO queue. Only the unit at the head of the
-// queue may claim the mutex and enter. Once absorbed, the next unit in queue is promoted.
-// This ensures "排队等待" (queue up and wait in line) behaviour.
+// Entry: EnterTransportTask (queueing tile → wait for turn → walk inside → limbo).
+// Exit: EvacuateTransportTask (LIFO, one at a time, spawned outside the footprint).
 //
-// Exit: evacuate() schedules an EvacuateBioReactorTask. LIFO order, one unit per
-// second, spawned at the building center.
+// Damage/sell/destroy never expel occupants (vanilla YR): absorbed infantry die with
+// the building instead of walking out.
 
 System.register(
   "game/gameobject/trait/InfantryAbsorbTrait",
@@ -20,7 +23,7 @@ System.register(
     "game/gameobject/trait/interface/NotifySell",
     "game/gameobject/trait/interface/NotifyTick",
     "game/gameobject/trait/interface/NotifyOwnerChange",
-    "game/gameobject/task/EvacuateBioReactorTask",
+    "game/gameobject/task/EvacuateTransportTask",
   ],
   function (e, t) {
     "use strict";
@@ -54,8 +57,7 @@ System.register(
         ((s = class extends i.GarrisonTrait {
           constructor(e, t) {
             super(e, t);
-            this._entryQueue = [];    // FIFO: [{task, unit}] — 排队队列
-            this._activeTask = null;  // mutex: the head-of-queue unit currently entering
+            this.loadQueue = []; // transport load queue, managed by EnterTransportTask
           }
           canBeOccupied() {
             return !0;
@@ -64,8 +66,7 @@ System.register(
           [g.NotifySell.onSell](e, t) {
             for (var i of this.units) t.destroyObject(i, { player: e.owner });
             this.units = [];
-            this._entryQueue.length = 0;
-            this._activeTask = null;
+            this.loadQueue.length = 0;
           }
           [r.NotifyDestroy.onDestroy](e, t, i, r) {
             for (var s of this.units) {
@@ -73,96 +74,46 @@ System.register(
               t.destroyObject(s, i, !0);
             }
             this.units = [];
-            this._entryQueue.length = 0;
-            this._activeTask = null;
+            this.loadQueue.length = 0;
           }
           [oc.NotifyOwnerChange.onChange](e, t, i) {
-            this._cancelActive();
-            this._entryQueue.length = 0;
+            this.loadQueue.length = 0;
           }
-          _cancelActive() {
-            if (this._activeTask) {
-              this._activeTask.task.cancel();
-              this._activeTask = null;
-            }
-          }
-          // Per-tick: clean up dead/mind-controlled/despawned entries from the queue
-          // and the active task, then promote the next if the slot is free.
+          // Per-tick: drop dead/crashed entries from the load queue (same as TransportTrait).
           [n.NotifyTick.onTick](e, t) {
-            // 1. 清理队列中已死/未生成/被心控的单位
-            for (var i = this._entryQueue.length - 1; i >= 0; i--) {
-              var r = this._entryQueue[i];
-              if (this._isUnitInvalid(r.unit)) {
-                r.task.cancel();
-                this._entryQueue.splice(i, 1);
-              }
-            }
-            // 2. 清理当前正在进入但已失效的单位
-            if (this._activeTask && this._isUnitInvalid(this._activeTask.unit)) {
-              this._activeTask.task.cancel();
-              this._activeTask = null;
-              this._promoteNext();
-            }
+            this.loadQueue = this.loadQueue.filter((e) => !e.isDestroyed && !e.isCrashing);
           }
-          _isUnitInvalid(e) {
-            return !e || e.isDestroyed || !e.isSpawned || !!e.mindControllableTrait?.isActive();
+          // ---- TransportTrait container interface (shared with Enter/EvacuateTransportTask) ----
+          unitFitsInside(e) {
+            return (
+              !!e &&
+              e.rules.size <= (this.building.rules.sizeLimit ?? this.building.rules.maxNumberOccupants) &&
+              e.rules.size <= this.getAvailableCapacity()
+            );
           }
-          // 注册到 FIFO 排队队列。总是返回 true（容量检查在上一层 isAllowed 中已完成）。
-          registerEntry(e, t) {
-            this._entryQueue.push({ task: e, unit: t });
-            return !0;
+          getOccupiedCapacity() {
+            return this.units.reduce((e, t) => e + t.rules.size, 0);
           }
-          // 互斥锁 + FIFO 队列头检查：只有队首任务且当前无活跃进入者时才能进入。
-          unitMayEnterNow(e, t) {
-            // 如果我已经持有锁（被中断后恢复），允许继续
-            if (this._activeTask && this._activeTask.task === e) return !0;
-            // 检查是否是队首
-            if (!this._entryQueue.length || this._entryQueue[0].task !== e) return !1;
-            // 队首且无活跃进入者，获取互斥锁
-            if (!this._activeTask) {
-              this._activeTask = { task: e, unit: t };
-              return !0;
-            }
-            return !1;
+          getMaxCapacity() {
+            return this.building.rules.passengers || this.maxOccupants;
           }
-          // 单位成功进入生化炉：清除活跃锁，出队并提升下一个。
-          onUnitEnteredBio(e) {
-            if (this._activeTask && this._activeTask.task === e) {
-              this._activeTask = null;
-            }
-            // 从队列中移除已完成的任务
-            var t = this._entryQueue.findIndex(function (i) { return i.task === e; });
-            if (t >= 0) this._entryQueue.splice(t, 1);
-            this._promoteNext();
+          getAvailableCapacity() {
+            return this.getMaxCapacity() - this.getOccupiedCapacity();
           }
-          // 单位放弃进入（被移走/取消/死亡）：从队列移除，若是活跃者则提升下一个。
-          onUnitAbortedEntry(e, t) {
-            var i = this._entryQueue.findIndex(function (r) { return r.task === e; });
-            if (i >= 0) this._entryQueue.splice(i, 1);
-            if (this._activeTask && this._activeTask.task === e) {
-              this._activeTask = null;
-              this._promoteNext();
-            }
+          addToLoadQueue(e) {
+            return (this.loadQueue.push(e), this.loadQueue.length - 1);
           }
-          // 将队列头部提升为新的活跃任务（跳过无效单位）
-          _promoteNext() {
-            while (this._entryQueue.length) {
-              var e = this._entryQueue[0];
-              if (this._isUnitInvalid(e.unit)) {
-                e.task.cancel();
-                this._entryQueue.shift();
-                continue;
-              }
-              // 下一个有效单位将成为活跃进入者
-              this._activeTask = { task: e.task, unit: e.unit };
-              return;
-            }
+          unitIsFirstInLoadQueue(e) {
+            return this.loadQueue[0] === e;
+          }
+          removeFromLoadQueue(e) {
+            var t = this.loadQueue.indexOf(e);
+            -1 !== t && this.loadQueue.splice(t, 1);
           }
           evacuate(e, t = !1) {
-            this._cancelActive();
-            this._entryQueue.length = 0;
+            this.loadQueue.length = 0;
             if (this.units.length && this.building) {
-              this.building.unitOrderTrait.addTask(new Evt.EvacuateBioReactorTask(e));
+              this.building.unitOrderTrait.addTask(new Evt.EvacuateTransportTask(e, !0));
             }
           }
         }),

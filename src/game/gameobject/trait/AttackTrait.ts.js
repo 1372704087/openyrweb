@@ -572,7 +572,12 @@ System.register(
                 !e.rules.civilian &&
                 (!e.rules.insignificant || (e.isBuilding() && e.garrisonTrait?.isOccupied())) &&
                 (1 < e.rules.threatPosed ||
-                  (e.isBuilding() && e.garrisonTrait?.isOccupied()) ||
+                  // OpenYRWeb: garrisoned buildings that actually shoot back (battle bunker,
+                  // civilian huts) count as passive threats — but InfantryAbsorb buildings
+                  // (Bio Reactor) absorb soldiers WITHOUT gaining weapons, so they must not be
+                  // auto-acquired just for being occupied (vanilla YR: ThreatPosed 0, attacked
+                  // only on explicit order).
+                  (e.isBuilding() && e.garrisonTrait?.isOccupied() && !e.rules.infantryAbsorb) ||
                   (0 < e.rules.specialThreatValue && !e.isBuilding()) ||
                   e.rules.harvester ||
                   e.name === t.rules.general.paradrop.paradropPlane)

@@ -158,6 +158,11 @@ System.register(
                     ? new ia.InfantryAbsorbTrait(n, t.maxNumberOccupants)
                     : new og.OccupiableGarrisonTrait(n, i.audioVisual.conditionRed, t.maxNumberOccupants)),
                   n.traits.add(n.garrisonTrait)),
+                // OpenYRWeb: InfantryAbsorb buildings (bio reactor) reuse the Battle Fortress
+                // transport enter/exit mechanism — the garrison trait doubles as the
+                // building's transportTrait (same `units` container + load queue), so
+                // EnterTransportTask / EvacuateTransportTask operate on it directly.
+                t.infantryAbsorb && (n.transportTrait = n.garrisonTrait),
                 t.capturable &&
                   t.needsEngineer &&
                   (0 < t.produceCashStartup || 0 < t.produceCashAmount) &&
