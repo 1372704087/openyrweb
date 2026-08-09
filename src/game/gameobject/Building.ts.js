@@ -229,6 +229,9 @@ System.register(
               );
             }
             update(e) {
+              // OpenYRWeb: Grinder grind-animation counter (set by EnterRecyclerTask while a
+              // unit is being ground; the renderable plays SpecialAnim while it is > 0).
+              0 < (this._grindingAnimTicks ?? 0) && this._grindingAnimTicks--;
               (this.buildStatus !== k.BuildUp ||
                 this.unitOrderTrait.hasTasks() ||
                 this.unitOrderTrait.addTask(new n.WaitForBuildUpTask(e.rules.general.buildupTime, e)),

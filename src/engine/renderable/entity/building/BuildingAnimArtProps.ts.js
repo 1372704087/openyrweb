@@ -31,7 +31,7 @@ System.register(
       ],
       execute: function () {
         ((i = new Map()
-          .set(u.AnimationType.IDLE, ["IdleAnim"])
+          .set(u.AnimationType.IDLE, ["IdleAnim", "IdleAnimTwo", "IdleAnimThree", "IdleAnimFour"])
           .set(u.AnimationType.PRODUCTION, ["ProductionAnim"])
           .set(u.AnimationType.SUPER, ["SuperAnim", "SuperAnimTwo", "SuperAnimThree", "SuperAnimFour"])
           .set(u.AnimationType.ACTIVE, ["ActiveAnim", "ActiveAnimTwo", "ActiveAnimThree", "ActiveAnimFour"])

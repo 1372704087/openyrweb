@@ -362,6 +362,7 @@ System.register(
                 s.AnimationType.SPECIAL_REPAIR_START,
                 s.AnimationType.SPECIAL_SHOOT,
                 s.AnimationType.SPECIAL_DOCKING,
+                s.AnimationType.SPECIAL_GRIND,
                 s.AnimationType.FACTORY_DEPLOYING,
                 s.AnimationType.FACTORY_ROOF_DEPLOYING,
               ]) {

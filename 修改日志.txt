@@ -944,3 +944,41 @@ feat(bioreactor-transport): 生化反应炉进驻/退出复用战斗要塞运输
 3. **疏散顺序**：Ctrl+E 或 D 键卸载，LIFO 逐个走出，LeaveBioReactorSound 正常播放。  
 4. **被动索敌**：敌方单位守卫/巡逻时不再自动攻击满编反应炉；右键指定攻击仍正常。  
 5. **普通驻军建筑回归**：战斗碉堡/民房仍要求 Occupier=yes、仍拦截心控单位、同 owner 占用规则不变。  
+
+feat(grinder): 尤里部队回收厂完整实现（回收退款、研磨动画、研磨音效、十字门进入）
+
+- 💰 **单位回收与退款**  
+  `OccupyOrder.isUnitRecycle` 将 Grinding=yes 建筑路由到 `EnterRecyclerTask`（走进建筑 → 退款 → unspawn → `UnitRecycleEvent` → dieSound）。退款公式复用 `SellTrait.computeRefundValue`（Soylent 非零用 Soylent，否则 `Cost × RefundPercent`，AI 全额）。退款计入**回收厂 owner**（`target.owner.credits += ...`）——心控单位 unspawn 时 `MindControllableTrait.onUnspawn` 会归还原主，若按单位自身 owner 退款会把钱付给敌人。用 `unspawnObject + dispose` 而非 destroy，避免死亡动画/乘员逃生。
+
+- 🚛 **运输车乘客一并回收**  
+  运输车送进回收厂时，车内全部单位一并销毁并退款（原版 YR：passengers die with the transport and refund）。乘客为 limbo 状态，直接退款给回收厂 owner 并 destroyObject。
+
+- 🤖 **AI 自动回收心控单位**  
+  `OriginalAiBot._tryGrind`：资金 < 3000 时周期性把心控缴获单位（`mindControlledBy` 非空且非 Fly 移动）送去回收厂换钱；间隔按难度 `grindInterval`（Easy 600 / Medium 300 / Brutal 180）。
+
+- 🎬 **研磨动画（SPECIAL_GRIND）**  
+  新增 `AnimationType.SPECIAL_GRIND=21` 及 `setAnimation` 专有分支：研磨时隐藏 ACTIVE/IDLE、只显示 SpecialAnim（研磨动画），结束后恢复默认。一次性研磨动画经 `j` 映射（SPECIAL_GRIND→IDLE）**自然播完**后结束，不再被计时器截断或循环重启；`_grindingAnimTicks` 计数器（600 tick，`EnterRecyclerTask` 设置、`Building.update` 递减）仅作循环动画的安全兜底；以"计数器跳变"检测新研磨，区分初始启动与自然播完。
+
+- 🖼️ **默认状态只显示 IdleAnimTwo**  
+  `Grinding=yes` 且定义了 `IdleAnimTwo` 时，默认状态每帧强制隐藏建筑主体、ACTIVE 与 IdleAnim，只显示 IdleAnimTwo（如 YAGRND_C，带头顶分支的完整建筑图）；研磨状态同样隐藏主体。无 IdleAnimTwo 时行为不变。
+
+- 🆕 **IdleAnimTwo/Three/Four 引擎支持**  
+  `BuildingAnimArtProps` 的 IDLE 映射从 `["IdleAnim"]` 扩展为 `["IdleAnim","IdleAnimTwo","IdleAnimThree","IdleAnimFour"]`（此前引擎不读取 IdleAnimTwo 等原版合法字段）。
+
+- 🔊 **研磨音效**  
+  读取 `[AudioVisual] EnterGrinderSound=`（原版 YR 配置，如 GrinderGrinding）并在研磨开始时播放；`SpecialAnim` 图稿带 `Report=` 时仍由 `setAnimationVisibility` 自动播放。未修改 rulescd.ini。
+
+- 🚪 **十字门进入**  
+  `MoveNextToTask` 支持显式目标格（第 3 参）；`EnterBuildingTask` 对 `Grinding=yes` 建筑启用"先走近门 → 再走进建筑"两段式：`findGrinderDoor(unit)` 选取单位距离最近的**十字门格**（四边中间 `(midX,by-1)/(midX,by+fh)/(bx-1,midY)/(bx+fw,midY)`），到达门后直接进入（跳过施法延迟，不需要 castProgressTrait，车辆/步兵均安全）。
+
+### ⚠️ 破坏性变更
+- `MoveNextToTask` 构造函数新增可选第 3 参（显式目标格），既有调用不受影响。
+- `EnterBuildingTask` 对 `Grinding=yes` 目标启用门接近阶段；医院/驻军等其他进入逻辑不变。
+- `rulescd.ini` 未修改（研磨音效读取用户数据 `[AudioVisual] EnterGrinderSound=`）。
+
+### 🧪 测试建议
+1. **回收退款**：送车辆/步兵进回收厂，单位从最近十字门进入、研磨动画完整播放一次后恢复默认、研磨音效（GrinderGrinding）播放、资金按 Soylent/退款比例到账。  
+2. **运输车回收**：送满载战斗要塞进回收厂，车内乘客一并销毁并退款。  
+3. **默认显示**：回收厂默认状态只显示 IdleAnimTwo（带头顶分支的完整建筑图），无主体叠加、无秃顶。  
+4. **AI 回收**：AI 资金 < 3000 时周期性将心控缴获单位送回收厂换钱。  
+5. **进门方向**：从不同方向送单位，均绕到最近的中间边门进入，不从角落/任意方向进入。  

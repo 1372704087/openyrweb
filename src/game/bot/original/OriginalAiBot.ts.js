@@ -19,6 +19,7 @@ System.register("game/bot/original/OriginalAiBot", [
       var OrderType = A.OrderType;
       var QueueType = A.QueueType;
       var SpeedType = A.SpeedType;
+      var MovementZone = A.MovementZone;
 
       // ============================================================
       // 难度配置
@@ -32,6 +33,7 @@ System.register("game/bot/original/OriginalAiBot", [
           scoutEarly: false,          // 是否开局侦查
           incomeMultiplier: 1.0,      // 收入倍率
           maxActiveTeams: 2,          // 最大活跃队伍数
+          grindInterval: 600,         // 缴获单位送回收厂的检查间隔
         },
         // Medium: 标准 AI
         Medium: {
@@ -41,6 +43,7 @@ System.register("game/bot/original/OriginalAiBot", [
           scoutEarly: true,
           incomeMultiplier: 1.5,
           maxActiveTeams: 4,
+          grindInterval: 300,
         },
         // Brutal: 反应快，经济强，进攻积极
         Brutal: {
@@ -50,6 +53,7 @@ System.register("game/bot/original/OriginalAiBot", [
           scoutEarly: true,
           incomeMultiplier: 2.0,
           maxActiveTeams: 6,
+          grindInterval: 180,
         },
       };
 
@@ -66,6 +70,7 @@ System.register("game/bot/original/OriginalAiBot", [
           this.lastBuildCheck = 0;
           this.lastDeployTick = -999;
           this.lastScoutTick = 0;
+          this.lastGrindTick = 0;
           this.buildQueue = [];       // [{unitType, count}]
           this.currentTask = null;    // 当前主要任务
         }
@@ -133,6 +138,9 @@ System.register("game/bot/original/OriginalAiBot", [
 
           // ---- 5. 单位任务（攻击/防守） ----
           this._handleUnits(game, tick);
+
+          // ---- 5.5 部队回收厂：缴获单位换资金 ----
+          this._tryGrind(game, tick);
 
           // ---- 6. 诊断输出 ----
           if (this.getDebugMode()) {
@@ -311,6 +319,44 @@ System.register("game/bot/original/OriginalAiBot", [
                 this.actionsApi.orderUnits(attackForce, OrderType.AttackMove, target.tile.rx, target.tile.ry);
               }
             }
+          } catch (_) {}
+        }
+
+        // ============================================================
+        // 部队回收厂：把心控缴获的单位送去回收成资金
+        // ============================================================
+        _tryGrind(game, tick) {
+          try {
+            if (tick - this.lastGrindTick < this.cfg.grindInterval) return;
+            this.lastGrindTick = tick;
+
+            // 找到己方部队回收厂（Grinding=yes 建筑）
+            var grinderId = null;
+            var selfIds = game.getVisibleUnits(this.name, "self", function () { return true; });
+            for (var i = 0; i < selfIds.length; i++) {
+              var ud = game.getUnitData(selfIds[i]);
+              if (ud && ud.rules && ud.rules.type === ObjectType.Building && ud.rules.grinding) {
+                grinderId = selfIds[i];
+                break;
+              }
+            }
+            if (!grinderId) return;
+
+            // 资金充足时保留缴获单位用于作战；缺钱时送去回收厂换钱
+            if (this._makeSnapshot(game).credits > 3000) return;
+
+            var grindIds = [];
+            for (var j = 0; j < selfIds.length; j++) {
+              var d = game.getUnitData(selfIds[j]);
+              if (!d || !d.rules || d.rules.type === ObjectType.Building) continue;
+              if (!d.mindControlledBy) continue; // 仅处理被己方心控的缴获单位
+              if (d.rules.movementZone === MovementZone.Fly) continue; // 空中单位不能进回收厂
+              grindIds.push(selfIds[j]);
+              if (grindIds.length >= 3) break; // 每次送少量，避免一次性损失过多兵力
+            }
+            if (grindIds.length === 0) return;
+
+            this.actionsApi.orderUnits(grindIds, OrderType.Occupy, grinderId);
           } catch (_) {}
         }
 

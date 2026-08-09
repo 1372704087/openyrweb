@@ -42,6 +42,15 @@ System.register(
 	                if (ft && i.map.mapBounds.isWithinBounds(ft)) candidates.push(ft);
 	                if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
 	              }
+	              // OpenYRWeb: Grinder (Grinding=yes) — walk to the middle of the front
+	              // (south) edge, the building's door, so units enter from the front
+	              // instead of any direction.
+	              if (t.rules?.grinding) {
+	                var gfw = t.art.foundation.width;
+	                var gfh = t.art.foundation.height;
+	                var door = i.map.tiles.getByMapCoords(t.tile.rx + Math.floor(gfw / 2), t.tile.ry + gfh);
+	                if (door && i.map.mapBounds.isWithinBounds(door)) return door;
+	              }
 	              let e = t.centerTile;
 	              return (
 	                i.map.mapBounds.isWithinBounds(e) ||
@@ -54,8 +63,8 @@ System.register(
 	            }
 	            return t.tile;
 	          }
-          constructor(e, t) {
-            (super(e, s.chooseTargetFoundationTile(t, e), !1, {
+          constructor(e, t, i) {
+            (super(e, void 0 !== i ? i : s.chooseTargetFoundationTile(t, e), !1, {
               ignoredBlockers: [t],
               closeEnoughTiles: Math.SQRT2,
               strictCloseEnough: !0,

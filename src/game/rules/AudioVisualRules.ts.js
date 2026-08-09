@@ -89,6 +89,10 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.airstrikeTargetAcquiredSound = e.getString("AirstrikeTargetAcquiredSound") || void 0),
               (this.airstrikeDeathSound = e.getString("AirstrikeDeathSound") || void 0),
               (this.airstrikeAbortSound = e.getString("AirstrikeAbortSound") || void 0),
+              // OpenYRWeb (2026-08-09): Grinder (Grinding=yes) grind sound (vanilla YR
+              // [AudioVisual] EnterGrinderSound=, e.g. GrinderGrinding). Played while a
+              // unit is being recycled; also falls back to the SpecialAnim's Report=.
+              (this.enterGrinderSound = e.getString("EnterGrinderSound") || void 0),
               // OpenYRWeb (2026-08-08): Spy Plane camera sound + cadence (vanilla YR
               // [AudioVisual]). SpyPlaneCamera is played each time the plane takes a
               // picture; SpyPlaneCameraFrames is how often (in ticks) it does so while

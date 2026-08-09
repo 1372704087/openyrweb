@@ -64,13 +64,24 @@ System.register(
                     (this.lastOutsideTile = t.tile),
                   !1
                 );
-              var e = this.state !== l.MovingIn && 0 < this.enterDelaySeconds,
+              // OpenYRWeb: Grinder (Grinding=yes) — walk to the door (front edge) first,
+              // then enter, matching vanilla. Delay-based entries keep their cast pause.
+              var e = this.state !== l.MovingIn && (0 < this.enterDelaySeconds || this.target.rules?.grinding),
                 i = this.game.map.tileOccupation.isTileOccupiedBy(t.tile, this.target),
                 i = e ? !i && this.rangeHelper.isInTileRange(t.tile, this.target, 0, Math.SQRT2) : i;
               if (this.state === l.Initial)
                 if (e) {
                   if (((this.state = l.MovingNear), !i))
-                    return (this.children.push(new n.MoveNextToTask(this.game, this.target)), !1);
+                    return (
+                      this.children.push(
+                        new n.MoveNextToTask(
+                          this.game,
+                          this.target,
+                          this.target.rules?.grinding ? this.findGrinderDoor(t) : void 0,
+                        ),
+                      ),
+                      !1
+                    );
                 } else if (((this.state = l.MovingIn), !i))
                   return (
                     this.children.push(new s.MoveInsideTask(this.game, this.target).setBlocking(!1)),
@@ -86,9 +97,17 @@ System.register(
                 );
               if (this.state === l.MovingNear) {
                 this.lastOutsideTile = t.tile;
-                let e = t.castProgressTrait;
-                if (!e) throw new Error("Enter delay requires a unit with a cast progress trait");
-                (e.reset(), e.start(this.enterDelaySeconds), (this.state = l.WaitingForDelay));
+                if (0 < this.enterDelaySeconds) {
+                  let e = t.castProgressTrait;
+                  if (!e) throw new Error("Enter delay requires a unit with a cast progress trait");
+                  (e.reset(), e.start(this.enterDelaySeconds), (this.state = l.WaitingForDelay));
+                } else {
+                  // Grinder: the door is reached — walk into the building (no cast pause).
+                  (this.state = l.MovingIn),
+                    this.children.push(new s.MoveInsideTask(this.game, this.target).setBlocking(!1)),
+                    (this.preventOpportunityFire = !0);
+                  return !1;
+                }
               }
               if (this.state !== l.WaitingForDelay)
                 return (
@@ -110,6 +129,33 @@ System.register(
             }
             onEnd(e) {
               e.castProgressTrait?.reset();
+            }
+            // OpenYRWeb: Grinder (Grinding=yes) — pick the middle cell of the nearest of
+            // the four edges (the "cross" door positions) as the approach destination,
+            // so units walk to the door instead of entering from any direction.
+            findGrinderDoor(u) {
+              let b = this.target,
+                fw = b.art.foundation.width,
+                fh = b.art.foundation.height,
+                bx = b.tile.rx,
+                by = b.tile.ry,
+                midX = bx + Math.floor(fw / 2),
+                midY = by + Math.floor(fh / 2),
+                cand = [
+                  [midX, by - 1],
+                  [midX, by + fh],
+                  [bx - 1, midY],
+                  [bx + fw, midY],
+                ],
+                best,
+                bestD = 1 / 0;
+              for (var [x, y] of cand) {
+                let c = this.game.map.tiles.getByMapCoords(x, y);
+                if (!c || !this.game.map.mapBounds.isWithinBounds(c)) continue;
+                let d = (c.rx - u.tile.rx) * (c.rx - u.tile.rx) + (c.ry - u.tile.ry) * (c.ry - u.tile.ry);
+                d < bestD && ((bestD = d), (best = c));
+              }
+              return best;
             }
             getTargetLinesConfig(e) {
               return { target: this.target, pathNodes: [] };
