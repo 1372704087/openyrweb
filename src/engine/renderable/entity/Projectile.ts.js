@@ -310,15 +310,15 @@ System.register(
               if (s.isLaser) {
                 let e = this.gameObject.position.worldPosition.clone(),
                   t = new THREE.Vector3();
-                a.length &&
-                  ((l = u.Coords.screenDistanceToWorld(a[0], 0)),
-                  (t.x = 4 * l.x),
-                  (t.z = 4 * l.y),
-                  (t.y = 4 * u.Coords.tileHeightToWorld(-a[1] / (u.Coords.ISO_TILE_SIZE / 2))));
+                // OpenYRWeb: a building's PrimaryFirePixelOffset/SecondaryFirePixelOffset is
+                // applied in Weapon.fire, so the projectile already spawns at the building's
+                // firing point and the laser source needs no pixel-offset correction here.
+                // Only the Prism network support beam (secondary) still raises BOTH endpoints
+                // to the tower's primary FLH height so the beams connect at the firing height.
                 let i = this.gameObject.target.getWorldCoords().clone();
                 (this.gameObject.fromObject?.name === this.rules.general.prism.type &&
                   this.gameObject.fromWeapon.type === g.WeaponType.Secondary &&
-                  ((t.y += this.gameObject.fromObject.art.primaryFireFlh.vertical), i.add(t)),
+                  ((t.y = this.gameObject.fromObject.art.primaryFireFlh.vertical), i.add(t)),
                   e.add(t));
                 var n = new THREE.Color(s.isHouseColor ? this.gameObject.fromPlayer.color.asHex() : 16711680),
                   o = s.laserDuration / m.GameSpeed.BASE_TICKS_PER_SECOND / this.gameSpeed.value,

@@ -287,6 +287,44 @@ System.register(
                         ((h = p.Coords.screenDistanceToWorld(fireOrigin.rules.turretAnimX, fireOrigin.rules.turretAnimY)),
                         (c = fireOrigin.getFoundationCenterOffset()),
                         i.position.moveByLeptons(-c.x + h.x, -c.y + h.y)));
+                    // OpenYRWeb: buildings may define PrimaryFirePixelOffset / SecondaryFirePixelOffset
+                    // (vanilla art.ini) as a fixed firing point instead of an FLH — e.g. the Maya
+                    // Pyramid (CAMEX01) has no FLH and fires from "0,-80". The offset is a screen-pixel
+                    // offset from the building's base centre: X → ground offset (screen-horizontal),
+                    // Y → world height (down positive). It stays fixed (does not rotate with facing).
+                    // Only applies when the building itself fires (not a garrisoned/transported unit).
+                    if (
+                      fireOrigin.isBuilding() &&
+                      fireOrigin === n &&
+                      // Note: module-level `r` (WeaponType) is shadowed inside fire() by the
+                      // local FLH clone, so compare against the raw enum values here:
+                      // WeaponType.Primary = 0, WeaponType.Secondary = 1.
+                      (0 === this.type || 1 === this.type)
+                    ) {
+                      let pf =
+                        0 === this.type
+                          ? fireOrigin.art.primaryFirePixelOffset
+                          : fireOrigin.art.secondaryFirePixelOffset;
+                      if (pf.length) {
+                        let px = p.Coords.screenDistanceToWorld(pf[0], 0);
+                        e.add(new f.Vector2(px.x, px.y));
+                        // OpenYRWeb: building PrimaryFirePixelOffset/SecondaryFirePixelOffset.
+                        // - Weapon WITH an FLH (Prism Tower: PrimaryFireFLH=0,0,378 +
+                        //   PrimaryFireDualOffset=true): the FLH already positions the firing
+                        //   point, and the pixel offset is a small screen-space correction.
+                        //   It uses the engine's original 4x art-pixel scale so the Prism
+                        //   Tower keeps its vanilla firing height (FLH 378 + 4*27.9 ≈ 490).
+                        // - Weapon WITHOUT an FLH (Maya Pyramid CAMEX01): PrimaryFirePixelOffset
+                        //   (0,0) anchors at the building's 3D centre (长宽高中心: foundation
+                        //   centre x/z + half its art Height). The offset Y is converted at
+                        //   3.375 leptons per art-pixel, calibrated so pf=(0,-80) lands on the
+                        //   pyramid's top firing device (centre + 270 ≈ 740).
+                        const hasFlh = 0 !== r.forward || 0 !== r.lateral || 0 !== r.vertical;
+                        r.vertical += hasFlh
+                          ? 4 * p.Coords.tileHeightToWorld(-pf[1] / (p.Coords.ISO_TILE_SIZE / 2))
+                          : p.Coords.tileHeightToWorld(fireOrigin.art.height) / 2 - pf[1] * 3.375;
+                      }
+                    }
                     let t = new y.Vector3(e.x, r.vertical, -e.y);
                     var h = t.clone().add(i.position.worldPosition);
                     if (
