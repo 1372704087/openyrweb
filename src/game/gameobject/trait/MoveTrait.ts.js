@@ -227,6 +227,12 @@ System.register(
                     .getGroundObjectsOnTile(a.tile)
                     .filter(
                       (e) =>
+                        // OpenYRWeb: bridge overlays must never be treated as crushable
+                        // targets — a Crusher/OmniCrusher (e.g. Battle Fortress) driving
+                        // onto a bridge tile would otherwise destroy the bridge and
+                        // trigger the bridge domino chain. Pathfinding (isOmniCrushTarget)
+                        // already excludes bridges, so this keeps crush behavior consistent.
+                        !(e.isOverlay() && e.isBridge?.()) &&
                         (!e.isUnit() || e.onBridge === a.onBridge) &&
                         // OpenYRWeb: use the full vanilla crush decision (Crusher/Crushable/
                         // OmniCrusher/OmniCrushResistant) instead of Crushable alone, so
