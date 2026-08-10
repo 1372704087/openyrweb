@@ -382,9 +382,13 @@ System.register(
             // OpenYRWeb: vanilla YR OmniCrusher target test. An OmniCrusher can drive over
             // infantry/walls (already crushable) and vehicles; OmniCrushResistant objects
             // and regular (non-wall) buildings are NOT crushable by an OmniCrusher.
+            // Invulnerable objects (Iron Curtain / Force Shield) are NOT drive-over
+            // targets either — vanilla YR: invulnerability negates crush, so they block
+            // the crusher like any other non-crushable obstacle.
             isOmniCrushTarget(t) {
               if (t?.isBuilding?.() && !t.rules.wall) return !1;
               if (t.rules.omniCrushResistant) return !1;
+              if (t?.invulnerableTrait?.isActive?.()) return !1;
               return t.isVehicle() || t.isInfantry() || (t.isOverlay() && t.rules.wall);
             }
             findObstacles(t, e) {

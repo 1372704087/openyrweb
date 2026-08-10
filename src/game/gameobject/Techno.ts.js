@@ -83,9 +83,13 @@ System.register(
           //    objects (vehicles etc.) unless the victim is OmniCrushResistant=yes,
           //    i.e. OmniCrushResistant trumps OmniCrusher.
           //  - Regular (non-wall) buildings can never be crushed.
+          //  - Invulnerable objects (Iron Curtain / Force Shield) can never be crushed —
+          //    vanilla YR: invulnerability negates ALL damage, including crush, so the
+          //    crusher drives around/gets blocked instead of driving over the target.
           canCrushObject(e) {
             return (
               !!this.crusher &&
+              !e?.invulnerableTrait?.isActive?.() &&
               (!!e?.rules?.crushable ||
                 (!!this.omniCrusher &&
                   !e?.rules?.omniCrushResistant &&

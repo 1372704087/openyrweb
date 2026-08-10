@@ -259,13 +259,19 @@ System.register(
                   let r = this.flh.clone();
                   // OpenYRWeb: when a passenger fires from an OpenTopped transport, use the
                   // transport's AlternateFLH (gun-port positions) instead of the passenger's
-                  // own FLH. Each passenger slot (0-4) maps to AlternateFLH0-4 on the transport
-                  // (e.g. BFRT: 0=(45,190,90), 1=(45,-190,90), ...). Falls back to (0,0,0)
-                  // (transport centre) if AlternateFLH is not defined for the slot.
+                  // own FLH. Each passenger slot (0-based) maps to AlternateFLH0, AlternateFLH1,
+                  // ... on the transport (e.g. BFRT: 0=(45,190,90), 1=(45,-190,90), ...).
+                  // Falls back to (0,0,0) (transport centre) if no AlternateFLH is defined.
+                  // If there are more passengers than configured ports (e.g. MaxPassengers=15
+                  // with only AlternateFLH0-4), the ports cycle (index % count) so every
+                  // passenger fires from a distinct gun port instead of stacking at the centre.
                   if (fireOrigin !== n && fireOrigin.transportTrait) {
                     var passengerIndex = fireOrigin.transportTrait.units.indexOf(n);
                     if (passengerIndex >= 0) {
-                      r = fireOrigin.art.getAlternateFlh(passengerIndex);
+                      var alternateFlhCount = fireOrigin.art.getAlternateFlhCount();
+                      r = fireOrigin.art.getAlternateFlh(
+                        alternateFlhCount > 0 ? passengerIndex % alternateFlhCount : passengerIndex,
+                      );
                     }
                   }
                   r.lateral *= this.lateralMuzzleMult;
@@ -337,7 +343,13 @@ System.register(
                       e?.isShrouded(fireOrigin.tile, fireOrigin.tileElevation) && e.revealTemporarily(fireOrigin);
                     }
                     (this.rules.decloakToFire && this.gameObject.cloakableTrait?.uncloak(a),
-                      a.events.dispatch(new d.WeaponFireEvent(this, this.gameObject)));
+                      // OpenYRWeb: dispatch the fire event with the fire origin (the OpenTopped
+                      // transport / garrison building) instead of the limboed shooter. SoundHandler
+                      // plays the weapon Report at the event object's position; the passenger's own
+                      // position is frozen where it entered the transport and can be far away or
+                      // shrouded, which made passenger fire reports inaudible. The origin's
+                      // position is live, so the sound follows the transport like vanilla YR.
+                      a.events.dispatch(new d.WeaponFireEvent(this, fireOrigin)));
                   } else t && (t.owner.removeOwnedObject(t), t.dispose());
                 }
               }

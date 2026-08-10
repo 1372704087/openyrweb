@@ -1014,5 +1014,19 @@ feat(map-triggers): 地图触发器 YR 动作/事件类型补全，并真实实�
 1. 加载含 `[Zone]` 与 EnemyInZone 事件的战役图：敌人单位进入区域后对应触发器触发（无 Zone 时该条件永不触发、不报错）。
 2. 用工程师占领 Capturable=yes 的科技建筑（如油井）：TechBuildingCaptured 触发。
 3. 触发器调用 ChangeAlliance/DoUnshroud/ForceShieldAt/PlaySoundFxRandom：联盟关系变更、区域揭示、力场盾效果、随机音效正常生效。
-4. 导入仍含占位事件/动作的地图：仍弹"触发器不受支持"确认框。
+4. 导入仍含占位事件/动作的地图：仍弹"触发器不受支持"确认框。  
+
+- 🚛 **战斗要塞成员开火机制完善（音效 / 炮口 / 碾压协同）**  
+  - 🔊 **成员开火音效跟随运输车**：`Weapon.fire` 派发 `WeaponFireEvent` 时改用 `fireOrigin`（OpenTopped 运输车 / 驻军建筑）而非被 limbo 的乘客自身。此前音效在乘客"进门时的旧坐标"播放，要塞移动后音效跑到远处/迷雾区被静音，完全听不到开火声。现在音效跟随运输车实时位置，顺带修复战斗碉堡驻军步兵开火的同类问题。  
+  - 🔁 **炮口位置循环复用**：`ObjectArt` 新增 `getAlternateFlhCount()`；`Weapon.fire` 按 `passengerIndex % count` 取 `AlternateFLH{index}`。当 MaxPassengers 大于配置的开火口数量（如 15 人 vs 仅 AlternateFLH0-4）时，乘客循环复用炮口，不再全部从车体中心 (0,0,0) 开火；配置了更多开火口则各用各的。  
+  - ⚔️ **碾压接近不影响开火**：`AttackTask` PrepareToFire 阶段对 `crushTarget` 跳过车身朝向判定（等同 OmniFire）。此前非直线接近时，要塞因朝向不对且碾压移动任务保持存活，一路走到目标格才"开火再碾压"；现在进入射程且有视线即开火，弹道飞向目标 aimPoint 不受朝向影响。  
+  - 🧊 **超时空冻结单位可被碾压**：`shouldDropTarget` 增加 Crusher 豁免——攻击者可 `canCrushObject` 目标时不因目标被冻结（warpedOut 不可伤害）而丢弃目标，要塞继续驶上并压碎（碾压为绝对伤害链路，冻结单位不免疫）。  
+  - 🛡️ **铁幕单位免疫碾压（原版行为）**：`Techno.canCrushObject` 与 `Terrain.isOmniCrushTarget` 排除 `invulnerableTrait.isActive()` 目标。铁幕/力场护盾覆盖的单位不能被压碎，寻路将其视为阻挡障碍绕行，要塞退回远程射击；超时空冻结（warpedOutTrait）仍可碾压，两者互不影响。  
+
+### 🧪 测试建议
+1. 战斗要塞装载 5 名步兵攻击远处目标：移动中乘客持续开火，音效跟随车辆位置。  
+2. 要塞 MaxPassengers 调至 15 且仅配 AlternateFLH0-4：第 6~15 名乘客循环复用炮口，子弹从对应炮口发出。  
+3. 斜向/绕路攻击可碾压目标：要塞进入射程即开火，边开火边驶近碾压。  
+4. 超时空军团兵冻结敌方坦克后命令要塞攻击：要塞驶上目标将其压碎。  
+5. 对己方坦克使用铁幕后命令敌方要塞攻击：铁幕坦克不被压碎，要塞被阻挡或停在射程外射击。
   

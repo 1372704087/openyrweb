@@ -425,6 +425,14 @@ System.register(
             getAlternateFlh(e) {
               return new d.FlhCoords(this.art.getNumberArray(`AlternateFLH${e}`));
             }
+            // OpenYRWeb: number of defined AlternateFLH gun ports (consecutive from 0).
+            // Lets Weapon.fire cycle ports when there are more passengers than ports
+            // (e.g. MaxPassengers=15 with only AlternateFLH0-4 defined).
+            getAlternateFlhCount() {
+              var e = 0;
+              while (0 < this.art.getNumberArray(`AlternateFLH${e}`).length) e++;
+              return e;
+            }
             get fireUp() {
               return this.art.getNumber("FireUp") || this.art.getNumber("DelayedFireDelay");
             }

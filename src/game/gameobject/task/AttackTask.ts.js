@@ -332,7 +332,7 @@ System.register(
                     return ((s.attackState = T.AttackState.CheckRange), this.onTick(r));
                   if (
                     !this.game.isValidTarget(this.target.obj) ||
-                    this.shouldDropTarget(this.target.obj) ||
+                    this.shouldDropTarget(this.target.obj, r) ||
                     (!magDragging &&
                       // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
                       // can attack all units including friendlies.
@@ -500,7 +500,7 @@ System.register(
               // so the unit moves on (airstrike planes then head straight for their
               // random exit).
               if (t && t.isDestroyed) return (this.cancel(), this.onTick(r));
-              let i = this.game.isValidTarget(t) && !this.shouldDropTarget(t);
+              let i = this.game.isValidTarget(t) && !this.shouldDropTarget(t, r);
               if (i && !magDragging) {
                 // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
                 // can attack all units including friendlies.
@@ -812,7 +812,21 @@ System.register(
                   (s.attackState = T.AttackState.CheckRange),
                   this.onTick(r)
                 );
-              if (!(this.weapon.rules.omniFire || (r.rules.omniFire && r.rules.fighter))) {
+              if (
+                !(
+                  this.weapon.rules.omniFire ||
+                  (r.rules.omniFire && r.rules.fighter) ||
+                  // OpenYRWeb: crush-on-attack fires ON THE MOVE while driving onto the
+                  // crushable target — skip the hull-facing requirement, otherwise a
+                  // crusher approaching at an angle (path not on a straight line to the
+                  // target) stays mis-aligned, the `if (a) return !1` below waits for the
+                  // crush move to finish, and the unit only fires once it arrives on the
+                  // victim's tile. Projectiles fly toward their aim point (the target),
+                  // so shots still hit even when the hull is off-angle — same reasoning
+                  // as the "fires on the move" stationary-check skip above.
+                  crushTarget
+                )
+              ) {
                 var h = new M.Vector3().copy(u).sub(h),
                   e = m.FacingUtil.fromMapCoords(new R.Vector2(h.x, h.z)),
                   h = this.weapon.projectileRules.rot ? k : I;
@@ -848,14 +862,21 @@ System.register(
                   : ((s.attackState = T.AttackState.Firing), this.onTick(r))
               );
             }
-            shouldDropTarget(e) {
+            shouldDropTarget(e, attacker) {
               return (
                 this.forceDropTarget ||
                 (e?.isTechno() &&
                   ((this.weapon.rules.limboLaunch &&
                     (((e.isVehicle() || e.isAircraft()) && e.parasiteableTrait?.isInfested()) ||
                       e.invulnerableTrait.isActive())) ||
-                    (e.warpedOutTrait.isInvulnerable() && !this.weapon.warhead.rules.temporal) ||
+                    (e.warpedOutTrait.isInvulnerable() &&
+                      !this.weapon.warhead.rules.temporal &&
+                      // OpenYRWeb: a Crusher (e.g. Battle Fortress) attacking a crushable
+                      // target must NOT drop it just because the victim was chrono-frozen —
+                      // the crush is an absolute kill that destroys frozen units (vanilla
+                      // YR: drive over a Chrono Legionnaire-frozen target). Non-crushers
+                      // still drop the frozen target since their weapons cannot damage it.
+                      !(attacker?.isUnit() && attacker.crusher && attacker.canCrushObject(e))) ||
                     this.initialTargetOwner !== e.owner))
               );
             }
