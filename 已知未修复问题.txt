@@ -340,3 +340,15 @@
 实际表现：云从静止加速起步、随机异步换向（45~210 tick、50% 概率保持方向）、ACCEL=0.03 惯性逼近目标速度，均为按反编译公式 + ModEnc 资料的近似实现；WindEffect=0 时仍按 StateAIAdvance 派生默认前进速度，而非原版"WindEffect=0 即无风漂移"。
 排查线索：漂移公式（风表×WindEffect、风向、高度+=速度）、风向动态变化、粒子初始速度随机加成等细节依赖反编译与 ModEnc 推断，未在真实 YR 中逐帧对照验证。
 优先级：低（视觉/表现层近似，伤害与链式蔓延逻辑按配置实现）
+
+35. BUS（城市大巴）Locomotor GUID 未识别
+影响模块：TechnoRules.ts.js Locomotor 解析 / game/type/LocomotorType.ts.js 的 `locomotorTypesByClsId` 映射表
+问题描述：[BUS] 节的 `Locomotor={55D141B8-DB94-11d1-AC98-006008055BB5}`（原版 Mech 机械腿移动 GUID，rulesmd.ini 注释 `mech->{55D141B8...}` 可佐证）不在引擎映射表中，解析时报 `Object rules "BUS" has invalid Locomotor ...` 并回退默认移动。
+处理建议：小改动——把 `{55D141B8-DB94-11d1-AC98-006008055BB5}` 映射进 `locomotorTypesByClsId`（近似归为 Vehicle/Drive）即可消除警告。BUS 为中立民用单位，对正常对战影响极小。
+优先级：低
+
+36. 触发器动作类型 125/15/1/119 未定义（战役图脚本不生效）
+影响模块：地图触发器系统（TriggerActionType 枚举 / TriggerReader.ts.js 解析）
+问题描述：战役图（苏联任务图）中触发器使用了动作 ID 125、15、1、119，而 `TriggerActionType` 枚举目前仅覆盖到 118（且非连续），这些 ID 未定义 → 解析时打印 `Unknown action type ... Skipping.` 并跳过动作，任务脚本不执行。日志大量重复是因为同一张战役图的多个触发器含这些动作，每次进图重复解析。
+处理建议：工作量较大——需先确认这些 ID 的原版 [Actions] 语义（125 为 YR 靠后的动作 ID），再补全枚举并实现对应执行器；仅影响战役图脚本，对遭遇战/联机无影响。与 #33 同类（已补 74-118，1/15/119/125 仍缺失）。
+优先级：中（战役图功能缺失，但无崩溃/误触发风险）
