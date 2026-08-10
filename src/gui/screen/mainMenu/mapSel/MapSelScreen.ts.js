@@ -268,7 +268,12 @@ System.register(
                     void (await this.messageBoxApi.alert(this.strings.get("TXT_MAP_ERROR"), this.strings.get("GUI:Ok")))
                   );
                 }
-                if (e.unknownActionTypes.size || e.unknownEventTypes.size)
+                if (
+                  e.unknownActionTypes.size ||
+                  e.unknownEventTypes.size ||
+                  e.unimplementedActionTypes?.size ||
+                  e.unimplementedEventTypes?.size
+                )
                   if (
                     !(await this.messageBoxApi.confirm(
                       this.strings.get("TS:MapUnsupportedTriggers"),

@@ -981,4 +981,38 @@ feat(grinder): 尤里部队回收厂完整实现（回收退款、研磨动画�
 2. **运输车回收**：送满载战斗要塞进回收厂，车内乘客一并销毁并退款。  
 3. **默认显示**：回收厂默认状态只显示 IdleAnimTwo（带头顶分支的完整建筑图），无主体叠加、无秃顶。  
 4. **AI 回收**：AI 资金 < 3000 时周期性将心控缴获单位送回收厂换钱。  
-5. **进门方向**：从不同方向送单位，均绕到最近的中间边门进入，不从角落/任意方向进入。  
+5. **进门方向**：从不同方向送单位，均绕到最近的中间边门进入，不从角落/任意方向进入。
+
+feat(map-triggers): 地图触发器 YR 动作/事件类型补全，并真实实现常用事件/动作
+
+- 🎯 **事件/动作类型枚举补全（YR 全部类型）**
+  `TriggerEventType` 补全 8 个缺失事件（3/4/5/18/23/24/33/35）；`TriggerActionType` 补全 40 个缺失动作（74-94、96、100、104-107、112、114、115、117、118），数值与原版 [Events]/[Actions] ID 逐一核对。修复前这些类型在 `TriggerReader` 解析时被**跳过**（console 警告 + `unknownEventTypes/unknownActionTypes`），导致：单事件触发器事件被跳过 → 0 条件 → 开局立即触发；混合多事件触发器被降级为仅保留已支持事件。补全后解析完整、不再误触发。
+
+- 🆕 **TriggerSupport 未实现类型注册表**
+  新增 `data/map/trigger/TriggerSupport.ts.js`，作为"已加入枚举但未实现逻辑"类型的单一来源：占位事件 → `NoEventCondition`（永不触发，安全默认，避免开局误触发）；占位动作 → `NoActionExecutor`（无操作）。两个工厂的 `default` 分支按注册表兜底，不再对未实现类型抛 `Unhandled action type` 崩溃。
+
+- 📍 **EnemyInZone(35) 真实实现（敌人在区域内）**
+  新增 `EnemyInZoneCondition`。`MapFile.readZones` 解析地图 `[Zone]` 节（每项 `N=X1,Y1,X2,Y2` 单元格坐标，归一化为矩形），`GameMap.getZones()` 暴露；条件每帧扫描触发阵营的敌对单位（`getCombatants` + `getOwnedObjects` + `alliances.areAllied`），单位所在格落入区域矩形即触发。参数：params[1]=区域索引，params[2]=阵营 ID（0=触发阵营自身）。
+
+- 🏛️ **TechBuildingCaptured(24) 真实实现（科技建筑被占领）**
+  新增 `TechBuildingCapturedCondition`，监听 `BuildingCaptureEvent`（派发时 `target.owner` 已是新占领方），按 `rules.capturable` 过滤，可选 params[1] 限定占领方阵营。
+
+- 🔊 **动作执行器真实实现（10 个）**
+  `DoShroud(80)`/`DoUnshroud(81)`（`MapShroud.unrevealAround/revealAround`，作用于触发阵营，路径点取 params[6]（AZ 编码）或 params[1]，半径 params[2] 默认 3）；`TextNotification(83)`（复用 `TriggerTextEvent`）；`PlaySoundEffect(85)`（复用 `TriggerSoundFxEvent`）；`ChangeAlliance(89)`（`game.alliances.setAlliance/breakAlliance` + `game.onAllianceChange` 同步 shroud/联盟事件，params[1]/[2]=国家 ID、params[3]=1 结盟/0 断盟）；`DisarmTrigger(90)`（`setTriggerEnabled(id,false)`）；`PlaySoundFxRandom(100)`（params[1..7] 随机挑一，走 `game.prng.generateRandomInt`）；`TimerPause(104)`/`TimerResume(105)`（`countdownTimer.stop()/start()`，stop 保留 ticks 即暂停语义）；`ForceShieldAt(112)`（复用 `SuperWeaponsTrait.activateEffect(SuperWeaponType.ForceShield)`）。
+
+- ⚠️ **保留"地图触发器不受支持"导入提示**
+  `TriggerReader` 在解析时统计"已识别但未实现"的类型（`unimplementedEventTypes/unimplementedActionTypes`），`MapFile` 存储，`MapSelScreen` 导入检查同时看 unknown 与 unimplemented 集合——仍使用占位类型的战役图导入时会弹提示，避免静默导入后任务目标全部失效。
+
+- 📦 **模块注册与接线**
+  新增 13 个模块（TriggerSupport + 2 条件 + 10 执行器）注册进 `_module-map.json`（moduleCount 1307→1320），并同步修正两个工厂条目的 deps 列表（原表过期，不含新增依赖）。构建通过（1320 模块），运行时验证：两个工厂 `create()` 对已实现类型返回对应类、对占位类型返回 NoAction/NoEvent 占位类。
+
+### ⚠️ 已知限制（详见 已知未修复问题.txt #33）
+- 未实现事件（ThievedBy/DiscoveredByPlayer/HouseDiscovered/CiviliansEvacuated/TeamInZone/SelectedByPlayer）以 `NoEventCondition` 占位：**永不触发**，且因条件 AND 语义，含占位事件的多事件触发器整体不触发。
+- 未实现动作（ReinforceTeam/CreateTeam/DestroyTeam/GenericFacing/GenericTimer/PlayMovie/ChronoWarp/UnloadAll/SabotageUnit/ChangeDifficulty/PlayBink/ShowTutorial/ResetTutorial/EndTutorial/PreferredTarget/TimerShow/TimerHide/ChronoshiftAt/ChronoWarpAt/PsychicRevealAt/GeneticMutatorAt）以 `NoActionExecutor` 占位：执行时无效果。
+
+### 🧪 测试建议
+1. 加载含 `[Zone]` 与 EnemyInZone 事件的战役图：敌人单位进入区域后对应触发器触发（无 Zone 时该条件永不触发、不报错）。
+2. 用工程师占领 Capturable=yes 的科技建筑（如油井）：TechBuildingCaptured 触发。
+3. 触发器调用 ChangeAlliance/DoUnshroud/ForceShieldAt/PlaySoundFxRandom：联盟关系变更、区域揭示、力场盾效果、随机音效正常生效。
+4. 导入仍含占位事件/动作的地图：仍弹"触发器不受支持"确认框。
+  

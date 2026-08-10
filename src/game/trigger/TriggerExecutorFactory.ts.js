@@ -1,15 +1,17 @@
 // === Reconstructed SystemJS module: game/trigger/TriggerExecutorFactory ===
-// deps: ["data/map/trigger/TriggerActionType","game/trigger/executor/AddSuperWeaponExecutor","game/trigger/executor/ApplyDamageExecutor","game/trigger/executor/ChangeHouseAllExecutor","game/trigger/executor/ChangeHouseExecutor","game/trigger/executor/CheerExecutor","game/trigger/executor/CreateCrateExecutor","game/trigger/executor/CreateRadarEventExecutor","game/trigger/executor/DestroyObjectExecutor","game/trigger/executor/DestroyTagExecutor","game/trigger/executor/DestroyTriggerExecutor","game/trigger/executor/DetonateWarheadExecutor","game/trigger/executor/EvictOccupiersExecutor","game/trigger/executor/FireSaleExecutor","game/trigger/executor/ForceEndExecutor","game/trigger/executor/ForceTriggerExecutor","game/trigger/executor/GlobalVariableExecutor","game/trigger/executor/IronCurtainExecutor","game/trigger/executor/LightningStrikeExecutor","game/trigger/executor/LocalVariableExecutor","game/trigger/executor/NoActionExecutor","game/trigger/executor/NukeStrikeExecutor","game/trigger/executor/PlayAnimAtExecutor","game/trigger/executor/PlaySoundFxAtExecutor","game/trigger/executor/PlaySoundFxExecutor","game/trigger/executor/PlaySpeechExecutor","game/trigger/executor/ReshroudMapExecutor","game/trigger/executor/ResizePlayerViewExecutor","game/trigger/executor/RevealAroundWaypointExecutor","game/trigger/executor/RevealMapExecutor","game/trigger/executor/SellBuildingExecutor","game/trigger/executor/SetAmbientLightExecutor","game/trigger/executor/SetAmbientRateExecutor","game/trigger/executor/SetAmbientStepExecutor","game/trigger/executor/StopSoundFxAtExecutor","game/trigger/executor/TextTriggerExecutor","game/trigger/executor/TimerExtendExecutor","game/trigger/executor/TimerSetExecutor","game/trigger/executor/TimerShortenExecutor","game/trigger/executor/TimerStartExecutor","game/trigger/executor/TimerStopExecutor","game/trigger/executor/TimerTextExecutor","game/trigger/executor/ToggleTriggerExecutor","game/trigger/executor/TurnOnOffBuildingExecutor","game/trigger/executor/UnrevealAroundWaypointExecutor"]
+// deps: ["data/map/trigger/TriggerActionType","data/map/trigger/TriggerSupport","game/trigger/executor/AddSuperWeaponExecutor","game/trigger/executor/ApplyDamageExecutor","game/trigger/executor/ChangeHouseAllExecutor","game/trigger/executor/ChangeHouseExecutor","game/trigger/executor/ChangeAllianceExecutor","game/trigger/executor/CheerExecutor","game/trigger/executor/CreateCrateExecutor","game/trigger/executor/CreateRadarEventExecutor","game/trigger/executor/DestroyObjectExecutor","game/trigger/executor/DestroyTagExecutor","game/trigger/executor/DestroyTriggerExecutor","game/trigger/executor/DetonateWarheadExecutor","game/trigger/executor/DisarmTriggerExecutor","game/trigger/executor/DoShroudExecutor","game/trigger/executor/DoUnshroudExecutor","game/trigger/executor/EvictOccupiersExecutor","game/trigger/executor/FireSaleExecutor","game/trigger/executor/ForceEndExecutor","game/trigger/executor/ForceShieldAtExecutor","game/trigger/executor/ForceTriggerExecutor","game/trigger/executor/GlobalVariableExecutor","game/trigger/executor/IronCurtainExecutor","game/trigger/executor/LightningStrikeExecutor","game/trigger/executor/LocalVariableExecutor","game/trigger/executor/NoActionExecutor","game/trigger/executor/NukeStrikeExecutor","game/trigger/executor/PlayAnimAtExecutor","game/trigger/executor/PlaySoundEffectExecutor","game/trigger/executor/PlaySoundFxAtExecutor","game/trigger/executor/PlaySoundFxExecutor","game/trigger/executor/PlaySoundFxRandomExecutor","game/trigger/executor/PlaySpeechExecutor","game/trigger/executor/ReshroudMapExecutor","game/trigger/executor/ResizePlayerViewExecutor","game/trigger/executor/RevealAroundWaypointExecutor","game/trigger/executor/RevealMapExecutor","game/trigger/executor/SellBuildingExecutor","game/trigger/executor/SetAmbientLightExecutor","game/trigger/executor/SetAmbientRateExecutor","game/trigger/executor/SetAmbientStepExecutor","game/trigger/executor/StopSoundFxAtExecutor","game/trigger/executor/TextNotificationExecutor","game/trigger/executor/TextTriggerExecutor","game/trigger/executor/TimerExtendExecutor","game/trigger/executor/TimerPauseExecutor","game/trigger/executor/TimerResumeExecutor","game/trigger/executor/TimerSetExecutor","game/trigger/executor/TimerShortenExecutor","game/trigger/executor/TimerStartExecutor","game/trigger/executor/TimerStopExecutor","game/trigger/executor/TimerTextExecutor","game/trigger/executor/ToggleTriggerExecutor","game/trigger/executor/TurnOnOffBuildingExecutor","game/trigger/executor/UnrevealAroundWaypointExecutor"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
   "game/trigger/TriggerExecutorFactory",
   [
     "data/map/trigger/TriggerActionType",
+    "data/map/trigger/TriggerSupport",
     "game/trigger/executor/AddSuperWeaponExecutor",
     "game/trigger/executor/ApplyDamageExecutor",
     "game/trigger/executor/ChangeHouseAllExecutor",
     "game/trigger/executor/ChangeHouseExecutor",
+    "game/trigger/executor/ChangeAllianceExecutor",
     "game/trigger/executor/CheerExecutor",
     "game/trigger/executor/CreateCrateExecutor",
     "game/trigger/executor/CreateRadarEventExecutor",
@@ -17,9 +19,13 @@ System.register(
     "game/trigger/executor/DestroyTagExecutor",
     "game/trigger/executor/DestroyTriggerExecutor",
     "game/trigger/executor/DetonateWarheadExecutor",
+    "game/trigger/executor/DisarmTriggerExecutor",
+    "game/trigger/executor/DoShroudExecutor",
+    "game/trigger/executor/DoUnshroudExecutor",
     "game/trigger/executor/EvictOccupiersExecutor",
     "game/trigger/executor/FireSaleExecutor",
     "game/trigger/executor/ForceEndExecutor",
+    "game/trigger/executor/ForceShieldAtExecutor",
     "game/trigger/executor/ForceTriggerExecutor",
     "game/trigger/executor/GlobalVariableExecutor",
     "game/trigger/executor/IronCurtainExecutor",
@@ -28,8 +34,10 @@ System.register(
     "game/trigger/executor/NoActionExecutor",
     "game/trigger/executor/NukeStrikeExecutor",
     "game/trigger/executor/PlayAnimAtExecutor",
+    "game/trigger/executor/PlaySoundEffectExecutor",
     "game/trigger/executor/PlaySoundFxAtExecutor",
     "game/trigger/executor/PlaySoundFxExecutor",
+    "game/trigger/executor/PlaySoundFxRandomExecutor",
     "game/trigger/executor/PlaySpeechExecutor",
     "game/trigger/executor/ReshroudMapExecutor",
     "game/trigger/executor/ResizePlayerViewExecutor",
@@ -40,8 +48,11 @@ System.register(
     "game/trigger/executor/SetAmbientRateExecutor",
     "game/trigger/executor/SetAmbientStepExecutor",
     "game/trigger/executor/StopSoundFxAtExecutor",
+    "game/trigger/executor/TextNotificationExecutor",
     "game/trigger/executor/TextTriggerExecutor",
     "game/trigger/executor/TimerExtendExecutor",
+    "game/trigger/executor/TimerPauseExecutor",
+    "game/trigger/executor/TimerResumeExecutor",
     "game/trigger/executor/TimerSetExecutor",
     "game/trigger/executor/TimerShortenExecutor",
     "game/trigger/executor/TimerStartExecutor",
@@ -54,10 +65,12 @@ System.register(
   function (e, t) {
     "use strict";
     var i,
+      af,
       r,
       s,
       a,
       n,
+      Z,
       o,
       l,
       c,
@@ -65,9 +78,13 @@ System.register(
       u,
       d,
       g,
+      ae,
+      J,
+      aa,
       p,
       m,
       f,
+      ab,
       y,
       T,
       v,
@@ -76,8 +93,10 @@ System.register(
       w,
       E,
       C,
+      X,
       x,
       O,
+      Q,
       A,
       M,
       R,
@@ -88,8 +107,11 @@ System.register(
       N,
       j,
       L,
+      Y,
       D,
       F,
+      ac,
+      ad,
       _,
       U,
       H,
@@ -106,6 +128,9 @@ System.register(
           i = e;
         },
         function (e) {
+          af = e;
+        },
+        function (e) {
           r = e;
         },
         function (e) {
@@ -116,6 +141,9 @@ System.register(
         },
         function (e) {
           n = e;
+        },
+        function (e) {
+          Z = e;
         },
         function (e) {
           o = e;
@@ -139,6 +167,15 @@ System.register(
           g = e;
         },
         function (e) {
+          ae = e;
+        },
+        function (e) {
+          J = e;
+        },
+        function (e) {
+          aa = e;
+        },
+        function (e) {
           p = e;
         },
         function (e) {
@@ -146,6 +183,9 @@ System.register(
         },
         function (e) {
           f = e;
+        },
+        function (e) {
+          ab = e;
         },
         function (e) {
           y = e;
@@ -172,10 +212,16 @@ System.register(
           C = e;
         },
         function (e) {
+          X = e;
+        },
+        function (e) {
           x = e;
         },
         function (e) {
           O = e;
+        },
+        function (e) {
+          Q = e;
         },
         function (e) {
           A = e;
@@ -208,10 +254,19 @@ System.register(
           L = e;
         },
         function (e) {
+          Y = e;
+        },
+        function (e) {
           D = e;
         },
         function (e) {
           F = e;
+        },
+        function (e) {
+          ac = e;
+        },
+        function (e) {
+          ad = e;
         },
         function (e) {
           _ = e;
@@ -342,7 +397,31 @@ System.register(
                   return new o.CheerExecutor(e, t);
                 case i.TriggerActionType.StopSoundsAt:
                   return new L.StopSoundFxAtExecutor(e, t);
+                // ========== YR 新增动作类型 ==========
+                case i.TriggerActionType.DoShroud:
+                  return new J.DoShroudExecutor(e, t);
+                case i.TriggerActionType.DoUnshroud:
+                  return new aa.DoUnshroudExecutor(e, t);
+                case i.TriggerActionType.TextNotification:
+                  return new Y.TextNotificationExecutor(e, t);
+                case i.TriggerActionType.PlaySoundEffect:
+                  return new X.PlaySoundEffectExecutor(e, t);
+                case i.TriggerActionType.ChangeAlliance:
+                  return new Z.ChangeAllianceExecutor(e, t);
+                case i.TriggerActionType.DisarmTrigger:
+                  return new ae.DisarmTriggerExecutor(e, t);
+                case i.TriggerActionType.PlaySoundFxRandom:
+                  return new Q.PlaySoundFxRandomExecutor(e, t);
+                case i.TriggerActionType.TimerPause:
+                  return new ac.TimerPauseExecutor(e, t);
+                case i.TriggerActionType.TimerResume:
+                  return new ad.TimerResumeExecutor(e, t);
+                case i.TriggerActionType.ForceShieldAt:
+                  return new ab.ForceShieldAtExecutor(e, t);
                 default:
+                  // 已加入枚举但未实现的动作类型: 以 NoActionExecutor 占位(无操作),
+                  // 避免触发器触发时抛错崩溃。具体清单见 data/map/trigger/TriggerSupport。
+                  if (af.TriggerSupport.placeholderActionTypes.has(e.type)) return new w.NoActionExecutor(e, t);
                   throw new Error(`Unhandled action type "${i.TriggerActionType[e.type]}"`);
               }
             }

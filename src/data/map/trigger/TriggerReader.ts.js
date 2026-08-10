@@ -1,13 +1,13 @@
 // === Reconstructed SystemJS module: data/map/trigger/TriggerReader ===
-// deps: ["data/map/trigger/TriggerEventType","data/map/trigger/TriggerActionType"]
+// deps: ["data/map/trigger/TriggerEventType","data/map/trigger/TriggerActionType","data/map/trigger/TriggerSupport"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
   "data/map/trigger/TriggerReader",
-  ["data/map/trigger/TriggerEventType", "data/map/trigger/TriggerActionType"],
+  ["data/map/trigger/TriggerEventType", "data/map/trigger/TriggerActionType", "data/map/trigger/TriggerSupport"],
   function (e, t) {
     "use strict";
-    var h, c, i;
+    var h, c, p, i;
     t && t.id;
     return {
       setters: [
@@ -17,6 +17,9 @@ System.register(
         function (e) {
           c = e;
         },
+        function (e) {
+          p = e;
+        },
       ],
       execute: function () {
         e(
@@ -24,8 +27,8 @@ System.register(
           (i = class {
             read(e, t, i, r) {
               let s = this.readTriggers(e),
-                { events: a, unknownEventTypes: n } = this.readEvents(t),
-                { actions: o, unknownActionTypes: l } = this.readActions(i),
+                { events: a, unknownEventTypes: n, unimplementedEventTypes: f } = this.readEvents(t),
+                { actions: o, unknownActionTypes: l, unimplementedActionTypes: k } = this.readActions(i),
                 c = [...r.values()],
                 h = new Set(s);
               for (let p of s.values()) {
@@ -50,7 +53,7 @@ System.register(
                   }
                 }
               }
-              return { triggers: s, unknownEventTypes: n, unknownActionTypes: l };
+              return { triggers: s, unknownEventTypes: n, unknownActionTypes: l, unimplementedEventTypes: f, unimplementedActionTypes: k };
             }
             readTriggers(e) {
               let t = [];
@@ -80,7 +83,8 @@ System.register(
             }
             readEvents(e) {
               let s = new Map(),
-                a = new Set();
+                a = new Set(),
+                f = new Set();
               for (var [n, t] of e.entries) {
                 let r = t.split(",");
                 if (r.length < 4) console.warn(`Invalid event ${n}=${t}. Skipping.`);
@@ -92,18 +96,20 @@ System.register(
                       c = Number(r.shift());
                     let e = r.splice(0, 2 === c ? 2 : 1);
                     void 0 !== h.TriggerEventType[l]
-                      ? ((c = { triggerId: n, eventIndex: i, type: l, params: [c, ...e.map((e) => e || "0")] }),
-                        t.push(c))
+                      ? (p.TriggerSupport.placeholderEventTypes.has(l) && f.add(l),
+                        ((c = { triggerId: n, eventIndex: i, type: l, params: [c, ...e.map((e) => e || "0")] }),
+                          t.push(c)))
                       : (a.add(l), console.warn(`Unknown event type ${l} for trigger id ${n}. Skipping.`));
                   }
                   s.set(n, t);
                 }
               }
-              return { events: s, unknownEventTypes: a };
+              return { events: s, unknownEventTypes: a, unimplementedEventTypes: f };
             }
             readActions(e) {
               let r = new Map(),
-                s = new Set();
+                s = new Set(),
+                k = new Set();
               for (var [a, t] of e.entries) {
                 let i = t.split(",");
                 if (i.length < 9) console.warn(`Invalid action ${a}=${t}. Skipping.`);
@@ -116,7 +122,8 @@ System.register(
                       var o = Number(i.shift()),
                         l = i.splice(0, 7);
                       void 0 !== c.TriggerActionType[o]
-                        ? ((l = {
+                        ? (p.TriggerSupport.placeholderActionTypes.has(o) && k.add(o),
+                          ((l = {
                             triggerId: a,
                             index: t,
                             type: o,
@@ -130,14 +137,14 @@ System.register(
                               l[6] ? this.readAZActionParam(l[6]) : 0,
                             ],
                           }),
-                          e.push(l))
+                            e.push(l)))
                         : (s.add(o), console.warn(`Unknown action type ${o} for trigger id "${a}". Skipping.`));
                     }
                     r.set(a, e);
                   }
                 }
               }
-              return { actions: r, unknownActionTypes: s };
+              return { actions: r, unknownActionTypes: s, unimplementedActionTypes: k };
             }
             readAZActionParam(e) {
               var t = "Z".charCodeAt(0),

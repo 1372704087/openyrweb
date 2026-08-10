@@ -85,6 +85,7 @@ System.register(
             return (
               this.readTiles(),
               this.readWaypoints(this.getOrCreateSection("Waypoints")),
+              this.readZones(this.getOrCreateSection("Zone")),
               this.readStructures(this.getOrCreateSection("Structures")),
               this.readVehicles(),
               this.readInfantries(),
@@ -130,8 +131,14 @@ System.register(
                 triggers: e,
                 unknownEventTypes: t,
                 unknownActionTypes: i,
+                unimplementedEventTypes: s,
+                unimplementedActionTypes: a,
               } = new o.TriggerReader().read(e, t, i, this.tags);
-            ((this.triggers = e), (this.unknownEventTypes = t), (this.unknownActionTypes = i));
+            ((this.triggers = e),
+              (this.unknownEventTypes = t),
+              (this.unknownActionTypes = i),
+              (this.unimplementedEventTypes = s ?? new Set()),
+              (this.unimplementedActionTypes = a ?? new Set()));
           }
           readCellTags(e) {
             this.cellTags = new l.CellTagsReader().read(this.getOrCreateSection("CellTags"), e);
@@ -199,6 +206,31 @@ System.register(
               isNaN((r = parseInt(t, 10))) ||
                 isNaN((e = parseInt(i, 10))) ||
                 ((t = Math.floor(e / 1e3)), (i = e - 1e3 * t), this.waypoints.push({ number: r, rx: i, ry: t }));
+            }
+          }
+          readZones(e) {
+            // [Zone] 节：触发器区域，每项格式 "N=X1,Y1,X2,Y2"（单元格坐标）。
+            // 引擎按矩形 (minX,minY)-(maxX,maxY) 归一化，供 EnemyInZone 等事件判定。
+            this.zones = [];
+            for (var [t, i] of e.entries) {
+              let r = i.split(",");
+              if (r.length < 4) {
+                console.warn(`Map [Zone] contains invalid entry "${t}=${i}". Skipping.`);
+                continue;
+              }
+              var n = [Number(r[0]), Number(r[1]), Number(r[2]), Number(r[3])];
+              if (n.some((e) => Number.isNaN(e))) {
+                console.warn(`Map [Zone] contains invalid entry "${t}=${i}". Skipping.`);
+                continue;
+              }
+              let s = Number(t);
+              this.zones.push({
+                index: Number.isNaN(s) ? this.zones.length : s,
+                minX: Math.min(n[0], n[2]),
+                minY: Math.min(n[1], n[3]),
+                maxX: Math.max(n[0], n[2]),
+                maxY: Math.max(n[1], n[3]),
+              });
             }
           }
           readStructures(e) {

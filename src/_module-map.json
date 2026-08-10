@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1307,
+  "moduleCount": 1320,
   "modules": [
     {
       "name": "data/IniSection",
@@ -6085,10 +6085,12 @@
       "file": "game/trigger/TriggerExecutorFactory.ts.js",
       "deps": [
         "data/map/trigger/TriggerActionType",
+        "data/map/trigger/TriggerSupport",
         "game/trigger/executor/AddSuperWeaponExecutor",
         "game/trigger/executor/ApplyDamageExecutor",
         "game/trigger/executor/ChangeHouseAllExecutor",
         "game/trigger/executor/ChangeHouseExecutor",
+        "game/trigger/executor/ChangeAllianceExecutor",
         "game/trigger/executor/CheerExecutor",
         "game/trigger/executor/CreateCrateExecutor",
         "game/trigger/executor/CreateRadarEventExecutor",
@@ -6096,9 +6098,13 @@
         "game/trigger/executor/DestroyTagExecutor",
         "game/trigger/executor/DestroyTriggerExecutor",
         "game/trigger/executor/DetonateWarheadExecutor",
+        "game/trigger/executor/DisarmTriggerExecutor",
+        "game/trigger/executor/DoShroudExecutor",
+        "game/trigger/executor/DoUnshroudExecutor",
         "game/trigger/executor/EvictOccupiersExecutor",
         "game/trigger/executor/FireSaleExecutor",
         "game/trigger/executor/ForceEndExecutor",
+        "game/trigger/executor/ForceShieldAtExecutor",
         "game/trigger/executor/ForceTriggerExecutor",
         "game/trigger/executor/GlobalVariableExecutor",
         "game/trigger/executor/IronCurtainExecutor",
@@ -6107,8 +6113,10 @@
         "game/trigger/executor/NoActionExecutor",
         "game/trigger/executor/NukeStrikeExecutor",
         "game/trigger/executor/PlayAnimAtExecutor",
+        "game/trigger/executor/PlaySoundEffectExecutor",
         "game/trigger/executor/PlaySoundFxAtExecutor",
         "game/trigger/executor/PlaySoundFxExecutor",
+        "game/trigger/executor/PlaySoundFxRandomExecutor",
         "game/trigger/executor/PlaySpeechExecutor",
         "game/trigger/executor/ReshroudMapExecutor",
         "game/trigger/executor/ResizePlayerViewExecutor",
@@ -6119,8 +6127,11 @@
         "game/trigger/executor/SetAmbientRateExecutor",
         "game/trigger/executor/SetAmbientStepExecutor",
         "game/trigger/executor/StopSoundFxAtExecutor",
+        "game/trigger/executor/TextNotificationExecutor",
         "game/trigger/executor/TextTriggerExecutor",
         "game/trigger/executor/TimerExtendExecutor",
+        "game/trigger/executor/TimerPauseExecutor",
+        "game/trigger/executor/TimerResumeExecutor",
         "game/trigger/executor/TimerSetExecutor",
         "game/trigger/executor/TimerShortenExecutor",
         "game/trigger/executor/TimerStartExecutor",
@@ -6485,6 +6496,7 @@
       "file": "game/trigger/TriggerConditionFactory.ts.js",
       "deps": [
         "data/map/trigger/TriggerEventType",
+        "data/map/trigger/TriggerSupport",
         "engine/type/ObjectType",
         "game/trigger/condition/AmbientLightCondition",
         "game/trigger/condition/AnyEventCondition",
@@ -6510,6 +6522,7 @@
         "game/trigger/condition/DestroyedUnitsCondition",
         "game/trigger/condition/ElapsedScenarioTimeCondition",
         "game/trigger/condition/ElapsedTimeCondition",
+        "game/trigger/condition/EnemyInZoneCondition",
         "game/trigger/condition/EnteredByCondition",
         "game/trigger/condition/GlobalVariableCondition",
         "game/trigger/condition/HealthBelowAnyCondition",
@@ -6524,6 +6537,7 @@
         "game/trigger/condition/SpiedByCondition",
         "game/trigger/condition/SpyEnteringAsHouseCondition",
         "game/trigger/condition/SpyEnteringAsInfantryCondition",
+        "game/trigger/condition/TechBuildingCapturedCondition",
         "game/trigger/condition/TimerExpiredCondition"
       ],
       "bytes": 7342
@@ -13795,6 +13809,115 @@
         "game/bot/custom-ai/logic/mission/actionBatcher"
       ],
       "bytes": 5400
+    },
+    {
+      "name": "data/map/trigger/TriggerSupport",
+      "file": "data/map/trigger/TriggerSupport.ts.js",
+      "deps": [],
+      "bytes": 2400
+    },
+    {
+      "name": "game/trigger/condition/EnemyInZoneCondition",
+      "file": "game/trigger/condition/EnemyInZoneCondition.ts.js",
+      "deps": [
+        "game/trigger/TriggerCondition"
+      ],
+      "bytes": 1400
+    },
+    {
+      "name": "game/trigger/condition/TechBuildingCapturedCondition",
+      "file": "game/trigger/condition/TechBuildingCapturedCondition.ts.js",
+      "deps": [
+        "game/event/EventType",
+        "game/trigger/TriggerCondition"
+      ],
+      "bytes": 1100
+    },
+    {
+      "name": "game/trigger/executor/PlaySoundFxRandomExecutor",
+      "file": "game/trigger/executor/PlaySoundFxRandomExecutor.ts.js",
+      "deps": [
+        "game/event/TriggerSoundFxEvent",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 900
+    },
+    {
+      "name": "game/trigger/executor/PlaySoundEffectExecutor",
+      "file": "game/trigger/executor/PlaySoundEffectExecutor.ts.js",
+      "deps": [
+        "game/event/TriggerSoundFxEvent",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 800
+    },
+    {
+      "name": "game/trigger/executor/TextNotificationExecutor",
+      "file": "game/trigger/executor/TextNotificationExecutor.ts.js",
+      "deps": [
+        "game/event/TriggerTextEvent",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 800
+    },
+    {
+      "name": "game/trigger/executor/ChangeAllianceExecutor",
+      "file": "game/trigger/executor/ChangeAllianceExecutor.ts.js",
+      "deps": [
+        "game/Alliances",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1500
+    },
+    {
+      "name": "game/trigger/executor/DoShroudExecutor",
+      "file": "game/trigger/executor/DoShroudExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 900
+    },
+    {
+      "name": "game/trigger/executor/DoUnshroudExecutor",
+      "file": "game/trigger/executor/DoUnshroudExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 900
+    },
+    {
+      "name": "game/trigger/executor/ForceShieldAtExecutor",
+      "file": "game/trigger/executor/ForceShieldAtExecutor.ts.js",
+      "deps": [
+        "game/trait/SuperWeaponsTrait",
+        "game/type/SuperWeaponType",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1000
+    },
+    {
+      "name": "game/trigger/executor/TimerPauseExecutor",
+      "file": "game/trigger/executor/TimerPauseExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 600
+    },
+    {
+      "name": "game/trigger/executor/TimerResumeExecutor",
+      "file": "game/trigger/executor/TimerResumeExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 600
+    },
+    {
+      "name": "game/trigger/executor/DisarmTriggerExecutor",
+      "file": "game/trigger/executor/DisarmTriggerExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 700
     }
   ]
 }

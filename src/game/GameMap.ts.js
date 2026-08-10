@@ -123,6 +123,9 @@ System.register(
             getVariables() {
               return this.mapFile.variables;
             }
+            getZones() {
+              return this.mapFile.zones;
+            }
             getWaypoint(t) {
               return this.mapFile.waypoints.find((e) => e.number === t);
             }

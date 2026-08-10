@@ -1,11 +1,12 @@
 // === Reconstructed SystemJS module: game/trigger/TriggerConditionFactory ===
-// deps: ["data/map/trigger/TriggerEventType","engine/type/ObjectType","game/trigger/condition/AmbientLightCondition","game/trigger/condition/AnyEventCondition","game/trigger/condition/AttackedByAnyCondition","game/trigger/condition/AttackedByHouseCondition","game/trigger/condition/BuildingExistsCondition","game/trigger/condition/BuildObjectTypeCondition","game/trigger/condition/ComesNearWaypointCondition","game/trigger/condition/CreditsBelowCondition","game/trigger/condition/CreditsExceedCondition","game/trigger/condition/CrossHorizLineCondition","game/trigger/condition/CrossVertLineCondition","game/trigger/condition/DestroyedAllBuildingsCondition","game/trigger/condition/DestroyedAllCondition","game/trigger/condition/DestroyedAllUnitsCondition","game/trigger/condition/DestroyedAllUnitsLandCondition","game/trigger/condition/DestroyedAllUnitsNavalCondition","game/trigger/condition/DestroyedBridgeCondition","game/trigger/condition/DestroyedBuildingsCondition","game/trigger/condition/DestroyedByAnyCondition","game/trigger/condition/DestroyedOrCapturedCondition","game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition","game/trigger/condition/DestroyedUnitsCondition","game/trigger/condition/ElapsedScenarioTimeCondition","game/trigger/condition/ElapsedTimeCondition","game/trigger/condition/EnteredByCondition","game/trigger/condition/GlobalVariableCondition","game/trigger/condition/HealthBelowAnyCondition","game/trigger/condition/HealthBelowCombatCondition","game/trigger/condition/LocalVariableCondition","game/trigger/condition/LowPowerCondition","game/trigger/condition/NoEventCondition","game/trigger/condition/NoFactoriesLeftCondition","game/trigger/condition/PickupCrateAnyCondition","game/trigger/condition/PickupCrateCondition","game/trigger/condition/RandomDelayCondition","game/trigger/condition/SpiedByCondition","game/trigger/condition/SpyEnteringAsHouseCondition","game/trigger/condition/SpyEnteringAsInfantryCondition","game/trigger/condition/TimerExpiredCondition"]
+// deps: ["data/map/trigger/TriggerEventType","data/map/trigger/TriggerSupport","engine/type/ObjectType","game/trigger/condition/AmbientLightCondition","game/trigger/condition/AnyEventCondition","game/trigger/condition/AttackedByAnyCondition","game/trigger/condition/AttackedByHouseCondition","game/trigger/condition/BuildingExistsCondition","game/trigger/condition/BuildObjectTypeCondition","game/trigger/condition/ComesNearWaypointCondition","game/trigger/condition/CreditsBelowCondition","game/trigger/condition/CreditsExceedCondition","game/trigger/condition/CrossHorizLineCondition","game/trigger/condition/CrossVertLineCondition","game/trigger/condition/DestroyedAllBuildingsCondition","game/trigger/condition/DestroyedAllCondition","game/trigger/condition/DestroyedAllUnitsCondition","game/trigger/condition/DestroyedAllUnitsLandCondition","game/trigger/condition/DestroyedAllUnitsNavalCondition","game/trigger/condition/DestroyedBridgeCondition","game/trigger/condition/DestroyedBuildingsCondition","game/trigger/condition/DestroyedByAnyCondition","game/trigger/condition/DestroyedOrCapturedCondition","game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition","game/trigger/condition/DestroyedUnitsCondition","game/trigger/condition/ElapsedScenarioTimeCondition","game/trigger/condition/ElapsedTimeCondition","game/trigger/condition/EnemyInZoneCondition","game/trigger/condition/EnteredByCondition","game/trigger/condition/GlobalVariableCondition","game/trigger/condition/HealthBelowAnyCondition","game/trigger/condition/HealthBelowCombatCondition","game/trigger/condition/LocalVariableCondition","game/trigger/condition/LowPowerCondition","game/trigger/condition/NoEventCondition","game/trigger/condition/NoFactoriesLeftCondition","game/trigger/condition/PickupCrateAnyCondition","game/trigger/condition/PickupCrateCondition","game/trigger/condition/RandomDelayCondition","game/trigger/condition/SpiedByCondition","game/trigger/condition/SpyEnteringAsHouseCondition","game/trigger/condition/SpyEnteringAsInfantryCondition","game/trigger/condition/TechBuildingCapturedCondition","game/trigger/condition/TimerExpiredCondition"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
   "game/trigger/TriggerConditionFactory",
   [
     "data/map/trigger/TriggerEventType",
+    "data/map/trigger/TriggerSupport",
     "engine/type/ObjectType",
     "game/trigger/condition/AmbientLightCondition",
     "game/trigger/condition/AnyEventCondition",
@@ -31,6 +32,7 @@ System.register(
     "game/trigger/condition/DestroyedUnitsCondition",
     "game/trigger/condition/ElapsedScenarioTimeCondition",
     "game/trigger/condition/ElapsedTimeCondition",
+    "game/trigger/condition/EnemyInZoneCondition",
     "game/trigger/condition/EnteredByCondition",
     "game/trigger/condition/GlobalVariableCondition",
     "game/trigger/condition/HealthBelowAnyCondition",
@@ -45,11 +47,13 @@ System.register(
     "game/trigger/condition/SpiedByCondition",
     "game/trigger/condition/SpyEnteringAsHouseCondition",
     "game/trigger/condition/SpyEnteringAsInfantryCondition",
+    "game/trigger/condition/TechBuildingCapturedCondition",
     "game/trigger/condition/TimerExpiredCondition",
   ],
   function (e, t) {
     "use strict";
     var i,
+      Q,
       r,
       s,
       a,
@@ -75,6 +79,7 @@ System.register(
       x,
       O,
       A,
+      X,
       M,
       R,
       P,
@@ -89,6 +94,7 @@ System.register(
       _,
       U,
       H,
+      Y,
       G,
       V;
     t && t.id;
@@ -96,6 +102,9 @@ System.register(
       setters: [
         function (e) {
           i = e;
+        },
+        function (e) {
+          Q = e;
         },
         function (e) {
           r = e;
@@ -173,6 +182,9 @@ System.register(
           A = e;
         },
         function (e) {
+          X = e;
+        },
+        function (e) {
           M = e;
         },
         function (e) {
@@ -213,6 +225,9 @@ System.register(
         },
         function (e) {
           H = e;
+        },
+        function (e) {
+          Y = e;
         },
         function (e) {
           G = e;
@@ -324,7 +339,15 @@ System.register(
                   return new T.DestroyedAllUnitsLandCondition(e, t);
                 case i.TriggerEventType.BuildingNotExists:
                   return new l.BuildingExistsCondition(e, t, !0);
+                // ========== YR 新增事件类型 ==========
+                case i.TriggerEventType.EnemyInZone:
+                  return new X.EnemyInZoneCondition(e, t);
+                case i.TriggerEventType.TechBuildingCaptured:
+                  return new Y.TechBuildingCapturedCondition(e, t);
                 default:
+                  // 已加入枚举但未实现的事件类型: 以 NoEventCondition 占位(永不触发,
+                  // 安全默认, 避免触发器开局误触发)。具体清单见 data/map/trigger/TriggerSupport。
+                  if (Q.TriggerSupport.placeholderEventTypes.has(e.type)) return new N.NoEventCondition(e, t);
                   throw new Error(`Unhandled trigger event type "${i.TriggerEventType[e.type]}"`);
               }
             }

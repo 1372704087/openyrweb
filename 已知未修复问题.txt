@@ -316,3 +316,19 @@
 尝试改为 +2 格（埃菲尔 1775、线圈 509）后用户选择维持 +1 格，未解决；
 疑似引擎渲染比例与原版不一致导致 FLH 高度偏低，需确认电击修正应如何按建筑差异化处理，或单独校准埃菲尔铁塔。
 优先级：低（影响视觉表现，不影响功能）
+
+33. 地图触发器部分 YR 事件/动作仍未实现（占位行为，多事件触发器会被"连坐"拖死）
+影响模块：地图触发器系统（TriggerSupport 注册表 / TriggerConditionFactory / TriggerExecutorFactory / TriggerManager.update）
+问题描述：YR 事件/动作类型已补全枚举（不再被解析跳过），但部分类型仍以占位方式处理：未实现事件 → `NoEventCondition`（永不触发）；未实现动作 → `NoActionExecutor`（无操作）。含占位事件的多事件触发器因条件 AND 语义被整体拖死。
+预期行为：所有 YR 事件/动作与原版一致生效，多事件触发器按各自事件独立判断。
+实际表现：
+- 未实现事件永不触发：ThievedBy(3)、DiscoveredByPlayer(4)、HouseDiscovered(5)、CiviliansEvacuated(18)、TeamInZone(23)、SelectedByPlayer(33)；
+- **回归场景**：混合多事件触发器（如 ElapsedTime + EnemyInZone）此前（事件被跳过时）会在 ElapsedTime 满足时触发，补全枚举后 EnemyInZone 虽已实现但其他占位事件（如 TeamInZone）恒 false 会把整条触发器拖死；
+- 未实现动作执行时无效果：ReinforceTeam(75)、CreateTeam(76)、DestroyTeam(77)、GenericFacing(78)、GenericTimer(79)、PlayMovie(82)、ChronoWarp(84)、UnloadAll(86)、SabotageUnit(87)、ChangeDifficulty(88)、PlayBink(91)、ShowTutorial(92)、ResetTutorial(93)、EndTutorial(94)、PreferredTarget(96)、TimerShow(106)、TimerHide(107)、ChronoshiftAt(114)、ChronoWarpAt(115)、PsychicRevealAt(117)、GeneticMutatorAt(118)。
+排查线索：
+- 占位类型清单单一来源：`data/map/trigger/TriggerSupport.ts.js`；工厂 `default` 分支按注册表返回占位类；
+- 地图导入时 `MapSelScreen` 仍会弹"该地图触发器不受支持"确认框（检查 `unimplementedEventTypes/unimplementedActionTypes`），可据此识别受影响地图；
+- 已真实实现：EnemyInZone(35)、TechBuildingCaptured(24) 及动作 80/81/83/85/89/90/100/104/105/112；
+- TeamInZone(23) 需要作战小队管理器（[TeamTypes]/[TaskForces] 解析与队伍追踪）；ReinforceTeam(75) 需要队伍 + 路径点增援系统；DiscoverByPlayer/HouseDiscovered 需要逐玩家视野变更事件；SelectedByPlayer 需要选择事件钩子；
+- 多事件触发器拖死根因：`TriggerManager.update` 对所有条件 AND 求值，任一占位条件恒 false → 整条触发器不触发（若要修复需让占位事件"透传"或改为事件驱动实现）。
+优先级：中（战役图触发器功能缺失，但已不再导致崩溃或开局误触发）
