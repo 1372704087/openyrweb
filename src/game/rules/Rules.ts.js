@@ -28,10 +28,11 @@ System.register(
     "game/rules/mpAllowedColors",
     "util/typeGuard",
     "game/Weapon",
+    "data/IniSection",
   ],
   function (e, t) {
     "use strict";
-    var a, n, s, r, i, o, l, c, h, u, d, g, p, m, f, y, T, v, b, S, w, E, C, x;
+    var a, n, s, r, i, o, l, c, h, u, d, g, p, m, f, y, T, v, b, S, w, E, C, x, z;
     t && t.id;
     return {
       setters: [
@@ -104,6 +105,9 @@ System.register(
         function (e) {
           C = e;
         },
+        function (e) {
+          z = e;
+        },
       ],
       execute: function () {
         e(
@@ -128,6 +132,11 @@ System.register(
                 (this.superWeaponTypes = new Map()),
                 (this.countryTypes = new Map()),
                 (this.weaponTypes = new Map()),
+                // OpenYRWeb: [Particles] list (vanilla YR particle types, e.g. VirusCloud1).
+                // The engine has no full YR particle engine, but the virus sniper toxic cloud
+                // reads its tuning values (Damage/MaxDC/MaxEC/Image/Warhead/...) from these
+                // rulesmd.ini sections instead of hardcoding them.
+                (this.particleTypes = new Map()),
                 (this.allObjectRules = new Map()),
                 (this.buildingRules = new Map()),
                 (this.infantryRules = new Map()),
@@ -307,6 +316,7 @@ System.register(
                 this.readObjectTypes("Warheads", this.warheadTypes),
                 this.readObjectTypes("Tiberiums", this.tiberiumTypes),
                 this.readObjectTypes("SuperWeaponTypes", this.superWeaponTypes),
+                this.readParticleTypes(),
                 this.allObjectRules
                   .set(n.ObjectType.Building, this.buildingRules)
                   .set(n.ObjectType.Infantry, this.infantryRules)
@@ -407,6 +417,23 @@ System.register(
                       : (r.set(s++, e), a.add(e))
                   : this.logger?.debug(`Non-string type found in rules section [${i}]. Skipping.`);
               });
+            }
+            // OpenYRWeb: read the [Particles] list (id=name) and store each particle's
+            // rulesmd.ini section so the virus cloud simulation can be tuned from config.
+            readParticleTypes() {
+              let e = this.ini.getSection("Particles");
+              if (e)
+                e.entries.forEach((e, t) => {
+                  "string" == typeof e &&
+                    !this.particleTypes.has(e) &&
+                    this.particleTypes.set(e, this.ini.getSection(e) ?? new z.IniSection(e));
+                });
+            }
+            getParticle(e) {
+              let t = e.toLowerCase(),
+                r = [...this.particleTypes.entries()].find(([e]) => e.toLowerCase() === t);
+              if (!r) throw new Error("Unknown particle " + e);
+              return r[1];
             }
             readColors() {
               let e = this.ini.getSection("Colors");

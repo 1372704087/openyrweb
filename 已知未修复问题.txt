@@ -332,3 +332,11 @@
 - TeamInZone(23) 需要作战小队管理器（[TeamTypes]/[TaskForces] 解析与队伍追踪）；ReinforceTeam(75) 需要队伍 + 路径点增援系统；DiscoverByPlayer/HouseDiscovered 需要逐玩家视野变更事件；SelectedByPlayer 需要选择事件钩子；
 - 多事件触发器拖死根因：`TriggerManager.update` 对所有条件 AND 求值，任一占位条件恒 false → 整条触发器不触发（若要修复需让占位事件"透传"或改为事件驱动实现）。
 优先级：中（战役图触发器功能缺失，但已不再导致崩溃或开局误触发）
+
+34. 病毒毒气云状态可能与原版不符
+影响模块：病毒狙击手毒气云（VirusCloudTrait / VirusCloudEvent / VirusCloudFxHandler）
+问题描述：引擎无原版 YR 粒子引擎，毒气云为"每格持续伤害源 + 视觉 puff"的近似模拟，其漂移、换向、加速/减速、寿命与动画状态均可能与原版粒子系统的真实状态存在差异。
+预期行为：与原版 YR 的 GasCloudSys 粒子行为完全一致。
+实际表现：云从静止加速起步、随机异步换向（45~210 tick、50% 概率保持方向）、ACCEL=0.03 惯性逼近目标速度，均为按反编译公式 + ModEnc 资料的近似实现；WindEffect=0 时仍按 StateAIAdvance 派生默认前进速度，而非原版"WindEffect=0 即无风漂移"。
+排查线索：漂移公式（风表×WindEffect、风向、高度+=速度）、风向动态变化、粒子初始速度随机加成等细节依赖反编译与 ModEnc 推断，未在真实 YR 中逐帧对照验证。
+优先级：低（视觉/表现层近似，伤害与链式蔓延逻辑按配置实现）

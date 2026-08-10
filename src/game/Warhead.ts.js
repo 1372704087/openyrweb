@@ -196,6 +196,17 @@ System.register(
                 t.isTechno() && !this.rules.temporal && this.supressOrScatterTarget(t, r),
                 !a.health &&
                   (t.isInfantry() && (t.infDeathType = this.rules.infDeath),
+                  // OpenYRWeb: Virus sniper toxic cloud. InfDeath=8 (InfantryVirus=VIRUSD)
+                  // kills spawn a lingering VirusGas cloud at the victim's tile. Only human
+                  // (non-NotHuman) infantry do so — NotHuman victims play Die1, not VIRUSD,
+                  // and release no gas (vanilla YR). Infantry killed by the gas itself carry
+                  // InfDeath=8 too, so the chain reaction feeds back through this same hook.
+                  t.isInfantry() &&
+                    t.isSpawned &&
+                    t.rules.isHuman &&
+                    !this.rules.temporal &&
+                    8 === this.rules.infDeath &&
+                    r.virusCloudTrait?.createCloud(t.tile, t.position?.worldPosition, r),
                   this.rules.temporal && (t.deathType = n.DeathType.Temporal),
                   // OpenYRWeb: Genetic Mutator transform. A warhead with InfDeath=Mutate (9) that
                   // kills convertible infantry spawns a Brute under the attacker's owner instead

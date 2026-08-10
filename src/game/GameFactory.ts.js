@@ -41,6 +41,7 @@ System.register(
     "game/ai/Ai",
     "game/bot/BotFactory",
     "game/BotManager",
+    "game/trait/VirusCloudTrait",
   ],
   function (e, t) {
     "use strict";
@@ -80,6 +81,7 @@ System.register(
       Ee,
       Ce,
       xe,
+      Ve,
       i;
     t && t.id;
     return {
@@ -192,6 +194,9 @@ System.register(
         function (e) {
           xe = e;
         },
+        function (e) {
+          Ve = e;
+        },
       ],
       execute: function () {
         e(
@@ -233,6 +238,11 @@ System.register(
                 L.traits.add(L.mapShroudTrait),
                 (L.mapRadiationTrait = new ue.MapRadiationTrait(A)),
                 L.traits.add(L.mapRadiationTrait),
+                // OpenYRWeb: Virus sniper toxic cloud. Ticks [VirusGas] damage over a 3x3
+                // area per gas particle; Infantry deaths with InfDeath=8 feed new clouds
+                // back in (see Warhead.inflictDamage) for the vanilla chain reaction.
+                (L.virusCloudTrait = new Ve.VirusCloudTrait(A)),
+                L.traits.add(L.virusCloudTrait),
                 (L.mapLightingTrait = new Se.MapLightingTrait(b.audioVisual, A.getLighting())),
                 L.traits.add(L.mapLightingTrait),
                 L.traits.add(new pe.SuperWeaponsTrait()),

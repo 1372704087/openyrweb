@@ -75,7 +75,10 @@ System.register("game/event/EventType", [], function (t, e) {
         (e[(e.TriggerAnim = 62)] = "TriggerAnim"),
         (e[(e.TriggerText = 63)] = "TriggerText"),
         (e[(e.TimerExpire = 64)] = "TimerExpire"),
-        (e[(e.RobotPowerStateChange = 65)] = "RobotPowerStateChange"));
+        (e[(e.RobotPowerStateChange = 65)] = "RobotPowerStateChange"),
+        // OpenYRWeb: Virus sniper toxic cloud lifecycle (spawn/remove) — consumed by the
+        // engine side VirusCloudFxHandler to render the green gas puffs.
+        (e[(e.VirusCloud = 66)] = "VirusCloud"));
     },
   };
 });

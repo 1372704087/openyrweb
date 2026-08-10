@@ -1029,4 +1029,24 @@ feat(map-triggers): 地图触发器 YR 动作/事件类型补全，并真实实�
 3. 斜向/绕路攻击可碾压目标：要塞进入射程即开火，边开火边驶近碾压。  
 4. 超时空军团兵冻结敌方坦克后命令要塞攻击：要塞驶上目标将其压碎。  
 5. 对己方坦克使用铁幕后命令敌方要塞攻击：铁幕坦克不被压碎，要塞被阻挡或停在射程外射击。
+
+- ☣️ **尤里病毒狙击手死亡动画与病毒蔓延粒子系统**
+  - 🎬 **死亡动画（InfDeath=8）**：`getDeathAnim` 已将 InfDeath=8 映射到 `[AudioVisual] InfantryVirus=VIRUSD`（受害者膨胀爆裂动画 + `VirusVictimSwell` 音效），仅人类步兵（非 NotHuman）播放，与原版 YR 一致（NotHuman 走 Die1 序列，不产生毒气）。
+  - 🌫️ **病毒蔓延粒子系统（VirusCloudTrait）**：新增游戏侧 `VirusCloudTrait`，模拟原版 YR 粒子系统（引擎无 YR 粒子引擎，用"每格持续伤害源"近似）。**全部数值由 md 配置驱动，不硬编码**：
+    - `Rules` 新增 `[Particles]` 列表解析（`readParticleTypes`/`getParticle`）。
+    - `[VIRUSD]`（artmd）`SpawnsParticle`/`NumParticles` → 粒子类型与数量。
+    - `[VirusCloud1]` `Damage`/`MaxDC`（伤害间隔）/`MaxEC`（寿命）/`Image`/`Warhead`/`StateAIAdvance`/`Translucency` → 主云参数。
+    - **`NextParticle=VirusCloudD1` 严格按原版拆为两个独立粒子对象**：主云（VirusCloud1）寿命耗尽时原地**新生成**一个独立的 VirusCloudD1 记录（独立 cloudId、独立计时、独立伤害节奏 MaxDC=60、独立透明度 Translucency=50，独立视觉 puff），主云自身消亡。
+    - `[VirusGas]` 自带 `InfDeath=8` → 被毒气杀死的步兵再次生成毒气 → 链式蔓延。
+    - 免疫：新增 `ImmuneToPoison=yes` 解析（[VIRUS] 单位自身免疫毒气）。
+  - 📍 **云生成于受害者精确位置**：毒气云在受害者死亡时的精确世界坐标（`position.worldPosition`）生成，而非格子中心。
+  - 🎨 **毒气视觉（VirusCloudFxHandler）**：引擎侧新增 fx handler，订阅 `VirusCloudEvent`（spawn/remove），使用事件携带的 md 粒子 Image（`[VirusCloud1] Image=TXGASG`，游戏数据中的原生粒子 SHP，无 art.ini 配置节）渲染气体 puff——不修改 artcd/rulescd 覆盖配置。每个独立粒子（主云或 D1 消散云）各有一个独立 puff，透明度取各自粒子的 `Translucency`；`StateAIAdvance` 推导翻腾速率；**无限循环直接设置 `animation.props.loopCount = -1`**（fallback ObjectArt 默认 LoopCount=1 只播一次；不能用 `playRemainingLoops(-1)`，其 `endLoopAndPlayToEnd()` 会在首轮播到结尾帧时置 STOPPED 导致动画只播一次就消失——与 Vehicle/Infantry/TntFx 同模式）。漂移速度与上升为纯视觉常量（原版气体粒子"初始速度随机加成"，引擎不模拟 WindEffect）。**漂移改为原版反编译公式**（游戏侧确定性锁步，渲染侧按 `(currentTick - spawnTick) × vel` 复算同一位置，视觉与伤害区始终贴在一起）：每帧 `地图X += WindEffect × 风表X[风向]`、`地图Z += WindEffect × 风表Y[风向]`、`高度 += 速度`；8 方向风表（0=北顺时针）`{0,-2},{2,-2},{2,0},{2,2},{0,2},{-2,2},{-2,0},{-2,-2}`（ModEnc 与反编译一致），风向取 `[General] WindDirection`（原版=1 东北）。`WindEffect` 从各粒子自身 rulesmd 节读取；`[VirusCloud1]` 配置为 0 时按**默认前进速度**继续飘：`风表偏移(2 leptons) ÷ StateAIAdvance(=4) = 0.5 leptons/tick`，**每个粒子用 PRNG 独立随机风向**（3 个云各自飞向不同方向，不抱团同向；若配置 WindEffect>0 则用全局 `[General] WindDirection` 方向并严格走 `WindEffect × 风表`）。**随机异步换向**：每个粒子有自己的换向计时器（初始及每次重掷后随机 45~210 tick，约 0.75~3.5 秒），到点各自重新随机方向——**不是全体同步换向**，3 个云交错改变方向；且**不一定必须换向**：每次计时到点仅 50% 概率重新随机方向（其余保持当前航向，只重置下次计时），方向变化更自然（锁步 PRNG 确定性）；游戏侧只更新**目标速度**并派发 `"vel"` 事件，渲染侧把当前推演位置作为新锚点后继续逼近新目标（视觉连续、伤害锚点始终跟随）。**加速/减速惯性**：粒子从静止起步，实际速度每 tick 以 `ACCEL=0.03 leptons/tick` 为上限向目标速度逼近（`vel += clamp(target-vel, ±ACCEL)`）——生成时有明显加速过程，变向时先减速、转向、再加速，不会瞬间跳变速度；游戏侧与渲染侧使用同一 ACCEL 积分公式，视觉与伤害锚点严格一致。
+  - 📦 新模块：`game/trait/VirusCloudTrait`、`game/event/VirusCloudEvent`、`engine/renderable/fx/handler/VirusCloudFxHandler`（moduleCount 1320→1323）。
+
+### 🧪 测试建议
+1. 病毒狙击手（VIRUS）射击敌方步兵：受害者播放膨胀爆裂动画并发出绿色毒气云。  
+2. 毒气云持续数秒，每隔 `MaxDC` 帧对以云格为中心的 **CellSpread=1（半径 1 格）** 范围内步兵造成伤害——原版判定：候选格为完整 3×3（含对角），但命中还需 **目标距云心 3D 距离 ≤ CellSpread×256 leptons**（正交邻格中心恰好命中，对角格中心 362 leptons 打不到），`[VirusGas] PercentAtMax=1` 无距离衰减。被毒气杀死的步兵再次爆出毒气云（链式蔓延）。  
+3. 病毒狙击手自身站在毒气云内不掉血（`ImmuneToPoison=yes`），其余友军步兵受伤害。  
+4. 轻型车辆（Verses 50%）过云受少量伤害，建筑/围墙（Verses 0%）不受伤害。  
+5. 军犬等 NotHuman 步兵被病毒击杀时只播放 Die1，不产生毒气云。
   

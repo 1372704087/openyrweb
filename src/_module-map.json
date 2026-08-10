@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1320,
+  "moduleCount": 1323,
   "modules": [
     {
       "name": "data/IniSection",
@@ -5619,6 +5619,17 @@
       "bytes": 1660
     },
     {
+      "name": "game/trait/VirusCloudTrait",
+      "file": "game/trait/VirusCloudTrait.ts.js",
+      "deps": [
+        "game/map/tileFinder/RadialTileFinder",
+        "game/Warhead",
+        "game/trait/interface/NotifyTick",
+        "game/event/VirusCloudEvent"
+      ],
+      "bytes": 6518
+    },
+    {
       "name": "game/Prng",
       "file": "game/Prng.ts.js",
       "deps": [
@@ -6574,6 +6585,14 @@
       "bytes": 265
     },
     {
+      "name": "game/event/VirusCloudEvent",
+      "file": "game/event/VirusCloudEvent.ts.js",
+      "deps": [
+        "game/event/EventType"
+      ],
+      "bytes": 988
+    },
+    {
       "name": "game/CountdownTimer",
       "file": "game/CountdownTimer.ts.js",
       "deps": [
@@ -6831,9 +6850,10 @@
         "game/rules/PowerupsRules",
         "game/rules/mpAllowedColors",
         "util/typeGuard",
-        "game/Weapon"
+        "game/Weapon",
+        "data/IniSection"
       ],
-      "bytes": 11427
+      "bytes": 12070
     },
     {
       "name": "game/Country",
@@ -11430,6 +11450,17 @@
       "bytes": 1071
     },
     {
+      "name": "engine/renderable/fx/handler/VirusCloudFxHandler",
+      "file": "engine/renderable/fx/handler/VirusCloudFxHandler.ts.js",
+      "deps": [
+        "util/disposable/CompositeDisposable",
+        "game/Coords",
+        "game/event/EventType",
+        "util/math"
+      ],
+      "bytes": 3962
+    },
+    {
       "name": "engine/renderable/fx/handler/CrateFxHandler",
       "file": "engine/renderable/fx/handler/CrateFxHandler.ts.js",
       "deps": [
@@ -11487,7 +11518,8 @@
         "engine/renderable/builder/VxlBuilderFactory",
         "engine/renderable/fx/handler/TriggerActionFxHandler",
         "util/BoxedVar",
-        "engine/renderable/fx/handler/ParasiteSparkFxHandler"
+        "engine/renderable/fx/handler/ParasiteSparkFxHandler",
+        "engine/renderable/fx/handler/VirusCloudFxHandler"
       ],
       "bytes": 6229
     },
@@ -11808,7 +11840,8 @@
         "game/Prng",
         "game/ai/Ai",
         "game/bot/BotFactory",
-        "game/BotManager"
+        "game/BotManager",
+        "game/trait/VirusCloudTrait"
       ],
       "bytes": 4317
     },

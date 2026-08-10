@@ -254,6 +254,10 @@ System.register(
                 (this.immune = this.ini.getBool("Immune")),
                 (this.immuneToRadiation = this.ini.getBool("ImmuneToRadiation")),
                 (this.immuneToPsionics = this.ini.getBool("ImmuneToPsionics")),
+                // OpenYRWeb: ImmuneToPoison=yes (InfantryTypes, vanilla YR). Units with this flag
+                // take no damage from poison gas warheads (Poison=yes) such as [VirusGas] used by
+                // the Virus sniper's toxic clouds. The Virus (VIRUS) unit itself is immune.
+                (this.immuneToPoison = this.ini.getBool("ImmuneToPoison")),
                 // OpenYRWeb: MindControlOverload — enables infinite mind control with self-damage
                 // when exceeding the weapon's Damage (safe capacity). Used by Mastermind (MIND).
                 (this.mindControlOverload = this.ini.getBool("MindControlOverload", !1)),

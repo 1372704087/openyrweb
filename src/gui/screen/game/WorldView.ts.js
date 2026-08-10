@@ -28,10 +28,11 @@ System.register(
     "engine/renderable/fx/handler/TriggerActionFxHandler",
     "util/BoxedVar",
     "engine/renderable/fx/handler/ParasiteSparkFxHandler",
+    "engine/renderable/fx/handler/VirusCloudFxHandler",
   ],
   function (e, t) {
     "use strict";
-    var u, o, v, b, S, w, l, c, E, C, x, O, A, M, R, P, I, k, B, N, j, d, L, i;
+    var u, o, v, b, S, w, l, c, E, C, x, O, A, M, R, P, I, k, B, N, j, d, L, Vc, i;
     t && t.id;
     return {
       setters: [
@@ -103,6 +104,9 @@ System.register(
         },
         function (e) {
           L = e;
+        },
+        function (e) {
+          Vc = e;
         },
       ],
       execute: function () {
@@ -256,6 +260,8 @@ System.register(
               (v.init(), this.disposables.add(v));
               let b = new L.ParasiteSparkFxHandler(e, p);
               (b.init(), this.disposables.add(b));
+              let Wv = new Vc.VirusCloudFxHandler(e, p);
+              (Wv.init(), this.disposables.add(Wv));
               let S = new j.TriggerActionFxHandler(e, p);
               return (
                 S.init(),
