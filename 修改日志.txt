@@ -1079,3 +1079,39 @@ feat(tech-hospital): 实现科技医院/机器商店全图自动回血与治疗�
 4. 敌人视角看不到图标；友方/观察者可见；未悬停/选中不显示。  
 5. 建造中/出售中的医院不生效；工程兵占领后切换回血归属。  
 6. 多医院/商店并存时回血叠加、闪烁正常。  
+
+fix(sidebar): 修复建造建筑侧边栏其他图标不变黑问题
+
+- 🐛 **根因**：`CombatantSidebarModel.updateSidebarTechnoItem` 计算 disabled 时条件 `1 === t.maxSize && 0 < l.length && l[0] !== t.getFirst()` 永假——`l` 是该对象在队列中的条目，maxSize=1 的队列最多只有 1 个条目，`l.length > 0` 时 `l[0]` 必然等于 `getFirst()`，第三个子句恒为 false，导致单槽队列（建筑/军械库）生产时其他图标永远不置灰。
+- ✅ **修复**：改为 `1 === t.maxSize && t.currentSize > 0 && l[0] !== t.getFirst()`，用队列当前占用数 `currentSize` 判断单槽是否忙碌：槽被其他单位占用时其余图标变黑（disabled 帧 +2），正在生产的单位图标保持亮态；队列空闲时不受影响。
+
+### ⚠️ 破坏性变更
+- 无，仅修正原逻辑的死条件。
+
+### 🧪 测试建议
+1. 建造建筑/军械库中某一单位时，同栏其他图标应变黑不可点击；正在生产的图标保持亮态。  
+2. 队列空闲时所有可生产图标恢复正常。  
+
+fix(skirmish-lobby): 修复切国家时报 "No player found on slot 0" 崩溃
+
+- 🐛 **根因**：`initOptions` 在槽位 0 为 AI（`LastHostObserver=ai` 或上次存档 `aiPlayers[0]` 存在）时，用 `{type: Ai, difficulty}` 直接**替换**了 `slotsInfo[0]`（丢了 name）；之后把槽位 0 切回玩家时，`changeSlotType` 只设 `type = Player` 不恢复 name。于是 `updatePlayerInfo` 里 `gameOpts.humanPlayers.find(e => e.name === slotsInfo[0].name)` 匹配到 `undefined` → 抛 "No player found on slot 0"，点击国家/颜色/出生点/队伍选择框即崩溃。
+- ✅ **修复**：槽位 0 切回玩家（`"player"` 分支）和切为观战者（`SlotOccupation.Observer` 分支，该分支同样置 `type=Player`）时恢复 `slotsInfo[0].name = this.playerName`（始终与 `humanPlayers[0].name` 一致）。
+
+### ⚠️ 破坏性变更
+- 无，仅补全槽位类型切换时丢失的 name 字段。
+
+### 🧪 测试建议
+1. 上次以"槽位0=AI"结束对局（或先切槽位0为AI并开始/退出）后重新进遭遇战，把槽位0切回玩家，再点国家/颜色/出生点/队伍，不应崩溃。
+2. 正常开局（槽位0=玩家）点国家，行为与之前一致。  
+
+fix(skirmish-lobby): 修复玩家栏切 AI 后启动报"地图出生点不足"错误
+
+- 🐛 **根因**：遭遇战大厅把槽位 0 运行时切为 AI 时，`changeSlotType` 把 `humanPlayers[0].countryId` 置为 OBS（主机变幽灵观战者）但**没有把 `startPos` 重置为 RANDOM**——`initOptions` 启动路径早已这样做（b7e9786 注释"观战者不占出生点槽位"），运行时切换路径遗漏。于是幽灵观战者带着玩家先前选择的固定出生点残留在 `humanPlayers` 里，`GameScreen.onEnter` 的出生点校验（与 `GameOptRandomGen.generateStartLocations` 一致：观战者 startPos 固定时也占 1 个）把它也计入，例如 4 出生点地图：4 个 AI + 幽灵观战者 = 5 个消费者 > 4 → 提示"需要 5 个出生点，地图仅提供 4 个"。
+- ✅ **修复**：`changeSlotType` 的 `Occupied`（槽位0切AI）与 `Observer`（主机切观战者）两个分支，在把 `humanPlayers[0].countryId` 置为 OBS 的同时重置 `humanPlayers[0].startPos = RANDOM_START_POS`，与 `initOptions` 行为完全一致，幽灵观战者不再占用出生点。
+
+### ⚠️ 破坏性变更
+- 无。观战者/幽灵玩家不再占用出生点（与启动路径行为一致）；主机从 AI 切回玩家后出生点需重新选择（此前也可能已是 RANDOM）。
+
+### 🧪 测试建议
+1. 4 出生点地图，玩家栏（槽位0）切为 AI（或先把槽位0设为AI的难度）后点开始游戏，应正常进入，不再报"地图出生点不足"。
+2. 玩家栏切回玩家，重新选国家/出生点，正常开局；人数超过地图出生点时仍会正确提示（减少 AI 即可）。  

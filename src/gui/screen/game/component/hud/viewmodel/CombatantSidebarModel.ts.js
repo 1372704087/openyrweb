@@ -153,7 +153,7 @@ System.register(
                 (e.quantity = l.reduce((e, t) => e + t.quantity, 0)),
                 (e.status = this.computeStatus(t, l[0])),
                 (e.disabled =
-                  (1 === t.maxSize && 0 < l.length && l[0] !== t.getFirst()) ||
+                  (1 === t.maxSize && t.currentSize > 0 && l[0] !== t.getFirst()) ||
                   a ||
                   (!o.length && (!t.currentSize || l[0] !== t.getFirst()))));
             }

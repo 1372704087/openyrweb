@@ -531,6 +531,10 @@ System.register(
             var r;
             if (e === "player" && 0 === t) {
               this.hostObserver = !1;
+              // OpenYRWeb: 槽位从 AI/观战者切回玩家时恢复名字，
+              // 否则 initOptions 里 slotsInfo[0] 被替换成无 name 的 AI 对象后，
+              // updatePlayerInfo 按 name 匹配 humanPlayers 会抛 "No player found on slot 0"
+              this.slotsInfo[0].name = this.playerName;
               this.slotsInfo[0].type = y.SlotType.Player;
               delete this.slotsInfo[0].difficulty;
               delete this.slotsInfo[0].observer;
@@ -547,9 +551,13 @@ System.register(
                 this.hostObserver = !0;
                 this.savedHostCountryId = this.gameOpts.humanPlayers[0].countryId;
                 this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID;
-                (this.slotsInfo[0].type = y.SlotType.Player),
+                // OpenYRWeb: 观战者不占出生点槽位（与 initOptions 一致）
+                (this.gameOpts.humanPlayers[0].startPos = v.RANDOM_START_POS),
+                  (this.slotsInfo[0].type = y.SlotType.Player),
                   delete this.slotsInfo[0].difficulty,
                   delete this.slotsInfo[0].observer,
+                  // OpenYRWeb: 恢复名字，避免 AI 槽位切回玩家后按 name 匹配失败崩溃
+                  (this.slotsInfo[0].name = this.playerName),
                   (this.gameOpts.aiPlayers[0] = void 0);
                 this.localPrefs.setItem(b.StorageKey.LastHostObserver, "observer");
                 this.localPrefs.setItem(b.StorageKey.LastPlayerCountry, String(this.savedHostCountryId));
@@ -572,6 +580,10 @@ System.register(
                 this.hostObserver || (this.savedHostCountryId = this.gameOpts.humanPlayers[0].countryId);
                 (this.hostObserver = !0),
                   (this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID),
+                  // OpenYRWeb: 观战者不占出生点槽位（与 initOptions 一致），
+                  // 否则残留的固定 startPos 会让 GameScreen 出生点校验把幽灵观战者也计入，
+                  // 槽位0切AI后启动报 "地图出生点不足"
+                  (this.gameOpts.humanPlayers[0].startPos = v.RANDOM_START_POS),
                   delete a.observer;
               }
               ((a.type = y.SlotType.Ai),
