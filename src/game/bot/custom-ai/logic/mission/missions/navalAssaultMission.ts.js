@@ -40,9 +40,9 @@ System.register("game/bot/custom-ai/logic/mission/missions/navalAssaultMission",
     ],
     execute: function () {
 
-      var NAVAL_ASSAULT_ATTACK_COOLDOWN_TICKS = 90;
-      var NAVAL_ASSAULT_RETARGET_TICKS = 300;
-      var NAVAL_ASSAULT_DISBAND_IDLE_TICKS = 600;
+      var NAVAL_ASSAULT_ATTACK_COOLDOWN_TICKS = 15;
+      var NAVAL_ASSAULT_RETARGET_TICKS = 100;
+      var NAVAL_ASSAULT_DISBAND_IDLE_TICKS = 200;
 
       var POWER_PLANT_NAMES = ["GAPOWR", "NAPOWR", "NANRCT", "YAPOWR", "NATBNK"];
       var SHIPYARD_NAMES = ["GAYARD", "NAYARD", "YAYARD"];
@@ -220,7 +220,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/navalAssaultMission",
         }).length > 0;
       }
 
-      var NAVAL_ASSAULT_CHECK_INTERVAL_TICKS = 1200;
+      var NAVAL_ASSAULT_CHECK_INTERVAL_TICKS = 400;
       var NAVAL_ASSAULT_PRIORITY = 70;
 
       var NavalAssaultMissionFactory = /** @class */ (function () {

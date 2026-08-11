@@ -551,6 +551,19 @@ System.register(
                 (t = new le.MapFile(s)));
               var f = de.MapSupport.check(t, this.strings);
               if (f) return void this.handleError(f, f);
+              // OpenYRWeb: 校验占用出生点的玩家数不超过地图出生点数，避免 "Map has fewer starting locations than players" 崩溃
+              // 占用规则与 GameOptRandomGen.generateStartLocations 一致：非观战玩家各占 1 个，
+              // 观战者仅在其 startPos 固定时额外占 1 个（会写入固定位置列表）。
+              var gsAll = (g.humanPlayers || []).concat(g.aiPlayers || []).filter(function (pl) { return !!pl; }),
+                gsConsumers = gsAll.filter(function (pl) {
+                  return pl.countryId !== pe.OBS_COUNTRY_ID || pl.startPos !== pe.RANDOM_START_POS;
+                }).length;
+              if (gsConsumers > t.startingLocations.length) {
+                var gsMsg =
+                  "地图出生点不足：当前配置需要 " + gsConsumers + " 个出生点，地图仅提供 " + t.startingLocations.length +
+                  " 个。请减少玩家数量或更换更大的地图。";
+                return void this.handleError(gsMsg, gsMsg);
+              }
             } catch (e) {
               return void this.handleMapLoadError(e, g.mapName);
             }

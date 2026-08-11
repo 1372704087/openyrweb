@@ -29,10 +29,10 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
     ],
     execute: function () {
 
-      var AIR_RAID_MIN_AIRCRAFT = 4;
-      var AIR_RAID_ATTACK_COOLDOWN_TICKS = 60;
-      var AIR_RAID_RETARGET_TICKS = 300;
-      var AIR_RAID_DISBAND_IDLE_TICKS = 600;
+      var AIR_RAID_MIN_AIRCRAFT = 2;
+      var AIR_RAID_ATTACK_COOLDOWN_TICKS = 10;
+      var AIR_RAID_RETARGET_TICKS = 100;
+      var AIR_RAID_DISBAND_IDLE_TICKS = 200;
 
       var POWER_PLANT_NAMES = ["GAPOWR", "NAPOWR", "NANRCT", "YAPOWR", "NATBNK"];
 
@@ -42,8 +42,12 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
         return POWER_PLANT_NAMES.indexOf(rules.name) !== -1;
       }
 
-      function isAirRaidTarget(rules) {
+      function isAirRaidTarget(rules, airUnitType) {
         if (!rules) return false;
+        // ZEP（基诺夫）只攻击建筑，不追采矿车
+        if (airUnitType === "ZEP") {
+          return rules.type === ObjectType.Building;
+        }
         if (rules.harvester) return true;
         if (isPowerPlant(rules)) return true;
         if (rules.refinery) return true;
@@ -51,8 +55,16 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
         return false;
       }
 
-      function getAirRaidTargetScore(rules) {
+      function getAirRaidTargetScore(rules, airUnitType) {
         if (!rules) return 0;
+        // ZEP 按建筑血量评分，优先拆高价值建筑
+        if (airUnitType === "ZEP") {
+          if (rules.constructionYard) return 1000;
+          if (rules.weaponsFactory) return 500;
+          if (rules.refinery) return 400;
+          if (isPowerPlant(rules)) return 300;
+          return rules.maxHitPoints || 100;
+        }
         if (rules.harvester) return 500;
         if (isPowerPlant(rules)) return 400;
         if (rules.refinery) return 350;
@@ -121,7 +133,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
             return noop();
           }
 
-          var targetId = this.pickTarget(gameApi, playerData, matchAwareness);
+          var targetId = this.pickTarget(gameApi, playerData, matchAwareness, airUnitTypes[0]);
           if (targetId !== null && targetId !== this.currentTargetId) {
             this.currentTargetId = targetId;
             this.lastTargetSeenAt = currentTick;
@@ -145,7 +157,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
               this.currentTargetId = null;
               return noop();
             }
-            actionsApi.orderUnits(aircraft.map(function (a) { return a.id; }), OrderType.Attack, this.currentTargetId);
+            actionsApi.orderUnits(aircraft.map(function (a) { return a.id; }), OrderType.ForceAttack, this.currentTargetId);
             this.lastAttackAt = currentTick;
             this.lastTargetSeenAt = currentTick;
           }
@@ -153,16 +165,16 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
           return noop();
         };
 
-        AirRaidMission.prototype.pickTarget = function (gameApi, playerData, matchAwareness) {
+        AirRaidMission.prototype.pickTarget = function (gameApi, playerData, matchAwareness, airUnitType) {
           var rallyPoint = matchAwareness.getMainRallyPoint();
           var enemyUnits = gameApi.getVisibleUnits(playerData.name, "enemy")
             .map(function (unitId) { return gameApi.getGameObjectData(unitId); })
-            .filter(function (u) { return !!u && !!u.rules && isAirRaidTarget(u.rules); });
+            .filter(function (u) { return !!u && !!u.rules && isAirRaidTarget(u.rules, airUnitType); });
 
           if (enemyUnits.length === 0) return null;
 
           var scored = enemyUnits.map(function (u) {
-            var score = getAirRaidTargetScore(u.rules);
+            var score = getAirRaidTargetScore(u.rules, airUnitType);
             var dist = distanceSq(rallyPoint.x, rallyPoint.y, u.tile.rx, u.tile.ry);
             return { unit: u, score: score, dist: dist };
           }).sort(function (a, b) {
@@ -188,7 +200,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/airRaidMission", ["ga
       }(Mission));
       e("AirRaidMission", AirRaidMission);
 
-      var AIR_RAID_CHECK_INTERVAL_TICKS = 900;
+      var AIR_RAID_CHECK_INTERVAL_TICKS = 300;
       var AIR_RAID_PRIORITY = 80;
 
       var AirRaidMissionFactory = /** @class */ (function () {

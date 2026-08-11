@@ -95,8 +95,8 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
 
       var AttackMissionState = { Preparing: 0, Attacking: 1, Retreating: 2 };
 
-      var NO_TARGET_RETARGET_TICKS = 450;
-      var NO_TARGET_IDLE_TIMEOUT_TICKS = 900;
+      var NO_TARGET_RETARGET_TICKS = 120;
+      var NO_TARGET_IDLE_TIMEOUT_TICKS = 300;
 
       function calculateTargetComposition(gameApi, playerData, matchAwareness, useNaval) {
         if (useNaval === void 0) { useNaval = false; }
@@ -117,8 +117,8 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
           : getAlliedCompositions(gameApi, playerData, matchAwareness);
       }
 
-      var ATTACK_MISSION_PRIORITY_RAMP = 1.05;
-      var ATTACK_MISSION_MAX_PRIORITY = 50;
+      var ATTACK_MISSION_PRIORITY_RAMP = 1.12;
+      var ATTACK_MISSION_MAX_PRIORITY = 90;
 
       var AttackMission = /** @class */ (function (Mission) {
         function AttackMission(uniqueName, priority, rallyArea, attackArea, radius, composition, logger) {
@@ -130,7 +130,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
           this.composition = composition;
           this.hasTriedLandAttack = false;
           this.landAttackFailCount = 0;
-          this.MAX_LAND_ATTACK_ATTEMPTS = 2;
+          this.MAX_LAND_ATTACK_ATTEMPTS = 1;
           this.isNavalMission = false;
           this.lastTargetSeenAt = 0;
           this.hasPickedNewTarget = false;
@@ -272,7 +272,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
       };
 
       var getTargetWeight = function (unitData, tryFocusHarvester) {
-        if (tryFocusHarvester && unitData.rules.harvester) return 100000;
+        if (tryFocusHarvester && unitData.rules.harvester) return 150000;
         if (unitData.type === ObjectType.Building) {
           var strategicPriority = STRATEGIC_BUILDING_PRIORITY[unitData.name];
           if (strategicPriority) return strategicPriority + unitData.maxHitPoints;
@@ -281,8 +281,8 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
         return unitData.maxHitPoints;
       };
 
-      // 威胁规避：评估目标点附近的敌方防御强度，返回权重乘数（0.1~1.0）
-      var THREAT_ASSESSMENT_RADIUS = 8;
+      // 威胁规避：评估目标点附近的敌方防御强度，返回权重乘数（0.3~1.0，更激进）
+      var THREAT_ASSESSMENT_RADIUS = 5;
       var assessTargetThreat = function (gameApi, matchAwareness, targetPoint, excludeUnitId) {
         try {
           var nearbyHostiles = matchAwareness.getHostilesNearPoint2d(targetPoint, THREAT_ASSESSMENT_RADIUS);
@@ -304,8 +304,8 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
           // 防御建筑威胁权重 3，移动战斗单位威胁权重 1
           var threatScore = defensiveBuildings * 3 + mobileThreats;
           if (threatScore === 0) return 1.0;
-          // 威胁越大惩罚越重，最低降至 0.1
-          var penalty = Math.max(0.1, 1.0 / (1.0 + threatScore * 0.15));
+          // 威胁惩罚大幅降低，AI更敢于硬冲
+          var penalty = Math.max(0.3, 1.0 / (1.0 + threatScore * 0.06));
           return penalty;
         } catch (err) {
           return 1.0;
@@ -435,11 +435,11 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
               if (!isPointReachable(gameApi, rallyPoint, targetPoint, SpeedType.Track, 6)) {
                 weight *= 0.3;
               }
-              // 距离惩罚：越远权重越低（线性衰减，最远降至 0.6 倍）
+              // 距离惩罚：越远权重越低（线性衰减，底限提高到 0.75 倍）
               var dist = rallyPoint.distanceTo(targetPoint);
               if (dist > 0) {
-                var maxDist = 120;
-                var distFactor = Math.max(0.6, 1 - (dist / maxDist) * 0.4);
+                var maxDist = 200;
+                var distFactor = Math.max(0.75, 1 - (dist / maxDist) * 0.25);
                 weight *= distFactor;
               }
               // 威胁规避：评估目标附近的敌方防御强度，防御密集的目标权重大幅降低
@@ -494,16 +494,16 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
       }
 
       // 多线作战参数
-      var VISIBLE_TARGET_ATTACK_COOLDOWN_TICKS = 15;
-      var BASE_ATTACK_COOLDOWN_TICKS = 3;
-      var AIR_RAID_PRIORITY = 80;
-      var NAVAL_ASSAULT_PRIORITY = 70;
+      var VISIBLE_TARGET_ATTACK_COOLDOWN_TICKS = 3;
+      var BASE_ATTACK_COOLDOWN_TICKS = 1;
+      var AIR_RAID_PRIORITY = 100;
+      var NAVAL_ASSAULT_PRIORITY = 95;
       // 同时允许的最大地面进攻任务数（Preparing 状态）
-      var MAX_CONCURRENT_GROUND_ATTACKS = 10;
+      var MAX_CONCURRENT_GROUND_ATTACKS = 20;
       // 同时允许的最大空袭任务数
-      var MAX_CONCURRENT_AIR_RAIDS = 5;
+      var MAX_CONCURRENT_AIR_RAIDS = 10;
       // 同时允许的最大海军突击任务数
-      var MAX_CONCURRENT_NAVAL_ASSAULTS = 5;
+      var MAX_CONCURRENT_NAVAL_ASSAULTS = 10;
 
       function hasAirProductionForSelector(gameApi, playerData) {
         if (!playerData.country) return false;
@@ -590,7 +590,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/attackMission", ["gam
             this.groundLaneIndex++;
             var laneRallyPoint = lanes[LANE_NAMES.indexOf(selectedLane)].rallyPoint;
 
-            var attackRadius = 10;
+            var attackRadius = 15;
             var includeEnemyBases = currentTick > this.lastAttackAt + BASE_ATTACK_COOLDOWN_TICKS;
             var attackArea = generateTarget(gameApi, playerData, matchAwareness, includeEnemyBases, logger, selectedLane, lanes);
             if (attackArea) {

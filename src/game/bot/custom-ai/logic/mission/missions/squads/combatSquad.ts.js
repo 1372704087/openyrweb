@@ -43,19 +43,21 @@ System.register("game/bot/custom-ai/logic/mission/missions/squads/combatSquad", 
     ],
     execute: function () {
 
-      var TARGET_UPDATE_INTERVAL_TICKS = 10;
-      var MIN_GATHER_RADIUS = 5;
-      var MAX_GATHER_RADIUS = 15;
-      var GATHER_RATIO = 10;
-      var ATTACK_SCAN_AREA = 15;
+      var TARGET_UPDATE_INTERVAL_TICKS = 2;
+      var MIN_GATHER_RADIUS = 3;
+      var MAX_GATHER_RADIUS = 8;
+      var GATHER_RATIO = 5;
+      var ATTACK_SCAN_AREA = 25;
 
       var SquadState = { Gathering: 0, Attacking: 1 };
 
       var CombatSquad = /** @class */ (function () {
-        function CombatSquad(rallyArea, targetArea, radius) {
+        function CombatSquad(rallyArea, targetArea, radius, shouldEngage) {
+          if (shouldEngage === void 0) { shouldEngage = true; }
           this.rallyArea = rallyArea;
           this.targetArea = targetArea;
           this.radius = radius;
+          this.shouldEngage = shouldEngage;
           this.lastCommand = null;
           this.state = SquadState.Gathering;
           this.debugLastTarget = undefined;
@@ -92,6 +94,17 @@ System.register("game/bot/custom-ai/logic/mission/missions/squads/combatSquad", 
                 this.state = SquadState.Gathering;
                 return noop();
               }
+
+              // 当 shouldEngage 为 false 时，小队不主动攻击附近敌人，只向目标点移动
+              if (!this.shouldEngage) {
+                for (var _i = 0, units_1 = units; _i < units_1.length; _i++) {
+                  var unit = units_1[_i];
+                  _this.submitActionIfNew(actionBatcher, manageMoveMicro(unit, targetPoint));
+                }
+                _this.debugLastTarget = "@" + targetPoint.x + "," + targetPoint.y + " (noEngage)";
+                return noop();
+              }
+
               var getRangeForUnit = function (unit) {
                 return unit.primaryWeapon ? unit.primaryWeapon.maxRange : (unit.secondaryWeapon ? unit.secondaryWeapon.maxRange : 5);
               };
@@ -105,8 +118,8 @@ System.register("game/bot/custom-ai/logic/mission/missions/squads/combatSquad", 
                 .map(function (_a) { var unitId = _a.unitId; return gameApi.getUnitData(unitId); })
                 .filter(function (unit) { return !!unit && !isOwnedByNeutral(unit); });
 
-              for (var _i = 0, units_1 = units; _i < units_1.length; _i++) {
-                var unit = units_1[_i];
+              for (var _j = 0, units_2 = units; _j < units_2.length; _j++) {
+                var unit = units_2[_j];
                 var unitRange = getRangeForUnit(unit);
                 var unitScanRadius = Math.max(ATTACK_SCAN_AREA, unitRange);
                 var nearbyHostiles = globalHostilesRaw.filter(function (hostile) {

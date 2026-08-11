@@ -1,7 +1,7 @@
 // === Custom AI module: game/bot/custom-ai/logic/mission/missions/defenceMission ===
 System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["game/api/index", "game/bot/custom-ai/logic/awareness", "game/bot/custom-ai/logic/mission/missionController", "game/bot/custom-ai/logic/mission/mission", "game/bot/custom-ai/logic/mission/missionFactories", "game/bot/custom-ai/logic/mission/missions/squads/combatSquad", "game/bot/custom-ai/logic/common/utils", "game/bot/custom-ai/logic/mission/actionBatcher"], function (e, t) {
   "use strict";
-  var ActionsApi, GameApi, PlayerData, UnitData, Vector2;
+  var ActionsApi, GameApi, PlayerData, SideType, UnitData, Vector2;
   var Mission, grabCombatants, noop, releaseUnits, requestUnits;
   var CombatSquad;
   var DebugLogger, isOwnedByNeutral;
@@ -12,6 +12,7 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
         ActionsApi = A.ActionsApi;
         GameApi = A.GameApi;
         PlayerData = A.PlayerData;
+        SideType = A.SideType;
         UnitData = A.UnitData;
         Vector2 = A.Vector2;
       },
@@ -36,15 +37,19 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
     ],
     execute: function () {
 
-      var MAX_PRIORITY = 100;
+      var MAX_PRIORITY = 70;
       var PRIORITY_INCREASE_PER_TICK_RATIO = 1.025;
 
       var DefenceMission = /** @class */ (function (Mission) {
-        function DefenceMission(uniqueName, priority, rallyArea, defenceArea, radius, logger) {
+        function DefenceMission(uniqueName, priority, rallyArea, defenceArea, radius, logger, preferredUnits, isProactive) {
+          if (preferredUnits === void 0) { preferredUnits = null; }
+          if (isProactive === void 0) { isProactive = false; }
           Mission.call(this, uniqueName, logger);
           this.priority = priority;
           this.defenceArea = defenceArea;
           this.radius = radius;
+          this.preferredUnits = preferredUnits;
+          this.isProactive = isProactive;
           this.squad = new CombatSquad(rallyArea, defenceArea, radius);
         }
         DefenceMission.prototype = Object.create(Mission.prototype);
@@ -61,6 +66,18 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
           if (update.type !== "noop") return update;
 
           if (foundTargets.length === 0) {
+            // 主动防御：没有敌人时，请求坦克单位驻守，不释放
+            if (this.isProactive && this.preferredUnits && this.preferredUnits.length > 0) {
+              var currentUnits = this.getUnitsGameObjectData(gameApi);
+              var currentNames = currentUnits.map(function (u) { return u.name; });
+              var missingUnits = this.preferredUnits.filter(function (name) { return currentNames.indexOf(name) === -1; });
+              // 如果当前单位数量不足 preferredUnits，请求补充
+              if (currentUnits.length < this.preferredUnits.length) {
+                this.priority = 10;
+                return requestUnits(missingUnits.length > 0 ? missingUnits : this.preferredUnits, this.priority);
+              }
+              return noop();
+            }
             this.priority = 0;
             if (this.getUnitIds().length > 0) {
               this.logger("(Defence Mission " + this.getUniqueName() + "): No targets found, releasing units.");
@@ -82,11 +99,12 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
       }(Mission));
       e("DefenceMission", DefenceMission);
 
-      var DEFENCE_CHECK_TICKS = 30;
+      var DEFENCE_CHECK_TICKS = 15;
       var DEFENCE_STARTING_RADIUS = 10;
       var DEFENCE_RADIUS_INCREASE_PER_GAME_TICK = 0.001;
-      // 多区域防御：每个防御区域独立形成任务，最多同时 8 个区域
-      var MAX_DEFENCE_ZONES = 8;
+      // 多区域防御：最少保留 2 支防守部队防偷家，最多 5 个区域
+      var MIN_DEFENCE_ZONES = 2;
+      var MAX_DEFENCE_ZONES = 5;
       // 同一区域内的防御任务去重半径
       var DEFENCE_ZONE_MIN_DISTANCE = 10;
 
@@ -143,6 +161,37 @@ System.register("game/bot/custom-ai/logic/mission/missions/defenceMission", ["ga
               logger("[MULTI_DEFENCE] 启动区域防御任务 " + missionName + " 于(" + dp.x + "," + dp.y + ") 发现 " + enemiesNear.length + " 敌人");
               var added = missionController.addMission(
                 new DefenceMission(missionName, 10, matchAwareness.getMainRallyPoint(), new Vector2(dp.x, dp.y), defendableRadius * 1.2, logger)
+              );
+              if (added) {
+                existingDefenceMissions.push(added);
+              }
+            }
+          }
+
+          // 保底防御：如果当前防御任务不足 MIN_DEFENCE_ZONES，即使没有敌人也创建驻守任务
+          if (existingDefenceMissions.length < MIN_DEFENCE_ZONES) {
+            // 根据阵营确定坦克类型
+            var tankUnit = "HTNK"; // 默认苏联犀牛坦克
+            if (playerData.country) {
+              if (playerData.country.side === SideType.GDI) tankUnit = "MTNK"; // 盟军灰熊
+              else if (playerData.country.side === SideType.ThirdSide) tankUnit = "LTNK"; // 尤里鞭打者
+            }
+            // 主动防御编队：2 辆坦克
+            var preferredUnits = [tankUnit, tankUnit];
+            for (var pi2 = 0; pi2 < defencePoints.length && existingDefenceMissions.length < MIN_DEFENCE_ZONES; pi2++) {
+              var dp2 = defencePoints[pi2];
+              var alreadyCovered2 = existingDefenceMissions.some(function (m) {
+                var defenceArea = m.defenceArea;
+                if (!defenceArea) return false;
+                var dx = defenceArea.x - dp2.x;
+                var dy = defenceArea.y - dp2.y;
+                return dx * dx + dy * dy < DEFENCE_ZONE_MIN_DISTANCE * DEFENCE_ZONE_MIN_DISTANCE;
+              });
+              if (alreadyCovered2) continue;
+              var missionName = "defence-" + dp2.label + "-" + gameApi.getCurrentTick();
+              logger("[MULTI_DEFENCE] 保底防御任务 " + missionName + " 于(" + dp2.x + "," + dp2.y + ") 驻守坦克=" + tankUnit);
+              var added = missionController.addMission(
+                new DefenceMission(missionName, 10, matchAwareness.getMainRallyPoint(), new Vector2(dp2.x, dp2.y), defendableRadius * 1.2, logger, preferredUnits, true)
               );
               if (added) {
                 existingDefenceMissions.push(added);

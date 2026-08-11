@@ -110,6 +110,29 @@ System.register(
         },
       ],
       execute: function () {
+        // OpenYRWeb: 统计地图 [Waypoints] 中编号 < 8 的出生点数量（与 data/MapFile.readStartingLocations 一致）
+        var countMapStartLocations = function (mapFile) {
+          try {
+            var text = mapFile.readAsString(),
+              secStart = text.search(/\[Waypoints\]/i);
+            if (secStart === -1) return 0;
+            var secEnd = text.indexOf("\n[", secStart + 12),
+              section = secEnd === -1 ? text.slice(secStart + 12) : text.slice(secStart + 12, secEnd),
+              count = 0,
+              lines = section.split(/\r?\n/);
+            for (var li = 0; li < lines.length; li++) {
+              var line = lines[li].trim();
+              if (!line || line.charAt(0) === ";" || line.charAt(0) === "[") continue;
+              var eq = line.indexOf("=");
+              if (eq === -1) continue;
+              var key = line.slice(0, eq).trim();
+              if (/^\d+$/.test(key) && Number(key) < 8) count++;
+            }
+            return count;
+          } catch (e) {
+            return 0;
+          }
+        };
         ((O = class extends p.MainMenuScreen {
           constructor(e, t, i, r, s, a, n, o, l, c) {
             (super(),
@@ -160,17 +183,19 @@ System.register(
               let i = this.mapList.getByName(a.mapName),
                 r = a.changedMapFile ?? this.currentMapFile;
               this.currentMapFile = r;
+              // OpenYRWeb: 换图后用实际出生点数钳制槽位
+              var onuMaxSlots = Math.min(i.maxSlots, countMapStartLocations(r) || i.maxSlots);
               var n = d.findIndexReverse(
                   this.slotsInfo,
                   (e) => e.type === y.SlotType.Ai || e.type === y.SlotType.Player || e.type === y.SlotType.Open,
                 ),
-                o = Math.max(0, n + 1 - i.maxSlots);
+                o = Math.max(0, n + 1 - onuMaxSlots);
               for (let e = 0; e < o; e++)
                 ((this.slotsInfo[n - e].type = y.SlotType.Closed), (this.gameOpts.aiPlayers[n - e] = void 0));
               let s = this.gameModes.getById(this.gameOpts.gameMode).mpDialogSettings;
               ([...this.gameOpts.humanPlayers, ...this.gameOpts.aiPlayers].forEach((e) => {
                 e &&
-                  (e.startPos > i.maxSlots - 1 && (e.startPos = v.RANDOM_START_POS),
+                  (e.startPos > onuMaxSlots - 1 && (e.startPos = v.RANDOM_START_POS),
                   t && (e.teamId = s.alliesAllowed && s.mustAlly ? 0 : v.NO_TEAM_ID));
               }),
                 this.applyGameOption((e) => {
@@ -178,7 +203,7 @@ System.register(
                     (e.mapDigest = w.MapDigest.compute(r)),
                     (e.mapSizeBytes = r.getSize()),
                     (e.mapTitle = i.getFullMapTitle(this.strings)),
-                    (e.maxSlots = i.maxSlots),
+                    (e.maxSlots = onuMaxSlots),
                     (e.mapOfficial = i.official));
                 }),
                 this.localPrefs.setItem(b.StorageKey.LastMap, i.fileName),
@@ -218,10 +243,12 @@ System.register(
             let d = (this.currentMapFile = await this.mapFileLoader.load(u.fileName)),
               g = new S.PreferredHostOpts();
             e ? g.unserialize(e) : g.applyMpDialogSettings(this.rules.mpDialogSettings);
+            // OpenYRWeb: 以地图实际出生点数钳制槽位，避免"Map has fewer starting locations than players"崩溃
+            var effectiveMaxSlots = Math.min(u.maxSlots, countMapStartLocations(d) || u.maxSlots);
             let p = h.mpDialogSettings,
               m = T.AiDifficulty.Medium,
               f = o ? new C.Parser().parseAiOpts(o) : void 0;
-            (f && this.sanitizeLastBotSettings(f, i, r, u.maxSlots, p),
+            (f && this.sanitizeLastBotSettings(f, i, r, effectiveMaxSlots, p),
               (this.gameOpts = {
                 gameMode: c,
                 shortGame: g.shortGame,
@@ -249,7 +276,7 @@ System.register(
                         ? Number(i)
                         : v.RANDOM_COLOR_ID,
                     startPos:
-                      void 0 !== r && Number(r) < this.getAvailableStartPositions(u.maxSlots).length
+                      void 0 !== r && Number(r) < this.getAvailableStartPositions(effectiveMaxSlots).length
                         ? Number(r)
                         : v.RANDOM_START_POS,
                     teamId:
@@ -258,7 +285,7 @@ System.register(
                 ],
                 aiPlayers: [
                   ...new Array(8).fill(void 0).map((e, t) => {
-                    if (!(t > u.maxSlots - 1)) {
+                    if (!(t > effectiveMaxSlots - 1)) {
                       var i = t === 1 ? (f ? f[1]?.difficulty : m) : f?.[t]?.difficulty;
                       if (void 0 !== i)
                         return {
@@ -275,7 +302,7 @@ System.register(
                 mapDigest: w.MapDigest.compute(d),
                 mapSizeBytes: d.getSize(),
                 mapTitle: u.getFullMapTitle(this.strings),
-                maxSlots: u.maxSlots,
+                maxSlots: effectiveMaxSlots,
                 mapOfficial: u.official,
               }),
               (this.slotsInfo = [
@@ -302,6 +329,8 @@ System.register(
                       ? this.savedHostCountryId
                       : v.RANDOM_COUNTRY_ID),
                 (this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID),
+                // OpenYRWeb: 观战者不占出生点槽位（固定 startPos 会消耗一个出生点，导致满员时崩溃）
+                (this.gameOpts.humanPlayers[0].startPos = v.RANDOM_START_POS),
                 (this.slotsInfo[0] = {
                   type: y.SlotType.Ai,
                   difficulty: this.gameOpts.aiPlayers[0].difficulty,
@@ -316,6 +345,8 @@ System.register(
                         ? this.savedHostCountryId
                         : v.RANDOM_COUNTRY_ID),
                   (this.gameOpts.humanPlayers[0].countryId = v.OBS_COUNTRY_ID),
+                  // OpenYRWeb: 观战者不占出生点槽位
+                  (this.gameOpts.humanPlayers[0].startPos = v.RANDOM_START_POS),
                   (this.slotsInfo[0].observer = !0))
                 : ((this.hostObserver = !1), (this.gameOpts.aiPlayers[0] = void 0));
           }
