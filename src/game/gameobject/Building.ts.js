@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/gameobject/Building ===
-// deps: ["engine/type/ObjectType","game/gameobject/trait/InfantryAbsorbTrait","game/gameobject/trait/OccupiableGarrisonTrait","game/gameobject/trait/TurretTrait","game/rules/TechnoRules","game/event/BuildStatusChangeEvent","game/gameobject/trait/PoweredTrait","game/gameobject/trait/FactoryTrait","game/gameobject/trait/DockTrait","game/gameobject/trait/FreeUnitTrait","game/gameobject/Techno","game/gameobject/trait/CrewedTrait","game/gameobject/trait/CabHutTrait","game/gameobject/trait/OilDerrickTrait","game/gameobject/trait/WallTrait","game/Coords","game/gameobject/trait/OverpoweredTrait","game/gameobject/trait/UnitRepairTrait","game/gameobject/trait/RallyTrait","game/gameobject/trait/C4ChargeTrait","game/gameobject/trait/HelipadTrait","game/gameobject/trait/UnitReloadTrait","game/gameobject/task/WaitForBuildUpTask","game/gameobject/trait/SuperWeaponTrait","game/gameobject/trait/GapGeneratorTrait","game/gameobject/trait/PsychicDetectorTrait","game/gameobject/trait/HospitalTrait","game/math/Vector2","game/gameobject/trait/DelayedKillTrait","game/gameobject/trait/interface/NotifyBuildStatus","game/gameobject/trait/SecureProgressTrait","game/gameobject/trait/TankBunkerTrait"]
+// deps: ["engine/type/ObjectType","game/gameobject/trait/InfantryAbsorbTrait","game/gameobject/trait/OccupiableGarrisonTrait","game/gameobject/trait/TurretTrait","game/rules/TechnoRules","game/event/BuildStatusChangeEvent","game/gameobject/trait/PoweredTrait","game/gameobject/trait/FactoryTrait","game/gameobject/trait/DockTrait","game/gameobject/trait/FreeUnitTrait","game/gameobject/Techno","game/gameobject/trait/CrewedTrait","game/gameobject/trait/CabHutTrait","game/gameobject/trait/OilDerrickTrait","game/gameobject/trait/WallTrait","game/Coords","game/gameobject/trait/OverpoweredTrait","game/gameobject/trait/UnitRepairTrait","game/gameobject/trait/RallyTrait","game/gameobject/trait/C4ChargeTrait","game/gameobject/trait/HelipadTrait","game/gameobject/trait/UnitReloadTrait","game/gameobject/task/WaitForBuildUpTask","game/gameobject/trait/SuperWeaponTrait","game/gameobject/trait/GapGeneratorTrait","game/gameobject/trait/PsychicDetectorTrait","game/gameobject/trait/HospitalTrait","game/gameobject/trait/TechHospitalHealTrait","game/math/Vector2","game/gameobject/trait/DelayedKillTrait","game/gameobject/trait/interface/NotifyBuildStatus","game/gameobject/trait/SecureProgressTrait","game/gameobject/trait/TankBunkerTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -32,6 +32,7 @@ System.register(
     "game/gameobject/trait/GapGeneratorTrait",
     "game/gameobject/trait/PsychicDetectorTrait",
     "game/gameobject/trait/HospitalTrait",
+    "game/gameobject/trait/TechHospitalHealTrait",
     "game/math/Vector2",
     "game/gameobject/trait/DelayedKillTrait",
     "game/gameobject/trait/interface/NotifyBuildStatus",
@@ -40,7 +41,7 @@ System.register(
   ],
   function (t, e) {
     "use strict";
-    var r, ia, og, l, c, s, h, u, d, g, i, p, m, f, y, a, T, v, b, S, w, E, n, C, x, O, A, M, R, P, I, k, B, TB;
+    var r, ia, og, l, c, s, h, u, d, g, i, p, m, f, y, a, T, v, b, S, w, E, n, C, x, O, A, TH, M, R, P, I, k, B, TB;
     e && e.id;
     return {
       setters: [
@@ -126,6 +127,9 @@ System.register(
           A = e;
         },
         function (e) {
+          TH = e;
+        },
+        function (e) {
           M = e;
         },
         function (e) {
@@ -194,6 +198,11 @@ System.register(
                 // handles damage redirection, weapon bonuses, and entry validation.
                 (t.bunker || "NATBNK" === t.name) && ((n.tankBunkerTrait = new TB.TankBunkerTrait(n)), n.traits.add(n.tankBunkerTrait)),
                 t.hospital && ((n.hospitalTrait = new A.HospitalTrait()), n.traits.add(n.hospitalTrait)),
+                // OpenYRWeb: YR Tech Hospital self-heal (InfantryGainSelfHeal / UnitsGainSelfHeal).
+                // Attached alongside the classic HospitalTrait — both can coexist on the same
+                // building. The classic trait handles enter-to-heal (queue + ammo); this trait
+                // handles the map-wide auto-heal for all friendly infantry/units.
+                (0 < t.infantryGainSelfHeal || 0 < t.unitsGainSelfHeal) && n.traits.add(new TH.TechHospitalHealTrait()),
                 (t.factory || t.cloning || t.numberOfDocks) &&
                   ((n.rallyTrait = new b.RallyTrait()), n.traits.add(n.rallyTrait)),
                 t.freeUnit && n.traits.add(new g.FreeUnitTrait()),

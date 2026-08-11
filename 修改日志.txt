@@ -1049,4 +1049,33 @@ feat(map-triggers): 地图触发器 YR 动作/事件类型补全，并真实实�
 3. 病毒狙击手自身站在毒气云内不掉血（`ImmuneToPoison=yes`），其余友军步兵受伤害。  
 4. 轻型车辆（Verses 50%）过云受少量伤害，建筑/围墙（Verses 0%）不受伤害。  
 5. 军犬等 NotHuman 步兵被病毒击杀时只播放 Die1，不产生毒气云。
-  
+
+feat(tech-hospital): 实现科技医院/机器商店全图自动回血与治疗图标闪烁
+
+- 🏥 **规则解析扩展**
+  - `GeneralRules` 新增 `SelfHealInfantryFrames`/`SelfHealInfantryAmount`/`SelfHealUnitFrames`/`SelfHealUnitAmount`（默认 50/1/50/1），读取 `[General]` 原版 YR 自回血参数。
+  - `TechnoRules` 新增 `InfantryGainSelfHeal`/`UnitsGainSelfHeal`（默认 0）。实际节奏由玩家 rulesmd.ini 决定（原版 YR：步兵 50 帧/20 HP，载具 75 帧/5 HP，间隔与回血量均不同）。
+- 🏥 **TechHospitalHealTrait（新模块）**
+  - 建筑完全建成（BuildStatus.Ready=1）后，每 `SelfHealXFrames` 帧对全图同阵营步兵/载具回血 `SelfHealXAmount × GainSelfHeal`，无需进入建筑；建造中/出售中不生效。
+  - 每栋建筑独立挂载 trait，多个医院/商店效果叠加（原版机制）。
+  - 工程兵占领（owner 变化）时重置治疗节奏；与经典进入式 `HospitalTrait` 并存。
+- 🎨 **治疗图标（PipOverlay）**
+  - 步兵显示红十字（pips.shp 第 13 帧）、载具显示扳手（第 20 帧），位于血条右侧、与血条同高；星级图标位置保持原版不变。
+  - 与血条一致：鼠标悬停或选中单位才显示。
+  - 仅自己/友方/观察者可见，敌人看不到（复用 `objectIsOpaqueToViewer` 门控）。
+  - 图标使用独立 `PaletteBasicMaterial`（alphaTest 0.1 以支持半透明），批量渲染路径经 `BatchedMesh.setOpacity/setExtraLight` 逐实例烘焙 `vertexColorMult`，非批量路径直接改材质；材质随 dispose 释放。
+- ✨ **回血闪烁（原版 YR 风格，非消失）**
+  - 治疗 trait 每次实际治愈单位时打瞬时标记 `__hospitalHealFlash`，渲染端读取后触发 200ms 闪烁——图标变为半透明（opacity 0.45）+ 阴影色（extraLight -0.6）再恢复。
+  - 覆盖"回满那下也闪"（治愈前判断 health<100）；满血不闪。
+  - 仅医院/商店治疗触发闪烁，其他回血来源（维修厂、进入式医院等）不会误闪。
+
+### ⚠️ 破坏性变更
+- 无，纯新增功能，不影响现有行为。
+
+### 🧪 测试建议
+1. 占领科技医院后受伤步兵自动回血，悬停/选中出现红十字图标。  
+2. 治疗瞬间图标半透明+阴影色闪烁约 200ms，回满那下也闪，满血稳定不闪。  
+3. 机器商店对受损车辆显示扳手图标，行为一致（原版节奏 75 帧）。  
+4. 敌人视角看不到图标；友方/观察者可见；未悬停/选中不显示。  
+5. 建造中/出售中的医院不生效；工程兵占领后切换回血归属。  
+6. 多医院/商店并存时回血叠加、闪烁正常。  

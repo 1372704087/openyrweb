@@ -165,6 +165,16 @@ System.register(
                   (this.lastPowerInfo = !1),
                   (this.lastPowerVal = -1),
                   (this.lastDrainVal = -1),
+                  // OpenYRWeb: Tech Hospital healing indicator state tracking
+                  (this.lastHasTechHospital = !1),
+                  (this.lastBeingHealed = !1),
+                  // Flash timer: starts at ~200ms when a heal pulse raises HP; the icon fades
+                  // to a semi-transparent shadow tint and back (vanilla YR flicker style).
+                  (this.healFlashTimer = 0),
+                  // Last rAF timestamp, used to measure real elapsed ms for the flash timer
+                  (this._lastHealUpdate = void 0),
+                  (this.healingIndicator = void 0),
+                  (this.healingMaterial = void 0),
                   (this.invalidatedElements = []),
                   (this.disposables = new f.CompositeDisposable()));
               }
@@ -727,6 +737,69 @@ System.register(
                   return ((e.matrixAutoUpdate = !1), (e.renderOrder = 999996), (e.receiveShadow = !1), e);
                 }
               }
+              // OpenYRWeb: check if this unit's owner has a Tech Hospital building
+              _hasTechHospital() {
+                var t = this.gameObject;
+                if (!t.owner || !t.owner.buildings) return !1;
+                for (var b of t.owner.buildings) {
+                  if (b.buildStatus !== 1) continue;
+                  if (t.isInfantry() && b.rules.infantryGainSelfHeal > 0) return !0;
+                  if (t.isVehicle() && b.rules.unitsGainSelfHeal > 0) return !0;
+                }
+                return !1;
+              }
+              // OpenYRWeb: check if this unit is actively being healed (injured + has Tech Hospital)
+              _isBeingHealed() {
+                return this.gameObject.healthTrait.health < 100 && this._hasTechHospital();
+              }
+              createHealingIndicator() {
+                // Use pips.shp frame 13 (medical cross) for infantry, frame 20 (wrench) for vehicles
+                var frameIdx = this.gameObject.isInfantry() ? 13 : 20;
+                var img = R.pipsFile.getImage(frameIdx);
+                if (!img) return void 0;
+                var geo = R.geometries.get(img);
+                if (!geo) return void 0;
+                // Dedicated material so the heal-pulse flash can animate opacity/brightness
+                // without affecting the shared pip material (R.material). alphaTest is lowered
+                // so the semi-transparent flash state isn't discarded (alphaTest 0.5 would).
+                var mat = (this.healingMaterial ||= new T.PaletteBasicMaterial({
+                  map: R.atlasCache.getTexture(),
+                  palette: m.TextureUtils.textureFromPalette(this.palette),
+                  alphaTest: 0.1,
+                  flatShading: !0,
+                  transparent: !0,
+                  depthTest: !1,
+                }));
+                let e = this.useSpriteBatching
+                  ? new v.BatchedMesh(geo, mat, v.BatchMode.Merging)
+                  : new THREE.Mesh(geo, mat);
+                return ((e.matrixAutoUpdate = !1), (e.renderOrder = 999996), (e.receiveShadow = !1), e);
+              }
+              updateHealingIndicatorSprite() {
+                (this.healingIndicator && this.rootObj.remove(this.healingIndicator),
+                  (this.healingIndicator = void 0));
+                // Only the owner, allies and observers see the heal icon (enemies don't).
+                if (this._hasTechHospital() && !this.objectIsOpaqueToViewer()) {
+                  var indicator = this.createHealingIndicator();
+                  if (indicator) {
+                    this.rootObj.add(indicator);
+                    // Position the healing indicator to the right of the health bar
+                    var pipBrd = R.pipBrdFile.getImage(this.gameObject.isInfantry() ? 1 : 0);
+                    var iconFrame = this.gameObject.isInfantry() ? 13 : 20;
+                    var t = p.Coords.screenDistanceToWorld(
+                      Math.floor(pipBrd.width / 2) + Math.floor(R.pipsFile.getImage(iconFrame).width / 2) + 2,
+                      0,
+                    );
+                    (indicator.position.x = t.x),
+                      // Match the health bar's height so the icon sits beside the bar,
+                      // not at the unit's feet (same pattern as the control-group sprite).
+                      (indicator.position.y = this.healthBar.position.y),
+                      (indicator.position.z = t.y),
+                      indicator.updateMatrix();
+                    this.healingIndicator = indicator;
+                  }
+                }
+              }
               get3DObject() {
                 return this.rootObj;
               }
@@ -781,7 +854,49 @@ System.register(
                         this.lastRepairState !== r && ((this.lastRepairState = r), this.updateRepairWrenchSprite(r)))
                       : (this.unitCastBarSprite?.update(e),
                         this.lastVeteranLevel !== t.veteranLevel &&
-                          ((this.lastVeteranLevel = t.veteranLevel), this.updateVeteranIndicatorSprite(t))),
+                          ((this.lastVeteranLevel = t.veteranLevel), this.updateVeteranIndicatorSprite(t)),
+                        // OpenYRWeb: Tech Hospital healing indicator — steady when full, blinks on each heal pulse
+                        (t.isInfantry() || t.isVehicle()) && (function() {
+                          // Gate on viewer relationship so enemies never see the heal icon
+                          var _has = this._hasTechHospital() && !this.objectIsOpaqueToViewer();
+                          var _heal = this._isBeingHealed();
+                          // Rebuild indicator when Tech Hospital presence changes
+                          if (_has !== this.lastHasTechHospital) {
+                            this.lastHasTechHospital = _has;
+                            this.lastBeingHealed = _heal;
+                            this.updateHealingIndicatorSprite();
+                          }
+                          // Detect heal pulse: the hospital heal trait marks every unit it
+                          // actually heals (including the pulse that restores full HP). The
+                          // icon flashes on that mark and stays steady otherwise — full-health
+                          // units never flash, and other heal sources don't trigger it.
+                          if (t.__hospitalHealFlash) {
+                            this.healFlashTimer = 200; // ~200ms flash
+                            t.__hospitalHealFlash = !1;
+                          }
+                          // Tick down flash timer using real elapsed ms (e is the rAF timestamp)
+                          void 0 !== this._lastHealUpdate && (this.healFlashTimer -= e - this._lastHealUpdate);
+                          this._lastHealUpdate = e;
+                          // Show only while the health bar is shown (hover/select).
+                          if (this.healingIndicator) {
+                            this.healingIndicator.visible = i >= A[0];
+                            var _flash = this.healFlashTimer > 0 ? this.healFlashTimer / 200 : 0,
+                              _opacity = 1 - 0.55 * _flash,
+                              _el = -0.6 * _flash,
+                              _icon = this.healingIndicator;
+                            // Batched path: per-item tint/alpha is baked into vertexColorMult
+                            // by MeshBatchManager from the BatchedMesh's own opacity/extraLight.
+                            if (_icon.setOpacity) {
+                              _icon.setOpacity(_opacity);
+                              ((this._healExtraLight || (this._healExtraLight = new THREE.Vector3())).set(_el, _el, _el),
+                                _icon.setExtraLight(this._healExtraLight));
+                            } else {
+                              // Non-batched path: animate the dedicated material directly.
+                              var _mat = _icon.material;
+                              (_mat.opacity = _opacity), _mat.extraLight.set(_el, _el, _el);
+                            }
+                          }
+                        }).call(this)),
                     this.updateFlyerHelper(i, e),
                     this.updateBehindAnim(e),
                     this.updateDebugLabel(),
@@ -1038,6 +1153,17 @@ System.register(
                   }
                   this.rootObj.add(this.healthBar);
                 }
+                // OpenYRWeb: re-evaluate healing indicator when health bar is refreshed (health changed)
+                (this.gameObject.isInfantry() || this.gameObject.isVehicle()) &&
+                  (function() {
+                    var _has = this._hasTechHospital() && !this.objectIsOpaqueToViewer();
+                    var _heal = this._isBeingHealed();
+                    if (_has !== this.lastHasTechHospital || _heal !== this.lastBeingHealed) {
+                      this.lastHasTechHospital = _has;
+                      this.lastBeingHealed = _heal;
+                      this.updateHealingIndicatorSprite();
+                    }
+                  }).call(this);
               }
               createRepairWrench() {
                 let e = this.animFactory("WRENCH");
@@ -1059,6 +1185,9 @@ System.register(
                   this.behindAnim?.dispose(),
                   this.debugLabel?.dispose(),
                   this.powerInfoSprite && (this.rootObj.remove(this.powerInfoSprite), (this.powerInfoSprite = void 0)),
+                  // OpenYRWeb: clean up healing indicator + its dedicated material
+                  this.healingIndicator && (this.rootObj.remove(this.healingIndicator), (this.healingIndicator = void 0)),
+                  this.healingMaterial && (this.healingMaterial.dispose(), (this.healingMaterial = void 0)),
                   (this.animFactory = void 0));
               }
             }),

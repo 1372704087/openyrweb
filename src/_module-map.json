@@ -2937,6 +2937,16 @@
       "bytes": 5280
     },
     {
+      "name": "game/gameobject/trait/TechHospitalHealTrait",
+      "file": "game/gameobject/trait/TechHospitalHealTrait.ts.js",
+      "deps": [
+        "game/gameobject/trait/interface/NotifyTick",
+        "game/gameobject/trait/interface/NotifyDestroy",
+        "game/gameobject/trait/interface/NotifyOwnerChange"
+      ],
+      "bytes": 4128
+    },
+    {
       "name": "game/event/FactoryProduceUnitEvent",
       "file": "game/event/FactoryProduceUnitEvent.ts.js",
       "deps": [

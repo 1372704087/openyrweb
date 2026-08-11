@@ -175,6 +175,11 @@ System.register(
                 (this.weaponsFactory = this.ini.getBool("WeaponsFactory")),
                 (this.helipad = this.ini.getBool("Helipad")),
                 (this.hospital = this.ini.getBool("Hospital")),
+                // OpenYRWeb: YR Tech Hospital self-heal flags. InfantryGainSelfHeal/UnitsGainSelfHeal
+                // are numeric multipliers (default 0 = disabled). When > 0, the building periodically
+                // heals all of the owner's infantry/units on the map. See TechHospitalHealTrait.
+                (this.infantryGainSelfHeal = this.ini.getNumber("InfantryGainSelfHeal", 0)),
+                (this.unitsGainSelfHeal = this.ini.getNumber("UnitsGainSelfHeal", 0)),
                 (this.landTargeting = this.ini.getEnumNumeric(
                   "LandTargeting",
                   u.LandTargeting,
