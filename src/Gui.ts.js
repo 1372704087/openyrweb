@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: Gui ===
-// deps: ["react","engine/Engine","engine/EngineType","gui/UiScene","engine/gfx/Renderer","game/rules/Rules","gui/screen/RootController","gui/screen/mainMenu/MainMenuRootScreen","gui/screen/game/GameScreen","gui/screen/game/gameMenu/ScreenType","gui/screen/mainMenu/ScreenType","gui/screen/ScreenType","gui/component/MessageBoxApi","network/WolConnection","network/GservConnection","network/gameopt/Parser","network/gameopt/Serializer","engine/ResourceLoader","ErrorHandler","engine/UiAnimationLoop","util/Logger","tools/DevToolsApi","gui/jsx/JsxRenderer","gui/Pointer","engine/sound/Sound","engine/sound/AudioSystem","engine/sound/Mixer","engine/sound/SoundSpecs","engine/sound/ChannelType","LocalPrefs","gui/screen/game/worldInteraction/keyboard/KeyBinds","gui/ReplayManager","gui/screen/replay/ReplayScreen","data/vfs/FileNotFoundError","engine/sound/Music","engine/sound/MusicSpecs","gui/screen/game/GameLoader","util/BoxedVar","engine/renderable/builder/vxlGeometry/VxlGeometryPool","engine/gfx/geometry/VxlGeometryCache","engine/gfx/RendererError","gui/replay/ReplayStorageFileSystem","gui/replay/ReplayStorageMemStorage","network/gamestate/Replay","data/vfs/StorageQuotaError","gui/CanvasMetrics","data/vfs/IOError","util/disposable/CompositeDisposable","gui/component/ToastApi","network/WolService","gui/screen/mainMenu/main/HomeScreen","gui/screen/mainMenu/lobby/SkirmishScreen","gui/screen/mainMenu/login/LoginScreen","gui/screen/mainMenu/newAccount/NewAccountScreen","gui/screen/mainMenu/customGame/CustomGameScreen","gui/screen/mainMenu/lobby/LobbyScreen","gui/screen/mainMenu/mapSel/MapSelScreen","gui/screen/replay/ReplaySelScreen","gui/screen/mainMenu/score/ScoreScreen","gui/screen/mainMenu/infoAndCredits/InfoAndCreditsScreen","gui/screen/mainMenu/credits/CreditsScreen","gui/screen/options/OptionsScreen","gui/screen/options/SoundOptsScreen","gui/screen/options/KeyboardScreen","gui/screen/options/StorageScreen","gui/screen/mainMenu/patchNotes/PatchNotesScreen","gui/screen/game/gameMenu/GameMenuHomeScreen","gui/screen/game/gameMenu/DiploScreen","gui/screen/game/gameMenu/ConnectionInfoScreen","gui/screen/game/gameMenu/QuitConfirmScreen","gui/screen/game/loadingScreen/LoadingScreenApiFactory","gui/screen/game/MapFileLoader","gui/screen/mainMenu/modSel/ModSelScreen","gui/screen/mainMenu/modSel/ModManager","gui/screen/mainMenu/quickGame/QuickGameScreen","network/ladder/WLadderService","gui/screen/mainMenu/ladder/LadderScreen","network/WolConfig","gui/screen/mainMenu/ladderRules/LadderRulesScreen","ClientApi","network/WGameResService","network/MapTransferService","util/string","RouteHelper","worker/workerHost"]
+// deps: ["react","engine/Engine","engine/EngineType","gui/UiScene","engine/gfx/Renderer","game/rules/Rules","gui/screen/RootController","gui/screen/mainMenu/MainMenuRootScreen","gui/screen/game/GameScreen","gui/screen/game/gameMenu/ScreenType","gui/screen/mainMenu/ScreenType","gui/screen/ScreenType","gui/component/MessageBoxApi","network/WolConnection","network/GservConnection","network/gameopt/Parser","network/gameopt/Serializer","engine/ResourceLoader","ErrorHandler","gui/component/ErrorDetailsBoxApi","engine/UiAnimationLoop","util/Logger","tools/DevToolsApi","gui/jsx/JsxRenderer","gui/Pointer","engine/sound/Sound","engine/sound/AudioSystem","engine/sound/Mixer","engine/sound/SoundSpecs","engine/sound/ChannelType","LocalPrefs","gui/screen/game/worldInteraction/keyboard/KeyBinds","gui/ReplayManager","gui/screen/replay/ReplayScreen","data/vfs/FileNotFoundError","engine/sound/Music","engine/sound/MusicSpecs","gui/screen/game/GameLoader","util/BoxedVar","engine/renderable/builder/vxlGeometry/VxlGeometryPool","engine/gfx/geometry/VxlGeometryCache","engine/gfx/RendererError","gui/replay/ReplayStorageFileSystem","gui/replay/ReplayStorageMemStorage","network/gamestate/Replay","data/vfs/StorageQuotaError","gui/CanvasMetrics","data/vfs/IOError","util/disposable/CompositeDisposable","gui/component/ToastApi","network/WolService","gui/screen/mainMenu/main/HomeScreen","gui/screen/mainMenu/lobby/SkirmishScreen","gui/screen/mainMenu/login/LoginScreen","gui/screen/mainMenu/newAccount/NewAccountScreen","gui/screen/mainMenu/customGame/CustomGameScreen","gui/screen/mainMenu/lobby/LobbyScreen","gui/screen/mainMenu/mapSel/MapSelScreen","gui/screen/replay/ReplaySelScreen","gui/screen/mainMenu/score/ScoreScreen","gui/screen/mainMenu/infoAndCredits/InfoAndCreditsScreen","gui/screen/mainMenu/credits/CreditsScreen","gui/screen/options/OptionsScreen","gui/screen/options/SoundOptsScreen","gui/screen/options/KeyboardScreen","gui/screen/options/StorageScreen","gui/screen/mainMenu/patchNotes/PatchNotesScreen","gui/screen/game/gameMenu/GameMenuHomeScreen","gui/screen/game/gameMenu/DiploScreen","gui/screen/game/gameMenu/ConnectionInfoScreen","gui/screen/game/gameMenu/QuitConfirmScreen","gui/screen/game/loadingScreen/LoadingScreenApiFactory","gui/screen/game/MapFileLoader","gui/screen/mainMenu/modSel/ModSelScreen","gui/screen/mainMenu/modSel/ModManager","gui/screen/mainMenu/quickGame/QuickGameScreen","network/ladder/WLadderService","gui/screen/mainMenu/ladder/LadderScreen","network/WolConfig","gui/screen/mainMenu/ladderRules/LadderRulesScreen","ClientApi","network/WGameResService","network/MapTransferService","util/string","RouteHelper","worker/workerHost"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -24,6 +24,7 @@ System.register(
     "network/gameopt/Serializer",
     "engine/ResourceLoader",
     "ErrorHandler",
+    "gui/component/ErrorDetailsBoxApi",
     "engine/UiAnimationLoop",
     "util/Logger",
     "tools/DevToolsApi",
@@ -112,6 +113,7 @@ System.register(
       ie,
       re,
       se,
+      ed,
       l,
       ae,
       c,
@@ -238,6 +240,9 @@ System.register(
         },
         function (e) {
           se = e;
+        },
+        function (e) {
+          ed = e;
         },
         function (e) {
           l = e;
@@ -527,7 +532,8 @@ System.register(
               ((this.toastApi = new Ee.ToastApi(this.viewport, a, l)),
                 this.disposables.add(this.toastApi),
                 (this.messageBoxApi = new X.MessageBoxApi(this.viewport.value, a, l)));
-              var c = new se.ErrorHandler(this.messageBoxApi, t),
+              var errorDetailsBoxApi = new ed.ErrorDetailsBoxApi(this.viewport, t, this.rootEl),
+                c = new se.ErrorHandler(this.messageBoxApi, t, errorDetailsBoxApi),
                 h = new te.Parser(),
                 u = new ie.Serializer();
               let d = (this.rootController = new K.RootController(this.serverRegions));

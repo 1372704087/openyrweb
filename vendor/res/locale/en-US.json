@@ -1,5 +1,9 @@
 {
     "gui:ok": "OK",
+    "gui:errordetails": "Details",
+    "gui:copydetails": "Copy Details",
+    "gui:copied": "Copied!",
+    "gui:downloadlog": "Download Log",
     "txt_copyright": "© 2000 ELECTRONIC ARTS INC. ALL RIGHTS RESERVED",
     "gui:wwbrand": "WESTWOOD STUDIOS™ IS AN ELECTRONIC ARTS™ BRAND",
     "gui:loadingex": "Loading...",

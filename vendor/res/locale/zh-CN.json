@@ -1,5 +1,9 @@
 {
     "gui:ok": "确定",
+    "gui:errordetails": "详细信息",
+    "gui:copydetails": "复制详细信息",
+    "gui:copied": "已复制！",
+    "gui:downloadlog": "下载日志",
     "txt_copyright": "© 2000 ELECTRONIC ARTS INC. 保留所有权利",
     "gui:wwbrand": "WESTWOOD STUDIOS™ 是 ELECTRONIC ARTS™ 的品牌",
     "gui:loadingex": "加载中...",

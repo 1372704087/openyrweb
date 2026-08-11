@@ -1115,3 +1115,49 @@ fix(skirmish-lobby): 修复玩家栏切 AI 后启动报"地图出生点不足"�
 ### 🧪 测试建议
 1. 4 出生点地图，玩家栏（槽位0）切为 AI（或先把槽位0设为AI的难度）后点开始游戏，应正常进入，不再报"地图出生点不足"。
 2. 玩家栏切回玩家，重新选国家/出生点，正常开局；人数超过地图出生点时仍会正确提示（减少 AI 即可）。  
+
+feat(error-details): 错误异常详细提示弹窗
+
+- 🆕 **新组件**：`gui/component/ErrorDetailsDialog`（可展开的详细信息弹窗）与 `gui/component/ErrorDetailsBoxApi`（弹窗生命周期管理）。弹窗含错误类型、原始错误消息、受影响文件、堆栈与上下文键值对，支持一键复制（`GUI:CopyDetails`/`GUI:Copied`）和下载日志（`GUI:DownloadLog`）；无详情时仅显示主消息。
+- 🔌 **ErrorHandler 扩展**：新增 `handleWithDetails(e, message, details, callback)`——有 `ErrorDetailsBoxApi` 时弹详细窗，否则回退到基础 MessageBox 并把 type/errorMessage/file 追加进消息。
+- ⚙️ **Gui 接线**：初始化时创建 `ErrorDetailsBoxApi(viewport, strings, rootEl)` 注入 ErrorHandler（新 deps 项 `gui/component/ErrorDetailsBoxApi`）。
+- 🎮 **GameScreen**：`handleError` 增加第 4 参 `extraDetails`，构建 `{type, errorMessage, stack, context, file}` 传给 `handleWithDetails`（无该方法时回退原 `handle`）。地图加载失败带 `MapName`，游戏初始化失败带 `GameId/Timestamp/MapName/MapOfficial/EngineVersion`，游戏内崩溃带 `GameId/CurrentTick/MapName/MapOfficial/PlayerName`。
+- 📦 **Application**：`handleGameResLoadError`/`handleGameResImportError` 收集 `{type, errorMessage, stack, file}`（当前 `BasicErrorBoxApi.show` 仅 2 参，第 3 参暂未消费，为后续扩展预留）。
+- 🌐 **本地化**：en-US/zh-CN 新增 `gui:errordetails`/`gui:copydetails`/`gui:copied`/`gui:downloadlog`；`_module-map.json` 注册两个新模块（moduleCount 1323→1325，实际条目 1336）；`style.css` 增加弹窗样式。
+- ✅ 已通过 `npm run repack` 验证：1336 个模块全部重打包成功，新模块与 `handleWithDetails` 已进入 `build/dist/ra2web.js`。
+
+### ⚠️ 破坏性变更
+- 无。`handle` 行为不变，`handleWithDetails` 为新增方法；GameScreen 报错弹窗由基础窗升级为带"详细信息"展开的弹窗。
+
+### 🧪 测试建议
+1. 遭遇战切 AI 导致出生点不足（或制造地图下载失败）→ 弹窗底部出现"[+] Details"展开按钮，含错误类型/堆栈/MapName 等上下文。
+2. 点击"Copy Details"复制并出现"Copied!"；"Download Log"下载 openyrweb-error-*.log。
+3. 正常游玩无报错时无任何变化；旧弹窗（GUI:Ok）路径不受影响。  
+
+feat(error-details): 错误详情弹窗改为窗口样式
+
+- 🪟 **窗口样式**：弹窗由"整屏大黑块"改为独立窗口——居中（继承 `.message-box` 50%/50%+translate）、圆角 6px、双层阴影、深色窗框 `#1c1e22`；`height:auto` 内容自适应、`max-height:85vh` 内部滚动。
+- 📌 **标题条**：错误主消息作为窗口顶部横条（深色底 + 底边框 + 红色加粗文字），与内容区/底部按钮栏分隔。
+- 🔘 **按钮栏**：底部固定条带（上边框 + 半透明底），「确定」为红色主按钮，复制/下载为灰钮；hover 态加深。
+- 🔍 **验证**：`build/test-error-dialog.html` 浏览器实测——带详情弹窗居中显示、展开后显示 Type/Error/File/Stack/MapName 等 8 行详情（Stack 等宽深色面板）、三按钮可用、onClosed 回调触发、无详情时正确隐藏 toggle；全程无报错。
+- ⚠️ 注意：`npm run build` 会清空 `build/`，测试页 `build/test-error-dialog.html` 需在每次构建后重新复制。
+
+### ⚠️ 破坏性变更
+- 无，仅视觉效果调整（同功能、同 API）。
+
+### 🧪 测试建议
+1. 打开 `http://127.0.0.1:8090/test-error-dialog.html`，点「模拟地图出生点不足（带详情）」→ 居中窗口 + 红色标题条 + 展开详细信息。
+2. 点「确定」关闭并触发 onClosed；再点「模拟普通错误（无详情）」→ 无 toggle 按钮。
+3. 实际游戏内触发错误，确认窗口样式与其它对话框一致。  
+
+feat(error-details): 美化错误详情弹窗滚动条
+
+- 🎨 **滚动条**：弹窗内滚动元素（详情区/详情面板/堆栈面板）使用自定义滚动条——10px 圆角、渐变滑块（灰→深灰）、hover/active 加深、轨道半透明；Firefox 用 `scrollbar-width: thin` + `scrollbar-color` 兼容。仅作用于 `.error-details-box` 内部，不影响其它界面。
+- ✅ 视觉确认正常；超长内容场景滚动条可见且可滚到底。
+
+### ⚠️ 破坏性变更
+- 无。
+
+### 🧪 测试建议
+1. 测试页点「模拟超长内容（滚动条测试）」展开详情，观察详情面板出现圆角渐变滚动条，滚动到最底部。
+2. 悬停/按住滚动条，滑块颜色加深。  

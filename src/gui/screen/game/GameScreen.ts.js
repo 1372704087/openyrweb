@@ -1572,7 +1572,7 @@ System.register(
                     : t instanceof z.IrcConnection.NoReplyError
                       ? this.strings.get("TS:MapDownloadFailed", i)
                       : this.strings.get("TXT_MAP_ERROR")),
-                this.handleError(t, e));
+                this.handleError(t, e, void 0, { context: { MapName: i } }));
             }
           }
           handleGameLoadError(i, r, s) {
@@ -1596,7 +1596,16 @@ System.register(
                     ));
                 }
               }
-              this.handleError(i, t);
+              var extraDetails = {
+                context: {
+                  GameId: r.gameId,
+                  Timestamp: new Date(r.timestamp).toISOString(),
+                  MapName: s.mapName || "N/A",
+                  MapOfficial: s.mapOfficial ? "Yes" : "No",
+                  EngineVersion: this.engineVersion,
+                }
+              };
+              this.handleError(i, t, void 0, extraDetails);
             }
           }
           handleGameError(e, t, i, r, s) {
@@ -1610,7 +1619,15 @@ System.register(
                   [Math.E, Math.LN10, Math.LN2, Math.LOG10E, Math.LOG2E, Math.PI, Math.SQRT1_2, Math.SQRT2].join(",")),
               a.finish(i.currentTick),
               this.saveReplay(a)),
-              this.handleError(e, t, s),
+              this.handleError(e, t, s, {
+                context: {
+                  GameId: i.id,
+                  CurrentTick: i.currentTick,
+                  MapName: i.gameOpts && i.gameOpts.mapName || "N/A",
+                  MapOfficial: i.gameOpts && i.gameOpts.mapOfficial ? "Yes" : "No",
+                  PlayerName: this.playerName,
+                }
+              }),
               this.sendDebugInfo(
                 e,
                 { gameId: i.id, replay: a, map: this.debugMapFile, official: i.gameOpts.mapOfficial },
@@ -1646,7 +1663,7 @@ System.register(
                 });
               })().catch((e) => console.error("Failed sending error to sentry", e));
           }
-          handleError(e, t, i) {
+          handleError(e, t, i, extraDetails) {
             (this.gameTurnMgr && this.gameTurnMgr.setErrorState(), this.pointer.unlock());
             let r = () => {
               (this.wolService.closeWolConnection(),
@@ -1654,16 +1671,42 @@ System.register(
                   this.gservCon.isOpen() &&
                   (this.gservCon.onClose.unsubscribe(this.onGservClose), this.gservCon.close()));
             };
-            (this.errorHandler.handle(
-              e,
-              t,
-              i
-                ? void 0
-                : () => {
-                    (r(), this.controller?.goToScreen(n.ScreenType.MainMenuRoot));
-                  },
-            ),
-              i && (r(), this.playerUi?.dispose()));
+            // 构建详细错误信息
+            var details = {
+              type: e && e.constructor && e.constructor.name !== "String" ? e.constructor.name : (typeof e === "string" ? "Error" : (e && e.name || "Unknown")),
+              errorMessage: e && e.message ? e.message : (typeof e === "string" ? e : ""),
+              stack: e && e.stack ? e.stack : "",
+            };
+            // 合并额外的上下文信息
+            if (extraDetails && extraDetails.context) {
+              details.context = extraDetails.context;
+            }
+            if (extraDetails && extraDetails.file) {
+              details.file = extraDetails.file;
+            }
+            if (this.errorHandler.handleWithDetails) {
+              this.errorHandler.handleWithDetails(
+                e,
+                t,
+                details,
+                i
+                  ? void 0
+                  : () => {
+                      (r(), this.controller?.goToScreen(n.ScreenType.MainMenuRoot));
+                    },
+              );
+            } else {
+              this.errorHandler.handle(
+                e,
+                t,
+                i
+                  ? void 0
+                  : () => {
+                      (r(), this.controller?.goToScreen(n.ScreenType.MainMenuRoot));
+                    },
+              );
+            }
+            i && (r(), this.playerUi?.dispose());
           }
           saveReplay(t) {
             (async () => {

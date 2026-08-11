@@ -510,11 +510,16 @@ System.register(
             }
             async handleGameResLoadError(e, t, i = !1) {
               let r = new B.BasicErrorBoxApi(this.viewport, t, this.rootEl),
-                s = t.get("ts:import_load_files_failed");
+                s = t.get("ts:import_load_files_failed"),
+                details = {
+                  type: e.constructor ? e.constructor.name : (e.name || "Unknown"),
+                  errorMessage: e.message || "",
+                  stack: e.stack || "",
+                };
               (e instanceof _.ChecksumError
-                ? (s += "\n\n" + t.get("ts:import_checksum_mismatch", e.file))
+                ? ((s += "\n\n" + t.get("ts:import_checksum_mismatch", e.file)), (details.file = e.file))
                 : e instanceof j.FileNotFoundError
-                  ? (s += "\n\n" + t.get("ts:import_file_not_found", e.file))
+                  ? ((s += "\n\n" + t.get("ts:import_file_not_found", e.file)), (details.file = e.file))
                   : e instanceof T.DownloadError || e.message?.match(/XHR error|Failed to fetch/i)
                     ? (s += "\n\n" + t.get("ts:downloadfailed"))
                     : e instanceof U.NoStorageError
@@ -529,13 +534,18 @@ System.register(
                               this.sentry?.captureException(
                                 new Error(`Game res load failed (${e.message ?? e.name})`, { cause: e }),
                               ),
-                await r.show(s, i));
+                await r.show(s, i, details));
             }
             async handleGameResImportError(e, t) {
               let i = new B.BasicErrorBoxApi(this.viewport, t, this.rootEl),
-                r = t.get("ts:import_failed");
+                r = t.get("ts:import_failed"),
+                details = {
+                  type: e.constructor ? e.constructor.name : (e.name || "Unknown"),
+                  errorMessage: e.message || "",
+                  stack: e.stack || "",
+                };
               (e instanceof j.FileNotFoundError
-                ? (r += "\n\n" + t.get("ts:import_file_not_found", e.file))
+                ? ((r += "\n\n" + t.get("ts:import_file_not_found", e.file)), (details.file = e.file))
                 : e instanceof D.InvalidArchiveError
                   ? (r += "\n\n" + t.get("ts:import_invalid_archive"))
                   : e instanceof F.ArchiveExtractionError
@@ -548,7 +558,7 @@ System.register(
                     : e instanceof ee.NoWebAssemblyError
                       ? (r += "\n\n" + t.get("ts:import_no_web_assembly"))
                       : e instanceof _.ChecksumError
-                        ? (r += "\n\n" + t.get("ts:import_checksum_mismatch", e.file))
+                        ? ((r += "\n\n" + t.get("ts:import_checksum_mismatch", e.file)), (details.file = e.file))
                         : e instanceof T.DownloadError ||
                             e.message?.match(
                               /XHR error|Failed to fetch|CompileError: WebAssembly|SystemJS|NetworkError|Load failed/i,
@@ -569,7 +579,7 @@ System.register(
                                     this.sentry?.captureException(
                                       new Error("Game res import failed " + (e.message ?? e.name), { cause: e }),
                                     ),
-                await i.show(r));
+                await i.show(r, false, details));
             }
             async loadGpuBenchmarkData() {
               let r = !1;

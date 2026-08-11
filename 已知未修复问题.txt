@@ -352,3 +352,11 @@
 问题描述：战役图（苏联任务图）中触发器使用了动作 ID 125、15、1、119，而 `TriggerActionType` 枚举目前仅覆盖到 118（且非连续），这些 ID 未定义 → 解析时打印 `Unknown action type ... Skipping.` 并跳过动作，任务脚本不执行。日志大量重复是因为同一张战役图的多个触发器含这些动作，每次进图重复解析。
 处理建议：工作量较大——需先确认这些 ID 的原版 [Actions] 语义（125 为 YR 靠后的动作 ID），再补全枚举并实现对应执行器；仅影响战役图脚本，对遭遇战/联机无影响。与 #33 同类（已补 74-118，1/15/119/125 仍缺失）。
 优先级：中（战役图功能缺失，但无崩溃/误触发风险）
+
+37. 所有界面出错未统一弹"详细错误窗口"（目前仅对局内生效）
+影响模块：ErrorHandler.ts.js（handle / handleWithDetails）、各界面 handleError（SkirmishScreen、LobbyScreen、Login、Replay 等 20+ 处调用 `errorHandler.handle(...)`）
+问题描述：已实现带详情的错误弹窗（ErrorDetailsDialog/ErrorDetailsBoxApi + `handleWithDetails`），但仅 [GameScreen.ts.js](src/gui/screen/game/GameScreen.ts.js) 的 handleError 接入了新窗口（覆盖地图加载失败、游戏初始化失败、游戏内崩溃/断线/失步、出生点不足校验等）。其它界面（遭遇战大厅、多人大厅、登录、MOD/地图选择、回放入口等）仍走旧的 `errorHandler.handle()` → 只有消息 + 确定的基础 MessageBox。
+预期行为：所有界面出错统一弹出"详细错误窗口"，附带错误类型/堆栈/相关上下文，便于定位问题。
+实际表现：仅对局内（GameScreen）出错弹详细窗口；其它界面仍是旧弹窗。
+排查线索：把各界面的 `handleError` 升级为调用 `handleWithDetails(e, message, details, callback)`——错误对象本身可提供 type/stack，各界面可补充各自的 context（如 MapName/GameId）；注意 `handleWithDetails` 已有无 ErrorDetailsBoxApi 时的回退逻辑，改动风险低。
+优先级：低（已记录，等有时间再实现）

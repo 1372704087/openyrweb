@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1323,
+  "moduleCount": 1325,
   "modules": [
     {
       "name": "data/IniSection",
@@ -9852,6 +9852,25 @@
         "gui/ReactFormat"
       ],
       "bytes": 1252
+    },
+    {
+      "name": "gui/component/ErrorDetailsDialog",
+      "file": "gui/component/ErrorDetailsDialog.ts.js",
+      "deps": [
+        "react",
+        "gui/component/Dialog"
+      ],
+      "bytes": 1800
+    },
+    {
+      "name": "gui/component/ErrorDetailsBoxApi",
+      "file": "gui/component/ErrorDetailsBoxApi.ts.js",
+      "deps": [
+        "gui/HtmlReactElement",
+        "util/disposable/CompositeDisposable",
+        "gui/component/ErrorDetailsDialog"
+      ],
+      "bytes": 1400
     },
     {
       "name": "engine/gameRes/importError/ChecksumError",

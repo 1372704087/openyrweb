@@ -2589,3 +2589,189 @@ input[type="range"]:focus {
     height: 20px;
     font-size: 13px;
 }
+
+/* ===== 详细错误弹窗样式（窗口样式） ===== */
+
+/* 窗口框架：居中（.message-box 已 50%/50%+translate）、圆角、阴影、内容自适应 */
+#ra2web-root .error-details-box.message-box {
+    width: 720px;
+    max-width: 92vw;
+    height: auto;
+    min-height: 320px;
+    max-height: 85vh;
+    background: #1c1e22;
+    border: 1px solid #4a4d55;
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 内容区：纵向布局，整体可滚动 */
+#ra2web-root .error-details-box.message-box .message-box-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+#ra2web-root .error-details-box.message-box .error-details-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 24px 8px 24px;
+    overflow-y: auto;
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* 标题条：窗口顶部横条，展示错误主消息 */
+#ra2web-root .error-details-box .error-details-message {
+    margin: -16px -24px 12px -24px;
+    padding: 12px 24px;
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid #3a3d44;
+    color: #ff8a80;
+    font-size: 15px;
+    font-weight: bold;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+#ra2web-root .error-details-box .error-details-toggle-wrap {
+    margin-top: 4px;
+}
+
+#ra2web-root .error-details-box .error-details-toggle {
+    background: #2a2d33;
+    border: 1px solid #4a4d55;
+    color: #cfd4da;
+    padding: 4px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+
+#ra2web-root .error-details-box .error-details-toggle:hover {
+    background: #34373e;
+    color: #fff;
+}
+
+#ra2web-root .error-details-box .error-details-section {
+    margin-top: 10px;
+    padding: 12px 16px;
+    background: #14161a;
+    border: 1px solid #383b42;
+    border-radius: 4px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+#ra2web-root .error-details-box .error-detail-row {
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: break-all;
+}
+
+#ra2web-root .error-details-box .error-detail-label {
+    color: #9aa0a6;
+    margin-right: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#ra2web-root .error-details-box .error-detail-value {
+    color: #e2e5e9;
+}
+
+#ra2web-root .error-details-box .error-detail-stack-row {
+    display: flex;
+    flex-direction: column;
+}
+
+#ra2web-root .error-details-box .error-detail-stack {
+    margin: 4px 0 0 0;
+    padding: 8px 12px;
+    background: #0d0f12;
+    border: 1px solid #2a2d33;
+    border-radius: 3px;
+    color: #b8c4cc;
+    font-size: 12px;
+    line-height: 1.4;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* 底部按钮栏 */
+#ra2web-root .error-details-box .message-box-footer {
+    position: static;
+    flex: 0 0 auto;
+    text-align: right;
+    padding: 12px 24px 14px 24px;
+    border-top: 1px solid #3a3d44;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+#ra2web-root .error-details-box .message-box-footer .dialog-button {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 5px 18px;
+    font-size: 13px;
+    background: #3a3d44;
+    border: 1px solid #555a63 outset;
+    color: #e2e5e9;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+
+#ra2web-root .error-details-box .message-box-footer .dialog-button:last-child {
+    background: #7a1f1f;
+    border: 1px solid #a04040 outset;
+}
+
+#ra2web-root .error-details-box .message-box-footer .dialog-button:hover:not(:disabled) {
+    background: #4a4e56;
+}
+
+#ra2web-root .error-details-box .message-box-footer .dialog-button:last-child:hover:not(:disabled) {
+    background: #a03030;
+}
+
+/* 滚动条美化（WebKit / Chromium） */
+#ra2web-root .error-details-box ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+#ra2web-root .error-details-box ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 5px;
+}
+#ra2web-root .error-details-box ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #565b64, #43464e);
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    border-radius: 5px;
+}
+#ra2web-root .error-details-box ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #6a707b, #52565f);
+}
+#ra2web-root .error-details-box ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, #7d848f, #60656e);
+}
+#ra2web-root .error-details-box ::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* 滚动条美化（Firefox） */
+#ra2web-root .error-details-box {
+    scrollbar-width: thin;
+    scrollbar-color: #565b64 rgba(255, 255, 255, 0.04);
+}
