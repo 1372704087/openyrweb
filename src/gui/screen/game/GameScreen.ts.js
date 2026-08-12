@@ -806,7 +806,7 @@ System.register(
                     this.disposables.add(() => w.DevToolsApi.unregisterVar("cheats")),
                     (() => {
                       let _cheatMenu = null, _cheatInfMoneyTimer = null, _cheatInfSuperWeaponTimer = null;
-                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, techBoost: false, mapRevealed: false, bypassBuildLimit: false, infSuperWeapon: false };
+                      const _cheatState = { infMoney: false, fastBuild: false, allTech: false, techBoost: false, mapRevealed: false, bypassBuildLimit: false, infSuperWeapon: false, buildAnywhere: false };
                       const _gs = this;
                       function _destroyCheatMenu() {
                         if (_cheatMenu) { _cheatMenu.remove(); _cheatMenu = null; }
@@ -866,6 +866,12 @@ System.register(
                           _cheatState.bypassBuildLimit = !_cheatState.bypassBuildLimit;
                           const prod = lp.production;
                           if (prod) prod.cheatsBypassBuildLimits = _cheatState.bypassBuildLimit;
+                        });
+                        // [CHEAT] 随处建造：无视地形（水面/斜坡等）与相邻建筑要求，任意位置放置建筑
+                        addToggle("随处建造", () => _cheatState.buildAnywhere, () => {
+                          _cheatState.buildAnywhere = !_cheatState.buildAnywhere;
+                          const prod = lp.production;
+                          if (prod) prod.cheatsBuildAnywhere = _cheatState.buildAnywhere;
                         });
                         // [CHEAT] 无限超级武器：所有超级武器瞬间冷却，可无限使用
                         addToggle("无限超级武器", () => _cheatState.infSuperWeapon, () => {
@@ -927,6 +933,7 @@ System.register(
                             _cheatState.techBoost = true;
                             _cheatState.bypassBuildLimit = true;
                           }
+                          if (!_cheatState.buildAnywhere) { _cheatState.buildAnywhere = true; if (prod) prod.cheatsBuildAnywhere = true; }
                           if (!_cheatState.infSuperWeapon) { _cheatState.infSuperWeapon = true; if (!_cheatInfSuperWeaponTimer) _cheatInfSuperWeaponTimer = setInterval(() => { if (g.status === 1 && lp.superWeaponsTrait) { for (const sw of lp.superWeaponsTrait.getAll()) { sw.chargeTicks = 0; sw.status = 2; } } }, 100); }
                           _destroyCheatMenu(); _createCheatMenu();
                         });

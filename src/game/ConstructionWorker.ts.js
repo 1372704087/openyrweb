@@ -79,6 +79,10 @@ System.register(
             getAdjacentRect(e, t, i) {
               return { x: e.rx - i, y: e.ry - i, width: t.width + 2 * i, height: t.height + 2 * i };
             }
+            // [CHEAT] 随处建造：读取玩家 production 上的作弊标志（Production.cheatsBuildAnywhere）
+            get cheatsBuildAnywhere() {
+              return !!this.player?.production?.cheatsBuildAnywhere;
+            }
             getAdjacencyMap(e) {
               var t;
               let i = [];
@@ -109,7 +113,8 @@ System.register(
                 h = r ? t : this.normalizePlacementTileCoords(o, t);
               let u = !0;
               o = { x: h.rx, y: h.ry, width: c.width, height: c.height };
-              a || this.meetsAdjacency(o, n.adjacent) || (u = !1);
+              // [CHEAT] 随处建造开启时跳过相邻建筑要求
+              a || this.cheatsBuildAnywhere || this.meetsAdjacency(o, n.adjacent) || (u = !1);
               for (let p = 0; p < c.width; p++)
                 for (let e = 0; e < c.height; e++) {
                   var d = { x: h.rx + p, y: h.ry + e },
@@ -131,7 +136,8 @@ System.register(
                 l = o.foundation,
                 c = r ? t : this.normalizePlacementTileCoords(o, t),
                 o = { x: c.rx, y: c.ry, width: l.width, height: l.height };
-              if (!a && !this.meetsAdjacency(o, n.adjacent)) return !1;
+              // [CHEAT] 随处建造开启时跳过相邻建筑要求
+              if (!a && !this.cheatsBuildAnywhere && !this.meetsAdjacency(o, n.adjacent)) return !1;
               for (let u = 0; u < l.width; u++)
                 for (let e = 0; e < l.height; e++) {
                   var h = { x: c.rx + u, y: c.ry + e },
@@ -230,9 +236,11 @@ System.register(
                 !this.map
                   .getGroundObjectsOnTile(e)
                   .some((e) => !(i?.includes(e) || (e.isBuilding() && e.rules.invisibleInGame) || e.isSmudge())) &&
-                (t.waterBound
-                  ? 0 < this.rules.getLandRules(e.landType).getSpeedModifier(r.SpeedType.Float)
-                  : 0 === e.rampType && this.rules.getLandRules(e.landType).buildable)
+                // [CHEAT] 随处建造开启时跳过地形（水面/斜坡/不可建地面）检查
+                (this.cheatsBuildAnywhere ||
+                  (t.waterBound
+                    ? 0 < this.rules.getLandRules(e.landType).getSpeedModifier(r.SpeedType.Float)
+                    : 0 === e.rampType && this.rules.getLandRules(e.landType).buildable))
               );
             }
             dispose() {

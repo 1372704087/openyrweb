@@ -87,7 +87,9 @@ System.register(
                   // [CHEAT] 作弊调试用：为true时突破建造数量限制。后续删除作弊时一并移除
                   (this.cheatsBypassBuildLimits = false),
                   // [CHEAT] 作弊调试用：为true时跳过科技等级限制，允许建造科技等级-1及以下（隐藏单位）的建筑/单位。后续删除作弊时一并移除
-                  (this.cheatsBypassTechLevel = false));
+                  (this.cheatsBypassTechLevel = false),
+                  // [CHEAT] 作弊调试用：为true时随处建造——无视地形（水面/斜坡/不可建地面）与相邻建筑限制。后续删除作弊时一并移除
+                  (this.cheatsBuildAnywhere = false));
               }
               get onQueueUpdate() {
                 return this._onQueueUpdate.asEvent();
