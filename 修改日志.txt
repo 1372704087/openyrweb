@@ -1161,3 +1161,43 @@ feat(error-details): 美化错误详情弹窗滚动条
 ### 🧪 测试建议
 1. 测试页点「模拟超长内容（滚动条测试）」展开详情，观察详情面板出现圆角渐变滚动条，滚动到最底部。
 2. 悬停/按住滚动条，滑块颜色加深。  
+
+feat(secret-lab): 实现秘密科技实验室（CASLAB）占领解锁单位功能
+
+- 🏛️ **规则解析**
+  - `TechnoRules` 新增 `SecretLab=yes` 解析（BuildingTypes，原版 YR），以及建筑级覆盖键 `SecretInfantry`/`SecretUnit`/`SecretBuilding`（单对象名，优先级高于地图随机分配，对应原版 `BuildingClass::GetSecretProduction`）。
+  - `GeneralRules` 新增 `SecretInfantry`/`SecretUnits`/`SecretBuildings` 数组解析（读取 `[General]` Secret Lab Section 原版三列表）。
+- 🎲 **地图加载时分配随机奖励**（`Game.assignSecretLabBonuses`，原版 `ScenarioClass::GenerateSecretLabBonuses`）
+  - `Game.init` 创建完地图对象后，按地图顺序枚举所有 `SecretLab=yes` 建筑，从「步兵+载具+建筑」合并奖励池中用确定性游戏 PRNG 逐个抽取**不重复**的奖励并写入 `Building.secretProduction`（所有锁步客户端一致）。
+  - 保留原版设定：奖励池数量少于实验室数量时**所有**实验室都不给奖励；带建筑级覆盖键的实验室始终给覆盖对象、不消耗池条目。
+- 🏭 **占领解锁**（`Production.isSecretLabGranted` + `hasFactoryForType`）
+  - `isAvailableForProduction` 增加分支：玩家拥有一座建成且未摧毁的 `SecretLab=yes` 建筑、其 `getSecretProduction()` 等于该对象时，**跳过国家/前置检查**（实验室本身就是前置），只需同类型工厂（不要求工厂 Owner 与单位 Owner 重叠，盟军玩家也能用自家兵营造苏联奖励兵种）。
+  - 归属制生效：实验室被敌方夺回后奖励随之转移给新占领方（与原版一致）；实验室被摧毁则奖励消失。
+  - 侧边栏在 `ObjectOwnerChange` 时自动刷新，占领后新单位立即出现在对应生产页签。
+- 🔊 **EVA 提示**：占领秘密科技实验室时播放 "EVA_NewTechnologyAcquired"（原版 YR 的 "New Technology Acquired" 播报），替代通用的科技建筑占领语音。
+- 📦 涉及模块：`TechnoRules`/`GeneralRules`/`Building`/`Game`/`Production`/`SoundHandler`（无新模块，moduleCount 不变）。
+
+### ⚠️ 破坏性变更
+- 无。此前秘密科技实验室被占领后无任何效果，现按原版逻辑解锁随机奖励单位。
+
+### 🧪 测试建议
+1. 选择一张含秘密科技实验室（CASLAB）的地图开局，用工程师占领：EVA 播报 "New Technology Acquired"，侧边栏出现随机的国家特色单位/建筑（如狙击手/自爆卡车/巨炮）。
+2. 占领后新建对应工厂（兵营/战车工厂/建造场），奖励单位可正常生产。
+3. 实验室被敌方夺回后，奖励从己方侧边栏消失、出现在敌方；摧毁实验室后奖励消失。
+4. 地图上实验室数量大于奖励池数量时，任何实验室占领后都不给奖励（原版设定）。
+
+fix(secret-lab): 修复实验室被炸后奖励图标残留在建造栏且无法建造
+
+- 🐛 **根因**：`LeaveRubble=yes` 建筑（秘密科技实验室 CASLAB 即是）被摧毁时，`Game.destroyObject` 的 LeaveRubble 分支会把被炸建筑对象**故意保留在世界中**（作为残骸阻挡物，见 `Terrain.isBlockerObject`/`MinimapModel`），因此 world 层的 `onObjectRemoved` 事件**不会触发**。而 `CombatantUi`/`ObserverUi` 刷新侧边栏只订阅了 `onObjectSpawned/onObjectRemoved/ObjectOwnerChange`——实验室被炸不触发任何一项，侧边栏缓存的可建造列表不更新，奖励图标残留在建造栏；此时 `Production.isAvailableForProduction` 已正确返回 false（`isSecretLabGranted` 排除 `isDestroyed`/已移除对象），点击入队被 `UpdateQueueAction` 的可用性校验拒绝，表现为"图标还在但无法建造"。
+- ✅ **修复**：`CombatantUi`/`ObserverUi` 新增对游戏事件 `ObjectDestroy` 的订阅——当己方（观察视角为当前观察玩家）的**建筑**被摧毁时重建侧边栏可建造列表，奖励图标随之消失。该订阅同时覆盖所有 LeaveRubble 建筑（油井/医院/机器商店等）被炸时侧边栏不刷新的同类问题；过滤 `owner === this.player` 避免他人建筑被炸时无谓刷新。
+- 📦 涉及模块：`gui/screen/game/CombatantUi`、`gui/screen/game/ObserverUi`（无新模块，moduleCount 不变）。
+
+### ⚠️ 破坏性变更
+- 无。仅补充 UI 侧边栏的刷新时机，不影响游戏逻辑与锁步。
+
+### 🧪 测试建议
+1. 占领秘密科技实验室获得奖励后，用敌方单位/超武炸毁实验室：奖励图标应立即从己方建造栏消失。
+2. 占领实验室的奖励后，敌方夺回实验室：己方奖励消失、敌方出现（原有 ObjectOwnerChange 刷新路径，回归确认）。
+3. 摧毁己方普通建筑（如油井、兵营）：侧边栏正常刷新，无异常报错；他人建筑被炸时己方侧边栏不刷新。
+
+

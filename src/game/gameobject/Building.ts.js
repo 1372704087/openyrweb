@@ -222,10 +222,24 @@ System.register(
                 (this.showWeaponRange = !1),
                 (this.direction = 0),
                 (this._buildStatus = k.BuildUp),
-                (this.lastBuildStatus = this.buildStatus));
+                (this.lastBuildStatus = this.buildStatus),
+                // OpenYRWeb: Secret Lab map-assigned bonus object name (e.g. "SNIPE"). Set by
+                // Game.assignSecretLabBonuses at map load for SecretLab=yes buildings. Only
+                // applies when the building rules don't define a per-building override.
+                (this.secretProduction = void 0));
             }
             isBuilding() {
               return !0;
+            }
+            // OpenYRWeb: Secret Lab granted production (vanilla BuildingClass::GetSecretProduction).
+            // Per-building overrides take priority; otherwise falls back to the map-assigned
+            // random bonus. The owner can build this object while the lab is owned (see
+            // Production.isSecretLabGranted).
+            getSecretProduction() {
+              if (this.rules.secretInfantry) return this.rules.secretInfantry;
+              if (this.rules.secretUnit) return this.rules.secretUnit;
+              if (this.rules.secretBuilding) return this.rules.secretBuilding;
+              return this.secretProduction;
             }
             getFoundation() {
               return this.art.foundation;

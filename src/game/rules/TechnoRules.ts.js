@@ -203,6 +203,17 @@ System.register(
                 (this.deploysInto = this.ini.getString("DeploysInto")),
                 (this.deployTime = this.ini.getNumber("DeployTime")),
                 (this.capturable = this.ini.getBool("Capturable")),
+                // OpenYRWeb: SecretLab=yes (BuildingTypes, vanilla YR). Marks a building as a
+                // Tech Secret Lab (CASLAB): capturing it grants the owner the ability to build
+                // a pseudo-random object assigned at map load. See GeneralRules.secretInfantry/
+                // secretUnits/secretBuildings and Game.assignSecretLabBonuses.
+                (this.secretLab = this.ini.getBool("SecretLab")),
+                // Per-building override keys (vanilla BuildingTypeClass::GetSecretProduction).
+                // If set, the lab always grants this specific object instead of the map-assigned
+                // random bonus. Priority: SecretInfantry > SecretUnit > SecretBuilding.
+                (this.secretInfantry = this.ini.getString("SecretInfantry") || void 0),
+                (this.secretUnit = this.ini.getString("SecretUnit") || void 0),
+                (this.secretBuilding = this.ini.getString("SecretBuilding") || void 0),
                 (this.spyable = this.ini.getBool("Spyable")),
                 (this.needsEngineer = this.ini.getBool("NeedsEngineer")),
                 (this.c4 = this.ini.getBool("C4")),

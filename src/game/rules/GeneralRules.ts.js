@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: game/rules/GeneralRules ===
+// === Reconstructed SystemJS module: game/rules/GeneralRules ===
 // deps: ["game/rules/general/RadarRules","game/rules/general/RepairRules","game/rules/general/VeteranRules","game/rules/general/CrewRules","game/rules/general/PrismRules","game/rules/general/ThreatRules","game/rules/general/ParadropRules","game/rules/general/LightningStormRules","game/rules/general/V3RocketRules","game/rules/general/DMislRules","game/rules/general/CMislRules","game/rules/general/HoverRules","util/math"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
@@ -149,6 +149,14 @@ System.register(
                   (this.radar = new i.RadarRules().readIni(e)),
                   (this.refundPercent = g.clamp(e.getNumber("RefundPercent"), 0, 1)),
                   (this.repair = new r.RepairRules().readIni(e)),
+                  // OpenYRWeb: Secret Lab bonus pools (vanilla YR [General] Secret Lab Section).
+                  // When a SecretLab=yes building (CASLAB) is captured, the owner gains the
+                  // ability to build ONE pseudo-random object drawn from the concatenation of
+                  // these three lists (infantry first, then units, then buildings). The draw
+                  // happens once at map load (see Game.assignSecretLabBonuses).
+                  (this.secretInfantry = e.getArray("SecretInfantry")),
+                  (this.secretUnits = e.getArray("SecretUnits")),
+                  (this.secretBuildings = e.getArray("SecretBuildings")),
                   // OpenYRWeb: YR Tech Hospital self-heal global parameters.
                   // SelfHealInfantryFrames/SelfHealUnitFrames: ticks between self-heal pulses.
                   // SelfHealInfantryAmount/SelfHealUnitAmount: HP healed per tick per multiplier.

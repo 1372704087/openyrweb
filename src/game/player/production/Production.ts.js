@@ -148,7 +148,13 @@ System.register(
                     this.rules.getSuperWeapon(e.superWeapon).type !== u.SuperWeaponType.ForceShield
                   ) &&
                   // [CHEAT] 作弊调试用：cheatsBypassPrereqs为true时跳过工厂和前置检查。后续删除作弊时恢复原逻辑
-                  (this.cheatsBypassPrereqs || (this.hasFactoryFor(e) && this.meetsPrerequisites(e)))
+                  (this.cheatsBypassPrereqs ||
+                    (this.isSecretLabGranted(e)
+                      ? // Secret Lab granted objects bypass country/prerequisite checks — the
+                        // lab itself is the prerequisite. Only a matching factory is required
+                        // (any owner), so e.g. an Allied player can build a Soviet bonus unit.
+                        this.hasFactoryForType(e)
+                      : this.hasFactoryFor(e) && this.meetsPrerequisites(e)))
                 );
               }
               getAvailableObjects() {
@@ -205,6 +211,36 @@ System.register(
                     if (!e) return !1;
                   } else if (-1 === t.indexOf(r)) return !1;
                 return !!this.meetsStolenTech(e);
+              }
+              // OpenYRWeb: Secret Lab grant (vanilla BuildingClass::GetSecretProduction +
+              // sidebar cameo enumeration). Returns true when the player owns a fully-built
+              // SecretLab=yes building whose granted production object is `e`. Ownership-based:
+              // whoever controls the lab can build its bonus object (re-capture transfers the
+              // bonus to the new owner, matching vanilla).
+              isSecretLabGranted(e) {
+                for (var b of this.player.buildings)
+                  if (
+                    b.rules.secretLab &&
+                    b.buildStatus === d.BuildStatus.Ready &&
+                    !b.isDestroyed &&
+                    b.getSecretProduction?.() === e.name
+                  )
+                    return !0;
+                return !1;
+              }
+              // Like hasFactoryFor but ignores the factory's Owner overlap — the player only
+              // needs a factory of the right type. Used for Secret Lab granted objects so e.g.
+              // an Allied player can build a Soviet bonus unit (DESO) from their own barracks.
+              hasFactoryForType(i) {
+                if (i.owner.length) {
+                  let t = this.getFactoryTypeFor(i);
+                  return !![...this.player.buildings].find(
+                    (e) =>
+                      e.factoryTrait?.type === t &&
+                      (t !== r.FactoryType.UnitType || e.rules.naval === i.naval),
+                  );
+                }
+                return !0;
               }
               getPrimaryFactory(e) {
                 return this.primaryFactories.get(e);

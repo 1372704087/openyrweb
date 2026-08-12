@@ -302,6 +302,19 @@ System.register(
                       this.soundHandler.handleAvailableObjectsUpdate(this.player.production.getAvailableObjects()));
                   }),
                 ),
+                // OpenYRWeb: rebuild the sidebar when a building is destroyed. LeaveRubble
+                // buildings (e.g. the Secret Lab CASLAB) keep their game object on the map as
+                // a rubble blocker after being destroyed, so the world-level onObjectRemoved
+                // never fires and without this the sidebar would keep showing a Secret Lab
+                // bonus that is no longer buildable.
+                this.disposables.add(
+                  this.game.events.subscribe(r.EventType.ObjectDestroy, (e) => {
+                    e.target.isBuilding() &&
+                      e.target.owner === this.player &&
+                      (this.sidebarModel.updateAvailableObjects(this.game.art),
+                      this.soundHandler.handleAvailableObjectsUpdate(this.player.production.getAvailableObjects()));
+                  }),
+                ),
                 this.player.production.onQueueUpdate.subscribe((e) => {
                   this.sidebarModel.updateFromQueue(e);
                   var t = this.placementMode.getBuilding();

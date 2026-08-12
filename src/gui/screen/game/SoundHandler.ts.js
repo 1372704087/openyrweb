@@ -512,7 +512,15 @@ System.register(
                   case L.EventType.BuildingCapture:
                     var v = r.target;
                     v.owner === this.player &&
-                      this.eva.play(v.rules.needsEngineer ? "EVA_TechBuildingCaptured" : "EVA_BuildingCaptured");
+                      this.eva.play(
+                        // OpenYRWeb: Secret Lab (CASLAB) grants a random unit — vanilla YR
+                        // announces it with the "New Technology Acquired" EVA message.
+                        v.rules.secretLab
+                          ? "EVA_NewTechnologyAcquired"
+                          : v.rules.needsEngineer
+                            ? "EVA_TechBuildingCaptured"
+                            : "EVA_BuildingCaptured",
+                      );
                     break;
                   case L.EventType.BuildingInfiltration:
                     ((T = r.source), (v = r.target));

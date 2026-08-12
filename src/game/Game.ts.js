@@ -341,6 +341,7 @@ System.register(
               init(e) {
                 ((this.localPlayer = e),
                   this.createMapObjects(),
+                  this.assignSecretLabBonuses(),
                   this.createPlayerInitialUnits(),
                   this.map.terrain.computeAllPassabilityGraphs(),
                   this.mapShroudTrait.init(this),
@@ -392,6 +393,39 @@ System.register(
                   this.createInitialMapOverlays(t.overlays, e),
                   this.createInitialMapSmudges(t.smudges),
                   this.createInitialMapTechnos(t.technos));
+              }
+              // OpenYRWeb: Secret Lab bonus assignment (vanilla ScenarioClass::
+              // GenerateSecretLabBonuses). Called once at map load: enumerates every
+              // SecretLab=yes building placed on the map (in map order) and draws a unique
+              // pseudo-random bonus for each from the [General] SecretInfantry/SecretUnits/
+              // SecretBuildings pool. The draw uses the deterministic game PRNG so all
+              // lockstep clients agree. Vanilla quirk kept: if there are more labs than
+              // possible bonuses, NO lab grants anything. Labs with a per-building override
+              // (SecretInfantry/SecretUnit/SecretBuilding) always grant their override and
+              // don't consume a pool entry.
+              assignSecretLabBonuses() {
+                var e = this.rules.general,
+                  t = [
+                    ...(e.secretInfantry ?? []),
+                    ...(e.secretUnits ?? []),
+                    ...(e.secretBuildings ?? []),
+                  ];
+                if (!t.length) return;
+                var i = this.world.getAllObjects().filter(
+                  (e) =>
+                    e.isBuilding() &&
+                    e.rules.secretLab &&
+                    !e.rules.secretInfantry &&
+                    !e.rules.secretUnit &&
+                    !e.rules.secretBuilding,
+                );
+                if (!i.length) return;
+                if (t.length < i.length) return;
+                var n = [...t];
+                for (var s of i) {
+                  var a = this.prng.generateRandomInt(0, n.length - 1);
+                  s.secretProduction = n.splice(a, 1)[0];
+                }
               }
               createInitialMapTerrains(e, t) {
                 for (var i of e) {
