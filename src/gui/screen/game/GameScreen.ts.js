@@ -569,6 +569,7 @@ System.register(
             }
             f = this.loadingScreenApiFactory.create(
               m ? ne.LoadingScreenType.SinglePlayer : ne.LoadingScreenType.MultiPlayer,
+              m && g.campaignId ? this.buildCampaignLoadingInfo(g) : void 0,
             );
             if (
               ((this.loadingScreenApi = f),
@@ -1236,7 +1237,166 @@ System.register(
                     },
               })),
               this.uiAnimationLoop.stop(),
-              this.gameAnimationLoop.start());
+              this.gameAnimationLoop.start(),
+              // OpenYRWeb: 触发器 DisableUserInput/EnableUserInput 桥接 —
+              // 轮询 game.inputLocked 状态并同步 WorldInteraction（锁定期间玩家无法操控单位）。
+              // 菜单打开时挂起同步，避免与菜单自身的 setEnabled 冲突。
+              ((this.inputLockSyncSuspended = !1),
+                (this.inputLockSyncHandler = () => {
+                  if (this.inputLockSyncSuspended) return;
+                  let e = this.game;
+                  if (!e) return;
+                  // MoveAndCenterView: 消费相机移动请求并平滑移动视野
+                  if (e.pendingCameraMove) {
+                    let pm = e.pendingCameraMove;
+                    e.pendingCameraMove = void 0;
+                    this.moveCameraToWaypoint(pm.waypoint, pm.speed);
+                  }
+                  // FlashSmall/Medium/Large/FlashTeam: 消费单元高亮请求
+                  if (e.pendingUnitFlash) {
+                    let pf = e.pendingUnitFlash;
+                    e.pendingUnitFlash = void 0;
+                    this.flashUnits(pf.ids, pf.cycles);
+                  }
+                  // 脚本化小队攻击指定路点：渲染脉冲目标标记
+                  this.updateAttackTargetMarkers();
+                  if (!this.playerUi?.worldInteraction) return;
+                  let t = !!e.inputLocked,
+                    n = this.playerUi.worldInteraction;
+                  if (n.isEnabled() !== !t) {
+                    n.setEnabled(!t);
+                    // 锁定玩家操控期间隐藏鼠标指针（RA2 过场/演出行为）
+                    this.pointer.setVisible(!t);
+                  }
+                }),
+                this.renderer.onFrame.subscribe(this.inputLockSyncHandler),
+                this.disposables.add(() => {
+                  this.renderer.onFrame.unsubscribe(this.inputLockSyncHandler);
+                  this.disposeAttackTargetMarkers();
+                })));
+          }
+          // OpenYRWeb: 触发器 MoveAndCenterView — 相机平滑移动到指定路点（参考临时源码 smoothstep 动画）
+          moveCameraToWaypoint(e, t) {
+            let n = this.playerUi?.worldInteraction;
+            if (!n || !this.game) return;
+            let r = this.game.map?.getTileAtWaypoint(e);
+            if (!r) return;
+            let i = n.minimapHandler?.mapPanningHelper?.computeCameraPanFromTile(r.rx, r.ry),
+              o = n.worldScene?.cameraPan;
+            if (!i || !o) return;
+            let s = o.getPan(),
+              a = Math.max(180, 1100 - Math.max(1, t || 1) * 180),
+              l = performance.now();
+            let c = !1,
+              h = (T) => {
+                if (c) return;
+                let _ = Math.min(1, (T - l) / a),
+                  E = _ * _ * (3 - 2 * _);
+                o.setPan({ x: s.x + (i.x - s.x) * E, y: s.y + (i.y - s.y) * E });
+                _ < 1 && requestAnimationFrame(h);
+              };
+            requestAnimationFrame(h);
+            this.disposables.add(() => (c = !0));
+          }
+          // OpenYRWeb: 触发器 FlashSmall/Medium/Large/FlashTeam — 高亮指定单元（对齐临时源码 renderable.highlight）
+          flashUnits(e, t) {
+            if (!e || !e.length || !this.game) return;
+            for (var id of e) {
+              let obj = this.game.getObjectById(id);
+              if (!obj) continue;
+              let r = this.renderableManager?.getRenderableByGameObject(obj);
+              if (!r) continue;
+              try {
+                if (t && r.highlightAnimRunner) r.highlightAnimRunner.animate(t);
+                else r.highlight?.();
+              } catch (_) {}
+            }
+          }
+          // OpenYRWeb: 脚本化小队攻击指定路点 — 目标标记渲染（脉冲红色光环）
+          updateAttackTargetMarkers() {
+            let e = this.game;
+            if (!e) return;
+            let n = this.playerUi?.worldInteraction?.worldScene;
+            if (!n) return;
+            let arr = e.attackTargetMarkers;
+            if (!arr) return;
+            let tick = e.currentTick;
+            if (arr.some((m) => m.expireTick <= tick)) e.attackTargetMarkers = arr.filter((m) => m.expireTick > tick);
+            arr = e.attackTargetMarkers;
+            let meshes = this.attackTargetMarkerMeshes || (this.attackTargetMarkerMeshes = []);
+            for (let i = meshes.length - 1; i >= 0; i--) {
+              let mm = meshes[i];
+              if (!arr.some((m) => m.rx === mm.rx && m.ry === mm.ry && m.teamName === mm.teamName)) {
+                n.scene.remove(mm.mesh);
+                mm.mesh.geometry?.dispose?.();
+                mm.mesh.material?.dispose?.();
+                meshes.splice(i, 1);
+              }
+            }
+            for (let m of arr) {
+              if (meshes.some((mm) => mm.rx === m.rx && mm.ry === m.ry && mm.teamName === m.teamName)) continue;
+              let mesh = this.createAttackMarkerMesh(n, m);
+              if (mesh) meshes.push({ rx: m.rx, ry: m.ry, teamName: m.teamName, mesh });
+            }
+            let t = performance.now() / 450;
+            for (let mm of meshes) {
+              let ph = t + mm.rx * 1.7 + mm.ry * 0.9,
+                s = 0.8 + 0.2 * Math.sin(ph);
+              mm.mesh.scale.set(s, s, s);
+              mm.mesh.material.opacity = 0.55 + 0.35 * Math.sin(ph);
+            }
+          }
+          createAttackMarkerMesh(e, t) {
+            try {
+              let wx = t.rx * 256,
+                wz = t.ry * 256,
+                geo = new THREE.RingGeometry(88, 128, 32),
+                mat = new THREE.MeshBasicMaterial({
+                  color: 16728063,
+                  transparent: !0,
+                  opacity: 0.7,
+                  depthTest: !1,
+                  depthWrite: !1,
+                  side: THREE.DoubleSide,
+                }),
+                mesh = new THREE.Mesh(geo, mat);
+              mesh.rotation.x = -Math.PI / 2;
+              mesh.position.set(wx, 4, wz);
+              e.scene.add(mesh);
+              return mesh;
+            } catch (_) {
+              return void 0;
+            }
+          }
+          disposeAttackTargetMarkers() {
+            let n = this.playerUi?.worldInteraction?.worldScene,
+              meshes = this.attackTargetMarkerMeshes;
+            this.attackTargetMarkerMeshes = void 0;
+            if (!n || !meshes) return;
+            for (let mm of meshes) {
+              n.scene.remove(mm.mesh);
+              mm.mesh.geometry?.dispose?.();
+              mm.mesh.material?.dispose?.();
+            }
+          }
+          // OpenYRWeb: 战役加载画面信息（参考临时源码 UKe / CampaignScreen 任务表）
+          buildCampaignLoadingInfo(e) {
+            var parts = String(e.campaignId || "").split("-"),
+              side = parts[0] || "training",
+              order = Number(parts[1]) || 1,
+              prefix = (e.mapName || "").slice(0, 5).toUpperCase(),
+              imgPrefix = "training" === side ? "LS800B" : "allied" === side ? "LS800A" : "LS800S",
+              loadingPath =
+                "campaign/ui/loading/" + (imgPrefix + String(order).padStart(2, "0")).toLowerCase() + ".png";
+            // 本地没有战役 UI 图时不要请求 404，让 LoadingScreen 只显示标题/简报/进度。
+            var hasLoadingImage = !!A.Engine.vfs && A.Engine.vfs.fileExists(loadingPath);
+            return {
+              side: side,
+              uiNameKey: "Name:" + prefix,
+              loadMessageKey: "LoadMsg:" + prefix,
+              loadBriefingKey: "training" === side ? void 0 : "LoadBrief:" + prefix,
+              loadingImage: hasLoadingImage ? loadingPath : void 0,
+            };
           }
           initNetStats(t) {
             let i,
@@ -1257,6 +1417,8 @@ System.register(
           initUi(i, r, s, e, t, a, n, o) {
             let { worldViewInitResult: l, messageList: c, chatHistory: h, minimap: u } = o;
             var { worldScene: d, worldSound: g, superWeaponFxHandler: p, beaconFxHandler: m, renderableManager: f } = l;
+            // OpenYRWeb: 触发器 Flash* 高亮单元用（按 gameObject 查渲染实体）
+            this.renderableManager = f;
             let y = new M.SoundHandler(r, g, n, this.sound, r.events, c, this.strings, i);
             if (
               (y.init(),
@@ -1408,7 +1570,8 @@ System.register(
           }
           initGameMenuEvents(e, t, i, r, s, a) {
             (e.onOpen.subscribe(() => {
-              (this.pointer.unlock(),
+              ((this.inputLockSyncSuspended = !0),
+                this.pointer.unlock(),
                 this.playerUi.worldInteraction.setEnabled(!1),
                 this.isSinglePlayer &&
                   ((this.pausedAtSpeed = i.speed.value),
@@ -1458,6 +1621,7 @@ System.register(
               }),
               e.onCancel.subscribe(() => {
                 (this.pointer.lock(),
+                  (this.inputLockSyncSuspended = !1),
                   this.playerUi.worldInteraction.setEnabled(!0),
                   this.isSinglePlayer &&
                     this.pausedAtSpeed &&
@@ -1469,7 +1633,11 @@ System.register(
               }));
           }
           async onGameEnd(e, t, i, r) {
-            var s = !t.defeated || e.alliances.getAllies(t).some((e) => !e.defeated);
+            // 单人战役：胜负只看本地玩家是否判负；多人沿用"盟友存活即算我方胜利"规则。
+            // 否则战役里玩家被打败但 AI 盟友（如 Civie1/Other1）未败时会错误显示"任务完成"。
+            var s = e.gameOpts.campaignId
+              ? !t.defeated
+              : !t.defeated || e.alliances.getAllies(t).some((e) => !e.defeated);
             let [a] = this.jsxRenderer.render(
               g.jsx(l.GameResultPopup, {
                 type: s && !t.isObserver ? l.GameResultType.MpVictory : l.GameResultType.MpDefeat,

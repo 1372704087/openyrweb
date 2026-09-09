@@ -12,7 +12,7 @@ System.register("game/ai/AiApi", [
   return {
     setters: [
       function (x) { GameApi = x.GameApi; OrderType = x.OrderType; ObjectType = x.ObjectType; SpeedType = x.SpeedType; },
-      function (x) { AiEngine = x.AiEngine; },
+      function (x) { AiEngine = x; },
       function (x) { AiData = x; },
     ],
     execute: function () {

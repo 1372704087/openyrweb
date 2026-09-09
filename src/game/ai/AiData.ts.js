@@ -31,12 +31,14 @@ System.register("game/ai/AiData", ["game/api/index"], function (e, t) {
       // 脚本
       var ScriptType = function (name) {
         this.name = name;
+        this.index = 0;         // 在 ScriptTypes 列表中的序号（ChangeScript 跳转用）
         this.actions = [];
       };
 
       // 队伍类型
       var TeamType = function (name) {
         this.name = name;
+        this.house = "";            // 归属阵营（House= 字段，可能为空/数字索引/阵营名）
         this.taskForce = null;      // 关联的 TaskForce 名
         this.scriptType = null;     // 关联的 ScriptType 名
         this.aiTrigger = null;      // 关联的 AITriggerType 名
@@ -152,7 +154,8 @@ System.register("game/ai/AiData", ["game/api/index"], function (e, t) {
           var scSec = aiIni.getSection(name);
           if (!scSec) continue;
           var sc = new ScriptType(name);
-          // 读取动作: 0=0,1, 1=5,2, 2=49,0 等
+          sc.index = i;
+          // 读取动作: 0=0,1, 1=5,2, 2=49,0 等（YR ScriptType 动作码，第二字段为路点/参数）
           for (var a = 0; ; a++) {
             var av = scSec.get(a.toString());
             if (av === undefined || av === null) break;
@@ -172,6 +175,15 @@ System.register("game/ai/AiData", ["game/api/index"], function (e, t) {
         var teams = {};
         var sec = aiIni.getSection("TeamTypes");
         if (!sec) return teams;
+        // 原版 AIMD.INI / 地图 AI 数据中，Annoyance/GuardSlower/Recruiter/Loadable/Full/
+        // AutoCreate/Prebuilt 等字段常写成 yes/no，而不是 1/0。这里统一兼容两种写法。
+        var boolOrNumber = function (tmSec, key, def) {
+          var raw = String(tmSec.get(key) || "").trim().toLowerCase();
+          if (!raw) return def;
+          if ("yes" === raw || "true" === raw || "on" === raw || "1" === raw) return 1;
+          if ("no" === raw || "false" === raw || "off" === raw || "0" === raw) return 0;
+          return tmSec.getNumber(key, def);
+        };
         for (var i = 0; ; i++) {
           var name = sec.get(i.toString());
           if (name === undefined || name === null) break;
@@ -179,21 +191,22 @@ System.register("game/ai/AiData", ["game/api/index"], function (e, t) {
           var tmSec = aiIni.getSection(name);
           if (!tmSec) continue;
           var tm = new TeamType(name);
+          tm.house = String(tmSec.get("House") || "").trim();
           tm.taskForce = String(tmSec.get("TaskForce") || "").trim();
           tm.scriptType = String(tmSec.get("Script") || "").trim();
           tm.aiTrigger = String(tmSec.get("AITrigger") || "").trim();
           tm.priority = tmSec.getNumber("Priority", 5);
           tm.maxExecuted = tmSec.getNumber("Max", 1);
           tm.mindControlDecision = tmSec.getNumber("MindControlDecision", 0);
-          tm.loadable = tmSec.getNumber("Loadable", 0);
-          tm.full = tmSec.getNumber("Full", 0);
-          tm.annoyance = tmSec.getNumber("Annoyance", 0);
-          tm.guardSlower = tmSec.getNumber("GuardSlower", 0);
+          tm.loadable = boolOrNumber(tmSec, "Loadable", 0);
+          tm.full = boolOrNumber(tmSec, "Full", 0);
+          tm.annoyance = boolOrNumber(tmSec, "Annoyance", 0);
+          tm.guardSlower = boolOrNumber(tmSec, "GuardSlower", 0);
           tm.avoidThreat = tmSec.getNumber("AvoidThreat", 0);
           tm.transportReturn = tmSec.getNumber("TransportReturn", 0);
-          tm.recruiter = tmSec.getNumber("Recruiter", 1);
-          tm.autoCreate = tmSec.getNumber("AutoCreate", 1);
-          tm.prebuilt = tmSec.getNumber("Prebuilt", 0);
+          tm.recruiter = boolOrNumber(tmSec, "Recruiter", 1);
+          tm.autoCreate = boolOrNumber(tmSec, "AutoCreate", 1);
+          tm.prebuilt = boolOrNumber(tmSec, "Prebuilt", 0);
           tm.group = tmSec.getNumber("Group", -1);
           teams[name] = tm;
         }

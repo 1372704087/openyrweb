@@ -58,6 +58,9 @@ System.register(
     "network/WolService",
     "gui/screen/mainMenu/main/HomeScreen",
     "gui/screen/mainMenu/lobby/SkirmishScreen",
+    "gui/screen/mainMenu/main/SinglePlayerScreen",
+    "gui/screen/mainMenu/campaign/CampaignScreen",
+    "gui/screen/mainMenu/campaign/CampaignResources",
     "gui/screen/mainMenu/login/LoginScreen",
     "gui/screen/mainMenu/newAccount/NewAccountScreen",
     "gui/screen/mainMenu/customGame/CustomGameScreen",
@@ -147,6 +150,9 @@ System.register(
       Ce,
       xe,
       Oe,
+      np,
+      op,
+      pp,
       Ae,
       Me,
       Re,
@@ -342,6 +348,15 @@ System.register(
         },
         function (e) {
           Oe = e;
+        },
+        function (e) {
+          np = e;
+        },
+        function (e) {
+          op = e;
+        },
+        function (e) {
+          pp = e;
         },
         function (e) {
           Ae = e;
@@ -615,6 +630,14 @@ System.register(
                 .set(
                   Y.ScreenType.Skirmish,
                   new Oe.SkirmishScreen(d, c, this.messageBoxApi, t, D, l, E, B, g, this.localPrefs),
+                )
+                .set(
+                  Y.ScreenType.SinglePlayer,
+                  new np.SinglePlayerScreen(t),
+                )
+                .set(
+                  Y.ScreenType.Campaign,
+                  new op.CampaignScreen(d, t, l, E, c, new pp.CampaignResources(G.Engine.vfs)),
                 )
                 .set(
                   Y.ScreenType.Login,

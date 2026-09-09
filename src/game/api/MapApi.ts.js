@@ -48,6 +48,13 @@ System.register(
               var i = __classPrivateFieldGet(this, s, "f").tiles.getByMapCoords(e, t);
               if (i && __classPrivateFieldGet(this, s, "f").mapBounds.isWithinBounds(i)) return i;
             }
+            getTileAtWaypoint(e) {
+              var t = __classPrivateFieldGet(this, s, "f").getWaypoint(e);
+              if (t) {
+                t = __classPrivateFieldGet(this, s, "f").tiles.getByMapCoords(t.rx, t.ry);
+                if (t) return t;
+              }
+            }
             getTilesInRect(e, t) {
               let i = t
                 ? __classPrivateFieldGet(this, s, "f").tiles.getInRectangle(e, t)

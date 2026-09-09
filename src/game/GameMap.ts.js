@@ -126,6 +126,27 @@ System.register(
             getZones() {
               return this.mapFile.zones;
             }
+            getScenarioScript(e) {
+              return this.mapFile.scenarioScripts.get(e);
+            }
+            getScenarioScriptByIndex(e) {
+              return [...this.mapFile.scenarioScripts.values()].find((t) => t.index === e);
+            }
+            getScenarioTaskForce(e) {
+              return this.mapFile.scenarioTaskForces.get(e);
+            }
+            getScenarioTeam(e) {
+              return this.mapFile.scenarioTeams.get(e);
+            }
+            getScenarioTeamByIndex(e) {
+              return [...this.mapFile.scenarioTeams.values()].find((t) => t.index === e);
+            }
+            getScenarioTeams() {
+              return this.mapFile.scenarioTeams.values();
+            }
+            getScenarioAiTriggers() {
+              return this.mapFile.scenarioAiTriggers.values();
+            }
             getWaypoint(t) {
               return this.mapFile.waypoints.find((e) => e.number === t);
             }

@@ -29,7 +29,9 @@ System.register("gui/screen/mainMenu/ScreenType", [], function (t, e) {
         (e[(e.Options = 16)] = "Options"),
         (e[(e.OptionsSound = 17)] = "OptionsSound"),
         (e[(e.OptionsKeyboard = 18)] = "OptionsKeyboard"),
-        (e[(e.OptionsStorage = 19)] = "OptionsStorage"));
+        (e[(e.OptionsStorage = 19)] = "OptionsStorage"),
+        (e[(e.SinglePlayer = 20)] = "SinglePlayer"),
+        (e[(e.Campaign = 21)] = "Campaign"));
     },
   };
 });

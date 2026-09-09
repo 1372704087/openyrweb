@@ -564,9 +564,11 @@ System.register(
                     break;
                   case L.EventType.PlayerDefeated:
                     var S = r.target;
+                    // 原版战役不播报“XX被击败”，只处理本地玩家失败
+                    if (this.game?.gameOpts?.campaignId && S !== this.player) break;
                     (S === this.player && !this.player.isObserver) ||
                       S.resigned ||
-                      ((w = S.isAi ? this.strings.get(W.aiUiNames.get(S.aiDifficulty)) : S.name),
+                      ((w = S.displayName || (S.isAi ? this.strings.get(W.aiUiNames.get(S.aiDifficulty)) : S.name)),
                       // 替换为昵称
                       w = this._lookupNickname(S.name) || w,
                       this.eva.play(S !== this.player ? "EVA_PlayerDefeated" : "EVA_YouHaveLost"),
@@ -575,7 +577,7 @@ System.register(
                   case L.EventType.PlayerResigned:
                     this.eva.play("EVA_PlayerResigned");
                     var w = r.target,
-                      S = w.isAi ? this.strings.get(W.aiUiNames.get(w.aiDifficulty)) : w.name;
+                      S = w.displayName || (w.isAi ? this.strings.get(W.aiUiNames.get(w.aiDifficulty)) : w.name);
                     S = this._lookupNickname(w.name) || S;
                     (this.messageList.addSystemMessage(
                       w.isObserver ? this.strings.get("TXT_PLAYER_DEFEATED", S) : this.strings.get("TXT_LEFT_GAME", S),

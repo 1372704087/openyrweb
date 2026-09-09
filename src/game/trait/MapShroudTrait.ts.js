@@ -87,6 +87,14 @@ System.register(
               let e = i.clone();
               (this.shroudByPlayer.set(r, e), this.revealObjects(e, r, t), e.update());
             }
+            // OpenYRWeb: 诊断 —— 记录未获得 shroud 的玩家（国家不可玩→isNeutral→非 combatant）
+            // 中立/观察者不需要 shroud，跳过避免误报。
+            for (var p of t.getAllPlayers())
+              if (!this.shroudByPlayer.has(p) && !p.isNeutral && !p.isObserver)
+                console.warn(
+                  `[OpenYRWeb] No shroud for player "${p.name}" (isNeutral=${p.isNeutral}, ` +
+                    `country=${p.country?.name ?? "none"})`,
+                );
           }
           [g.NotifyElevationChange.onElevationChange](e, t, i) {
             if (Math.floor(e.tileElevation) !== Math.floor(i)) {

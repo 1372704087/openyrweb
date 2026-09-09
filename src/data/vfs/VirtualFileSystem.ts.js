@@ -84,8 +84,15 @@ System.register(
               });
             }
             async addArchiveByFilename(e, t) {
-              var i;
-              this.allArchives.has(e) || ((i = await this.openFileWithRfs(e)) && this.addArchive(t(i), e));
+              var f;
+              if (this.allArchives.has(e)) return;
+              try {
+                f = await this.openFileWithRfs(e);
+              } catch (e) {
+                if (e instanceof i.FileNotFoundError) return; // silently skip archives not in the install
+                throw e;
+              }
+              f && this.addArchive(t(f), e);
             }
             async openFileWithRfs(e) {
               let t;
@@ -130,7 +137,11 @@ System.register(
                 await this.addMixFile("cameomd.mix"),
                 await this.addMixFile("cameo.mix"),
                 await this.addMixFile("multimd.mix"),
-                await this.addMixFile("multi.mix"));
+                await this.addMixFile("multi.mix"),
+                // Map packs (skirmish/campaign maps live inside these archives).
+                await this.addMixFile("maps01.mix"),
+                await this.addMixFile("maps02.mix"),
+                await this.addMixFile("mapsmd03.mix"));
             }
             async loadExtraMixFiles(i) {
               // OpenYRWeb: YR-only — always pick up both expand##.mix and expandmd##.mix (plus

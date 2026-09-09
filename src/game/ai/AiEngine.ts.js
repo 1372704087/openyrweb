@@ -53,23 +53,37 @@ System.register("game/ai/AiEngine", [
       AiEngine.prototype.init = function (aiIni) {
         if (!aiIni) {
           try { aiIni = this.gameApi.getAiIni(); } catch (e) {
-            console.warn("[AiEngine] No AI Ini available");
-            return;
+            console.warn("[AiEngine] No AI Ini available (" + (e && e.message) + ")");
           }
         }
-        this.parsed = {
-          groupWeights: AiData.parseGroupWeights(aiIni),
-          taskForces: AiData.parseTaskForces(aiIni),
-          scriptTypes: AiData.parseScriptTypes(aiIni),
-          teamTypes: AiData.parseTeamTypes(aiIni),
-          triggers: AiData.parseAITriggerTypes(aiIni),
-          defenses: AiData.parseAIDefenseTypes(aiIni),
-          buildQueues: AiData.parseBuildQueues(aiIni),
-        };
-        console.log("[AiEngine] Loaded " + Object.keys(this.parsed.teamTypes).length + " team types, " +
-          Object.keys(this.parsed.triggers).length + " triggers, " +
-          Object.keys(this.parsed.taskForces).length + " task forces, " +
-          Object.keys(this.parsed.scriptTypes).length + " scripts");
+        if (!aiIni) {
+          // 无地图/aimd AI 数据时降级为空解析结果，避免 parsed=null 导致小队系统整体不可用
+          console.warn("[AiEngine] AI Ini is undefined — AI teams will not be creatable.");
+          this.parsed = {
+            groupWeights: {}, taskForces: {}, scriptTypes: {}, teamTypes: {}, triggers: {}, defenses: {}, buildQueues: {},
+          };
+          return;
+        }
+        try {
+          this.parsed = {
+            groupWeights: AiData.parseGroupWeights(aiIni),
+            taskForces: AiData.parseTaskForces(aiIni),
+            scriptTypes: AiData.parseScriptTypes(aiIni),
+            teamTypes: AiData.parseTeamTypes(aiIni),
+            triggers: AiData.parseAITriggerTypes(aiIni),
+            defenses: AiData.parseAIDefenseTypes(aiIni),
+            buildQueues: AiData.parseBuildQueues(aiIni),
+          };
+          console.log("[AiEngine] Loaded " + Object.keys(this.parsed.teamTypes).length + " team types, " +
+            Object.keys(this.parsed.triggers).length + " triggers, " +
+            Object.keys(this.parsed.taskForces).length + " task forces, " +
+            Object.keys(this.parsed.scriptTypes).length + " scripts");
+        } catch (e) {
+          console.warn("[AiEngine] AI Ini parse failed: " + (e && e.message || e));
+          this.parsed = {
+            groupWeights: {}, taskForces: {}, scriptTypes: {}, teamTypes: {}, triggers: {}, defenses: {}, buildQueues: {},
+          };
+        }
       };
 
       // 主更新循环（每tick调用）
@@ -78,7 +92,9 @@ System.register("game/ai/AiEngine", [
         var tick = this.gameApi.getCurrentTick();
 
         this.updateTechLevel(tick);
-        this.checkTriggers(tick);
+        // 战役人类阵营的 ScenarioTeamBot 关闭自主 AITrigger 评估：
+        // 只执行显式 CreateTeam 创建的小队，避免引擎自发征用玩家单位。
+        if (this.options.evaluateTriggers !== false) this.checkTriggers(tick);
         this.updateTeams(tick);
 
         // 清理完成的队伍
@@ -204,6 +220,53 @@ System.register("game/ai/AiEngine", [
         this.activeTeams.push(at);
         this.totalTeamsCreated++;
         console.log("[AiEngine] Spawn team " + teamType.name + " (TF=" + teamType.taskForce + ")");
+      };
+
+      // OpenYRWeb: 战役援军/CreateReinforcement 专用 — 用已经直接生成的单位建立小队。
+      // 与 spawnTeam 的区别：不经过招募阶段，单位已经由触发器创建并放置在地图上。
+      AiEngine.prototype.spawnTeamWithUnits = function (teamType, tick, unitIds) {
+        var at = new ActiveTeam(teamType);
+        at.taskForce = this.parsed.taskForces[teamType.taskForce] || null;
+        at.scriptType = this.parsed.scriptTypes[teamType.scriptType] || null;
+        at.unitIds = Array.isArray(unitIds) ? unitIds.slice() : [];
+        at.createdAt = tick;
+        this.activeTeams.push(at);
+        this.totalTeamsCreated++;
+        if (at.taskForce && at.scriptType && at.unitIds.length) {
+          at.state = "executing";
+          at.scriptIndex = 0;
+          this.setRallyPoint(at);
+        } else if (!at.taskForce || at.taskForce.groups.length === 0 || !at.unitIds.length) {
+          at.state = "done";
+        } else {
+          at.state = "executing";
+          at.scriptIndex = 0;
+          this.setRallyPoint(at);
+        }
+        console.log(
+          "[AiEngine] Spawn reinforcement team " + teamType.name + " (TF=" + teamType.taskForce +
+            ", units=" + at.unitIds.length + ")",
+        );
+        return at;
+      };
+
+      // OpenYRWeb: DestroyTeam 动作 — 将同名活跃小队标记为完成并停止脚本推进。
+      // 单位本身保留在地图上（原版 DestroyTeam 只解散小队/回收脚本控制）。
+      AiEngine.prototype.destroyTeam = function (teamName) {
+        if (!teamName) return 0;
+        var lower = String(teamName).toLowerCase();
+        var count = 0;
+        for (var i = this.activeTeams.length - 1; i >= 0; i--) {
+          var t = this.activeTeams[i];
+          if (!t || t.state === "done") continue;
+          var name = (t.teamType && t.teamType.name) || "";
+          if (name.toLowerCase() === lower) {
+            t.state = "done";
+            count++;
+          }
+        }
+        if (count) console.log("[AiEngine] Destroyed team " + teamName + " (" + count + " active instance(s))");
+        return count;
       };
 
       // 更新所有活跃队伍
@@ -337,50 +400,140 @@ System.register("game/ai/AiEngine", [
         var action = actions[team.scriptIndex];
         if (!action) { team.scriptIndex++; return; }
 
-        this.executeAction(team, action, tick);
-        team.scriptIndex++;
+        var result = this.executeAction(team, action, tick);
+        if (result === "done") team.state = "done";
+        else if (result !== "jump") team.scriptIndex++;
       };
 
-      // 执行单个脚本动作
+      // 路点 -> 瓦片坐标（MapApi.getTileAtWaypoint）
+      AiEngine.prototype.getWaypointTile = function (wp) {
+        try {
+          var tile = this.gameApi.mapApi.getTileAtWaypoint(wp);
+          return tile ? { x: tile.rx, y: tile.ry } : void 0;
+        } catch (_) { return void 0; }
+      };
+
+      // 攻击最近可见敌人（Attack 回退/攻击建筑用）
+      AiEngine.prototype.pickAndAttack = function (team) {
+        var target = team.attackTarget;
+        if (!target) {
+          target = this.pickTarget(team);
+          team.attackTarget = target;
+        }
+        if (target) this.orderUnits(team.unitIds, OrderType.AttackMove, target.x, target.y);
+      };
+
+      // 在路点格查找攻击目标（含中立/民用目标，如自由女神像——参考临时源码 queueAttackWaypoint）
+      AiEngine.prototype.findWaypointAttackTarget = function (rx, ry) {
+        try {
+          var ids = this.gameApi.getAllUnits();
+          for (var id of ids) {
+            var d = this.gameApi.getGameObjectData(id);
+            if (!d || !d.tile) continue;
+            if (Number.isFinite(d.hitPoints) && d.hitPoints <= 0) continue;
+            // 参考临时源码：不可作为合法目标的对象不参与路点攻击
+            if (d.rules && d.rules.legalTarget === false) continue;
+            var f = d.foundation || { width: 1, height: 1 };
+            var covered =
+              rx >= d.tile.rx &&
+              rx < d.tile.rx + (f.width || 1) &&
+              ry >= d.tile.ry &&
+              ry < d.tile.ry + (f.height || 1);
+            if (covered) return { id: id, name: d.name, owner: d.owner };
+          }
+        } catch (_) {}
+        return void 0;
+      };
+
+      // 命令单位攻击指定对象（经 actionsApi，同 Bot 其它指令路径）
+      AiEngine.prototype.orderUnitsTarget = function (unitIds, order, targetId) {
+        if (!unitIds || !unitIds.length || !targetId) return;
+        var batchSize = 5;
+        for (var i = 0; i < unitIds.length; i += batchSize) {
+          try {
+            this.actionsApi.orderUnits(unitIds.slice(i, i + batchSize), order, targetId);
+          } catch (_) {}
+        }
+      };
+
+      // 执行单个脚本动作（YR ScriptType 动作码，参考临时源码 Tt 枚举）
+      // 返回 "done" 结束脚本 / "jump" 表示 scriptIndex 已被改写 / 其它正常推进
       AiEngine.prototype.executeAction = function (team, action, tick) {
         try {
+          var p = action.target; // 第二字段：路点编号/参数
           switch (action.action) {
-            case 0: // Attack — 攻击
-            case 14: // AttackMove
-              var target = team.attackTarget;
-              if (!target) {
-                target = this.pickTarget(team);
-                team.attackTarget = target;
-              }
-              if (target) {
-                this.orderUnits(team.unitIds, OrderType.AttackMove, target.x, target.y);
-              }
+            case 0: // Attack — 攻击最近可见敌人
+              this.pickAndAttack(team);
               break;
-            case 1: // Move
-              if (team.rallyPoint) {
-                this.orderUnits(team.unitIds, OrderType.Move, team.rallyPoint.x, team.rallyPoint.y);
-              }
+            case 1: // AttackWaypoint — 攻击指定路点（优先直接攻击路点格上的对象，含中立目标）
+              // 参考临时源码 queueAttackWaypoint：对路点目标使用 force attack，
+              // 否则普通 Attack 可能因目标是中立/民用（如自由女神像）而拒绝开火。
+              var wp1 = this.getWaypointTile(p);
+              if (wp1) {
+                var tgt1 = this.findWaypointAttackTarget(wp1.x, wp1.y);
+                if (tgt1) this.orderUnitsTarget(team.unitIds, OrderType.ForceAttack, tgt1.id);
+                else this.orderUnits(team.unitIds, OrderType.ForceAttack, wp1.x, wp1.y);
+                // 登记攻击目标标记（GUI 层渲染脉冲光环，方便玩家看到指定攻击目标）
+                try {
+                  this.gameApi.addAttackTargetMarker(wp1.x, wp1.y, team.teamType ? team.teamType.name : "");
+                } catch (_) {}
+              } else this.pickAndAttack(team);
               break;
-            case 2: // Guard — 守卫
+            case 2: // GoBerserk
+            case 13: // IdleAnimation
+            case 19: // Panic
+            case 21: // Scatter
+            case 22: // MoveToShroud
+            case 42: // ForceFacing
+              break;
+            case 3: // MoveToWaypoint
+            case 16: // PatrolToWaypoint
+              var wp3 = this.getWaypointTile(p);
+              if (wp3) this.orderUnits(team.unitIds, OrderType.Move, wp3.x, wp3.y);
+              break;
+            case 4: // MoveToCell — 参数为路点/坐标，简化按路点处理
+              var wp4 = this.getWaypointTile(p);
+              if (wp4) this.orderUnits(team.unitIds, OrderType.Move, wp4.x, wp4.y);
+              break;
+            case 5: // GuardArea — 守卫当前区域
               this.orderUnits(team.unitIds, OrderType.Guard);
               break;
-            case 3: // Deploy — 展开（MCV等）
+            case 6: // JumpToLine — 跳转到指定脚本行（1-based）
+              team.scriptIndex = Math.max(0, p - 1);
+              return "jump";
+            case 8: // Unload
+              this.orderUnits(team.unitIds, OrderType.UnloadAll);
+              break;
+            case 9: // Deploy
               this.orderUnits(team.unitIds, OrderType.DeploySelected);
               break;
-            case 4: // Deploy 到目标
-              if (team.attackTarget) {
-                this.orderUnits(team.unitIds, OrderType.DeploySelected, team.attackTarget.x, team.attackTarget.y);
+            case 10: // FollowFriendlies
+            case 11: // AssignMission
+            case 14: // LoadOntoTransport
+            case 15: // SpyOnBuildingAtWaypoint
+            case 20: // ChangeHouse
+            case 43: // WaitUntilFullyLoaded
+              break;
+            case 17: // ChangeScript — 切换到另一脚本（按 ScriptTypes 序号）
+              var scs = this.parsed.scriptTypes;
+              for (var sk in scs) {
+                if (scs[sk].index === p) {
+                  team.scriptType = scs[sk];
+                  team.scriptIndex = 0;
+                  return "jump";
+                }
               }
               break;
-            case 49: // Unload
-              this.orderUnits(team.unitIds, OrderType.Unload);
+            case 46: // AttackEnemyBuilding
+              this.pickAndAttack(team);
               break;
-            case 5: // Move to target
-              if (team.attackTarget) {
-                this.orderUnits(team.unitIds, OrderType.Move, team.attackTarget.x, team.attackTarget.y);
-              }
+            case 47: // MoveToEnemyBuilding
+            case 48: // Scout
+              this.pickAndAttack(team);
               break;
-            case 54: // Return to base
+            case 49: // Success — 脚本成功完成
+              return "done";
+            case 54: // GatherAtBase
               try {
                 var pd = this.gameApi.getPlayerData(this.playerName);
                 this.orderUnits(team.unitIds, OrderType.Move, pd.startLocation.x, pd.startLocation.y);
@@ -390,7 +543,7 @@ System.register("game/ai/AiEngine", [
         } catch (_) {}
       };
 
-      // 命令单位
+      // 命令单位（经 actionsApi 入队，同 Bot 其它指令路径）
       AiEngine.prototype.orderUnits = function (unitIds, order, x, y) {
         if (!unitIds || unitIds.length === 0) return;
         // 分批发送命令（最多5个单位一组）
@@ -399,9 +552,9 @@ System.register("game/ai/AiEngine", [
           var batch = unitIds.slice(i, i + batchSize);
           try {
             if (x !== undefined && y !== undefined) {
-              this.gameApi.orderUnits(batch, order, x, y);
+              this.actionsApi.orderUnits(batch, order, void 0, x, y);
             } else {
-              this.gameApi.orderUnits(batch, order);
+              this.actionsApi.orderUnits(batch, order);
             }
           } catch (_) {}
         }

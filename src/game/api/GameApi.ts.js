@@ -252,6 +252,17 @@ System.register(
             getAiIni() {
               return __classPrivateFieldGet(this, n, "f").ai.getIni();
             }
+            addAttackTargetMarker(e, t, i) {
+              // OpenYRWeb: 脚本化小队攻击指定路点时登记目标标记（GUI 层渲染）
+              var g = __classPrivateFieldGet(this, n, "f");
+              g.attackTargetMarkers = g.attackTargetMarkers || [];
+              g.attackTargetMarkers.push({
+                rx: e,
+                ry: t,
+                teamName: i || "",
+                expireTick: g.currentTick + 900,
+              });
+            }
             generateRandomInt(e, t) {
               if (__classPrivateFieldGet(this, s, "f"))
                 return __classPrivateFieldGet(this, n, "f").generateRandomInt(e, t);

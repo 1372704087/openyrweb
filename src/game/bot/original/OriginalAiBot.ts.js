@@ -86,8 +86,11 @@ System.register("game/bot/original/OriginalAiBot", [
               triggerCooldown: this.cfg.triggerCooldown,
             });
             this.aiApi.init();
+            console.log("[OriginalAiBot] " + this.difficulty + " initialized with AiApi (engine parsed=" +
+              !!(this.aiApi.engine && this.aiApi.engine.parsed) + ")");
             this.logger && this.logger.info("[OriginalAiBot] " + this.difficulty + " initialized with AiApi");
           } catch (e) {
+            console.warn("[OriginalAiBot] AiApi init failed for " + this.name + ": " + (e && e.message || e));
             this.logger && this.logger.info("[OriginalAiBot] AiApi init failed: " + (e.message || e));
           }
         }

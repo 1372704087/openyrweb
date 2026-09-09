@@ -27,7 +27,9 @@ System.register("game/gameopts/constants", ["game/gameopts/GameOpts"], function 
   .set(i.AiDifficulty.Brutal_Ori, "GUI:AIHard")
   .set(i.AiDifficulty.Easy, "GUI:AIDummy")
   .set(i.AiDifficulty.Medium, "NOSTR:伊拉克AI")
-  .set(i.AiDifficulty.Brutal, "NOSTR:Custom AI")),
+  .set(i.AiDifficulty.Brutal, "NOSTR:自定义AI(困难)")
+  .set(i.AiDifficulty.Easy_Custom, "NOSTR:自定义AI(简单)")
+  .set(i.AiDifficulty.Medium_Custom, "NOSTR:自定义AI(普通)")),
         e("aiUiTooltips", new Map()),
         e("RANDOM_COUNTRY_UI_NAME", "GUI:RandomEx"),
         e("RANDOM_COUNTRY_UI_TOOLTIP", "STT:PlayerSideRandom"),

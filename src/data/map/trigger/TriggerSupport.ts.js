@@ -22,30 +22,9 @@ System.register("data/map/trigger/TriggerSupport", [], function (t, e) {
           33, // SelectedByPlayer: 被玩家选中（无选择事件钩子）
         ]),
         // 未实现的动作类型（占位 NoActionExecutor，无操作）
-        placeholderActionTypes: new Set([
-          74, // FlashTeam: 雷达闪烁队伍（无队伍管理器，需团队位置）
-          75, // ReinforceTeam: 增援队伍（需作战小队/路径系统）
-          76, // CreateTeam: 创建队伍（需作战小队管理器）
-          77, // DestroyTeam: 销毁队伍（同上）
-          78, // GenericFacing: 设置朝向（需队伍上下文）
-          79, // GenericTimer: 通用计时器
-          82, // PlayMovie: 播放影片
-          84, // ChronoWarp: 超时空传送
-          86, // UnloadAll: 卸载所有运输工具（需逐单位卸载调度）
-          87, // SabotageUnit: 破坏单位
-          88, // ChangeDifficulty: 更改难度
-          91, // PlayBink: 播放 Bink 视频
-          92, // ShowTutorial: 显示教程
-          93, // ResetTutorial: 重置教程
-          94, // EndTutorial: 结束教程
-          96, // PreferredTarget: 设置优先目标（需 AI 目标系统）
-          106, // TimerShow: 显示计时器（无可见性标志）
-          107, // TimerHide: 隐藏计时器（同上）
-          114, // ChronoshiftAt: 超时空传送至位置
-          115, // ChronoWarpAt: 时间扭曲至位置
-          117, // PsychicRevealAt: 心灵探测至位置
-          118, // GeneticMutatorAt: 基因突变至位置
-        ]),
+        // OpenYRWeb: 所有已枚举动作现均有执行器（SuperWeaponFx/ShroudFx/UnloadAll/Sabotage/
+        // ChangeLighting/Misc 等），故此表已清空；Misc 类动作在触发时打印 debug 日志。
+        placeholderActionTypes: new Set([]),
       });
     },
   };

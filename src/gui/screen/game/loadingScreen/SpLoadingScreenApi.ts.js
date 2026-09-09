@@ -37,12 +37,13 @@ System.register(
         e(
           "SpLoadingScreenApi",
           (o = class {
-            constructor(e, t, i, r, s) {
+            constructor(e, t, i, r, s, campaignInfo) {
               ((this.rules = e),
                 (this.strings = t),
                 (this.uiScene = i),
                 (this.jsxRenderer = r),
                 (this.gameResConfig = s),
+                (this.campaignInfo = campaignInfo),
                 (this.lastLoadPercent = 0),
                 (this.disposables = new a.CompositeDisposable()),
                 (this.handleLoadInfoUpdate = (t) => {
@@ -90,6 +91,7 @@ System.register(
                   playerInfos: this.createExtendedLoadingInfos(0),
                   gameResConfig: this.gameResConfig,
                   mapPreviewUrl: this.mapPreviewUrl,
+                  campaignInfo: this.campaignInfo,
                 }),
               );
               (this.uiScene.add(e), this.disposables.add(e, () => this.uiScene.remove(e)));

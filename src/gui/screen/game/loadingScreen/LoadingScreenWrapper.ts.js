@@ -148,6 +148,7 @@ System.register(
                     playerInfos: this.props.playerInfos,
                     bgImageSrc: this.bgHtmlImg,
                     mapPreviewUrl: this.props.mapPreviewUrl,
+                    campaignInfo: this.props.campaignInfo,
                   },
                 }),
               );

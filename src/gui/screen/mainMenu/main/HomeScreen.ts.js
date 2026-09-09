@@ -71,11 +71,11 @@ System.register(
                 },
               },
               {
-                // 遭遇戰：原 Demo 按钮路径不变（goToScreen(Skirmish)），仅文案改
-                label: e.get("GUI:Demo"),
-                tooltip: e.get("STT:Demo"),
+                // 单机模式：进入单机大厅（战役 + 遭遇战）
+                label: e.get("GUI:SinglePlayer"),
+                tooltip: e.get("STT:SinglePlayer"),
                 onClick: () => {
-                  this.controller?.goToScreen(i.ScreenType.Skirmish);
+                  this.controller?.goToScreen(i.ScreenType.SinglePlayer);
                 },
               },
               {

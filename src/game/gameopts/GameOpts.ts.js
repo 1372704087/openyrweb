@@ -16,7 +16,9 @@ System.register("game/gameopts/GameOpts", [], function (t, e) {
         (e[(e.Easy = 2)] = "Easy"),
         (e[(e.Brutal_Ori = 3)] = "Brutal_Ori"),
         (e[(e.Medium_Ori = 4)] = "Medium_Ori"),
-        (e[(e.Easy_Ori = 5)] = "Easy_Ori"));
+        (e[(e.Easy_Ori = 5)] = "Easy_Ori"),
+        (e[(e.Easy_Custom = 6)] = "Easy_Custom"),
+        (e[(e.Medium_Custom = 7)] = "Medium_Custom"));
     },
   };
 });

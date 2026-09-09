@@ -44,11 +44,21 @@ System.register("game/bot/custom-ai/CustomAiBot", [
       var DEBUG_STATE_UPDATE_INTERVAL_SECONDS = 6;
       var NATURAL_TICK_RATE = 15;
 
+      // OpenYRWeb: 自定义AI难度配置（遭遇战三档可选）
+      // Easy: 反应慢、经济弱、初始资金少；Brutal: 反应快、经济强、初始资金多
+      var CUSTOM_AI_DIFFICULTY = {
+        Easy:   { botApm: 150, incomeMultiplier: 2.0, initialCredits: 30000 },
+        Medium: { botApm: 220, incomeMultiplier: 3.5, initialCredits: 60000 },
+        Brutal: { botApm: 300, incomeMultiplier: 5.0, initialCredits: 100000 },
+      };
+
       class RA2WEBCustomBot extends Bot {
-        constructor(name, country, tryAllyWith, enableLogging) {
+        constructor(name, country, tryAllyWith, enableLogging, difficulty) {
           super(name, country);
           this.tryAllyWith = tryAllyWith || [];
           this.enableLogging = enableLogging !== undefined ? enableLogging : true;
+          this.difficulty = difficulty || "Brutal";
+          this.cfg = CUSTOM_AI_DIFFICULTY[this.difficulty] || CUSTOM_AI_DIFFICULTY.Brutal;
           this.tickRatio = undefined;
           this.knownMapBounds = undefined;
           this.matchAwareness = null;
@@ -58,7 +68,7 @@ System.register("game/bot/custom-ai/CustomAiBot", [
           );
           this.queueController = new QueueCtrlMod.QueueController();
           this._lastCredits = null;
-          this._incomeMultiplier = 5.0;
+          this._incomeMultiplier = this.cfg.incomeMultiplier;
           // 聊天Bot引擎
           this.chatBot = new ChatBotEngine(this.enableLogging ? function (msg) { this.logger.info(msg); }.bind(this) : function () {});
           // 随机偏移聊天检测时间，避免所有Bot同时说话
@@ -75,15 +85,15 @@ System.register("game/bot/custom-ai/CustomAiBot", [
 
         onGameStart(game) {
           var gameRate = game.getTickRate();
-          var botApm = 300;
+          var botApm = this.cfg.botApm;
           var botRate = botApm / 60;
           this.tickRatio = Math.ceil(gameRate / botRate);
 
           this.knownMapBounds = MapMod.determineMapBounds(game.mapApi);
           var myPlayer = game.getPlayerData(this.name);
 
-          // 硬编码：AI 初始资金加成 (+100000)
-          game.addPlayerCredits(this.name, 100000);
+          // 初始资金加成（按难度配置）
+          game.addPlayerCredits(this.name, this.cfg.initialCredits);
           this._lastCredits = game.getPlayerData(this.name).credits;
 
           this.matchAwareness = new AwareMod.MatchAwarenessImpl(

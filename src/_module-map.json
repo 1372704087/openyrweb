@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1325,
+  "moduleCount": 1363,
   "modules": [
     {
       "name": "data/IniSection",
@@ -5541,9 +5541,20 @@
         "game/gameopts/GameOpts",
         "game/bot/DummyBot",
         "game/bot/iraq/IraqBot",
-        "game/bot/custom-ai/CustomAiBot"
+        "game/bot/custom-ai/CustomAiBot",
+        "game/bot/original/OriginalAiBot",
+        "game/bot/campaign/ScenarioTeamBot"
       ],
       "bytes": 780
+    },
+    {
+      "name": "game/bot/campaign/ScenarioTeamBot",
+      "file": "game/bot/campaign/ScenarioTeamBot.ts.js",
+      "deps": [
+        "game/bot/Bot",
+        "game/ai/AiApi"
+      ],
+      "bytes": 1900
     },
     {
       "name": "game/ai/AiData",
@@ -6102,6 +6113,191 @@
       "bytes": 587
     },
     {
+      "name": "game/trigger/executor/WinLoseExecutor",
+      "file": "game/trigger/executor/WinLoseExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 876
+    },
+    {
+      "name": "game/trigger/executor/AllianceExecutor",
+      "file": "game/trigger/executor/AllianceExecutor.ts.js",
+      "deps": [
+        "game/Alliances",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1480
+    },
+    {
+      "name": "game/trigger/executor/EnemyExecutor",
+      "file": "game/trigger/executor/EnemyExecutor.ts.js",
+      "deps": [
+        "game/Alliances",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1480
+    },
+    {
+      "name": "game/trigger/executor/SuperWeaponFxExecutor",
+      "file": "game/trigger/executor/SuperWeaponFxExecutor.ts.js",
+      "deps": [
+        "game/trait/SuperWeaponsTrait",
+        "game/type/SuperWeaponType",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 2100
+    },
+    {
+      "name": "game/trigger/executor/ShroudFxExecutor",
+      "file": "game/trigger/executor/ShroudFxExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1050
+    },
+    {
+      "name": "game/trigger/executor/UnloadAllExecutor",
+      "file": "game/trigger/executor/UnloadAllExecutor.ts.js",
+      "deps": [
+        "game/gameobject/task/EvacuateTransportTask",
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1100
+    },
+    {
+      "name": "game/trigger/executor/SabotageUnitExecutor",
+      "file": "game/trigger/executor/SabotageUnitExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1100
+    },
+    {
+      "name": "game/trigger/executor/ChangeLightingExecutor",
+      "file": "game/trigger/executor/ChangeLightingExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 700
+    },
+    {
+      "name": "game/trigger/executor/MiscActionExecutor",
+      "file": "game/trigger/executor/MiscActionExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 750
+    },
+    {
+      "name": "game/trigger/executor/CreateTeamExecutor",
+      "file": "game/trigger/executor/CreateTeamExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1300
+    },
+    {
+      "name": "game/trigger/executor/UserInputExecutor",
+      "file": "game/trigger/executor/UserInputExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 850
+    },
+    {
+      "name": "game/trigger/executor/MoveCameraExecutor",
+      "file": "game/trigger/executor/MoveCameraExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 850
+    },
+    {
+      "name": "game/trigger/executor/FlashUnitExecutor",
+      "file": "game/trigger/executor/FlashUnitExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1400
+    },
+    {
+      "name": "game/trigger/executor/CreateReinforcementExecutor",
+      "file": "game/trigger/executor/CreateReinforcementExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor",
+        "game/api/index",
+        "game/map/tileFinder/RadialTileFinder"
+      ],
+      "bytes": 4800
+    },
+    {
+      "name": "game/trigger/executor/DestroyTeamExecutor",
+      "file": "game/trigger/executor/DestroyTeamExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1300
+    },
+    {
+      "name": "game/trigger/executor/AllToHuntExecutor",
+      "file": "game/trigger/executor/AllToHuntExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor",
+        "game/api/index"
+      ],
+      "bytes": 2100
+    },
+    {
+      "name": "game/trigger/executor/DestroyAllExecutor",
+      "file": "game/trigger/executor/DestroyAllExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1700
+    },
+    {
+      "name": "game/trigger/executor/CreateBuildingExecutor",
+      "file": "game/trigger/executor/CreateBuildingExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor",
+        "game/api/index"
+      ],
+      "bytes": 2200
+    },
+    {
+      "name": "game/trigger/executor/TeleportAllExecutor",
+      "file": "game/trigger/executor/TeleportAllExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1500
+    },
+    {
+      "name": "game/trigger/executor/GenericFacingExecutor",
+      "file": "game/trigger/executor/GenericFacingExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1400
+    },
+    {
+      "name": "game/trigger/executor/BlackoutRadarExecutor",
+      "file": "game/trigger/executor/BlackoutRadarExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1500
+    },
+    {
+      "name": "game/trigger/executor/FlashBuildingsOfTypeExecutor",
+      "file": "game/trigger/executor/FlashBuildingsOfTypeExecutor.ts.js",
+      "deps": [
+        "game/trigger/TriggerExecutor"
+      ],
+      "bytes": 1600
+    },
+    {
       "name": "game/trigger/TriggerExecutorFactory",
       "file": "game/trigger/TriggerExecutorFactory.ts.js",
       "deps": [
@@ -6160,7 +6356,29 @@
         "game/trigger/executor/TimerTextExecutor",
         "game/trigger/executor/ToggleTriggerExecutor",
         "game/trigger/executor/TurnOnOffBuildingExecutor",
-        "game/trigger/executor/UnrevealAroundWaypointExecutor"
+        "game/trigger/executor/UnrevealAroundWaypointExecutor",
+        "game/trigger/executor/WinLoseExecutor",
+        "game/trigger/executor/AllianceExecutor",
+        "game/trigger/executor/EnemyExecutor",
+        "game/trigger/executor/SuperWeaponFxExecutor",
+        "game/trigger/executor/ShroudFxExecutor",
+        "game/trigger/executor/UnloadAllExecutor",
+        "game/trigger/executor/SabotageUnitExecutor",
+        "game/trigger/executor/ChangeLightingExecutor",
+        "game/trigger/executor/MiscActionExecutor",
+        "game/trigger/executor/CreateTeamExecutor",
+        "game/trigger/executor/CreateReinforcementExecutor",
+        "game/trigger/executor/DestroyTeamExecutor",
+        "game/trigger/executor/AllToHuntExecutor",
+        "game/trigger/executor/DestroyAllExecutor",
+        "game/trigger/executor/CreateBuildingExecutor",
+        "game/trigger/executor/TeleportAllExecutor",
+        "game/trigger/executor/GenericFacingExecutor",
+        "game/trigger/executor/BlackoutRadarExecutor",
+        "game/trigger/executor/FlashBuildingsOfTypeExecutor",
+        "game/trigger/executor/UserInputExecutor",
+        "game/trigger/executor/MoveCameraExecutor",
+        "game/trigger/executor/FlashUnitExecutor"
       ],
       "bytes": 7019
     },
@@ -6624,6 +6842,20 @@
       "bytes": 182
     },
     {
+      "name": "game/scenario/ScenarioTeamRuntime",
+      "file": "game/scenario/ScenarioTeamRuntime.ts.js",
+      "deps": [
+        "game/trait/interface/NotifyTick",
+        "game/gameobject/task/system/CallbackTask",
+        "game/gameobject/task/system/WaitTicksTask",
+        "game/gameobject/task/AttackTask",
+        "game/gameobject/task/move/MoveTask",
+        "game/map/tileFinder/RadialTileFinder",
+        "game/api/index"
+      ],
+      "bytes": 14500
+    },
+    {
       "name": "game/Game",
       "file": "game/Game.ts.js",
       "deps": [
@@ -6673,7 +6905,9 @@
         "game/Warhead",
         "game/trait/interface/NotifyObjectTraitAdd",
         "game/event/RadarOnOffEvent",
-        "util/geometry"
+        "util/geometry",
+        "game/gameobject/task/system/WaitTicksTask",
+        "game/scenario/ScenarioTeamRuntime"
       ],
       "bytes": 22356
     },
@@ -11362,6 +11596,37 @@
       "bytes": 359
     },
     {
+      "name": "gui/screen/mainMenu/main/SinglePlayerScreen",
+      "file": "gui/screen/mainMenu/main/SinglePlayerScreen.ts.js",
+      "deps": [
+        "gui/screen/mainMenu/ScreenType",
+        "engine/sound/Music",
+        "gui/screen/mainMenu/MainMenuScreen"
+      ],
+      "bytes": 2308
+    },
+    {
+      "name": "gui/screen/mainMenu/campaign/CampaignScreen",
+      "file": "gui/screen/mainMenu/campaign/CampaignScreen.ts.js",
+      "deps": [
+        "gui/screen/mainMenu/ScreenType",
+        "engine/sound/Music",
+        "gui/screen/mainMenu/MainMenuScreen",
+        "gui/screen/mainMenu/MainMenuRoute",
+        "engine/MapDigest",
+        "react",
+        "gui/jsx/jsx",
+        "gui/jsx/HtmlView"
+      ],
+      "bytes": 24000
+    },
+    {
+      "name": "gui/screen/mainMenu/campaign/CampaignResources",
+      "file": "gui/screen/mainMenu/campaign/CampaignResources.ts.js",
+      "deps": [],
+      "bytes": 2600
+    },
+    {
       "name": "gui/screen/game/worldInteraction/keyboard/command/CenterBaseCmd",
       "file": "gui/screen/game/worldInteraction/keyboard/command/CenterBaseCmd.ts.js",
       "deps": [
@@ -12983,6 +13248,9 @@
         "network/WolService",
         "gui/screen/mainMenu/main/HomeScreen",
         "gui/screen/mainMenu/lobby/SkirmishScreen",
+        "gui/screen/mainMenu/main/SinglePlayerScreen",
+        "gui/screen/mainMenu/campaign/CampaignScreen",
+        "gui/screen/mainMenu/campaign/CampaignResources",
         "gui/screen/mainMenu/login/LoginScreen",
         "gui/screen/mainMenu/newAccount/NewAccountScreen",
         "gui/screen/mainMenu/customGame/CustomGameScreen",

@@ -119,6 +119,10 @@ System.register(
               let e = new c.EventsApi(t.events);
               var i, r;
               for (i of t.getCombatants().filter((e) => e.isAi)) this.bots.set(i, this.botFactory.create(i));
+              // OpenYRWeb: 战役人类阵营没有常规 AI Bot，但也需要脚本小队引擎
+              // （CreateTeam 等触发器动作对任意阵营都可用，参考临时源码 scenarioTeamRuntime）。
+              for (i of t.getCombatants().filter((e) => e.isCampaign && !e.isAi))
+                this.bots.set(i, this.botFactory.create(i));
               this.updateDebugBotIndex(this.botDebugIndex.value, t);
               let s = (e) => this.updateDebugBotIndex(e, t);
               (this.botDebugIndex.onChange.subscribe(s),
@@ -151,15 +155,16 @@ System.register(
                   this._game.aiPlayerNicknames = {};
                 }
                 this.bots.forEach(function (bot) {
-                  if (bot.nickname) {
-                    this._game.aiPlayerNicknames[bot.name] = bot.nickname;
-                    // 在玩家对象上设置 displayName 属性（UI组件读取，不影响内部name查找）
-                    try {
-                      var p = this._game.getPlayerByName(bot.name);
-                      if (p) {
-                        p.displayName = bot.nickname;
-                      }
-                    } catch (_) {}
+                  var p;
+                  try {
+                    p = this._game.getPlayerByName(bot.name);
+                  } catch (_) {}
+                  // 战役玩家已在 GameFactory 设置 displayName（真实阵营名），
+                  // 这里统一同步到 aiPlayerNicknames，供 SoundHandler/ScoreTable 等显示。
+                  var displayName = bot.nickname || (p && p.displayName);
+                  if (displayName) {
+                    this._game.aiPlayerNicknames[bot.name] = displayName;
+                    if (p) p.displayName = displayName;
                   }
                 }.bind(this));
               }
@@ -172,6 +177,9 @@ System.register(
                 r && this.actionLogger.debug(`(${t.player.name})@${e.currentTick}: ` + r);
               }
               for (i of e.getCombatants().filter((e) => e.isAi)) this.bots.get(i).onGameTick(this.gameApi);
+              // OpenYRWeb: 战役人类阵营的脚本小队 Bot 同样需要每 tick 推进队伍状态
+              for (i of e.getCombatants().filter((e) => e.isCampaign && !e.isAi))
+                this.bots.get(i).onGameTick(this.gameApi);
               // 自动Flush AI聊天消息到Game队列（单机模式），供GUI层消费
               var chatMsgs = this.flushChatMessages();
               for (var cm = 0; cm < chatMsgs.length; cm++) {

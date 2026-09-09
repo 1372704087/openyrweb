@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/Game ===
-// deps: ["game/ConstructionWorker","game/gameopts/GameOpts","engine/type/ObjectType","util/event","game/map/OreSpread","game/gameobject/Infantry","game/Alliances","util/BoxedVar","game/StartingUnitsGenerator","game/map/tileFinder/CardinalTileFinder","game/type/SpeedType","game/Target","game/map/BridgeOverlayTypes","util/math","game/GameEventBus","game/event/ObjectDestroyEvent","game/event/PlayerDefeatedEvent","game/ini/GameModeType","game/Traits","game/trait/interface/NotifyTick","game/trait/interface/NotifyDestroy","game/trait/interface/NotifySpawn","game/trait/interface/NotifyUnspawn","game/trait/interface/NotifyOwnerChange","game/event/ObjectOwnerChangeEvent","game/event/ObjectUnspawnEvent","game/trait/interface/NotifyTargetDestroy","game/gameobject/unit/VeteranLevel","game/event/ObjectSpawnEvent","game/map/OreOverlayTypes","game/Weapon","game/GameSpeed","game/gameobject/common/DeathType","game/map/Bridges","game/SuperWeapon","game/event/AllianceChangeEvent","game/trait/interface/NotifyAllianceChange","game/gameopts/constants","game/gameobject/unit/ZoneType","game/Prng","game/trigger/TriggerManager","game/CountdownTimer","game/WeaponType","game/Warhead","game/trait/interface/NotifyObjectTraitAdd","game/event/RadarOnOffEvent","util/geometry"]
+// deps: ["game/ConstructionWorker","game/gameopts/GameOpts","engine/type/ObjectType","util/event","game/map/OreSpread","game/gameobject/Infantry","game/Alliances","util/BoxedVar","game/StartingUnitsGenerator","game/map/tileFinder/CardinalTileFinder","game/type/SpeedType","game/Target","game/map/BridgeOverlayTypes","util/math","game/GameEventBus","game/event/ObjectDestroyEvent","game/event/PlayerDefeatedEvent","game/ini/GameModeType","game/Traits","game/trait/interface/NotifyTick","game/trait/interface/NotifyDestroy","game/trait/interface/NotifySpawn","game/trait/interface/NotifyUnspawn","game/trait/interface/NotifyOwnerChange","game/event/ObjectOwnerChangeEvent","game/event/ObjectUnspawnEvent","game/trait/interface/NotifyTargetDestroy","game/gameobject/unit/VeteranLevel","game/event/ObjectSpawnEvent","game/map/OreOverlayTypes","game/Weapon","game/GameSpeed","game/gameobject/common/DeathType","game/map/Bridges","game/SuperWeapon","game/event/AllianceChangeEvent","game/trait/interface/NotifyAllianceChange","game/gameopts/constants","game/gameobject/unit/ZoneType","game/Prng","game/trigger/TriggerManager","game/CountdownTimer","game/WeaponType","game/Warhead","game/trait/interface/NotifyObjectTraitAdd","game/event/RadarOnOffEvent","util/geometry","game/gameobject/task/system/WaitTicksTask"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -52,6 +52,8 @@ System.register(
     "game/trait/interface/NotifyObjectTraitAdd",
     "game/event/RadarOnOffEvent",
     "util/geometry",
+    "game/gameobject/task/system/WaitTicksTask",
+    "game/scenario/ScenarioTeamRuntime",
   ],
   function (t, e) {
     "use strict";
@@ -103,7 +105,9 @@ System.register(
       q,
       $,
       Q,
-      Y;
+      Y,
+      aa,
+      ab;
     e && e.id;
     return {
       setters: [
@@ -248,6 +252,12 @@ System.register(
         function (e) {
           $ = e;
         },
+        function (e) {
+          aa = e;
+        },
+        function (e) {
+          ab = e;
+        },
       ],
       execute: function () {
         var e;
@@ -290,8 +300,22 @@ System.register(
                   (this.objectFactory = g),
                   (this.botManager = p),
                   (this.triggers = new G.TriggerManager()),
+                  // 单人战役: 地图 [Houses] 阵营名 -> Player 映射（GameFactory 战役模式填充）
+                  (this.housePlayers = c.housePlayers || new Map()),
+                  // 单人战役: 地图 [Houses] 原始列表（按索引访问，Win/Lose 动作用）
+                  (this.campaignHouses = c.campaignHouses || void 0),
+                  // 单人战役: 场景小队运行时（CreateTeam/CreateReinforcement/脚本执行）
+                  (this.scenarioTeamRuntime = void 0),
                   // AI聊天消息队列（单机模式用，由BotManager填充，GUI层消费）
-                  (this.aiChatMessages = []));
+                  (this.aiChatMessages = []),
+                  // 触发器 DisableUserInput/EnableUserInput 状态: 锁定玩家操控（GUI 层轮询桥接）
+                  (this.inputLocked = !1),
+                  // 触发器 MoveAndCenterView 待处理的相机移动请求（GUI 层轮询消费）
+                  (this.pendingCameraMove = void 0),
+                  // 触发器 FlashSmall/Medium/Large/FlashTeam 待处理的单元高亮请求（GUI 层轮询消费）
+                  (this.pendingUnitFlash = void 0),
+                  // 脚本化小队攻击指定路点时的目标标记（GUI 层渲染脉冲光环）
+                  (this.attackTargetMarkers = []));
               }
               addPlayer(e) {
                 (this.playerList.addPlayer(e), this.constructionWorkers.set(e, this.createConstructionWorker(e)));
@@ -342,21 +366,27 @@ System.register(
                 ((this.localPlayer = e),
                   this.createMapObjects(),
                   this.assignSecretLabBonuses(),
-                  this.createPlayerInitialUnits(),
+                  // 战役地图自带初始单位/基地，不生成遭遇战式基地车
+                  this.gameOpts.campaignId || this.createPlayerInitialUnits(),
                   this.map.terrain.computeAllPassabilityGraphs(),
                   this.mapShroudTrait.init(this),
                   this.crateGeneratorTrait.init(this),
-                  this.playerList.getAll().forEach((e) => (e.credits = this.gameOpts.credits)),
+                  this.playerList.getAll().forEach((e) => (e.credits = e.scenarioCredits ?? this.gameOpts.credits)),
                   this.playerList.getAll().forEach((e) => {
                     if (e.isAi) {
                       if (e.aiDifficulty === a.AiDifficulty.Brutal || e.aiDifficulty === a.AiDifficulty.Brutal_Ori) e.credits += 10000;
-                      else if (e.aiDifficulty === a.AiDifficulty.Medium || e.aiDifficulty === a.AiDifficulty.Medium_Ori) e.credits += 5000;
-                      else if (e.aiDifficulty === a.AiDifficulty.Easy || e.aiDifficulty === a.AiDifficulty.Easy_Ori) e.credits += 2000;
+                      else if (e.aiDifficulty === a.AiDifficulty.Medium || e.aiDifficulty === a.AiDifficulty.Medium_Ori || e.aiDifficulty === a.AiDifficulty.Medium_Custom) e.credits += 5000;
+                      else if (e.aiDifficulty === a.AiDifficulty.Easy || e.aiDifficulty === a.AiDifficulty.Easy_Ori || e.aiDifficulty === a.AiDifficulty.Easy_Custom) e.credits += 2000;
                     }
                   }),
                   this.rules.mpDialogSettings.alliesAllowed && this.createInitialTeams(),
                   this.botManager.init(this),
-                  this.triggers.init(this));
+                  this.triggers.init(this),
+                  // OpenYRWeb: 战役场景小队运行时（参考临时源码 cQe）
+                  this.gameOpts.campaignId &&
+                    this.map.getScenarioTeams &&
+                    ((this.scenarioTeamRuntime = new ab.ScenarioTeamRuntime(this, this.map)),
+                      this.traits.add(this.scenarioTeamRuntime)));
               }
               start() {
                 ((this.status = Q.Started),
@@ -548,9 +578,12 @@ System.register(
                   if (this.validateMapObjectRulesAndArt(r, n.type)) {
                     var s = this.map.tiles.getByMapCoords(n.rx, n.ry);
                     if (s) {
-                      var a = t.get(n.owner);
+                      // 战役地图的 Owner= 是 [Houses] 阵营名，先按阵营名查找，再回退到国家名
+                      var a = this.housePlayers.get(n.owner) ?? t.get(n.owner);
                       if (a) {
-                        if (a.isNeutral) {
+                        // 中立对象总是创建；非中立对象（玩家/敌方基地与单位）仅战役模式创建
+                        // （遭遇战开局用 MCV 生成单位，不创建地图预置的非中立对象）。
+                        if (a.isNeutral || this.gameOpts.campaignId) {
                           let t = this.createObject(n.type, r);
                           (n.tag && (t.tag = i.find((e) => e.id === n.tag)),
                             (t.healthTrait.health = (n.health / 256) * 100));
@@ -583,6 +616,8 @@ System.register(
                           } else t.poweredTrait?.setTurnedOn(n.poweredOn);
                           (this.changeObjectOwner(t, a),
                             this.spawnObject(t, s),
+                            (n.isInfantry() || n.isVehicle() || n.isAircraft()) &&
+                              this.applyInitialUnitMission(t, n),
                             e && this.destroyObject(t, void 0, !0));
                         }
                       } else console.warn(`Invalid owner "${n.owner}" for map object`, n);
@@ -594,6 +629,20 @@ System.register(
                 return this.rules.hasObject(e, t)
                   ? !!this.art.hasObject(e, t) || (console.warn(`Map object '${e}' has no art section. Skipping.`), !1)
                   : (console.warn(`Map object '${e}' has no rules section. Skipping.`), !1);
+              }
+              applyInitialUnitMission(e, t) {
+                // OpenYRWeb: 处理地图初始单位的 Mission 字段（参考临时源码 initializeMapUnit）：
+                //   sleep/wait/harmless/stop -> 原地待命（挂超长等待任务，同时阻止被动索敌）
+                //   guard/area guard -> 守卫当前位置区域（AttackTrait 被动索敌接管）
+                //   attack/hunt -> 保持默认被动索敌攻击
+                if (!t.mission || !e.unitOrderTrait) return;
+                var m = String(t.mission).replace(/[ _-]/g, "").toLowerCase();
+                if ("sleep" === m || "harmless" === m || "wait" === m || "stop" === m)
+                  e.unitOrderTrait.addTask(new aa.WaitTicksTask(Number.MAX_SAFE_INTEGER));
+                else if ("guard" === m || "areaguard" === m) {
+                  e.guardMode = !0;
+                  e.guardArea = { tile: e.tile, onBridge: !!e.isUnit() && e.onBridge };
+                }
               }
               createPlayerInitialUnits() {
                 let e = this.playerList.getCombatants().map((e) => e.country);
@@ -908,9 +957,16 @@ System.register(
                       let i = t[0];
                       if (i.isTechno() && i.owner !== this.localPlayer) {
                         let t = this.mapShroudTrait.getPlayerShroud(this.localPlayer);
+                        // OpenYRWeb: 战役玩家 shroud 缺失时防御（国家不可玩导致 isNeutral 未建 shroud 的场景）
+                        if (!t)
+                          console.warn(
+                            `[OpenYRWeb] Missing shroud for local player "${this.localPlayer.name}" ` +
+                              `(isCombatant=${this.localPlayer.isCombatant()}, isNeutral=${this.localPlayer.isNeutral}, ` +
+                              `country=${this.localPlayer.country?.name ?? "none"})`,
+                          );
                         this.map.tileOccupation
                           .calculateTilesForGameObject(i.tile, i)
-                          .find((e) => !t.isShrouded(e, i.tileElevation)) ||
+                          .find((e) => !t || !t.isShrouded(e, i.tileElevation)) ||
                           (this.unitSelection.deselectAll(), this.unitSelection.cleanupUnit(i));
                       }
                     }
@@ -940,30 +996,33 @@ System.register(
                 let r = this.stalemateDetectTrait?.isStale() && 0 === this.stalemateDetectTrait.getCountdownTicks(),
                   s = this.gameOpts.shortGame;
                 e.forEach((t) => {
-                  let i;
+                  let i, hasSignificant = !1;
                   if (r) i = !0;
                   else {
-                    let e;
-                    ((e = s
-                      ? ((e = [...t.getOwnedObjectsByType(S.ObjectType.Building, !0)].some(
-                          (e) => !e.rules.insignificant,
-                        )),
-                        e || t.getOwnedObjects(!0).some((e) => this.rules.general.baseUnit.includes(e.name)))
-                      : t.getOwnedObjects(!0).some((e) => !e.rules.insignificant && !e.limboData?.inTransport)),
-                      (i = !e));
+                    hasSignificant = s
+                      ? [...t.getOwnedObjectsByType(S.ObjectType.Building, !0)].some((e) => !e.rules.insignificant) ||
+                        t.getOwnedObjects(!0).some((e) => this.rules.general.baseUnit.includes(e.name))
+                      : t.getOwnedObjects(!0).some((e) => !e.rules.insignificant && !e.limboData?.inTransport);
+                    i = !hasSignificant;
                   }
                   var e;
-                  i &&
-                    ((t.defeated = !0),
-                    (e = this.alliances.getHostilePlayers().some((e) => !e.first.isAi || !e.second.isAi)) &&
-                      (t.isObserver = !0),
-                    this.removeAllPlayerAssets(t),
-                    this.events.dispatch(new l.PlayerDefeatedEvent(t)),
-                    e &&
-                      (this.mapShroudTrait.getPlayerShroud(t)?.revealAll(),
-                      (e = t.radarTrait.isDisabled()),
-                      t.radarTrait.setDisabled(!1),
-                      e && this.events.dispatch(new q.RadarOnOffEvent(t, !0))));
+                  // 原版战役：非本地玩家只剩无意义建筑/单位时不播报“被击败”，也不判负刷屏
+                  if (i && !(this.gameOpts.campaignId && t !== this.localPlayer && !hasSignificant))
+                    (console.warn(
+                      `[OpenYRWeb] Defeat check: "${t.name}" owned=${t.getOwnedObjects(!0).length} ` +
+                        `sig=${t.getOwnedObjects(!0).filter((o) => !o.rules.insignificant).length} ` +
+                        `buildings=${t.getOwnedObjectsByType(S.ObjectType.Building, !0).length}`,
+                    ),
+                      (t.defeated = !0),
+                      (e = this.alliances.getHostilePlayers().some((e) => !e.first.isAi || !e.second.isAi)) &&
+                        (t.isObserver = !0),
+                      this.removeAllPlayerAssets(t),
+                      this.events.dispatch(new l.PlayerDefeatedEvent(t)),
+                      e &&
+                        (this.mapShroudTrait.getPlayerShroud(t)?.revealAll(),
+                        (e = t.radarTrait.isDisabled()),
+                        t.radarTrait.setDisabled(!1),
+                        e && this.events.dispatch(new q.RadarOnOffEvent(t, !0))));
                 });
               }
               removeAllPlayerAssets(e) {

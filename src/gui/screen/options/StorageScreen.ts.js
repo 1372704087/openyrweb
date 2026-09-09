@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: gui/screen/options/StorageScreen ===
-// deps: ["gui/jsx/jsx","gui/jsx/HtmlView","gui/screen/options/component/StorageExplorer","gui/screen/mainMenu/MainMenuScreen"]
+// deps: ["gui/jsx/jsx","gui/jsx/HtmlView","gui/screen/options/component/StorageExplorer","gui/screen/mainMenu/MainMenuScreen","data/vfs/RealFileSystemDir"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -9,10 +9,11 @@ System.register(
     "gui/jsx/HtmlView",
     "gui/screen/options/component/StorageExplorer",
     "gui/screen/mainMenu/MainMenuScreen",
+    "data/vfs/RealFileSystemDir",
   ],
   function (e, t) {
     "use strict";
-    var i, r, s, a, n;
+    var i, r, s, a, n, c;
     t && t.id;
     return {
       setters: [
@@ -27,6 +28,9 @@ System.register(
         },
         function (e) {
           a = e;
+        },
+        function (e) {
+          c = e;
         },
       ],
       execute: function () {
@@ -86,6 +90,34 @@ System.register(
                       );
                     }
                   }
+                },
+              },
+              {
+                label: this.strings.get("GUI:ImportMixFiles"),
+                onClick: () => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.multiple = true;
+                  input.accept = ".mix";
+                  input.onchange = async () => {
+                    try {
+                      const root = this.rfs.getRootDirectoryHandle();
+                      const files = Array.from(input.files || []);
+                      for (const file of files) {
+                        // Root-level .mix uploads are stored lowercase (VFS lookup is
+                        // case-insensitive, and the FileExplorer does the same).
+                        await new c.RealFileSystemDir(root).writeFile(file, file.name.toLowerCase());
+                      }
+                      this.messageBoxApi.show(
+                        this.strings.get("TS:MixFilesImported", files.length),
+                        this.strings.get("GUI:Ok"),
+                      );
+                    } catch (e) {
+                      console.error("Failed to import mix files", e);
+                      this.messageBoxApi.show(this.strings.get("TS:ImportMixFailed"), this.strings.get("GUI:Ok"));
+                    }
+                  };
+                  input.click();
                 },
               },
               {

@@ -26,14 +26,10 @@ System.register(
               ((this.resourceLoader = e), (this.vfs = t));
             }
             async load(e, t) {
-              let i;
-              if (this.vfs)
-                try {
-                  i = await this.vfs.openFileWithRfs(e);
-                } catch (e) {
-                  e instanceof r.FileNotFoundError || console.error(e);
-                }
-              return ((i = i || s.VirtualFile.fromBytes(await this.resourceLoader.loadBinary(e, t), e)), i);
+              // OpenYRWeb (offline): maps are read from the imported game files only.
+              // No remote download fallback — a missing map surfaces as FileNotFoundError.
+              if (this.vfs) return await this.vfs.openFileWithRfs(e);
+              throw new r.FileNotFoundError(`File "${e}" not found in virtual file system`);
             }
           }),
         );

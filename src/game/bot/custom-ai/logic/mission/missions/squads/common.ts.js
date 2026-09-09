@@ -67,6 +67,11 @@ System.register("game/bot/custom-ai/logic/mission/missions/squads/common", ["gam
         var x = attacker.tile.rx, y = attacker.tile.ry;
         var hX = target.tile.rx, hY = target.tile.ry;
 
+        // 无主武器（或无弹道数据）的单位无法攻击任何目标，直接排除（maxBy 会跳过 null 权重）。
+        if (!attacker.primaryWeapon || !attacker.primaryWeapon.projectileRules) {
+          return null;
+        }
+
         var isUnderWaterUnit = ["SUB", "DLPH", "SQD"].indexOf(attacker.name) !== -1;
         var isNavalTarget = ["DEST", "AEGIS", "CARRIER", "SUB", "HYD", "DRED", "DLPH", "SQD"].indexOf(target.name) !== -1;
 

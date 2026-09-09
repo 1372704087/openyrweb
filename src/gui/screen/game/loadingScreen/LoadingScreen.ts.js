@@ -59,6 +59,32 @@ System.register(
               let e = this.props.playerInfos;
               var t = this.props.countryName,
                 i = this.props.color;
+              // OpenYRWeb: 战役加载画面（参考临时源码 UKe）
+              if (this.props.campaignInfo) {
+                var ci = this.props.campaignInfo,
+                  strings = this.props.strings,
+                  loadMsg = strings.get(ci.loadMessageKey),
+                  brief = ci.loadBriefingKey ? strings.get(ci.loadBriefingKey) : "";
+                return o.default.createElement(
+                  "div",
+                  {
+                    className: "campaign-loading-screen " + (ci.side || "training"),
+                    "data-testid": "campaign-loading-screen",
+                    style: this.getStyle(this.props.bgImageSrc),
+                  },
+                  ci.loadingImage
+                    ? o.default.createElement("img", {
+                        className: "campaign-loading-art",
+                        src: ci.loadingImage,
+                        alt: "",
+                      })
+                    : null,
+                  o.default.createElement("div", { className: "campaign-loading-title" }, strings.get(ci.uiNameKey)),
+                  loadMsg !== ci.loadMessageKey ? o.default.createElement("p", { className: "campaign-loading-message" }, loadMsg) : null,
+                  brief ? o.default.createElement("p", { className: "campaign-loading-briefing" }, brief) : null,
+                  o.default.createElement("progress", { className: "campaign-loading-progress", value: "" + (e?.[0]?.loadPercent ?? 0), max: 100 }),
+                );
+              }
               let r = 1 < e.length && e.every((e) => !e.country || e.team !== l.NO_TEAM_ID);
               var s = h.get(t),
                 a = c.get(t);

@@ -45,16 +45,16 @@ System.register(
                   (this.gameResConfig = s),
                   (this.gservCon = a));
               }
-              create(e) {
-                var { rules: t, strings: i, uiScene: r, jsxRenderer: s, gameResConfig: a, gservCon: n } = this;
+              create(e, campaignInfo) {
+                var { rules, strings, uiScene, jsxRenderer, gameResConfig, gservCon } = this;
                 switch (e) {
                   case d.SinglePlayer:
-                    return new u.SpLoadingScreenApi(t, i, r, s, a);
+                    return new u.SpLoadingScreenApi(rules, strings, uiScene, jsxRenderer, gameResConfig, campaignInfo);
                   case d.MultiPlayer:
                     var o = new l.LoadInfoParser();
-                    return new c.MpLoadingScreenApi(n, o, t, i, r, s, a);
+                    return new c.MpLoadingScreenApi(gservCon, o, rules, strings, uiScene, jsxRenderer, gameResConfig);
                   case d.Replay:
-                    return new h.ReplayLoadingScreenApi(t, i, r, s, a);
+                    return new h.ReplayLoadingScreenApi(rules, strings, uiScene, jsxRenderer, gameResConfig);
                   default:
                     throw new Error(`Unsupported loading screen type "${e}"`);
                 }

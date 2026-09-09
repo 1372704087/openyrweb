@@ -83,6 +83,10 @@ System.register(
             let r = this.getSection("Basic");
             i = this.iniFormat = r?.getNumber("NewINIFormat") ?? 0;
             return (
+              ((this.scenarioScripts = new Map()),
+                (this.scenarioTaskForces = new Map()),
+                (this.scenarioTeams = new Map()),
+                (this.scenarioAiTriggers = new Map())),
               this.readTiles(),
               this.readWaypoints(this.getOrCreateSection("Waypoints")),
               this.readZones(this.getOrCreateSection("Zone")),
@@ -95,6 +99,7 @@ System.register(
               this.readSmudges(),
               this.readLighting(),
               this.readTagsAndTriggers(),
+              this.readScenarioTeams(),
               this.readCellTags(i),
               this.readVariableNames(),
               (this.startingLocations = this.readStartingLocations(this.waypoints)),
@@ -139,6 +144,95 @@ System.register(
               (this.unknownActionTypes = i),
               (this.unimplementedEventTypes = s ?? new Set()),
               (this.unimplementedActionTypes = a ?? new Set()));
+          }
+          readScenarioTeams() {
+            // 参考临时源码 readScenarioTeams：把地图内嵌的 ScriptTypes/TaskForces/TeamTypes/
+            // AITriggerTypes 解析成场景运行时可直接使用的结构。
+            this.scenarioScripts.clear();
+            this.scenarioTaskForces.clear();
+            this.scenarioTeams.clear();
+            this.scenarioAiTriggers.clear();
+            for (var [s, r] of this.readListedSectionIds("ScriptTypes").entries()) {
+              var sc = this.getSection(r);
+              if (!sc) continue;
+              var actions = [];
+              for (var o of this.readNumericEntries(sc)) {
+                var [l, c] = o.split(",").map(Number);
+                if (!Number.isFinite(l)) continue;
+                actions.push({ type: l, parameter: Number.isFinite(c) ? c : 0 });
+              }
+              this.scenarioScripts.set(r, { id: r, index: s, actions: actions });
+            }
+            for (var [s, r] of this.readListedSectionIds("TaskForces").entries()) {
+              var tf = this.getSection(r);
+              if (!tf) continue;
+              var entries = [];
+              for (var o of this.readNumericEntries(tf)) {
+                var [l, c] = o.split(",");
+                var cnt = Number(l);
+                if (Number.isFinite(cnt) && c) entries.push({ count: cnt, objectName: String(c).trim() });
+              }
+              this.scenarioTaskForces.set(r, { id: r, index: s, entries: entries });
+            }
+            for (var [s, r] of this.readListedSectionIds("TeamTypes").entries()) {
+              var tm = this.getSection(r);
+              if (!tm) continue;
+              var wp = tm.getString("Waypoint", "").trim(),
+                twp = tm.getString("TransportWaypoint", "").trim();
+              this.scenarioTeams.set(r, {
+                id: r,
+                index: s,
+                houseName: tm.getString("House", "").trim(),
+                scriptId: tm.getString("Script", "").trim(),
+                taskForceId: tm.getString("TaskForce", "").trim(),
+                tagId: this.readTagId(tm.getString("Tag", "None")),
+                waypoint: wp ? this.readAlphabeticIndex(wp) : void 0,
+                transportWaypoint: twp ? this.readAlphabeticIndex(twp) : void 0,
+                veteranLevel: Math.max(0, tm.getNumber("VeteranLevel", 0) - 1),
+                aggressive: tm.getBool("Aggressive", !1),
+                annoyance: tm.getBool("Annoyance", !1),
+                autocreate: tm.getBool("Autocreate", !1),
+                droppod: tm.getBool("Droppod", !1),
+                full: tm.getBool("Full", !1),
+                group: tm.getNumber("Group", -1),
+                guardSlower: tm.getBool("GuardSlower", !1),
+                loadable: tm.getBool("Loadable", !1),
+                looseRecruit: tm.getBool("LooseRecruit", !1),
+                max: tm.getNumber("Max", 0),
+                onTransOnly: tm.getBool("OnTransOnly", !1),
+                prebuild: tm.getBool("Prebuild", !1),
+                priority: tm.getNumber("Priority", 5),
+                recruiter: tm.getBool("Recruiter", !1),
+                reinforce: tm.getBool("Reinforce", !1),
+                suicide: tm.getBool("Suicide", !1),
+                techLevel: tm.getNumber("TechLevel", -1),
+                transportsReturnOnUnload: tm.getBool("TransportsReturnOnUnload", !1),
+                useTransportOrigin: tm.getBool("UseTransportOrigin", !1),
+                areTeamMembersRecruitable: tm.getBool("AreTeamMembersRecruitable", !0),
+                onlyTargetHouseEnemy: tm.getBool("OnlyTargetHouseEnemy", !1),
+              });
+            }
+            var at = this.getSection("AITriggerTypes"),
+              en = this.getSection("AITriggerTypesEnable");
+            for (var [s, r] of at?.entries ?? []) {
+              if (typeof r !== "string") continue;
+              var e = en?.entries.get(s),
+                enabled = typeof e === "string" && /^(?:yes|true|1)$/i.test(e);
+              this.scenarioAiTriggers.set(s, { id: s, raw: r, enabled: enabled });
+            }
+          }
+          readListedSectionIds(e) {
+            var t = this.getSection(e);
+            return t ? this.readNumericEntries(t) : [];
+          }
+          readNumericEntries(e) {
+            return [...e.entries]
+              .filter(([t, s]) => Number.isFinite(Number(t)) && typeof s === "string")
+              .sort(([t], [s]) => Number(t) - Number(s))
+              .map(([, t]) => t);
+          }
+          readAlphabeticIndex(e) {
+            return e.toUpperCase().split("").reduce((t, s) => t * 26 + s.charCodeAt(0) - 65 + 1, 0) - 1;
           }
           readCellTags(e) {
             this.cellTags = new l.CellTagsReader().read(this.getOrCreateSection("CellTags"), e);
@@ -268,6 +362,7 @@ System.register(
                     (e.rx = Number(i[3])),
                     (e.ry = Number(i[4])),
                     (e.direction = Number(i[5])),
+                    (e.mission = i[6] || ""),
                     (e.tag = this.readTagId(i[7])),
                     (e.veterancy = Number(i[8])),
                     (e.onBridge = "1" === i[10]),
@@ -290,6 +385,7 @@ System.register(
                     (e.rx = Number(i[3])),
                     (e.ry = Number(i[4])),
                     (e.subCell = Number(i[5])),
+                    (e.mission = i[6] || ""),
                     (e.direction = Number(i[7])),
                     (e.tag = this.readTagId(i[8])),
                     (e.veterancy = Number(i[9])),
@@ -310,6 +406,7 @@ System.register(
                   (e.rx = Number(t[3])),
                   (e.ry = Number(t[4])),
                   (e.direction = Number(t[5])),
+                  (e.mission = t[6] || ""),
                   (e.tag = this.readTagId(t[7])),
                   (e.veterancy = Number(t[8])),
                   (e.onBridge = "1" === t[t.length - 4]),
@@ -382,6 +479,136 @@ System.register(
                 r = new a.RgbBitmap(i, r);
               return (S.Format5.decodeInto(s, r.data), r);
             }
+          }
+          getHouses() {
+            // RA2/YR 单人任务地图 [Houses] 阵营表。国家/颜色/结盟等属性来自每个阵营的
+            // 独立 section（[Player House] 内的 Country=/Color=/IQ=/Credits=/TechLevel=/Allies=），
+            // [Houses] 行本身通常是纯阵营名（0=Player House）。
+            let t = [];
+            let sec = this.getSection("Houses");
+            if (!sec) {
+              console.warn("[OpenYRWeb] Map has no [Houses] section.");
+              return t;
+            }
+            // [Basic] Player= 标识人类阵营（无匹配时取第一个阵营）
+            let humanName = (this.getSection("Basic")?.getString("Player", "") ?? "").trim().toLowerCase();
+            // [Countries] 段: CountryName=HouseName → house -> country（部分地图用此格式）
+            let houseCountry = new Map();
+            let csec = this.getSection("Countries");
+            if (csec) {
+              console.info(
+                "[OpenYRWeb] [Countries] section:",
+                [...csec.entries].map(([c, h]) => `${c}=${h}`).join(", ") || "(empty)",
+              );
+              for (var [c, h] of csec.entries) {
+                let hn = h.trim();
+                if (hn && !houseCountry.has(hn.toLowerCase())) houseCountry.set(hn.toLowerCase(), c.trim());
+              }
+            } else console.warn("[OpenYRWeb] Map has no [Countries] section.");
+            // 大小写不敏感取 section
+            let findSection = (name) => {
+              let s = this.getSection(name);
+              if (s) return s;
+              let lower = name.toLowerCase();
+              return this.getOrderedSections().find((e) => e.name.toLowerCase() === lower);
+            };
+            console.info(
+              "[OpenYRWeb] Raw [Houses]:",
+              [...sec.entries].map(([k, v]) => `${k}=${v}`).join(", ") || "(empty)",
+            );
+            let idx = 0;
+            let humanAssigned = !1;
+            for (var [i, r] of sec.entries) {
+              if (!/^\d+$/.test(i)) continue;
+              var s = r.split(",");
+              var name = (s[0] || "").trim();
+              if (!name) continue;
+              let psec = findSection(name);
+              let country = psec ? psec.getString("Country", "").trim() : "";
+              let baseName = name.replace(/\s+House$/i, "").trim().toLowerCase();
+              if (!country) {
+                // [Countries] 是显式映射（Country=House），优先使用；
+                // [Houses] 第二列常见是阵营别名（如 Player/BadGuy1），不是国家代码，不能直接当 Country 用。
+                let second = (s[1] || "").trim();
+                country =
+                  houseCountry.get(name.toLowerCase()) ||
+                  (second && second.toLowerCase() !== baseName ? second : "") ||
+                  "";
+              }
+              let countryLower = country.toLowerCase();
+              let color = psec ? psec.getString("Color", "LightGrey").trim() : "";
+              let iq = psec ? psec.getNumber("IQ", 0) : 0;
+              let edge = psec ? psec.getString("Edge", "").trim() : "";
+              let credits = psec ? psec.getNumber("Credits", 0) : 0;
+              let techLevel = psec ? psec.getNumber("TechLevel", 0) : 0;
+              let playerControl = psec ? psec.getBool("PlayerControl", !1) : !1;
+              let allies = psec ? psec.getArray("Allies", /,\s*/, []) : [];
+              let base = name.replace(/\s+House$/i, "").toLowerCase();
+              let isHuman =
+                !humanAssigned &&
+                (0 === idx || (humanName && (humanName === name.toLowerCase() || humanName === base)));
+              if (isHuman) humanAssigned = !0;
+              let control;
+              if (s[7]) control = (s[7] || "").trim().toLowerCase();
+              else if (isHuman) control = "human";
+              else if (/civie|civilian|dummy|neutral/i.test(name) || "civilian" === countryLower || "neutral" === countryLower)
+                control = "civilian";
+              else control = "computer";
+              t.push({
+                name,
+                country,
+                color,
+                iq,
+                edge,
+                credits,
+                techLevel,
+                playerControl,
+                allies,
+                control,
+              });
+              idx++;
+            }
+            console.info(
+              `[OpenYRWeb] Parsed [Houses]:`,
+              t
+                .map((h) => `${h.name}(country=${h.country},color=${h.color},control=${h.control},allies=${h.allies.join("|")})`)
+                .join(", ") || "(none)",
+            );
+            return t;
+          }
+          getAiIni() {
+            // 提取地图定义的 AI 数据（TaskForces/ScriptTypes/TeamTypes/AITriggerTypes 等），
+            // 供战役敌方 AI 使用。格式与 aimd.ini 一致（AiData 可直接解析）。
+            // 地图无 AI 段时返回 undefined（回退到 aimd.ini）。
+            let out = new r.IniFile();
+            let aiSections = [
+              "TaskForces",
+              "ScriptTypes",
+              "TeamTypes",
+              "AITriggerTypes",
+              "AIDefenseTypes",
+              "BuildQueue",
+              "BuildQueueGroup",
+            ];
+            let added = !1;
+            for (let secName of aiSections) {
+              let src = this.getSection(secName);
+              if (!src) continue;
+              let dst = out.getOrCreateSection(secName);
+              for (let [k, v] of src.entries) dst.set(k, v);
+              // 复制引用的子段（如 [TeamType名]、[TaskForce名]、[Script名] 的定义段）
+              for (let v of src.entries.values()) {
+                let childName = String(v).trim();
+                if (!childName) continue;
+                let child = this.getSection(childName);
+                if (child) {
+                  let cd = out.getOrCreateSection(childName);
+                  for (let [k2, v2] of child.entries) cd.set(k2, v2);
+                }
+              }
+              added = !0;
+            }
+            return added ? out : void 0;
           }
         }),
           e("MapFile", d),
