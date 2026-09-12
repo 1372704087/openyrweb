@@ -61,6 +61,9 @@ System.register(
           setExtraLight(e) {
             ((this.extraLight = e), this.object && (this.material.extraLight = e));
           }
+          setVxlLightDir(e) {
+            ((this.lightDir = e), this.object && (this.material.lightDir = e));
+          }
           setShadow(t) {
             ((this.castShadow = t), this.sections?.forEach((e) => (e.castShadow = t)));
           }

@@ -22,6 +22,7 @@ System.register("engine/gfx/batch/BatchedMesh", [], function (t, e) {
               (this.castShadow = !1),
               (this.opacity = 1),
               (this.extraLight = new THREE.Vector3(0, 0, 0)),
+              (this.lightDir = new THREE.Vector3(-1, 0, 0)),
               (this.paletteIndex = 0),
               (this.clippingPlanes = []),
               (this.clippingPlanesHash = ""),
@@ -44,6 +45,12 @@ System.register("engine/gfx/batch/BatchedMesh", [], function (t, e) {
           }
           setPaletteIndex(e) {
             this.paletteIndex = e;
+          }
+          getLightDir() {
+            return this.lightDir;
+          }
+          setLightDir(e) {
+            this.lightDir = e;
           }
           getClippingPlanes() {
             return this.clippingPlanes;

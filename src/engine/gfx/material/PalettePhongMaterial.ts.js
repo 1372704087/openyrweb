@@ -19,11 +19,21 @@ System.register("engine/gfx/material/PalettePhongMaterial", ["engine/gfx/materia
           .replace("#include <common>", "#include <common>\n" + i.paletteShaderLib.instanceParsVertex)
           .replace("void main() {", "void main() {\n" + i.paletteShaderLib.instanceVertex),
         fragmentShader: THREE.ShaderChunk.meshphong_frag
-          .replace("#include <common>", "#include <common>\n" + i.paletteShaderLib.paletteColorParsFrag)
+          .replace(
+            "#include <common>",
+            "#include <common>\n" + i.paletteShaderLib.paletteColorParsFrag + "\n" + i.paletteShaderLib.vplParsFrag,
+          )
           .replace("#include <color_fragment>", "#include <color_fragment>\n" + i.paletteShaderLib.paletteColorFrag)
+          // 先注 paletteFullLightFragment（非 VPL 基路径的唯一照明源：用场景方向光的 N·L 乘材质 extraLight），
+          // 再注 paletteVplFragment。VPL 开启时 paletteVplFragment 会把 reflectedLight 清零并令
+          // totalEmissiveRadiance=vplColor，从而覆盖 paletteFullLightFragment 的结果；VPL 关闭时
+          // 走 paletteFullLightFragment 保住原版实时光照外观。
           .replace(
             "#include <lights_fragment_end>",
-            "#include <lights_fragment_end>\n" + i.paletteShaderLib.paletteFullLightFragment,
+            "#include <lights_fragment_end>\n" +
+              i.paletteShaderLib.paletteFullLightFragment +
+              "\n" +
+              i.paletteShaderLib.paletteVplFragment,
           ),
       }),
         (r = class extends THREE.MeshPhongMaterial {
@@ -51,13 +61,34 @@ System.register("engine/gfx/material/PalettePhongMaterial", ["engine/gfx/materia
           set extraLight(e) {
             this.uniforms.extraLight.value = e;
           }
-          constructor({ palette: e, paletteCount: t, paletteOffset: i, extraLight: r, ...s } = {}) {
-            (super(s),
+          get vpl() {
+            return this.uniforms.vplTexture.value;
+          }
+          set vpl(e) {
+            this.uniforms.vplTexture.value = e;
+          }
+          get vplEnabled() {
+            return this.uniforms.vplEnabled.value;
+          }
+          set vplEnabled(e) {
+            this.uniforms.vplEnabled.value = e;
+          }
+          get lightDir() {
+            return this.uniforms.vplLightDir.value;
+          }
+          set lightDir(e) {
+            this.uniforms.vplLightDir.value = e;
+          }
+          constructor({ palette: e, paletteCount: t, paletteOffset: n, extraLight: r, vpl: s, vplEnabled: o, lightDir: p, ...l } = {}) {
+            (super(l),
               (this.uniforms = THREE.UniformsUtils.clone(a.uniforms)),
               e && (this.palette = e),
               t && (this.paletteCount = t),
-              i && (this.paletteOffset = i),
+              n && (this.paletteOffset = n),
               r && this.extraLight.copy(r),
+              p ? this.lightDir.copy(p) : i.paletteShaderLib.vplLightDir && this.lightDir.copy(i.paletteShaderLib.vplLightDir),
+              s ? (this.vpl = s) : i.paletteShaderLib.vplTexture && (this.vpl = i.paletteShaderLib.vplTexture),
+              (this.vplEnabled = void 0 === o ? !!i.paletteShaderLib.vplTexture : o),
               (this.vertexShader = a.vertexShader),
               (this.fragmentShader = a.fragmentShader),
               (this.type = "PalettePhongMaterial"));

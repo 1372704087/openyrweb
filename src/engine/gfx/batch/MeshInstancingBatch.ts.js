@@ -74,6 +74,10 @@ System.register("engine/gfx/batch/MeshInstancingBatch", ["engine/gfx/batch/Insta
                     this.instancedMesh.geometry.addAttribute(
                       "instanceExtraLight",
                       new THREE.InstancedBufferAttribute(new Float32Array(3 * this.maxInstances), 3),
+                    ),
+                    this.instancedMesh.geometry.addAttribute(
+                      "instanceLightDir",
+                      new THREE.InstancedBufferAttribute(new Float32Array(3 * this.maxInstances), 3),
                     )),
                   this.target?.add(this.instancedMesh)),
                 this.instancedMesh.updateFromMeshes(e))

@@ -95,7 +95,8 @@ System.register("engine/gfx/batch/InstancedMesh", [], function (e, t) {
               r = this.geometry.attributes;
             let s = r.instanceOpacity,
               a = r.instancePaletteOffset,
-              n = r.instanceExtraLight;
+              n = r.instanceExtraLight,
+              ld = r.instanceLightDir;
             for (let h = 0, u = t.length; h < u; h++) {
               let e = t[h];
               this.setMatrixAt(h, e.matrixWorld);
@@ -111,7 +112,13 @@ System.register("engine/gfx/batch/InstancedMesh", [], function (e, t) {
                   (o = Math.fround(l.y)),
                   (l = Math.fround(l.z)),
                   (c === n.getX(h) && o === n.getY(h) && l === n.getZ(h)) ||
-                    (n.setXYZ(h, c, o, l), (n.needsUpdate = !0))));
+                    (n.setXYZ(h, c, o, l), (n.needsUpdate = !0)),
+                  ld &&
+                    ((l = e.getLightDir()),
+                    ld.setX(h, Math.fround(l.x)),
+                    ld.setY(h, Math.fround(l.y)),
+                    ld.setZ(h, Math.fround(l.z)),
+                    (ld.needsUpdate = !0))));
             }
             this.setRenderCount(t.length);
             for (e of this.instanceMatrixAttributes) e.needsUpdate = !0;

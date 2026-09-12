@@ -158,15 +158,17 @@ System.register(
                 g = 0;
               for (let b = 0, S = i.length; b < S; b++) {
                 var p = i[b],
-                  m = t ? p.value : (p.value / 256) | 0;
+                  m = t ? p.value : (p.value / 256) | 0,
+                  q = t ? 0 : p.value % 256;
                 ((l[u++] = a.x + p.position[0] * n.x),
                   (l[u++] = a.y + p.position[1] * n.y),
                   (l[u++] = a.z + p.position[2] * n.z),
                   (h[g++] = m / 255),
                   (h[g++] = 0),
-                  (h[g++] = 0),
+                  // color.z = normalIndex/255：VPL 片段着色器据此判断 stale normal（≥253 → ambient 页 16）
+                  (h[g++] = q / 255),
                   t ||
-                    ((p = p.value % 256),
+                    ((p = q),
                     (p = o[Math.min(p, o.length - 1)]),
                     (c[d++] = p.x),
                     (c[d++] = p.y),

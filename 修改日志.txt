@@ -1200,4 +1200,32 @@ fix(secret-lab): 修复实验室被炸后奖励图标残留在建造栏且无法
 2. 占领实验室的奖励后，敌方夺回实验室：己方奖励消失、敌方出现（原有 ObjectOwnerChange 刷新路径，回归确认）。
 3. 摧毁己方普通建筑（如油井、兵营）：侧边栏正常刷新，无异常报错；他人建筑被炸时己方侧边栏不刷新。
 
+feat(vpl-lighting): 实现 VXL 体素 VPL 查表光照
+
+- 💡 **VPL 光照表加载（Canvas 纹理）**
+  `GameRes.loadVpl` 读取 `voxels.vpl`（`units.vpl` 兜底），解析 32 页亮度表，重排为 `pages[page][color]` 布局并通过 **Canvas 纹理**（R 通道 = VPL 值，行=页、列=色）上传——规避本项目 DataTexture 上传后采样恒为 0 的问题（调色板用 Canvas 纹理已验证可行）。光照表模块级挂到 `paletteShaderLib`，材质构造时兜底读取。
+
+- 🔆 **光照公式**
+  页号 = `(ambient + diffuse + spec×0.3) × 16`；diffuse = `max(N·L,0)`；spec 用 Schlick `H·N/(3 − H·N·3 + H·N)`，viewer 固定 +Z，Schlick S=3。法线使用**体素空间原始法线**（法线表[normalIndex]，不随 modelMatrix 变换），stale normal 索引 253-255 → 固定页 16。最终索引 = `vpl[page][color]`，查调色板得到 RGB。
+
+- 🧭 **世界固定光源（随单位朝向）**
+  光 = `Rz(-e°)·(-1,0,0)`（e 为单位 direction 0-360°），**连续**随模型反向旋转，使光照不随坦克自转（世界固定太阳），转向任意角度明暗一致、不露馅。facing=0 时光为 `(-1,0,0)`。
+
+- 🧩 **per-instance 光传递**
+  新增 `instanceLightDir` 实例属性（3 floats），链路 `Vehicle → setVxlLightDir → BatchedMesh.lightDir → MeshInstancingBatch 增属性 → InstancedMesh.updateFromMeshes(每帧 getLightDir 拷贝) → 着色器 vInstanceLightDir`。shader 实例路径用它、非实例路径回退 `vplLightDir` uniform（默认 facing0 的 (-1,0,0)）。`PalettePhongMaterial` 新增 `lightDir` 访问器。
+
+- 🎨 **明暗亮度可调**
+  页公式环境光地板 `vplAmbient`（默认 0.25）可调：太亮调低、太暗调高；spec 系数 0.3。
+
+### ⚠️ 破坏性变更
+- 无。VPL 表缺失时回退原实时光照（保留 `vplEnabled=false` 路径），行为向后兼容。
+- 新增 per-instance `instanceLightDir` 属性，随 `VxlBatchedBuilder`/`MeshInstancingBatch` 自动创建，不影响既有 SHP/合并渲染。
+
+### 🧪 测试建议
+1. **加载**：控制台出现 `VPL 光照表 voxels.vpl: 已加载 sections=32`，坦克/载具体素由实时光照切换为 VPL 查表光照。
+2. **明暗方向**：侧面受光、背面变暗，背光面不被完全压黑（ambient 0.25 托底）。
+3. **转向**：下达转向/移动指令，坦克掉头后受光/背光面随转向切换，任意朝向明暗一致（世界固定太阳）。
+4. **调亮度**：整体偏亮/偏暗时调整 `vplAmbient`（默认 0.25）。
+5. **回归**：无 VPL 数据（缺失 mix）时单位仍能正常显示，不黑屏。
+
 

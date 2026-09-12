@@ -412,6 +412,13 @@ System.register(
                       ? (e = this.lastDirection)
                       : (this.lastDirectionDelta = T)),
                     (this.lastDirection = e));
+                  // vera20k 体素光=世界固定太阳：模型按 e(度) 连续旋转，光反向 Rz(-e)·(-1,0,0) 抵消，使光照不随模型自转。
+                  // facing=0 时光=(-1,0,0)；转向时光连续随模型反向，绝不"露馅"。
+                  var _vxlRad = (e * Math.PI) / 180,
+                    _vxlLd = new THREE.Vector3(-Math.cos(_vxlRad), Math.sin(_vxlRad), 0);
+                  ((!this._lastVoxelLight || this._lastVoxelLight.distanceToSquared(_vxlLd) > 1e-8) &&
+                    ((this._lastVoxelLight ?? (this._lastVoxelLight = new THREE.Vector3())).copy(_vxlLd),
+                    this.vxlBuilders.forEach((b) => b.setVxlLightDir(_vxlLd))));
                   var m = this.gameObject.owner.color;
                   this.lastOwnerColor !== m &&
                     (this.palette.remap(m),

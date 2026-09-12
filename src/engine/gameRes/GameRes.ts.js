@@ -38,10 +38,11 @@ System.register(
     "engine/gameRes/GameResImporter",
     "data/vfs/MemArchive",
     "data/vfs/VirtualFile",
+    "engine/gfx/material/paletteShaderLib",
   ],
   function (e, t) {
     "use strict";
-    var l, r, s, c, h, f, o, u, d, y, n, g, T, p, m, v, b, S, w, E, C, x, O, A, M, R, P, I, k, B, N, i, Ma, Vf;
+    var l, r, s, c, h, f, o, u, d, y, n, g, T, p, m, v, b, S, w, E, C, x, O, A, M, R, P, I, k, B, N, i, Ma, Vf, Q;
     t && t.id;
     return {
       setters: [
@@ -143,6 +144,9 @@ System.register(
         },
         function (e) {
           Vf = e;
+        },
+        function (e) {
+          Q = e;
         },
       ],
       execute: function () {
@@ -448,6 +452,7 @@ System.register(
                 await o.loadExtraMixFiles(f.Engine.getActiveEngine()),
                 await this.loadCustomMix(o),
                 await this.loadMixes(i, r, o, e),
+                await this.loadVpl(),
                 await f.Engine.loadMapList(),
                 await this.initUiCssVariables(this.rootEl),
                 r
@@ -574,6 +579,63 @@ System.register(
                   } catch (e) {
                     if (!(e instanceof I.StorageQuotaError)) throw e;
                   }
+              }
+            }
+            async loadVpl() {
+              // VPL 光照表懒加载（voxels.vpl，ra2.mix/local.mix 内；units.vpl 兜底）。
+              // 格式（ModEnc 权威）：16 字节头(firstRemap,lastRemap,numSections,unknown) + 768 字节冗余调色板
+              // + numSections × 256 字节亮度页（RA2 为 32 页，文件共 8976 字节）。
+              // 重排成 256 页纹理（页 p → sections[min(p, numSections-1)]），行=page 列=color，
+              // 对齐 C++ VxlRenderer.cpp 的 VplTex.Load(x=colorIndex, y=page)。
+              let e = f.Engine.vfs;
+              if (!e) return;
+              var t = null;
+              for (var s of ["voxels.vpl", "units.vpl"]) {
+                try {
+                  t = e.openFile(s).stream;
+                  break;
+                } catch (e) {
+                  if (!(e instanceof k.FileNotFoundError)) throw e;
+                }
+              }
+              if (!t) {
+                console.warn("VPL 光照表 voxels.vpl/units.vpl 未找到,保持现有实时光照");
+                return;
+              }
+              try {
+                var a = t.readUint8Array(t.byteLength);
+                if (a.length < 16 + 768 + 256) throw new Error("VPL 文件过小(" + a.length + " 字节)");
+                var n = a[8] | (a[9] << 8) | (a[10] << 16) | (a[11] << 24);
+                n < 1 && (n = 1);
+                n > 32 && (n = 32);
+                // 页序对齐 vera20k/vpl_file：页=行、色=列，直接 src=min(p,n-1)，不翻转。
+                // 用 Canvas 承接 VPL RGBA（本项目 DataTexture 上传不可靠，探针实测采样返回 0；
+                // 调色板走 Canvas 纹理已验证可行）。R 通道=VPL 值，行=l页，列=color。
+                var cv = document.createElement("canvas");
+                (cv.width = 256), (cv.height = 256);
+                var ctx = cv.getContext("2d"),
+                  id = ctx.createImageData(256, 256),
+                  d = id.data;
+                for (var l = 0; l < 256; l++) {
+                  var src = l < n ? l : n - 1;
+                  var c = src;
+                  for (var h = 0; h < 256; h++) {
+                    var v = a[16 + 768 + c * 256 + h],
+                      p = 4 * (l * 256 + h);
+                    (d[p] = v), (d[p + 1] = 0), (d[p + 2] = 0), (d[p + 3] = 255);
+                  }
+                }
+                ctx.putImageData(id, 0, 0);
+                // 行向：与已脱色的调色板同约定 flipY=false（y=(row+0.5)/H → 正确行）。现在存储页 l=section l，与 C++ 对齐。
+                var g = new THREE.CanvasTexture(cv);
+                (g.minFilter = THREE.NearestFilter),
+                  (g.magFilter = THREE.NearestFilter),
+                  (g.generateMipmaps = !1),
+                  (g.flipY = !1),
+                  (g.needsUpdate = !0);
+                (Q.paletteShaderLib.vplTexture = g), (Q.paletteShaderLib.vplEnabled = !0);
+                } catch (e) {
+                console.warn("VPL 光照表解析失败,保持现有实时光照", e);
               }
             }
             async initUiCssVariables(t) {
