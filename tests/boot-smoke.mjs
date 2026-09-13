@@ -11,15 +11,25 @@
  *   3. No uncaught error that looks like a module-resolution / vendor failure.
  *
  * jsdom cannot do WebGL, so we do NOT assert "reached main menu" here — we assert
- * the module graph is intact and the entry executes without a missing-module
- * throw. Full visual boot is verified separately by the Playwright gate / humans.
+ * the module graph is intact (every module registered, vendor deps included). Note
+ * that index.html's inline capability probe also fires `alert("Browser not
+ * supported")` under jsdom and the app therefore never gets to render; that is
+ * expected and non-fatal. Full visual boot is verified separately by the Playwright
+ * gate / humans.
  *
- * Run: node tests/boot-smoke.mjs   (needs the server running on 127.0.0.1:8091)
+ * Registration is read from `System.defined` (absolute-URL keyed), NOT `System.has()`
+ * — the vendored SystemJS ships `has` as a legacy stub that always returns false.
+ *
+ * Run: node tests/boot-smoke.mjs   (needs `npm run serve` running; the served port
+ *      is taken from PORT, matching server/index.mjs, default 8080)
  */
 
 import { JSDOM } from "jsdom";
 
-const SERVER = "http://127.0.0.1:8091";
+// Must stay in lockstep with server/index.mjs (`process.env.PORT || argv || "8080"`);
+// a hardcoded port here silently disconnected this test from the dev server.
+const PORT = parseInt(process.env.PORT || "8080", 10);
+const SERVER = process.env.OPENYRWEB_TEST_URL || `http://127.0.0.1:${PORT}`;
 
 async function main() {
   console.log("Loading built index.html from", SERVER);
@@ -80,19 +90,32 @@ async function main() {
   console.log("\n=== RESULTS ===");
 
   // Verify SystemJS + the vendor bundle registered the modules the engine imports.
+  //
+  // DO NOT use System.has(name) here. The vendored SystemJS build exposes `has` as a
+  // legacy stub: it returns false for every module, including ones that are registered
+  // (measured: ra2web.js issues all 1363 System.register calls, yet has("main") is
+  // false). The registry that actually holds them is System.defined, keyed by the
+  // ABSOLUTE resolved URL — so membership must be tested via URL resolution.
   const probe = await window.eval(`(async () => {
-    const results = { hasSystem: !!window.System, mainResolved: null, vendorSamples: {} };
-    if (!window.System || !window.System.has) return results;
-    // 'main' / 'Application' are registered by ra2web.js.
-    results.mainResolved = window.System.has("main");
+    const results = { hasSystem: !!window.System, registered: 0, mainResolved: null, headResolved: null, vendorSamples: {} };
+    if (!window.System) return results;
+    const defined = window.System.defined || {};
+    results.registered = Object.keys(defined).length;
+    const has = (name) => !!defined[new URL(name, window.location.origin + "/").href];
+    // 'main' is registered by ra2web.js mid-bundle (module 725 of 1363) and
+    // 'data/IniSection' is the first one — together they bracket a full load.
+    results.mainResolved = has("main");
+    results.headResolved = has("data/IniSection");
     // Sample critical vendor modules that the engine imports at boot.
     const want = ["react","react-dom","@puzzl/core/lib/async/cancellation","threads","three"];
-    for (const name of want) results.vendorSamples[name] = window.System.has(name);
+    for (const name of want) results.vendorSamples[name] = has(name);
     return results;
   })()`);
 
   console.log("SystemJS present:", probe.hasSystem);
-  console.log("'main' registered:", probe.mainResolved);
+  console.log("System.defined entries:", probe.registered);
+  console.log("bundle head module registered ('data/IniSection'):", probe.headResolved);
+  console.log("bundle mid module registered ('main'):", probe.mainResolved);
   console.log("Vendor modules registered:");
   let vendorMissing = 0;
   for (const [name, ok] of Object.entries(probe.vendorSamples || {})) {
@@ -112,8 +135,14 @@ async function main() {
     fatal.forEach((e) => console.log("   ✗ " + e.slice(0, 300)));
   }
 
-  const pass = probe.hasSystem && probe.mainResolved && vendorMissing === 0 && fatal.length === 0;
-  console.log("\n=== " + (pass ? "PASS ✅ — module graph intact, entry executed" : "FAIL ❌") + " ===");
+  const pass =
+    probe.hasSystem &&
+    probe.registered > 0 &&
+    probe.headResolved &&
+    probe.mainResolved &&
+    vendorMissing === 0 &&
+    fatal.length === 0;
+  console.log("\n=== " + (pass ? "PASS ✅ — module graph intact, entry registered" : "FAIL ❌") + " ===");
   process.exit(pass ? 0 : 1);
 }
 

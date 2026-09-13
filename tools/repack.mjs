@@ -15,6 +15,15 @@
  *   - "@chronodivide/sp-bots"      -> "@openyrweb/sp-bots"   (in GameLoader import)
  *   - version module string        -> OpenYRWeb version      (default 0.1.0)
  *
+ * Module sources (JS -> TS migration):
+ *   Each module body comes from ONE of two places, chosen by a single run-wide flag:
+ *     - TS-driven run (any non-.d.ts .ts exists under src/): tools/compile-ts.mjs is
+ *       invoked first, then build/ts-modules/<name>.js is preferred for every module
+ *       that has one; modules without a .ts rewrite fall back to the .ts.js twin.
+ *     - otherwise: every body comes from the .ts.js twin, and any leftover
+ *       build/ts-modules/ is deleted so a stale artifact cannot shadow its twin.
+ *   Once a module has a .ts rewrite, its .ts.js twin is dead — edit the .ts.
+ *
  * Minification: we collapse each module body back to one line (safe — SystemJS register
  * format is whitespace-insensitive; ASI is preserved because statements stay ;-terminated).
  * We do NOT re-mangle identifiers.
@@ -24,15 +33,18 @@
  *   VERSION=0.2.0 node tools/repack.mjs  # override version
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SRC = join(ROOT, "src");
+const TOOLS = resolve(__dirname);
 const OUT_FILE = join(ROOT, "build", "dist", "ra2web.js");
 const MAP = join(SRC, "_module-map.json");
+const TS_MODULES = join(ROOT, "build", "ts-modules");
 const VERSION = process.env.VERSION || "0.1.0";
 
 // Alias-normalization substitutions applied to every module's source text.
@@ -173,10 +185,92 @@ function collapseWhitespace(code) {
   return out.trim();
 }
 
+/** The reconstructed .ts.js twin of a not-yet-converted (or non-TS-built) module. */
+function extractTwin(mod) {
+  const filePath = join(SRC, mod.file);
+  if (!existsSync(filePath)) {
+    console.warn("  SKIP missing: " + mod.file);
+    return null;
+  }
+  return extractModule(filePath, mod.name);
+}
+
+/** Recursively collect every non-declaration .ts under src/ (absolute paths, sorted).
+ *  Hand-written walk rather than readdirSync({recursive:true}) so this works on
+ *  Node 18 / 20.0 too, not just 20.1+. `.d.ts` files don't emit and are skipped. */
+function collectTsSources() {
+  const found = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) found.push(full);
+    }
+  };
+  walk(SRC);
+  return found.sort();
+}
+
+/** Count the module files compile-ts.mjs emitted into build/ts-modules/. */
+function collectEmitted() {
+  let n = 0;
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) walk(join(dir, entry.name));
+      else if (entry.name.endsWith(".js")) n++;
+    }
+  };
+  if (existsSync(TS_MODULES)) walk(TS_MODULES);
+  return n;
+}
+
+/** Preferred source of a module body.
+ *
+ *  `useTs` is the single flag that governs the whole run (see main()): when the
+ *  build is TS-driven, build/ts-modules/<name>.js (from tools/compile-ts.mjs)
+ *  wins over the reconstructed .ts.js; otherwise the twin is authoritative.
+ *  Gating on this flag — not merely on the artifact's existence — is what stops
+ *  a stale build/ts-modules/ entry from silently shadowing a restored .ts.js
+ *  twin after a .ts source is deleted or reverted. */
+function loadModuleBody(mod, useTs) {
+  if (useTs) {
+    const tsFile = join(TS_MODULES, mod.name + ".js");
+    if (existsSync(tsFile)) {
+      let body = readFileSync(tsFile, "utf8").trimEnd();
+      if (!body.endsWith(";")) body += ";";
+      for (const [re, repl] of ALIASES) body = body.replace(re, repl);
+      return collapseWhitespace(body) + "\n";
+    }
+  }
+  return extractTwin(mod);
+}
+
 function main() {
   if (!existsSync(MAP)) {
     console.error("Missing src/_module-map.json. Run tools/split-bundle.mjs first.");
     process.exit(1);
+  }
+  // Is this run TS-driven? This single flag must govern BOTH the compile step
+  // below AND the per-module source choice in loadModuleBody(). Deriving them from
+  // two different conditions (src/*.ts presence vs. build/ts-modules/*.js presence)
+  // is what let a stale compiled artifact outlive its deleted .ts source.
+  const tsSources = collectTsSources();
+  const useTs = tsSources.length > 0;
+  if (useTs) {
+    const r = spawnSync(process.execPath, [join(TOOLS, "compile-ts.mjs")], {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+    if (r.status !== 0) throw new Error("TS compile failed");
+    console.log(
+      "  using " + collectEmitted() + " TS-compiled module(s) over their .ts.js twins",
+    );
+  } else {
+    // No TS sources: drop compiled artifacts left over from an earlier run so the
+    // .ts.js twins are authoritative. Without this, `npm run repack` silently
+    // disagrees with `npm run build` (which wipes build/ before repacking).
+    rmSync(TS_MODULES, { recursive: true, force: true });
+    console.log("  no TS sources under src/ — all module bodies from .ts.js twins");
   }
   const map = JSON.parse(readFileSync(MAP, "utf8"));
   console.log("Repacking " + map.moduleCount + " modules from src/ -> " + OUT_FILE);
@@ -191,13 +285,9 @@ function main() {
   let count = 0;
   let versionChanged = false;
   for (const mod of map.modules) {
-    const filePath = join(SRC, mod.file);
-    if (!existsSync(filePath)) {
-      console.warn("  SKIP missing: " + mod.file);
-      continue;
-    }
     const wasVersion = mod.name === "version";
-    const body = extractModule(filePath, mod.name);
+    const body = loadModuleBody(mod, useTs);
+    if (body === null) continue;
     if (wasVersion && body.includes('"' + VERSION + '"')) versionChanged = true;
     parts.push(body);
     count++;

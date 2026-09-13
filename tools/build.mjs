@@ -79,7 +79,13 @@ function copyTree(rootDir, relDir, dstDir) {
 // ---- 1. Repack our bundle (dist/ra2web.js) -----------------------------------
 function stepRepack() {
   log("[1/6] Repacking bundle: src/ -> build/dist/ra2web.js");
-  const r = spawnSync("node", [join(__dirname, "repack.mjs")], { cwd: ROOT, stdio: "inherit" });
+  // Use process.execPath, not the bare name "node": spawnSync goes through
+  // CreateProcess, which cannot resolve .cmd/.ps1 shims. With a version-manager
+  // Node (nvm-windows / fnm / volta) on PATH this would die with ENOENT while the
+  // outer `node tools/build.mjs` and `npm run build` both still worked — and the
+  // bare wrapper (build.bat) would print "[INFO] Starting build" then stop with no
+  // error at all. compile-ts.mjs and repack.mjs already use process.execPath.
+  const r = spawnSync(process.execPath, [join(__dirname, "repack.mjs")], { cwd: ROOT, stdio: "inherit" });
   if (r.status !== 0) throw new Error("repack failed");
 }
 
@@ -139,6 +145,9 @@ function stepIndex() {
   // Strip the upstream's analytics / third-party injectors entirely.
   html = html.replace(/<!-- Global site tag[\s\S]*?<\/script>/i, "");
   html = html.replace(/<script async src="https:\/\/www\.googletagmanager\.com[^"]*"><\/script>/i, "");
+  // The inline gtag config block (dataLayer + G-XXXX id) survives the two rules
+  // above (they only match the loader comment / external script tag) — drop it too.
+  html = html.replace(/<script>\s*window\.dataLayer[\s\S]*?<\/script>\s*/i, "");
   html = html.replace(/<script[^>]*nonce=[^>]*>[\s\S]*?zaraz[\s\S]*?<\/script>/i, "");
   html = html.replace(/<script data-cfasync="false"[\s\S]*?<\/script>(?=\s*<\/head>)/i, "");
   html = html.replace(/<script>\(function\(\)\{function c\(\)\{var b=a\.contentDocument[\s\S]*?<\/script>\s*<\/body>/i, "</body>");
@@ -249,6 +258,8 @@ function stepVerify() {
     ["chronodivide", /chronodivide/i],
     ["chrono divide", /chrono divide/i],
     ["0.82.0", /0\.82\.0/],
+    ["google analytics (gtag id)", /G-NT498QGSGZ|googletagmanager/i],
+    ["google analytics (dataLayer/gtag)", /window\.dataLayer|gtag\(/],
   ];
   let bad = 0;
   const walk = (d, rel) => {

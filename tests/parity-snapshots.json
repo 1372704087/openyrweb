@@ -1,0 +1,537 @@
+{
+  "util/math": {
+    "0": 2,
+    "1": 3,
+    "2": 0,
+    "3": 1.5,
+    "4": true,
+    "5": false,
+    "6": 2.5,
+    "7": 0,
+    "8": 3.141,
+    "9": -3.141,
+    "10": 0,
+    "11": 3.142,
+    "12": -2.72,
+    "13": 6,
+    "14": -9,
+    "15": 1456420779,
+    "16": 1743471802,
+    "17": 2166136261
+  },
+  "game/math/GameMath": {
+    "0": 6,
+    "1": 1000000,
+    "2": 1296,
+    "3": 0,
+    "4": 1,
+    "5": -0.004848117819001606,
+    "6": 0,
+    "7": 1.414213562373095,
+    "8": 3,
+    "9": 0.01,
+    "10": 0,
+    "11": 1.2246467991473532e-16,
+    "12": 1,
+    "13": 0.6932620820235242,
+    "14": 0.35111543947278884,
+    "15": -0.2775009676380955,
+    "16": null,
+    "17": null,
+    "18": 1,
+    "19": 0.33289269147567685,
+    "20": -0.802123192755044,
+    "21": 0,
+    "22": 0.5235987755982988,
+    "23": 1.5707963267948966,
+    "24": -0.2521031141769585,
+    "25": null,
+    "26": 1.5707963267948966,
+    "27": 1.0471975511965979,
+    "28": 3.141592653589793,
+    "29": 0.7851949811,
+    "30": 0,
+    "31": 2.356397672489793,
+    "32": -0.7851949811,
+    "33": -2.356397672489793,
+    "34": 0,
+    "35": 1.5707963267948966,
+    "36": 3.141592653589793,
+    "37": 1.5707963267948966,
+    "38": 0,
+    "39": 0.7853981633974483,
+    "40": null,
+    "41": 1024,
+    "42": 15.625,
+    "43": {
+      "__error__": "Error: Exponent must be a safe integer"
+    },
+    "44": 1.0000000000000001e+60,
+    "45": 1,
+    "46": 108,
+    "47": 647
+  },
+  "game/math/Quaternion": {
+    "0": {
+      "x": 1,
+      "y": 2,
+      "z": 3,
+      "w": 4,
+      "len": 5.477225575051661
+    },
+    "1": {
+      "x": 0,
+      "y": 0.36469622203881186,
+      "z": 0,
+      "w": 0.9311265572577219
+    },
+    "2": {
+      "x": 0.3505392747564955,
+      "y": 0.19996380818445908,
+      "z": 0.46856000757904925,
+      "w": 0.785867807946782
+    },
+    "3": {
+      "x": 0.06442799492037588,
+      "y": 0.3983871749956078,
+      "z": 0.317524273221952,
+      "w": 0.8580880072489243
+    },
+    "4": {
+      "x": 0.27443972234007763,
+      "y": 0.45608593021496463,
+      "z": 0.17448846509965488,
+      "w": 0.8283853201312888
+    },
+    "5": {
+      "x": 0.14084441758066096,
+      "y": 0.13395850882022273,
+      "z": 0,
+      "w": 0.9793607185402542
+    },
+    "6": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "7": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    }
+  },
+  "game/math/Vector2": {
+    "0": {
+      "x": 3,
+      "y": 4,
+      "len": 5
+    },
+    "1": 0.7851949811,
+    "2": 3.141592653589793,
+    "3": 3.1425926532621706,
+    "4": 5,
+    "5": {
+      "x": 3.421390162789373,
+      "y": 4.337194881865135
+    }
+  },
+  "game/math/Vector3": {
+    "0": {
+      "x": 1,
+      "y": 2,
+      "z": 2,
+      "len": 3
+    },
+    "1": {
+      "x": 0.5000000000000002,
+      "y": 0,
+      "z": -0.8660254037844386
+    },
+    "2": {
+      "x": 0.6163322836331092,
+      "y": 0.7645901394389912,
+      "z": -0.18851110000278548
+    },
+    "3": 5.830951894845301,
+    "4": 0.4751174074873452,
+    "5": {
+      "x": 1,
+      "y": 0,
+      "z": 3
+    },
+    "6": {
+      "x": 1,
+      "y": -2,
+      "z": 3
+    },
+    "7": {
+      "x": 3.399025696079046,
+      "y": 3.4837395160532747,
+      "z": -1.1446323871371307
+    },
+    "8": {
+      "x": 4.73853268926911,
+      "y": 2,
+      "z": -1.595715498680153
+    }
+  },
+  "game/GameSpeed": {
+    "0": 15,
+    "1": 0.6666666666666666,
+    "2": 0.8,
+    "3": 1.3333333333333333,
+    "4": 2,
+    "5": 3,
+    "6": 4
+  },
+  "game/event/EventType": {
+    "0": 0,
+    "1": 64,
+    "2": 66,
+    "3": "Cheer",
+    "4": "VirusCloud",
+    "5": "WarheadDetonate",
+    "6": 134
+  },
+  "game/event/TimerExpireEvent": {
+    "0": {
+      "type": 64,
+      "sameTarget": true
+    }
+  },
+  "game/CountdownTimer": {
+    "0": {
+      "initial": {
+        "ticks": 0,
+        "running": false
+      },
+      "afterSet": {
+        "ticks": 40,
+        "seconds": 2
+      },
+      "afterAdd": {
+        "ticks": 0
+      },
+      "finalTicks": 0,
+      "finalRunning": false,
+      "events": [
+        {
+          "type": 64,
+          "isTarget": true
+        }
+      ],
+      "isRunning": false
+    },
+    "1": {
+      "stopped": {
+        "running": false
+      },
+      "ticksAfterStoppedUpdate": 15
+    }
+  },
+  "game/Prng": {
+    "0": {
+      "seq": [
+        10,
+        7,
+        6,
+        3,
+        2,
+        8,
+        2,
+        1
+      ],
+      "last": 0.05242926115170121
+    },
+    "1": {
+      "seq": [
+        94,
+        43,
+        35,
+        68,
+        38
+      ]
+    },
+    "2": {
+      "seq": [
+        0.9540608604438603,
+        0.6439338501077145,
+        0.5141786322928965,
+        0.20896972715854645,
+        0.14856502530165017
+      ]
+    },
+    "3": {
+      "seq": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ]
+    },
+    "4": {
+      "p1": 0.7201855960302055,
+      "p2": 0.7201855960302055
+    }
+  },
+  "util/Base64": {
+    "0": "SGVsbG8sIFJBMiE=",
+    "1": "Hello, RA2!",
+    "2": "roundtrip-binaryÿþ",
+    "3": true,
+    "4": false,
+    "5": false,
+    "6": true
+  },
+  "util/string": {
+    "0": "0007",
+    "1": "000042",
+    "2": "123",
+    "3": true,
+    "4": false,
+    "5": [
+      72,
+      105
+    ],
+    "6": [
+      72,
+      105
+    ],
+    "7": "SGk=",
+    "8": "Hi",
+    "9": "你好RA2",
+    "10": [
+      79,
+      96
+    ],
+    "11": "1011121314151617",
+    "12": ""
+  },
+  "data/Crc32": {
+    "0": 256,
+    "1": 1996959894,
+    "2": 755167117,
+    "3": 1293356558,
+    "4": 3421780262,
+    "5": 0,
+    "6": 796801258,
+    "7": {
+      "got": 2180413220,
+      "polynomal": 4294967295
+    },
+    "8": 575428999,
+    "9": {
+      "oneShot": 688229491,
+      "matches": true
+    }
+  },
+  "game/Coords": {
+    "0": 30,
+    "1": 256,
+    "2": 8.533333333333333,
+    "3": 0.5235987755982988,
+    "4": 0.7853981633974483,
+    "5": 0.7071067811865476,
+    "6": 0.816496580927726,
+    "7": {
+      "x": 512,
+      "y": 768
+    },
+    "8": 313.53468707624677,
+    "9": 7.5,
+    "10": {
+      "x": 2133,
+      "y": 1280
+    },
+    "11": 256,
+    "12": {
+      "x": 1024,
+      "y": 209.02312471749786,
+      "z": 1792
+    },
+    "13": {
+      "x": 1,
+      "y": 3
+    },
+    "14": {
+      "x": 5,
+      "y": 0,
+      "z": 6
+    }
+  },
+  "engine/type/ObjectType": {
+    "0": 0,
+    "1": 7,
+    "2": 2,
+    "3": 11,
+    "4": "Building",
+    "5": "Debris",
+    "6": 24
+  },
+  "game/SideType": {
+    "0": 0,
+    "1": 3,
+    "2": 4,
+    "3": "Nod",
+    "4": "Mutant",
+    "5": 10
+  },
+  "util/Color": {
+    "0": 16744448,
+    "1": "#ff8000",
+    "2": "#10ff03",
+    "3": "255,128",
+    "4": 16711680,
+    "5": 16777215,
+    "6": 255,
+    "7": "#c8af63",
+    "8": "#00803f",
+    "9": 19659520
+  },
+  "game/Traits": {
+    "0": {
+      "orderAfterAdd": [
+        "HashTrait",
+        "EchoTrait"
+      ],
+      "orderAfterFront": [
+        "EchoTrait",
+        "HashTrait",
+        "EchoTrait"
+      ],
+      "byClass": 1,
+      "byProto": [],
+      "afterRemove": 2,
+      "noMatch": 0,
+      "disposed": true
+    },
+    "1": "No matching trait found",
+    "2": [
+      0,
+      1,
+      0
+    ],
+    "3": true,
+    "4": false,
+    "5": true
+  },
+  "game/Country": {
+    "0": {
+      "id": 0,
+      "side": 3,
+      "name": "Americans",
+      "playable": true
+    },
+    "1": false,
+    "2": false,
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "4": "Cannot read properties of undefined (reading 'Overlay')",
+    "5": "Soviets"
+  },
+  "game/PlayerList": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Civilian')"
+    },
+    "1": "RangeError: Player #0 out of bounds",
+    "2": "Player with name \"Nobody\" not found",
+    "3": "Player X not found"
+  },
+  "game/Alliances": {
+    "0": "0/1",
+    "1": {
+      "afterRequest": {
+        "status": 0,
+        "found": true,
+        "allied": false
+      },
+      "formed": true,
+      "alliesOfA": [
+        "B"
+      ],
+      "hash": 214582783,
+      "state": [
+        [
+          "B",
+          "A",
+          1
+        ]
+      ],
+      "sharedIntelAB": true,
+      "sharedIntelAC": false
+    },
+    "2": [
+      "Player Bot is not a human combatant.",
+      "There is no pending alliance request for player B from player A",
+      "There is no alliance between player A and player B"
+    ],
+    "3": {
+      "__error__": "Error: There is no pending alliance request for player A from player B"
+    },
+    "4": [
+      true,
+      true,
+      2,
+      "no-throw"
+    ],
+    "5": {
+      "observer": true,
+      "self": true,
+      "emptyHash": 2166136261
+    }
+  },
+  "game/Player": {
+    "0": {
+      "name": "Bob",
+      "credits": 0,
+      "score": 0,
+      "isObserver": true,
+      "isNeutral": false,
+      "combatant": false,
+      "color": "#ff0000"
+    },
+    "1": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Civilian')"
+    },
+    "2": [
+      "RangeError: Can't set credits to a negative value",
+      12345
+    ],
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
+    },
+    "4": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "5": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
+    },
+    "6": {
+      "emptyHash": 84696351,
+      "traitHash": 175541448,
+      "noHashTrait": 292984781
+    },
+    "7": {
+      "name": "Bob",
+      "credits": 0,
+      "traits": {
+        "Object": {
+          "hp": 1
+        }
+      }
+    },
+    "8": "Cannot read properties of undefined (reading 'Vehicle')",
+    "9": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "10": {
+      "disposed": 11,
+      "ok": true
+    }
+  }
+}

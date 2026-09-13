@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "rootDir": "src",
+    "outDir": "build/ts-out",
+    "target": "es2020",
+    "module": "system",
+    "moduleResolution": "node10",
+    "strict": false,
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "sourceMap": false,
+    "esModuleInterop": false,
+    "newLine": "lf"
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+}

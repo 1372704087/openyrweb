@@ -18,6 +18,9 @@ assets/
 .fetch-manifest.json
 .tmp/
 
+# TypeScript incremental build info (tsc --incremental / composite)
+*.tsbuildinfo
+
 # Reverse-engineering workspace (internal; not for the public repo)
 re/
 docs/
@@ -27,6 +30,8 @@ AGENTS.md
 .zcode/
 .zcode-final-base.png
 .pi/
+.workbuddy/
+TS迁移检查报告.md
 
 # Playwright browser cache
 .browsers/

@@ -10,12 +10,15 @@
   },
   "scripts": {
     "build:vendor": "node tools/build-vendor.mjs",
+    "build:ts": "node tools/compile-ts.mjs",
     "split": "node tools/split-bundle.mjs",
-    "beautify": "prettier --write \"src/**/*.ts.js\"",
+    "beautify": "prettier --write \"src/**/*.ts\"",
+    "beautify:twins": "prettier --write \"src/**/*.ts.js\"",
     "repack": "node tools/repack.mjs",
     "build": "node tools/build.mjs",
     "serve": "node server/index.mjs",
-    "test:boot": "node tests/boot-smoke.mjs"
+    "test:boot": "node tests/boot-smoke.mjs",
+    "test:parity": "node tests/ts-parity.mjs"
   },
   "dependencies": {
     "@puzzl/core": "1.0.0-beta.1",
@@ -32,13 +35,14 @@
     "react-dom": "16.13.1",
     "sprintf-js": "^1.1.3",
     "stats.js": "^0.17.0",
-    "three.meshline": "1.2.0",
     "threads": "^1.7.0",
+    "three.meshline": "1.2.0",
     "wavefile": "^11.0.0"
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
     "jsdom": "^29.1.1",
-    "prettier": "^3.9.0"
+    "prettier": "^3.9.0",
+    "typescript": "^5.9.3"
   }
 }
