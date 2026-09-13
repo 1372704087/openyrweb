@@ -361,10 +361,8 @@
 排查线索：把各界面的 `handleError` 升级为调用 `handleWithDetails(e, message, details, callback)`——错误对象本身可提供 type/stack，各界面可补充各自的 context（如 MapName/GameId）；注意 `handleWithDetails` 已有无 ErrorDetailsBoxApi 时的回退逻辑，改动风险低。
 优先级：低（已记录，等有时间再实现）
 
-38. VPL 体素光照下坦克等 VXL 载具"变黑/明暗暗化"失效
-影响模块：`src/engine/gfx/material/paletteShaderLib.ts.js`（paletteVplFragment）、`src/engine/renderable/entity/Vehicle.ts.js`（vxlExtraLight/setExtraLight）
-问题描述：VPL 查表光照的片段分支把 `vplColor` 直接作为输出（`totalEmissiveRadiance = vplColor`，`reflectedLight` 清零），并且**不再叠加 extraLight**（实现 VPL 时删除了 `vplColor += extraLight * vplColor` 以避免 extraLight≈0.5-0.8 时整体过亮）。因此依赖 `vxlExtraLight` 的明暗效果在坦克/VXL 载具上失效：原来的"变黑/暗化"（及力场盾/铁幕/脉冲/部分特效经 extraLight 调暗）不再生效。
-预期行为：VPL 模式下，载具 extraLight 变化（暗化/变亮）仍能反映到体素模型明暗。
-实际表现：坦克等 VXL 载具在应暗化的场景（extraLight 被调低）亮度不变。
-排查线索：VPL 分支需在 `vplColor` 上施加 per-instance `vInstanceExtraLight` 的明暗比例，但要避免破坏已调好的基准亮度——正确做法是给每个实例同时传递"基础 extraLight"（`baseVxlExtraLight = computeNoAmbient + extraUnitLight`）作为归一化基准，用 `当前/基准` 作乘性系数（正常≈1、暗化<1、变亮>1）；目前 `instanceExtraLight` 只有当前值、无基准值，需增加 per-instance 属性。
-优先级：中
+38. [已修复] VPL 体素光照下坦克等 VXL 载具"变黑/明暗暗化"失效
+影响模块：`src/engine/gfx/material/paletteShaderLib.ts.js`（paletteVplFragment）、`src/engine/renderable/entity/Vehicle.ts.js`、`src/engine/gfx/batch/{BatchedMesh,InstancedMesh,MeshInstancingBatch}.ts.js`、`src/engine/renderable/builder/{VxlBatchedBuilder,VxlNonBatchedBuilder}.ts.js`
+问题描述：VPL 查表光照的片段分支把 `vplColor` 直接作为输出，且不再叠加 extraLight，导致坦克等 VXL 载具在 extraLight 被调低（暗化/特效）时亮度不变。
+已实施修复：新增 per-instance 属性 `instanceBaseExtraLight`，VPL 分支用 `factor = clamp(当前 extraLight / 基准 extraLight, 0, 2)` 乘 vplColor（正常≈1 不破坏已调亮度、暗化<1、变亮>1；仅当基准有效时生效）。基准 = `baseVxlExtraLight`（`computeNoAmbient + extraUnitLight`），在 Vehicle.updateBaseLight/创建网格时推给 VXL 构建器。非批处理路径（VxlNonBatchedBuilder 共享材质）暂未做归一化，仅存字段避免报错。
+优先级：中（已完成）

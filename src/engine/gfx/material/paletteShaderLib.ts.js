@@ -168,6 +168,14 @@ varying vec3 vVplWorldNormal;
     float vplPaletteRow = (paletteOffsetCount.x + 0.5) / paletteOffsetCount.y;
   #endif
     vec3 vplColor = texture2D(palette, vec2((vplIdx + 0.5) / 256.0, vplPaletteRow)).rgb;
+  #ifdef INSTANCE_TRANSFORM
+    // extraLight 明暗（修复：#38）。不用 per-instance 基准（会扰动实例化 attribute 布局致坦克变黑），
+    // 改为以常量 vplBaseX ≈ 正常日照基准(≈0.37) 参照：factor = clamp(1+(当前-基准)*gain, floor, 2)。
+    // 正常≈1（不破坏已调亮度）、extraLight 降低→暗化、升高→变亮，floor 兜底避免全黑。
+    const float vplBaseX = 0.33;
+    float vplDim = clamp(1.0 + (vInstanceExtraLight.x - vplBaseX) * 3.0, 0.2, 2.0);
+    vplColor *= vplDim;
+  #endif
     diffuseColor = vec4(vplColor, diffuseColor.a);
     reflectedLight.directDiffuse = vec3(0.0);
     reflectedLight.directSpecular = vec3(0.0);
