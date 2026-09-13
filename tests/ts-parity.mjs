@@ -919,6 +919,298 @@ const CONVERTED = [
     ],
   },
   {
+    name: "util/event",
+    tsjs: "src/util/event.ts.js",
+    probes: [
+      (ns) => {
+        const dispatcher = new ns.EventDispatcher();
+        const received = [];
+        dispatcher.subscribe((data, type) => received.push([type, data, "always"]));
+        dispatcher.subscribeOnce((data, type) => received.push([type, data, "once"]));
+        dispatcher.dispatch("evt", 1); // 两个监听器都触发
+        dispatcher.dispatch("evt", 2); // 仅常驻监听器触发
+        return received;
+      },
+      (ns) => {
+        const dispatcher = new ns.EventDispatcher();
+        dispatcher.subscribe((data) => received.push(data));
+        const received = [];
+        dispatcher.unsubscribe(dispatcher.listeners.values().next().value);
+        dispatcher.dispatch("evt", 1);
+        return { afterUnsubscribe: received.length, asEvent: dispatcher.asEvent() === dispatcher };
+      },
+      // 参数反转约定：dispatch(type, data) → listener(data, type)
+      (ns) => {
+        const dispatcher = new ns.EventDispatcher();
+        let got;
+        dispatcher.subscribe((data, type) => (got = [data, type]));
+        dispatcher.dispatch("the-type", "the-data");
+        return got;
+      },
+    ],
+  },
+  {
+    name: "game/theater/rampHeights",
+    tsjs: "src/game/theater/rampHeights.ts.js",
+    probes: [
+      (ns) => ns.rampHeights.length,
+      (ns) => ns.rampHeights[0],
+      (ns) => ns.rampHeights[13],
+      (ns) => ns.rampHeights[20],
+      (ns) => ns.rampHeights.map((row) => row.reduce((a, b) => a + b, 0)),
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyTick",
+    tsjs: "src/game/gameobject/trait/interface/NotifyTick.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyTick.onTick, // 必须是 symbol
+      (ns) => String(ns.NotifyTick.onTick).startsWith("Symbol()"),
+      (ns) => ns.NotifyTick.onTick === ns.NotifyTick.onTick,
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyDestroy",
+    tsjs: "src/game/gameobject/trait/interface/NotifyDestroy.ts.js",
+    probes: [(ns) => typeof ns.NotifyDestroy.onDestroy, (ns) => Object.keys(ns.NotifyDestroy).length],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyOwnerChange",
+    tsjs: "src/game/gameobject/trait/interface/NotifyOwnerChange.ts.js",
+    probes: [(ns) => typeof ns.NotifyOwnerChange.onChange, (ns) => Object.keys(ns.NotifyOwnerChange).length],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifySpawn",
+    tsjs: "src/game/gameobject/trait/interface/NotifySpawn.ts.js",
+    probes: [(ns) => typeof ns.NotifySpawn.onSpawn, (ns) => Object.keys(ns.NotifySpawn).length],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyUnspawn",
+    tsjs: "src/game/gameobject/trait/interface/NotifyUnspawn.ts.js",
+    probes: [(ns) => typeof ns.NotifyUnspawn.onUnspawn, (ns) => Object.keys(ns.NotifyUnspawn).length],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyAttack",
+    tsjs: "src/game/gameobject/trait/interface/NotifyAttack.ts.js",
+    probes: [(ns) => typeof ns.NotifyAttack.onAttack, (ns) => Object.keys(ns.NotifyAttack).length],
+  },
+  {
+    name: "game/gameobject/common/DeathType",
+    tsjs: "src/game/gameobject/common/DeathType.ts.js",
+    probes: [
+      (ns) => ns.DeathType.None,
+      (ns) => ns.DeathType.Normal,
+      (ns) => ns.DeathType.Temporal,
+      (ns) => ns.DeathType.Sink,
+      (ns) => ns.DeathType[ns.DeathType.Crush],
+      (ns) => Object.keys(ns.DeathType).length,
+    ],
+  },
+  {
+    name: "game/gameobject/Unit",
+    tsjs: "src/game/gameobject/Unit.ts.js",
+    probes: [(ns) => Object.keys(ns).length, (ns) => typeof ns],
+  },
+  {
+    name: "game/gameobject/Terrain",
+    tsjs: "src/game/gameobject/Terrain.ts.js",
+    probes: [
+      (ns) => {
+        const terrain = ns.Terrain.factory("T01", { radarInvisible: true, width: 1, height: 1 }, {});
+        return {
+          name: terrain.name,
+          type: terrain.type,
+          isTerrain: terrain.isTerrain(),
+          isSmudge: terrain.isSmudge(),
+          radarInvisible: terrain.radarInvisible,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/Smudge",
+    tsjs: "src/game/gameobject/Smudge.ts.js",
+    probes: [
+      (ns) => {
+        const smudge = ns.Smudge.factory("SCRTSTB", { width: 2, height: 2, radarInvisible: false }, {});
+        return {
+          type: smudge.type,
+          isSmudge: smudge.isSmudge(),
+          foundation: smudge.getFoundation(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/GameObject",
+    tsjs: "src/game/gameobject/GameObject.ts.js",
+    probes: [
+      (ns) => {
+        const object = new ns.GameObject(ns.ObjectType.Terrain, "T01", { uiName: "Tree" }, {});
+        return {
+          type: object.type,
+          name: object.name,
+          isTerrain: object.isTerrain(),
+          isOverlay: object.isOverlay(),
+          isBuilding: object.isBuilding(),
+          isUnit: object.isUnit(),
+          isTechno: object.isTechno(),
+          foundation: object.getFoundation(),
+          uiName: object.getUiName(),
+          spawned: object.isSpawned,
+          deathType: object.deathType,
+        };
+      },
+      (ns) => {
+        // 生命周期广播：挂载带 Symbol 钩子的 trait 并逐一触发
+        const object = new ns.GameObject(ns.ObjectType.Vehicle, "HTK", {}, {});
+        const calls = [];
+        const trait = {
+          owner: null,
+          [ns.NotifyTick.onTick](self, world) {
+            calls.push(["tick", world, self === object]);
+          },
+          [ns.NotifySpawn.onSpawn](self, world) {
+            calls.push(["spawn", world]);
+          },
+          [ns.NotifyUnspawn.onUnspawn](self, world) {
+            calls.push(["unspawn", world]);
+          },
+          [ns.NotifyDestroy.onDestroy](self, damage, warhead, attacker) {
+            calls.push(["destroy", damage, warhead, attacker]);
+          },
+          [ns.NotifyOwnerChange.onChange](self, oldOwner, newOwner) {
+            calls.push(["owner", oldOwner, newOwner]);
+          },
+          [ns.NotifyAttack.onAttack](self, a, b) {
+            calls.push(["attack", a, b]);
+          },
+        };
+        object.addTrait(trait);
+        object.update("W1");
+        object.onSpawn("W");
+        object.onAttack("src", "tgt"); // 分发时对调：trait 收到 (self, "tgt", "src")
+        object.onOwnerChange("old", "new");
+        object.onDestroy("dmg", "wh", "atk");
+        object.onUnspawn("W");
+        return {
+          calls,
+          spawnedAfterUnspawn: object.isSpawned,
+          cachedTick: object.cachedTraits.tick.length,
+        };
+      },
+      (ns) => {
+        // addTrait 的 tick 缓存只登记实现了 NotifyTick 的 trait
+        const object = new ns.GameObject(ns.ObjectType.Building, "GAPILE", {}, {});
+        object.addTrait({});
+        object.addTrait({ [ns.NotifyTick.onTick]: () => {} });
+        const hashWithTrait = (() => {
+          object.id = 5;
+          object.position = {
+            worldPosition: { x: 1.5, y: 0, z: -2.25, toArray: () => [1.5, 0, -2.25] },
+          };
+          return object.getHash();
+        })();
+        const state = object.debugGetState();
+        object.dispose();
+        return { cachedTick: object.cachedTraits.tick.length, hashWithTrait, stateId: state.id, disposed: object.isDisposed };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/ObjectPosition",
+    tsjs: "src/game/gameobject/ObjectPosition.ts.js",
+    probes: [
+      (ns, THREE) => {
+        // moveToTileCoords：tile 切换 + 小数偏移 + 世界坐标合成
+        const tiles = {
+          getByMapCoords: (rx, ry) => ({ rx, ry, z: 0, rampType: 0 }),
+          getPlaceholderTile: (rx, ry) => ({ rx, ry, z: 0, rampType: 0, placeholder: true }),
+        };
+        const position = new ns.ObjectPosition(tiles, { getBridgeOnTile: () => "bridge" });
+        position.moveToTileCoords(2.25, 3.5);
+        const world = position.worldPosition;
+        return {
+          tile: [position.tile.rx, position.tile.ry],
+          offset: [position._tileOffset.x, position._tileOffset.y],
+          world: [world.x, world.y, world.z],
+          subCell: position.subCell,
+          mapPosition: position.getMapPosition(),
+        };
+      },
+      (ns, THREE) => {
+        // 不存在的 tile：默认抛错 / allowPlaceholder 走占位
+        const tiles = {
+          getByMapCoords: () => null,
+          getPlaceholderTile: (rx, ry) => ({ rx, ry, z: 0, rampType: 0, placeholder: true }),
+        };
+        const position = new ns.ObjectPosition(tiles, {});
+        let error;
+        try {
+          position.moveToTileCoords(9, 9);
+        } catch (e) {
+          error = e.constructor.name;
+        }
+        position.moveToTileCoords(9, 9, true);
+        return { error, placeholder: position.tile.placeholder };
+      },
+      (ns, THREE) => {
+        // subCell 九宫格：0 居中，1-8 四角四边
+        const tiles = { getByMapCoords: (rx, ry) => ({ rx, ry, z: 0, rampType: 0 }) };
+        const position = new ns.ObjectPosition(tiles, {});
+        const out = [];
+        for (let cell = 0; cell <= 8; cell++) {
+          position.subCell = cell;
+          out.push([cell, position.subCell, position._tileOffset.x, position._tileOffset.y]);
+        }
+        return out;
+      },
+      (ns, THREE) => {
+        // 斜坡高度插值 + tileElevation 往返
+        const tiles = { getByMapCoords: (rx, ry) => ({ rx, ry, z: 2, rampType: 4 }) };
+        const position = new ns.ObjectPosition(tiles, {});
+        position.moveToTileCoords(1, 1);
+        const interpolated = position.interpolateRampHeight(0.25, 0.75, 4);
+        position.tileElevation = 2;
+        const worldY = position.worldPosition.y;
+        position.tileElevation = undefined === position.tileElevation ? 0 : position.tileElevation;
+        return { interpolated, worldY, elevation: position.tileElevation };
+      },
+      (ns, THREE) => {
+        // 事件派发 + tileChanged 标记 + 桥面查询 + clone
+        const tiles = { getByMapCoords: (rx, ry) => ({ rx, ry, z: 0, rampType: 0 }) };
+        const occupation = { getBridgeOnTile: (tile) => "bridge@" + tile.rx };
+        const position = new ns.ObjectPosition(tiles, occupation);
+        const events = [];
+        position.onPositionChange.subscribe((self, payload) =>
+          events.push([payload.tileChanged, self === position]),
+        );
+        position.moveToTileCoords(0, 0);
+        position.moveToTileCoords(0.5, 0); // 同 tile → tileChanged=false
+        position.tile = tiles.getByMapCoords(1, 1); // 直接换 tile → true
+        const bridge = position.getBridgeBelow();
+        const cloned = position.clone();
+        return {
+          events,
+          bridge,
+          clonedTile: [cloned.tile.rx, cloned.tile.ry],
+          clonedWorld: cloned.worldPosition.toArray(),
+          sameInstance: cloned === position,
+        };
+      },
+      (ns, THREE) => {
+        // 绝对高度模式：setAbsoluteElevationWorld 后 elevation 走反推
+        const tiles = { getByMapCoords: (rx, ry) => ({ rx, ry, z: 0, rampType: 0 }) };
+        const position = new ns.ObjectPosition(tiles, {});
+        position.moveToTileCoords(3, 3);
+        position.setAbsoluteElevationWorld(512);
+        const elevationAfterSet = position.tileElevation;
+        position.moveByLeptons3({ x: 256, y: 64, z: 0 });
+        return { elevationAfterSet, world: position.worldPosition.toArray() };
+      },
+    ],
+  },
+  {
     name: "game/Coords",
     tsjs: "src/game/Coords.ts.js",
     probes: [
@@ -969,6 +1261,17 @@ const RECON_DEPS = [
   "game/SideType",
   "game/Country",
   "game/Player",
+  "game/theater/rampHeights",
+  "game/gameobject/trait/interface/NotifyTick",
+  "game/gameobject/trait/interface/NotifyDestroy",
+  "game/gameobject/trait/interface/NotifyOwnerChange",
+  "game/gameobject/trait/interface/NotifySpawn",
+  "game/gameobject/trait/interface/NotifyUnspawn",
+  "game/gameobject/trait/interface/NotifyAttack",
+  "game/gameobject/common/DeathType",
+  "game/gameobject/GameObject",
+  "game/Coords",
+  "util/event",
 ];
 
 // three r94 UMD: expose it globally the same way index.html does for the
