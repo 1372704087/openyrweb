@@ -255,6 +255,9 @@ System.register(
               // OpenYRWeb: Grinder grind-animation counter (set by EnterRecyclerTask while a
               // unit is being ground; the renderable plays SpecialAnim while it is > 0).
               0 < (this._grindingAnimTicks ?? 0) && this._grindingAnimTicks--;
+              // OpenYRWeb: 精炼厂倒矿触发计数——每次倒矿 +1，渲染器据此播放"矿石到达"动画(GAREFNOR)。
+              // 这里轻微衰减让计数值在两次倒矿间回落，便于渲染器以"计数值上涨"判定为新一次倒矿。
+              0 < (this._refineryOrePile ?? 0) && (this._refineryOrePile = Math.max(0, this._refineryOrePile - 0.0005));
               (this.buildStatus !== k.BuildUp ||
                 this.unitOrderTrait.hasTasks() ||
                 this.unitOrderTrait.addTask(new n.WaitForBuildUpTask(e.rules.general.buildupTime, e)),

@@ -1,4 +1,4 @@
-﻿// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingShpHelper ===
+// === Reconstructed SystemJS module: engine/renderable/entity/building/BuildingShpHelper ===
 // deps: ["engine/AnimProps","engine/ImageFinder","engine/renderable/builder/ShpAggregator"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 

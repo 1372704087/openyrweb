@@ -1,4 +1,4 @@
-- 🏗️ **建筑动画状态机与生化反应炉特殊表现**  
+- 🏗️ **建筑动画状态机与生化反应炉特殊表现**
   建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
 
 - 🎬 **建筑动画配置支持受损图片**  
@@ -1228,4 +1228,9 @@ feat(vpl-lighting): 实现 VXL 体素 VPL 查表光照
 4. **调亮度**：整体偏亮/偏暗时调整 `vplAmbient`（默认 0.25）。
 5. **回归**：无 VPL 数据（缺失 mix）时单位仍能正常显示，不黑屏。
 
+- 🐛 **VPL 下 VXL 载具 extraLight 明暗暗化修复**
+  VPL 查表路径原先直接输出 `vplColor`、不叠加 extraLight，导致依赖 `extraLight` 的明暗效果（如磁暴/幻影/部分特效暗化）在坦克等 VXL 载具上失效。修复：VPL 分支按 `clamp(1 + (当前 extraLight − 基准0.37) × gain, 0.2, 2)` 乘 `vplColor`——正常≈1 不破坏已调亮度、extraLight 降低→暗化、升高→变亮、floor 兜底避免全黑；仅 per-instance（`instanceExtraLight`）路径生效。
+
+- 🏭 **精炼厂倒矿"矿石到达"动画**
+  矿车每次在精炼厂卸矿（`ReturnOreTask`）对建筑 `_refineryOrePile` 累计本次倒矿量；渲染器检测到倒矿量上涨即切 `SPECIAL_DOCKING`，用建筑自带的一次性 `SpecialAnim`（盟军 GAREFNOR / 苏军 NAREFNOR，"矿石到达"动画）完整播放一遍（对齐原版 YR 的 SpecialAnim 槽位逻辑），播完回到 IDLE。位置/层级由建筑动画体系管理。缺失的可选动画 SHP（如精炼厂 ActiveAnimTwo/Three/Four = GAREFNL2/3/4）仍是 `console.debug` 提示后跳过，不静默隐藏，便于排查数据缺失。
 

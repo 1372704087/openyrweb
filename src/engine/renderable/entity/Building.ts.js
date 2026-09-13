@@ -639,6 +639,13 @@ System.register(
                           (this.setAnimationVisibility(M.AnimationType.ACTIVE, !1),
                             this.setAnimationVisibility(M.AnimationType.IDLE, !1, 0),
                             this.setAnimationVisibility(M.AnimationType.IDLE, !0, 1))),
+                    // OpenYRWeb: 精炼厂倒矿"矿石到达"动画——每次新倒矿（gameobject._refineryOrePile 累计倒矿量上涨）切到
+                    // SPECIAL_DOCKING 完整播一次建筑自带的一次性 SpecialAnim（GAREFNOR/NAREFNOR），播完回 IDLE。
+                    !this.gameObject.isDestroyed &&
+                      this.objectRules.refinery &&
+                      (this.currentAnimType === M.AnimationType.IDLE ||
+                        this.currentAnimType === M.AnimationType.SPECIAL_DOCKING) &&
+                      (()=>{if(this.currentAnimType===M.AnimationType.IDLE){const _p=this.gameObject._refineryOrePile??0;const _prev=this._lastRefineryPileVal??0;this._lastRefineryPileVal=_p;if(_p>_prev&&this.hasAnimation(M.AnimationType.SPECIAL))this.setAnimation(M.AnimationType.SPECIAL_DOCKING,i);}else{const _so=this.animObjects.get(M.AnimationType.SPECIAL);if(_so&&_so.length&&_so.every(o=>(this.animations.get(o)?.getState()??f.AnimationState.STOPPED)===f.AnimationState.STOPPED))this.setAnimation(M.AnimationType.IDLE,i)}})(),
                     n ||
                       (this.animations.forEach((e, t) => {
                         switch (e.getState()) {
@@ -1322,9 +1329,12 @@ System.register(
               }
               setActiveAnimationVisible() {
                 let e = this.animArtProps.getByType(M.AnimationType.ACTIVE);
+                // OpenYRWeb: 精炼厂矿堆（GAREFNL1-4 槽）——游戏数据通常只带 GAREFNL1 一个 shp，
+                // 且原版倒矿钱直达玩家、塔 tier 恒 0，故精炼厂固定只渲染第 0 槽（GAREFNL1），
+                // 避免设置到缺失的 GAREFNL2/3/4 触发 "No image file found"。
                 (this.objectRules.refinery && (e = [e[0]]),
-                  e.forEach(({ showWhenUnpowered: e }, t) => {
-                    let i = this.powered || e;
+                  e.forEach(({ showWhenUnpowered: p }, t) => {
+                    let i = this.powered || p;
                     if (this.gameObject.bioReactorPowerTrait) {
                       let r = !!this.gameObject.garrisonTrait?.isOccupied();
                       0 === t && (i = i && !r), 1 === t && (i = i && r);
@@ -1334,7 +1344,6 @@ System.register(
                     } catch (e) {
                       if (!(e instanceof RangeError)) throw e;
                     }
-                    // Bio Reactor: hide shadow on ACTIVE animation overlays — main building already provides shadow
                     if (this.gameObject.bioReactorPowerTrait) {
                       let r = this.animObjects.get(M.AnimationType.ACTIVE);
                       r && t < r.length && r[t].setShadowVisible(!1);

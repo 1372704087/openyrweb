@@ -184,6 +184,10 @@ System.register(
               (this.target.owner.isAi && (a = this.target.owner.aiDifficulty === 0 ? Math.floor(a * 2) : this.target.owner.aiDifficulty === 1 ? Math.floor(a * 1.5) : a)),
               (this.target.owner.credits += a),
               (this.target.owner.creditsGained += a),
+              // OpenYRWeb: 精炼厂倒矿触发——累计本次倒矿量（原始矿石值 e，可为零）。渲染器据此按"矿量/满矿"
+              // 比例播放 GAREFNOR"矿石到达"动画（对齐原版：矿多播得长、矿少播得短/几乎不播）。
+              (this.target.rules.refinery &&
+                (this.target._refineryOrePile = (this.target._refineryOrePile ?? 0) + e)),
               s.empty(),
               1 === r.unitOrderTrait.getTasks().length && r.unitOrderTrait.addTask(new g.GatherOreTask(this.game)),
               !0
