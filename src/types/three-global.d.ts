@@ -14,6 +14,7 @@ declare namespace THREE {
     set(x: number, y: number): this;
     copy(v: THREE.Vector2): this;
     clone(): this;
+    add(v: THREE.Vector2): this;
     length(): number;
     lengthSq(): number;
     distanceToSquared(v: THREE.Vector2): number;
@@ -27,6 +28,7 @@ declare namespace THREE {
     set(x: number, y: number, z: number): this;
     copy(v: THREE.Vector3): this;
     clone(): this;
+    add(v: THREE.Vector3): this;
     toArray(): number[];
     length(): number;
     lengthSq(): number;

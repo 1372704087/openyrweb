@@ -1809,6 +1809,503 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/WeaponInfo",
+    tsjs: "src/game/WeaponInfo.ts.js",
+    probes: [(ns) => Object.keys(ns).length, (ns) => typeof ns],
+  },
+  {
+    name: "game/WeaponTargeting",
+    tsjs: "src/game/WeaponTargeting.ts.js",
+    probes: [
+      // 普通武器：打敌方可瞄准、友方拒绝、隐形拒绝
+      (ns) => {
+        const self = {
+          name: "GTANK",
+          owner: { name: "P1" },
+          rules: { attackCursorOnFriendlies: false, navalTargeting: 5, landTargeting: 0 },
+        };
+        const warheadRules = {};
+        const weaponRules = { damage: 50 };
+        const projectileRules = { isAntiGround: true, isAntiAir: false };
+        const game = {
+          areFriendly: (a, b) => a.owner === b.owner,
+          alliances: { haveSharedIntel: () => false },
+        };
+        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, projectileRules, weaponRules, warheadRules, self, { prism: { type: "PRISM" } });
+        const enemy = { isTechno: () => true, isUnit: () => true, owner: { name: "P2" }, zone: 0, tileElevation: 0 };
+        const friend = { isTechno: () => true, isUnit: () => true, owner: { name: "P1" }, zone: 0, tileElevation: 0 };
+        const cloaked = { isTechno: () => true, isUnit: () => true, owner: { name: "P2" }, zone: 0, tileElevation: 0, cloakableTrait: { isCloaked: () => true } };
+        const tile = { landType: 0 }; // LandType.Clear
+        return [
+          targeting.canTarget(enemy, game, false, false, false),
+          targeting.canTarget(friend, game, false, false, false),
+          targeting.canTarget(cloaked, game, false, false, false),
+        ];
+      },
+      // 区域策略：对空弹体打空中目标、副武器专属对空不打地面
+      (ns) => {
+        const self = {
+          name: "AATANK",
+          owner: { name: "P1" },
+          rules: { attackCursorOnFriendlies: false, navalTargeting: 5, landTargeting: 0 },
+        };
+        const projectileRules = { isAntiGround: false, isAntiAir: true };
+        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, projectileRules, { damage: 10 }, {}, self, { prism: { type: "PRISM" } });
+        const airUnit = { isUnit: () => true, isTechno: () => true, owner: { name: "P2" }, zone: 1 };
+        const groundUnit = { isUnit: () => true, isTechno: () => true, owner: { name: "P2" }, zone: 0 };
+        return [
+          targeting.canTarget(airUnit, { areFriendly: () => false, alliances: { haveSharedIntel: () => false } }, false, false, false),
+          targeting.canTargetZone(airUnit, null),
+          targeting.canTargetZone(groundUnit, { landType: 0 }),
+        ];
+      },
+      // 海军策略枚举逐值
+      (ns) => {
+        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, {}, {}, {}, { rules: {} }, { prism: { type: "PRISM" } });
+        const submergedSub = { isVehicle: () => true, submergibleTrait: { isSubmerged: () => true } };
+        const surfacedShip = { isVehicle: () => true, submergibleTrait: { isSubmerged: () => false } };
+        const organic = { isTechno: () => true, rules: { organic: true, naval: true } };
+        return [
+          targeting.canTargetNaval(ns.NavalTargeting.UnderwaterNever, null, submergedSub, 0),
+          targeting.canTargetNaval(ns.NavalTargeting.UnderwaterOnly, null, submergedSub, 0),
+          targeting.canTargetNaval(ns.NavalTargeting.UnderwaterOnly, null, surfacedShip, 0),
+          targeting.canTargetNaval(ns.NavalTargeting.OrganicSecondary, null, organic, 1),
+          targeting.canTargetNaval(ns.NavalTargeting.SealSpecial, null, organic, 1),
+          targeting.canTargetNaval(ns.NavalTargeting.NavalAllEquivalent, null, null, 0),
+          targeting.canTargetNaval(ns.NavalTargeting.NavalNone, null, null, 0),
+        ];
+      },
+      // 治疗武器（负伤害）：只指向受损友军
+      (ns) => {
+        const self = { name: "MEDIC", owner: { name: "P1" }, rules: { attackCursorOnFriendlies: false } };
+        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, { isAntiGround: true }, { damage: -20 }, {}, self, { prism: { type: "PRISM" } });
+        const game = { areFriendly: () => true, alliances: { haveSharedIntel: () => true } };
+        const hurtFriend = { isTechno: () => true, isUnit: () => true, owner: { name: "P1" }, healthTrait: { health: 40 }, zone: 0 };
+        const fullFriend = { isTechno: () => true, isUnit: () => true, owner: { name: "P1" }, healthTrait: { health: 100 }, zone: 0 };
+        return [
+          targeting.canTarget(hurtFriend, game, false, false, false),
+          targeting.canTarget(fullFriend, game, false, false, false),
+        ];
+      },
+    ],
+  },
+  {
+    name: "game/Weapon",
+    tsjs: "src/game/Weapon.ts.js",
+    probes: [
+      // computeSpeed：弧线/即时命中/常规
+      (ns) => [
+        ns.Weapon.computeSpeed({ speed: 60 }, { arcing: true }),
+        ns.Weapon.computeSpeed({ speed: 60 }, { arcing: false, rot: 0 }),
+        ns.Weapon.computeSpeed({ speed: 60, isLaser: true }, { arcing: false, rot: 1 }),
+        ns.Weapon.computeSpeed({ speed: 60 }, { arcing: false, rot: 1, inviso: false }),
+      ],
+      // 静态缺省值
+      (ns) => [
+        ns.Weapon.NUKE_PAYLOAD_NAME,
+        ns.Weapon.berserkROFMultiplier,
+        ns.Weapon.bunkerWeaponRangeBonus,
+        ns.Weapon.openToppedRangeBonus,
+        ns.Weapon.openToppedDamageMultiplier,
+        ns.Weapon.occupyWeaponRange,
+        ns.Weapon.occupyROFMultiplier,
+      ],
+      // 冷却与连发计数
+      (ns) => {
+        const weaponRules = { rof: 50, burst: 3, burstDelay: [7, 8], name: "Test", spawner: false, limboLaunch: false, decloakToFire: false, revealOnFire: false, iniSpeed: 30 };
+        const gameObject = {
+          name: "GTANK",
+          rules: { distributedFire: false, radialFireSegments: 0, burstDelay: [7, 8] },
+          isAircraft: () => false,
+          isUnit: () => true,
+          crateBonuses: { firepower: 1.5 },
+          ammoTrait: { ammo: 10 },
+        };
+        const weapon = new ns.Weapon(ns.WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Shell" }, null, null);
+        weapon.resetCooldown();
+        const cooldown = weapon.getCooldownTicks();
+        weapon.tick();
+        const afterTick = weapon.getCooldownTicks();
+        weapon.expireCooldown();
+        // 模拟一次 fire：createProjectile 记录弹丸
+        const created = [];
+        const game = {
+          generateRandomInt: (a, b) => 4,
+          createProjectile: (name, owner, weapon2, target, flag) => {
+            const proj = {
+              isAircraft: () => false,
+              position: {
+                moveToLeptons: () => {},
+                get tileElevation() { return 0; },
+                set tileElevation(v) {},
+                moveByLeptons: () => {},
+                moveByLeptons3: () => {},
+                worldPosition: { x: 0, y: 0, z: 0, clone: () => ({ add: () => ({ x: 0 }) }) },
+              },
+              baseDamageMultiplier: 0,
+              direction: 0,
+              owner,
+            };
+            created.push(proj);
+            return proj;
+          },
+          map: { isWithinHardBounds: () => true },
+          limboObject: () => {},
+          getUnitSelection: () => ({ isSelected: () => false, getOrCreateSelectionModel: () => ({ getControlGroupNumber: () => 0 }) }),
+          events: { dispatch: (e) => dispatched.push(e) },
+          unlimboObject: () => {},
+          spawnObject: () => {},
+          mapShroudTrait: { getPlayerShroud: () => null },
+        };
+        const dispatched = [];
+        const target = { obj: { isTechno: () => true, owner: { name: "P2" } } };
+        gameObject.position = {
+          getMapPosition: () => ({ x: 0, y: 0, clone: () => ({ sub: () => ({}) }) }),
+          tileElevation: 0,
+          tile: {},
+          worldPosition: { x: 0, y: 0, z: 0, clone: () => ({ add: () => ({ x: 0 }) }) },
+        };
+        gameObject.art = { turretOffset: 0, getAlternateFlhCount: () => 0, getAlternateFlh: () => ({ forward: 0, lateral: 0, vertical: 0, clone: () => ({ forward: 0, lateral: 0, vertical: 0 }) }) };
+        weapon.flh = { clone: () => ({ forward: 10, lateral: 5, vertical: 1, clone: () => ({ forward: 10, lateral: 5, vertical: 1 }) }) };
+        weapon.fire(target, game, 2);
+        const firedOnce = {
+          burstsLeft: weapon.burstsLeft,
+          burstIndex: weapon.burstIndex,
+          useBurstDelay: weapon.useBurstDelay,
+          cooldown: weapon.getCooldownTicks(),
+          baseDamage: created[0].baseDamageMultiplier,
+          spawned: created.length,
+        };
+        weapon.fire(target, game, 2); // 第二发：连发递减
+        return { cooldown, afterTick, expireZero: weapon.getCooldownTicks(), firedOnce, secondBurstLeft: weapon.burstsLeft, secondIndex: weapon.burstIndex, dispatched: dispatched.length };
+      },
+      // 工厂参数表机器验证：(name, weaponType, gameObject, gameRules, flh?)
+      (ns) => {
+        const weaponRules = {
+          name: "Maverick3",
+          warhead: "WH",
+          projectile: "Shell",
+          spawner: false,
+          burst: 1,
+          rof: 30,
+          iniSpeed: 20,
+          isLaser: false,
+          damage: 100,
+          limboLaunch: false,
+          drainWeapon: false,
+        };
+        const warheadIni = { rulesTag: "WH" };
+        const projectileRules = { name: "Shell", arcing: false, rot: 1, inviso: false };
+        const gameRules = {
+          getWeapon: (n) => (n === "Maverick3" ? weaponRules : null),
+          getWarhead: (n) => (n === "WH" ? warheadIni : null),
+          getProjectile: (n) => (n === "Shell" ? projectileRules : null),
+          general: { prism: { type: "PRISM" } },
+        };
+        const gameObject = {
+          name: "A10",
+          owner: { name: "P1" },
+          rules: { attackCursorOnFriendlies: false, navalTargeting: 5, landTargeting: 0 },
+        };
+        const flh = { forward: 1, lateral: 2, vertical: 3 };
+        const weapon = ns.Weapon.factory("Maverick3", ns.WeaponType.Primary, gameObject, gameRules, flh);
+        return {
+          type: weapon.type,
+          gameObjectIsSame: weapon.gameObject === gameObject,
+          rulesIsSame: weapon.rules === weaponRules,
+          warheadRulesIsSame: weapon.warhead.rules === warheadIni,
+          projectileIsSame: weapon.projectileRules === projectileRules,
+          flhIsSame: weapon.flh === flh,
+          targetingWired:
+            weapon.targeting.gameObject === gameObject &&
+            weapon.targeting.weaponType === ns.WeaponType.Primary &&
+            weapon.targeting.warheadRules === warheadIni,
+          defaultFlhWhenAbsent: !!ns.Weapon.factory("Maverick3", ns.WeaponType.Primary, gameObject, gameRules).flh,
+        };
+      },
+      // fire 的两层越界语义：三维越界仍入场/派发；空射 guard 失败全跳过
+      (ns) => {
+        const boundsResults = [true, false]; // 第一次（平面位置）通过，第二次（三维合成）越界
+        const created = [];
+        const spawned = [];
+        const moved3 = [];
+        const dispatched = [];
+        const weaponRules = {
+          name: "T", rof: 30, burst: 1, burstDelay: [], spawner: false,
+          limboLaunch: false, decloakToFire: false, revealOnFire: false,
+          iniSpeed: 30, isLaser: false, damage: 10,
+        };
+        const gameObject = {
+          name: "GTANK",
+          rules: { distributedFire: false, radialFireSegments: 0, burstDelay: [] },
+          isAircraft: () => false,
+          isUnit: () => true,
+          crateBonuses: { firepower: 1 },
+          position: {
+            getMapPosition: () => ({ x: 0, y: 0, clone: () => ({ sub: () => ({}) }) }),
+            tileElevation: 0,
+            tile: {},
+            worldPosition: { x: 0, y: 0, z: 0, clone: () => ({ add: () => ({ x: 0 }) }) },
+          },
+          art: { turretOffset: 0 },
+        };
+        const weapon = new ns.Weapon(ns.WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Shell" }, { clone: () => ({ forward: 10, lateral: 0, vertical: 2 }) }, null);
+        const game = {
+          createProjectile: () => {
+            const proj = {
+              isAircraft: () => false,
+              position: {
+                moveToLeptons: () => {},
+                tileElevation: 0,
+                moveByLeptons: () => {},
+                moveByLeptons3: (v) => moved3.push(v),
+                worldPosition: { x: 0, y: 0, z: 0, clone: () => ({ add: () => ({ x: 0 }) }) },
+              },
+              baseDamageMultiplier: 0,
+              direction: 0,
+              owner: gameObject,
+            };
+            created.push(proj);
+            return proj;
+          },
+          map: { isWithinHardBounds: () => boundsResults.shift() ?? true },
+          getUnitSelection: () => ({ isSelected: () => false, getOrCreateSelectionModel: () => ({ getControlGroupNumber: () => 0 }) }),
+          limboObject: () => {},
+          unlimboObject: () => {},
+          spawnObject: (obj) => spawned.push(obj),
+          mapShroudTrait: { getPlayerShroud: () => null },
+          events: { dispatch: (e) => dispatched.push(e) },
+          generateRandomInt: () => 4,
+        };
+        weapon.fire({ obj: null }, game, 1);
+        return {
+          spawnedDespiteWorldOob: spawned.length === 1,
+          moveByLeptons3Skipped: moved3.length === 0,
+          eventDispatched: dispatched.length === 1,
+        };
+      },
+      // 空射 guard 失败：prepareLaunch 返回空 → 完全不发射
+      (ns) => {
+        const created = [];
+        let burstsTouched = false;
+        const weaponRules = {
+          name: "AirBomb", rof: 30, burst: 2, burstDelay: [], spawner: true,
+          limboLaunch: false, decloakToFire: false, revealOnFire: false, iniSpeed: 30, damage: 10,
+        };
+        const gameObject = {
+          name: "AIRCRAFT",
+          rules: { distributedFire: false, radialFireSegments: 0, burstDelay: [] },
+          isAircraft: () => true,
+          isUnit: () => true,
+          crateBonuses: { firepower: 1 },
+          airSpawnTrait: { prepareLaunch: () => null, availableSpawns: 0 },
+          ammoTrait: { ammo: 5 },
+          position: {
+            getMapPosition: () => ({ x: 0, y: 0, clone: () => ({ sub: () => ({}) }) }),
+            tileElevation: 0,
+            tile: {},
+            worldPosition: { x: 0, y: 0, z: 0, clone: () => ({ add: () => ({ x: 0 }) }) },
+          },
+          art: { turretOffset: 0 },
+        };
+        const weapon = new ns.Weapon(ns.WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Bomb" }, { clone: () => ({ forward: 0, lateral: 0, vertical: 0 }) }, null);
+        weapon.fire({ obj: null }, {
+          createProjectile: () => created.push(1),
+          map: { isWithinHardBounds: () => true },
+          generateRandomInt: () => 4,
+        }, 1);
+        return { nothingFired: created.length === 0, burstsUntouched: weapon.burstsLeft === 0 && weapon.burstIndex === 0 };
+      },
+    ],
+  },
+  {
+    name: "game/Warhead",
+    tsjs: "src/game/Warhead.ts.js",
+    probes: [
+      // 静态常量
+      (ns) => [ns.Warhead.SPECIAL_WARHEAD_NAME, ns.Warhead.HE_WARHEAD_NAME],
+      // canDamage 判定矩阵
+      (ns) => {
+        const warhead = new ns.Warhead({ temporal: false, radiation: false, psychicDamage: false });
+        const mk = (props) => ({
+          isSpawned: true, isDisposed: false, isDestroyed: false, isCrashing: false,
+          isTechno: () => false, isUnit: () => false, isBuilding: () => false, isOverlay: () => false, isTerrain: () => false,
+          moveTrait: { reservedPathNodes: [] },
+          healthTrait: {},
+          zone: 0,
+          rules: {},
+          warpedOutTrait: { isInvulnerable: () => false },
+          ...props,
+        });
+        const normal = mk({});
+        const destroyed = mk({ isDestroyed: true });
+        const immune = mk({ isTechno: () => true, rules: { immune: true }, warpedOutTrait: { isInvulnerable: () => false } });
+        const temporalImmune = mk({ isTechno: () => true, rules: { warpable: false } });
+        const temporalWarhead = new ns.Warhead({ temporal: true, radiation: false, psychicDamage: false });
+        return [
+          warhead.canDamage(normal, {}, 0),
+          warhead.canDamage(destroyed, {}, 0),
+          warhead.canDamage(immune, {}, 0),
+          temporalWarhead.canDamage(immune, {}, 0),
+          temporalWarhead.canDamage(temporalImmune, {}, 0),
+          warhead.canDamage(temporalImmune, {}, 0),
+        ];
+      },
+      // computeDamage：装甲衰减 / 墙免疫 / 取整方向
+      (ns) => {
+        const mk = (props) => ({
+          isTechno: () => false, isOverlay: () => false, isTerrain: () => false,
+          isBuilding: () => false, isUnit: () => false, isInfantry: () => false, isAircraft: () => false,
+          stance: 0,
+          ...props,
+        });
+        const verses = new Map([[ns.ArmorType.Heavy, 0.5], [ns.ArmorType.Wood, 2]]);
+        const warhead = new ns.Warhead({ proneDamage: 0.5, verses, wallAbsoluteDestroyer: false, wall: false, wood: false });
+        const techno = mk({ isTechno: () => true, rules: { armor: ns.ArmorType.Heavy }, veteranTrait: null, crateBonuses: { armor: 1 } });
+        const halfVerses = warhead.computeDamage(100, techno, { gameOpts: {} });
+        const wall = mk({ isBuilding: () => true, rules: { wall: true, armor: ns.ArmorType.Wood } });
+        const wallZero = warhead.computeDamage(100, wall, { gameOpts: {} });
+        const woodWarhead = new ns.Warhead({ proneDamage: 0.5, verses, wallAbsoluteDestroyer: false, wall: false, wood: true });
+        const wallWood = woodWarhead.computeDamage(100, wall, { gameOpts: {} });
+        const absDestroyer = new ns.Warhead({ proneDamage: 0.5, verses, wallAbsoluteDestroyer: true, wall: false, wood: false });
+        const wallAbs = absDestroyer.computeDamage(100, wall, { gameOpts: {} });
+        const negative = warhead.computeDamage(-30, mk({}), { gameOpts: {} });
+        return { halfVerses, wallZero, wallWood, wallAbs, negative };
+      },
+      // pickExplodeAnim：C4 固定末帧 / emEffect 档位外随机 / 水花
+      (ns) => {
+        const game = {
+          generateRandomInt: (a, b) => a, // emEffect 分支固定取下界（两侧一致即可）
+          rules: {
+            audioVisual: { weatherConBoltExplosion: "BOLT", weaponNullifyAnim: "NULL" },
+            combatDamage: { splashList: ["splash0", "splash1", "splash2"], c4Warhead: "C4WH" },
+          },
+        };
+        const anims = { animList: ["a0", "a1", "a2", "a3"] };
+        const c4 = new ns.Warhead({ animList: ["a0", "a1", "a2", "a3"], conventional: false, emEffect: false });
+        const c4Anim = c4.pickExplodeAnim(100, null, 0, game, false); // C4 弹头名匹配 → 末帧
+        c4.rules.name = "C4WH";
+        const c4AnimMatched = c4.pickExplodeAnim(100, null, 0, game, false);
+        const normal = new ns.Warhead({ animList: ["a0", "a1", "a2", "a3"], conventional: false, emEffect: false });
+        const lowDamage = normal.pickExplodeAnim(10, null, 0, game, false); // floor(10/25)=0
+        const lightning = normal.pickExplodeAnim(10, null, 0, game, true);
+        const splash = new ns.Warhead({ animList: [], conventional: true, emEffect: false });
+        const splashAnim = splash.pickExplodeAnim(120, null, 2, game, false); // floor(120/50)=2 → splash2
+        const empty = new ns.Warhead({ animList: [], conventional: false }).pickExplodeAnim(10, null, 0, game, false);
+        return { c4Anim, c4AnimMatched, lowDamage, lightning, splashAnim, empty };
+      },
+      // detonate 空场 scaffolding：无目标时仍派发事件、不建辐射
+      (ns) => {
+        const warhead = new ns.Warhead({ cellSpread: 0, percentAtMax: 0.5, radLevel: 0, animList: ["boom"], conventional: false, emEffect: false, wall: false, wood: false, psychicDamage: false, isLocomotor: false, rocker: false, causesDelayKill: false, affectsAllies: false, wallAbsoluteDestroyer: false, infDeath: 1, penetratesBunker: false, proneDamage: 1, verses: new Map() });
+        const dispatched = [];
+        let radCreated = 0;
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: {},
+            mapBounds: {},
+            getObjectsOnTile: () => [],
+          },
+          events: { dispatch: (e) => dispatched.push(e) },
+          mapRadiationTrait: { createRadSite: () => radCreated++ },
+          alliances: { areAllied: () => false },
+          rules: { audioVisual: { weaponNullifyAnim: "NULL" }, combatDamage: { splashList: [] } },
+          generateRandomInt: () => 0,
+        };
+        warhead.detonate(game, 100, { rx: 5, ry: 5, z: 0, rampType: 0 }, 0, { x: 0, y: 0 }, 0, 0, { obj: null, getBridge: () => null }, { weapon: null, obj: null, player: null }, undefined, undefined, undefined, false);
+        return { dispatched: dispatched.length, radCreated, anim: dispatched[0]?.animList ?? dispatched[0]?.anim ?? (dispatched[0] ? "dispatched" : "none") };
+      },
+      // supressOrScatterTarget：胆小单位惊慌逃散
+      (ns) => {
+        const warhead = new ns.Warhead({});
+        const tasks = [];
+        const fraidycat = {
+          rules: { fraidycat: true, insignificant: false },
+          isVehicle: () => false,
+          isInfantry: () => true,
+          isPanicked: false,
+          unitOrderTrait: { hasTasks: () => false, addTask: (t) => tasks.push(t) },
+          moveTrait: { isIdle: () => false },
+          suppressionTrait: null,
+        };
+        warhead.supressOrScatterTarget(fraidycat, {});
+        return { tasks: tasks.length, panicked: fraidycat.isPanicked };
+      },
+      // createDummyWeaponInfo
+      (ns) => {
+        const warhead = new ns.Warhead({});
+        const info = warhead.createDummyWeaponInfo();
+        return {
+          type: info.type,
+          speed: info.speed === Infinity ? "Inf" : info.speed,
+          isThisWarhead: info.warhead === warhead,
+          range: info.range,
+        };
+      },
+      // inflictDamage 死亡三分支的返回值（机器验证"突变也返回 true"：
+      // 整个逗号表达式末尾是 !0，三元分支里的 !1 被丢弃）。
+      (ns) => {
+        const mkWarhead = (rules) => new ns.Warhead({ temporal: false, radiation: false, psychicDamage: false, penetratesBunker: false, ...rules });
+        const mkTarget = (props) => ({
+          isVehicle: undefined, // 无碉堡转嫁
+          healthTrait: {
+            health: 5,
+            getHitPoints: function () { return 5; },
+            inflictDamage: function (d) { this.health = Math.max(0, this.health - d); },
+            healBy: () => {},
+          },
+          onAttack: () => {},
+          isTechno: () => false,
+          isInfantry: () => true,
+          isUnit: () => true,
+          zone: 0,
+          crashableTrait: null,
+          rules: { infDeath: undefined, isHuman: false, immuneToPsionics: false },
+          tile: "T",
+          position: { worldPosition: null },
+          ...props,
+        });
+        const mkGame = (hasBrute) => ({
+          traits: { filter: () => [] },
+          events: { dispatch: () => {} },
+          destroyObject: (target, attacker, a, b) => destroyedCalls.push([target, a === undefined ? "undef" : a, b]),
+          createUnitForPlayer: (rules, owner) => ({ brute: true, owner }),
+          spawnObject: (unit, tile) => spawnedBrutes.push([unit, tile]),
+          rules: { hasObject: () => hasBrute, getObject: () => ({ name: "BRUTE" }) },
+          virusCloudTrait: undefined,
+        });
+        let destroyedCalls = [];
+        let spawnedBrutes = [];
+        const attacker = { player: { name: "P1" } };
+        // ① 常规死亡（InfDeath=1，无 BRUTE 规则）→ destroy + true
+        const normalWarhead = mkWarhead({ infDeath: 1 });
+        const victim1 = mkTarget({});
+        const normalResult = normalWarhead.inflictDamage(10, victim1, attacker, mkGame(false), false);
+        const normalDestroy = destroyedCalls.length;
+        destroyedCalls = [];
+        spawnedBrutes = [];
+        // ② 突变死亡（InfDeath=9，规则有 BRUTE）→ 生成狂兽人 + 静默销毁 + 返回 true
+        const mutateWarhead = mkWarhead({ infDeath: 9 });
+        const victim2 = mkTarget({ name: "E1" });
+        const mutateResult = mutateWarhead.inflictDamage(10, victim2, attacker, mkGame(true), false);
+        const mutateDestroy = destroyedCalls.length;
+        const bruteSpawned = spawnedBrutes.length;
+        const mutateInfDeath = victim2.infDeathType;
+        destroyedCalls = [];
+        // ③ 幸存 → false
+        const survivor = mkTarget({});
+        survivor.healthTrait.health = 50;
+        survivor.healthTrait.inflictDamage = function (d) { this.health = Math.max(0, this.health - Math.min(d, 5)); };
+        const aliveResult = mkWarhead({ infDeath: 1 }).inflictDamage(10, survivor, attacker, mkGame(false), false);
+        return {
+          normalResult, normalDestroy,
+          mutateResult, mutateDestroy, bruteSpawned, mutateInfDeath,
+          aliveResult,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

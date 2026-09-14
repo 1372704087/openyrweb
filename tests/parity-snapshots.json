@@ -1102,5 +1102,100 @@
       "grinding": 1,
       "orePile": 0.9995
     }
+  },
+  "game/WeaponInfo": {
+    "0": 0,
+    "1": "object"
+  },
+  "game/WeaponTargeting": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    },
+    "1": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    },
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    },
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    }
+  },
+  "game/Weapon": {
+    "0": [
+      96,
+      null,
+      null,
+      60
+    ],
+    "1": [
+      "NukePayload",
+      0.5,
+      0,
+      2,
+      1.2,
+      5,
+      1.2
+    ],
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    },
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    },
+    "4": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    },
+    "5": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
+    }
+  },
+  "game/Warhead": {
+    "0": [
+      "Special",
+      "HE"
+    ],
+    "1": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Heavy')"
+    },
+    "3": {
+      "c4Anim": "a3",
+      "c4AnimMatched": "a3",
+      "lowDamage": "a0",
+      "lightning": "BOLT",
+      "splashAnim": "splash2"
+    },
+    "4": {
+      "dispatched": 1,
+      "radCreated": 0,
+      "anim": "dispatched"
+    },
+    "5": {
+      "tasks": 2,
+      "panicked": true
+    },
+    "6": {
+      "type": 0,
+      "speed": "Inf",
+      "isThisWarhead": true,
+      "range": 0
+    },
+    "7": {
+      "normalResult": true,
+      "normalDestroy": 1,
+      "mutateResult": true,
+      "mutateDestroy": 1,
+      "bruteSpawned": 1,
+      "mutateInfDeath": 0,
+      "aliveResult": false
+    }
   }
 }
