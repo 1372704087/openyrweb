@@ -176,7 +176,10 @@ System.register(
                 s
               );
             }
-            inflictDamage(e, t, i, r, s = !1) {
+            // `isPrimary` was originally the single-letter `s`, which shadowed the
+            // module-level `s` alias of engine/type/ObjectType (dep #14) and made
+            // `s.ObjectType.Infantry` below throw. Renamed to match the TS source.
+            inflictDamage(e, t, i, r, isPrimary = !1) {
               // OpenYRWeb: Tank Bunker damage redirection. If the target is a vehicle
               // docked inside a Tank Bunker and the warhead doesn't have
               // PenetratesBunker=yes, redirect the damage to the bunker building.
@@ -192,7 +195,7 @@ System.register(
                   e[c.NotifyAttack.onAttack](t, i?.obj, r);
                 }),
                 t.onAttack(r, i),
-                r.events.dispatch(new p.ObjectAttackedEvent(t, i, s)),
+                r.events.dispatch(new p.ObjectAttackedEvent(t, i, isPrimary)),
                 t.isTechno() && !this.rules.temporal && this.supressOrScatterTarget(t, r),
                 !a.health &&
                   (t.isInfantry() && (t.infDeathType = this.rules.infDeath),
@@ -215,15 +218,19 @@ System.register(
                   // resolved from rules ("BRUTE"); immuneToPsionics / already-Brute victims are skipped.
                   // vanilla YR: InfDeath=9 (=Mutate) is the ONLY value that triggers mutation
                   // (ModEnc/InfDeath). The earlier `=== 8` check matched Virus instead and never fired.
+                  // Return value: the whole comma expression ends in `!0` (the trailing `, !0`
+                  // below), so the `!1` inside this ternary branch is discarded — a mutation death
+                  // reports `true` exactly like a normal death. No caller consumes this return
+                  // value (all 9 call sites discard it); do not read it as "mutated".
                   this.rules.infDeath === 9 &&
                   t.isInfantry() &&
                   !t.rules.immuneToPsionics &&
                   "BRUTE" !== t.name &&
-                  r.rules.hasObject("BRUTE", j.ObjectType.Infantry)
+                  r.rules.hasObject("BRUTE", s.ObjectType.Infantry)
                     ? (this._mutateInfantryToBrute(t, i, r), !1)
                     : t.isUnit() && t.crashableTrait && t.zone === k.ZoneType.Air && !this.rules.temporal
                       ? t.crashableTrait.crash(i)
-                      : r.destroyObject(t, i, void 0, s),
+                      : r.destroyObject(t, i, void 0, isPrimary),
                   !0)
               );
             }
@@ -274,8 +281,11 @@ System.register(
             // owner at the victim's tile, then silently destroys the victim (no death anim).
             _mutateInfantryToBrute(e, t, i) {
               var r = t?.player ?? e.owner,
-                s = i.rules.getObject("BRUTE", j.ObjectType.Infantry),
-                a = i.createUnitForPlayer(s, r),
+                // `s` here is the module-level ObjectType alias (dep #14); the local must not
+                // reuse the name or the initializer would read the not-yet-assigned local.
+                // (`j` is RadialTileFinder, dep #10 — using j.ObjectType threw a TypeError.)
+                bruteRules = i.rules.getObject("BRUTE", s.ObjectType.Infantry),
+                a = i.createUnitForPlayer(bruteRules, r),
                 l = e.tile;
               (i.spawnObject(a, l),
                 (e.infDeathType = 0),
@@ -292,7 +302,10 @@ System.register(
                 warhead: this,
               };
             }
-            detonate(r, e, t, i, s, a, n, o, l, c = H.SpecialWarheadType.None, h, u, d = !1) {
+            // `smudgeType` was originally the single-letter `h`, which shadowed the
+            // module-level `h` alias of game/type/ArmorType (dep #7) — the
+            // `h.ArmorType.Wood` read below then threw. Renamed to match the TS source.
+            detonate(r, e, t, i, s, a, n, o, l, c = H.SpecialWarheadType.None, smudgeType, u, d = !1) {
               var g,
                 p,
                 m,
@@ -465,7 +478,7 @@ System.register(
               l?.weapon?.rules?.isDiskLaser && (T = void 0);
               if (!R && a === k.ZoneType.Ground) {
                 let e = new U.AnimTerrainEffect();
-                (T && e.destroyOre(T, t, r), h && e.spawnSmudges(h, t, r), T && e.spawnSmudges(T, t, r));
+                (T && e.destroyOre(T, t, r), smudgeType && e.spawnSmudges(smudgeType, t, r), T && e.spawnSmudges(T, t, r));
               }
               r.events.dispatch(new _.WarheadDetonateEvent(this, s, T, w));
             }
