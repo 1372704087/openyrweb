@@ -366,3 +366,38 @@
 问题描述：VPL 查表光照的片段分支把 `vplColor` 直接作为输出，且不再叠加 extraLight，导致坦克等 VXL 载具在 extraLight 被调低（暗化/特效）时亮度不变。
 已实施修复：新增 per-instance 属性 `instanceBaseExtraLight`，VPL 分支用 `factor = clamp(当前 extraLight / 基准 extraLight, 0, 2)` 乘 vplColor（正常≈1 不破坏已调亮度、暗化<1、变亮>1；仅当基准有效时生效）。基准 = `baseVxlExtraLight`（`computeNoAmbient + extraUnitLight`），在 Vehicle.updateBaseLight/创建网格时推给 VXL 构建器。非批处理路径（VxlNonBatchedBuilder 共享材质）暂未做归一化，仅存字段避免报错。
 优先级：中（已完成）
+
+39. 巨炮（Grand Cannon）VPL 体素光照异常
+影响模块：`src/engine/gfx/material/paletteShaderLib.ts.js`（paletteVplFragment / instanceLightDir）、`src/engine/renderable/entity/Building.ts.js`（baseVxlExtraLight）、`src/engine/renderable/builder/{VxlBatchedBuilder,VxlNonBatchedBuilder}.ts.js`
+问题描述：法国巨炮的炮管是 VXL 体素，其 VPL 查表光照显示异常（明暗分布与表面实际朝向不符）。怀疑与 #38 的 VPL 归一化改动相关——该改动引入了按实例的比率因子（当前 extraLight / 基准 extraLight）去乘 vplColor，若巨炮这一类"建筑 + 可旋转炮塔"的基准 extraLight 取值路径与 Vehicle 不同（或在炮塔旋转/瞄准时被重算），比率会整体偏移，表现为炮管忽明忽暗或明暗反相。
+预期行为：炮管各面的 VPL 明暗与其世界朝向一致，且在炮塔旋转、瞄准、受损等状态下亮度不跳变。
+实际表现：用户报告"巨炮 VPL 异常"；具体是整条炮管偏亮/偏暗，还是明暗方向错位，待与报告者确认后再细化。
+排查线索：
+确认是否为 #38 的回归——临时把 VPL 分支的比率因子固定为 1，观察巨炮是否恢复正常（若恢复，则问题在基准 extraLight 的取值，而非光照方向）；
+对比 Vehicle 与 Building 两条路径计算 baseVxlExtraLight 的时机与取值来源，特别是炮塔旋转/瞄准是否触发了基准重算；
+确认巨炮的 VXL 是否走批处理（VxlBatchedBuilder）还是非批处理（VxlNonBatchedBuilder）；#38 明确说明非批处理路径未做归一化，若巨炮走该路径需单独处理。
+优先级：中（视觉异常，不影响玩法）
+
+40. 飞碟（镭射幽浮 / Floating Disc）VPL 光照角度异常
+影响模块：`src/engine/gfx/material/paletteShaderLib.ts.js`（instanceLightDir）、`src/engine/gfx/batch/{BatchedMesh,InstancedMesh,MeshInstancingBatch}.ts.js`（per-instance lightDir 上传）、`src/engine/renderable/entity/{Vehicle,Aircraft}.ts.js`（baseVxlExtraLight 与朝向/俯仰处理）、`src/engine/renderable/builder/VxlBatchedBuilder.ts.js`
+问题描述：飞碟的 VXL 体素 VPL 明暗方向与本体的朝向不匹配，表现为"光照角度"错位——明暗面相对本体朝向有固定偏移，或随转向/俯仰被错误地一起旋转。
+预期行为：VPL 明暗只取决于体素表面朝向与全局光照方向；载具自身旋转/俯仰不应让明暗相对本体错位（否则同一朝向的两台载具会呈现不同的受光面）。
+实际表现：用户报告"飞碟 VPL 光照角度异常"；偏移量及是否随朝向变化待与报告者确认。
+排查线索：
+首要怀疑：instanceLightDir 的计算把物体自身的旋转（或俯仰/悬浮高度）也乘了进去——先确认它是在模型空间还是世界空间求值，以及上传到实例属性前是否已按本体朝向做了归一；
+同场景对照：摆放朝向不同但静止的普通坦克，检查它们的明暗面是否一致（若坦克正常、只有飞碟异常，则问题在飞碟专属的朝向/俯仰处理，而非通用着色器）；
+确认飞碟的悬浮/俯仰是否参与了光照方向计算（飞碟疑似带俯仰或悬浮高度，可能与光照方向的球坐标换算冲突）；
+与 #38 对照：基准 extraLight 归一化只影响强度不影响方向，但若方向相关属性也被 per-instance 化，需核对上传值。
+优先级：中（视觉异常，不影响玩法）
+
+41. 基因突变动画在雪地（theater=snow）出现蓝色描边
+影响模块：`src/game/superweapon/GeneticMutatorEffect.ts.js`、`src/engine/renderable/entity/Anim.ts.js`（调色板取自 `theater.getPalette(objectArt.paletteType, objectArt.customPaletteName)`，见该文件 73–74 行；另有 remapColor）、`src/engine/renderable/entity/Infantry.ts.js`（约 590 行，`_mutateCasterColor` 的 remap 回流）、theater 调色板资源加载（res 下的 *.pal）
+问题描述：基因突变器的动画在雪地地图上播放时，动画边缘出现蓝色描边。
+预期行为：该动画在任意 theater 下都使用 Art.ini 指定的调色板，边缘不应出现原版没有的颜色。
+实际表现：仅雪地（theater=snow）出现蓝色描边；温带/城市等 theater 未报告该现象。
+排查线索：
+蓝色描边高度符合"边缘索引在调色板上取到了错误颜色"——雪地调色板与温带不同，先打印/对比该动画在 snow 与 temperate 下实际取到的调色板，确认 Art.ini 的 PaletteType / CustomPaletteName 是否被 theater 覆盖或回落；
+确认该动画是否被 remap（Anim.remapColor）：突变动画与 Infantry 的 `_mutateCasterColor` 有交互，若动画被 remap，remap 表在雪地调色板上可能把边缘索引映射成蓝色；
+若动画 Art.ini 带 Shadow=yes，雪地阴影走的是另一套调色板，先确认"描边"是否实际是错配的阴影帧而非动画本体；
+若为 SHP 动画，确认边缘半透明/透明索引在雪地调色板上的定义是否与温带一致（透明索引若在雪地调色板里非透明，就会渲染出实色描边）。
+优先级：中（视觉异常，不影响玩法）
