@@ -1211,6 +1211,321 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/type/SpeedType",
+    tsjs: "src/game/type/SpeedType.ts.js",
+    probes: [
+      (ns) => ns.SpeedType.Foot,
+      (ns) => ns.SpeedType.Winged,
+      (ns) => ns.SpeedType[ns.SpeedType.Hover],
+      (ns) => Object.keys(ns.SpeedType).length,
+    ],
+  },
+  {
+    name: "game/type/PipColor",
+    tsjs: "src/game/type/PipColor.ts.js",
+    probes: [(ns) => ns.PipColor.Green, (ns) => ns.PipColor.Blue, (ns) => Object.keys(ns.PipColor).length],
+  },
+  {
+    name: "game/type/PipScale",
+    tsjs: "src/game/type/PipScale.ts.js",
+    probes: [
+      (ns) => ns.PipScale.None,
+      (ns) => ns.PipScale.Tiberium,
+      (ns) => ns.PipScale.MindControl, // 自定义扩展值 5
+      (ns) => Object.keys(ns.PipScale).length,
+    ],
+  },
+  {
+    name: "game/type/LocomotorType",
+    tsjs: "src/game/type/LocomotorType.ts.js",
+    probes: [
+      (ns) => ns.LocomotorType.Statue,
+      (ns) => ns.LocomotorType.Vehicle,
+      (ns) => ns.locomotorTypesByClsId.get("{4A582741-9839-11d1-B709-00A024DDAFD1}"),
+      (ns) => ns.locomotorTypesByClsId.get("{92612C46-F71F-11d1-AC9F-006008055BB5}"),
+      (ns) => ns.locomotorTypesByClsId.size,
+      (ns) => ns.defaultSpeedsByLocomotor.get(ns.LocomotorType.Infantry),
+      (ns) => ns.defaultSpeedsByLocomotor.get(ns.LocomotorType.Ship),
+      (ns) => ns.defaultSpeedsByLocomotor.get(ns.LocomotorType.Chrono),
+    ],
+  },
+  {
+    name: "game/type/MovementZone",
+    tsjs: "src/game/type/MovementZone.ts.js",
+    probes: [(ns) => ns.MovementZone.Fly, (ns) => ns.MovementZone.Normal, (ns) => Object.keys(ns.MovementZone).length],
+  },
+  {
+    name: "game/type/ArmorType",
+    tsjs: "src/game/type/ArmorType.ts.js",
+    probes: [(ns) => ns.ArmorType.None, (ns) => ns.ArmorType.Concrete, (ns) => ns.ArmorType.Special_2, (ns) => Object.keys(ns.ArmorType).length],
+  },
+  {
+    name: "game/type/LandTargeting",
+    tsjs: "src/game/type/LandTargeting.ts.js",
+    probes: [(ns) => ns.LandTargeting.LandOk, (ns) => ns.LandTargeting.LandSecondary, (ns) => Object.keys(ns.LandTargeting).length],
+  },
+  {
+    name: "game/type/NavalTargeting",
+    tsjs: "src/game/type/NavalTargeting.ts.js",
+    probes: [
+      (ns) => ns.NavalTargeting.UnderwaterNever,
+      (ns) => ns.NavalTargeting.NavalAll,
+      (ns) => ns.NavalTargeting.NavalAllEquivalent, // 自定义登记的原版 YR 值 7
+      (ns) => Object.keys(ns.NavalTargeting).length,
+    ],
+  },
+  {
+    name: "game/type/VhpScan",
+    tsjs: "src/game/type/VhpScan.ts.js",
+    probes: [(ns) => ns.VhpScan.None, (ns) => ns.VhpScan.Strong, (ns) => Object.keys(ns.VhpScan).length],
+  },
+  {
+    name: "game/gameobject/unit/VeteranAbility",
+    tsjs: "src/game/gameobject/unit/VeteranAbility.ts.js",
+    probes: [
+      (ns) => ns.VeteranAbility.FASTER,
+      (ns) => ns.VeteranAbility.CRUSHER,
+      (ns) => ns.VeteranAbility[ns.VeteranAbility.SELF_HEAL],
+      (ns) => Object.keys(ns.VeteranAbility).length,
+    ],
+  },
+  {
+    name: "game/WeaponType",
+    tsjs: "src/game/WeaponType.ts.js",
+    probes: [(ns) => ns.WeaponType.Primary, (ns) => ns.WeaponType.DeathWeapon, (ns) => Object.keys(ns.WeaponType).length],
+  },
+  {
+    name: "game/rules/ObjectRules",
+    tsjs: "src/game/rules/ObjectRules.ts.js",
+    probes: [
+      (ns) => ns.ObjectRules.iniSpeedToLeptonsPerTick(255, 65),
+      (ns) => ns.ObjectRules.iniSpeedToLeptonsPerTick(100, 100),
+      (ns) => ns.ObjectRules.iniRotToDegsPerTick(256),
+      (ns) => ns.ObjectRules.iniRotToDegsPerTick(64),
+      (ns) => ns.ObjectRules.IMAGE_NONE,
+      (ns) => {
+        const ini = {
+          name: "E1",
+          getString: (k) => ({ UIName: "STSNAME|E1", Image: "null" }[k]),
+          getBool: (k, d) => d,
+        };
+        const rules = new ns.ObjectRules(ns.ObjectType.Infantry, ini);
+        return {
+          name: rules.name,
+          imageName: rules.imageName, // Image="null" → 回落段落名
+          crushable: rules.crushable, // 步兵默认可碾压
+          legalTarget: rules.legalTarget,
+          uiName: rules.uiName,
+          index: rules.index,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/TechnoRules",
+    tsjs: "src/game/rules/TechnoRules.ts.js",
+    probes: [
+      (ns) => ns.TechnoRules.MAX_SIGHT + "/" + ns.BuildCat.Power + "/" + ns.FactoryType.AircraftType,
+      // 步兵最小段落：一串缺省值（可碾压、Chrono 移动器、Foot 速度类型等）
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Infantry,
+          makeMockIni("E1", { Strength: 100, Cost: 200 }),
+          -1,
+          { unitsUnsellable: false, returnStructures: false },
+        );
+        return {
+          crushable: rules.crushable,
+          locomotor: rules.locomotor,
+          speedType: rules.speedType,
+          speed: rules.speed,
+          movementZone: rules.movementZone,
+          pip: rules.pip,
+          pipScale: rules.pipScale,
+          sight: rules.sight,
+          trainable: rules.trainable,
+          isHuman: rules.organic,
+          factory: rules.factory,
+          buildLimit: rules.buildLimit === Infinity ? "Inf" : rules.buildLimit,
+          eliteAbilities: rules.eliteAbilities.size,
+          unsellable: rules.unsellable,
+          returnable: rules.returnable,
+        };
+      },
+      // 建筑最小段落：Statue 移动器、无速度类型、建筑缺省（可修复、不可训练等）
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Building,
+          makeMockIni("GAPILE", { Strength: 400, Power: -50 }),
+          -1,
+          { unitsUnsellable: false, returnStructures: true },
+        );
+        return {
+          locomotor: rules.locomotor,
+          speedType: rules.speedType === undefined ? "none" : rules.speedType,
+          repairable: rules.repairable,
+          clickRepairable: rules.clickRepairable,
+          tooBig: rules.tooBigToFitUnderBridge,
+          trainable: rules.trainable,
+          crushable: rules.crushable,
+          returnable: rules.returnable,
+          power: rules.power,
+        };
+      },
+      // 载具：缺省移动器 Chrono 下按是否碾压给 Track/Wheel；速度封顶 256
+      (ns) => {
+        const crusher = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("HTK", { Crusher: "yes", Speed: 110 }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        const normal = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("RHINO", { Speed: 110 }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        return {
+          crusherSpeedType: crusher.speedType,
+          normalSpeedType: normal.speedType,
+          speedCapped: crusher.speed,
+        };
+      },
+      // 武器槽：none 归一化为 undefined；精英槽缺失回落普通槽
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Infantry,
+          makeMockIni("GGI", {
+            Primary: "M1Carbine",
+            Secondary: "none",
+            ElitePrimary: "MissileLauncher",
+            Weapon1: "Flak",
+            EliteWeapon1: "none",
+            Weapon2: "MG",
+          }),
+          -1,
+          { unitsUnsellable: false, returnStructures: false },
+        );
+        return {
+          primary: rules.primary,
+          secondary: rules.secondary === undefined ? "none" : rules.secondary,
+          elitePrimary: rules.elitePrimary,
+          weapon1: rules.getWeaponAtIndex(0),
+          eliteWeapon1Fallback: rules.getEliteWeaponAtIndex(0),
+          weapon2: rules.getWeaponAtIndex(1),
+          eliteWeapon2: rules.getEliteWeaponAtIndex(1) === undefined ? "none" : "set",
+        };
+      },
+      // 老兵/精英能力集合：精英 = 老兵 ∪ EliteAbilities
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Vehicle,
+          makeMockIni("HTK", { VeteranAbilities: "FASTER,STRONGER", EliteAbilities: "C4" }),
+          -1,
+          { unitsUnsellable: false, returnStructures: false },
+        );
+        return {
+          veteran: rules.veteranAbilities.size,
+          elite: rules.eliteAbilities.size,
+          hasC4: rules.eliteAbilities.has(ns.VeteranAbility.C4),
+        };
+      },
+      // 盖特阶段阈值：未声明的阶段为 +∞
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Building,
+          makeMockIni("GTGCTRK", { IsGattling: "yes", WeaponStages: 3, Stage1: 40, Stage2: 80, EliteStage1: 30 }),
+          -1,
+          { unitsUnsellable: false, returnStructures: false },
+        );
+        const fmt = (arr) => arr.map((v) => (v === Infinity ? "Inf" : v));
+        return { stages: fmt(rules.stageThresholds), eliteStages: fmt(rules.eliteStageThresholds) };
+      },
+      // IFV 炮塔映射：*TurretWeapon 的值作为键、*TurretIndex 作为值
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Vehicle,
+          makeMockIni("IFV", {
+            Gunner: "yes",
+            StingerTurretWeapon: "55",
+            StingerTurretIndex: "2",
+            OtherTurretWeapon: "66",
+          }),
+          -1,
+          { unitsUnsellable: false, returnStructures: false },
+        );
+        return Array.from(rules.turretIndexesByIfvMode.entries());
+      },
+      // Factory=UnitType + Naval=yes → 归入海军船坞
+      (ns) => {
+        const naval = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("SUB", { Factory: "UnitType", Naval: "yes" }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        const land = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("TNK", { Factory: "UnitType" }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        return [naval.factory, land.factory];
+      },
+      // AIBasePlanningSide：合法序号保留，越界/未填为 undefined
+      (ns) => {
+        const valid = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("A", { AIBasePlanningSide: 2 }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        const invalid = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("B", { AIBasePlanningSide: 99 }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        const absent = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("C", {}), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        return [
+          valid.aiBasePlanningSide,
+          invalid.aiBasePlanningSide === undefined ? "undef" : invalid.aiBasePlanningSide,
+          absent.aiBasePlanningSide === undefined ? "undef" : absent.aiBasePlanningSide,
+        ];
+      },
+      // 视野截断：Sight 上限 11、工程师建筑强制 6
+      (ns) => {
+        const big = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("A", { Sight: 99 }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        const engineer = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("B", { NeedsEngineer: "yes", Sight: 99 }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        return [big.sight, engineer.sight];
+      },
+      // 矿奴字段：SlavesNumber/Slaves 双拼写 + 数量兜底
+      (ns) => {
+        const declared = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("YAREFN", { SlavesNumber: "3" }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        const named = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("YASLMN", { Slaves: "YSLAV" }), -1, {
+          unitsUnsellable: false,
+          returnStructures: false,
+        });
+        return {
+          declared: [declared.slaveMiner, declared.initialSlaves, declared.slaves],
+          named: [named.slaveMiner, named.initialSlaves, named.slaves],
+        };
+      },
+      // 受伤冒烟挂点：y/z 对调 + z/√2 坐标换算
+      (ns) => {
+        const rules = new ns.TechnoRules(
+          ns.ObjectType.Building,
+          makeMockIni("GACNST", { DamageSmokeOffset: "10,20,30" }),
+          -1,
+          { unitsUnsellable: false, returnStructures: false },
+        );
+        const s = rules.damageSmokeOffset;
+        return [s.x, Math.round(s.y * 100) / 100, s.z];
+      },
+    ],
+  },
+  {
     name: "game/Coords",
     tsjs: "src/game/Coords.ts.js",
     probes: [
@@ -1272,6 +1587,18 @@ const RECON_DEPS = [
   "game/gameobject/GameObject",
   "game/Coords",
   "util/event",
+  "game/type/SpeedType",
+  "game/type/PipColor",
+  "game/type/PipScale",
+  "game/type/LocomotorType",
+  "game/type/MovementZone",
+  "game/type/ArmorType",
+  "game/type/LandTargeting",
+  "game/type/NavalTargeting",
+  "game/type/VhpScan",
+  "game/rules/ObjectRules",
+  "game/WeaponType",
+  "game/gameobject/unit/VeteranAbility",
 ];
 
 // three r94 UMD: expose it globally the same way index.html does for the
@@ -1346,6 +1673,69 @@ async function instantiate(variantSource) {
 
 function deepEqual(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/**
+ * 测试用 INI 段落包装（模拟 rules 解析层接口，行为与真实 IniSection 对齐）：
+ * getString/getBool/getNumber/getFixed/getArray/getEnum/getEnumNumeric/
+ * getEnumArray/getNumberArray/has/entries/name。TechnoRules 等规则类的新旧
+ * 两个变体在探针内使用同一份 mock 数据，保证解析输入逐字一致。
+ */
+function makeMockIni(name, entries) {
+  const get = (key) => (key in entries ? entries[key] : undefined);
+  return {
+    name,
+    // 遍历约定：每项为 [值, 键]（TechnoRules.parseTurretIndexes 依赖此顺序）。
+    entries: Object.entries(entries).map(([key, value]) => [value, key]),
+    has: (key) => key in entries,
+    getString: (key) => {
+      const value = get(key);
+      return value === undefined ? "" : String(value);
+    },
+    getBool: (key, defaultValue) => {
+      const value = get(key);
+      if (value === undefined) return !!defaultValue;
+      return value === true || value === "yes" || value === 1 || value === "1";
+    },
+    getNumber: (key, defaultValue) => {
+      const value = get(key);
+      if (value === undefined) return defaultValue;
+      const n = Number(value);
+      return Number.isNaN(n) ? defaultValue : n;
+    },
+    getFixed: (key, defaultValue) => {
+      const value = get(key);
+      if (value === undefined) return defaultValue;
+      const n = parseFloat(value);
+      return Number.isNaN(n) ? defaultValue : n;
+    },
+    getArray: (key) => {
+      const value = get(key);
+      return value === undefined ? [] : String(value).split(",");
+    },
+    getEnum: (key, enumObj, defaultValue) => {
+      const value = get(key);
+      if (value === undefined) return defaultValue;
+      return enumObj[value] !== undefined ? enumObj[value] : defaultValue;
+    },
+    getEnumNumeric: (key, enumObj, defaultValue) => {
+      const value = get(key);
+      if (value === undefined) return defaultValue;
+      const n = enumObj[value];
+      return n !== undefined ? n : defaultValue;
+    },
+    getEnumArray: (key, enumObj) => {
+      const value = get(key);
+      return value === undefined ? [] : String(value).split(",").map((name) => enumObj[name]);
+    },
+    getNumberArray: (key, _default, fallback) => {
+      const value = get(key);
+      if (value === undefined) return fallback ?? _default ?? [];
+      return String(value)
+        .split(",")
+        .map((part) => Number(part));
+    },
+  };
 }
 
 /**

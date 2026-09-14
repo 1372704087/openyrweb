@@ -153,6 +153,6 @@ export enum EventType {
   TimerExpire = 64,
   /** 遥控坦克（Robot Tank）的电力/连接状态变化；由 RobotControlTrait 直接派发，无独立事件类。 */
   RobotPowerStateChange = 65,
-  /** OpenYRWeb: 病毒狙击手毒雾生命周期事件，引擎侧 VirusCloudFxHandler 消费并渲染绿色毒雾。 */
+  /** 病毒狙击手毒雾生命周期事件：引擎侧 VirusCloudFxHandler 消费并渲染绿色毒雾。 */
   VirusCloud = 66,
 }

@@ -792,5 +792,118 @@
         768
       ]
     }
+  },
+  "game/type/SpeedType": {
+    "0": 0,
+    "1": 7,
+    "2": "Hover",
+    "3": 16
+  },
+  "game/type/PipColor": {
+    "0": 0,
+    "1": 4,
+    "2": 10
+  },
+  "game/type/PipScale": {
+    "0": 0,
+    "1": 4,
+    "2": 5,
+    "3": 12
+  },
+  "game/type/LocomotorType": {
+    "0": 0,
+    "1": 8,
+    "2": 8,
+    "3": 5,
+    "4": 8,
+    "5": 0,
+    "6": 4
+  },
+  "game/type/MovementZone": {
+    "0": 6,
+    "1": 9,
+    "2": 24
+  },
+  "game/type/ArmorType": {
+    "0": 0,
+    "1": 8,
+    "2": 10,
+    "3": 22
+  },
+  "game/type/LandTargeting": {
+    "0": 0,
+    "1": 2,
+    "2": 6
+  },
+  "game/type/NavalTargeting": {
+    "0": 0,
+    "1": 5,
+    "2": 7,
+    "3": 16
+  },
+  "game/type/VhpScan": {
+    "0": 0,
+    "1": 2,
+    "2": 6
+  },
+  "game/gameobject/unit/VeteranAbility": {
+    "0": 0,
+    "1": 14,
+    "2": "SELF_HEAL",
+    "3": 30
+  },
+  "game/WeaponType": {
+    "0": 0,
+    "1": 2,
+    "2": 6
+  },
+  "game/rules/ObjectRules": {
+    "0": 256,
+    "1": 256,
+    "2": 360,
+    "3": 90,
+    "4": "none",
+    "5": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
+    }
+  },
+  "game/rules/TechnoRules": {
+    "0": "11/3/5",
+    "1": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
+    },
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
+    },
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "4": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
+    },
+    "5": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "6": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
+    },
+    "7": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "8": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "9": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
+    },
+    "10": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "11": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
+    },
+    "12": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
+    }
   }
 }
