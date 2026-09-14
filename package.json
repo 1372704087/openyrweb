@@ -18,7 +18,8 @@
     "build": "node tools/build.mjs",
     "serve": "node server/index.mjs",
     "test:boot": "node tests/boot-smoke.mjs",
-    "test:parity": "node tests/ts-parity.mjs"
+    "test:parity": "node tests/ts-parity.mjs",
+    "test:aliases": "node tests/alias-shadow-audit.mjs"
   },
   "dependencies": {
     "@puzzl/core": "1.0.0-beta.1",
