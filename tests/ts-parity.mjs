@@ -9,9 +9,15 @@
  *   2. Snapshot track (twin deleted — the migration end state): compare the
  *      compiled TS output against tests/parity-snapshots.json only.
  *
- * Snapshots are recorded from the .ts.js twin (the behavior baseline). New
- * snapshots are created automatically on first run; use
- * `npm run test:parity -- --update-snapshots` to re-baseline deliberately.
+ * Snapshots are recorded from the .ts.js twin (the behavior baseline). A missing
+ * entry is captured automatically on first run, from the twin. `--update-snapshots`
+ * instead re-baselines every entry from the CURRENT TS output — an explicit
+ * acceptance of behavior change (the twin track still guards accidental drift
+ * for as long as the twins exist).
+ *
+ * A probe result of `undefined` is legitimate and is stored explicitly as
+ * `{__undefined__: true}`; a bare `undefined` would be dropped by JSON.stringify
+ * and could not be told apart from a missing entry.
  *
  * Run: node tests/ts-parity.mjs   (requires `npm run build:ts` first)
  */
@@ -1776,15 +1782,24 @@ function assertRegistryMatchesDisk() {
   console.log(`parity registry OK: ${declared.length} converted module(s), all registered`);
 }
 
-/** Encode a probe outcome for snapshot storage. Errors are tagged explicitly. */
+/** Encode a probe outcome for snapshot storage.
+ *
+ *  Both errors AND a legitimate `undefined` result must be tagged: a bare
+ *  `undefined` is dropped by JSON.stringify, so an untagged one would be
+ *  indistinguishable from a missing entry — the snapshot would then be
+ *  re-created on every run and never actually compared. */
 function encodeOutcome(value, error) {
-  return error !== undefined ? { __error__: error } : value;
+  if (error !== undefined) return { __error__: error };
+  if (value === undefined) return { __undefined__: true };
+  return value;
 }
 
 function decodeSnapshot(stored) {
-  return stored && typeof stored === "object" && "__error__" in stored
-    ? { error: stored.__error__ }
-    : { value: stored };
+  if (stored && typeof stored === "object") {
+    if ("__error__" in stored) return { error: stored.__error__ };
+    if ("__undefined__" in stored) return { value: undefined };
+  }
+  return { value: stored };
 }
 
 async function main() {
@@ -1832,10 +1847,16 @@ async function main() {
       }
 
       // Track 2: committed snapshot vs new TS output.
-      const stored = snapshots[mod.name]?.[i];
-      const expected = decodeSnapshot(stored);
-      if (stored === undefined) {
-        // First capture: only legal while the twin still exists as the baseline.
+      //
+      // Entry presence is tested with hasOwnProperty, not `=== undefined`: a probe
+      // may legitimately return undefined (stored as {__undefined__: true}), and
+      // treating that as "no entry yet" re-captured the snapshot on every run.
+      const store = snapshots[mod.name];
+      const hasEntry = store !== undefined && Object.prototype.hasOwnProperty.call(store, i);
+      const expected = decodeSnapshot(hasEntry ? store[i] : undefined);
+
+      if (!hasEntry) {
+        // First capture. Only legal while the twin still exists, as the oracle.
         if (hasTwin) {
           let oldV, oldErr;
           try {
@@ -1845,14 +1866,22 @@ async function main() {
           }
           (snapshots[mod.name] ??= {})[i] = encodeOutcome(oldV, oldErr);
           snapshotsChanged.add(mod.name);
+        } else if (UPDATE_SNAPSHOTS) {
+          (snapshots[mod.name] ??= {})[i] = encodeOutcome(newV, newErr);
+          snapshotsChanged.add(mod.name);
         } else {
           fail("no snapshot and no twin to baseline from — restore the twin or use --update-snapshots");
         }
+      } else if (UPDATE_SNAPSHOTS) {
+        // Deliberate re-baseline: accept the current TS output as the new expected
+        // value. Track 1 above still guards accidental drift while a twin exists.
+        store[i] = encodeOutcome(newV, newErr);
+        snapshotsChanged.add(mod.name);
       } else if (expected.error !== undefined) {
         if (newErr !== expected.error)
           fail(`snapshot=${expected.error} new=${newErr ?? JSON.stringify(newV)}`);
       } else if (newErr !== undefined || !deepEqual(newV, expected.value)) {
-        fail(`snapshot=${JSON.stringify(expected.value)} new=${newErr ?? JSON.stringify(newV)}${UPDATE_SNAPSHOTS ? "" : " (run: npm run test:parity -- --update-snapshots)"}`);
+        fail(`snapshot=${JSON.stringify(expected.value)} new=${newErr ?? JSON.stringify(newV)} (run: npm run test:parity -- --update-snapshots)`);
       }
     });
     totalFailures += moduleFailures;
