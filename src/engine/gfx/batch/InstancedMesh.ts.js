@@ -91,15 +91,44 @@ System.register("engine/gfx/batch/InstancedMesh", [], function (e, t) {
           }
           updateFromMeshes(t) {
             var e,
+              k,
               i = !!t[0].material.palette,
               r = this.geometry.attributes;
             let s = r.instanceOpacity,
               a = r.instancePaletteOffset,
               n = r.instanceExtraLight,
               ld = r.instanceLightDir;
+            // Per-slot matrix cache, sized to maxInstances and rebuilt whenever that
+            // changes — a Float32Array silently drops out-of-range writes, so a cache
+            // allocated for a smaller count would read back undefined and mark every
+            // slot dirty forever (correct, but the dirty check would never pay off).
+            this._matCacheSize !== this.maxInstances &&
+              ((this._matCacheSize = this.maxInstances),
+              (this._matCache = new Float32Array(16 * this.maxInstances)),
+              (this._matMesh = new Array(this.maxInstances)));
+            this._matDirty = !1;
             for (let h = 0, u = t.length; h < u; h++) {
-              let e = t[h];
-              this.setMatrixAt(h, e.matrixWorld);
+              let e = t[h],
+                mw = e.matrixWorld,
+                base = 16 * h,
+                changed = e !== this._matMesh[h];
+              // Same mesh object in the same slot and byte-identical elements: the
+              // instance buffer already holds this matrix, so skip the upload.
+              // NOTE: mw.elements is a plain Array of doubles (three r94) while the
+              // cache is a Float32Array, so compare through Math.fround — that is
+              // exactly "would the float32 GPU buffer change", and a raw !== would
+              // be true on nearly every element and defeat the whole check.
+              if (!changed) {
+                for (k = 0; k < 16; k++)
+                  if (Math.fround(mw.elements[k]) !== this._matCache[base + k]) {
+                    changed = !0;
+                    break;
+                  }
+              }
+              if (changed) {
+                (this.setMatrixAt(h, mw), (this._matMesh[h] = e), (this._matDirty = !0));
+                for (k = 0; k < 16; k++) this._matCache[base + k] = mw.elements[k];
+              }
               var o,
                 l,
                 c = e.getOpacity();
@@ -121,7 +150,8 @@ System.register("engine/gfx/batch/InstancedMesh", [], function (e, t) {
                     (ld.needsUpdate = !0))));
             }
             this.setRenderCount(t.length);
-            for (e of this.instanceMatrixAttributes) e.needsUpdate = !0;
+            // Only touch the GPU buffers when at least one slot actually changed.
+            if (this._matDirty) for (e of this.instanceMatrixAttributes) e.needsUpdate = !0;
           }
           dispose() {
             (this.geometry.dispose(), this.material.dispose());

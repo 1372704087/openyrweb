@@ -165,6 +165,12 @@ System.register(
             setLightFocusPoint(e, t) {
               this.lightFocusPoint = { x: e, y: t };
             }
+            // Called by RenderableManager whenever a renderable is added to or removed
+            // from the world, so the mesh batches only rebuild when their contents
+            // actually changed instead of every frame.
+            markBatchRebuild() {
+              this.meshBatchManager?.markNeedsRebuild();
+            }
             applyLighting(e) {
               var t = e.computeTint(r.LightingType.Ambient);
               (this.ambientLight.color.setRGB(t.x, t.y, t.z), this.directionalLight.color.setRGB(t.x, t.y, t.z));
@@ -174,12 +180,14 @@ System.register(
             update(e, t) {
               (super.update(e, t), this._onBeforeCameraUpdate.dispatch(this, e));
               var i = this.cameraZoom.getZoom(),
-                r = this.cameraPan.getPan();
-              ((s.pointEquals(r, this.lastCameraPan) && this.lastCameraZoom === i) ||
-                (this.updateCamera(r, i), (this.lastCameraZoom = i), (this.lastCameraPan = r)),
+                r = this.cameraPan.getPan(),
+                // Camera motion changes which meshes fall inside the visible set, so it
+                // forces a batch rebuild; a still camera lets the batches stay cached.
+                n = !(s.pointEquals(r, this.lastCameraPan) && this.lastCameraZoom === i);
+              (n && (this.updateCamera(r, i), (this.lastCameraZoom = i), (this.lastCameraPan = r)),
                 this._onCameraUpdate.dispatch(this, e),
                 this.scene.updateMatrixWorld(!1),
-                this.meshBatchManager.updateMeshes());
+                this.meshBatchManager.updateMeshes(n));
             }
             dispose() {
               (this.shadowQualityListener &&

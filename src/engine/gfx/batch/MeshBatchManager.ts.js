@@ -32,7 +32,12 @@ System.register(
       execute: function () {
         ((r = class extends i.RenderableContainer {
           constructor(e) {
-            (super(), (this.renderableContainer = e), (this.batches = new Map()));
+            (super(),
+              (this.renderableContainer = e),
+              (this.batches = new Map()),
+              (this._meshBatchMap = new Map()),
+              (this._needsRebuild = !0),
+              (this._frame = 0));
           }
           create3DObject() {
             let e = this.get3DObject();
@@ -43,12 +48,41 @@ System.register(
               this.set3DObject(e)),
               super.create3DObject());
           }
-          updateMeshes() {
-            var e = this.renderableContainer.get3DObject();
-            e &&
-              ((e = this.collectMeshes(e)),
-              (e = this.fillBatches(this.groupMeshesByBatchKey(e))),
-              this.cleanUnusedBatches(e));
+          /** Marks the batch contents as stale. Callers that add or remove batched
+           *  meshes must call this, or the rebuild only happens on the periodic
+           *  fallback inside updateMeshes(). */
+          markNeedsRebuild() {
+            this._needsRebuild = !0;
+          }
+          /** `e` forces a full rebuild this frame. It defaults to true, so a plain
+           *  updateMeshes() keeps the original rebuild-every-frame behaviour — only
+           *  callers that participate in the dirty protocol (passing false when
+           *  nothing changed) get the incremental path. */
+          updateMeshes(e = !0) {
+            var t = this.renderableContainer.get3DObject();
+            if (!t) return;
+            ++this._frame;
+            // Rebuild on an explicit force, on a pending invalidation, or every 4th
+            // frame as a safety net. The net matters because not every mutation is
+            // reported: Building.updateImage() and Anim flip `visible` on batched
+            // meshes when damage state or animation state changes, which changes the
+            // collected set without touching this manager. 4 frames keeps that lag
+            // under ~70ms even if the frame rate drops, while still skipping 3 of
+            // every 4 scene-graph walks.
+            if (e || this._needsRebuild || (this._frame & 3) === 0) {
+              ((this._needsRebuild = !1),
+                (t = this.collectMeshes(t)),
+                (t = this.fillBatches(this.groupMeshesByBatchKey(t))),
+                this.cleanUnusedBatches(t));
+            } else this.refreshOnly();
+          }
+          /** Re-applies the cached mesh lists without re-walking the scene graph. */
+          refreshOnly() {
+            for (var e of this.batches.values())
+              for (var t of e) {
+                var i = this._meshBatchMap.get(t);
+                i && t.setMeshes(i);
+              }
           }
           collectMeshes(e) {
             let t = [];
@@ -79,7 +113,7 @@ System.register(
                   i.push(t),
                   this.add(t),
                   this.processRenderQueue()),
-                  t.setMeshes(e),
+                  (this._meshBatchMap.set(t, e), t.setMeshes(e)),
                   r++);
               }
               t.set(s, r);
@@ -91,7 +125,7 @@ System.register(
               let e = this.batches.get(t);
               if (e) {
                 var r;
-                for (r of e.splice(i)) (this.remove(r), r.dispose());
+                for (r of e.splice(i)) (this.remove(r), this._meshBatchMap.delete(r), r.dispose());
                 e.length || this.batches.delete(t);
               }
             }

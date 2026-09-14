@@ -31,6 +31,7 @@ System.register("engine/RenderableManager", ["engine/gfx/OctreeContainer"], func
                 var e = t.isTechno() && t.rules.isLightpost;
                 let i = this.createRenderable(t, e ? this.worldScene : this.container);
                 i.onCreate && i.onCreate(this);
+                this.worldScene.markBatchRebuild?.();
                 e = ({ tileChanged: e }) => this.onObjectPositionChanged(t, e);
                 (this.positionListeners.set(t, e), t.position.onPositionChange.subscribe(e));
               }),
@@ -71,18 +72,36 @@ System.register("engine/RenderableManager", ["engine/gfx/OctreeContainer"], func
           }
           removeAndDisposeRenderable(e, t) {
             let i = t.isTechno() && t.rules.isLightpost ? this.worldScene : this.container;
-            (i.remove(e), e.dispose?.(), this.renderablesByGameObject.delete(t), this.renderablesById.delete(t.id));
+            // Marked here rather than in onWorldObjectRemoved so the deferred
+            // (async onRemove) path is covered too — that path returns a promise and
+            // only actually detaches the renderable some frames later.
+            (i.remove(e),
+              e.dispose?.(),
+              this.renderablesByGameObject.delete(t),
+              this.renderablesById.delete(t.id),
+              this.worldScene.markBatchRebuild?.());
           }
           createTransientAnim(e, t) {
             var i = this.renderableFactory.createTransientAnim(e, this.container);
-            return (t?.(i), this.container.add(i), i);
+            return (
+              t?.(i),
+              this.container.add(i),
+              this.worldScene.markBatchRebuild?.(),
+              i
+            );
           }
           createAnim(e, t, i = !1) {
             var r = this.renderableFactory.createAnim(e);
-            return (t?.(r), i || this.container.add(r), r);
+            return (
+              t?.(r),
+              i || (this.container.add(r), this.worldScene.markBatchRebuild?.()),
+              r
+            );
           }
           addEffect(e) {
-            (e.setContainer(this.worldScene), this.worldScene.add(e));
+            (e.setContainer(this.worldScene),
+              this.worldScene.add(e),
+              this.worldScene.markBatchRebuild?.());
           }
           dispose() {
             (this.worldScene.remove(this.container),
