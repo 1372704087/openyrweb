@@ -1,6 +1,6 @@
 ﻿#!/usr/bin/env pwsh
 # OpenYRWeb 一键启动脚本（Windows）
-# 功能：检查环境 -> 安装依赖 -> 构建 vendor -> 构建客户端 -> 启动服务 -> 打开浏览器
+# 功能：检查环境 -> 安装依赖 -> 构建 vendor -> 构建客户端 -> 启动服务
 
 $ErrorActionPreference = "Stop"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Definition
@@ -148,10 +148,6 @@ if (-not $started) {
 # 启动成功后清理日志
 Remove-Item $outLog, $errLog -ErrorAction SilentlyContinue
 Write-Host "`n服务器已启动：$SERVE_URL" -ForegroundColor Green
-
-# 7. 打开浏览器
-Write-Step "打开浏览器"
-Start-Process $SERVE_URL
 
 Write-Host "`n按任意键停止服务器并退出..." -ForegroundColor Yellow
 [void][System.Console]::ReadKey($true)
