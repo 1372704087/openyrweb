@@ -908,5 +908,199 @@
     "12": {
       "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
     }
+  },
+  "game/gameobject/unit/VeteranLevel": {
+    "0": 0,
+    "1": 2,
+    "2": 6
+  },
+  "game/gameobject/infantry/StanceType": {
+    "0": 0,
+    "1": 2,
+    "2": 5,
+    "3": 12
+  },
+  "game/gameobject/unit/ZoneType": {
+    "0": 0,
+    "1": 2,
+    "2": 6,
+    "3": 0,
+    "4": 2,
+    "5": 0
+  },
+  "game/gameobject/infantry/InfDeathType": {
+    "0": 1,
+    "1": 8,
+    "2": 10,
+    "3": "Mutate",
+    "4": 22
+  },
+  "game/gameobject/unit/CrateBonuses": {
+    "0": {
+      "firepower": 1,
+      "armor": 1,
+      "speed": 1
+    }
+  },
+  "game/gameobject/Techno": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "1": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    }
+  },
+  "game/gameobject/Infantry": {
+    "0": {
+      "name": "GI",
+      "isUnit": true,
+      "isInfantry": true,
+      "isTechno": true,
+      "traitCount": 2,
+      "hasMove": true,
+      "hasSuppression": false,
+      "hasIdle": true,
+      "zone": 0,
+      "infDeath": 1,
+      "subCells": [
+        2,
+        4,
+        3
+      ]
+    },
+    "1": {
+      "hasCrashable": true,
+      "hasSuppression": true,
+      "hasAgent": true,
+      "hasCast": true,
+      "hasCargo": true,
+      "traitCount": 7
+    },
+    "2": {
+      "storage": 3,
+      "hasCargo": true
+    },
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Deployed')"
+    }
+  },
+  "game/gameobject/Vehicle": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "1": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Ship')"
+    },
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "3": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Hover')"
+    },
+    "4": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    },
+    "5": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
+    }
+  },
+  "game/gameobject/trait/interface/NotifyBuildStatus": {
+    "0": "symbol",
+    "1": 1
+  },
+  "game/event/BuildStatusChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "status": 1,
+      "type": 15,
+      "typeName": "n/a"
+    }
+  },
+  "game/gameobject/Aircraft": {
+    "0": {
+      "name": "HARRIER",
+      "isAircraft": true,
+      "isUnit": true,
+      "isTechno": true,
+      "hasAirportBound": true,
+      "hasCrashable": true,
+      "hasSpawnLink": true,
+      "hasMissileSpawn": false,
+      "hasMove": true,
+      "hasParasiteable": true,
+      "traitCount": 7,
+      "zone": 0,
+      "direction": 42,
+      "yaw": 42
+    },
+    "1": {
+      "missile": {
+        "crashable": false,
+        "missileSpawn": true,
+        "spawnLink": false
+      },
+      "paradropTraitCount": 3,
+      "fighterTraitCount": 2
+    }
+  },
+  "game/gameobject/Building": {
+    "0": [
+      0,
+      1,
+      2
+    ],
+    "1": {
+      "isBuilding": true,
+      "status": 0,
+      "traitCount": 0,
+      "foundation": {
+        "width": 3,
+        "height": 3
+      },
+      "offset": [
+        384,
+        384
+      ],
+      "isTechno": true
+    },
+    "2": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'BuildingType')"
+    },
+    "3": {
+      "hasOilDerrick": true,
+      "wallC4": false,
+      "wallTrait": true,
+      "natbnkBunker": false,
+      "namedBunker": true
+    },
+    "4": {
+      "tasksAdded": 1,
+      "disabledLog": [
+        true,
+        true,
+        true
+      ],
+      "dispatched": [
+        [
+          "?",
+          1
+        ]
+      ],
+      "status": 1
+    },
+    "5": {
+      "withUnit": "APOC",
+      "fallback": "SNIPE"
+    },
+    "6": {
+      "grinding": 1,
+      "orePile": 0.9995
+    }
   }
 }

@@ -1217,6 +1217,598 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/unit/VeteranLevel",
+    tsjs: "src/game/gameobject/unit/VeteranLevel.ts.js",
+    probes: [(ns) => ns.VeteranLevel.None, (ns) => ns.VeteranLevel.Elite, (ns) => Object.keys(ns.VeteranLevel).length],
+  },
+  {
+    name: "game/gameobject/infantry/StanceType",
+    tsjs: "src/game/gameobject/infantry/StanceType.ts.js",
+    probes: [
+      (ns) => ns.StanceType.None,
+      (ns) => ns.StanceType.Prone,
+      (ns) => ns.StanceType.Cheer,
+      (ns) => Object.keys(ns.StanceType).length,
+    ],
+  },
+  {
+    name: "game/gameobject/unit/ZoneType",
+    tsjs: "src/game/gameobject/unit/ZoneType.ts.js",
+    probes: [
+      (ns) => ns.ZoneType.Ground,
+      (ns) => ns.ZoneType.Water,
+      (ns) => Object.keys(ns.ZoneType).length,
+      (ns) => ns.getZoneType(2), // LandType.Water（惰性加载孪生后取到真值）
+      (ns) => ns.getZoneType(3), // LandType.Beach
+      (ns) => ns.getZoneType(0), // LandType.Clear
+    ],
+  },
+  {
+    name: "game/gameobject/infantry/InfDeathType",
+    tsjs: "src/game/gameobject/infantry/InfDeathType.ts.js",
+    probes: [
+      (ns) => ns.InfDeathType.Gunfire,
+      (ns) => ns.InfDeathType.Virus,
+      (ns) => ns.InfDeathType.YuriDeath,
+      (ns) => ns.InfDeathType[ns.InfDeathType.Mutate],
+      (ns) => Object.keys(ns.InfDeathType).length,
+    ],
+  },
+  {
+    name: "game/gameobject/unit/CrateBonuses",
+    tsjs: "src/game/gameobject/unit/CrateBonuses.ts.js",
+    probes: [
+      (ns) => {
+        const bonuses = new ns.CrateBonuses();
+        return { firepower: bonuses.firepower, armor: bonuses.armor, speed: bonuses.speed };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/Techno",
+    tsjs: "src/game/gameobject/Techno.ts.js",
+    probes: [
+      // 规则标志快照 + 便捷读取器降级
+      (ns) => {
+        const rules = {
+          explodes: true,
+          radarInvisible: true,
+          c4: true,
+          crusher: true,
+          omniCrusher: true,
+          defaultToGuardArea: true,
+          cost: 500,
+          sight: 8,
+        };
+        const techno = new ns.Techno(ns.ObjectType.Vehicle, "HTK", rules, {});
+        return {
+          explodes: techno.explodes,
+          crusher: techno.crusher,
+          omniCrusher: techno.omniCrusher,
+          purchaseValue: techno.purchaseValue,
+          guardMode: techno.guardMode,
+          primary: techno.primaryWeapon === undefined ? "none" : "set",
+          veteranLevel: techno.veteranLevel,
+          sight: techno.sight,
+          isTechno: techno.isTechno(),
+          isBuilding: techno.isBuilding(),
+        };
+      },
+      // 碾压判定矩阵
+      (ns) => {
+        const rules = { crusher: true, omniCrusher: true, cost: 1, sight: 1 };
+        const tank = new ns.Techno(ns.ObjectType.Vehicle, "HTK", rules, {});
+        const mkTarget = (props) => ({ rules: {}, ...props });
+        const crushableInf = mkTarget({ rules: { crushable: true } });
+        const wallBuilding = mkTarget({ rules: { crushable: true, wall: true }, isBuilding: () => true });
+        const building = mkTarget({ rules: { crushable: true }, isBuilding: () => true });
+        const vehicle = mkTarget({ rules: { crushable: false } });
+        const omniResistant = mkTarget({ rules: { crushable: false, omniCrushResistant: true } });
+        const invulnerable = mkTarget({ rules: { crushable: true }, invulnerableTrait: { isActive: () => true } });
+        return [
+          tank.canCrushObject(crushableInf),
+          tank.canCrushObject(wallBuilding),
+          tank.canCrushObject(building),
+          tank.canCrushObject(vehicle),
+          tank.canCrushObject(omniResistant),
+          tank.canCrushObject(invulnerable),
+        ];
+      },
+      // 非碾压车；警戒复位
+      (ns) => {
+        const rules = { crusher: false, omniCrusher: false, cost: 1, sight: 1, defaultToGuardArea: false };
+        const car = new ns.Techno(ns.ObjectType.Vehicle, "CAR", rules, {});
+        const crushResult = car.canCrushObject({ rules: { crushable: true } });
+        car.guardMode = true;
+        car.guardArea = { x: 1 };
+        car.resetGuardModeToIdle();
+        return { crushResult, guardMode: car.guardMode, guardArea: car.guardArea === undefined ? "undef" : "set" };
+      },
+      // 超时空离场 tick 分流：仅 ticksWhenWarpedOut 的 trait 被驱动
+      (ns) => {
+        const rules = { crusher: false, omniCrusher: false, cost: 1, sight: 1 };
+        const techno = new ns.Techno(ns.ObjectType.Vehicle, "HTK", rules, {});
+        const calls = [];
+        techno.warpedOutTrait = { isActive: () => true };
+        techno.addTrait({ [ns.NotifyTick.onTick]: () => calls.push("always") });
+        techno.addTrait({ ticksWhenWarpedOut: true, [ns.NotifyTick.onTick]: () => calls.push("warped") });
+        techno.update("W");
+        techno.warpedOutTrait = { isActive: () => false };
+        techno.update("W");
+        return calls;
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/Infantry",
+    tsjs: "src/game/gameobject/Infantry.ts.js",
+    probes: [
+      // 最简出厂：恒挂 move/idle，fearless 无压制 trait
+      (ns) => {
+        const rules = { crashable: false, fearless: true, agent: false, engineer: false, storage: 0, slaved: false };
+        const gi = ns.Infantry.factory("GI", rules, {}, {});
+        return {
+          name: gi.name,
+          isUnit: gi.isUnit(),
+          isInfantry: gi.isInfantry(),
+          isTechno: gi.isTechno(),
+          traitCount: gi.traits.getAll().length,
+          hasMove: !!gi.moveTrait,
+          hasSuppression: !!gi.suppressionTrait,
+          hasIdle: !!gi.idleActionTrait,
+          zone: gi.zone,
+          infDeath: gi.infDeathType,
+          subCells: ns.Infantry.SUB_CELLS,
+        };
+      },
+      // 条件 trait：压制/特工/工程师/载货
+      (ns) => {
+        const rules = { crashable: true, fearless: false, agent: true, engineer: true, storage: 5, slaved: false };
+        const tanya = ns.Infantry.factory("TANYA", rules, {}, {});
+        return {
+          hasCrashable: !!tanya.crashableTrait,
+          hasSuppression: !!tanya.suppressionTrait,
+          hasAgent: !!tanya.agentTrait,
+          hasCast: !!tanya.castProgressTrait,
+          hasCargo: !!tanya.harvesterTrait,
+          traitCount: tanya.traits.getAll().length,
+        };
+      },
+      // 矿奴：slaved 强制存储 ≥3 → 载货 trait 挂载
+      (ns) => {
+        const rules = { crashable: false, fearless: true, agent: false, engineer: false, slaved: true };
+        const slave = ns.Infantry.factory("SLAV", rules, {}, {});
+        return { storage: rules.storage, hasCargo: !!slave.harvesterTrait };
+      },
+      // 姿态读写与压制覆盖（压制 trait 为真实旧实现）
+      (ns) => {
+        const rules = { crashable: false, fearless: false, agent: false, engineer: false, storage: 0, slaved: false };
+        const gi = ns.Infantry.factory("GI", rules, {}, {});
+        const initial = gi.stance;
+        gi.stance = ns.StanceType.Deployed;
+        const deployed = gi.stance;
+        gi.stance = ns.StanceType.None;
+        return [initial, deployed, gi.stance];
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/Vehicle",
+    tsjs: "src/game/gameobject/Vehicle.ts.js",
+    probes: [
+      // 最简出厂（地面坦克）：沉没判定（非海军 → 沉）、Ground 区
+      (ns) => {
+        const rules = {
+          naval: false,
+          underwater: false,
+          weight: 100,
+          crashable: false,
+          crewed: false,
+          harvester: false,
+          passengers: 0,
+          turret: false,
+          consideredAircraft: false,
+          landable: false,
+          parasiteable: false,
+          locomotor: ns.LocomotorType.Vehicle,
+          powered: false,
+          poweredUnit: false,
+          prerequisite: [],
+        };
+        const tank = ns.Vehicle.factory("HTK", rules, { isVoxel: false }, { general: { shipSinkingWeight: 200 } }, {});
+        return {
+          isSinker: tank.isSinker,
+          zone: tank.zone,
+          isVehicle: tank.isVehicle(),
+          isUnit: tank.isUnit(),
+          traitCount: tank.traits.getAll().length,
+          rockingTicksConst: ns.ROCKING_TICKS,
+        };
+      },
+      // 潜艇：水下 → SubmergibleTrait + Water 区 + 不沉（海军且未超重）
+      (ns) => {
+        const rules = {
+          naval: true,
+          underwater: true,
+          weight: 100,
+          crashable: false,
+          crewed: false,
+          harvester: false,
+          passengers: 0,
+          turret: false,
+          consideredAircraft: false,
+          landable: false,
+          parasiteable: false,
+          locomotor: ns.LocomotorType.Ship,
+          powered: false,
+          poweredUnit: false,
+          prerequisite: [],
+        };
+        const sub = ns.Vehicle.factory("SMSUB", rules, { isVoxel: false }, { general: { shipSinkingWeight: 200 } }, {});
+        return { isSinker: sub.isSinker, zone: sub.zone, traitCount: sub.traits.getAll().length };
+      },
+      // IFV：运兵 + gunner → GunnerTrait；UI 名带模式前缀
+      (ns) => {
+        const rules = {
+          naval: false,
+          underwater: false,
+          weight: 100,
+          crashable: false,
+          crewed: false,
+          harvester: false,
+          passengers: 2,
+          turret: false,
+          consideredAircraft: false,
+          landable: false,
+          parasiteable: false,
+          locomotor: ns.LocomotorType.Vehicle,
+          powered: false,
+          poweredUnit: false,
+          prerequisite: [],
+          gunner: true,
+        };
+        const ifv = ns.Vehicle.factory("IFV", rules, { isVoxel: false }, { general: { shipSinkingWeight: 200 } }, {});
+        ifv.armedTrait = { getSpecialWeaponIndex: () => 0 };
+        ifv.transportTrait.units = [{ name: "GI" }];
+        const uiName = ifv.getUiName();
+        return { hasGunner: !!ifv.gunnerTrait, hasTransport: !!ifv.transportTrait, uiName };
+      },
+      // 机器人坦克：poweredUnit + 前置 → RobotControlTrait；悬浮移动器
+      (ns) => {
+        const rules = {
+          naval: false,
+          underwater: false,
+          weight: 100,
+          crashable: false,
+          crewed: false,
+          harvester: false,
+          passengers: 0,
+          turret: true,
+          consideredAircraft: false,
+          landable: false,
+          parasiteable: false,
+          locomotor: ns.LocomotorType.Hover,
+          powered: false,
+          poweredUnit: true,
+          prerequisite: ["GACSPH"],
+        };
+        const robot = ns.Vehicle.factory("ROBOT", rules, { isVoxel: false }, { general: { shipSinkingWeight: 200 } }, {});
+        return { hasRobotControl: !!robot.robotControlTrait, traitCount: robot.traits.getAll().length };
+      },
+      // 体素倾斜 + 摇晃：Vehicle/Chrono + voxel → TilterTrait；命中摇晃 34 tick
+      (ns) => {
+        const base = {
+          naval: false,
+          underwater: false,
+          weight: 100,
+          crashable: false,
+          crewed: false,
+          harvester: false,
+          passengers: 0,
+          turret: false,
+          consideredAircraft: false,
+          landable: false,
+          parasiteable: false,
+          locomotor: ns.LocomotorType.Vehicle,
+          powered: false,
+          poweredUnit: false,
+          prerequisite: [],
+        };
+        const voxel = ns.Vehicle.factory("HTK", { ...base }, { isVoxel: true }, { general: { shipSinkingWeight: 200 } }, {});
+        const shp = ns.Vehicle.factory("HTK2", { ...base }, { isVoxel: false }, { general: { shipSinkingWeight: 200 } }, {});
+        const hasTilt = [!!voxel.tilterTrait, !!shp.tilterTrait];
+        voxel.warpedOutTrait = { isActive: () => false };
+        voxel.applyRocking(90, 0.5);
+        const rocking = { ticksLeft: voxel.rocking.ticksLeft, factor: voxel.rocking.factor };
+        for (let i = 0; i < ns.ROCKING_TICKS; i++) voxel.update("W");
+        return { hasTilt, rocking, cleared: voxel.rocking === undefined };
+      },
+      // 采矿车：harvester → HarvesterTrait + 乘员 + 寄生 + 体素倾斜
+      (ns) => {
+        const rules = {
+          naval: false,
+          underwater: false,
+          weight: 300,
+          crashable: false,
+          crewed: true,
+          harvester: true,
+          passengers: 0,
+          turret: false,
+          consideredAircraft: false,
+          landable: false,
+          parasiteable: true,
+          locomotor: ns.LocomotorType.Vehicle,
+          powered: false,
+          poweredUnit: false,
+          prerequisite: [],
+          storage: 20,
+        };
+        const warMiner = ns.Vehicle.factory("WARMINER", rules, { isVoxel: true }, { general: { shipSinkingWeight: 200 } }, {});
+        return {
+          hasHarvester: !!warMiner.harvesterTrait,
+          hasCrewed: !!warMiner.crewedTrait,
+          hasParasiteable: !!warMiner.parasiteableTrait,
+          hasTilter: !!warMiner.tilterTrait,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyBuildStatus",
+    tsjs: "src/game/gameobject/trait/interface/NotifyBuildStatus.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyBuildStatus.onStatusChange,
+      (ns) => Object.keys(ns.NotifyBuildStatus).length,
+    ],
+  },
+  {
+    name: "game/event/BuildStatusChangeEvent",
+    tsjs: "src/game/event/BuildStatusChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { tag: "GAPOWR" };
+        const event = new ns.BuildStatusChangeEvent(target, 1);
+        return {
+          sameTarget: event.target === target,
+          status: event.status,
+          type: event.type,
+          typeName: ns.EventType ? ns.EventType[event.type] : "n/a",
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/Aircraft",
+    tsjs: "src/game/gameobject/Aircraft.ts.js",
+    probes: [
+      // 基础出厂：机场绑定 + 可坠毁 + 子机链接 + 可停靠
+      (ns) => {
+        const rules = {
+          airportBound: true,
+          dock: ["GAAIRP"],
+          missileSpawn: false,
+          spawned: true,
+          landable: false,
+          parasiteable: true,
+        };
+        const general = { general: { paradrop: { paradropPlane: "PDPLANE" } } };
+        const harrier = ns.Aircraft.factory("HARRIER", rules, {}, general, {});
+        return {
+          name: harrier.name,
+          isAircraft: harrier.isAircraft(),
+          isUnit: harrier.isUnit(),
+          isTechno: harrier.isTechno(),
+          hasAirportBound: !!harrier.airportBoundTrait,
+          hasCrashable: !!harrier.crashableTrait,
+          hasSpawnLink: !!harrier.spawnLinkTrait,
+          hasMissileSpawn: !!harrier.missileSpawnTrait,
+          hasMove: !!harrier.moveTrait,
+          hasParasiteable: !!harrier.parasiteableTrait,
+          traitCount: harrier.traits.getAll().length,
+          zone: harrier.zone,
+          direction: (harrier.direction = 42), // direction 读写即 yaw
+          yaw: harrier.yaw,
+        };
+      },
+      // 导弹出生体：无坠毁 trait、挂 MissileSpawn；空降机 landable → 无 Unlandable
+      (ns) => {
+        const general = { general: { paradrop: { paradropPlane: "PDPLANE" } } };
+        const missileRules = {
+          airportBound: false,
+          dock: [],
+          missileSpawn: true,
+          spawned: true,
+          landable: false,
+          parasiteable: false,
+        };
+        const missile = ns.Aircraft.factory("DMISSILE", missileRules, {}, general, {});
+        const paradropRules = {
+          airportBound: false,
+          dock: [],
+          missileSpawn: false,
+          spawned: false,
+          landable: true,
+          parasiteable: false,
+        };
+        const paradrop = ns.Aircraft.factory("PDPLANE", paradropRules, {}, general, {});
+        const fighterRules = {
+          airportBound: false,
+          dock: [],
+          missileSpawn: false,
+          spawned: false,
+          landable: true,
+          parasiteable: false,
+        };
+        const fighter = ns.Aircraft.factory("FIGHTER", fighterRules, {}, general, {});
+        return {
+          missile: {
+            crashable: !!missile.crashableTrait,
+            missileSpawn: !!missile.missileSpawnTrait,
+            spawnLink: !!missile.spawnLinkTrait,
+          },
+          paradropTraitCount: paradrop.traits.getAll().length, // 可降落空降机：无 Unlandable
+          fighterTraitCount: fighter.traits.getAll().length, // 普通战机：多一个 Unlandable
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/Building",
+    tsjs: "src/game/gameobject/Building.ts.js",
+    probes: [
+      // 内部枚举 + 静态缺省
+      (ns) => [ns.BuildStatus.BuildUp, ns.BuildStatus.Ready, ns.BuildStatus.BuildDown],
+      // 最简建筑：无附加 trait；占位中心偏移；状态机初始 BuildUp
+      (ns) => {
+        const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
+        const building = ns.Building.factory("GACNST", {}, world, { foundation: { width: 3, height: 3 } }, null, null);
+        const offset = building.getFoundationCenterOffset();
+        return {
+          isBuilding: building.isBuilding(),
+          status: building.buildStatus,
+          traitCount: building.traits.getAll().length,
+          foundation: building.getFoundation(),
+          offset: [offset.x, offset.y],
+          isTechno: building.isTechno(),
+        };
+      },
+      // 出厂组装矩阵（桩类 $args 记录构造参数，可断言传入值）
+      (ns) => {
+        const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
+        const art = { foundation: { width: 2, height: 2 }, dockingOffsets: [1, 2] };
+        const rules = {
+          canBeOccupied: true,
+          infantryAbsorb: true,
+          maxNumberOccupants: 5,
+          capturable: true,
+          needsEngineer: true,
+          produceCashStartup: 10,
+          produceCashAmount: 20,
+          canC4: true,
+          wall: false,
+          eligibleForDelayKill: true,
+          crewed: true,
+          turret: true,
+          overpowerable: true,
+          powered: true,
+          power: -100,
+          factory: ns.FactoryType.BuildingType,
+          cloning: false,
+          superWeapon: "ChronoStorm",
+          numberOfDocks: 1,
+          helipad: true,
+          unitRepair: true,
+          unitReload: true,
+          bunker: false,
+          hospital: false,
+          infantryGainSelfHeal: 0.5,
+          unitsGainSelfHeal: 0,
+          gapGenerator: true,
+          gapRadiusInCells: 12,
+          psychicDetectionRadius: 10,
+          freeUnit: "E1",
+        };
+        const building = ns.Building.factory("GAWAPHUT", rules, world, art, "dockCtx", "bridgeCtx");
+        return {
+          hasGarrison: !!building.garrisonTrait,
+          transportIsGarrison: building.transportTrait === building.garrisonTrait, // 吸收式驻扎兼任运输
+          hasSecure: !!building.secureProgressTrait,
+          hasC4: !!building.c4ChargeTrait,
+          hasDelayedKill: !!building.delayedKillTrait,
+          hasCrewed: !!building.crewedTrait,
+          hasTurret: !!building.turretTrait,
+          hasOverpowered: !!building.overpoweredTrait,
+          hasPowered: !!building.poweredTrait,
+          factoryArgs: building.factoryTrait.$args,
+          hasSuperWeapon: !!building.superWeaponTrait,
+          hasDock: !!building.dockTrait,
+          dockArgs: building.dockTrait.$args.slice(2),
+          hasHelipad: !!building.helipadTrait,
+          hasUnitRepair: !!building.unitRepairTrait,
+          hasUnitReload: !!building.unitReloadTrait,
+          hasHospitalHeal: building.traits.getAll().some((t) => t.$stub === "game/gameobject/trait/TechHospitalHealTrait"),
+          hasRally: !!building.rallyTrait,
+          hasFreeUnit: building.traits.getAll().some((t) => t.$stub === "game/gameobject/trait/FreeUnitTrait"),
+          hasGap: building.gapGeneratorTrait.$args,
+          hasPsychicDetector: !!building.psychicDetectorTrait,
+          traitCount: building.traits.getAll().length,
+        };
+      },
+      // 油井（produceCashStartup）、墙（wall 抑制 C4）、坦克碉堡 NATBNK 特例
+      (ns) => {
+        const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
+        const art = { foundation: { width: 1, height: 1 }, dockingOffsets: [] };
+        const derrick = ns.Building.factory("GAOILB", { produceCashStartup: 1 }, world, art, null, null);
+        const wallWithC4 = ns.Building.factory(
+          "GAWALL",
+          { canC4: true, wall: true },
+          world,
+          art,
+          null,
+          null,
+        );
+        const natbnk = ns.Building.factory("NATBNK", {}, world, art, null, null);
+        const namedBunker = ns.Building.factory("MYBNK", { bunker: true }, world, art, null, null);
+        return {
+          hasOilDerrick: derrick.traits.getAll().some((t) => t.$stub === "game/gameobject/trait/OilDerrickTrait"),
+          wallC4: !!wallWithC4.c4ChargeTrait, // 墙不可被安放 C4
+          wallTrait: !!wallWithC4.wallTrait,
+          natbnkBunker: !!natbnk.tankBunkerTrait, // 按名字特判
+          namedBunker: !!namedBunker.tankBunkerTrait,
+        };
+      },
+      // 建造状态机：BuildUp 阻塞任务、断电禁用攻击、状态变化广播与事件
+      (ns) => {
+        const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
+        const building = ns.Building.factory("GACNST", {}, world, { foundation: { width: 1, height: 1 } }, null, null);
+        const addedTasks = [];
+        const disabledLog = [];
+        const dispatched = [];
+        building.unitOrderTrait = {
+          hasTasks: () => addedTasks.length > 0,
+          addTask: (task) => addedTasks.push(task),
+        };
+        building.attackTrait = { setDisabled: (v) => disabledLog.push(v) };
+        building.poweredTrait = { isPoweredOn: () => false };
+        building.warpedOutTrait = { isActive: () => false };
+        const events = [];
+        const simWorld = { rules: { general: { buildupTime: 5 } }, events: { dispatch: (event) => dispatched.push(event) } };
+        building.update(simWorld); // BuildUp → 挂等待任务 + 攻击禁用
+        building.update(simWorld); // 已有任务 → 不重复挂
+        building.setBuildStatus(ns.BuildStatus.Ready, simWorld); // 就绪 → 广播 + 事件
+        building.setBuildStatus(ns.BuildStatus.Ready, simWorld); // 状态未变 → 不重复广播
+        building.update(simWorld); // 就绪且断电 → 仍禁用
+        return {
+          tasksAdded: addedTasks.length,
+          disabledLog,
+          dispatched: dispatched.map((event) => [event.constructor.name === "BuildStatusChangeEvent" ? "evt" : "?", event.status]),
+          status: building.buildStatus,
+        };
+      },
+      // 秘密实验室奖励的优先级：规则覆盖键 > 地图分配
+      (ns) => {
+        const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
+        const building = ns.Building.factory("CASLAB", { secretLab: true, secretUnit: "APOC" }, world, { foundation: { width: 2, height: 2 } }, null, null);
+        building.secretProduction = "SNIPE";
+        const withUnit = building.getSecretProduction();
+        building.rules.secretUnit = undefined;
+        const fallback = building.getSecretProduction();
+        return { withUnit, fallback };
+      },
+      // 碾磨/倒矿动画计数衰减
+      (ns) => {
+        const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
+        const refinery = ns.Building.factory("GAREFN", {}, world, { foundation: { width: 3, height: 3 } }, null, null);
+        refinery.warpedOutTrait = { isActive: () => false };
+        refinery.unitOrderTrait = { hasTasks: () => true };
+        refinery._grindingAnimTicks = 2;
+        refinery._refineryOrePile = 1;
+        refinery.update({ rules: { general: { buildupTime: 5 } } });
+        return { grinding: refinery._grindingAnimTicks, orePile: refinery._refineryOrePile };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -1621,6 +2213,27 @@ function makeSystem() {
     if (instances.has(name)) return instances.get(name);
     const def = defs.get(name);
     if (!def) {
+      // 未转换的 trait/task 模块 → 用 Proxy 魔法桩替代真实实现：可实例化、
+      // 任意方法调用返回 undefined。原因：trait 与 task 之间存在循环依赖
+      // （如 MoveTrait ↔ MoveTask），真实闭包在迷你运行时里的初始化顺序
+      // 无法复刻生产包；而本测试关心的是转换模块的出厂组装决策，桩类
+      // 新旧变体共用，依然严格对等。
+      if (/^game\/gameobject\/(trait|task)\//.test(name)) {
+        defs.set(name, { deps: [], factory: makeStubFactory(name) });
+        return get(name);
+      }
+      // 惰性加载：未预注册的规范名依赖（如 game/type/LandType 等叶子模块）
+      // 按需从孪生或编译产物读取，避免手工维护完整的依赖清单。
+      const lazyTwin = "src/" + name + ".ts.js";
+      const lazyCompiled = "build/ts-modules/" + name + ".js";
+      if (existsSync(join(ROOT, lazyTwin))) {
+        loadFile(system, lazyTwin);
+        return get(name);
+      }
+      if (existsSync(join(ROOT, lazyCompiled))) {
+        loadFile(system, lazyCompiled);
+        return get(name);
+      }
       // Bare npm specifier (e.g. "mersenne-twister"): resolve via node and wrap
       // CJS exports the way the vendor bundle does ({ default: Class }).
       // Canonical bundle names (game/...、util/... 等) never fall through here.
@@ -1634,6 +2247,9 @@ function makeSystem() {
       throw new Error("module not registered: " + name);
     }
     const ns = {};
+    // 先占位再执行：循环依赖（A 的 setter/execute 期间 B 又请求 A）时
+    // 返回半初始化命名空间——与真实 SystemJS 语义一致，否则无限递归。
+    instances.set(name, ns);
     const exports = (key, value) => {
       ns[key] = value;
       return value; // 真实 SystemJS 的 exports 会返回 value（EventType 模块依赖此行为）
@@ -1643,13 +2259,13 @@ function makeSystem() {
       ret.setters[i](await get(def.deps[i]));
     }
     ret.execute();
-    instances.set(name, ns);
     return ns;
   }
-  return {
+  const system = {
     register: (name, deps, factory) => defs.set(name, { deps, factory }),
     get,
   };
+  return system;
 }
 
 function loadFile(sys, relPath) {
@@ -1679,6 +2295,34 @@ async function instantiate(variantSource) {
 
 function deepEqual(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/**
+ * 为未转换的 trait/task 模块生成桩类工厂：
+ *  - 类可 new（记录构造参数到 $stub/$args，便于断言）；
+ *  - 实例上任意属性读取/方法调用返回 undefined 的函数（可链式调用），
+ *    使工厂逻辑（setDisabled/isSuppressed 等）能无异常跑通。
+ */
+function makeStubFactory(name) {
+  const exportName = name.split("/").pop();
+  return (exports) => {
+    class StubTrait {}
+    const proxyClass = new Proxy(StubTrait, {
+      construct(_target, args) {
+        return new Proxy(
+          { $stub: name, $args: args },
+          {
+            get(target, prop) {
+              if (prop in target) return target[prop];
+              return () => undefined;
+            },
+          },
+        );
+      },
+    });
+    exports(exportName, proxyClass);
+    return { setters: [], execute() {} };
+  };
 }
 
 /**
