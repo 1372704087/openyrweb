@@ -60,7 +60,6 @@ export class Alliances {
 
   constructor(playerList: PlayerList) {
     this.playerList = playerList;
-    this.alliances = [];
   }
 
   findByPlayers(playerA: Player, playerB: Player): AllianceEntry | undefined {

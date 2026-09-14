@@ -1197,5 +1197,119 @@
       "mutateInfDeath": 0,
       "aliveResult": false
     }
+  },
+  "game/rules/general/RepairRules": {
+    "0": {
+      "repairPercent": 30,
+      "repairRate": 17
+    }
+  },
+  "game/rules/general/CrewRules": {
+    "0": {
+      "alliedCrew": "GI",
+      "sovietCrew": "CONSCRIPT",
+      "crewEscape": 0.5,
+      "survivorRate": 30,
+      "thirdCrew": ""
+    }
+  },
+  "game/rules/general/PrismRules": {
+    "0": {
+      "type": "GAPRIS",
+      "supportMax": 3,
+      "modifier": 1.5
+    }
+  },
+  "game/rules/general/ThreatRules": {
+    "0": [
+      5,
+      null
+    ]
+  },
+  "game/rules/general/HoverRules": {
+    "0": [
+      60,
+      3,
+      20,
+      null
+    ]
+  },
+  "game/rules/general/LightningStormRules": {
+    "0": [
+      250,
+      "LBOLT",
+      180,
+      null
+    ]
+  },
+  "game/rules/general/MissileRules": {
+    "0": 0
+  },
+  "game/rules/general/V3RocketRules": {
+    "0": {
+      "__error__": "TypeError: Right-hand side of 'instanceof' is not an object"
+    }
+  },
+  "game/rules/general/DMislRules": {
+    "0": {
+      "__error__": "TypeError: Right-hand side of 'instanceof' is not an object"
+    }
+  },
+  "game/rules/general/VeteranRules": {
+    "0": {
+      "sightFloored": 1,
+      "ratio": 3,
+      "cap": 2,
+      "initialVeteran": true
+    }
+  },
+  "game/rules/general/CMislRules": {
+    "0": {
+      "type": "CM",
+      "raiseRate": 12,
+      "altitude": 3000
+    }
+  },
+  "game/rules/general/RadarRules": {
+    "0": [
+      6,
+      40,
+      3,
+      60,
+      3,
+      "RangeError: No event duration is defined for type undefined"
+    ]
+  },
+  "game/rules/general/ParadropRules": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'GDI')"
+    },
+    "1": [
+      "RangeError",
+      "Missing rules [General]->ParadropPlane",
+      "Unhandled side type \"99\""
+    ]
+  },
+  "game/rules/GeneralRules": {
+    "0": {
+      "refundClamped": 1,
+      "revealClamped": 10,
+      "selfHealDefault": 80,
+      "allySquad": [
+        {
+          "inf": "E1",
+          "num": 3
+        }
+      ],
+      "radarDurations": 6,
+      "veteranRatio": 3,
+      "missileV3": true,
+      "missileUnknown": "Unsupported missile type \"X\"",
+      "prereqPower": [
+        "GAPOWR"
+      ],
+      "chronoTrigger": true
+    },
+    "1": "Missing rules [General]->ParadropPlane"
   }
 }

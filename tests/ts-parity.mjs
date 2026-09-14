@@ -2306,6 +2306,314 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/rules/general/RepairRules",
+    tsjs: "src/game/rules/general/RepairRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.RepairRules().readIni(makeMockIni("G", { RepairPercent: "30", RepairRate: "17" }));
+        return {
+          repairPercent: rules.repairPercent,
+          repairRate: rules.repairRate,
+          uRepairRate: rules.uRepairRate,
+          iRepairStep: rules.iRepairStep,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/CrewRules",
+    tsjs: "src/game/rules/general/CrewRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.CrewRules().readIni(
+          makeMockIni("G", { AlliedCrew: "GI", SovietCrew: "CONSCRIPT", CrewEscape: "0.5", SurvivorRate: "30" }),
+        );
+        return {
+          alliedCrew: rules.alliedCrew,
+          sovietCrew: rules.sovietCrew,
+          crewEscape: rules.crewEscape,
+          survivorRate: rules.survivorRate,
+          thirdCrew: rules.thirdCrew === undefined ? "none" : rules.thirdCrew,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/PrismRules",
+    tsjs: "src/game/rules/general/PrismRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.PrismRules().readIni(
+          makeMockIni("G", { PrismType: "GAPRIS", PrismSupportMax: "3", PrismSupportModifier: "1.5" }),
+        );
+        return { type: rules.type, supportMax: rules.supportMax, modifier: rules.supportModifier };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/ThreatRules",
+    tsjs: "src/game/rules/general/ThreatRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.ThreatRules().readIni(makeMockIni("G", { MyEffectivenessCoefficientDefault: "5" }));
+        return [rules.myEffectivenessCoefficientDefault, rules.targetStrengthCoefficientDefault];
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/HoverRules",
+    tsjs: "src/game/rules/general/HoverRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.HoverRules().readIni(
+          makeMockIni("G", { HoverHeight: "60", HoverBob: "3", HoverBoost: "20" }),
+        );
+        return [rules.height, rules.bob, rules.boost, rules.brake];
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/LightningStormRules",
+    tsjs: "src/game/rules/general/LightningStormRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.LightningStormRules().readIni(
+          makeMockIni("G", { LightningDamage: "250", LightningWarhead: "LBOLT", LightningStormDuration: "180" }),
+        );
+        return [rules.damage, rules.warhead, rules.duration, rules.cellSpread];
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/MissileRules",
+    tsjs: "src/game/rules/general/MissileRules.ts.js",
+    probes: [(ns) => Object.keys(new ns.MissileRules()).length],
+  },
+  {
+    name: "game/rules/general/V3RocketRules",
+    tsjs: "src/game/rules/general/V3RocketRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.V3RocketRules().readIni(
+          makeMockIni("G", { V3RocketType: "V3", V3RocketDamage: "200", V3RocketLazyCurve: "yes" }),
+        );
+        return {
+          isMissile: rules instanceof ns.MissileRules,
+          type: rules.type,
+          damage: rules.damage,
+          lazyCurve: rules.lazyCurve,
+          eliteDamage: rules.eliteDamage,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/DMislRules",
+    tsjs: "src/game/rules/general/DMislRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.DMislRules().readIni(makeMockIni("G", { DMislType: "DM", DMislPauseFrames: "5" }));
+        return { type: rules.type, pauseFrames: rules.pauseFrames, isMissile: rules instanceof ns.MissileRules };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/VeteranRules",
+    tsjs: "src/game/rules/general/VeteranRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.VeteranRules().readIni(
+          makeMockIni("G", { VeteranSight: "0.5", InitialVeteran: "yes" }),
+        );
+        return {
+          sightFloored: rules.veteranSight, // max(1, 0.5) = 1
+          ratio: rules.veteranRatio,
+          cap: rules.veteranCap,
+          initialVeteran: rules.initialVeteran,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/CMislRules",
+    tsjs: "src/game/rules/general/CMislRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.CMislRules().readIni(
+          makeMockIni("G", { CMislType: "CM", CMislRaiseRate: "12", CMislAltitude: "3000" }),
+        );
+        return { type: rules.type, raiseRate: rules.raiseRate, altitude: rules.altitude };
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/RadarRules",
+    tsjs: "src/game/rules/general/RadarRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.RadarRules().readIni(
+          makeMockIni("G", {
+            RadarEventSuppressionDistances: "10,20,30,40,50,60",
+            RadarEventVisibilityDurations: "1,2,3,4,5,6",
+            RadarEventDurations: "10,20,30,40,50,60",
+            FlashFrameTime: "3",
+          }),
+        );
+        const out = [
+          rules.eventSuppressionDistances.length,
+          rules.getEventSuppresionDistance(ns.RadarEventType.BaseUnderAttack),
+          rules.getEventVisibilityDuration(ns.RadarEventType.DropZone),
+          rules.getEventDuration(ns.RadarEventType.EnemyObjectSensed),
+          rules.flashFrameTime,
+        ];
+        try {
+          rules.getEventDuration(99);
+          out.push("no-throw");
+        } catch (e) {
+          out.push(e.constructor.name + ": " + e.message);
+        }
+        return out;
+      },
+    ],
+  },
+  {
+    name: "game/rules/general/ParadropRules",
+    tsjs: "src/game/rules/general/ParadropRules.ts.js",
+    probes: [
+      // 编队过滤（数量>0）+ 阵营映射 + 必填运载机
+      (ns) => {
+        const rules = new ns.ParadropRules().readIni(
+          makeMockIni("G", {
+            AllyParaDropInf: "GI,GGI,SPY",
+            AllyParaDropNum: "6,3,0",
+            AmerParaDropInf: "AMER",
+            AmerParaDropNum: "8",
+            SovParaDropInf: "SHK",
+            SovParaDropNum: "5",
+            YuriParaDropInf: "INIT",
+            YuriParaDropNum: "4",
+            ParadropPlane: "PDPLANE",
+            ParadropRadius: "6",
+          }),
+        );
+        return {
+          ally: rules.allyParaDrop,
+          amer: rules.amerParaDrop.length,
+          byGdi: rules.getParadropSquads(ns.SideType.GDI)[0].inf,
+          byNod: rules.getParadropSquads(ns.SideType.Nod)[0].inf,
+          byThird: rules.getParadropSquads(ns.SideType.ThirdSide)[0].inf,
+          plane: rules.paradropPlane,
+          radius: rules.paradropRadius,
+        };
+      },
+      (ns) => {
+        const out = [];
+        try {
+          new ns.ParadropRules().readIni(
+            makeMockIni("G", { AllyParaDropInf: "GI", AllyParaDropNum: "1,2", ParadropPlane: "P" }),
+          );
+          out.push("no-throw");
+        } catch (e) {
+          out.push(e.constructor.name);
+        }
+        try {
+          new ns.ParadropRules().readIni(makeMockIni("G", {}));
+          out.push("no-throw");
+        } catch (e) {
+          out.push(e.message);
+        }
+        try {
+          const rules = new ns.ParadropRules().readIni(
+            makeMockIni("G", {
+              AllyParaDropInf: "GI",
+              AllyParaDropNum: "1",
+              AmerParaDropInf: "AM",
+              AmerParaDropNum: "1",
+              SovParaDropInf: "SH",
+              SovParaDropNum: "1",
+              YuriParaDropInf: "IN",
+              YuriParaDropNum: "1",
+              ParadropPlane: "P",
+            }),
+          );
+          rules.getParadropSquads(99);
+          out.push("no-throw");
+        } catch (e) {
+          out.push(e.message);
+        }
+        return out;
+      },
+    ],
+  },
+  {
+    name: "game/rules/GeneralRules",
+    tsjs: "src/game/rules/GeneralRules.ts.js",
+    probes: [
+      // 完整 [General] 段：缺省值、clamp、min、子规则接线、导弹分发
+      //（注意原实现 readIni 无返回值：先实例化再单独调用）
+      (ns) => {
+        const rules = new ns.GeneralRules();
+        rules.readIni(
+          makeMockIni("G", {
+            RefundPercent: "150", // clamp → 1
+            RevealTriggerRadius: "99", // min(10, 99) → 10
+            SelfHealInfantryFrames: "80",
+            ParadropPlane: "PDPLANE",
+            AllyParaDropInf: "E1,E2",
+            AllyParaDropNum: "3,0",
+            PrismType: "GAPRIS",
+            RadarEventDurations: "10,20,30,40,50,60",
+            V3RocketType: "V3",
+            DMislType: "DM",
+            CMislType: "CM",
+            PrerequisitePower: "GAPOWR",
+            PrerequisiteFactory: "GACNST",
+            PrerequisiteBarracks: "GAPILE",
+            PrerequisiteRadar: "GARADR",
+            PrerequisiteTech: "GATECH",
+            PrerequisiteProc: "GAREFN",
+          }),
+        );
+        return {
+          refundClamped: rules.refundPercent,
+          revealClamped: rules.revealTriggerRadius,
+          selfHealDefault: rules.selfHealInfantryFrames,
+          allySquad: rules.paradrop.allyParaDrop,
+          radarDurations: rules.radar.eventDurations.length,
+          veteranRatio: rules.veteran.veteranRatio,
+          missileV3: rules.getMissileRules("V3") === rules.v3Rocket,
+          missileUnknown: (() => {
+            try {
+              rules.getMissileRules("X");
+              return "no-throw";
+            } catch (e) {
+              return e.message;
+            }
+          })(),
+          prereqPower: rules.prereqCategories.get(ns.PrereqCategory ? 0 : 0),
+          chronoTrigger: rules.chronoTrigger,
+        };
+      },
+      // 缺前置表 → 报错（逐字消息）
+      (ns) => {
+        try {
+          new ns.GeneralRules().readIni(
+            makeMockIni("G", {
+              PrerequisitePower: "A",
+              PrerequisiteFactory: "B",
+              PrerequisiteBarracks: "C",
+              PrerequisiteRadar: "D",
+              PrerequisiteProc: "F",
+            }),
+          );
+          return "no-throw";
+        } catch (e) {
+          return e.message;
+        }
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
