@@ -1,13 +1,21 @@
 // === Reconstructed SystemJS module: game/bot/BotFactory ===
-// OpenYRWeb: 3 个难度 × 3 种 AI = 9 个选项
-//   简单 → DummyBot / 原版AI(Easy) / 自定义AI(简单)
-//   普通 → IraqBot / 原版AI(Medium) / 自定义AI(普通)
-//   困难 → CustomAiBot / 原版AI(Brutal) / 自定义AI(困难)
+// OpenYRWeb: 遭遇战每个难度档位对应一个 Bot 实现
+//   简单 → DummyBot / 原版AI(Easy)
+//   普通 → IraqBot / 原版AI(Medium)
+//   困难 → 原版AI(Brutal)
 // 战役：电脑阵营 → OriginalAiBot；人类阵营 → ScenarioTeamBot（仅脚本小队引擎）
-// deps: ["game/gameopts/GameOpts","game/bot/DummyBot","game/bot/iraq/IraqBot","game/bot/custom-ai/CustomAiBot","game/bot/original/OriginalAiBot","game/bot/campaign/ScenarioTeamBot"]
-System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/DummyBot", "game/bot/iraq/IraqBot", "game/bot/custom-ai/CustomAiBot", "game/bot/original/OriginalAiBot", "game/bot/campaign/ScenarioTeamBot"], function (e, t) {
+//
+// ⚠️ AiDifficulty 的数值同时被当作「难度档位索引」硬编码在别的模块里
+//   （0=最难 / 1=中 / 2=易，见 Game.ts:377、ReturnOreTask:184、
+//   SlaveGatherTask:504、SlaveMinerVehicleTrait:318）。
+//   因此 AiDifficulty 的成员与数值一律不得增删或重排。
+//   Brutal(0) / Easy_Custom(6) / Medium_Custom(7) 原由 custom-ai 承担，
+//   custom-ai 移除后统一回落到 OriginalAiBot —— 数值槽位保留不动，
+//   将来接自研 Bot 时只需改下面这三个 case。
+// deps: ["game/gameopts/GameOpts","game/bot/DummyBot","game/bot/iraq/IraqBot","game/bot/original/OriginalAiBot","game/bot/campaign/ScenarioTeamBot"]
+System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/DummyBot", "game/bot/iraq/IraqBot", "game/bot/original/OriginalAiBot", "game/bot/campaign/ScenarioTeamBot"], function (e, t) {
   "use strict";
-  var i, r, s, c, o, a;
+  var i, r, s, o, a;
   t && t.id;
   return {
     setters: [
@@ -19,9 +27,6 @@ System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/Dumm
       },
       function (e) {
         s = e;
-      },
-      function (e) {
-        c = e;
       },
       function (e) {
         o = e;
@@ -44,7 +49,7 @@ System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/Dumm
               if (e.isCampaign) return new a.ScenarioTeamBot(e.name, e.country.name);
               throw new Error(`Player "${e.name}" is not an AI`);
             }
-            // OpenYRWeb: 战役 AI 不使用遭遇战 AI（OriginalAiBot / CustomAiBot / IraqBot 等），
+            // OpenYRWeb: 战役 AI 不使用遭遇战 AI（OriginalAiBot / IraqBot 等），
             // 统一使用 ScenarioTeamBot —— 只执行地图/触发器创建的脚本小队，不做自主生产与进攻。
             if (e.isCampaign) return new a.ScenarioTeamBot(e.name, e.country.name);
             switch (e.aiDifficulty) {
@@ -52,16 +57,17 @@ System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/Dumm
                 return new r.DummyBot(e.name, e.country.name);
               case i.AiDifficulty.Easy_Ori:
                 return new o.OriginalAiBot(e.name, e.country.name, "Easy");
+              // custom-ai 移除后回落的三个槽位（数值保留，见文件头说明）
               case i.AiDifficulty.Easy_Custom:
-                return new c.RA2WEBCustomBot(e.name, e.country.name, void 0, void 0, "Easy");
+                return new o.OriginalAiBot(e.name, e.country.name, "Easy");
               case i.AiDifficulty.Medium:
                 return new s.IraqBot(e.name, e.country.name);
               case i.AiDifficulty.Medium_Ori:
                 return new o.OriginalAiBot(e.name, e.country.name, "Medium");
               case i.AiDifficulty.Medium_Custom:
-                return new c.RA2WEBCustomBot(e.name, e.country.name, void 0, void 0, "Medium");
+                return new o.OriginalAiBot(e.name, e.country.name, "Medium");
               case i.AiDifficulty.Brutal:
-                return new c.RA2WEBCustomBot(e.name, e.country.name, void 0, void 0, "Brutal");
+                return new o.OriginalAiBot(e.name, e.country.name, "Brutal");
               case i.AiDifficulty.Brutal_Ori:
                 return new o.OriginalAiBot(e.name, e.country.name, "Brutal");
               default:

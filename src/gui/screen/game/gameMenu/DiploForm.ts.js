@@ -141,7 +141,7 @@ System.register(
                         b.default.createElement(
                           "td",
                           { className: "player-name" },
-                          t.player.displayName || (t.player.isAi ? i.get(w.aiUiNames.get(t.player.aiDifficulty)) : t.player.name),
+                          t.player.displayName || (t.player.isAi ? i.get(w.aiUiNames.get(t.player.aiDifficulty) || "NOSTR:AI") : t.player.name),
                         ),
                         b.default.createElement(
                           "td",

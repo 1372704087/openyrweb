@@ -21,15 +21,15 @@ System.register("game/gameopts/constants", ["game/gameopts/GameOpts"], function 
         e("OBS_COLOR_ID", -2),
         e("RANDOM_COUNTRY_NAME", "Random"),
         e("OBS_COUNTRY_NAME", "Observer"),
+        // custom-ai 已移除：原先 Brutal / Easy_Custom / Medium_Custom 三个档位的
+        // 「自定义AI」名字随之删除，它们不再出现在 AI 选项列表里。
+        // 显示层对未登记的难度有兜底（见 SoundHandler / DiploForm / ScoreTable）。
         e("aiUiNames", new Map()
   .set(i.AiDifficulty.Easy_Ori, "GUI:AIEasy")
   .set(i.AiDifficulty.Medium_Ori, "GUI:AINormal")
   .set(i.AiDifficulty.Brutal_Ori, "GUI:AIHard")
   .set(i.AiDifficulty.Easy, "GUI:AIDummy")
-  .set(i.AiDifficulty.Medium, "NOSTR:伊拉克AI")
-  .set(i.AiDifficulty.Brutal, "NOSTR:自定义AI(困难)")
-  .set(i.AiDifficulty.Easy_Custom, "NOSTR:自定义AI(简单)")
-  .set(i.AiDifficulty.Medium_Custom, "NOSTR:自定义AI(普通)")),
+  .set(i.AiDifficulty.Medium, "NOSTR:伊拉克AI")),
         e("aiUiTooltips", new Map()),
         e("RANDOM_COUNTRY_UI_NAME", "GUI:RandomEx"),
         e("RANDOM_COUNTRY_UI_TOOLTIP", "STT:PlayerSideRandom"),
