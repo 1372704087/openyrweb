@@ -3412,6 +3412,188 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/system/TaskStatus",
+    tsjs: "src/game/gameobject/task/system/TaskStatus.ts.js",
+    probes: [
+      (ns) => [ns.TaskStatus.NotStarted, ns.TaskStatus.Finished, ns.TaskStatus.Cancelled],
+      (ns) => Object.keys(ns.TaskStatus).length,
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/Task",
+    tsjs: "src/game/gameobject/task/system/Task.ts.js",
+    probes: [
+      (ns) => {
+        const task = new ns.Task();
+        const initial = { status: task.status, cancellable: task.cancellable, blocking: task.blocking };
+        const chained = task.setCancellable(false).setBlocking(false);
+        const afterSet = { cancellable: chained.cancellable, blocking: chained.blocking };
+        chained.onStart = undefined;
+        task.cancel(); // NotStarted → Cancelled
+        return { initial, afterSet, statusAfterCancel: task.status, isRunning: task.isRunning() };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/CallbackTask",
+    tsjs: "src/game/gameobject/task/system/CallbackTask.ts.js",
+    probes: [
+      (ns) => {
+        let called = 0;
+        const task = new ns.CallbackTask(() => called++);
+        const firstTick = task.onTick({}); // 回调 + 返回 true（完成）
+        return { called, firstTick };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/WaitTicksTask",
+    tsjs: "src/game/gameobject/task/system/WaitTicksTask.ts.js",
+    probes: [
+      (ns) => {
+        const task = new ns.WaitTicksTask(3);
+        const ticks = [task.onTick({}), task.onTick({}), task.onTick({}), task.onTick({})];
+        return ticks; // [false, false, false, true]
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/WaitMinutesTask",
+    tsjs: "src/game/gameobject/task/WaitMinutesTask.ts.js",
+    probes: [
+      (ns) => {
+        const task = new ns.WaitMinutesTask(1);
+        return { ticks: task.ticks }; // 15×60 = 900
+      },
+    ],
+  },
+  {
+    name: "util/geometry",
+    tsjs: "src/util/geometry.ts.js",
+    probes: [
+      (ns) => [
+        ns.pointEquals({ x: 1, y: 2 }, { x: 1, y: 2 }),
+        ns.pointEquals(null, null),
+        ns.rectIntersect({ x: 0, y: 0, width: 5, height: 5 }, { x: 3, y: 3, width: 5, height: 5 }),
+        ns.rectIntersect({ x: 0, y: 0, width: 5, height: 5 }, { x: 6, y: 6, width: 5, height: 5 }),
+        ns.rectEquals({ x: 1, y: 2, width: 3, height: 4 }, { x: 1, y: 2, width: 3, height: 4 }),
+        ns.circleContainsPoint({ center: { x: 0, y: 0 }, radius: 5 }, { x: 3, y: 4 }),
+        ns.circleContainsPoint({ center: { x: 0, y: 0 }, radius: 5 }, { x: 5, y: 5 }),
+        ns.octileDistance({ x: 0, y: 0 }, { x: 3, y: 4 }),
+      ],
+    ],
+  },
+  {
+    name: "util/disposable/CompositeDisposable",
+    tsjs: "src/util/disposable/CompositeDisposable.ts.js",
+    probes: [
+      (ns) => {
+        const disposed = [];
+        const container = new ns.CompositeDisposable();
+        container.add(() => disposed.push("fn"));
+        container.add({ dispose: () => disposed.push("obj") });
+        container.add({ destroy: () => disposed.push("destroy") });
+        container.dispose();
+        return { disposed, empty: container.disposables.size };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/morph/PackBuildingTask",
+    tsjs: "src/game/gameobject/task/morph/PackBuildingTask.ts.js",
+    probes: [
+      (ns) => {
+        const statuses = [];
+        let waitTaskPushed = 0;
+        const building = {
+          buildStatus: ns.BuildStatus ? ns.BuildStatus.Ready : 1,
+          rules: { wall: false },
+          setBuildStatus: (s) => statuses.push(s),
+        };
+        const game = { rules: { general: { buildupTime: 5 } } };
+        const task = new ns.PackBuildingTask(game);
+        const tick1 = task.onTick(building); // 设 BuildDown + 挂 WaitMinutes
+        const tick2 = task.onTick(building); // 已 BuildDown → true
+        return { statuses, waitTaskPushed: task.children.length, tick1, tick2 };
+      },
+      // 墙类建筑：设 BuildDown 后立即完成（不挂等待任务）
+      (ns) => {
+        const statuses = [];
+        const building = {
+          buildStatus: ns.BuildStatus ? ns.BuildStatus.Ready : 1,
+          rules: { wall: true },
+          setBuildStatus: (s) => statuses.push(s),
+        };
+        const task = new ns.PackBuildingTask({ rules: { general: { buildupTime: 5 } } });
+        const tick1 = task.onTick({ rules: { general: { buildupTime: 5 } } });
+        return { statuses, tick1, children: task.children.length };
+      },
+    ],
+  },
+  {
+    name: "game/ConstructionWorker",
+    tsjs: "src/game/ConstructionWorker.ts.js",
+    probes: [
+      // getAdjacentRect + meetsAdjacency + isTileBuildable
+      (ns, THREE) => {
+        const buildings = new Set();
+        buildings.add({
+          tile: { rx: 5, ry: 5 },
+          art: { foundation: { width: 2, height: 2 } },
+          rules: { baseNormal: true, eligibleForAllyBuilding: false },
+        });
+        const player = { name: "P1", buildings };
+        const rules = { getBuilding: () => ({ adjacent: 1 }), getLandRules: () => ({ buildable: true, getSpeedModifier: () => 1 }) };
+        const map = {
+          tiles: { getByMapCoords: (x, y) => ({ rx: x, ry: y, z: 0, rampType: 0, landType: 0 }) },
+          tileOccupation: { onChange: { subscribe: () => {}, unsubscribe: () => {} }, calculateTilesForGameObject: () => [] },
+          getObjectsOnTile: () => [],
+          getGroundObjectsOnTile: () => [],
+          isWithinBounds: () => true,
+        };
+        const game = {
+          gameOpts: { buildOffAlly: false },
+          alliances: { getAllies: () => [] },
+          events: { subscribe: () => {} },
+          mapShroudTrait: { getPlayerShroud: () => null },
+          createObject: () => ({ name: "test" }),
+          changeObjectOwner: () => {},
+          spawnObject: () => {},
+          unspawnObject: () => {},
+          sellTrait: { computePurchaseValue: () => 0 },
+        };
+        const worker = new ns.ConstructionWorker(player, rules, {}, map, game);
+        const rect = worker.getAdjacentRect({ rx: 5, ry: 5 }, { width: 2, height: 2 }, 1);
+        const meets = worker.meetsAdjacency({ x: 5, y: 5, width: 2, height: 2 }, 1);
+        const notMeets = worker.meetsAdjacency({ x: 50, y: 50, width: 2, height: 2 }, 1);
+        const tileBuildable = worker.isTileBuildable({ landType: 0, rampType: 0 }, { waterBound: false });
+        return { rect, meets, notMeets, tileBuildable };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/TaskGroup",
+    tsjs: "src/game/gameobject/task/system/TaskGroup.ts.js",
+    probes: [
+      (ns) => {
+        const taskA = new (class extends ns.Task {})();
+        const taskB = new (class extends ns.Task {})();
+        const group = new ns.TaskGroup(taskA, taskB);
+        return { children: group.children.length, isTask: group instanceof ns.Task };
+      },
+    ],
+  },
+  {
+    name: "gui/screen/options/GeneralOptions",
+    tsjs: "src/gui/screen/options/GeneralOptions.ts.js",
+    probes: [(ns) => typeof ns.GeneralOptions],
+  },
+  {
+    name: "util/BoxedVar",
+    tsjs: "src/util/BoxedVar.ts.js",
+    probes: [(ns) => typeof ns.BoxedVar],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -4043,7 +4225,7 @@ function assertRegistryMatchesDisk() {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
-      else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
+      else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts") && existsSync(join(dir, entry.name.replace(/.ts$/, ".ts.js")))) {
         onDisk.push(relative(SRC, full).replace(/\\/g, "/").replace(/\.ts$/, ""));
       }
     }

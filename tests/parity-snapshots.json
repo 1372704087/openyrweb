@@ -1643,5 +1643,98 @@
       0.5,
       0.5
     ]
+  },
+  "game/gameobject/task/system/TaskStatus": {
+    "0": [
+      0,
+      2,
+      4
+    ],
+    "1": 10
+  },
+  "game/gameobject/task/system/Task": {
+    "0": {
+      "initial": {
+        "cancellable": true,
+        "blocking": true
+      },
+      "afterSet": {
+        "cancellable": false,
+        "blocking": false
+      },
+      "isRunning": true
+    }
+  },
+  "game/gameobject/task/system/CallbackTask": {
+    "0": {
+      "called": 0
+    }
+  },
+  "game/gameobject/task/system/WaitTicksTask": {
+    "0": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "game/gameobject/task/system/WaitMinutesTask": {
+    "0": {}
+  },
+  "util/geometry": {
+    "0": [
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      5.242640687119286
+    ]
+  },
+  "util/disposable/CompositeDisposable": {
+    "0": {
+      "disposed": [
+        "fn",
+        "obj",
+        "destroy"
+      ],
+      "empty": 0
+    }
+  },
+  "game/gameobject/task/morph/PackBuildingTask": {
+    "0": {
+      "statuses": [],
+      "waitTaskPushed": 0
+    },
+    "1": {
+      "statuses": [],
+      "children": 0
+    }
+  },
+  "game/ConstructionWorker": {
+    "0": {
+      "rect": {
+        "x": 4,
+        "y": 4,
+        "width": 4,
+        "height": 4
+      },
+      "meets": true,
+      "notMeets": false,
+      "tileBuildable": true
+    }
+  },
+  "game/gameobject/task/system/TaskGroup": {
+    "0": {
+      "__error__": "TypeError: Class extends value undefined is not a constructor or null"
+    }
+  },
+  "gui/screen/options/GeneralOptions": {
+    "0": "function"
+  },
+  "util/BoxedVar": {
+    "0": "function"
   }
 }
