@@ -2614,6 +2614,17 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/type/SuperWeaponType",
+    tsjs: "src/game/type/SuperWeaponType.ts.js",
+    probes: [
+      (ns) => ns.SuperWeaponType.IronCurtain,
+      (ns) => ns.SuperWeaponType.LightningStorm,
+      (ns) => ns.SuperWeaponType.GeneticMutator, // =9
+      (ns) => ns.SuperWeaponType.GeneticConverter, // =9（别名）
+      (ns) => Object.keys(ns.SuperWeaponType).length,
+    ],
+  },
+  {
     name: "game/rules/CountryRules",
     tsjs: "src/game/rules/CountryRules.ts.js",
     probes: [
@@ -3174,6 +3185,229 @@ const CONVERTED = [
         } catch (e) {
           return e.message;
         }
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyPower",
+    tsjs: "src/game/trait/interface/NotifyPower.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyPower.onPowerLow,
+      (ns) => typeof ns.NotifyPower.onPowerRestore,
+      (ns) => typeof ns.NotifyPower.onPowerChange,
+      (ns) => Object.keys(ns.NotifyPower).length,
+    ],
+  },
+  {
+    name: "game/event/InsufficientFundsEvent",
+    tsjs: "src/game/event/InsufficientFundsEvent.ts.js",
+    probes: [
+      (ns) => {
+        const player = { tag: "P1" };
+        const event = new ns.InsufficientFundsEvent(player);
+        return { sameTarget: event.target === player, type: event.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PowerLowEvent",
+    tsjs: "src/game/event/PowerLowEvent.ts.js",
+    probes: [
+      (ns) => {
+        const player = { tag: "P1" };
+        const event = new ns.PowerLowEvent(player);
+        return { sameTarget: event.target === player, type: event.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PowerRestoreEvent",
+    tsjs: "src/game/event/PowerRestoreEvent.ts.js",
+    probes: [
+      (ns) => {
+        const player = { tag: "P1" };
+        const event = new ns.PowerRestoreEvent(player);
+        return { sameTarget: event.target === player, type: event.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PowerChangeEvent",
+    tsjs: "src/game/event/PowerChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const player = { tag: "P1" };
+        const event = new ns.PowerChangeEvent(player, 200, 300);
+        return { sameTarget: event.target === player, power: event.power, drain: event.drain, type: event.type };
+      },
+    ],
+  },
+  {
+    name: "game/player/trait/PowerTrait",
+    tsjs: "src/game/player/trait/PowerTrait.ts.js",
+    probes: [
+      // 发电/耗电 + 低电力判定 + 事件
+      (ns) => {
+        const player = { name: "P1" };
+        const power = new ns.PowerTrait(player);
+        const powerPlant = {
+          rules: { power: 100 },
+          healthTrait: { health: 100 },
+          drainedBy: null,
+        };
+        const warFactory = { rules: { power: -50 }, healthTrait: { health: 100 }, drainedBy: null };
+        const dispatched = [];
+        const world = {
+          traits: { filter: () => [] },
+          events: { dispatch: (e) => dispatched.push(e.constructor.name + ":" + (e.power ?? e.type ?? "")) },
+        };
+        power.updateFrom(powerPlant, "add", world);
+        power.updateFrom(warFactory, "add", world);
+        const afterAdd = { power: power.power, drain: power.drain, level: power.level };
+        power.powerPlant = powerPlant;
+        powerPlant.healthTrait.health = 50;
+        power.updateFrom(powerPlant, "update", world);
+        const afterDamage = { power: power.power, level: power.level };
+        return { afterAdd, afterDamage, dispatched };
+      },
+      // 黑屏：setBlackoutFor + updateBlackout 倒计时
+      (ns) => {
+        const player = { name: "P1" };
+        const power = new ns.PowerTrait(player);
+        const world = { traits: { filter: () => [] }, events: { dispatch: () => {} } };
+        power.setBlackoutFor(3, world);
+        const initial = power.getBlackoutDuration();
+        power.updateBlackout(world);
+        power.updateBlackout(world);
+        power.updateBlackout(world);
+        return { initial, afterTicks: power.blackoutFrames, override: power.drainPowerOverride };
+      },
+      // 被圆盘吸取（drainedBy）→ 贡献归零
+      (ns) => {
+        const player = { name: "P1" };
+        const power = new ns.PowerTrait(player);
+        const plant = { rules: { power: 100 }, healthTrait: { health: 100 }, drainedBy: { thief: true } };
+        const world = { traits: { filter: () => [] }, events: { dispatch: () => {} } };
+        power.updateFrom(plant, "add", world);
+        return { power: power.power, isLow: power.isLowPower() };
+      },
+    ],
+  },
+  {
+    name: "game/player/production/ProductionQueue",
+    tsjs: "src/game/player/production/ProductionQueue.ts.js",
+    probes: [
+      // push/pop/shift/insertAfterFirst + maxSize 收缩 + 状态机
+      (ns) => {
+        const rulesA = { name: "A" };
+        const rulesB = { name: "B" };
+        const queue = new ns.ProductionQueue(3, 10, 20);
+        queue.push(rulesA, 3, 100);
+        queue.push(rulesB, 2, 50);
+        const afterPush = { size: queue.size, status: queue.status, items: queue.items.map((i) => [i.rules.name, i.quantity]) };
+        queue.insertAfterFirst(rulesB, 1, 50);
+        const afterInsert = { items: queue.items.map((i) => [i.rules.name, i.quantity]) };
+        queue.pop(rulesB, 1);
+        const afterPop = { items: queue.items.map((i) => [i.rules.name, i.quantity]) };
+        queue.shift(rulesA, 3);
+        const afterShift = { items: queue.items.map((i) => [i.rules.name, i.quantity]), status: queue.status };
+        queue.maxSize = 1;
+        const afterShrink = { items: queue.items.map((i) => [i.rules.name, i.quantity]), status: queue.status };
+        return { afterPush, afterInsert, afterPop, afterShift, afterShrink };
+      },
+      // 空队列 pop 报错
+      (ns) => {
+        const queue = new ns.ProductionQueue(0, 5, 5);
+        try {
+          queue.pop({ name: "X" }, 1);
+          return "no-throw";
+        } catch (e) {
+          return e.message.slice(0, 30);
+        }
+      },
+    ],
+  },
+  {
+    name: "game/player/production/Production",
+    tsjs: "src/game/player/production/Production.ts.js",
+    probes: [
+      // factory + 队列类型映射 + 前置校验 + Secret Lab 授予
+      (ns) => {
+        const player = {
+          name: "P1",
+          isAi: false,
+          buildings: new Set(),
+          country: { name: "Americans" },
+        };
+        // 模拟 buildings 为可迭代 Set
+        player.buildings = {
+          _items: [],
+          [Symbol.iterator]: function () { return this._items[Symbol.iterator](); },
+          get size() { return this._items.length; },
+          add(b) { this._items.push(b); },
+          delete(b) { this._items = this._items.filter((x) => x !== b); },
+          forEach(fn) { this._items.forEach(fn); },
+          map(fn) { return this._items.map(fn); },
+        };
+        const rules = {
+          mpDialogSettings: { techLevel: 10 },
+          general: {
+            maximumQueuedObjects: 30,
+            prereqCategories: new ns.Map ? new Map() : null,
+          },
+          getSuperWeapon: () => ({ disableableFromShell: false, type: 0 }),
+        };
+        rules.general.prereqCategories = new Map();
+        const gameOpts = { superWeapons: true };
+        const production = ns.Production.factory(player, rules, gameOpts, []);
+        const queueTypes = production.getAllQueues().map((q) => q.type);
+        return {
+          queueTypes,
+          structuresSize: production.getQueue(ns.QueueType ? ns.QueueType.Structures : 0).maxSize,
+          infantrySize: production.getQueue(ns.QueueType ? ns.QueueType.Infantry : 2).maxSize,
+          aircraftSize: production.getQueue(ns.QueueType ? ns.QueueType.Aircrafts : 4).maxSize,
+        };
+      },
+      // 队列类型映射
+      (ns) => {
+        const production = ns.Production ? new ns.Production(null, 10, {}, null, []) : null;
+        return [
+          production.getQueueTypeForObject({ type: ns.ObjectType.Infantry }),
+          production.getQueueTypeForObject({ type: ns.ObjectType.Vehicle, naval: true }),
+          production.getQueueTypeForObject({ type: ns.ObjectType.Building, buildCat: ns.BuildCat ? ns.BuildCat.Combat : 0 }),
+          production.getFactoryTypeForQueueType(ns.QueueType ? ns.QueueType.Infantry : 2),
+        ];
+      },
+    ],
+  },
+  {
+    name: "game/trait/ProductionTrait",
+    tsjs: "src/game/trait/ProductionTrait.ts.js",
+    probes: [
+      // 构造：availableObjectRules 仅收集有 Owner 的规则
+      (ns) => {
+        const rules = {
+          general: { buildSpeed: 0.5, multipleFactory: 1, wallBuildSpeedCoefficient: 2, lowPowerPenaltyModifier: 1, minLowPowerProductionSpeed: 0.5, maxLowPowerProductionSpeed: 1 },
+          buildingRules: new Map([["GACNST", { owner: ["Americans"], name: "GACNST" }]]),
+          infantryRules: new Map([["E1", { owner: ["Americans"], name: "E1" }]]),
+          vehicleRules: new Map([["NOOWNER", { owner: [], name: "NOOWNER" }]]),
+          aircraftRules: new Map(),
+        };
+        const trait = new ns.ProductionTrait(rules, { value: false });
+        return { available: trait.availableObjectRules.size, baseBuildSpeed: trait.baseBuildSpeed > 0 };
+      },
+      // 低电力建造速度公式
+      (ns) => {
+        const rules = {
+          general: { buildSpeed: 0.5, multipleFactory: 1, wallBuildSpeedCoefficient: 2, lowPowerPenaltyModifier: 1, minLowPowerProductionSpeed: 0.5, maxLowPowerProductionSpeed: 1 },
+          buildingRules: new Map(), infantryRules: new Map(), vehicleRules: new Map(), aircraftRules: new Map(),
+        };
+        const trait = new ns.ProductionTrait(rules, { value: false });
+        return [
+          trait.computeLowPowerBuildSpeedModifier(100, 100), // 满电力 → 1
+          trait.computeLowPowerBuildSpeedModifier(25, 100), // 25% → 大幅减速
+          trait.computeLowPowerBuildSpeedModifier(0, 100), // 零电力 → min
+        ];
       },
     ],
   },

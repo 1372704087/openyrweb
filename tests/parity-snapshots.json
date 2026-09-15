@@ -1477,5 +1477,171 @@
       "__error__": "Error: Missing [Radiation] section"
     },
     "2": "Missing [AudioVisual] section"
+  },
+  "game/type/SuperWeaponType": {
+    "0": 1,
+    "1": 2,
+    "2": 9,
+    "3": 9,
+    "4": 25
+  },
+  "game/trait/interface/NotifyPower": {
+    "0": "symbol",
+    "1": "symbol",
+    "2": "symbol",
+    "3": 3
+  },
+  "game/event/InsufficientFundsEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 41
+    }
+  },
+  "game/event/PowerLowEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 36
+    }
+  },
+  "game/event/PowerRestoreEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 37
+    }
+  },
+  "game/event/PowerChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "power": 200,
+      "drain": 300,
+      "type": 35
+    }
+  },
+  "game/player/trait/PowerTrait": {
+    "0": {
+      "afterAdd": {
+        "power": 100,
+        "drain": 50,
+        "level": 1
+      },
+      "afterDamage": {
+        "power": 50,
+        "level": 1
+      },
+      "dispatched": [
+        "i:100",
+        "i:100",
+        "i:50"
+      ]
+    },
+    "1": {
+      "initial": 3,
+      "afterTicks": 0,
+      "override": 0
+    },
+    "2": {
+      "power": 0,
+      "isLow": false
+    }
+  },
+  "game/player/production/ProductionQueue": {
+    "0": {
+      "afterPush": {
+        "size": 5,
+        "status": 1,
+        "items": [
+          [
+            "A",
+            3
+          ],
+          [
+            "B",
+            2
+          ]
+        ]
+      },
+      "afterInsert": {
+        "items": [
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            1
+          ],
+          [
+            "A",
+            2
+          ],
+          [
+            "B",
+            2
+          ]
+        ]
+      },
+      "afterPop": {
+        "items": [
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            1
+          ],
+          [
+            "A",
+            2
+          ],
+          [
+            "B",
+            1
+          ]
+        ]
+      },
+      "afterShift": {
+        "items": [
+          [
+            "B",
+            1
+          ],
+          [
+            "B",
+            1
+          ]
+        ],
+        "status": 1
+      },
+      "afterShrink": {
+        "items": [
+          [
+            "B",
+            1
+          ]
+        ],
+        "status": 1
+      }
+    },
+    "1": "Can't remove non-existent item"
+  },
+  "game/player/production/Production": {
+    "0": {
+      "__error__": "TypeError: ns.Map is not a constructor"
+    },
+    "1": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
+    }
+  },
+  "game/trait/ProductionTrait": {
+    "0": {
+      "available": 2,
+      "baseBuildSpeed": true
+    },
+    "1": [
+      1,
+      0.5,
+      0.5
+    ]
   }
 }

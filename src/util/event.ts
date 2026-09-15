@@ -33,8 +33,8 @@ export class EventDispatcher {
     this.listeners.delete(listener);
   }
 
-  /** 触发全部监听器；参数顺序反转：listener 收到 (data, type)。 */
-  dispatch(type: any, data: any): void {
+  /** 触发全部监听器；参数顺序反转：listener 收到 (data, type)。data 可省略。 */
+  dispatch(type: any, data?: any): void {
     this.listeners.forEach((listener) => listener(data, type));
   }
 

@@ -21,7 +21,6 @@ const ROOT = resolve(__dirname, "..");
 
 // 模块名 → { class: 导出类名, desc: 中文头部说明 }
 const DESC = {
-  "game/rules/CountryRules": { class: "CountryRules", desc: "国家规则（[Countries] 段条目：所属阵营、可玩性、老兵名单）。类外两张静态表：段名→SideType 映射、国家名→UI 文案键。" },
   "game/rules/WeaponRules": { class: "WeaponRules", desc: "武器规则（[WeaponTypes] 段条目：伤害/射速/弹头引用/波束与激光/磁电束表现参数）。" },
   "game/rules/AudioVisualRules": { class: "AudioVisualRules", desc: "音视规则（[AudioVisual] 段：环境光、事件动画与音效、颜色表等全局表现参数）。" },
   "game/rules/WarheadRules": { class: "WarheadRules", desc: "弹头规则（[Warheads] 段条目：verses 威力表、死亡方式、辐射/心灵/时间等特殊标记）。" },
