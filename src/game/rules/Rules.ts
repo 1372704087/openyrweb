@@ -44,6 +44,7 @@ import { mpAllowedColors } from "game/rules/mpAllowedColors";
 import { isNotNullOrUndefined } from "util/typeGuard";
 import { Weapon } from "game/Weapon";
 import * as IniSectionModule from "data/IniSection"; // 未转换（any-shim）
+import { ExtensionHost } from "extensions/ExtensionHost";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class Rules {
@@ -283,6 +284,8 @@ export class Rules {
 
   /** 解析全部规则段（顺序见类注释）。 */
   init(): void {
+    // 设置界面启用的源码扩展（Ares/Phobos）先改写 INI，再进入正常解析。
+    ExtensionHost.applyToRules(this.ini);
     this.readAudioVisual();
     this.readCombatDamage();
     this.readRadiation();

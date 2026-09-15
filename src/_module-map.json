@@ -1,7 +1,98 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1305,
+  "moduleCount": 1315,
   "modules": [
+    {
+      "name": "extensions/ExtensionDefinition",
+      "file": "extensions/ExtensionDefinition.ts.js",
+      "deps": [],
+      "bytes": 0
+    },
+    {
+      "name": "gui/screen/mainMenu/extensions/ExtensionsScreen",
+      "file": "gui/screen/mainMenu/extensions/ExtensionsScreen.ts.js",
+      "deps": [
+        "gui/jsx/jsx",
+        "gui/screen/mainMenu/MainMenuScreen",
+        "gui/jsx/HtmlView",
+        "gui/screen/mainMenu/extensions/component/ExtensionsOpts",
+        "LocalPrefs",
+        "extensions/ExtensionHost"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "gui/screen/mainMenu/extensions/component/ExtensionsOpts",
+      "file": "gui/screen/mainMenu/extensions/component/ExtensionsOpts.ts.js",
+      "deps": [
+        "react",
+        "gui/component/List",
+        "gui/component/Image",
+        "gui/screen/mainMenu/extensions/component/ExtensionsModel"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "gui/screen/game/component/hud/PhobosVersionWarning",
+      "file": "gui/screen/game/component/hud/PhobosVersionWarning.ts.js",
+      "deps": [
+        "react",
+        "extensions/ExtensionHost",
+        "extensions/phobos/PhobosVersion"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "gui/screen/mainMenu/extensions/component/ExtensionsModel",
+      "file": "gui/screen/mainMenu/extensions/component/ExtensionsModel.ts.js",
+      "deps": [
+        "extensions/ExtensionHost"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ExtensionConfig",
+      "file": "extensions/ExtensionConfig.ts.js",
+      "deps": [
+        "extensions/ExtensionDefinition"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ExtensionHost",
+      "file": "extensions/ExtensionHost.ts.js",
+      "deps": [
+        "extensions/ExtensionDefinition",
+        "extensions/ExtensionConfig",
+        "extensions/ares/AresExtension",
+        "extensions/phobos/PhobosExtension"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ares/AresExtension",
+      "file": "extensions/ares/AresExtension.ts.js",
+      "deps": [
+        "extensions/ExtensionDefinition"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/phobos/PhobosExtension",
+      "file": "extensions/phobos/PhobosExtension.ts.js",
+      "deps": [
+        "extensions/ExtensionDefinition",
+        "extensions/ExtensionConfig",
+        "extensions/phobos/PhobosVersion"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/phobos/PhobosVersion",
+      "file": "extensions/phobos/PhobosVersion.ts.js",
+      "deps": [],
+      "bytes": 0
+    },
     {
       "name": "data/IniSection",
       "file": "data/IniSection.ts.js",
@@ -7095,7 +7186,8 @@
         "game/rules/mpAllowedColors",
         "util/typeGuard",
         "game/Weapon",
-        "data/IniSection"
+        "data/IniSection",
+        "extensions/ExtensionHost"
       ],
       "bytes": 12070
     },
@@ -9649,7 +9741,9 @@
         "util/typeGuard",
         "gui/screen/game/component/hud/DebugText",
         "engine/Engine",
-        "engine/EngineType"
+        "engine/EngineType",
+        "gui/jsx/HtmlView",
+        "gui/screen/game/component/hud/PhobosVersionWarning"
       ],
       "bytes": 13703
     },
@@ -13265,6 +13359,7 @@
         "gui/screen/options/KeyboardScreen",
         "gui/screen/options/StorageScreen",
         "gui/screen/mainMenu/patchNotes/PatchNotesScreen",
+        "gui/screen/mainMenu/extensions/ExtensionsScreen",
         "gui/screen/game/gameMenu/GameMenuHomeScreen",
         "gui/screen/game/gameMenu/DiploScreen",
         "gui/screen/game/gameMenu/ConnectionInfoScreen",
@@ -13344,7 +13439,8 @@
         "data/CsfFile",
         "util/Sentry",
         "engine/gameRes/importError/NoWebAssemblyError",
-        "network/WolConfig"
+        "network/WolConfig",
+        "extensions/ExtensionHost"
       ],
       "bytes": 16864
     },

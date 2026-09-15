@@ -75,6 +75,7 @@ System.register(
     "gui/screen/options/KeyboardScreen",
     "gui/screen/options/StorageScreen",
     "gui/screen/mainMenu/patchNotes/PatchNotesScreen",
+    "gui/screen/mainMenu/extensions/ExtensionsScreen",
     "gui/screen/game/gameMenu/GameMenuHomeScreen",
     "gui/screen/game/gameMenu/DiploScreen",
     "gui/screen/game/gameMenu/ConnectionInfoScreen",
@@ -167,6 +168,7 @@ System.register(
       Fe,
       _e,
       Ue,
+      xt,
       He,
       Ge,
       Ve,
@@ -399,6 +401,9 @@ System.register(
         },
         function (e) {
           Ue = e;
+        },
+        function (e) {
+          xt = e;
         },
         function (e) {
           He = e;
@@ -777,6 +782,7 @@ System.register(
                   ),
                 ),
                 F.set(Y.ScreenType.PatchNotes, new Ue.PatchNotesScreen(t, l, this.config.patchNotesUrl || "res/changelog.html")),
+                F.set(Y.ScreenType.Extensions, new xt.ExtensionsScreen(t, l, this.localPrefs)),
                 this.config.ladderRulesUrl &&
                   F.set(Y.ScreenType.LadderRules, new Je.LadderRulesScreen(t, l, this.config.ladderRulesUrl)));
               ((p = await this.getMainMenuVideoUrl(s, N)),

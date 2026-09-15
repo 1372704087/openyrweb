@@ -12,6 +12,7 @@ System.register("LocalPrefs", [], function (t, e) {
       var e;
       (((e = i || t("StorageKey", (i = {}))).GameRes = "_r_gameRes"),
         (e.Options = "_r_opts_v3"),
+        (e.Extensions = "_r_extensions"),
         (e.Mixer = "_r_mixer_v3"),
         (e.MusicOpts = "_r_opts_music"),
         (e.LastGpuTier = "_r_last_gpu"),

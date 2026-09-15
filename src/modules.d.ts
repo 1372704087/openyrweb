@@ -40,3 +40,7 @@ declare module "worker/*" {
   const module_: any;
   export = module_;
 }
+declare module "extensions/*" {
+  const module_: any;
+  export = module_;
+}

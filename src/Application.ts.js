@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: Application ===
-// deps: ["fontfaceobserver","detect-gpu","@puzzl/core/lib/async/cancellation","engine/Engine","engine/EngineType","gui/component/SplashScreen","network/WolConnection","network/gameopt/Parser","Config","util/Routing","tools/LobbyFormTester","tools/VxlTester","tools/ShpTester","tools/BuildingTester","data/IniFile","util/time","engine/ResourceLoader","ConsoleVars","util/Logger","tools/DevToolsApi","tools/VehicleTester","tools/InfantryTester","tools/AircraftTester","tools/SoundTester","LocalPrefs","gui/FullScreen","version","data/Strings","network/ServerRegions","gui/screen/options/GeneralOptions","engine/gameRes/GameResConfig","gui/component/BasicErrorBoxApi","engine/gameRes/GameRes","engine/gameRes/importError/FileNotFoundError","engine/gameRes/importError/ArchiveDownloadError","engine/gameRes/importError/InvalidArchiveError","engine/gameRes/importError/ArchiveExtractionError","engine/gameRes/importError/ChecksumError","engine/gameRes/importError/NoStorageError","data/MapFile","gui/component/ImageContext","util/BoxedVar","gui/replay/ReplayStorageFileSystem","gui/replay/ReplayStorageMigration","data/vfs/StorageQuotaError","Gui","data/vfs/IOError","network/WolService","data/vfs/FileNotFoundError","RouteHelper","data/CsfFile","util/Sentry","engine/gameRes/importError/NoWebAssemblyError","network/WolConfig"]
+// deps: ["fontfaceobserver","detect-gpu","@puzzl/core/lib/async/cancellation","engine/Engine","engine/EngineType","gui/component/SplashScreen","network/WolConnection","network/gameopt/Parser","Config","util/Routing","tools/LobbyFormTester","tools/VxlTester","tools/ShpTester","tools/BuildingTester","data/IniFile","util/time","engine/ResourceLoader","ConsoleVars","util/Logger","tools/DevToolsApi","tools/VehicleTester","tools/InfantryTester","tools/AircraftTester","tools/SoundTester","LocalPrefs","gui/FullScreen","version","data/Strings","network/ServerRegions","gui/screen/options/GeneralOptions","engine/gameRes/GameResConfig","gui/component/BasicErrorBoxApi","engine/gameRes/GameRes","engine/gameRes/importError/FileNotFoundError","engine/gameRes/importError/ArchiveDownloadError","engine/gameRes/importError/InvalidArchiveError","engine/gameRes/importError/ArchiveExtractionError","engine/gameRes/importError/ChecksumError","engine/gameRes/importError/NoStorageError","data/MapFile","gui/component/ImageContext","util/BoxedVar","gui/replay/ReplayStorageFileSystem","gui/replay/ReplayStorageMigration","data/vfs/StorageQuotaError","Gui","data/vfs/IOError","network/WolService","data/vfs/FileNotFoundError","RouteHelper","data/CsfFile","util/Sentry","engine/gameRes/importError/NoWebAssemblyError","network/WolConfig","extensions/ExtensionHost"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -59,6 +59,7 @@ System.register(
     "util/Sentry",
     "engine/gameRes/importError/NoWebAssemblyError",
     "network/WolConfig",
+    "extensions/ExtensionHost",
   ],
   function (e, t) {
     "use strict";
@@ -116,7 +117,8 @@ System.register(
       J,
       ee,
       te,
-      ie;
+      ie,
+      xt;
     t && t.id;
     return {
       setters: [
@@ -281,6 +283,9 @@ System.register(
         },
         function (e) {
           te = e;
+        },
+        function (e) {
+          xt = e;
         },
       ],
       execute: function () {
@@ -708,6 +713,9 @@ System.register(
                   width: this.config.viewport.width,
                   height: this.config.viewport.height,
                 })),
+                xt.ExtensionHost.bindConfig(
+                  xt.ExtensionHost.createConfigFromStorage(this.localPrefs.getItem(O.StorageKey.Extensions)),
+                ),
                 this.setPreferredViewportSize(s.graphics.resolution.value),
                 s.graphics.resolution.onChange.subscribe((e) => {
                   this.setPreferredViewportSize(e);

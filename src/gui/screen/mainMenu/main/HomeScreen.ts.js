@@ -86,6 +86,13 @@ System.register(
                 },
               },
               {
+                label: e.get("TS:Extensions"),
+                tooltip: e.get("STT:Extensions"),
+                onClick: () => {
+                  this.controller?.pushScreen(i.ScreenType.Extensions);
+                },
+              },
+              {
                 label: e.get("GUI:Options"),
                 tooltip: e.get("STT:MainButtonOptions"),
                 onClick: () => {

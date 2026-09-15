@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: gui/screen/game/component/Hud ===
-// deps: ["gui/jsx/jsx","data/ShpFile","game/SideType","gui/screen/game/component/hud/SidebarCard","gui/screen/game/component/hud/SidebarTabs","gui/screen/game/component/hud/SidebarIconButton","gui/screen/game/component/hud/SidebarMenu","gui/UiObject","gui/HtmlContainer","util/event","gui/screen/game/component/hud/GameMenuContentArea","gui/screen/game/component/hud/SidebarPower","gui/screen/game/component/hud/SidebarCredits","gui/screen/game/component/hud/SidebarRadar","gui/screen/game/component/hud/viewmodel/CombatantSidebarModel","gui/screen/game/component/hud/SidebarGameTime","gui/screen/game/component/hud/Messages","gui/screen/game/component/hud/SuperWeaponTimers","engine/renderable/builder/ShpAggregator","gui/screen/game/component/hud/commandBar/CommandBarButtonType","gui/screen/game/component/hud/commandBar/commandButtonConfigs","util/typeGuard","gui/screen/game/component/hud/DebugText","engine/Engine","engine/EngineType"]
+// deps: ["gui/jsx/jsx","data/ShpFile","game/SideType","gui/screen/game/component/hud/SidebarCard","gui/screen/game/component/hud/SidebarTabs","gui/screen/game/component/hud/SidebarIconButton","gui/screen/game/component/hud/SidebarMenu","gui/UiObject","gui/HtmlContainer","util/event","gui/screen/game/component/hud/GameMenuContentArea","gui/screen/game/component/hud/SidebarPower","gui/screen/game/component/hud/SidebarCredits","gui/screen/game/component/hud/SidebarRadar","gui/screen/game/component/hud/viewmodel/CombatantSidebarModel","gui/screen/game/component/hud/SidebarGameTime","gui/screen/game/component/hud/Messages","gui/screen/game/component/hud/SuperWeaponTimers","engine/renderable/builder/ShpAggregator","gui/screen/game/component/hud/commandBar/CommandBarButtonType","gui/screen/game/component/hud/commandBar/commandButtonConfigs","util/typeGuard","gui/screen/game/component/hud/DebugText","engine/Engine","engine/EngineType","gui/jsx/HtmlView","gui/screen/game/component/hud/PhobosVersionWarning"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -30,10 +30,12 @@ System.register(
     "gui/screen/game/component/hud/DebugText",
     "engine/Engine",
     "engine/EngineType",
+    "gui/jsx/HtmlView",
+    "gui/screen/game/component/hud/PhobosVersionWarning",
   ],
   function (e, t) {
     "use strict";
-    var Q, r, Y, Z, X, J, i, s, y, T, ee, te, ie, re, se, ae, ne, oe, le, c, ce, he, ue, de, ge, a;
+    var Q, r, Y, Z, X, J, i, s, y, T, ee, te, ie, re, se, ae, ne, oe, le, c, ce, he, ue, de, ge, _t, $t, a;
     t && t.id;
     return {
       setters: [
@@ -111,6 +113,12 @@ System.register(
         },
         function (e) {
           ge = e;
+        },
+        function (e) {
+          _t = e;
+        },
+        function (e) {
+          $t = e;
         },
       ],
       execute: function () {
@@ -267,6 +275,17 @@ System.register(
                 Q.jsx(
                   "fragment",
                   null,
+                  // Phobos 版本警告：贴屏幕顶边，右缘贴紧建造栏左缘（x.x）
+                  Q.jsx(_t.HtmlView, {
+                    component: $t.PhobosVersionWarning,
+                    props: {},
+                    x: Math.max(0, x.x - 420),
+                    y: 0,
+                    width: 420,
+                    height: 32,
+                    zIndex: 50,
+                    ref: (e) => (this.phobosVersionWarning = e),
+                  }),
                   Q.jsx(
                     "container",
                     { x: x.x, y: x.y },
@@ -519,7 +538,8 @@ System.register(
               this.commandBarButtons?.forEach((e) => e.getUiObject().setVisible(!1)),
               this.messages.getUiObject().setVisible(!1),
               this.debugText.getUiObject().setVisible(!1),
-              this.superWeaponTimers.getUiObject().setVisible(!1));
+              this.superWeaponTimers.getUiObject().setVisible(!1),
+              this.phobosVersionWarning?.getUiObject().setVisible(!1));
           }
           hideSidebarMenu() {
             (this.sideCameoRepeaters.setVisible(!0),
@@ -532,7 +552,8 @@ System.register(
               this.commandBarButtons?.forEach((e) => e.getUiObject().setVisible(!0)),
               this.messages.getUiObject().setVisible(!0),
               this.debugText.getUiObject().setVisible(!0),
-              this.superWeaponTimers.getUiObject().setVisible(!0));
+              this.superWeaponTimers.getUiObject().setVisible(!0),
+              this.phobosVersionWarning?.getUiObject().setVisible(!0));
           }
           setMenuContentComponent(e) {
             let t = this.menuContentContainerInner;
@@ -543,7 +564,8 @@ System.register(
             this.sidebarRadar.setMinimap(e);
           }
           toggleMenuContentVisibility(e) {
-            this.menuContentContainer.setVisible(e);
+            (this.menuContentContainer.setVisible(e),
+              this.phobosVersionWarning?.getUiObject().setVisible(!e));
           }
           renderCommandBarButtons(t, e, i, r) {
             let s = 0,
