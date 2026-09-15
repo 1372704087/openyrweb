@@ -1311,5 +1311,171 @@
       "chronoTrigger": true
     },
     "1": "Missing rules [General]->ParadropPlane"
+  },
+  "game/rules/CountryRules": {
+    "0": {
+      "id": 0,
+      "name": "Americans",
+      "side": 0,
+      "uiName": "NAME",
+      "uiTooltip": "STT:PlayerSideAmerica",
+      "playable": true
+    },
+    "1": [
+      "Missing Side for country \"X\"",
+      "Unknown side \"Mars\" for country \"X\""
+    ]
+  },
+  "game/rules/MpDialogSettings": {
+    "0": {
+      "minMoney": 10,
+      "money": 5000,
+      "crates": true,
+      "mcvRedeploys": true,
+      "shortGame": true,
+      "alliesAllowed": true
+    }
+  },
+  "game/rules/mpAllowedColors": {
+    "0": 8,
+    "1": "Gold",
+    "2": true
+  },
+  "util/typeGuard": {
+    "0": false,
+    "1": false,
+    "2": true,
+    "3": [
+      1,
+      2
+    ]
+  },
+  "game/rules/TiberiumRules": {
+    "0": {
+      "value": 50
+    }
+  },
+  "game/rules/AiRules": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'buildPower')"
+    }
+  },
+  "game/rules/LandRules": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Foot')"
+    }
+  },
+  "game/rules/RadiationRules": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'radDurationMultiple')"
+    }
+  },
+  "game/rules/ElevationModelRules": {
+    "0": [
+      2,
+      6,
+      8,
+      0,
+      0
+    ]
+  },
+  "game/rules/CrateRules": {
+    "0": {
+      "crateMaximum": 20,
+      "unitCrateType": "HARV",
+      "unitCrateNoneCase": "none",
+      "freeMCV": true
+    }
+  },
+  "game/rules/SuperWeaponRules": {
+    "0": {
+      "type": 2,
+      "rechargeTime": 420,
+      "sidebarImage": "swipw",
+      "weaponType": "LBOLT",
+      "isPowered": false
+    }
+  },
+  "game/rules/PowerupsRules": {
+    "0": {
+      "count": 2,
+      "armor": {
+        "type": 0,
+        "probShares": 40,
+        "animName": "CRATEANIM",
+        "waterAllowed": true
+      },
+      "moneyWaterAllowed": false,
+      "warnings": [
+        "Unknown powerup \"UnknownPower\". Skipping."
+      ]
+    }
+  },
+  "game/rules/ProjectileRules": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Projectile')"
+    }
+  },
+  "game/rules/WarheadRules": {
+    "0": {
+      "name": "HE",
+      "affectsAllies": "yes",
+      "temporal": true,
+      "cellSpread": "5",
+      "percentAtMax": "0.7",
+      "infDeath": 5,
+      "verses": [
+        1,
+        0.8,
+        0.6
+      ]
+    }
+  },
+  "game/rules/ObjectRulesFactory": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
+    }
+  },
+  "game/rules/WeaponRules": {
+    "0": {
+      "name": "M1",
+      "burst": 2,
+      "damage": 110,
+      "decloakToFire": false,
+      "fireWhileMoving": false,
+      "waveColor": [
+        10,
+        20,
+        30
+      ],
+      "magnaBeamWidth": 12.5,
+      "isLaser": true,
+      "radLevel": 3,
+      "range": 200,
+      "rof": 50,
+      "iniSpeed": 100,
+      "speed": 256,
+      "projectile": "Shell",
+      "warhead": "HE",
+      "report": [
+        "one",
+        "two"
+      ]
+    }
+  },
+  "game/rules/AudioVisualRules": {
+    "0": {}
+  },
+  "game/rules/CombatDamageRules": {
+    "0": {}
+  },
+  "game/rules/Rules": {
+    "0": {
+      "__error__": "Error: Missing [Radiation] section"
+    },
+    "1": {
+      "__error__": "Error: Missing [Radiation] section"
+    },
+    "2": "Missing [AudioVisual] section"
   }
 }

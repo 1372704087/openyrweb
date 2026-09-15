@@ -2614,6 +2614,570 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/rules/CountryRules",
+    tsjs: "src/game/rules/CountryRules.ts.js",
+    probes: [
+      // 正常解析 + 默认 Tooltip 回落
+      (ns) => {
+        const ini = {
+          name: "Americans",
+          getString: (k) => ({ Side: "GDI", UIName: "NAME" }[k] ?? ""),
+          getBool: (k) => k === "Multiplay",
+          getArray: () => [],
+        };
+        const country = new ns.CountryRules(0);
+        country.readIni(ini);
+        return {
+          id: country.id,
+          name: country.name,
+          side: country.side,
+          uiName: country.uiName,
+          uiTooltip: country.uiTooltip,
+          playable: country.multiplay,
+        };
+      },
+      // Side 缺失 / 未登记阵营 → 报错（消息逐字）
+      (ns) => {
+        const mk = (side) => ({
+          name: "X",
+          getString: (k) => (k === "Side" ? side : ""),
+          getBool: () => false,
+          getArray: () => [],
+        });
+        const out = [];
+        try {
+          new ns.CountryRules(0).readIni(mk(""));
+          out.push("no-throw");
+        } catch (e) {
+          out.push(e.message);
+        }
+        try {
+          new ns.CountryRules(0).readIni(mk("Mars"));
+          out.push("no-throw");
+        } catch (e) {
+          out.push(e.message);
+        }
+        return out;
+      },
+    ],
+  },
+  {
+    name: "game/rules/MpDialogSettings",
+    tsjs: "src/game/rules/MpDialogSettings.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.MpDialogSettings().readIni(
+          makeMockIni("G", { MinMoney: "10", Money: "5000", Crates: "yes", MCVRedeploys: "yes", ShortGame: "yes" }),
+        );
+        return {
+          minMoney: rules.minMoney,
+          money: rules.money,
+          crates: rules.crates,
+          mcvRedeploys: rules.mcvRedeploys,
+          shortGame: rules.shortGame,
+          alliesAllowed: rules.alliesAllowed, // 缺省 true
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/mpAllowedColors",
+    tsjs: "src/game/rules/mpAllowedColors.ts.js",
+    probes: [(ns) => ns.mpAllowedColors.length, (ns) => ns.mpAllowedColors[0], (ns) => ns.mpAllowedColors.includes("Purple")],
+  },
+  {
+    name: "util/typeGuard",
+    tsjs: "src/util/typeGuard.ts.js",
+    probes: [
+      (ns) => ns.isNotNullOrUndefined(null),
+      (ns) => ns.isNotNullOrUndefined(undefined),
+      (ns) => ns.isNotNullOrUndefined(0),
+      (ns) => [1, null, 2].filter(ns.isNotNullOrUndefined),
+    ],
+  },
+  {
+    name: "game/rules/TiberiumRules",
+    tsjs: "src/game/rules/TiberiumRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.TiberiumRules().readIni(makeMockIni("G", { Value: "50" }));
+        return { value: rules.value };
+      },
+    ],
+  },
+  {
+    name: "game/rules/AiRules",
+    tsjs: "src/game/rules/AiRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.AiRules().readIni(
+          makeMockIni("G", { BuildPower: "GAPOWR", BuildRefinery: "GAREFN", BuildTech: "GATECH", TiberiumNearScan: "9" }),
+        );
+        return {
+          buildPower: rules.buildPower,
+          buildRefinery: rules.buildRefinery,
+          farScan: rules.tiberiumFarScan, // 缺省 50
+          nearScan: rules.tiberiumNearScan,
+          slaveMiner: rules.aislaveMinerNumber,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/LandRules",
+    tsjs: "src/game/rules/LandRules.ts.js",
+    probes: [
+      // 段内凡 SpeedType 名的键都登记为通行系数；Foot 在 Track=0 时禁行
+      (ns) => {
+        const rules = new ns.LandRules();
+        rules.readIni({
+          getBool: () => false,
+          getNumber: (k) => Number(k) || 0,
+          entries: new Map([
+            ["Buildable", "yes"],
+            ["Foot", "100"],
+            ["Track", "0"],
+            ["Wheel", "80"],
+            ["Water", "120"],
+            ["NotASpeedType", "999"],
+          ]),
+        });
+        return {
+          footBlockedByTrackZero: rules.getSpeedModifier(ns.SpeedType.Foot),
+          wheel: rules.getSpeedModifier(ns.SpeedType.Wheel),
+          water: rules.getSpeedModifier(ns.SpeedType.Float), // 未登记 → 1
+          trackNonZeroCase: (() => {
+            rules.speedModifiers.set(ns.SpeedType.Track, 50);
+            return rules.getSpeedModifier(ns.SpeedType.Foot);
+          })(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/RadiationRules",
+    tsjs: "src/game/rules/RadiationRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.RadiationRules().readIni(
+          makeMockIni("G", { RadDurationMultiple: "100", RadLevelMax: "2", RadColor: "0,255,0" }),
+        );
+        return {
+          duration: rules.radDurationMultiple,
+          levelMax: rules.radLevelMax,
+          color: rules.radColor,
+          warhead: rules.radSiteWarhead === undefined ? "none" : rules.radSiteWarhead,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/ElevationModelRules",
+    tsjs: "src/game/rules/ElevationModelRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.ElevationModelRules().readIni(
+          makeMockIni("G", { ElevationIncrement: "3", ElevationIncrementBonus: "2", ElevationBonusCap: "4" }),
+        );
+        // 加成 = min(cap, floor((攻高-守高)/increment)) × bonus；低于等于 0
+        return [
+          rules.getBonus(6, 3), // (6-3)/3=1 → 2
+          rules.getBonus(12, 3), // 3 层 → 6
+          rules.getBonus(30, 3), // 9 层 → 18 但 cap=4
+          rules.getBonus(3, 3), // 平地 → 0
+          rules.getBonus(1, 3),
+        ];
+      },
+    ],
+  },
+  {
+    name: "game/rules/CrateRules",
+    tsjs: "src/game/rules/CrateRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.CrateRules().readIni(
+          makeMockIni("G", {
+            CrateMaximum: "20",
+            CrateMinimum: "2",
+            UnitCrateType: "HARV",
+            WaterCrateImg: "WCRATE",
+            FreeMCV: "yes",
+          }),
+        );
+        return {
+          crateMaximum: rules.crateMaximum,
+          unitCrateType: rules.unitCrateType,
+          unitCrateNoneCase: (() => {
+            const r2 = new ns.CrateRules().readIni(makeMockIni("G", { UnitCrateType: "none" }));
+            return r2.unitCrateType === undefined ? "none" : "set";
+          })(),
+          freeMCV: rules.freeMCV,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/SuperWeaponRules",
+    tsjs: "src/game/rules/SuperWeaponRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.SuperWeaponRules().readIni(
+          makeMockIni("G", {
+            Type: "LightningStorm",
+            RechargeTime: "420",
+            SidebarImage: "SWIPW",
+            WeaponType: "LBOLT",
+            IsPowered: "no",
+          }),
+        );
+        return {
+          type: rules.type,
+          rechargeTime: rules.rechargeTime,
+          sidebarImage: rules.sidebarImage,
+          weaponType: rules.weaponType,
+          isPowered: rules.isPowered,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/PowerupsRules",
+    tsjs: "src/game/rules/PowerupsRules.ts.js",
+    probes: [
+      (ns) => {
+        const warnings = [];
+        const ini = {
+          entries: new Map([
+            ["Armor", "40,CRATEANIM,yes"],
+            ["Money", "25,CRATEANIM,no"],
+            ["IonStorm", "10,X,yes"], // 未支持类型 → 告警跳过
+            ["UnknownPower", "1,X,no"], // 未登记 → 告警跳过
+          ]),
+        };
+        const origWarn = console.warn;
+        console.warn = (msg) => warnings.push(msg);
+        const rules = new ns.PowerupsRules().readIni(ini);
+        console.warn = origWarn;
+        return {
+          count: rules.powerups.length,
+          armor: rules.powerups[0],
+          moneyWaterAllowed: rules.powerups[1].waterAllowed,
+          warnings,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/ProjectileRules",
+    tsjs: "src/game/rules/ProjectileRules.ts.js",
+    probes: [
+      // 继承 ObjectRules 通用键 + 弹体专属键 + ROT/Acceleration 换算
+      (ns) => {
+        const ini = {
+          name: "Shell",
+          getString: (k) => ({ ShrapnelWeapon: "SHRAP" }[k] ?? ""),
+          getBool: (k, d) => ({ Arcing: true, Inviso: true, AA: true, AG: false, Vertical: false }[k] ?? d ?? false),
+          getNumber: (k, d) => ({ ROT: "128", Acceleration: "0", Inaccurate: 5 }[k] ?? d ?? 0),
+        };
+        const rules = new ns.ProjectileRules(ns.ObjectType.Projectile, ini, -1);
+        return {
+          name: rules.name,
+          arcing: rules.arcing,
+          isAntiAir: rules.isAntiAir,
+          isAntiGround: rules.isAntiGround, // 缺省 true
+          rotDegs: rules.rot, // 128/256*360 = 180
+          imageName: rules.imageName, // 基类回落段落名
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/WarheadRules",
+    tsjs: "src/game/rules/WarheadRules.ts.js",
+    probes: [
+      // verses 表按序填充 + 布尔标志 + 死亡方式枚举
+      (ns) => {
+        const ini = {
+          name: "HE",
+          getBool: (k, d) => ({ AffectsAllies: "yes", Temporal: true }[k] ?? d ?? false),
+          getNumber: (k, d) => ({ CellSpread: "5", PercentAtMax: "0.7", ProneDamage: "0.4" }[k] ?? d ?? 0),
+          getFixed: (k, d) => ({ ProneDamage: "0.4" }[k] ?? d ?? 0),
+          getEnumNumeric: (k, enumObj, d) => (k === "InfDeath" ? 5 : d),
+          getFixedArray: (k) => (k === "Verses" ? [1, 0.8, 0.6] : []),
+          getArray: () => [],
+        };
+        const warheadRules = new ns.WarheadRules(ini);
+        return {
+          name: warheadRules.name,
+          affectsAllies: warheadRules.affectsAllies,
+          temporal: warheadRules.temporal,
+          cellSpread: warheadRules.cellSpread,
+          percentAtMax: warheadRules.percentAtMax,
+          infDeath: warheadRules.infDeath,
+          verses: [warheadRules.verses.get(0), warheadRules.verses.get(1), warheadRules.verses.get(2)],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/ObjectRulesFactory",
+    tsjs: "src/game/rules/ObjectRulesFactory.ts.js",
+    probes: [
+      (ns) => {
+        const mkIni = (name) => ({ name, getString: () => "", getBool: (k, d) => d, getNumber: () => 0 });
+        const general = { unitsUnsellable: false, returnStructures: false };
+        const factory = ns.ObjectRulesFactory;
+        const techno = factory.create(ns.ObjectType.Infantry, mkIni("E1"), null, general);
+        const overlay = factory.create(ns.ObjectType.Overlay, mkIni("GASMOKE"), null);
+        const fallback = factory.create(ns.ObjectType.VoxelAnim, mkIni("X"), null);
+        return {
+          techno: techno.constructor.name,
+          technoType: techno.type,
+          overlay: overlay.constructor.name,
+          fallback: fallback.constructor.name,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/MpDialogSettings",
+    tsjs: "src/game/rules/MpDialogSettings.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.MpDialogSettings().readIni(
+          makeMockIni("G", { MinMoney: "10", Money: "5000", Crates: "yes", MCVRedeploys: "yes", ShortGame: "yes" }),
+        );
+        return {
+          minMoney: rules.minMoney,
+          money: rules.money,
+          crates: rules.crates,
+          mcvRedeploys: rules.mcvRedeploys,
+          shortGame: rules.shortGame,
+          alliesAllowed: rules.alliesAllowed, // 缺省 true
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/WeaponRules",
+    tsjs: "src/game/rules/WeaponRules.ts.js",
+    probes: [
+      // 机械生成的键包：抽验普通键 / 数组带正则拆分与缺省 / ROT 换算 / 弹头引用
+      (ns) => {
+        const rules = new ns.WeaponRules(makeMockIni("M1", {
+          Burst: "2",
+          Damage: "110",
+          DecloakToFire: "no",
+          FireWhileMoving: "no",
+          "Wave.Color": "10,20,30",
+          MagnaBeamWidth: "12.5",
+          IsLaser: "yes",
+          RadLevel: "3",
+          Range: "200",
+          ROF: "50",
+          Speed: "100",
+          Projectile: "Shell",
+          Warhead: "HE",
+          Report: "one,two",
+        }));
+        return {
+          name: rules.name,
+          burst: rules.burst,
+          damage: rules.damage,
+          decloakToFire: rules.decloakToFire, // 缺省 true，显式 no → false
+          fireWhileMoving: rules.fireWhileMoving, // 显式 no → false
+          waveColor: rules.waveColor,
+          magnaBeamWidth: rules.magnaBeamWidth, // 缺省 10，显式 12.5
+          isLaser: rules.isLaser,
+          radLevel: rules.radLevel,
+          range: rules.range,
+          rof: rules.rof,
+          iniSpeed: rules.iniSpeed,
+          speed: rules.speed, // iniSpeedToLeptonsPerTick(100, 100) = 256
+          projectile: rules.projectile,
+          warhead: rules.warhead,
+          report: rules.report,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/AudioVisualRules",
+    tsjs: "src/game/rules/AudioVisualRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.AudioVisualRules(makeMockIni("AV", {
+          AmbientChangeRate: "5",
+          ConditionRed: "75",
+          ConditionYellow: "50",
+          IdleActionFrequency: "2", // ×60 → 120
+          Gravity: "0.3",
+          FireNames: "A.B,C", // 按点/逗号拆分，过滤空段
+        }));
+        return {
+          ambientChangeRate: rules.ambientChangeRate,
+          conditionRed: rules.conditionRed,
+          conditionYellow: rules.conditionYellow,
+          idleActionFrequency: rules.idleActionFrequency,
+          gravity: rules.gravity,
+          fireNames: rules.fireNames,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/CombatDamageRules",
+    tsjs: "src/game/rules/CombatDamageRules.ts.js",
+    probes: [
+      (ns) => {
+        const rules = new ns.CombatDamageRules(
+          makeMockIni("G", {
+            BallisticScatter: "20",
+            C4Warhead: "C4WH",
+            CrushWarhead: "CRUSH2", // 缺省 "Crush"，显式覆盖
+            BerserkROFMultiplier: "0.4",
+            SplashList: "s1,s2",
+          }),
+        );
+        return {
+          ballisticScatter: rules.ballisticScatter,
+          crushWarhead: rules.crushWarhead,
+          c4Warhead: rules.c4Warhead,
+          berserkROF: rules.berserkROFMultiplier,
+          bunkerROF: rules.bunkerROFMultiplier, // 缺省 1
+          splashList: rules.splashList,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/rules/Rules",
+    tsjs: "src/game/rules/Rules.ts.js",
+    probes: [
+      // 全链路 init：最小 rulesmd.ini → 类型表/规则表/武器清单/全局参数
+      (ns) => {
+        const sections = {
+          AudioVisual: { ConditionRed: "75" },
+          CombatDamage: { SplashList: "s1", BerserkROFMultiplier: "0.4", ForceShieldRadius: "8" },
+          General: {
+            ForceShieldRadius: "9", // 从 [General] 搬到 [CombatDamage]
+            PrerequisitePower: "GAPOWR",
+            PrerequisiteFactory: "GACNST",
+            PrerequisiteBarracks: "GAPILE",
+            PrerequisiteRadar: "GARADR",
+            PrerequisiteTech: "GATECH",
+            PrerequisiteProc: "GAREFN",
+            ParadropPlane: "PDPLANE",
+            DropPodWeapon: "PODWH",
+            AllyParaDropInf: "GI",
+            AllyParaDropNum: "6",
+            AmerParaDropInf: "AMER",
+            AmerParaDropNum: "8",
+            SovParaDropInf: "SHK",
+            SovParaDropNum: "5",
+            YuriParaDropInf: "INIT",
+            YuriParaDropNum: "4",
+            V3RocketType: "V3",
+            DMislType: "DM",
+            CMislType: "CM",
+            PrismType: "GAPRIS",
+          },
+          AI: {},
+          CrateRules: {},
+          ElevationModel: { ElevationIncrement: "3" },
+          MultiplayerDialogSettings: { Money: "5000" },
+          BuildingTypes: { "0": "GACNST" },
+          InfantryTypes: { "0": "E1" },
+          VehicleTypes: { "0": "HTK" },
+          AircraftTypes: {},
+          TerrainTypes: {},
+          SmudgeTypes: {},
+          Animations: {},
+          VoxelAnims: {},
+          OverlayTypes: { "0": "GAWALL" },
+          Colors: { Gold: "30,255,255" },
+          Countries: { "0": "Americans" },
+          Warheads: { "0": "HE" },
+          Tiberiums: { "0": "RIPPARIUS" },
+          SuperWeaponTypes: { "0": "WSCHRPS" },
+          Powerups: { Armor: "40,CRATEANIM,yes" },
+          Particles: { "0": "VirusCloud1" },
+          // 对象段
+          GACNST: { Strength: "1000", Image: "GACNST" },
+          E1: { Strength: "125", Primary: "M1Carbine", ElitePrimary: "M1CarbineE", Warhead: "WH" },
+          HTK: { Strength: "400", Primary: "TANKSHELL" },
+          GAWALL: { Strength: "300", Wall: "yes" },
+          Americans: { Side: "GDI", UIName: "NAME:Americans" },
+          HE: { CellSpread: "2" },
+          RIPPARIUS: { Value: "50" },
+          WSCHRPS: { Type: "0", RechargeTime: "7", WeaponType: "PODWH" },
+          VirusCloud1: { Damage: "60" },
+          Rock: { Foot: "100" },
+        };
+        const ini = makeRulesIni(sections);
+        const rules = new ns.Rules(ini);
+        return {
+          buildings: rules.buildingTypes.size,
+          infantry: rules.infantryTypes.size,
+          hasWall: rules.hasObject("GAWALL", ns.ObjectType.Overlay),
+          wallId: rules.getOverlayId("GAWALL"),
+          countrySide: rules.getCountry("Americans").side,
+          mpCountries: rules.getMultiplayerCountries().length,
+          weaponList: rules.weaponTypes.size,
+          nukeInList: [...rules.weaponTypes.values()].includes(ns.Weapon.NUKE_PAYLOAD_NAME),
+          dropPodInList: [...rules.weaponTypes.values()].includes("PODWH"),
+          missileV3: rules.general.getMissileRules("V3") === rules.general.v3Rocket,
+          bunkerPropagated: ns.Weapon.berserkROFMultiplier, // CombatDamage 写入 Weapon 静态字段
+          fsRadiusFromGeneral: rules.combatDamage.forceShieldRadius, // [General] 搬运 → 9
+          particles: rules.particleTypes.size,
+          goldColor: rules.colors.get("Gold") !== undefined,
+          landRock: rules.getLandRules(ns.LandType ? 6 : 6).buildable === false, // Cliff → Rock 段
+          superWeapon: rules.getSuperWeapon("WSCHRPS").rechargeTime,
+        };
+      },
+      // 缓存语义：getWeapon/getWarhead/getProjectile 同名返回同一实例
+      (ns) => {
+        const sections = {
+          AudioVisual: {},
+          CombatDamage: {},
+          General: {
+            PrerequisitePower: "A", PrerequisiteFactory: "B", PrerequisiteBarracks: "C",
+            PrerequisiteRadar: "D", PrerequisiteTech: "E", PrerequisiteProc: "F",
+            ParadropPlane: "P", V3RocketType: "V3", DMislType: "DM", CMislType: "CM", PrismType: "GAPRIS",
+          },
+          AI: {}, CrateRules: {}, ElevationModel: {}, MultiplayerDialogSettings: {},
+          BuildingTypes: {}, InfantryTypes: {}, VehicleTypes: {}, AircraftTypes: {},
+          TerrainTypes: {}, SmudgeTypes: {}, Animations: {}, VoxelAnims: {}, OverlayTypes: {},
+          Colors: {}, Countries: {}, Warheads: {}, Tiberiums: {}, SuperWeaponTypes: {},
+          M1: { Damage: "10" },
+          he: { CellSpread: "1" }, // 小写段 → 大写查询也能命中（ordered 回退）
+          Shell: { Level: "yes" },
+        };
+        const rules = new ns.Rules(makeRulesIni(sections));
+        const w1 = rules.getWeapon("M1");
+        const w2 = rules.getWeapon("M1");
+        const wh1 = rules.getWarhead("HE");
+        const wh2 = rules.getWarhead("he"); // 大小写回退
+        const p1 = rules.getProjectile("Shell");
+        const p2 = rules.getProjectile("shell");
+        return {
+          weaponCached: w1 === w2,
+          warheadCachedLower: wh1 === wh2,
+          projectileCached: p1 === p2,
+        };
+      },
+      // 缺段报错：Missing [AudioVisual]
+      (ns) => {
+        try {
+          new ns.Rules(makeRulesIni({ General: {} }));
+          return "no-throw";
+        } catch (e) {
+          return e.message;
+        }
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -3136,12 +3700,52 @@ function makeStubFactory(name) {
  * getEnumArray/getNumberArray/has/entries/name。TechnoRules 等规则类的新旧
  * 两个变体在探针内使用同一份 mock 数据，保证解析输入逐字一致。
  */
+/**
+ * 构造 rulesmd.ini 级别的 mock：{段名: {键: 值}} → 带段落的 IniFile 视图。
+ * 提供 Rules 类用到的 getSection/getOrderedSections/getOrCreateSection；
+ * 每个段落是 makeMockIni 的实例。段查找带大小写不敏感回退（与原实现一致）。
+ */
+function makeRulesIni(sections) {
+  const byName = new Map();
+  const lower = new Map();
+  const wrap = (name, obj) => {
+    const m = makeMockIni(name, obj);
+    m.set = (key, value) => {
+      obj[key] = value;
+      m.entries.set(key, value);
+    };
+    return m;
+  };
+  for (const [name, obj] of Object.entries(sections)) {
+    const section = wrap(name, obj);
+    byName.set(name, section);
+    lower.set(name.toLowerCase(), section);
+  }
+  return {
+    getSection: (name) => byName.get(name) ?? lower.get(name.toLowerCase()) ?? null,
+    getOrderedSections: () => [...byName.values()],
+    getOrCreateSection: (name) => {
+      let section = byName.get(name) ?? lower.get(name.toLowerCase());
+      if (!section) {
+        section = wrap(name, {});
+        byName.set(name, section);
+        lower.set(name.toLowerCase(), section);
+      }
+      return section;
+    },
+  };
+}
+
 function makeMockIni(name, entries) {
   const get = (key) => (key in entries ? entries[key] : undefined);
   return {
     name,
-    // 遍历约定：每项为 [值, 键]（TechnoRules.parseTurretIndexes 依赖此顺序）。
-    entries: Object.entries(entries).map(([key, value]) => [value, key]),
+    set: (key, value) => {
+      entries[key] = value;
+    },
+    // entries 为 Map（键 → 值），与真实 IniSection 一致：
+    // Map.forEach((value, key))、entries.keys() 均可用。
+    entries: new Map(Object.entries(entries)),
     has: (key) => key in entries,
     getString: (key) => {
       const value = get(key);
