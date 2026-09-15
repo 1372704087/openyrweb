@@ -151,6 +151,13 @@ System.register(
                   (this.pipOverlay = m),
                   (this.worldSound = f),
                   (this.rotorSpeeds = []),
+                  // OpenYRWeb: gravity-style tilt transition state. _curTilt drives an
+                  // accelerating (ease-in) progress from rest toward the ramp tilt, like a
+                  // tank settling onto a slope. tiltGravityTicks = blend time in game ticks
+                  // (a unit crosses one tile in ~10 ticks at Speed 6, so keep this well under
+                  // that or fast units never settle); set to 0 to restore the old instant snap.
+                  (this._curTilt = null),
+                  (this.tiltGravityTicks = 5),
                   (this.vxlBuilders = []),
                   (this.highlightAnimRunner = new T.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new v.InvulnerableAnimRunner(this.gameSpeed)),
@@ -460,7 +467,7 @@ System.register(
                     ((t = this.gameObject.turretNo !== this.currentTurretIdx),
                       (this.currentTurretIdx = this.gameObject.turretNo));
                   this.objectArt.isVoxel
-                    ? (this.updateVxlRotation(e, p),
+                    ? (this.updateVxlRotation(e, p, r),
                       this.updateBodyVxl(),
                       (v = (T = this.gameObject.rocking?.facing) !== this.lastRockingFacing),
                       (this.lastRockingFacing = T),
@@ -487,7 +494,7 @@ System.register(
                   this.shpRenderable?.setExtraLight(this.shpExtraLight);
                 }
               }
-              updateVxlRotation(e, t) {
+              updateVxlRotation(e, t, d) {
                 var i,
                   r = this.gameObject.tilterTrait?.tilt ?? { yaw: 0, pitch: 0 };
                 var crashPitch = this.gameObject.crashPitch ?? 0,
@@ -496,13 +503,78 @@ System.register(
                   // axis is inverted vs. yrmd's -0.1 rad). Applied on mainObj's LOCAL axis
                   // so the nose pitches up no matter which way the unit is facing.
                   crushTilt = this.gameObject.crushTilt ?? 0,
-                  combinedPitch = r.pitch + crashPitch;
-                ((this.lastTilt && combinedPitch === this.lastTilt.pitch && r.yaw === this.lastTilt.yaw && !t) ||
-                  ((this.lastTilt = { pitch: combinedPitch, yaw: r.yaw }),
-                  (this.tiltObj.rotation.y = THREE.Math.degToRad(r.yaw)),
-                  (this.tiltObj.rotation.x = THREE.Math.degToRad(combinedPitch)),
+                  // OpenYRWeb: the blend tracks the RAMP tilt only. crashPitch is rewritten
+                  // every tick while crashing (JumpjetLocomotor.tickCrash), so including it
+                  // in the target would restart the blend every frame and it would never
+                  // complete. It is added back after the blend instead, like crushTilt.
+                  targetPitch = r.pitch,
+                  targetYaw = r.yaw;
+                // OpenYRWeb: gravity-style tilt transition. When the ramp tilt changes the
+                // tilt starts from rest and ACCELERATES toward the new target (ease-in),
+                // then stops firmly on arrival — the feel of a tank settling onto a slope
+                // instead of the old instant snap. Acceleration is derived so the blend
+                // completes in tiltGravityTicks; tiltGravityTicks = 0 disables it.
+                var tiltCur = this._curTilt;
+                if (!tiltCur) {
+                  tiltCur = this._curTilt = {
+                    startPitch: targetPitch,
+                    startYaw: targetYaw,
+                    targetPitch: targetPitch,
+                    targetYaw: targetYaw,
+                    progress: 1,
+                    velocity: 0,
+                    pitch: targetPitch,
+                    yaw: targetYaw,
+                  };
+                }
+                var tiltRestart = tiltCur.targetPitch !== targetPitch || tiltCur.targetYaw !== targetYaw;
+                if (tiltRestart) {
+                  tiltCur.startPitch = tiltCur.pitch;
+                  tiltCur.startYaw = tiltCur.yaw;
+                  tiltCur.targetPitch = targetPitch;
+                  tiltCur.targetYaw = targetYaw;
+                  tiltCur.progress = 0;
+                  // velocity is deliberately NOT reset here: a unit crossing tiles faster
+                  // than the blend time would otherwise restart from rest every tile and
+                  // never catch up (visible as a jitter that never reaches the ramp tilt).
+                }
+                var tiltDt = Math.max(0, d ?? 0);
+                if (this.tiltGravityTicks > 0 && tiltCur.progress < 1 && tiltDt > 0) {
+                  var tiltAccel = 2 / (this.tiltGravityTicks * this.tiltGravityTicks),
+                    tiltYD = 0;
+                  tiltCur.velocity += tiltAccel * tiltDt; // cumulative gravity pull
+                  tiltCur.progress += tiltCur.velocity * tiltDt;
+                  if (tiltCur.progress >= 1) {
+                    tiltCur.progress = 1; // firm landing: stop
+                    tiltCur.velocity = 0; // and rest, so the next ramp starts from zero
+                  }
+                  tiltYD = (((((tiltCur.targetYaw - tiltCur.startYaw + 180) % 360) + 360) % 360) - 180); // shortest arc
+                  tiltCur.pitch = tiltCur.startPitch + (tiltCur.targetPitch - tiltCur.startPitch) * tiltCur.progress;
+                  tiltCur.yaw = tiltCur.startYaw + tiltYD * tiltCur.progress;
+                }
+                if (this.tiltGravityTicks > 0) {
+                  if (tiltCur.progress >= 1) {
+                    tiltCur.pitch = tiltCur.targetPitch;
+                    tiltCur.yaw = tiltCur.targetYaw;
+                  }
+                } else {
+                  // tiltGravityTicks = 0 -> no blend at all, snap straight to the ramp tilt.
+                  // Without this the restart above leaves progress at 0 while both the
+                  // advance branch and the progress>=1 branch are skipped, freezing the tilt
+                  // at the previous ramp's value instead of snapping.
+                  tiltCur.progress = 1;
+                  tiltCur.velocity = 0;
+                  tiltCur.pitch = tiltCur.targetPitch;
+                  tiltCur.yaw = tiltCur.targetYaw;
+                }
+                var appliedPitch = tiltCur.pitch + crashPitch,
+                  appliedYaw = tiltCur.yaw;
+                ((this.lastTilt && appliedPitch === this.lastTilt.pitch && appliedYaw === this.lastTilt.yaw && !t) ||
+                  ((this.lastTilt = { pitch: appliedPitch, yaw: appliedYaw }),
+                  (this.tiltObj.rotation.y = THREE.Math.degToRad(appliedYaw)),
+                  (this.tiltObj.rotation.x = THREE.Math.degToRad(appliedPitch)),
                   this.tiltObj.updateMatrix(),
-                  (this.dirWrapObj.rotation.y = THREE.Math.degToRad(e - r.yaw)),
+                  (this.dirWrapObj.rotation.y = THREE.Math.degToRad(e - appliedYaw)),
                   this.dirWrapObj.updateMatrix()),
                   this.mainObj &&
                     ((this.mainObj.rotation.x = THREE.Math.degToRad(crushTilt)),
