@@ -37,6 +37,7 @@ const DESC = {
   "game/rules/CombatDamageRules": { class: "CombatDamageRules", desc: "战斗伤害规则（[CombatDamage] 段：弹头引用、铁幕/力盾时长、伊文炸弹、心灵控制、碉堡/敞开运输车/驻楼武器加成参数）。" },
   "engine/renderable/entity/Building": { class: "Building", desc: "建筑渲染对象（sprite 动画/损毁/炮塔 VXL 光照）。" },
   "engine/renderable/entity/Vehicle": { class: "Vehicle", desc: "载具渲染对象（sprite/VXL 动画/坡度/VPL 光照/碾压俯仰）。" },
+  "game/gameobject/trait/AttackTrait": { class: "AttackTrait", desc: "战斗攻击 trait（目标选择/武器匹配/攻击状态机/开火/机会火/分散火力）。" },
 };
 
 function fail(msg) {
