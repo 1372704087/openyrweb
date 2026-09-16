@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/GameFactory ===
-// deps: ["game/rules/Rules","game/art/Art","data/IniFile","game/Country","game/gameobject/ObjectFactory","game/World","game/GameMap","game/gameopts/GameOpts","game/gameopts/constants","util/typeGuard","game/Alliances","game/PlayerList","game/gameobject/selection/UnitSelection","util/BoxedVar","game/player/PlayerFactory","game/trait/PowerTrait","game/trait/SellTrait","game/trait/RadarTrait","game/trait/ProductionTrait","game/trait/MapShroudTrait","game/Game","game/trait/MapRadiationTrait","game/action/ActionFactory","game/action/ActionFactoryReg","game/trait/SuperWeaponsTrait","game/trait/SharedDetectDisguiseTrait","game/trait/SharedDetectCloakTrait","game/trait/CrateGeneratorTrait","game/trait/StalemateDetectTrait","game/gameopts/GameOptSanitizer","game/gameopts/GameOptRandomGen","game/trait/MapLightingTrait","game/Prng","game/ai/Ai","game/bot/BotFactory","game/BotManager"]
+// deps: ["game/rules/Rules","game/art/Art","data/IniFile","game/Country","game/gameobject/ObjectFactory","game/World","game/GameMap","game/gameopts/GameOpts","game/gameopts/constants","util/typeGuard","game/Alliances","game/PlayerList","game/gameobject/selection/UnitSelection","util/BoxedVar","game/player/PlayerFactory","game/trait/PowerTrait","game/trait/SellTrait","game/trait/RadarTrait","game/trait/ProductionTrait","game/trait/MapShroudTrait","game/Game","game/trait/MapRadiationTrait","game/action/ActionFactory","game/action/ActionFactoryReg","game/trait/SuperWeaponsTrait","game/trait/SharedDetectDisguiseTrait","game/trait/SharedDetectCloakTrait","game/trait/CrateGeneratorTrait","game/trait/StalemateDetectTrait","game/gameopts/GameOptSanitizer","game/gameopts/GameOptRandomGen","game/trait/MapLightingTrait","game/Prng","game/ai/Ai","game/bot/BotFactory","game/BotManager","game/trait/VirusCloudTrait","game/SideType","extensions/ExtensionHost"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -43,6 +43,7 @@ System.register(
     "game/BotManager",
     "game/trait/VirusCloudTrait",
     "game/SideType",
+    "extensions/ExtensionHost",
   ],
   function (e, t) {
     "use strict";
@@ -84,7 +85,8 @@ System.register(
       xe,
       Ve,
       i,
-      yi;
+      yi,
+      xt;
     t && t.id;
     return {
       setters: [
@@ -201,6 +203,9 @@ System.register(
         },
         function (e) {
           yi = e;
+        },
+        function (e) {
+          xt = e;
         },
       ],
       execute: function () {
@@ -432,6 +437,13 @@ System.register(
                   } else L.addPlayer(F.createObserver(t, b));
                 }),
                   L.addPlayer(F.createNeutral(b, "@@NEUTRAL@@")));
+              // OpenYRWeb: attach source extensions (Ares/Phobos) to the live game.
+              // Dispatches onMatchStart and wires runtime hooks (onTick/onObjectSpawn/…).
+              try {
+                xt.ExtensionHost.attachToGame(L);
+              } catch (err) {
+                console.warn("[ExtensionHost] attachToGame failed", err);
+              }
               return L;
             }
           }),

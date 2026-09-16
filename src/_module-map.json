@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1315,
+  "moduleCount": 1319,
   "modules": [
     {
       "name": "extensions/ExtensionDefinition",
@@ -53,38 +53,7 @@
     {
       "name": "extensions/ExtensionConfig",
       "file": "extensions/ExtensionConfig.ts.js",
-      "deps": [
-        "extensions/ExtensionDefinition"
-      ],
-      "bytes": 0
-    },
-    {
-      "name": "extensions/ExtensionHost",
-      "file": "extensions/ExtensionHost.ts.js",
-      "deps": [
-        "extensions/ExtensionDefinition",
-        "extensions/ExtensionConfig",
-        "extensions/ares/AresExtension",
-        "extensions/phobos/PhobosExtension"
-      ],
-      "bytes": 0
-    },
-    {
-      "name": "extensions/ares/AresExtension",
-      "file": "extensions/ares/AresExtension.ts.js",
-      "deps": [
-        "extensions/ExtensionDefinition"
-      ],
-      "bytes": 0
-    },
-    {
-      "name": "extensions/phobos/PhobosExtension",
-      "file": "extensions/phobos/PhobosExtension.ts.js",
-      "deps": [
-        "extensions/ExtensionDefinition",
-        "extensions/ExtensionConfig",
-        "extensions/phobos/PhobosVersion"
-      ],
+      "deps": [],
       "bytes": 0
     },
     {
@@ -13636,6 +13605,62 @@
         "game/trigger/TriggerExecutor"
       ],
       "bytes": 700
+    },
+    {
+      "name": "extensions/ExtensionHost",
+      "file": "extensions/ExtensionHost.ts.js",
+      "deps": [
+        "extensions/ExtensionConfig",
+        "extensions/ares/AresExtension",
+        "extensions/phobos/PhobosExtension",
+        "extensions/ExtensionContext",
+        "extensions/ExtensionEventBus"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ExtensionContext",
+      "file": "extensions/ExtensionContext.ts.js",
+      "deps": [],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ExtensionEventBus",
+      "file": "extensions/ExtensionEventBus.ts.js",
+      "deps": [],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ExtensionHooks",
+      "file": "extensions/ExtensionHooks.ts.js",
+      "deps": [],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ExtensionSdk",
+      "file": "extensions/ExtensionSdk.ts.js",
+      "deps": [
+        "extensions/ExtensionConfig",
+        "extensions/ExtensionContext",
+        "extensions/ExtensionHooks",
+        "extensions/ExtensionEventBus",
+        "extensions/ExtensionHost"
+      ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/ares/AresExtension",
+      "file": "extensions/ares/AresExtension.ts.js",
+      "deps": [],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/phobos/PhobosExtension",
+      "file": "extensions/phobos/PhobosExtension.ts.js",
+      "deps": [
+        "extensions/phobos/PhobosVersion"
+      ],
+      "bytes": 0
     }
   ]
 }

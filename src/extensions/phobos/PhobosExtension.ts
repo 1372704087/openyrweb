@@ -2,9 +2,13 @@
  * Phobos — 源码内置扩展骨架（总开关 + 子功能分组）。
  *
  * 子功能 id 与设置界面 / 存储字段一一对应；具体键位实现落在各 feature 分支。
+ * 钩子走 ExtensionHookContext：INI 写入自动落在 OpenYRWeb.Phobos.* 命名空间下。
+ *
+ * 依赖：Phobos 以 Ares 为运行框架（YRpp 生态同构）——dependsOn 声明后，
+ * ExtensionHost 拓扑排序保证 Ares 先于 Phobos 执行；Ares 关闭时 Phobos 整体跳过。
  */
 import { ExtensionDefinition } from "extensions/ExtensionDefinition";
-import { ExtensionConfig } from "extensions/ExtensionConfig";
+import { ExtensionHookContext } from "extensions/ExtensionContext";
 import {
   getPhobosVersionDescription,
   PHOBOS_PRODUCT_VERSION,
@@ -15,6 +19,9 @@ export const phobosExtension: ExtensionDefinition = {
   id: "phobos",
   name: "Phobos",
   descriptionKey: "STT:Ext.Phobos",
+  // 依赖 Ares 作为运行框架（与真实 Phobos↔Ares 关系一致）
+  dependsOn: ["ares"],
+  priority: 100,
   features: [
     {
       id: "weapons",
@@ -35,14 +42,16 @@ export const phobosExtension: ExtensionDefinition = {
       defaultEnabled: true,
     },
   ],
-  applyToRules(ini: any, config: ExtensionConfig) {
-    const general = ini?.getOrCreateSection?.("General");
-    if (!general?.set) return;
-    general.set("OpenYRWeb.Phobos.Enabled", "yes");
-    general.set("OpenYRWeb.Phobos.ProductVersion", PHOBOS_PRODUCT_VERSION);
-    general.set("OpenYRWeb.Phobos.BuildType", PHOBOS_BUILD_TYPE);
-    general.set("OpenYRWeb.Phobos.VersionDescription", getPhobosVersionDescription());
-    const enabled = config.getEnabledFeatureIds("phobos");
-    general.set("OpenYRWeb.Phobos.Features", enabled.join(";") || "none");
+  hooks: {
+    applyToRules(ctx: ExtensionHookContext) {
+      if (!ctx.ini) return;
+      // 命名空间写入：实际键为 OpenYRWeb.Phobos.* 
+      ctx.ini.set("Enabled", "yes");
+      ctx.ini.set("ProductVersion", PHOBOS_PRODUCT_VERSION);
+      ctx.ini.set("BuildType", PHOBOS_BUILD_TYPE);
+      ctx.ini.set("VersionDescription", getPhobosVersionDescription());
+      const enabled = ctx.getEnabledFeatures();
+      ctx.ini.set("Features", enabled.join(";") || "none");
+    },
   },
 };
