@@ -80,18 +80,36 @@ System.register(
               this.riseDuration = 20;
               this.riseStartElevation = 0;
               this.riseEndElevation = 0;
-              // Cache HoverBobTrait reference at construction time (HoverBobTrait is added
-              // to cachedTraits.tick before RobotControlTrait in the Vehicle factory flow).
+              // Cache HoverBobTrait reference. Vehicle factory adds HoverBobTrait via
+              // traits.add() BEFORE RobotControlTrait, but ObjectFactory rebuilds
+              // cachedTraits.tick only after the whole factory returns — so the old
+              // scan of cachedTraits.tick always missed and hbTrait stayed null.
+              // Scan traits.getAll() instead (HoverBob is already registered there).
               this.hbTrait = null;
-              if (e && e.cachedTraits) {
-                for (var _hbi = 0; _hbi < e.cachedTraits.tick.length; _hbi++) {
-                  var _hbc = e.cachedTraits.tick[_hbi];
+              if (e && e.traits && e.traits.getAll) {
+                var _all = e.traits.getAll();
+                for (var _hbi = 0; _hbi < _all.length; _hbi++) {
+                  var _hbc = _all[_hbi];
                   if (_hbc.disabled !== void 0 && _hbc.computeHoverBobLeptons) {
                     this.hbTrait = _hbc;
                     break;
                   }
                 }
               }
+            }
+            // Lazy fallback: resolve HoverBobTrait if the constructor scan missed
+            // (e.g. traits added after construction). Call once per onTick until found.
+            ensureHoverBobResolved(e) {
+              if (this.hbTrait || !e || !e.traits || !e.traits.getAll) return this.hbTrait;
+              var _all = e.traits.getAll();
+              for (var _hbi = 0; _hbi < _all.length; _hbi++) {
+                var _hbc = _all[_hbi];
+                if (_hbc.disabled !== void 0 && _hbc.computeHoverBobLeptons) {
+                  this.hbTrait = _hbc;
+                  break;
+                }
+              }
+              return this.hbTrait;
             }
             // Returns true if the player owns at least one operational control-center
             // building (a building with powersUnit matching this unit's name that is
@@ -129,6 +147,7 @@ System.register(
             [i.NotifyTick.onTick](e, t) {
               // Skip if destroyed or not a vehicle.
               if (!e || e.isDestroyed || !e.isVehicle()) return;
+              var hbTrait = this.ensureHoverBobResolved(e);
               // Never paralyze while the unit is still exiting the factory (ExitFactoryTask active).
               // Also skip if the unit is on a factory building tile (deployTime delays ExitFactoryTask).
               var curTask = e.unitOrderTrait?.getCurrentTask?.();
@@ -143,7 +162,6 @@ System.register(
               }
               var operational = this.hasOperationalControlCenter();
               this.paralyzed = !operational;
-              var hbTrait = this.hbTrait;
               // ── Paralyzed → disable move/attack immediately ──
               if (this.paralyzed) {
                 var mt = e.moveTrait;
@@ -163,6 +181,12 @@ System.register(
                   this.landDuration = Math.floor(30 + 30 * Math.random()); // 30-60 frames (~0.5-1s at 60fps)
                   this.landStartElevation = e.position.tileElevation;
                   this.landBodyStartDir = e.direction;
+                  // Disable hover-bob immediately so it cannot fight the landing
+                  // animation with a negative bob delta (which sinks below terrain).
+                  if (hbTrait) {
+                    hbTrait.disabled = !0;
+                    hbTrait.prevHoverBobLeptons = 0;
+                  }
                   // Phase 1: body + turret rotate in the same direction (CW or CCW).
                   // Body: 180-350° (not exceeding 360°). Turret: only 10-30° more than body.
                   var isCW = Math.random() > 0.5;
@@ -196,8 +220,9 @@ System.register(
                 if (this.landing) {
                   var rawProgress = Math.min(1, (t.currentTick - this.landStartTick) / this.landDuration);
                   var eased = 1 - (1 - rawProgress) * (1 - rawProgress); // ease-out quad for elevation
-                  // Elevation: descends across BOTH phases (full duration).
-                  e.position.tileElevation = this.landStartElevation * (1 - eased);
+                  // Elevation: descends across BOTH phases (full duration). Clamp at
+                  // ground (0 relative) so residual bob from a prior frame never sinks.
+                  e.position.tileElevation = Math.max(0, this.landStartElevation * (1 - eased));
                   if (rawProgress < 0.5) {
                     // ── Phase 1: body + turret spin in same direction (turret goes further) ──
                     var p1 = rawProgress * 2; // 0→0, 0.5→1
@@ -230,11 +255,21 @@ System.register(
                       e.turretTrait.desiredFacing = this.landTurretPhase2Target;
                     }
                     if (hbTrait) hbTrait.disabled = !0;
+                    var landGroundElev = e.onBridge
+                      ? (t.map.tileOccupation.getBridgeOnTile(e.tile)?.tileElevation ?? 0)
+                      : 0;
+                    e.position.tileElevation = Math.max(landGroundElev, 0);
                   }
                 } else {
-                  // Already landed — force ground elevation every frame to prevent any hover bob.
-                  hbTrait && (hbTrait.disabled = !0);
-                  e.position.tileElevation = 0;
+                  // Already landed — force ground elevation every frame to prevent any
+                  // hover-bob drift. Ground is bridge elevation when onBridge, else 0
+                  // (tileElevation is relative to terrain height). Also clamp: residual
+                  // bob deltas from an earlier frame must never push below ground.
+                  if (hbTrait) hbTrait.disabled = !0;
+                  var groundElev = e.onBridge
+                    ? (t.map.tileOccupation.getBridgeOnTile(e.tile)?.tileElevation ?? 0)
+                    : 0;
+                  e.position.tileElevation = Math.max(groundElev, 0);
                 }
               } else {
                 // ── Not paralyzed — restore ──

@@ -4295,6 +4295,133 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/trait/RobotControlTrait",
+    tsjs: "src/game/gameobject/trait/RobotControlTrait.ts.js",
+    probes: [
+      (ns) => typeof ns.RobotControlTrait,
+      (ns) => {
+        // 瘫痪：无控制中心 → disable move/attack；有则恢复
+        const disabled = [];
+        const hover = {
+          disabled: false,
+          prevHoverBobLeptons: 0,
+          spawnTick: 0,
+          computeHoverBobLeptons: () => 0.1,
+          setBaseElevation: () => {},
+        };
+        const makeObj = (buildings) => ({
+          isDestroyed: false,
+          isVehicle: () => true,
+          isSinker: false,
+          zone: 0,
+          direction: 0,
+          spinVelocity: 0,
+          onBridge: false,
+          tile: { rx: 0, ry: 0 },
+          deathType: 0,
+          position: { tileElevation: 1.5 },
+          owner: { buildings },
+          rules: { name: "ROBOT" },
+          unitOrderTrait: { getCurrentTask: () => null },
+          moveTrait: { setDisabled: (d) => disabled.push({ move: d }) },
+          attackTrait: { setDisabled: (d) => disabled.push({ attack: d }) },
+          turretTrait: null,
+          traits: { getAll: () => [hover] },
+        });
+        const world = {
+          currentTick: 10,
+          events: { dispatch: () => {} },
+          destroyObject: () => {},
+          map: {
+            tileOccupation: {
+              isTileOccupiedBy: () => false,
+              getBridgeOnTile: () => undefined,
+            },
+          },
+          rules: { general: { hover: { height: 100, bob: 1 } } },
+        };
+        // 无控制中心 → 瘫痪
+        const trait = new ns.RobotControlTrait(makeObj([]));
+        const proto = Object.getPrototypeOf(trait);
+        const onTickSym = Object.getOwnPropertySymbols(proto).find(
+          (s) => typeof proto[s] === "function" && proto[s].length === 2,
+        );
+        if (onTickSym) proto[onTickSym].call(trait, trait.obj, world);
+        const paralyzed = trait.isParalyzed();
+        // 推进到落地结束
+        world.currentTick = 100;
+        if (onTickSym) proto[onTickSym].call(trait, trait.obj, world);
+        return {
+          paralyzed,
+          hoverDisabled: hover.disabled,
+          elevation: trait.obj.position.tileElevation,
+          elevNonNeg: trait.obj.position.tileElevation >= 0,
+        };
+      },
+      (ns) => {
+        // 有供电控制中心 → 不瘫痪
+        const hover = {
+          disabled: true,
+          prevHoverBobLeptons: 0,
+          spawnTick: 0,
+          computeHoverBobLeptons: () => 0.2,
+          setBaseElevation: () => {},
+        };
+        const obj = {
+          isDestroyed: false,
+          isVehicle: () => true,
+          isSinker: false,
+          zone: 0,
+          direction: 0,
+          onBridge: false,
+          tile: { rx: 0, ry: 0 },
+          position: { tileElevation: 0 },
+          owner: {
+            buildings: [
+              {
+                buildStatus: 1,
+                rules: { powersUnit: "ROBOT" },
+                poweredTrait: { isPoweredOn: () => true },
+              },
+            ],
+          },
+          rules: { name: "ROBOT" },
+          unitOrderTrait: { getCurrentTask: () => null },
+          moveTrait: { setDisabled: () => {} },
+          attackTrait: { setDisabled: () => {} },
+          turretTrait: null,
+          traits: { getAll: () => [hover] },
+        };
+        const world = {
+          currentTick: 1,
+          events: { dispatch: () => {} },
+          destroyObject: () => {},
+          map: {
+            tileOccupation: {
+              isTileOccupiedBy: () => false,
+              getBridgeOnTile: () => undefined,
+            },
+          },
+          rules: { general: { hover: { height: 100, bob: 1 } } },
+        };
+        const trait = new ns.RobotControlTrait(obj);
+        const proto = Object.getPrototypeOf(trait);
+        const onTickSym = Object.getOwnPropertySymbols(proto).find(
+          (s) => typeof proto[s] === "function" && proto[s].length === 2,
+        );
+        if (onTickSym) proto[onTickSym].call(trait, obj, world);
+        // 升起完成后 hover 应恢复
+        world.currentTick = 200;
+        if (onTickSym) proto[onTickSym].call(trait, obj, world);
+        return {
+          paralyzed: trait.isParalyzed(),
+          hoverDisabled: hover.disabled,
+          elevNonNeg: obj.position.tileElevation >= 0,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

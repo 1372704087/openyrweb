@@ -1931,5 +1931,19 @@
       "onBridge": true,
       "elevation": 5
     }
+  },
+  "game/gameobject/trait/RobotControlTrait": {
+    "0": "function",
+    "1": {
+      "paralyzed": true,
+      "hoverDisabled": true,
+      "elevation": 0,
+      "elevNonNeg": true
+    },
+    "2": {
+      "paralyzed": false,
+      "hoverDisabled": false,
+      "elevNonNeg": true
+    }
   }
 }
