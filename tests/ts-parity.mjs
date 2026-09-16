@@ -4422,6 +4422,16 @@ const CONVERTED = [
     ],
   },
   {
+    name: "engine/gfx/material/paletteShaderLib",
+    tsjs: "src/engine/gfx/material/paletteShaderLib.ts.js",
+    probes: [
+      (ns) => typeof ns.paletteShaderLib,
+      (ns) => ns.paletteShaderLib.vplEnabled,
+      (ns) => typeof ns.paletteShaderLib.instanceParsVertex,
+      (ns) => typeof ns.paletteShaderLib.paletteVplFragment,
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

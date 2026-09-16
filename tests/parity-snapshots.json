@@ -1945,5 +1945,11 @@
       "hoverDisabled": false,
       "elevNonNeg": true
     }
+  },
+  "engine/gfx/material/paletteShaderLib": {
+    "0": "object",
+    "1": false,
+    "2": "string",
+    "3": "string"
   }
 }

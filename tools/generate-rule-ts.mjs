@@ -35,6 +35,8 @@ const DESC = {
   "game/rules/PowerupsRules": { class: "PowerupsRules", desc: "箱子掉落表规则（Powerups 段：类型,概率,动画,数据 逐行解析；未支持类型告警跳过）。" },
   "game/rules/ObjectRulesFactory": { class: "ObjectRulesFactory", desc: "对象规则工厂：按 ObjectType 实例化对应规则类（Techno/Overlay/Terrain/Smudge/Debris/通用）。" },
   "game/rules/CombatDamageRules": { class: "CombatDamageRules", desc: "战斗伤害规则（[CombatDamage] 段：弹头引用、铁幕/力盾时长、伊文炸弹、心灵控制、碉堡/敞开运输车/驻楼武器加成参数）。" },
+  "engine/renderable/entity/Building": { class: "Building", desc: "建筑渲染对象（sprite 动画/损毁/炮塔 VXL 光照）。" },
+  "engine/renderable/entity/Vehicle": { class: "Vehicle", desc: "载具渲染对象（sprite/VXL 动画/坡度/VPL 光照/碾压俯仰）。" },
 };
 
 function fail(msg) {
