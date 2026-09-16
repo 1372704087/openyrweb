@@ -273,6 +273,30 @@ System.register(
                   this.shpExtraLight.copy(this.baseShpExtraLight),
                   this.plugins.forEach((e) => e.updateLighting?.()));
               }
+              /**
+               * VPL 体素光=世界固定太阳：炮塔 VXL 的 lightDir 须按 turretFacing
+               * 反向抵消 mesh 旋转（同 Vehicle）。建筑此前从不更新 lightDir，
+               * 巨炮等 TurretAnimIsVoxel 建筑一转炮塔明暗就错位。
+               * force=true 时忽略 lastTurretVxlLight 强制写入（创建后首帧）。
+               */
+              updateTurretVxlLightDir(force) {
+                if (!this.turretBuilders?.length || !this.gameObject.turretTrait) return;
+                var facing = ((Math.floor(this.gameObject.turretTrait.facing) % 360) + 360) % 360;
+                var rad = (facing * Math.PI) / 180;
+                var ld = new THREE.Vector3(-Math.cos(rad), Math.sin(rad), 0);
+                if (
+                  !force &&
+                  this._lastTurretVxlLight &&
+                  this._lastTurretVxlLight.distanceToSquared(ld) <= 1e-8
+                )
+                  return;
+                (this._lastTurretVxlLight ?? (this._lastTurretVxlLight = new THREE.Vector3())).copy(ld);
+                this.turretBuilders.forEach((b) => {
+                  // SHP 炮塔无 VPL lightDir，只处理 VXL
+                  if (b instanceof d.ShpBuilder) return;
+                  b.setVxlLightDir?.(ld);
+                });
+              }
               get3DObject() {
                 return this.target;
               }
@@ -330,7 +354,8 @@ System.register(
                       e instanceof d.ShpBuilder
                         ? e.setExtraLight(this.shpExtraLight)
                         : e.setExtraLight(this.vxlExtraLight);
-                    }));
+                    }),
+                    this.updateTurretVxlLightDir(!0));
                 }
               }
               createLamp(e) {
@@ -750,7 +775,8 @@ System.register(
                       ((h = this.gameObject.turretTrait.facing) !== this.lastTurretFacing &&
                         ((this.lastTurretFacing = h),
                         (this.turretRot.rotation.y = THREE.Math.degToRad(h)),
-                        this.turretRot.updateMatrix()),
+                        this.turretRot.updateMatrix(),
+                        this.updateTurretVxlLightDir()),
                       (h = this.gameObject.turretTrait.isRotating() && !n),
                       this.lastTurretRotating !== h &&
                         ((this.lastTurretRotating = h),

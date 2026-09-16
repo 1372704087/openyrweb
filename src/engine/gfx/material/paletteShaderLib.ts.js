@@ -168,14 +168,22 @@ varying vec3 vVplWorldNormal;
     float vplPaletteRow = (paletteOffsetCount.x + 0.5) / paletteOffsetCount.y;
   #endif
     vec3 vplColor = texture2D(palette, vec2((vplIdx + 0.5) / 256.0, vplPaletteRow)).rgb;
+    // extraLight 与 VPL 的关系（#38 明暗 + 温带压暗 + 瘫痪变黑）：
+    // 正常载具/飞机的 extraLight 已含 ExtraUnitLight/AircraftLight（默认 0.2）
+    // 与坡度/格灯微扰，属于「基准外观」的一部分，不能当特效。
+    // 瘫痪时 Vehicle 写入强负 ≈ -0.35；无敌/高亮会抬到明显大于正常区间。
+    // 故用死区：仅强负压暗、强正提亮，0.2 附近的正常发光不动。
   #ifdef INSTANCE_TRANSFORM
-    // extraLight 明暗（修复：#38）。不用 per-instance 基准（会扰动实例化 attribute 布局致坦克变黑），
-    // 改为以常量 vplBaseX ≈ 正常日照基准(≈0.37) 参照：factor = clamp(1+(当前-基准)*gain, floor, 2)。
-    // 正常≈1（不破坏已调亮度）、extraLight 降低→暗化、升高→变亮，floor 兜底避免全黑。
-    const float vplBaseX = 0.33;
-    float vplDim = clamp(1.0 + (vInstanceExtraLight.x - vplBaseX) * 3.0, 0.2, 2.0);
-    vplColor *= vplDim;
+    float vplX = vInstanceExtraLight.x;
+  #else
+    float vplX = extraLight.x;
   #endif
+    // 上界 0.45：正常 ExtraUnitLight=0.2 + 坡度/格灯仍在死区内；无敌/高亮才越过。
+    float vplBoost = clamp((vplX - 0.45) * 2.0, 0.0, 1.0);
+    // 下界 0.1：仅 extraLight 明显为负（瘫痪 -0.35）才压暗。
+    // -0.35 → dark≈0.75 → factor≈0.25（明显断电变暗）。
+    float vplDark = clamp((-vplX - 0.1) * 3.0, 0.0, 0.85);
+    vplColor *= (1.0 + vplBoost - vplDark);
     diffuseColor = vec4(vplColor, diffuseColor.a);
     reflectedLight.directDiffuse = vec3(0.0);
     reflectedLight.directSpecular = vec3(0.0);

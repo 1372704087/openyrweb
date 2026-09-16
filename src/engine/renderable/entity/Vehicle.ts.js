@@ -159,6 +159,9 @@ System.register(
                   (this._curTilt = null),
                   (this.tiltGravityTicks = 5),
                   (this.vxlBuilders = []),
+                  // 炮塔/炮管 VXL：光向须按 turretFacing 抵消自转（TurretSpins 如飞碟），
+                  // 否则光只抵消车身朝向，明暗会跟着炮塔转。
+                  (this.turretVxlBuilders = []),
                   (this.highlightAnimRunner = new T.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new v.InvulnerableAnimRunner(this.gameSpeed)),
                   // OpenYRWeb: invulnerable visual state tracking (version counter, flash, FS).
@@ -419,13 +422,26 @@ System.register(
                       ? (e = this.lastDirection)
                       : (this.lastDirectionDelta = T)),
                     (this.lastDirection = e));
-                  // vera20k 体素光=世界固定太阳：模型按 e(度) 连续旋转，光反向 Rz(-e)·(-1,0,0) 抵消，使光照不随模型自转。
-                  // facing=0 时光=(-1,0,0)；转向时光连续随模型反向，绝不"露馅"。
+                  // vera20k 体素光=世界固定太阳：模型按 facing(度) 连续旋转，光反向 Rz(-facing)·(-1,0,0) 抵消。
+                  // 车身用 body 朝向 e；炮塔/炮管在 dirWrap 下还有相对炮塔角，须用 turretFacing 抵消完整世界旋转，
+                  // 否则 TurretSpins（飞碟）自转时明暗跟着炮塔转。
                   var _vxlRad = (e * Math.PI) / 180,
                     _vxlLd = new THREE.Vector3(-Math.cos(_vxlRad), Math.sin(_vxlRad), 0);
                   ((!this._lastVoxelLight || this._lastVoxelLight.distanceToSquared(_vxlLd) > 1e-8) &&
                     ((this._lastVoxelLight ?? (this._lastVoxelLight = new THREE.Vector3())).copy(_vxlLd),
-                    this.vxlBuilders.forEach((b) => b.setVxlLightDir(_vxlLd))));
+                    this.vxlBuilders.forEach((b) => {
+                      // 炮塔构建器在下方按 turretFacing 单独设，这里只更新车身
+                      if (this.turretVxlBuilders && this.turretVxlBuilders.indexOf(b) >= 0) return;
+                      b.setVxlLightDir(_vxlLd);
+                    })));
+                  if (this.gameObject.turretTrait && this.turretVxlBuilders && this.turretVxlBuilders.length) {
+                    var _tF = ((Math.floor(this.gameObject.turretTrait.facing) % 360) + 360) % 360,
+                      _tRad = (_tF * Math.PI) / 180,
+                      _tLd = new THREE.Vector3(-Math.cos(_tRad), Math.sin(_tRad), 0);
+                    (!this._lastTurretLight || this._lastTurretLight.distanceToSquared(_tLd) > 1e-8) &&
+                      ((this._lastTurretLight ?? (this._lastTurretLight = new THREE.Vector3())).copy(_tLd),
+                      this.turretVxlBuilders.forEach((b) => b.setVxlLightDir(_tLd)));
+                  }
                   var m = this.gameObject.owner.color;
                   this.lastOwnerColor !== m &&
                     (this.palette.remap(m),
@@ -816,6 +832,7 @@ System.register(
                         var u = o ? this.voxelAnims.get(i.replace(".vxl", ".hva")) : void 0;
                         let e = this.vxlBuilderFactory.create(h, u, this.paletteRemaps, this.palette);
                         this.vxlBuilders.push(e);
+                        this.turretVxlBuilders.push(e);
                         let t = e.build();
                         ((t.visible = a === this.gameObject.turretNo), r.push(t));
                       } else (console.warn(`<${this.gameObject.name}>: Missing turret file "${i}"`), r.push(void 0));
@@ -834,6 +851,7 @@ System.register(
                       var d = o ? this.voxelAnims.get(s.replace(".vxl", ".hva")) : void 0;
                       let e = this.vxlBuilderFactory.create(c, d, this.paletteRemaps, this.palette);
                       this.vxlBuilders.push(e);
+                      this.turretVxlBuilders.push(e);
                       var g = (this.barrel = e.build());
                       t.add(g);
                     }
