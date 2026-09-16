@@ -620,15 +620,9 @@ System.register(
                     ? !inRange || !this.losHelper.hasLineOfSight(r, e, this.weapon) || !a
                     : (!inRange ||
                         !this.losHelper.hasLineOfSight(r, e, this.weapon) ||
-                        (r.isUnit() &&
-                          r.rules.balloonHover &&
-                          !r.rules.hoverAttack &&
-                          // OpenYRWeb: BalloonHover units (e.g. Floating Disc) use actual Range;
-                          // exempt from same-tile rule so they stop at weapon range and fire.
-                          !(this.weapon.rules.isDiskLaser || this.weapon.rules.drainWeapon || this.weapon.range > 0) &&
-                          !a &&
-                          r.tile !== c &&
-                          !this.options.holdGround) ||
+                        // OpenYRWeb: Aircraft bombing-run approach (Kirov keeps flying
+                        // via vertical bomb path; fighters weave). BalloonHover Disc
+                        // uses the standard tank path — no same-tile force.
                         (r.isAircraft() && !a && (this.weapon.projectileRules.iniRot <= 1 || r.rules.fighter)))
                 ) {
                   if (r.isUnit() && !this.options.holdGround && this.game.map.isWithinBounds(c)) {
@@ -761,9 +755,14 @@ System.register(
                 if (
                   ((this.moveExecuted = !1),
                   (this.moveAttempts = 0),
+                  // OpenYRWeb: Once in weapon range, cancel the approach move and fire
+                  // (same as a tank/prism). Disc DiskLaser must not keep the move task
+                  // alive — that caused loiter at the range edge. balloonHover only
+                  // means "never land" (Jumpjet idle), not special attack logic.
+                  // Fighters/spawned keep the move child so the strafe/run finishes;
+                  // crush-on-attack keeps the move so fire+crush overlap.
                   a &&
-                    ((r.rules.balloonHover && !r.rules.hoverAttack) ||
-                      r.rules.fighter ||
+                    (r.rules.fighter ||
                       r.rules.spawned ||
                       (r.rules.movementZone === O.MovementZone.Fly &&
                         !this.rangeHelper.isInRange2(
@@ -772,9 +771,6 @@ System.register(
                           this.weapon.minRange,
                           this.weapon.range - 1,
                         )) ||
-                      // OpenYRWeb: crush-on-attack keeps the move task alive so the weapon
-                      // fires while the crusher keeps closing in to crush (vanilla YR does
-                      // both simultaneously).
                       (!crushTarget && a.cancel())),
                   a && (r.isInfantry() || this.weapon.rules.spawner))
                 )
