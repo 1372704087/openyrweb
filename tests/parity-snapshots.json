@@ -1951,5 +1951,74 @@
     "1": false,
     "2": "string",
     "3": "string"
+  },
+  "game/gameobject/trait/SensorsTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/AirportBoundTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/SuppressionTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/AgentTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/DockableTrait": {
+    "0": "function",
+    "1": [
+      null,
+      null
+    ]
+  },
+  "game/gameobject/trait/MissileSpawnTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/IdleActionTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/CloakableTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/SlaveCargoTrait": {
+    "0": "function",
+    "1": [
+      0,
+      0,
+      0,
+      false,
+      true
+    ]
+  },
+  "game/gameobject/trait/UnlandableTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/SpawnLinkTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/CastProgressTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/CrashableTrait": {
+    "0": "function",
+    "1": [
+      false,
+      {},
+      "obj"
+    ]
+  },
+  "game/gameobject/trait/HealthTrait": {
+    "0": "function",
+    "1": [
+      100,
+      100,
+      0,
+      100
+    ],
+    "2": [
+      40,
+      40,
+      2
+    ]
   }
 }

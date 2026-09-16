@@ -31,12 +31,12 @@ import * as TransportTraitModule from "game/gameobject/trait/TransportTrait"; //
 import * as MoveTraitModule from "game/gameobject/trait/MoveTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
 import * as TurretTraitModule from "game/gameobject/trait/TurretTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
 import { ZoneType } from "game/gameobject/unit/ZoneType";
-import * as DockableTraitModule from "game/gameobject/trait/DockableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as DockableTraitModule from "game/gameobject/trait/DockableTrait"; // 已转换
 import { Techno } from "game/gameobject/Techno";
 import * as CrewedTraitModule from "game/gameobject/trait/CrewedTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
 import * as GunnerTraitModule from "game/gameobject/trait/GunnerTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
 import * as ParasiteableTraitModule from "game/gameobject/trait/ParasiteableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as CrashableTraitModule from "game/gameobject/trait/CrashableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as CrashableTraitModule from "game/gameobject/trait/CrashableTrait"; // 已转换
 import * as SubmergibleTraitModule from "game/gameobject/trait/SubmergibleTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
 import { LocomotorType } from "game/type/LocomotorType";
 import * as HoverBobTraitModule from "game/gameobject/trait/HoverBobTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入

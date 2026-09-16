@@ -25,14 +25,14 @@ import { ZoneType } from "game/gameobject/unit/ZoneType";
 import { StanceType } from "game/gameobject/infantry/StanceType";
 import { InfDeathType } from "game/gameobject/infantry/InfDeathType";
 import * as MoveTraitModule from "game/gameobject/trait/MoveTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as SuppressionTraitModule from "game/gameobject/trait/SuppressionTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as SuppressionTraitModule from "game/gameobject/trait/SuppressionTrait"; // 已转换
 import { Techno } from "game/gameobject/Techno";
-import * as IdleActionTraitModule from "game/gameobject/trait/IdleActionTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as CrashableTraitModule from "game/gameobject/trait/CrashableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as AgentTraitModule from "game/gameobject/trait/AgentTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as IdleActionTraitModule from "game/gameobject/trait/IdleActionTrait"; // 已转换
+import * as CrashableTraitModule from "game/gameobject/trait/CrashableTrait"; // 已转换
+import * as AgentTraitModule from "game/gameobject/trait/AgentTrait"; // 已转换
 import { CrateBonuses } from "game/gameobject/unit/CrateBonuses";
-import * as CastProgressTraitModule from "game/gameobject/trait/CastProgressTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as SlaveCargoTraitModule from "game/gameobject/trait/SlaveCargoTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as CastProgressTraitModule from "game/gameobject/trait/CastProgressTrait"; // 已转换
+import * as SlaveCargoTraitModule from "game/gameobject/trait/SlaveCargoTrait"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class Infantry extends Techno {

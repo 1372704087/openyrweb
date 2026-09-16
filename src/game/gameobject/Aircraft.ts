@@ -21,15 +21,15 @@
 import { ObjectType } from "engine/type/ObjectType";
 import * as MoveTraitModule from "game/gameobject/trait/MoveTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
 import { ZoneType } from "game/gameobject/unit/ZoneType";
-import * as DockableTraitModule from "game/gameobject/trait/DockableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as DockableTraitModule from "game/gameobject/trait/DockableTrait"; // 已转换
 import { Techno } from "game/gameobject/Techno";
 import * as ParasiteableTraitModule from "game/gameobject/trait/ParasiteableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as CrashableTraitModule from "game/gameobject/trait/CrashableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as AirportBoundTraitModule from "game/gameobject/trait/AirportBoundTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as SpawnLinkTraitModule from "game/gameobject/trait/SpawnLinkTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
-import * as MissileSpawnTraitModule from "game/gameobject/trait/MissileSpawnTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as CrashableTraitModule from "game/gameobject/trait/CrashableTrait"; // 已转换
+import * as AirportBoundTraitModule from "game/gameobject/trait/AirportBoundTrait"; // 已转换
+import * as SpawnLinkTraitModule from "game/gameobject/trait/SpawnLinkTrait"; // 已转换
+import * as MissileSpawnTraitModule from "game/gameobject/trait/MissileSpawnTrait"; // 已转换
 import { CrateBonuses } from "game/gameobject/unit/CrateBonuses";
-import * as UnlandableTraitModule from "game/gameobject/trait/UnlandableTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as UnlandableTraitModule from "game/gameobject/trait/UnlandableTrait"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class Aircraft extends Techno {

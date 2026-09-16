@@ -17,7 +17,7 @@
 import * as NotifyDestroyModule from "game/gameobject/trait/interface/NotifyDestroy"; // 已转换：可改具名导入
 import * as NotifyOwnerChangeModule from "game/gameobject/trait/interface/NotifyOwnerChange"; // 已转换
 import * as NotifySellModule from "game/gameobject/trait/interface/NotifySell"; // 已转换
-import * as DockableTraitModule from "game/gameobject/trait/DockableTrait"; // 未转换（any-shim）
+import * as DockableTraitModule from "game/gameobject/trait/DockableTrait"; // 已转换
 import { Coords } from "game/Coords";
 import * as NotifyTickModule from "game/gameobject/trait/interface/NotifyTick"; // 已转换
 import * as NotifySpawnModule from "game/gameobject/trait/interface/NotifySpawn"; // 已转换

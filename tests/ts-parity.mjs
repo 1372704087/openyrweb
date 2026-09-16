@@ -4432,6 +4432,112 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/trait/SensorsTrait",
+    tsjs: "src/game/gameobject/trait/SensorsTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/AirportBoundTrait",
+    tsjs: "src/game/gameobject/trait/AirportBoundTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/SuppressionTrait",
+    tsjs: "src/game/gameobject/trait/SuppressionTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/AgentTrait",
+    tsjs: "src/game/gameobject/trait/AgentTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/DockableTrait",
+    tsjs: "src/game/gameobject/trait/DockableTrait.ts.js",
+    probes: [
+      (ns) => typeof Object.values(ns)[0],
+      (ns) => {
+        const Trait = Object.values(ns)[0];
+        const t = new Trait();
+        t.undock({});
+        t.dispose();
+        return [t.dock, t.reservedDock];
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/MissileSpawnTrait",
+    tsjs: "src/game/gameobject/trait/MissileSpawnTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/IdleActionTrait",
+    tsjs: "src/game/gameobject/trait/IdleActionTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/CloakableTrait",
+    tsjs: "src/game/gameobject/trait/CloakableTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/SlaveCargoTrait",
+    tsjs: "src/game/gameobject/trait/SlaveCargoTrait.ts.js",
+    probes: [
+      (ns) => typeof Object.values(ns)[0],
+      (ns) => {
+        const Trait = Object.values(ns)[0];
+        const c = new Trait(10);
+        return [c.ore, c.gems, c.status, c.isFull(), c.isEmpty()];
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/UnlandableTrait",
+    tsjs: "src/game/gameobject/trait/UnlandableTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/SpawnLinkTrait",
+    tsjs: "src/game/gameobject/trait/SpawnLinkTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/CastProgressTrait",
+    tsjs: "src/game/gameobject/trait/CastProgressTrait.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/trait/CrashableTrait",
+    tsjs: "src/game/gameobject/trait/CrashableTrait.ts.js",
+    probes: [
+      (ns) => typeof Object.values(ns)[0],
+      (ns) => {
+        const Trait = Object.values(ns)[0];
+        const t = new Trait({ name: "obj" });
+        return [t.crashingEvtSent, t.crashState, t.gameObject.name];
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/HealthTrait",
+    tsjs: "src/game/gameobject/trait/HealthTrait.ts.js",
+    probes: [
+      (ns) => typeof Object.values(ns)[0],
+      (ns) => {
+        const Trait = Object.values(ns)[0];
+        const hp = new Trait(100, null, 0.75, 0.5);
+        return [hp.getHitPoints(), hp.health, hp.level, hp.getProjectedHitPoints()];
+      },
+      (ns) => {
+        const Trait = Object.values(ns)[0];
+        const hp = new Trait(100, null, 0.75, 0.5);
+        hp.setHitPoints(40);
+        return [hp.getHitPoints(), hp.health, hp.level];
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
