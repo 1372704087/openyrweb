@@ -3837,6 +3837,167 @@ const CONVERTED = [
     probes: [(ns) => typeof ns.UnitRepairTrait],
   },
   {
+    name: "game/gameobject/trait/ArmedTrait",
+    tsjs: "src/game/gameobject/trait/ArmedTrait.ts.js",
+    probes: [
+      (ns) => {
+        // 无主/副/死亡武器：构造不触发 Weapon.factory
+        const gameObject = {
+          name: "E1",
+          veteranLevel: 0,
+          rules: {
+            primary: undefined,
+            secondary: undefined,
+            elitePrimary: undefined,
+            eliteSecondary: undefined,
+            occupyWeapon: undefined,
+            eliteOccupyWeapon: undefined,
+            deathWeapon: undefined,
+            weaponCount: 0,
+            isGattling: false,
+            explodes: false,
+            crashableTrait: null,
+            guardRange: 5,
+            deployFire: false,
+            deployFireWeapon: 0,
+            openTransportWeapon: -1,
+            combatDamage: {},
+          },
+          art: {
+            primaryFireFlh: null,
+            elitePrimaryFireFlh: null,
+            secondaryFireFlh: null,
+            eliteSecondaryFireFlh: null,
+            getSpecialWeaponFlh: () => null,
+          },
+          garrisonTrait: null,
+          transportTrait: null,
+          isBuilding: () => false,
+        };
+        const armed = new ns.ArmedTrait(gameObject, gameObject.rules);
+        const target = { range: 4 };
+        return {
+          type: typeof ns.ArmedTrait,
+          specialIndex: armed.getSpecialWeaponIndex(),
+          weapons: armed.getWeapons().length,
+          hasPrimary: !!armed.primaryWeapon,
+          guard: armed.computeGuardScanRange(target),
+          openTopped: armed.getOpenToppedWeapon(),
+          deployFire: armed.getDeployFireWeapon(),
+        };
+      },
+      (ns) => {
+        // 驻楼乘员武器 / 敞开运输车武器选择（构造不组装武器，手工注入）
+        const garrisonWeapon = { name: "UCPara", range: 5, rules: { neverUse: false } };
+        const primary = { name: "M1Carbine", range: 4, rules: { neverUse: false } };
+        const secondary = { name: "MissileLauncher", range: 6, rules: { neverUse: false } };
+        const gameObject = {
+          name: "E1",
+          veteranLevel: 0,
+          rules: {
+            primary: undefined,
+            secondary: undefined,
+            occupyWeapon: undefined,
+            weaponCount: 0,
+            isGattling: false,
+            explodes: false,
+            crashableTrait: null,
+            guardRange: 5,
+            deployFire: true,
+            deployFireWeapon: 1,
+            openTransportWeapon: 1,
+            combatDamage: {},
+          },
+          art: {},
+          garrisonTrait: {
+            isOccupied: () => true,
+            units: [{ armedTrait: { getGarrisonWeapon: () => garrisonWeapon } }],
+          },
+          transportTrait: {
+            units: [{ armedTrait: { getOpenToppedWeapon: () => secondary } }],
+          },
+          isBuilding: () => true,
+        };
+        const armed = new ns.ArmedTrait(gameObject, gameObject.rules);
+        armed.primaryWeapon = primary;
+        armed.secondaryWeapon = secondary;
+        armed.occupyWeapon = garrisonWeapon;
+        return {
+          garrison: armed.getGarrisonWeapon()?.name,
+          openTopped: armed.getOpenToppedWeapon()?.name,
+          deployFire: armed.getDeployFireWeapon()?.name,
+          equippedPrimary: armed.isEquippedWithWeapon(primary),
+          equippedGarrison: armed.isEquippedWithWeapon(garrisonWeapon),
+          guardFromOccupants: armed.computeGuardScanRange(null),
+        };
+      },
+      (ns) => {
+        // 特殊武器 / 盖特：越界应抛错；getSpecialWeaponIndex 可读
+        const makeObj = (weaponCount, isGattling) => ({
+          name: "GAT",
+          veteranLevel: 0,
+          rules: {
+            weaponCount,
+            isGattling,
+            guardRange: 4,
+            explodes: false,
+            crashableTrait: null,
+            combatDamage: {},
+          },
+          art: { getSpecialWeaponFlh: () => null },
+          garrisonTrait: null,
+          transportTrait: null,
+          isBuilding: () => false,
+        });
+        const results = {};
+        try {
+          new ns.ArmedTrait(makeObj(0, false), { combatDamage: {} });
+          results.specialNoCount = "no-throw";
+        } catch (e) {
+          results.specialNoCount = e.constructor.name;
+        }
+        try {
+          new ns.ArmedTrait(makeObj(1, true), { combatDamage: {} });
+          results.gattlingTooFew = "no-throw";
+        } catch (e) {
+          results.gattlingTooFew = e.constructor.name;
+        }
+        return results;
+      },
+      (ns) => {
+        // NotifyDestroy：死亡武器开火条件（temporal / 正常死亡）
+        const fired = [];
+        const deathWeapon = {
+          name: "DeathWeapon",
+          fire: (target, world) => fired.push({ target: target?.id, world: !!world }),
+        };
+        const proto = ns.ArmedTrait.prototype;
+        const destroySym = Object.getOwnPropertySymbols(proto).find(
+          (s) => typeof proto[s] === "function" && proto[s].length === 3,
+        );
+        const makeArmed = () => {
+          const armed = Object.create(proto);
+          armed.deathWeapon = deathWeapon;
+          return armed;
+        };
+        const object = { id: "victim", tile: { rx: 1, ry: 2 }, crashableTrait: null };
+        const world = { createTarget: (obj, tile) => ({ id: obj.id, tile }) };
+        if (destroySym) {
+          // temporal → 不开火
+          proto[destroySym].call(makeArmed(), object, world, {
+            weapon: { warhead: { rules: { temporal: true } } },
+          });
+        }
+        const afterTemporal = fired.length;
+        if (destroySym) {
+          // 正常死亡 → 开火
+          proto[destroySym].call(makeArmed(), object, world, null);
+        }
+        return { afterTemporal, afterNormal: fired.length, firedWorld: fired[0]?.world ?? null };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

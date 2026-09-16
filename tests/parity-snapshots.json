@@ -1818,5 +1818,31 @@
   },
   "game/gameobject/trait/UnitRepairTrait": {
     "0": "function"
+  },
+  "game/gameobject/trait/ArmedTrait": {
+    "0": {
+      "type": "function",
+      "specialIndex": 0,
+      "weapons": 0,
+      "hasPrimary": false,
+      "guard": 9
+    },
+    "1": {
+      "garrison": "UCPara",
+      "openTopped": "MissileLauncher",
+      "deployFire": "MissileLauncher",
+      "equippedPrimary": true,
+      "equippedGarrison": true,
+      "guardFromOccupants": 9
+    },
+    "2": {
+      "specialNoCount": "no-throw",
+      "gattlingTooFew": "Error"
+    },
+    "3": {
+      "afterTemporal": 0,
+      "afterNormal": 1,
+      "firedWorld": true
+    }
   }
 }
