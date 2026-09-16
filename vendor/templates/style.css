@@ -2874,14 +2874,14 @@ input[type="range"]:focus {
     display: inline-flex;
     align-items: center;
 }
-/* 对局 HUD：Phobos 版本警告贴屏幕顶边、右缘贴建造栏；黑底只包住文本 */
+/* 对局 HUD：Phobos 版本警告贴屏幕顶边、右缘贴建造栏；底色与 EVA/系统消息一致（半透明黑） */
 #ra2web-root .phobos-version-overlay {
     display: inline-block;
     width: max-content;
     max-width: 100%;
     box-sizing: border-box;
     padding: 4px 8px;
-    background: #000;
+    background: rgba(0, 0, 0, 0.75);
     color: #f33;
     font-family: 'Fira Sans Condensed', Arial, sans-serif;
     font-size: 13px;
