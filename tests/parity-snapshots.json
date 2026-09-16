@@ -1800,5 +1800,23 @@
       "hasTask": true,
       "taskTileIsRally": true
     }
+  },
+  "game/gameobject/trait/HelipadTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/UnitReloadTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/TurretTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/RallyTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/CrewedTrait": {
+    "0": "function"
+  },
+  "game/gameobject/trait/UnitRepairTrait": {
+    "0": "function"
   }
 }

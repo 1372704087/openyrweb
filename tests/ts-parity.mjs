@@ -3807,6 +3807,36 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/trait/HelipadTrait",
+    tsjs: "src/game/gameobject/trait/HelipadTrait.ts.js",
+    probes: [(ns) => typeof ns.HelipadTrait],
+  },
+  {
+    name: "game/gameobject/trait/UnitReloadTrait",
+    tsjs: "src/game/gameobject/trait/UnitReloadTrait.ts.js",
+    probes: [(ns) => typeof ns.UnitReloadTrait],
+  },
+  {
+    name: "game/gameobject/trait/TurretTrait",
+    tsjs: "src/game/gameobject/trait/TurretTrait.ts.js",
+    probes: [(ns) => typeof ns.TurretTrait],
+  },
+  {
+    name: "game/gameobject/trait/RallyTrait",
+    tsjs: "src/game/gameobject/trait/RallyTrait.ts.js",
+    probes: [(ns) => typeof ns.RallyTrait],
+  },
+  {
+    name: "game/gameobject/trait/CrewedTrait",
+    tsjs: "src/game/gameobject/trait/CrewedTrait.ts.js",
+    probes: [(ns) => typeof ns.CrewedTrait],
+  },
+  {
+    name: "game/gameobject/trait/UnitRepairTrait",
+    tsjs: "src/game/gameobject/trait/UnitRepairTrait.ts.js",
+    probes: [(ns) => typeof ns.UnitRepairTrait],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
