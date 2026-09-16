@@ -1736,5 +1736,52 @@
   },
   "util/BoxedVar": {
     "0": "function"
+  },
+  "game/gameobject/trait/interface/NotifySell": {
+    "0": "symbol",
+    "1": 1
+  },
+  "game/trait/interface/NotifyProduceUnit": {
+    "0": "symbol",
+    "1": 1
+  },
+  "game/gameobject/trait/interface/NotifyWarpChange": {
+    "0": "symbol",
+    "1": 1
+  },
+  "game/event/FactoryProduceUnitEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 44
+    }
+  },
+  "game/gameobject/trait/DockTrait": {
+    "0": {
+      "docked": true,
+      "available": 2,
+      "afterUndock": false,
+      "dockTiles": 3
+    },
+    "1": {
+      "destroyCalls": 1,
+      "atk": "atk1",
+      "temporal": false
+    }
+  },
+  "game/gameobject/trait/FactoryTrait": {
+    "0": {
+      "status": 0,
+      "isCloningVats": false
+    },
+    "1": {
+      "notified": [
+        0,
+        1
+      ]
+    },
+    "2": {
+      "hasTask": true,
+      "taskTileIsRally": true
+    }
   }
 }

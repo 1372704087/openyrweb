@@ -3594,6 +3594,178 @@ const CONVERTED = [
     probes: [(ns) => typeof ns.BoxedVar],
   },
   {
+    name: "game/gameobject/trait/interface/NotifySell",
+    tsjs: "src/game/gameobject/trait/interface/NotifySell.ts.js",
+    probes: [(ns) => typeof ns.NotifySell.onSell, (ns) => Object.keys(ns.NotifySell).length],
+  },
+  {
+    name: "game/trait/interface/NotifyProduceUnit",
+    tsjs: "src/game/trait/interface/NotifyProduceUnit.ts.js",
+    probes: [(ns) => typeof ns.NotifyProduceUnit.onProduce, (ns) => Object.keys(ns.NotifyProduceUnit).length],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyWarpChange",
+    tsjs: "src/game/gameobject/trait/interface/NotifyWarpChange.ts.js",
+    probes: [(ns) => typeof ns.NotifyWarpChange.onChange, (ns) => Object.keys(ns.NotifyWarpChange).length],
+  },
+  {
+    name: "game/event/FactoryProduceUnitEvent",
+    tsjs: "src/game/event/FactoryProduceUnitEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { tag: "unit" };
+        const event = new ns.FactoryProduceUnitEvent(target);
+        return { sameTarget: event.target === target, type: event.type };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/DockTrait",
+    tsjs: "src/game/gameobject/trait/DockTrait.ts.js",
+    probes: [
+      (ns) => {
+        const building = { name: "GAPILE", warpedOutTrait: { isActive: () => false }, tankBunkerTrait: null, helipadTrait: null, unitRepairTrait: {}, rules: { naval: false, unitRepair: true, dock: ["GAPILE"] } };
+        const tiles = { getByMapCoords: (x, y) => ({ rx: x, ry: y, z: 0, rampType: 0 }) };
+        const dock = new ns.DockTrait(building, tiles, 3, [
+          { x: 0, y: 0, z: 0 }, { x: 256, y: 0, z: 0 }, { x: 512, y: 0, z: 0 },
+        ]);
+        dock.dockTiles = [{ rx: 5, ry: 5 }, { rx: 6, ry: 5 }, { rx: 7, ry: 5 }];
+        const unit = { name: "HTK", isVehicle: () => true, isDestroyed: false, isDisposed: false, tile: dock.dockTiles[0], traits: { find: () => null, get: () => null } };
+        dock.dockUnitAt(unit, 0);
+        const docked = dock.isDocked(unit);
+        const available = dock.getAvailableDockCount();
+        dock.undockUnit(unit);
+        return { docked, available, afterUndock: dock.isDocked(unit), dockTiles: dock.dockTiles.length };
+      },
+      (ns) => {
+        // NotifyDestroy 实参顺序：(object, game, attacker, temporal)
+        const destroyed = [];
+        const building = { name: "GAPILE", warpedOutTrait: { isActive: () => false }, tankBunkerTrait: null, helipadTrait: null, unitRepairTrait: {}, rules: { naval: false, unitRepair: true, dock: [] } };
+        const dock = new ns.DockTrait(building, { getByMapCoords: () => ({}) }, 1, [{ x: 0, y: 0, z: 0 }]);
+        dock.dockTiles = [{ rx: 0, ry: 0 }];
+        const unit = { name: "HTK", isDestroyed: false, isDisposed: false, tile: dock.dockTiles[0], traits: { find: () => null, get: () => null } };
+        dock.dockUnitAt(unit, 0);
+        const game = { destroyObject: (u, atk, temporal) => destroyed.push({ id: u.name, atk: atk?.id ?? null, temporal }) };
+        const attacker = { id: "atk1", weapon: { warhead: { rules: { temporal: false } } } };
+        const proto = Object.getPrototypeOf(dock);
+        for (const s of Object.getOwnPropertySymbols(proto)) {
+          if (typeof proto[s] === "function" && proto[s].length === 4) {
+            try {
+              proto[s].call(dock, building, game, attacker, false);
+            } catch {
+              /* 其他 4 参 handler mock 不完整时忽略 */
+            }
+          }
+        }
+        return { destroyCalls: destroyed.length, atk: destroyed[0]?.atk ?? null, temporal: destroyed[0]?.temporal ?? null };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/FactoryTrait",
+    tsjs: "src/game/gameobject/trait/FactoryTrait.ts.js",
+    probes: [
+      (ns) => {
+        const trait = new ns.FactoryTrait(ns.FactoryType ? ns.FactoryType.BuildingType : 1);
+        return { status: trait.status, isCloningVats: trait.isCloningVats };
+      },
+      (ns) => {
+        // NotifyWarpChange：BuildingType(1) 应刷新 Structures(0)+Armory(1) 两条队列
+        const notified = [];
+        const queues = {
+          0: { notifyUpdated: () => notified.push(0) },
+          1: { notifyUpdated: () => notified.push(1) },
+          3: { notifyUpdated: () => notified.push(3) },
+        };
+        const object = {
+          owner: {
+            production: {
+              getQueueTypeForFactory: () => 3,
+              getQueue: (t) => queues[t],
+            },
+          },
+        };
+        // BuildingType = 1（TechnoRules.FactoryType）
+        const trait = new ns.FactoryTrait(ns.FactoryType ? ns.FactoryType.BuildingType : 1);
+        const proto = Object.getPrototypeOf(trait);
+        const symbols = Object.getOwnPropertySymbols(proto).filter(
+          (s) => typeof proto[s] === "function" && proto[s].length === 3,
+        );
+        for (const s of symbols) {
+          try {
+            proto[s].call(trait, object, null, null);
+          } catch {
+            /* owner-change 等路径 mock 不完整时忽略 */
+          }
+        }
+        return { notified };
+      },
+      (ns) => {
+        // produceGroundUnitAt：飞行器规则的 rallyTile 应等于 spawnTile（MoveTask 目标）
+        // 第二参为生产队列项 {rules}，与 onTick 里 queue.getFirst() 一致
+        const FactoryType = ns.FactoryType ?? { None: 0, UnitType: 3, AircraftType: 5, BuildingType: 1, InfantryType: 2, NavalUnitType: 4 };
+        const rallyTile = { rx: 10, ry: 10, z: 0 };
+        const spawnTile = { rx: 12, ry: 11, z: 0 };
+        const tasks = [];
+        const unitRules = { consideredAircraft: true, trainable: false };
+        const queueItem = { rules: unitRules, creditsSpent: 0, progress: 0 };
+        const unit = {
+          rules: unitRules,
+          position: { subCell: 0 },
+          isInfantry: () => false,
+          isAircraft: () => true,
+          veteranTrait: null,
+          unitOrderTrait: {
+            addTask: (t) => tasks.push({ kind: "add", t }),
+            addTaskNext: (t) => tasks.push({ kind: "next", t }),
+          },
+          direction: 0,
+          tile: null,
+          zone: 0,
+        };
+        const building = {
+          owner: { canProduceVeteran: () => false, buildings: [] },
+          rules: {},
+          tile: { rx: 0, ry: 0, z: 0 },
+          art: { height: 0 },
+          rallyTrait: {
+            getRallyPoint: () => null,
+            findRallyPointforUnit: () => rallyTile,
+            findRallyNodeForUnit: () => ({ tile: rallyTile, onBridge: undefined }),
+            changeRallyPoint: () => {},
+          },
+          getFoundation: () => ({ width: 3, height: 3 }),
+          isSpawned: true,
+          buildStatus: 1,
+        };
+        const world = {
+          createUnitForPlayer: () => unit,
+          spawnObject: (u, tile) => {
+            u.tile = tile;
+          },
+          traits: { filter: () => ({ forEach: () => {} }) },
+          events: { dispatch: () => {} },
+          rules: { general: { closeEnough: 1 } },
+          map: {
+            tiles: { getByMapCoords: () => spawnTile },
+            tileOccupation: { getObjectsOnTileByLayer: () => [], isTileOccupiedBy: () => false },
+            mapBounds: {},
+            terrain: {},
+          },
+          changeObjectOwner: () => {},
+          destroyObject: () => {},
+        };
+        const trait = new ns.FactoryTrait(FactoryType.UnitType ?? 3);
+        trait.produceGroundUnitAt(building, queueItem, world);
+        const next = tasks.find((x) => x.kind === "next");
+        const task = next?.t;
+        // 桩 Proxy 对缺失属性返回函数（truthy），故直接读 $args
+        const taskTile = task?.$args?.[1] ?? null;
+        return { hasTask: !!task, taskTileIsRally: taskTile === rallyTile };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -3966,6 +4138,9 @@ const RECON_DEPS = [
   "game/gameobject/trait/interface/NotifySpawn",
   "game/gameobject/trait/interface/NotifyUnspawn",
   "game/gameobject/trait/interface/NotifyAttack",
+  "game/gameobject/trait/interface/NotifyWarpChange",
+  "game/gameobject/trait/interface/NotifySell",
+  "game/trait/interface/NotifyProduceUnit",
   "game/gameobject/common/DeathType",
   "game/gameobject/GameObject",
   "game/Coords",
