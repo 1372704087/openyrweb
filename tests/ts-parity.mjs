@@ -4097,6 +4097,102 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/event/LeaveTransportEvent",
+    tsjs: "src/game/event/LeaveTransportEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { tag: "transport" };
+        const event = new ns.LeaveTransportEvent(target);
+        return { sameTarget: event.target === target, type: event.type };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TransportTrait",
+    tsjs: "src/game/gameobject/trait/TransportTrait.ts.js",
+    probes: [
+      (ns) => {
+        const transport = { rules: { passengers: 5, sizeLimit: 6 } };
+        const trait = new ns.TransportTrait(transport);
+        const inf = { rules: { size: 1, speedType: 0 }, isInfantry: () => true };
+        const tank = { rules: { size: 3, speedType: 1 }, isInfantry: () => false };
+        const big = { rules: { size: 7, speedType: 1 }, isInfantry: () => false };
+        trait.units.push(inf);
+        return {
+          fitsInf: trait.unitFitsInside(inf),
+          fitsTank: trait.unitFitsInside(tank),
+          fitsBig: trait.unitFitsInside(big),
+          maxCap: trait.getMaxCapacity(),
+          occupied: trait.getOccupiedCapacity(),
+          available: trait.getAvailableCapacity(),
+        };
+      },
+      (ns) => {
+        // NotifyDestroy 实参 (object, world, attacker, isPrimary)；乘员处理路径
+        const destroyed = [];
+        const survivors = [];
+        const proto = ns.TransportTrait.prototype;
+        const destroySym = Object.getOwnPropertySymbols(proto).find(
+          (s) => typeof proto[s] === "function" && proto[s].length === 4,
+        );
+        const unit = { id: "pax", rules: { size: 1 }, position: {}, armedTrait: null, transport: {} };
+        const transport = { id: "apc", zone: 0, tile: { rx: 1, ry: 1 }, onBridge: false, position: { tileElevation: 0 }, deathType: 0, rules: { passengers: 1, sizeLimit: 2 } };
+        const world = {
+          destroyObject: (u, atk, primary) => destroyed.push({ id: u.id, primary, atkIsAttacker: atk === attacker }),
+          getUnitSelection: () => ({ isSelected: () => false, addToSelection: () => {} }),
+          events: { dispatch: () => {} },
+          map: { terrain: { getPassableSpeed: () => 1 }, getTileZone: () => 0, tileOccupation: { getBridgeOnTile: () => ({ tileElevation: 0 }) } },
+          unlimboObject: () => {},
+        };
+        const attacker = { id: "atk" };
+        if (destroySym) {
+          const trait = new ns.TransportTrait(transport);
+          trait.units.push(unit);
+          trait.spawnSurvivors = (w) => survivors.push(w === world);
+          // isPrimary=true → 乘员随车销毁
+          proto[destroySym].call(trait, transport, world, attacker, true);
+        }
+        return { destroyed: destroyed.length, primary: destroyed[0]?.primary ?? null, atkIsAttacker: destroyed[0]?.atkIsAttacker ?? null, survivors: survivors.length };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/HarvesterTrait",
+    tsjs: "src/game/gameobject/trait/HarvesterTrait.ts.js",
+    probes: [
+      (ns) => {
+        const trait = new ns.HarvesterTrait(20);
+        trait.addBails("Ore", 5);
+        trait.addBails("Gems", 3);
+        return {
+          ore: trait.ore,
+          gems: trait.gems,
+          isFull: trait.isFull(),
+          isEmpty: trait.isEmpty(),
+          hash: trait.getHash(),
+          bails: trait.getBails(),
+        };
+      },
+      (ns) => {
+        // onPush：移动类指令置位 autoGatherOnNextIdle（遍历 2 参 Symbol 方法）
+        const proto = ns.HarvesterTrait.prototype;
+        const trait = new ns.HarvesterTrait(20);
+        trait.status = 4; // LookingForRefinery
+        const orderType = 0; // OrderType.Move
+        for (const s of Object.getOwnPropertySymbols(proto)) {
+          if (typeof proto[s] === "function" && proto[s].length === 2) {
+            try {
+              proto[s].call(trait, { owner: { isCombatant: () => true }, unitOrderTrait: {}, tile: { landType: 0 } }, orderType);
+            } catch {
+              /* onSpawn 等 mock 不完整时忽略 */
+            }
+          }
+        }
+        return { autoGather: trait.autoGatherOnNextIdle, status: trait.status };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -4471,6 +4567,8 @@ const RECON_DEPS = [
   "game/gameobject/trait/interface/NotifyAttack",
   "game/gameobject/trait/interface/NotifyWarpChange",
   "game/gameobject/trait/interface/NotifySell",
+  "game/gameobject/trait/interface/NotifyOrder",
+  "game/gameobject/trait/interface/NotifyTeleport",
   "game/trait/interface/NotifyProduceUnit",
   "game/gameobject/common/DeathType",
   "game/gameobject/GameObject",

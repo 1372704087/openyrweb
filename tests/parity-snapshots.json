@@ -1861,5 +1861,50 @@
       "afterNormal": 1,
       "firedWorld": true
     }
+  },
+  "game/event/LeaveTransportEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 49
+    }
+  },
+  "game/gameobject/trait/TransportTrait": {
+    "0": {
+      "fitsInf": true,
+      "fitsTank": true,
+      "fitsBig": false,
+      "maxCap": 5,
+      "occupied": 1,
+      "available": 4
+    },
+    "1": {
+      "destroyed": 1,
+      "primary": true,
+      "atkIsAttacker": true,
+      "survivors": 0
+    }
+  },
+  "game/gameobject/trait/HarvesterTrait": {
+    "0": {
+      "ore": 8,
+      "gems": 0,
+      "isFull": false,
+      "isEmpty": false,
+      "hash": 800,
+      "bails": [
+        [
+          "Ore",
+          5
+        ],
+        [
+          "Gems",
+          3
+        ]
+      ]
+    },
+    "1": {
+      "autoGather": true,
+      "status": 0
+    }
   }
 }
