@@ -163,7 +163,7 @@ export class ConstructionWorker {
   placeAt(name: string, tile: any, normalize = false): any[] {
     const placed = [];
     const buildingRules = this.rules.getBuilding(name);
-    const originTile = normalize ? tile : this.normalizePlacementTile(buildingRules, tile);
+    const originTile = normalize ? tile : this.normalizePlacementTile(name, tile);
     if (buildingRules.wall) {
       // 墙：放置本体 + 四方向连接墙。
       const toPlace: any[][] = [[originTile, buildingRules]];

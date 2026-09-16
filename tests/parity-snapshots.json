@@ -1655,6 +1655,7 @@
   "game/gameobject/task/system/Task": {
     "0": {
       "initial": {
+        "status": 0,
         "cancellable": true,
         "blocking": true
       },
@@ -1662,24 +1663,28 @@
         "cancellable": false,
         "blocking": false
       },
-      "isRunning": true
+      "statusAfterCancel": 0,
+      "isRunning": false
     }
   },
   "game/gameobject/task/system/CallbackTask": {
     "0": {
-      "called": 0
+      "called": 1,
+      "firstTick": true
     }
   },
   "game/gameobject/task/system/WaitTicksTask": {
     "0": [
-      null,
-      null,
-      null,
-      null
+      false,
+      false,
+      false,
+      true
     ]
   },
   "game/gameobject/task/system/WaitMinutesTask": {
-    "0": {}
+    "0": {
+      "ticks": 900
+    }
   },
   "util/geometry": {
     "0": [
@@ -1705,11 +1710,18 @@
   },
   "game/gameobject/task/morph/PackBuildingTask": {
     "0": {
-      "statuses": [],
-      "waitTaskPushed": 0
+      "statuses": [
+        2
+      ],
+      "waitTaskPushed": 1,
+      "tick1": false,
+      "tick2": true
     },
     "1": {
-      "statuses": [],
+      "statuses": [
+        2
+      ],
+      "tick1": true,
       "children": 0
     }
   },
@@ -1724,6 +1736,11 @@
       "meets": true,
       "notMeets": false,
       "tileBuildable": true
+    },
+    "1": {
+      "artNameTypes": [
+        "GAPILE"
+      ]
     }
   },
   "game/gameobject/task/system/TaskGroup": {

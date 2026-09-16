@@ -3459,7 +3459,7 @@ const CONVERTED = [
   },
   {
     name: "game/gameobject/task/system/WaitMinutesTask",
-    tsjs: "src/game/gameobject/task/WaitMinutesTask.ts.js",
+    tsjs: "src/game/gameobject/task/system/WaitMinutesTask.ts.js",
     probes: [
       (ns) => {
         const task = new ns.WaitMinutesTask(1);
@@ -3504,11 +3504,13 @@ const CONVERTED = [
     probes: [
       (ns) => {
         const statuses = [];
-        let waitTaskPushed = 0;
         const building = {
           buildStatus: ns.BuildStatus ? ns.BuildStatus.Ready : 1,
           rules: { wall: false },
-          setBuildStatus: (s) => statuses.push(s),
+          setBuildStatus(s) {
+            statuses.push(s);
+            this.buildStatus = s;
+          },
         };
         const game = { rules: { general: { buildupTime: 5 } } };
         const task = new ns.PackBuildingTask(game);
@@ -3522,10 +3524,13 @@ const CONVERTED = [
         const building = {
           buildStatus: ns.BuildStatus ? ns.BuildStatus.Ready : 1,
           rules: { wall: true },
-          setBuildStatus: (s) => statuses.push(s),
+          setBuildStatus(s) {
+            statuses.push(s);
+            this.buildStatus = s;
+          },
         };
         const task = new ns.PackBuildingTask({ rules: { general: { buildupTime: 5 } } });
-        const tick1 = task.onTick({ rules: { general: { buildupTime: 5 } } });
+        const tick1 = task.onTick(building);
         return { statuses, tick1, children: task.children.length };
       },
     ],
@@ -3568,6 +3573,42 @@ const CONVERTED = [
         const notMeets = worker.meetsAdjacency({ x: 50, y: 50, width: 2, height: 2 }, 1);
         const tileBuildable = worker.isTileBuildable({ landType: 0, rampType: 0 }, { waterBound: false });
         return { rect, meets, notMeets, tileBuildable };
+      },
+      // placeAt 非 normalize 路径：normalizePlacementTile 必须收到建筑名字符串
+      (ns) => {
+        const seen = [];
+        const buildings = new Set();
+        const player = { name: "P1", buildings };
+        const buildingRules = { name: "GAPILE", wall: false, adjacent: 1, baseNormal: true };
+        const rules = { getBuilding: () => buildingRules, getLandRules: () => ({ buildable: true, getSpeedModifier: () => 1 }) };
+        const art = {
+          getObject: (nameOrRules) => {
+            seen.push(typeof nameOrRules === "string" ? nameOrRules : typeof nameOrRules);
+            return { foundation: { width: 2, height: 2 }, foundationCenter: { x: 0, y: 0 } };
+          },
+        };
+        const mapTile = { rx: 0, ry: 0, z: 0, rampType: 0, landType: 0 };
+        const map = {
+          tiles: { getByMapCoords: () => mapTile },
+          tileOccupation: { onChange: { subscribe: () => {}, unsubscribe: () => {} }, calculateTilesForGameObject: () => [] },
+          getObjectsOnTile: () => [],
+          getGroundObjectsOnTile: () => [],
+          isWithinBounds: () => true,
+        };
+        const game = {
+          gameOpts: { buildOffAlly: false },
+          alliances: { getAllies: () => [] },
+          events: { subscribe: () => {} },
+          mapShroudTrait: { getPlayerShroud: () => null },
+          createObject: () => ({ name: "GAPILE" }),
+          changeObjectOwner: () => {},
+          spawnObject: () => {},
+          unspawnObject: () => {},
+          sellTrait: { computePurchaseValue: () => 0 },
+        };
+        const worker = new ns.ConstructionWorker(player, rules, art, map, game);
+        worker.placeAt("GAPILE", { rx: 10, ry: 10 }, false);
+        return { artNameTypes: seen };
       },
     ],
   },
@@ -4157,6 +4198,14 @@ const RECON_DEPS = [
   "game/rules/ObjectRules",
   "game/WeaponType",
   "game/gameobject/unit/VeteranAbility",
+  // 已转换的 task 系统：必须预注册，否则被 trait/task 桩规则吞掉
+  "game/gameobject/task/system/TaskStatus",
+  "game/gameobject/task/system/Task",
+  "game/gameobject/task/system/TaskGroup",
+  "game/gameobject/task/system/CallbackTask",
+  "game/gameobject/task/system/WaitTicksTask",
+  "game/gameobject/task/system/WaitMinutesTask",
+  "game/gameobject/task/morph/PackBuildingTask",
 ];
 
 // three r94 UMD: expose it globally the same way index.html does for the
