@@ -1906,5 +1906,30 @@
       "autoGather": true,
       "status": 0
     }
+  },
+  "game/gameobject/trait/MoveTrait": {
+    "0": "function",
+    "1": [
+      0,
+      3
+    ],
+    "2": [
+      0,
+      1
+    ],
+    "3": [
+      0,
+      1
+    ],
+    "4": {
+      "lastTeleportTick": 42,
+      "moveStateAfter": 0,
+      "eventIsChrono": true,
+      "eventPrevRx": 0
+    },
+    "5": {
+      "onBridge": true,
+      "elevation": 5
+    }
   }
 }

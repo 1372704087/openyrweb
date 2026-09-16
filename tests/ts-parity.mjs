@@ -4193,6 +4193,108 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/trait/MoveTrait",
+    tsjs: "src/game/gameobject/trait/MoveTrait.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveTrait,
+      (ns) => ns.MoveState ? [ns.MoveState.Idle, ns.MoveState.Moving] : "lazy",
+      (ns) => ns.MoveResult ? [ns.MoveResult.Success, ns.MoveResult.Cancel] : "lazy",
+      (ns) => ns.CollisionState ? [ns.CollisionState.Waiting, ns.CollisionState.Resolved] : "lazy",
+      (ns) => {
+        // teleportUnitToTile(newTile, bridge, isChronoshift, isReverse, world)
+        // ObjectTeleportEvent 在 handleTileChange 的 EnterTile 之后派发（events[1]）。
+        const events = [];
+        const object = {
+          tile: { rx: 0, ry: 0, landType: 0, onBridgeLandType: 0 },
+          zone: 0, // Ground
+          onBridge: false,
+          tileElevation: 0,
+          position: {
+            tileElevation: 0,
+            tile: null,
+            subCell: 0,
+            desiredSubCell: 0,
+          },
+          traits: { filter: () => ({ forEach: () => {} }) },
+          isVehicle: () => false,
+          moveTrait: null,
+        };
+        const tile = { rx: 5, ry: 5, landType: 0, onBridgeLandType: 0 };
+        const world = {
+          currentTick: 42,
+          events: { dispatch: (e) => events.push(e) },
+          map: {
+            tileOccupation: {
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+              getBridgeOnTile: () => undefined,
+              getGroundObjectsOnTile: () => [],
+            },
+            technosByTile: { updateObject: () => {} },
+            getGroundObjectsOnTile: () => [],
+          },
+          traits: { filter: () => ({ forEach: () => {} }) },
+          rules: {
+            getLandRules: () => ({ getSpeedModifier: () => 1 }),
+            combatDamage: null,
+          },
+          areFriendly: () => true,
+          destroyObject: () => {},
+          crateGeneratorTrait: { pickupCrate: () => {} },
+        };
+        const trait = new ns.MoveTrait(object, world.map.tileOccupation);
+        object.moveTrait = trait;
+        trait.moveState = ns.MoveState.Moving;
+        trait.teleportUnitToTile(tile, undefined, true, false, world);
+        const teleportEvent = events.find((e) => e.isChronoshift !== undefined || e.prevTile !== undefined);
+        return {
+          lastTeleportTick: trait.lastTeleportTick,
+          moveStateAfter: trait.moveState,
+          eventIsChrono: teleportEvent?.isChronoshift ?? null,
+          eventPrevRx: teleportEvent?.prevTile?.rx ?? null,
+        };
+      },
+      (ns) => {
+        // handleTileChange：第二参是新桥；桥面切换时调整海拔并更新 onBridge
+        const object = {
+          tile: { rx: 2, ry: 0, landType: 0, onBridgeLandType: 0, tileElevation: 10 },
+          zone: 0, // Ground
+          onBridge: false,
+          tileElevation: 0,
+          position: { tileElevation: 0 },
+          traits: { filter: () => ({ forEach: () => {} }) },
+          isVehicle: () => false,
+          crusher: false,
+          moveTrait: { reservedPathNodes: [] },
+        };
+        const previousTile = { rx: 1, ry: 0, landType: 0, onBridgeLandType: 0 };
+        const bridge = { tileElevation: 5, isHighBridge: () => true };
+        const world = {
+          map: {
+            tileOccupation: {
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+              getBridgeOnTile: () => undefined,
+            },
+            technosByTile: { updateObject: () => {} },
+            getGroundObjectsOnTile: () => [],
+          },
+          traits: { filter: () => ({ forEach: () => {} }) },
+          events: { dispatch: () => {} },
+          rules: { getLandRules: () => ({ getSpeedModifier: () => 1 }) },
+          areFriendly: () => true,
+          destroyObject: () => {},
+        };
+        const trait = new ns.MoveTrait(object, world.map.tileOccupation);
+        trait.handleTileChange(previousTile, bridge, false, world, false);
+        return {
+          onBridge: object.onBridge,
+          elevation: object.position.tileElevation,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
