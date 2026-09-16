@@ -1811,13 +1811,30 @@
     "0": "function"
   },
   "game/gameobject/trait/RallyTrait": {
-    "0": "function"
+    "0": "function",
+    "1": {
+      "hasRally": true,
+      "pointAsTile": true,
+      "objectAsObject": true
+    }
   },
   "game/gameobject/trait/CrewedTrait": {
-    "0": "function"
+    "0": "function",
+    "1": {
+      "afterTemporal": 0,
+      "afterNormal": 1,
+      "normalWorldIsGame": true
+    }
   },
   "game/gameobject/trait/UnitRepairTrait": {
-    "0": "function"
+    "0": "function",
+    "1": {
+      "ok": true,
+      "healCalls": 1,
+      "sourceIsBuilding": true,
+      "worldIsWorld": true,
+      "amount": 1
+    }
   },
   "game/gameobject/trait/ArmedTrait": {
     "0": {

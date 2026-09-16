@@ -3824,17 +3824,116 @@ const CONVERTED = [
   {
     name: "game/gameobject/trait/RallyTrait",
     tsjs: "src/game/gameobject/trait/RallyTrait.ts.js",
-    probes: [(ns) => typeof ns.RallyTrait],
+    probes: [
+      (ns) => typeof ns.RallyTrait,
+      (ns) => {
+        // changeRallyPoint 实参顺序 (point, object, world)：point 作 tile 校验
+        const seen = [];
+        const point = { rx: 10, ry: 20, terrainType: 0, z: 0 };
+        const object = {
+          rules: { naval: false },
+          factoryTrait: null,
+          isBuilding: () => true,
+          getFoundation: () => ({ width: 1, height: 1 }),
+          tile: { rx: 0, ry: 0 },
+        };
+        const world = {
+          map: {
+            tiles: {
+              getByMapCoords: (x, y) => {
+                seen.push({ x, y });
+                return { rx: x, ry: y, terrainType: 0, z: 0 };
+              },
+            },
+            mapBounds: {},
+            tileOccupation: {
+              isTileOccupiedBy: (tile, obj) => {
+                seen.push({ occupiedCheck: tile, sameObject: obj === object });
+                return false;
+              },
+            },
+            terrain: { getPassableSpeed: () => 0 },
+          },
+        };
+        // RadialTileFinder 是 stub：getNextTile 返回 undefined → 回落 found
+        const trait = new ns.RallyTrait();
+        trait.changeRallyPoint(point, object, world);
+        // 若顺序正确：isTileOccupiedBy 收到 (point, object)
+        const occupied = seen.find((s) => s.occupiedCheck);
+        return {
+          hasRally: !!trait.rallyPoint,
+          pointAsTile: occupied?.occupiedCheck === point,
+          objectAsObject: occupied?.sameObject === true,
+        };
+      },
+    ],
   },
   {
     name: "game/gameobject/trait/CrewedTrait",
     tsjs: "src/game/gameobject/trait/CrewedTrait.ts.js",
-    probes: [(ns) => typeof ns.CrewedTrait],
+    probes: [
+      (ns) => typeof ns.CrewedTrait,
+      (ns) => {
+        // NotifyDestroy 实参顺序 (object, game, attacker, temporal)
+        const spawned = [];
+        const proto = ns.CrewedTrait.prototype;
+        const destroySym = Object.getOwnPropertySymbols(proto).find(
+          (s) => typeof proto[s] === "function" && proto[s].length === 4,
+        );
+        const object = { id: "v", isVehicle: () => true, moveTrait: { isMoving: () => false }, crashableTrait: null, rules: {}, owner: { country: { side: 1 } } };
+        const game = { rules: { general: {} }, sellTrait: { computeRefundValue: () => 0 } };
+        // temporal=true → 不逃出
+        if (destroySym) {
+          const trait = new ns.CrewedTrait();
+          trait.spawnSurvivors = (o, w) => spawned.push({ obj: o === object, worldIsGame: w === game });
+          proto[destroySym].call(trait, object, game, null, true);
+        }
+        const afterTemporal = spawned.length;
+        // 正常死亡：spawnSurvivors 应收到 (object, game) 而非 attacker
+        if (destroySym) {
+          const trait = new ns.CrewedTrait();
+          trait.spawnSurvivors = (o, w) => spawned.push({ obj: o === object, worldIsGame: w === game });
+          proto[destroySym].call(trait, object, game, { obj: null, weapon: null }, false);
+        }
+        return {
+          afterTemporal,
+          afterNormal: spawned.length,
+          normalWorldIsGame: spawned[0]?.worldIsGame ?? null,
+        };
+      },
+    ],
   },
   {
     name: "game/gameobject/trait/UnitRepairTrait",
     tsjs: "src/game/gameobject/trait/UnitRepairTrait.ts.js",
-    probes: [(ns) => typeof ns.UnitRepairTrait],
+    probes: [
+      (ns) => typeof ns.UnitRepairTrait,
+      (ns) => {
+        // tickRepair：repair 规则来自 world.rules；healBy(amount, building, world)
+        const healCalls = [];
+        const building = {};
+        const worldMock = { rules: { general: { repair: { repairStep: 1, repairPercent: 0 } } } };
+        const unit = {
+          purchaseValue: 1000,
+          owner: { credits: 10000 },
+          healthTrait: {
+            maxHitPoints: 100,
+            getHitPoints: () => 50,
+            healBy: (amount, source, world) =>
+              healCalls.push({ amount, sourceIsBuilding: source === building, worldIsWorld: world === worldMock }),
+          },
+        };
+        const trait = new ns.UnitRepairTrait();
+        const ok = trait.tickRepair(unit, worldMock, building);
+        return {
+          ok,
+          healCalls: healCalls.length,
+          sourceIsBuilding: healCalls[0]?.sourceIsBuilding ?? null,
+          worldIsWorld: healCalls[0]?.worldIsWorld ?? null,
+          amount: healCalls[0]?.amount ?? null,
+        };
+      },
+    ],
   },
   {
     name: "game/gameobject/trait/ArmedTrait",

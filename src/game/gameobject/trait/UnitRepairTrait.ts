@@ -97,7 +97,7 @@ export class UnitRepairTrait {
    * @returns 是否实际修复了至少 1 点
    */
   tickRepair(unit: any, world: any, building: any): boolean {
-    const repairRules = building.rules.general.repair;
+    const repairRules = world.rules.general.repair;
     const step = Math.floor(repairRules.repairStep);
     const percent = repairRules.repairPercent;
     let healAmount: number;
@@ -111,7 +111,7 @@ export class UnitRepairTrait {
       healAmount = step;
     }
     healAmount = Math.min(healAmount, unit.healthTrait.maxHitPoints - unit.healthTrait.getHitPoints());
-    return !!healAmount && (unit.healthTrait.healBy(healAmount, world, building), true);
+    return !!healAmount && (unit.healthTrait.healBy(healAmount, building, world), true);
   }
 
   /** 修理厂缺省集结点：占位正下方一格。 */

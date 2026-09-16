@@ -25,8 +25,8 @@ export class RallyTrait {
     return this.rallyPoint;
   }
 
-  /** 设置集结点（会校验合法性，非法点忽略）。 */
-  changeRallyPoint(object: any, point: any, world: any): void {
+  /** 设置集结点（会校验合法性，非法点忽略）。实参顺序 (point, object, world)。 */
+  changeRallyPoint(point: any, object: any, world: any): void {
     const valid = this.findValidRallyPoint(object, point, world.map);
     if (valid) this.rallyPoint = valid;
   }

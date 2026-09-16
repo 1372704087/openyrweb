@@ -24,10 +24,11 @@ export class CrewedTrait {
     this.spawnSurvivors(object, world);
   }
 
-  [NotifyDestroyModule.NotifyDestroy.onDestroy](object: any, attacker: any, game: any, isPrimary: any): void {
+  /** 实参顺序 (object, game, attacker, temporal)。 */
+  [NotifyDestroyModule.NotifyDestroy.onDestroy](object: any, game: any, attacker: any, temporal: any): void {
     // 自杀武器自毁 / 移动中 / 有坠毁 trait 的不逃出乘员。
     if (
-      isPrimary ||
+      temporal ||
       (attacker?.obj === object && attacker.weapon?.rules.suicide) ||
       (object.isVehicle() && object.moveTrait.isMoving()) ||
       object.crashableTrait
