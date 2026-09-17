@@ -4922,6 +4922,156 @@ const CONVERTED = [
     ],
   },
   {
+    name: "engine/type/TerrainType",
+    tsjs: "src/engine/type/TerrainType.ts.js",
+    probes: [
+      (ns) => typeof ns.TerrainType,
+      (ns) => [
+        ns.TerrainType.Default,
+        ns.TerrainType.Tunnel,
+        ns.TerrainType.Railroad,
+        ns.TerrainType.Rock1,
+        ns.TerrainType.Rock2,
+        ns.TerrainType.Water,
+        ns.TerrainType.Shore,
+        ns.TerrainType.Pavement,
+        ns.TerrainType.Dirt,
+        ns.TerrainType.Clear,
+        ns.TerrainType.Rough,
+        ns.TerrainType.Cliff,
+      ],
+      (ns) => Object.keys(ns.TerrainType).length,
+    ],
+  },
+  {
+    name: "engine/type/TiberiumType",
+    tsjs: "src/engine/type/TiberiumType.ts.js",
+    probes: [
+      (ns) => typeof ns.TiberiumType,
+      (ns) => [
+        ns.TiberiumType.Riparius,
+        ns.TiberiumType.Ore,
+        ns.TiberiumType.Cruentus,
+        ns.TiberiumType.Gems,
+        ns.TiberiumType.Vinifera,
+        ns.TiberiumType.Ore2,
+        ns.TiberiumType.Aboreus,
+        ns.TiberiumType.Ore3,
+      ],
+      (ns) => Object.keys(ns.TiberiumType).length,
+    ],
+  },
+  {
+    name: "game/order/OrderType",
+    tsjs: "src/game/order/OrderType.ts.js",
+    probes: [
+      (ns) => typeof ns.OrderType,
+      (ns) => [
+        ns.OrderType.Move,
+        ns.OrderType.ForceMove,
+        ns.OrderType.Attack,
+        ns.OrderType.ForceAttack,
+        ns.OrderType.AttackMove,
+        ns.OrderType.Guard,
+        ns.OrderType.GuardArea,
+        ns.OrderType.Capture,
+        ns.OrderType.Occupy,
+        ns.OrderType.Deploy,
+        ns.OrderType.DeploySelected,
+        ns.OrderType.Stop,
+        ns.OrderType.Cheer,
+        ns.OrderType.Dock,
+        ns.OrderType.Gather,
+        ns.OrderType.Repair,
+        ns.OrderType.Scatter,
+        ns.OrderType.EnterTransport,
+        ns.OrderType.PlaceBomb,
+        ns.OrderType.UnloadAll,
+      ],
+      (ns) => Object.keys(ns.OrderType).length,
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyElevationChange",
+    tsjs: "src/game/trait/interface/NotifyElevationChange.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyElevationChange,
+      (ns) => typeof ns.NotifyElevationChange.onElevationChange,
+      (ns) => typeof Object.values(ns)[0],
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyTeleport",
+    tsjs: "src/game/gameobject/trait/interface/NotifyTeleport.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyTeleport,
+      (ns) => typeof ns.NotifyTeleport.onBeforeTeleport,
+      (ns) => typeof Object.values(ns)[0],
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyTileChange",
+    tsjs: "src/game/trait/interface/NotifyTileChange.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyTileChange,
+      (ns) => typeof ns.NotifyTileChange.onTileChange,
+      (ns) => typeof Object.values(ns)[0],
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyTileChange",
+    tsjs: "src/game/gameobject/trait/interface/NotifyTileChange.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyTileChange,
+      (ns) => typeof ns.NotifyTileChange.onTileChange,
+      (ns) => typeof Object.values(ns)[0],
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyCrash",
+    tsjs: "src/game/gameobject/trait/interface/NotifyCrash.ts.js",
+    probes: [
+      (ns) => typeof ns.NotifyCrash,
+      (ns) => typeof ns.NotifyCrash.onCrash,
+      (ns) => typeof Object.values(ns)[0],
+    ],
+  },
+  {
+    name: "game/type/LandType",
+    tsjs: "src/game/type/LandType.ts.js",
+    probes: [
+      (ns) => ns.LandType.Water,
+      (ns) => ns.LandType.Cliff,
+      (ns) => ns.LandType.Beach,
+      (ns) => Object.keys(ns.LandType).length,
+      // getLandType 映射（基线有该导出；缺失会直接 TypeError）
+      (ns) => {
+        const t = ns.getLandType;
+        if (typeof t !== "function") return "missing-getLandType";
+        try {
+          return [
+            t(0), // Default → Clear
+            t(13), // Clear → Clear
+            t(5), // Tunnel → Cliff
+            t(9), // Water → Water
+            t(10), // Shore → Beach
+            t(11), // Pavement → Road
+          ];
+        } catch (e) {
+          return String(e);
+        }
+      },
+      (ns) => {
+        try {
+          ns.getLandType(99);
+          return "no-throw";
+        } catch (e) {
+          return String(e);
+        }
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

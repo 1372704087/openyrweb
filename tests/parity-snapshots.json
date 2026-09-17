@@ -2247,5 +2247,103 @@
       null,
       null
     ]
+  },
+  "engine/type/TerrainType": {
+    "0": "object",
+    "1": [
+      0,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "2": 24
+  },
+  "engine/type/TiberiumType": {
+    "0": "object",
+    "1": [
+      0,
+      0,
+      1,
+      1,
+      2,
+      2,
+      3,
+      3
+    ],
+    "2": 12
+  },
+  "game/order/OrderType": {
+    "0": "object",
+    "1": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "2": 40
+  },
+  "game/trait/interface/NotifyElevationChange": {
+    "0": "object",
+    "1": "symbol",
+    "2": "object"
+  },
+  "game/gameobject/trait/interface/NotifyTeleport": {
+    "0": "object",
+    "1": "symbol",
+    "2": "object"
+  },
+  "game/trait/interface/NotifyTileChange": {
+    "0": "object",
+    "1": "symbol",
+    "2": "object"
+  },
+  "game/gameobject/trait/interface/NotifyTileChange": {
+    "0": "object",
+    "1": "symbol",
+    "2": "object"
+  },
+  "game/gameobject/trait/interface/NotifyCrash": {
+    "0": "object",
+    "1": "symbol",
+    "2": "object"
+  },
+  "game/type/LandType": {
+    "0": 7,
+    "1": 10,
+    "2": 3,
+    "3": 22,
+    "4": [
+      0,
+      0,
+      10,
+      7,
+      3,
+      1
+    ],
+    "5": "Error: Unknown terrain type 99"
   }
 }

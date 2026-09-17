@@ -28,7 +28,7 @@ import { GameSpeed } from "game/GameSpeed"; // 已转换
 import * as NotifyTeleportModule from "game/gameobject/trait/interface/NotifyTeleport"; // 未转换（any-shim）
 import * as NotifyOrderModule from "game/gameobject/trait/interface/NotifyOrder"; // 未转换（any-shim）
 import * as OrderTypeModule from "game/order/OrderType"; // 未转换（any-shim）
-import * as LandTypeModule from "game/type/LandType"; // 未转换（any-shim）
+import * as LandTypeModule from "game/type/LandType"; // 已转换
 import * as TiberiumTypeModule from "engine/type/TiberiumType"; // 未转换（any-shim）
 
 /** 采矿车状态。 */

@@ -26,7 +26,7 @@
 import { StanceType } from "game/gameobject/infantry/StanceType";
 import { ZoneType } from "game/gameobject/unit/ZoneType";
 import { LandTargeting } from "game/type/LandTargeting";
-import * as LandTypeModule from "game/type/LandType"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as LandTypeModule from "game/type/LandType"; // 已转换
 import { NavalTargeting } from "game/type/NavalTargeting";
 import { SpeedType } from "game/type/SpeedType";
 import { WeaponType } from "game/WeaponType";

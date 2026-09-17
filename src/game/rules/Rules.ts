@@ -27,7 +27,7 @@ import { WeaponRules } from "game/rules/WeaponRules";
 import { AudioVisualRules } from "game/rules/AudioVisualRules";
 import { GeneralRules } from "game/rules/GeneralRules";
 import { MpDialogSettings } from "game/rules/MpDialogSettings";
-import * as LandTypeModule from "game/type/LandType"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入
+import * as LandTypeModule from "game/type/LandType"; // 已转换
 import { LandRules } from "game/rules/LandRules";
 import { WarheadRules } from "game/rules/WarheadRules";
 import { ProjectileRules } from "game/rules/ProjectileRules";
