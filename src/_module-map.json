@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1319,
+  "moduleCount": 1320,
   "modules": [
     {
       "name": "extensions/ExtensionDefinition",
@@ -8176,6 +8176,14 @@
         "engine/gfx/batch/BatchedMesh"
       ],
       "bytes": 1482
+    },
+    {
+      "name": "engine/renderable/entity/unit/VxlShadowProxy",
+      "file": "engine/renderable/entity/unit/VxlShadowProxy.ts.js",
+      "deps": [
+        "game/Coords"
+      ],
+      "bytes": 0
     },
     {
       "name": "engine/renderable/entity/Infantry",

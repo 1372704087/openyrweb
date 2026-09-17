@@ -33,10 +33,11 @@ System.register(
     "engine/renderable/entity/unit/ExtraLightHelper",
     "engine/renderable/DebugRenderable",
     "engine/gfx/MathUtils",
+    "engine/renderable/entity/unit/VxlShadowProxy",
   ],
   function (t, e) {
     "use strict";
-    var o, a, S, y, n, p, m, f, w, E, C, x, h, i, s, T, O, r, l, c, A, v, u, d, g, M, b, R, P, I, k;
+    var o, a, S, y, n, p, m, f, w, E, C, x, h, i, s, T, O, r, l, c, A, v, u, d, g, M, b, R, Z, P, I, k;
     e && e.id;
     return {
       setters: [
@@ -123,6 +124,9 @@ System.register(
         },
         function (e) {
           R = e;
+        },
+        function (e) {
+          Z = e;
         },
       ],
       execute: function () {
@@ -317,7 +321,7 @@ System.register(
                   (this.shpRenderable?.setOpacity(t),
                     this.shpRenderable?.setFlat(u),
                     this.vxlBuilders.forEach((e) => {
-                      (e.setOpacity(t), e.setShadow(!u));
+                      (e.setOpacity(t), e.setShadow(!u && !this._airShadowOn));
                     }),
                     this.placeholder?.setOpacity(t),
                     this.posObj &&
@@ -508,7 +512,19 @@ System.register(
                   // on Robot Tank paralysis) would have no visible effect.
                   this.vxlBuilders.forEach((e) => e.setExtraLight(this.vxlExtraLight));
                   this.shpRenderable?.setExtraLight(this.shpExtraLight);
+                  this.updateShadowProxy();
                 }
+              }
+              // OpenYRWeb: 只有真正升空的单位才走影子副本 —— 在地面时保持主体的实时投影，
+              // 避免起降瞬间出现"两个影子"。潜水（submerged）时主体本来就不投影。
+              updateShadowProxy() {
+                if (!this.shadowProxy) return;
+                var e = this.gameObject.zone === A.ZoneType.Air;
+                (e !== this._airShadowOn &&
+                  ((this._airShadowOn = e),
+                  this.shadowProxy.setEnabled(e),
+                  this.vxlBuilders.forEach((t) => t.setShadow(!e && !this.lastSubmerged))),
+                  e && this.shadowProxy.update());
               }
               updateVxlRotation(e, t, d) {
                 var i,
@@ -757,7 +773,11 @@ System.register(
                 let s = (this.rockingTiltObj = new THREE.Object3D());
                 ((s.matrixAutoUpdate = !1), (s.rotation.order = "YXZ"), s.add(r), i.add(s), e.add(i));
                 let a = (this.posObj = new THREE.Object3D());
-                ((a.matrixAutoUpdate = !1), a.add(e), t.add(a));
+                ((a.matrixAutoUpdate = !1), a.add(e), t.add(a),
+                  // OpenYRWeb: 空中单位（jumpjet 类，如基洛夫/飞碟）的阴影偏移同样随高度线性放大，
+                  // 改用限制在低位的不可见影子副本投影，偏移封顶在约 1 格。详见 VxlShadowProxy。
+                  (this.shadowProxy = new Z.VxlShadowProxy(this.gameObject)),
+                  this.shadowProxy.create3DObject(a, e));
               }
               computeSpriteAnchorOffset(e) {
                 var t = this.objectArt.getDrawOffset();
@@ -975,6 +995,7 @@ System.register(
                 (this.plugins.forEach((e) => e.dispose()),
                   this.pipOverlay?.dispose(),
                   this.shpRenderable?.dispose(),
+                  this.shadowProxy?.dispose(),
                   this.vxlBuilders.forEach((e) => e.dispose()),
                   this.sinkWakeAnims?.forEach((e) => e.dispose()),
                   this.squidGrabAnim?.dispose(),

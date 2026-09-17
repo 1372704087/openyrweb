@@ -1234,3 +1234,40 @@ feat(vpl-lighting): 实现 VXL 体素 VPL 查表光照
 - 🏭 **精炼厂倒矿"矿石到达"动画**
   矿车每次在精炼厂卸矿（`ReturnOreTask`）对建筑 `_refineryOrePile` 累计本次倒矿量；渲染器检测到倒矿量上涨即切 `SPECIAL_DOCKING`，用建筑自带的一次性 `SpecialAnim`（盟军 GAREFNOR / 苏军 NAREFNOR，"矿石到达"动画）完整播放一遍（对齐原版 YR 的 SpecialAnim 槽位逻辑），播完回到 IDLE。位置/层级由建筑动画体系管理。缺失的可选动画 SHP（如精炼厂 ActiveAnimTwo/Three/Four = GAREFNL2/3/4）仍是 `console.debug` 提示后跳过，不静默隐藏，便于排查数据缺失。
 
+fix(vxl-shadow): 空中 VXL 单位阴影偏移封顶在 1 格
+
+- 📐 **根因：偏移与飞行高度严格成正比**
+  VXL 阴影由 three.js 的 shadow map 产生（`castShadow` 默认开），而 `WorldScene` 的平行光约 46° 斜射（光源 position(-87.012, 204.338, 195.409)、target(0,0,0)，水平/垂直 ≈ 1.0468）→ 阴影水平偏移 = 飞行高度 × 1.0468，且没有任何上限。入侵者/黑鹰（`FlightLevel=1500`）偏出 ≈ 6.1 格，基洛夫/飞碟（`JumpjetHeight=500`）≈ 2 格 —— 与"第 1 格的单位、第 7 格的阴影"完全吻合。
+
+- 🪞 **低位影子副本（新增 `engine/renderable/entity/unit/VxlShadowProxy`）**
+  单位升空（`zone === Air`）后主体退出实时投影，改由一份克隆出来的"影子副本"投影：
+  - 克隆主体渲染树（`tiltObj` 整棵），几何与主体共享 VXL geometry pool，**零额外显存**；
+  - 材质换成全局共享的 `MeshBasicMaterial({ colorWrite:false, depthWrite:false, depthTest:false })` —— 主渲染不写颜色/深度所以人眼看不见，但 `castShadow = true`，shadow pass 照常出影；
+  - 副本按 `max(0, 净飞行高度 − MAX_PROJECTION_HEIGHT)` 下沉，偏移因此封顶在 **0.5 格**（`MAX_PROJECTION_HEIGHT = MAX_SHADOW_OFFSET / 1.0468`，`MAX_SHADOW_OFFSET = 0.5 格 = 128`）；
+  - 克隆树改手动矩阵，只在 position/rotation/scale/visible 真正变化时才重算 —— 否则每帧会把整棵子树标脏，InstancedMesh 会跟着每帧重传实例矩阵；
+  - 落回地面即还原主体投影，起降瞬间不会出现"两个影子"。
+
+- ⚠️ **高度基准（首版写错，导致封顶静默失效）**
+  地面高度必须取 `gameObject.tile.z`（地形高度层），**不能用 `position.tileElevation`** —— `ObjectPosition` 在该字段未显式赋值时会 `computeTileElevationFromWorldPos()` 从 `worldPosition` 反算，对飞行单位等于"当前飞行高度层"，两者相减恒为 0 ⇒ `sink` 恒为 0 ⇒ 影子与机体重合、偏移与改动前完全一样（用户反馈"还是比较远"即是此因）。桥上单位另取 `position.getBridgeBelow().tileElevation` 作地面。
+
+- 🚗 **jumpjet 载具同样接入**
+  `Vehicle` 的 `updateShadowProxy()` 与 `Aircraft` 同构，并接上原有潜水逻辑（`setShadow(!submerged && !air)`），避免潜水分支把主体的投影又打开。
+
+- 🧩 **接线**
+  deps / `var` / `setters` 三者顺序同步插入新模块 —— `var` 里的新变量必须落在与其 dep 同序号的位置，否则 `test:aliases` 的 var↔deps 映射会错位；`src/_module-map.json` 登记新模块（`moduleCount` 1319 → 1320）。
+
+- 🧪 **新增常驻单测 `tests/vxl-shadow-proxy.mjs`（`npm run test:shadow`）**
+  用最小 System shim 把 `src/*.ts.js` 直接加载进 node + three 环境，锁住：封顶数值与斜率、`computeSink()` 的边界（1500 / 500 / 100 / 0 / 带地形高度 / 桥上）、克隆接线（隐藏材质、castShadow、手动矩阵、BatchedMesh 字段回填）、`BatchedMesh.clone()` 可用性、镜像与 sink 行为。它先后抓出两处回归：walk 的源/目标参数写反（把主体节点 `matrixAutoUpdate` 也关掉 → 飞机朝向矩阵冻结），以及地面基准误用反算的 `tileElevation`（→ 封顶静默失效，已补一条专门的护栏断言）。
+
+### ⚠️ 破坏性变更
+- 无。地面单位、建筑、SHP 单位完全不受影响（只有 `zone === Air` 时才切换投影方式）。
+- 空中 VXL 单位会多一份克隆节点树（几何共享）与一个额外批次；主体的 `castShadow` 随升空/降落切换，会触发该单位所在批次重建一次。
+
+### 🧪 测试建议
+1. **空中单位**：让入侵者/黑鹰/基洛夫/飞碟升空，影子应贴在机身下方半格之内，不再甩出数格。
+2. **起降切换**：飞机停在机场地面时走主体投影；起飞后切到低位副本，全程只有**一个**影子。
+3. **地形起伏**：在山坡/高地上空飞行，影子仍贴地跟随，不随地形高度整体拉远。
+4. **朝向**：转向、俯仰时影子形状跟随本体（克隆树逐帧镜像 position/rotation/scale/visible）。
+5. **回归**：地面坦克/建筑阴影不受影响；潜水单位（如潜艇）依旧不投影。
+6. **调上限**：默认 0.5 格（`MAX_SHADOW_OFFSET = 128` 世界单位）。仍觉得偏就调小，置 0 = 完全贴正下方（1 格 = 256）。首次生效时控制台会打印一次 `[VxlShadowProxy] cap active: … current sink=NNN` —— **`sink` 是个大数（如 1378）才说明封顶生效**；若恒为 0，说明地面基准又取错了。
+

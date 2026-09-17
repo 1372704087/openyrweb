@@ -258,16 +258,19 @@
 验证单位骨骼/变换矩阵更新顺序：是否在炮塔旋转之前或之后计算了开火位置。
 优先级：中（影响射击视觉反馈与真实感，但不影响伤害判定）
 
-27. 飞行类单位阴影偏移距离过大（远超原版数值）
-影响模块：飞行单位阴影定位逻辑
+27. [已修复] 飞行类单位阴影偏移距离过大（远超原版数值）
+影响模块：`engine/renderable/entity/unit/VxlShadowProxy`（新增）、`engine/renderable/entity/Aircraft.ts.js`、`engine/renderable/entity/Vehicle.ts.js`
 问题描述：飞行类单位（如基洛夫空艇、入侵者战机、飞碟等）在地面上的阴影投影偏移量严重超标。例如，单位位于第 1 格时，其阴影却被绘制到了第 7 格位置，而原版《尤里的复仇》中阴影仅偏移约 1 个格子的距离。当前的夸张偏移导致阴影与单位本体严重脱节，视觉上极不自然。
 预期行为：阴影偏移量应保持在与原版一致的较小范围内（约 1 个格子距离），随飞行高度略有变化但不应过度偏离单位正下方。
 实际表现：阴影偏移了数个格子的距离，投影与单位本体位置严重不匹配。
-排查线索：
-检查阴影偏移计算公式中的系数或乘数，确认是否被错误放大（如 ShadowDistance = BaseOffset * 某倍率 中的倍率被误设为远大于 1 的值）；
-对比原版源码/配置中飞行单位阴影偏移的硬编码数值或配置参数；
-确认该偏移是否与单位飞行高度呈线性关系，且比例系数是否与原版一致。
-优先级：中（影响视觉真实性，但不影响功能）
+根因：VXL 单位的阴影来自 three.js 的 shadow map（`VxlBatchedBuilder`/`VxlNonBatchedBuilder` 默认 `castShadow = true`），而 `WorldScene` 的平行光约 46° 斜射——光源 position(-87.012, 204.338, 195.409)、target(0,0,0)，水平分量 / 垂直分量 = 213.9 / 204.3 ≈ 1.0468。于是阴影的水平偏移 ≈ 飞行高度 × 1.0468，与高度严格成正比且没有任何上限。代入实际数值：`Aircraft=yes` 的入侵者/黑鹰 `FlightLevel=1500` → 偏移 ≈ 1570 世界单位 ≈ 6.1 格（正好对应"第 1 格的单位、第 7 格的阴影"）；基洛夫/飞碟 `JumpjetHeight=500` → ≈ 2 格。原版约 1 格，等价于把"参与投影的等效高度"封顶。当前默认进一步把偏移上限压到 **0.5 格**（≤ 128 世界单位），即允许参与投影的最大高度 ≈ 122.3。
+已实施修复：新增 `VxlShadowProxy` —— 单位升空（`zone === Air`）时主体退出实时投影（`castShadow = false`），改由一份克隆出来的"低位影子副本"投影。
+影子副本共享主体的 VXL 几何（零额外显存），材质换成全局共享的 `MeshBasicMaterial({ colorWrite:false, depthWrite:false, depthTest:false })`——主渲染既不写颜色也不写深度，所以人眼看不到它，但它 `castShadow = true`，shadow pass 照常投影；
+副本被下沉 `max(0, 净飞行高度 − MAX_PROJECTION_HEIGHT)`，其中 `MAX_PROJECTION_HEIGHT = MAX_SHADOW_OFFSET / 1.0468`、`MAX_SHADOW_OFFSET = 0.5 格 = 128` ⇒ **偏移上限 0.5 格**（想更贴近就把 `MAX_SHADOW_OFFSET` 调小，置 0 = 完全贴正下方）。克隆树改为手动矩阵，且只在 position/rotation/scale/visible 真正变化时才重算，避免每帧把整棵子树标脏、导致 InstancedMesh 每帧重传实例矩阵；
+落回地面时还原主体的实时投影，避免起降瞬间出现"两个影子"；`Vehicle` 原有的潜水投影逻辑一并接上（`setShadow(!submerged && !air)`）。
+⚠️ 高度基准陷阱（首版踩过，导致封顶完全失效）：地面高度必须取 `gameObject.tile.z`（地形高度层，与 `WingedLocomotor` / `JumpjetLocomotor` 自己的基准一致），**绝不能用 `position.tileElevation`** —— `ObjectPosition` 在该字段未被显式赋值时会 `computeTileElevationFromWorldPos()` 从 `worldPosition` 反算，对飞行单位等于"当前飞行高度层"，两者相减恒为 0 ⇒ `sink` 恒为 0 ⇒ 影子与机体重合，偏移与改动前一模一样。桥上单位另取 `position.getBridgeBelow().tileElevation` 作地面。
+验收：`tsc --noEmit` / `test:aliases`（1311 个孪生 0 命中）/ `test:parity`（154 PASS、0 FAIL）/ `build`（bundle 1320 模块、`node --check` 通过）/ `test:boot`（`System.defined` 1352、0 报错）全绿。另新增常驻单测 `tests/vxl-shadow-proxy.mjs`（`npm run test:shadow`），锁住封顶数值、克隆接线与镜像行为——它先后抓出两处回归："误把主体节点的 `matrixAutoUpdate` 也关掉"（会让飞机朝向冻结），以及"地面基准取了反算的 `tileElevation`"（会让封顶静默失效）。
+优先级：中（影响视觉真实性，但不影响功能）—— 已完成
 
 28. 尤里雷达（心灵探测器）主建筑存在两个相同动画重叠播放
 影响模块：尤里雷达建筑动画渲染

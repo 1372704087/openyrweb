@@ -19,10 +19,11 @@ System.register(
     "engine/renderable/entity/unit/RotorHelper",
     "engine/renderable/entity/unit/ExtraLightHelper",
     "engine/renderable/DebugRenderable",
+    "engine/renderable/entity/unit/VxlShadowProxy",
   ],
   function (e, t) {
     "use strict";
-    var s, i, a, r, o, g, n, l, c, p, h, u, d, m, f;
+    var s, i, a, r, o, g, n, l, c, p, h, u, d, m, Z, f;
     t && t.id;
     return {
       setters: [
@@ -67,6 +68,9 @@ System.register(
         },
         function (e) {
           m = e;
+        },
+        function (e) {
+          Z = e;
         },
       ],
       execute: function () {
@@ -222,7 +226,8 @@ System.register(
                     e.setPosition(this.withPosition.getPosition()),
                   ),
                 (this.lastZone = a)),
-                this.updateVxlRotation());
+                this.updateVxlRotation(),
+                this.updateShadowProxy());
             }
             updateVxlRotation() {
               var { pitch: e, yaw: t, roll: i } = this.gameObject;
@@ -240,6 +245,17 @@ System.register(
                         (e.rotateOnAxis(this.objectArt.rotors[t].axis, this.rotorSpeeds[t]), e.updateMatrix()));
                   }));
             }
+            // OpenYRWeb: 只有真正升空的单位才走影子副本 —— 停在地面时保持主体的实时投影，
+            // 避免起飞/降落瞬间出现"两个影子"。
+            updateShadowProxy() {
+              if (!this.shadowProxy) return;
+              var e = this.gameObject.zone === c.ZoneType.Air;
+              (e !== this._airShadowOn &&
+                ((this._airShadowOn = e),
+                this.shadowProxy.setEnabled(e),
+                this.vxlBuilders.forEach((t) => t.setShadow(!e))),
+                e && this.shadowProxy.update());
+            }
             createObjects(t) {
               if (this.debugFrame.value) {
                 let e = a.DebugUtils.createWireframe({ width: 1, height: 1 }, 1);
@@ -252,7 +268,13 @@ System.register(
               var i = this.createMainObject();
               e.add(i);
               let r = (this.posObj = new THREE.Object3D());
-              ((r.matrixAutoUpdate = !1), r.add(e), t.add(r));
+              ((r.matrixAutoUpdate = !1), r.add(e), t.add(r),
+                // OpenYRWeb: 空中单位的阴影偏移随飞行高度线性放大（光源约 46° 斜射，
+                // 偏移 ≈ 高度 × 1.047），入侵者/黑鹰这类 FlightLevel=1500 的飞机会偏出约 6 格。
+                // 改用"影子副本"：主体不再投影，改由这份被限制在低位的不可见克隆投影，
+                // 偏移因此封顶在约 1 格。详见 VxlShadowProxy。
+                (this.shadowProxy = new Z.VxlShadowProxy(this.gameObject)),
+                this.shadowProxy.create3DObject(r, e));
             }
             createMainObject() {
               var e = this.objectArt.imageName.toLowerCase(),
@@ -315,6 +337,7 @@ System.register(
             dispose() {
               (this.plugins.forEach((e) => e.dispose()),
                 this.pipOverlay?.dispose(),
+                this.shadowProxy?.dispose(),
                 this.vxlBuilders.forEach((e) => e.dispose()),
                 this.placeholder?.dispose());
             }
