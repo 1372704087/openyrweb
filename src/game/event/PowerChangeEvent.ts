@@ -14,11 +14,12 @@ export class PowerChangeEvent {
   readonly power: number;
   /** 当前总电力消耗。 */
   readonly drain: number;
-  readonly type: number = EventType.PowerChange;
+  readonly type: number;
 
   constructor(target: any, power: number, drain: number) {
     this.target = target;
     this.power = power;
     this.drain = drain;
+    this.type = EventType.PowerChange;
   }
 }

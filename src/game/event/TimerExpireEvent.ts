@@ -10,9 +10,10 @@ import { EventType } from "game/event/EventType";
 export class TimerExpireEvent {
   /** 触发该事件的对象（当前只有 CountdownTimer）。 */
   readonly target: any;
-  readonly type: EventType = EventType.TimerExpire;
+  readonly type: EventType;
 
   constructor(target: any) {
     this.target = target;
+    this.type = EventType.TimerExpire;
   }
 }

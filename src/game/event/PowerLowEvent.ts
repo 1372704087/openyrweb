@@ -9,9 +9,10 @@ import { EventType } from "game/event/EventType";
 export class PowerLowEvent {
   /** 触发事件的玩家。 */
   readonly target: any;
-  readonly type: number = EventType.PowerLow;
+  readonly type: number;
 
   constructor(target: any) {
     this.target = target;
+    this.type = EventType.PowerLow;
   }
 }

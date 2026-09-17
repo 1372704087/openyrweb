@@ -10,9 +10,10 @@ import { EventType } from "game/event/EventType";
 export class LeaveTransportEvent {
   /** 运输车对象。 */
   readonly target: any;
-  readonly type: number = EventType.LeaveTransport;
+  readonly type: number;
 
   constructor(target: any) {
     this.target = target;
+    this.type = EventType.LeaveTransport;
   }
 }

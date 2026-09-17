@@ -9,9 +9,10 @@ import { EventType } from "game/event/EventType";
 export class InsufficientFundsEvent {
   /** 触发事件的玩家。 */
   readonly target: any;
-  readonly type: number = EventType.InsufficientFunds;
+  readonly type: number;
 
   constructor(target: any) {
     this.target = target;
+    this.type = EventType.InsufficientFunds;
   }
 }

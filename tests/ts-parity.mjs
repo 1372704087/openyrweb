@@ -5092,6 +5092,26 @@ const CONVERTED = [
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
   {
+    name: "game/gameobject/unit/Timer",
+    tsjs: "src/game/gameobject/unit/Timer.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/event/ObjectCloakChangeEvent",
+    tsjs: "src/game/event/ObjectCloakChangeEvent.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/event/ObjectCrashingEvent",
+    tsjs: "src/game/event/ObjectCrashingEvent.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/task/ScatterTask",
+    tsjs: "src/game/gameobject/task/ScatterTask.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

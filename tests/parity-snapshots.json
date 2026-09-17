@@ -2357,5 +2357,17 @@
   },
   "game/gameobject/locomotor/Locomotor": {
     "0": "exists"
+  },
+  "game/gameobject/unit/Timer": {
+    "0": "function"
+  },
+  "game/event/ObjectCloakChangeEvent": {
+    "0": "function"
+  },
+  "game/event/ObjectCrashingEvent": {
+    "0": "function"
+  },
+  "game/gameobject/task/ScatterTask": {
+    "0": "function"
   }
 }

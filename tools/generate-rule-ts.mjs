@@ -9,10 +9,21 @@
  *  2. readIni(e) / parse(e) 方法参数 e → ini（方法体内部 \be\b 同步改名）。
  * 其余内容一律不改，保证行为逐字等价（tests/ts-parity.mjs 仍会做双实现比对）。
  *
- * 用法：node tools/generate-rule-ts.mjs  （清单写死在 DESC 表中）
+ * 用法：node tools/generate-rule-ts.mjs [模块名 ...] [--force]
+ *   不带模块名 = 遍历 DESC 全表（`Object.keys(DESC)`），见下方安全护栏。
+ *   不带 --force 时**已存在的 src/<模块>.ts 一律跳过**，不覆盖、不写盘。
+ *
+ * ⚠️ 安全护栏（不要移除）
+ * 本工具做的是**纯文本词边界替换**（`\b<setterVar>\b` → `M<i>_<Name>`），它分不清
+ * "模块别名"与"形参/局部变量/成员名"。因此：
+ *  - 只适合类体内 setterVar 与参数名**无撞名**的"键包"类（rules 层，形参多为 ini/e）；
+ *  - **不适合**带 `tick(e, t, i)` 这类形参的模块（locomotor / 大 trait）—— 实测
+ *    `\bi\b` 会把形参 i 改成模块命名空间，产出 `M9_math = i[...]`（给 import 赋值）。
+ * 强烈建议加新条目后先跑 `node .workbuddy/_gen-landmine.mjs <模块名>` 查撞名。
+ * 另外新条目必须与已有产物一一对应（清单里有、产物没有 = 无参调用时的地雷）。
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -35,8 +46,8 @@ const DESC = {
   "game/rules/PowerupsRules": { class: "PowerupsRules", desc: "箱子掉落表规则（Powerups 段：类型,概率,动画,数据 逐行解析；未支持类型告警跳过）。" },
   "game/rules/ObjectRulesFactory": { class: "ObjectRulesFactory", desc: "对象规则工厂：按 ObjectType 实例化对应规则类（Techno/Overlay/Terrain/Smudge/Debris/通用）。" },
   "game/rules/CombatDamageRules": { class: "CombatDamageRules", desc: "战斗伤害规则（[CombatDamage] 段：弹头引用、铁幕/力盾时长、伊文炸弹、心灵控制、碉堡/敞开运输车/驻楼武器加成参数）。" },
-  "engine/renderable/entity/Building": { class: "Building", desc: "建筑渲染对象（sprite 动画/损毁/炮塔 VXL 光照）。" },
-  "engine/renderable/entity/Vehicle": { class: "Vehicle", desc: "载具渲染对象（sprite/VXL 动画/坡度/VPL 光照/碾压俯仰）。" },
+
+
   "game/gameobject/trait/AttackTrait": { class: "AttackTrait", desc: "战斗攻击 trait（目标选择/武器匹配/攻击状态机/开火/机会火/分散火力）。" },
 };
 
@@ -80,6 +91,14 @@ function extractDeps(src) {
 function generate(modName) {
   const meta = DESC[modName];
   if (!meta) fail(`no DESC for ${modName}`);
+  const outPath = join(ROOT, "src", modName + ".ts");
+  // 安全护栏：绝不覆盖已存在的产物。手工精修过的 .ts 一旦被机械产物覆盖，
+  // 轻则引用未定义符号（tsc TS2304），重则因 noEmitOnError 让 repack 静默回退
+  // 孪生 —— 而且没人会收到提示。要覆盖必须显式 --force。
+  if (existsSync(outPath) && !FORCE) {
+    console.log(`${modName}: SKIP（src/${modName}.ts 已存在；确认要覆盖请加 --force）`);
+    return;
+  }
   const src = readFileSync(join(ROOT, "src", modName + ".ts.js"), "utf8");
   const { deps, setterVars } = extractDeps(src);
 
@@ -164,5 +183,8 @@ ${imports.join("\n")}
   console.log(`${modName}: generated (${imports.length} imports, ${fieldNames.length} fields, body ${body.length} chars)`);
 }
 
-const TARGETS = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(DESC);
+const ARGS = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const FORCE = process.argv.includes("--force");
+const TARGETS = ARGS.length ? ARGS : Object.keys(DESC);
+if (!ARGS.length) console.log(`未指定模块名 → 遍历 DESC 全表（${TARGETS.length} 条）；已存在的 .ts 会被跳过（--force 可覆盖）`);
 for (const t of TARGETS) generate(t);

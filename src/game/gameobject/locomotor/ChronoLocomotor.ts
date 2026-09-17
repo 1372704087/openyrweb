@@ -14,7 +14,8 @@ import { Vector3 } from "game/math/Vector3"; // 已转换
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class ChronoLocomotor {
   game: any;
-  ignoresTerrain = true;
+  /** 声明不带初始化器：赋值留在构造函数里，保持与孪生一致的属性建立顺序。 */
+  ignoresTerrain: boolean;
   distanceToWaypoint: Vector2;
 
   constructor(game: any) {
