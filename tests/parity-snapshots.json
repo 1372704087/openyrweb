@@ -2020,5 +2020,40 @@
       40,
       2
     ]
+  },
+  "game/gameobject/trait/AttackTrait": {
+    "0": "function",
+    "1": 0,
+    "2": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "3": [
+      false,
+      false
+    ],
+    "4": [
+      false,
+      "Error: unexpected full path"
+    ],
+    "5": {
+      "found": true,
+      "calls": [
+        "target|tile|game|boolean|boolean"
+      ]
+    },
+    "6": {
+      "found": true,
+      "calls": [
+        "target|tile|game|true|false"
+      ]
+    },
+    "7": [
+      false,
+      false
+    ]
   }
 }

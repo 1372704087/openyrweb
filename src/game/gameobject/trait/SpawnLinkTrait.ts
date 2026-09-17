@@ -7,7 +7,7 @@
 import * as AttackTaskModule from "game/gameobject/task/AttackTask"; // 未转换（any-shim）
 import * as MoveTaskModule from "game/gameobject/task/move/MoveTask"; // 未转换（any-shim）
 import * as RangeHelperModule from "game/gameobject/unit/RangeHelper"; // 未转换（any-shim）
-import * as AttackTraitModule from "game/gameobject/trait/AttackTrait"; // 未转换（any-shim）
+import * as AttackTraitModule from "game/gameobject/trait/AttackTrait"; // 已转换
 import * as NotifyTickModule from "game/gameobject/trait/interface/NotifyTick"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -48,7 +48,7 @@ export class SpawnLinkTrait {
               force: true,
             }),
           );
-        } else if (obj.attackTrait.attackState !== AttackTraitModule.AttackTrait.AttackState.Idle) {
+        } else if (obj.attackTrait.attackState !== AttackTraitModule.AttackState.Idle) {
           currentTask.requestTargetUpdate(parentTarget);
         }
       } else if (currentTask) {

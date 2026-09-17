@@ -85,7 +85,7 @@ export class ArmedTrait {
     }
     // 死亡武器：explodes 或 crashable 时组装，弹头优先级 DeathWeapon →
     // 副武器名 → 主武器名 → [CombatDamage]DeathWeapon。
-    if (object.rules.explodes || object.crashableTrait) {
+    if (object.explodes || object.crashableTrait) {
       const deathName =
         object.rules.deathWeapon ||
         (!!object.crashableTrait && this.secondaryWeapon?.rules.name) ||

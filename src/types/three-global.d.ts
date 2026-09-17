@@ -15,6 +15,7 @@ declare namespace THREE {
     copy(v: THREE.Vector2): this;
     clone(): this;
     add(v: THREE.Vector2): this;
+    addScalar(s: number): this;
     sub(v: THREE.Vector2): this;
     length(): number;
     lengthSq(): number;

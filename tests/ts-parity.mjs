@@ -4538,6 +4538,189 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/trait/AttackTrait",
+    tsjs: "src/game/gameobject/trait/AttackTrait.ts.js",
+    probes: [
+      (ns) => typeof ns.AttackTrait,
+      (ns) => ns.AttackState ? ns.AttackState.Idle : "no-enum",
+      (ns) => [
+        ns.AttackState.CheckRange,
+        ns.AttackState.PrepareToFire,
+        ns.AttackState.FireUp,
+        ns.AttackState.Firing,
+        ns.AttackState.JustFired,
+      ],
+      // shouldRetaliate 形参序 (object, game, damage, ...)：damage<1 须短路为 false
+      (ns) => {
+        const trait = Object.create(ns.AttackTrait.prototype);
+        const object = {
+          isBuilding: () => false,
+          garrisonTrait: undefined,
+          berserkTrait: undefined,
+          rules: { canRetaliate: true },
+          primaryWeapon: {},
+          unitOrderTrait: { hasTasks: () => false },
+        };
+        const game = {
+          areFriendly: () => {
+            throw new Error("areFriendly must not run when damage < 1");
+          },
+          isValidTarget: () => true,
+        };
+        return [
+          trait.shouldRetaliate(object, game, 0, { rules: {} }, { rules: {} }),
+          trait.shouldRetaliate(object, game, 0.5, { rules: {} }, { rules: {} }),
+        ];
+      },
+      // damage≥1：友好判定在 game 上（第 2 参），不是 damage
+      (ns) => {
+        const trait = Object.create(ns.AttackTrait.prototype);
+        const object = {
+          isBuilding: () => false,
+          garrisonTrait: undefined,
+          berserkTrait: undefined,
+          rules: { canRetaliate: true },
+          primaryWeapon: {},
+          unitOrderTrait: { hasTasks: () => false },
+        };
+        const friendly = {
+          areFriendly: () => true,
+          isValidTarget: () => {
+            throw new Error("isValidTarget must not run when friendly");
+          },
+        };
+        const hostile = {
+          areFriendly: () => false,
+          isValidTarget: () => {
+            throw new Error("unexpected full path");
+          },
+        };
+        return [
+          trait.shouldRetaliate(object, friendly, 10, { rules: {} }, { rules: {} }),
+          (() => {
+            try {
+              return trait.shouldRetaliate(object, hostile, 10, { rules: {} }, { rules: {} });
+            } catch (e) {
+              return String(e);
+            }
+          })(),
+        ];
+      },
+      // Drainable 武器 canTarget 实参序须为 (target, tile, game, …)
+      (ns) => {
+        const trait = Object.create(ns.AttackTrait.prototype);
+        const calls = [];
+        const tile = { __tile: 1 };
+        const target = {
+          isInfantry: () => false,
+          isVehicle: () => false,
+          isBuilding: () => true,
+          isTechno: () => true,
+          isAircraft: () => false,
+          disguiseTrait: undefined,
+          overpoweredTrait: undefined,
+          owner: { name: "E" },
+          rules: { drainable: true, armor: 0 },
+          tile,
+          zone: 0,
+          missileSpawnTrait: undefined,
+        };
+        const mark = (a) => {
+          if (a === target) return "target";
+          if (a === tile) return "tile";
+          if (a && a.__game === 1) return "game";
+          return typeof a;
+        };
+        const drainWeapon = {
+          rules: { drainWeapon: true, neverUse: false },
+          warhead: {
+            rules: {
+              name: "DrainWH",
+              ivanBomb: false,
+              bombDisarm: false,
+              nukeMaker: false,
+              verses: new Map([[0, 1]]),
+            },
+          },
+          targeting: {
+            canTarget: (...args) => {
+              calls.push(args.map(mark).join("|"));
+              return true;
+            },
+          },
+        };
+        const game = { __game: 1 };
+        const object = { owner: { name: "S" } };
+        const selected = trait.selectWeaponFromList(object, target, tile, [drainWeapon], game, false, false, false);
+        return { found: selected === drainWeapon, calls };
+      },
+      // 普通武器循环 canTarget 实参序 (target, tile, game, ignoreBuildings, ignoreDisguise)
+      (ns) => {
+        const trait = Object.create(ns.AttackTrait.prototype);
+        const calls = [];
+        const tile = { __tile: 1 };
+        const target = {
+          isInfantry: () => false,
+          isVehicle: () => false,
+          isBuilding: () => false,
+          isTechno: () => true,
+          isAircraft: () => false,
+          disguiseTrait: undefined,
+          rules: { armor: 0 },
+          tile,
+          zone: 0,
+          missileSpawnTrait: undefined,
+        };
+        const mark = (a) => {
+          if (a === target) return "target";
+          if (a === tile) return "tile";
+          if (a && a.__game === 1) return "game";
+          if (a === true) return "true";
+          if (a === false) return "false";
+          return typeof a;
+        };
+        const weapon = {
+          rules: { neverUse: false, drainWeapon: false },
+          warhead: {
+            rules: {
+              name: "WH",
+              ivanBomb: false,
+              bombDisarm: false,
+              nukeMaker: false,
+              verses: new Map([[0, 1]]),
+            },
+          },
+          targeting: {
+            canTarget: (...args) => {
+              calls.push(args.map(mark).join("|"));
+              return true;
+            },
+          },
+        };
+        const game = { __game: 1 };
+        const object = { owner: { name: "S" } };
+        const selected = trait.selectWeaponFromList(object, target, tile, [weapon], game, true, false, false);
+        return { found: selected === weapon, calls };
+      },
+      // isOnCooldown：入参是 object；部署区域开火武器仅在已部署时剔除
+      (ns) => {
+        const trait = Object.create(ns.AttackTrait.prototype);
+        const area = {
+          rules: { areaFire: true, fireOnce: false },
+          getCooldownTicks: () => 3,
+        };
+        const primary = { getCooldownTicks: () => 0 };
+        const make = (deployedFlag) => ({
+          primaryWeapon: primary,
+          secondaryWeapon: undefined,
+          armedTrait: { getDeployFireWeapon: () => area },
+          deployerTrait: { isDeployed: () => deployedFlag },
+        });
+        return [trait.isOnCooldown(make(false)), trait.isOnCooldown(make(true))];
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

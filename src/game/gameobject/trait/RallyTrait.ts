@@ -44,16 +44,18 @@ export class RallyTrait {
         (object.rules.naval || tile.terrainType !== TerrainTypeModule.TerrainType.Water) &&
         !map.tileOccupation.isTileOccupiedBy(tile, object),
     );
-    const found = finder.getNextTile();
+    let found = finder.getNextTile();
     if (!found && object.factoryTrait?.type === FactoryTypeModule.FactoryType.NavalUnitType) {
-      // 海军工厂：在自身占位内找可通行的水域格。
+      // 海军工厂：在自身占位内找可通行水域格。与基线一致——只 break 内层，
+      // 外层继续扫，最终保留最后一列的首个可通行格。
       const foundation = object.getFoundation();
       for (let dx = 0; dx < foundation.width; dx++) {
         for (let dy = 0; dy < foundation.height; dy++) {
           const tile = map.tiles.getByMapCoords(object.tile.rx + dx, object.tile.ry + dy);
           if (!tile) break;
           if (map.terrain.getPassableSpeed(tile, SpeedTypeModule.SpeedType.Float, false, false) > 0) {
-            return tile;
+            found = tile;
+            break;
           }
         }
       }
