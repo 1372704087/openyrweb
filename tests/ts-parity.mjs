@@ -5072,6 +5072,26 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/locomotor/Locomotor",
+    tsjs: "src/game/gameobject/locomotor/Locomotor.ts.js",
+    probes: [() => "exists"], // 空模块存在性检查（常量，新旧一致）
+  },
+  {
+    name: "game/gameobject/locomotor/LocomotorFactory",
+    tsjs: "src/game/gameobject/locomotor/LocomotorFactory.ts.js",
+    probes: [(ns) => typeof ns.LocomotorFactory],
+  },
+  {
+    name: "game/gameobject/locomotor/ChronoLocomotor",
+    tsjs: "src/game/gameobject/locomotor/ChronoLocomotor.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
+    name: "game/gameobject/locomotor/FootLocomotor",
+    tsjs: "src/game/gameobject/locomotor/FootLocomotor.ts.js",
+    probes: [(ns) => typeof Object.values(ns)[0]],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

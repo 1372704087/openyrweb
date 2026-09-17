@@ -2345,5 +2345,17 @@
       1
     ],
     "5": "Error: Unknown terrain type 99"
+  },
+  "game/gameobject/locomotor/LocomotorFactory": {
+    "0": "function"
+  },
+  "game/gameobject/locomotor/ChronoLocomotor": {
+    "0": "function"
+  },
+  "game/gameobject/locomotor/FootLocomotor": {
+    "0": "function"
+  },
+  "game/gameobject/locomotor/Locomotor": {
+    "0": "exists"
   }
 }
