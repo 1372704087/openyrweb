@@ -4721,6 +4721,207 @@ const CONVERTED = [
     ],
   },
   {
+    name: "util/bresenham",
+    tsjs: "src/util/bresenham.ts.js",
+    probes: [
+      (ns) => typeof ns.bresenham,
+      // 水平主导 / 垂直主导 / 对角 / 单点 / 自定义 visit
+      (ns) => ns.bresenham(0, 0, 3, 1),
+      (ns) => ns.bresenham(0, 0, 1, 3),
+      (ns) => ns.bresenham(0, 0, 2, 2),
+      (ns) => ns.bresenham(5, 5, 5, 5),
+      (ns) => {
+        const seen = [];
+        const ret = ns.bresenham(0, 0, 2, 0, (x, y) => seen.push([x, y]));
+        return { seen, ret };
+      },
+      (ns) => ns.bresenham(3, 1, 0, 0), // 反向
+    ],
+  },
+  {
+    name: "game/gameobject/unit/CollisionType",
+    tsjs: "src/game/gameobject/unit/CollisionType.ts.js",
+    probes: [
+      (ns) => typeof ns.CollisionType,
+      (ns) => [
+        ns.CollisionType.None,
+        ns.CollisionType.Ground,
+        ns.CollisionType.Wall,
+        ns.CollisionType.Cliff,
+        ns.CollisionType.OnBridge,
+        ns.CollisionType.UnderBridge,
+        ns.CollisionType.Shore,
+      ],
+      (ns) => Object.keys(ns.CollisionType).length,
+    ],
+  },
+  {
+    name: "game/gameobject/unit/FacingUtil",
+    tsjs: "src/game/gameobject/unit/FacingUtil.ts.js",
+    probes: [
+      (ns) => typeof ns.FacingUtil,
+      (ns) => [
+        ns.FacingUtil.tick(0, 0, 10),
+        ns.FacingUtil.tick(0, 5, 10), // 差小于 rate → 吸附
+        ns.FacingUtil.tick(0, 180, 30), // 等距 → 取 cw (ccw<=cw → +)
+        ns.FacingUtil.tick(0, 90, 30), // 最短弧
+        ns.FacingUtil.tick(350, 10, 30),
+        ns.FacingUtil.tick(0, 350, 30),
+      ],
+      (ns) => [ns.FacingUtil.toWorldDeg(0), ns.FacingUtil.toWorldDeg(90), ns.FacingUtil.toWorldDeg(270)],
+      (ns) => {
+        const v = ns.FacingUtil.toMapCoords(0);
+        return [v.x, v.y];
+      },
+      (ns) => {
+        const noTurret = {};
+        ns.FacingUtil.pointTurretToTarget(noTurret);
+        return "ok";
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/unit/TargetUtil",
+    tsjs: "src/game/gameobject/unit/TargetUtil.ts.js",
+    probes: [
+      (ns) => typeof ns.TargetUtil,
+      // computeTurnCircle(pos, dir, turnRate, turnRadius) 四参序
+      (ns) => {
+        const makeVec = () => ({
+          rotateAround() {
+            return this;
+          },
+          setLength(n) {
+            this._len = n;
+            return this;
+          },
+          add() {
+            return { kind: "added" };
+          },
+          clone() {
+            return makeVec();
+          },
+        });
+        // turnRate=0 → radius=Inf → center 回落 pos.clone()
+        const r = ns.TargetUtil.computeTurnCircle({ clone: () => "posFallback" }, makeVec(), 0, 10);
+        return { radius: Number.isFinite(r.radius) ? r.radius : "inf", center: r.center };
+      },
+      (ns) => {
+        const makeVec = () => ({
+          rotateAround() {
+            return this;
+          },
+          setLength(n) {
+            this._len = n;
+            return this;
+          },
+          add() {
+            return { kind: "added" };
+          },
+          clone() {
+            return makeVec();
+          },
+        });
+        // radius = 100 / degToRad(90)
+        const r = ns.TargetUtil.computeTurnCircle({ clone: () => makeVec() }, makeVec(), 90, 100);
+        return { radius: Math.round(r.radius * 1e6) / 1e6, center: r.center };
+      },
+      (ns) => {
+        // 无实数解 → new Vector3()
+        const rel = { dot: () => 100 };
+        const dir = { length: () => 10, dot: () => 0, clone: () => ({ multiplyScalar: () => ({ add: () => "hit" }) }) };
+        const targetPos = { clone: () => ({ sub: () => rel }) };
+        const r = ns.TargetUtil.computeInterceptPoint(targetPos, 0, { clone: () => ({}) }, dir);
+        return [r.x, r.y, r.z];
+      },
+    ],
+  },
+  {
+    name: "game/map/tileFinder/RadialTileFinder",
+    tsjs: "src/game/map/tileFinder/RadialTileFinder.ts.js",
+    probes: [
+      (ns) => typeof ns.RadialTileFinder,
+      (ns) => {
+        // 1×1 foundation，distance=0，max=0：只 yield 起点（predicate 通过）
+        const start = { rx: 10, ry: 20 };
+        const tiles = { getByMapCoords: () => null };
+        const mapBounds = { isWithinBounds: () => true };
+        const f = new ns.RadialTileFinder(tiles, mapBounds, start, { width: 1, height: 1 }, 0, 0, () => true);
+        const first = f.getNextTile();
+        const second = f.getNextTile();
+        return { first: first === start ? "start" : first, second };
+      },
+      (ns) => {
+        // 扫描顺序：distance=1 时先底边右→左
+        const order = [];
+        const start = { rx: 5, ry: 5 };
+        const tiles = {
+          getByMapCoords: (x, y) => {
+            order.push([x, y]);
+            return null; // 全部失败 → 走完整环
+          },
+        };
+        const mapBounds = { isWithinBounds: () => true };
+        const f = new ns.RadialTileFinder(tiles, mapBounds, start, { width: 1, height: 1 }, 1, 1, () => true);
+        // 拉完整生成器直到耗尽
+        for (let i = 0; i < 20 && f.getNextTile() !== undefined; i++);
+        // 底边第一个查询应是 (right, bottom)=(6,6)
+        return order[0];
+      },
+      (ns) => {
+        // checkBounds=false 时跳过 bounds
+        const start = { rx: 0, ry: 0 };
+        const tiles = { getByMapCoords: (x, y) => ({ rx: x, ry: y }) };
+        const mapBounds = {
+          isWithinBounds: () => {
+            throw new Error("should not check bounds");
+          },
+        };
+        const f = new ns.RadialTileFinder(tiles, mapBounds, start, { width: 1, height: 1 }, 0, 0, () => true, false);
+        return f.getNextTile()?.rx === 0 && f.getNextTile() === undefined ? "ok" : "bad";
+      },
+    ],
+  },
+  {
+    name: "game/map/tileFinder/CardinalTileFinder",
+    tsjs: "src/game/map/tileFinder/CardinalTileFinder.ts.js",
+    probes: [
+      (ns) => typeof ns.CardinalTileFinder,
+      (ns) => {
+        const start = { rx: 0, ry: 0 };
+        const tiles = { getByMapCoords: (x, y) => ({ rx: x, ry: y }) };
+        const mapBounds = { isWithinBounds: () => true };
+        const f = new ns.CardinalTileFinder(tiles, mapBounds, start, 1, 2, () => true);
+        return {
+          diagonal: f.diagonal,
+          distance: f.distance,
+          maxDistance: f.maxDistance,
+          finished: f.finished,
+        };
+      },
+      (ns) => {
+        // distance=1：从 (1,0) 起，每步转 45°；命中 predicate 立即返回
+        const start = { rx: 0, ry: 0 };
+        const tiles = { getByMapCoords: (x, y) => ({ rx: x, ry: y }) };
+        const mapBounds = { isWithinBounds: () => true };
+        const f = new ns.CardinalTileFinder(tiles, mapBounds, start, 1, 5, (t) => t.rx === 1 && t.ry === 0);
+        const hit = f.getNextTile();
+        const f2 = new ns.CardinalTileFinder(tiles, mapBounds, start, 1, 1, () => false);
+        const miss = f2.getNextTile();
+        return { hit, miss, finishedAfterMiss: f2.finished };
+      },
+      (ns) => {
+        // FactoryTrait 用法：构造后改 diagonal=false
+        const start = { rx: 0, ry: 0 };
+        const tiles = { getByMapCoords: (x, y) => ({ rx: x, ry: y }) };
+        const mapBounds = { isWithinBounds: () => true };
+        const f = new ns.CardinalTileFinder(tiles, mapBounds, start, 1, 1, () => true);
+        f.diagonal = false;
+        return f.diagonal;
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

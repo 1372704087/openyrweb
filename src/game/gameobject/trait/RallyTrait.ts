@@ -12,7 +12,7 @@
  * 采用 .ts 模块的编译产物。
  */
 import * as TerrainTypeModule from "engine/type/TerrainType"; // 未转换（any-shim）
-import * as RadialTileFinderModule from "game/map/tileFinder/RadialTileFinder"; // 未转换（any-shim）
+import * as RadialTileFinderModule from "game/map/tileFinder/RadialTileFinder"; // 已转换
 import * as FactoryTypeModule from "game/rules/TechnoRules"; // 已转换
 import * as MovementZoneModule from "game/type/MovementZone"; // 已转换
 import * as SpeedTypeModule from "game/type/SpeedType"; // 已转换

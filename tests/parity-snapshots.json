@@ -2055,5 +2055,197 @@
       false,
       false
     ]
+  },
+  "util/bresenham": {
+    "0": "function",
+    "1": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": 1,
+        "y": 0
+      },
+      {
+        "x": 2,
+        "y": 1
+      },
+      {
+        "x": 3,
+        "y": 1
+      }
+    ],
+    "2": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": 0,
+        "y": 1
+      },
+      {
+        "x": 1,
+        "y": 2
+      },
+      {
+        "x": 1,
+        "y": 3
+      }
+    ],
+    "3": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": 1,
+        "y": 1
+      },
+      {
+        "x": 2,
+        "y": 2
+      }
+    ],
+    "4": [
+      {
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "5": {
+      "seen": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "ret": []
+    },
+    "6": [
+      {
+        "x": 3,
+        "y": 1
+      },
+      {
+        "x": 2,
+        "y": 1
+      },
+      {
+        "x": 1,
+        "y": 0
+      },
+      {
+        "x": 0,
+        "y": 0
+      }
+    ]
+  },
+  "game/gameobject/unit/CollisionType": {
+    "0": "object",
+    "1": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "2": 14
+  },
+  "game/gameobject/unit/FacingUtil": {
+    "0": "function",
+    "1": [
+      {
+        "facing": 0,
+        "delta": 0
+      },
+      {
+        "facing": 5,
+        "delta": 0
+      },
+      {
+        "facing": 30,
+        "delta": 30
+      },
+      {
+        "facing": 30,
+        "delta": 30
+      },
+      {
+        "facing": 10,
+        "delta": 0
+      },
+      {
+        "facing": 350,
+        "delta": 0
+      }
+    ],
+    "2": [
+      -90,
+      -180,
+      -360
+    ],
+    "3": [
+      0,
+      -1
+    ],
+    "4": "ok"
+  },
+  "game/map/tileFinder/RadialTileFinder": {
+    "0": "function",
+    "1": {
+      "first": "start"
+    },
+    "2": [
+      6,
+      6
+    ],
+    "3": "ok"
+  },
+  "game/map/tileFinder/CardinalTileFinder": {
+    "0": "function",
+    "1": {
+      "diagonal": true,
+      "distance": 1,
+      "maxDistance": 2,
+      "finished": false
+    },
+    "2": {
+      "hit": {
+        "rx": 1,
+        "ry": 0
+      },
+      "finishedAfterMiss": true
+    },
+    "3": false
+  },
+  "game/gameobject/unit/TargetUtil": {
+    "0": "function",
+    "1": {
+      "radius": "inf",
+      "center": "posFallback"
+    },
+    "2": {
+      "radius": 63.661977,
+      "center": {
+        "kind": "added"
+      }
+    },
+    "3": [
+      null,
+      null,
+      null
+    ]
   }
 }

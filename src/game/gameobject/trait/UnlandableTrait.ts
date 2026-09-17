@@ -7,7 +7,7 @@
  * 本文件为修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { Vector2 } from "game/math/Vector2"; // 已转换
-import * as bresenhamModule from "util/bresenham"; // 未转换（any-shim）
+import * as bresenhamModule from "util/bresenham"; // 已转换
 import { isNotNullOrUndefined } from "util/typeGuard"; // 已转换
 import * as MoveTaskModule from "game/gameobject/task/move/MoveTask"; // 未转换（any-shim）
 import * as CallbackTaskModule from "game/gameobject/task/system/CallbackTask"; // 未转换（any-shim）

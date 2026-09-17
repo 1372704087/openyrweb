@@ -20,6 +20,9 @@ declare namespace THREE {
     length(): number;
     lengthSq(): number;
     distanceToSquared(v: THREE.Vector2): number;
+    round(): this;
+    angle(): number;
+    rotateAround(center: THREE.Vector2, angle: number): this;
   }
 
   class Vector3 {

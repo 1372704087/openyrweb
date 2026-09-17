@@ -28,12 +28,12 @@ import * as ScatterTaskModule from "game/gameobject/task/ScatterTask"; // 未转
 import * as BridgeOverlayTypesModule from "game/map/BridgeOverlayTypes"; // 未转换（any-shim）
 import * as NotifyAttackModule from "game/trait/interface/NotifyAttack"; // 未转换（any-shim）
 import { ArmorType } from "game/type/ArmorType";
-import * as CollisionTypeModule from "game/gameobject/unit/CollisionType"; // 未转换（any-shim）
+import * as CollisionTypeModule from "game/gameobject/unit/CollisionType"; // 已转换
 import * as RangeHelperModule from "game/gameobject/unit/RangeHelper"; // 未转换（any-shim）
-import * as RadialTileFinderModule from "game/map/tileFinder/RadialTileFinder"; // 未转换（any-shim）
+import * as RadialTileFinderModule from "game/map/tileFinder/RadialTileFinder"; // 已转换
 import { Coords } from "game/Coords";
 import { lerp, clamp } from "util/math";
-import * as FacingUtilModule from "game/gameobject/unit/FacingUtil"; // 未转换（any-shim）
+import * as FacingUtilModule from "game/gameobject/unit/FacingUtil"; // 已转换
 import { ObjectType } from "engine/type/ObjectType";
 import * as WarheadDetonateEventModule from "game/event/WarheadDetonateEvent"; // 未转换（any-shim）
 import { WeaponType } from "game/WeaponType";

@@ -7,7 +7,7 @@
  * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先
  * 采用 .ts 模块的编译产物。
  */
-import * as FacingUtilModule from "game/gameobject/unit/FacingUtil"; // 未转换（any-shim）
+import * as FacingUtilModule from "game/gameobject/unit/FacingUtil"; // 已转换
 import * as NotifyTickModule from "game/gameobject/trait/interface/NotifyTick"; // 已转换
 import * as NotifySpawnModule from "game/gameobject/trait/interface/NotifySpawn"; // 已转换
 

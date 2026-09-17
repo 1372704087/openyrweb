@@ -25,13 +25,13 @@ import * as ExitFactoryTaskModule from "game/gameobject/task/move/ExitFactoryTas
 import * as TerrainTypeModule from "engine/type/TerrainType"; // 未转换（any-shim）
 import * as NotifySpawnModule from "game/gameobject/trait/interface/NotifySpawn"; // 已转换
 import * as MoveTraitModule from "game/gameobject/trait/MoveTrait"; // 未转换（any-shim）
-import * as CardinalTileFinderModule from "game/map/tileFinder/CardinalTileFinder"; // 未转换（any-shim）
+import * as CardinalTileFinderModule from "game/map/tileFinder/CardinalTileFinder"; // 已转换
 import * as DockTraitModule from "game/gameobject/trait/DockTrait"; // 本批转换
 import * as FactoryProduceUnitEventModule from "game/event/FactoryProduceUnitEvent"; // 已转换
 import * as InfantryModule from "game/gameobject/Infantry"; // 已转换
 import * as TileOccupationModule from "game/map/TileOccupation"; // 未转换（any-shim）
 import * as MoveTaskModule from "game/gameobject/task/move/MoveTask"; // 未转换（any-shim）
-import * as RadialTileFinderModule from "game/map/tileFinder/RadialTileFinder"; // 未转换（any-shim）
+import * as RadialTileFinderModule from "game/map/tileFinder/RadialTileFinder"; // 已转换
 import * as NotifyWarpChangeModule from "game/gameobject/trait/interface/NotifyWarpChange"; // 已转换
 import * as VeteranLevelModule from "game/gameobject/unit/VeteranLevel"; // 已转换
 import * as NotifyProduceUnitModule from "game/trait/interface/NotifyProduceUnit"; // 已转换
