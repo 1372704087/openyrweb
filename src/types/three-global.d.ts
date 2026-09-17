@@ -21,6 +21,8 @@ declare namespace THREE {
     length(): number;
     lengthSq(): number;
     distanceToSquared(v: THREE.Vector2): number;
+    multiplyScalar(scalar: number): this;
+    lerp(v: THREE.Vector2, alpha: number): this;
     round(): this;
     angle(): number;
     rotateAround(center: THREE.Vector2, angle: number): this;

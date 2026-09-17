@@ -5109,7 +5109,17 @@ const CONVERTED = [
   {
     name: "game/gameobject/task/ScatterTask",
     tsjs: "src/game/gameobject/task/ScatterTask.ts.js",
-    probes: [(ns) => typeof Object.values(ns)[0]],
+    probes: [(ns) => typeof ns.ScatterTask],
+  },
+  {
+    name: "game/gameobject/locomotor/DriveLocomotor",
+    tsjs: "src/game/gameobject/locomotor/DriveLocomotor.ts.js",
+    probes: [(ns) => typeof ns.DriveLocomotor],
+  },
+  {
+    name: "game/gameobject/locomotor/HoverLocomotor",
+    tsjs: "src/game/gameobject/locomotor/HoverLocomotor.ts.js",
+    probes: [(ns) => typeof ns.HoverLocomotor],
   },
   {
     name: "game/type/SpeedType",

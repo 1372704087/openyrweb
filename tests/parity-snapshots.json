@@ -2369,5 +2369,13 @@
   },
   "game/gameobject/task/ScatterTask": {
     "0": "function"
+  },
+  "game/gameobject/locomotor/DriveLocomotor": {
+    "0": "function",
+    "1": "undefined"
+  },
+  "game/gameobject/locomotor/HoverLocomotor": {
+    "0": "function",
+    "1": "lazy"
   }
 }
