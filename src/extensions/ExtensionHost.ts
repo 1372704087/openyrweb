@@ -220,21 +220,36 @@ export class ExtensionHost {
         console.warn(`Extension "${ext.id}" applyToRules failed`, err);
       }
     }
-    // 内置扩展功能开关 → 引擎规则键注入：在 Rules 解析前写入 [General]，
+    // 内置扩展功能开关 → 引擎规则键注入：在 Rules 解析前写入对应段，
     // 与 INI 作者手写的键等效（源码内置扩展与引擎一体，不受插件命名空间
-    // 隔离约束）。开关缺省开启时不写任何键，保持原版风格：
-    //  - 「AI克隆生产」关闭（npext 或 ares 任一）→ DisableParallelAIQueues=yes
-    //    （FactoryTrait.onTick 据此禁止 AI 多工厂并行出货）
-    //  - npext「AI超越上限生产」关闭 → EnableAIBuildLimitation=yes
-    //    （Production.isAvailableForProduction 据此让 AI 受 BuildLimit 约束）
-    // 总开关关闭的扩展视为未定制，不参与判定。
+    // 隔离约束）。每个扩展只控制自身对应的键，总开关关闭的扩展不写键：
+    //  - ares「AI克隆生产」开 → [GlobalControls] AllowParallelAIQueues=yes
+    //    关 → AllowParallelAIQueues=no（Ares 自身键，反极性）
+    //  - npext「AI克隆生产」开 → [General] DisableParallelAIQueues=no
+    //    关 → DisableParallelAIQueues=yes（NPatch 自身键）
+    //  - npext「AI超越上限生产」开 → EnableAIBuildLimitation=no
+    //    关 → EnableAIBuildLimitation=yes
+    // 引擎侧统一归一读取（FactoryTrait/Production）：任一禁用键成立即禁止。
+    // 两个拓展总开关都关闭时不写任何键，走默认引擎逻辑。
     if (ini?.getOrCreateSection) {
       const section = ini.getOrCreateSection("General");
-      const cloneOff = (extId) =>
-        config.getMaster(extId) && !config.getFeatureRaw(extId, "aiCloneProduction");
-      if (cloneOff("npext") || cloneOff("ares")) section.set("DisableParallelAIQueues", "yes");
-      if (config.getMaster("npext") && !config.getFeatureRaw("npext", "aiOverLimitProduction"))
-        section.set("EnableAIBuildLimitation", "yes");
+      const globalControls = ini.getOrCreateSection("GlobalControls");
+      if (config.getMaster("ares"))
+        globalControls.set(
+          "AllowParallelAIQueues",
+          config.getFeatureRaw("ares", "aiCloneProduction") ? "yes" : "no",
+        );
+      if (config.getMaster("npext")) {
+        section.set(
+          "DisableParallelAIQueues",
+          config.getFeatureRaw("npext", "aiCloneProduction") ? "no" : "yes",
+        );
+        // 「AI超越上限生产」开 = AI 可超限 → EnableAIBuildLimitation=no(不启用约束)
+        section.set(
+          "EnableAIBuildLimitation",
+          config.getFeatureRaw("npext", "aiOverLimitProduction") ? "no" : "yes",
+        );
+      }
     }
   }
 
