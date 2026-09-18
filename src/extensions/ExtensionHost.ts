@@ -23,6 +23,7 @@ import { ExtensionConfig } from "extensions/ExtensionConfig";
 import { aresExtension } from "extensions/ares/AresExtension";
 import { phobosExtension } from "extensions/phobos/PhobosExtension";
 import { npextExtension } from "extensions/npext/NPextExtension";
+import { placeExExtension } from "extensions/placeex/PlaceExExtension";
 import {
   createHookContext,
   ExtensionHookContext,
@@ -61,6 +62,7 @@ export class ExtensionHost {
     ExtensionHost.register(aresExtension);
     ExtensionHost.register(phobosExtension);
     ExtensionHost.register(npextExtension);
+    ExtensionHost.register(placeExExtension);
     ExtensionHost.registered = true;
   }
 

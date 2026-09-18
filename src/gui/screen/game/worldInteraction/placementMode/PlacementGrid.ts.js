@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: gui/screen/game/worldInteraction/placementMode/PlacementGrid ===
-// deps: ["game/Coords","game/theater/rampHeights","engine/gfx/OverlayUtils","util/geometry","engine/gfx/SpriteUtils","engine/IsoCoords"]
+// deps: ["game/Coords","game/theater/rampHeights","engine/gfx/OverlayUtils","util/geometry","engine/gfx/SpriteUtils","engine/IsoCoords","extensions/ExtensionHost","data/ShpFile","engine/Engine"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 
 System.register(
@@ -11,10 +11,13 @@ System.register(
     "util/geometry",
     "engine/gfx/SpriteUtils",
     "engine/IsoCoords",
+    "extensions/ExtensionHost",
+    "data/ShpFile",
+    "engine/Engine",
   ],
   function (e, t) {
     "use strict";
-    var u, d, a, n, s, g, p, i;
+    var u, d, a, n, s, g, p, i, b, j, k;
     t && t.id;
     return {
       setters: [
@@ -35,6 +38,15 @@ System.register(
         },
         function (e) {
           p = e;
+        },
+        function (e) {
+          b = e;
+        },
+        function (e) {
+          j = e;
+        },
+        function (e) {
+          k = e;
         },
       ],
       execute: function () {
@@ -140,10 +152,47 @@ System.register(
                     t = e.getContext("2d");
                   if (!t) throw new Error("Couldn't acquire canvas 2d context");
                   ((e.width = g(a.width)), (e.height = g(2 * a.height * d.rampHeights.length)));
+                  // placeex「使用 place.shp」:开启时用游戏资源 place.shp 的原版
+                  // 菱形色块(纯色、无描边,与 gamemd 0x47EC90 逐格 DrawSHP 观感
+                  // 一致)填充每个坡度槽位;place.shp 缺失或开关关闭时回退到下方
+                  // 自绘白菱形(带 1px 描边,历史行为)。纹理生成后缓存,开关对
+                  // 新一局生效。白色像素经材质 color 染成红/绿/黄。
+                  let f = null;
+                  if (
+                    k.Engine.vfs &&
+                    k.Engine.vfs.fileExists("place.shp") &&
+                    b.ExtensionHost.isFeatureEnabled("placeex", "usePlaceShp")
+                  ) {
+                    try {
+                      var v = new j.ShpFile(k.Engine.vfs.openFile("place.shp")).getImage(0);
+                      if (v && v.width > 0 && v.height > 0) {
+                        f = t.createImageData(v.width, v.height);
+                        for (let e = 0; e < v.imageData.length; ++e)
+                          v.imageData[e] &&
+                            ((f.data[4 * e] = 255),
+                              (f.data[4 * e + 1] = 255),
+                              (f.data[4 * e + 2] = 255),
+                              (f.data[4 * e + 3] = 255));
+                      }
+                    } catch (e) {
+                      (console.warn("[PlacementGrid] place.shp unavailable, using procedural grid", e),
+                        (f = null));
+                    }
+                  }
                   let i = p.IsoCoords.tileToScreen(0, 0);
                   i.x += -a.width / 2;
                   var n = u.Coords.ISO_TILE_SIZE / 2;
                   for (let r = 0; r < d.rampHeights.length; ++r) {
+                    if (f) {
+                      // shp 帧在 2×格高的槽位带内垂直居中(与自绘平地菱形同位);
+                      // 各坡度槽位复用同一原版形状(与 VERA20K 的简化一致)。
+                      t.putImageData(
+                        f,
+                        Math.round((a.width - f.width) / 2),
+                        Math.round((2 * a.height - f.height) / 2) + 2 * r * a.height,
+                      );
+                      continue;
+                    }
                     var o = d.rampHeights[r],
                       l = [
                         [0, 1],
