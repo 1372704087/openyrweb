@@ -13,23 +13,16 @@ export const aresExtension: ExtensionDefinition = {
   descriptionKey: "STT:Ext.Ares",
   // Ares 是基础扩展：无依赖，优先级略高（Phobos 若声明 dependsOn: ["ares"] 则自动排后）
   priority: 50,
+  // 占位功能组（weapons/general/technos）已移除：无实际引擎逻辑的条目不再展示
   features: [
     {
-      id: "weapons",
-      labelKey: "TS:Ext.Ares.Feature.Weapons",
-      hintKey: "STT:Ext.Ares.Feature.Weapons",
-      defaultEnabled: true,
-    },
-    {
-      id: "general",
-      labelKey: "TS:Ext.Ares.Feature.General",
-      hintKey: "STT:Ext.Ares.Feature.General",
-      defaultEnabled: true,
-    },
-    {
-      id: "technos",
-      labelKey: "TS:Ext.Ares.Feature.Technos",
-      hintKey: "STT:Ext.Ares.Feature.Technos",
+      // 「AI克隆生产」：关闭后向 [General] 注入 DisableParallelAIQueues=yes
+      // （对应 Ares 自身的 AllowParallelAIQueues=no 语义），AI 同一时刻
+      // 只从一座同类工厂出货。与 npext 同名开关任一关闭即生效。
+      id: "aiCloneProduction",
+      labelKey: "TS:Ext.Ares.Feature.AICloneProduction",
+      hintKey: "STT:Ext.Ares.Feature.AICloneProduction",
+      groupKey: "TS:Ext.Group.EnhancedLogic",
       defaultEnabled: true,
     },
   ],

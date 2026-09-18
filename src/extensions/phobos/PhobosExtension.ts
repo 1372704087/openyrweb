@@ -22,26 +22,8 @@ export const phobosExtension: ExtensionDefinition = {
   // 依赖 Ares 作为运行框架（与真实 Phobos↔Ares 关系一致）
   dependsOn: ["ares"],
   priority: 100,
-  features: [
-    {
-      id: "weapons",
-      labelKey: "TS:Ext.Phobos.Feature.Weapons",
-      hintKey: "STT:Ext.Phobos.Feature.Weapons",
-      defaultEnabled: true,
-    },
-    {
-      id: "technos",
-      labelKey: "TS:Ext.Phobos.Feature.Technos",
-      hintKey: "STT:Ext.Phobos.Feature.Technos",
-      defaultEnabled: true,
-    },
-    {
-      id: "drawing",
-      labelKey: "TS:Ext.Phobos.Feature.Drawing",
-      hintKey: "STT:Ext.Phobos.Feature.Drawing",
-      defaultEnabled: true,
-    },
-  ],
+  // 占位功能组（weapons/technos/drawing）已移除：无实际引擎逻辑的条目不再展示
+  features: [],
   hooks: {
     applyToRules(ctx: ExtensionHookContext) {
       if (!ctx.ini) return;

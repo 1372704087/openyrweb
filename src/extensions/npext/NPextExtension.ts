@@ -19,36 +19,12 @@ export const npextExtension: ExtensionDefinition = {
   priority: 150,
   features: [
     {
-      id: "general",
-      labelKey: "TS:Ext.NPext.Feature.General",
-      hintKey: "STT:Ext.NPext.Feature.General",
-      defaultEnabled: true,
-    },
-    {
-      id: "countries",
-      labelKey: "TS:Ext.NPext.Feature.Countries",
-      hintKey: "STT:Ext.NPext.Feature.Countries",
-      defaultEnabled: true,
-    },
-    {
-      id: "technos",
-      labelKey: "TS:Ext.NPext.Feature.Technos",
-      hintKey: "STT:Ext.NPext.Feature.Technos",
-      defaultEnabled: true,
-    },
-    {
-      id: "weapons",
-      labelKey: "TS:Ext.NPext.Feature.Weapons",
-      hintKey: "STT:Ext.NPext.Feature.Weapons",
-      defaultEnabled: true,
-    },
-    {
       // 「AI克隆生产」：关闭后向 [General] 注入 DisableParallelAIQueues=yes，
       // AI 同一时刻只从一座同类工厂出货（见 ExtensionHost.applyToRules 注入）。
       id: "aiCloneProduction",
       labelKey: "TS:Ext.NPext.Feature.AICloneProduction",
       hintKey: "STT:Ext.NPext.Feature.AICloneProduction",
-      groupKey: "TS:Ext.NPext.Group.EnhancedLogic",
+      groupKey: "TS:Ext.Group.EnhancedLogic",
       defaultEnabled: true,
     },
     {
@@ -57,7 +33,7 @@ export const npextExtension: ExtensionDefinition = {
       id: "aiOverLimitProduction",
       labelKey: "TS:Ext.NPext.Feature.AIOverLimitProduction",
       hintKey: "STT:Ext.NPext.Feature.AIOverLimitProduction",
-      groupKey: "TS:Ext.NPext.Group.EnhancedLogic",
+      groupKey: "TS:Ext.Group.EnhancedLogic",
       defaultEnabled: true,
     },
   ],
