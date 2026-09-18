@@ -84,6 +84,7 @@ System.register(
                           l.ListItem,
                           {
                             key: u.id + ".__master",
+                            tooltip: t.get("STT:Ext." + u.id),
                             onClick: () => d(u.id),
                           },
                           s.createElement(
