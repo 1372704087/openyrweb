@@ -157,9 +157,10 @@ System.register(
                 if (!this.textureCache) {
                   var a = p.IsoCoords.getScreenTileSize(),
                     m2 = [
-                      ["green", [60, 220, 60], [140, 255, 140]],
-                      ["red", [230, 60, 60], [255, 120, 120]],
-                      ["yellow", [220, 220, 60], [255, 255, 140]],
+                      // 红色填充浓度单独调高(0.55):低透明度的红叠在地形上偏淡
+                      ["green", [60, 220, 60], [140, 255, 140], 0.43],
+                      ["red", [230, 60, 60], [255, 120, 120], 0.55],
+                      ["yellow", [220, 220, 60], [255, 255, 140], 0.43],
                     ];
                   // placeex「使用 place.shp」:开启时用游戏资源 place.shp 的原版
                   // 菱形色块(纯色、无描边);place.shp 缺失或解码失败时回退到
@@ -179,7 +180,7 @@ System.register(
                     }
                   }
                   this.textureCache = {};
-                  for (var [w2, y2, x2] of m2) {
+                  for (var [w2, y2, x2, fa] of m2) {
                     let e = document.createElement("canvas"),
                       t = e.getContext("2d");
                     if (!t) throw new Error("Couldn't acquire canvas 2d context");
@@ -232,7 +233,7 @@ System.register(
                       // 半透明填充 + 同色系亮边 1.5px
                       (t.closePath(),
                         (t.lineWidth = 1.5),
-                        (t.fillStyle = "rgba(" + y2[0] + "," + y2[1] + "," + y2[2] + ",0.43)"),
+                        (t.fillStyle = "rgba(" + y2[0] + "," + y2[1] + "," + y2[2] + "," + fa + ")"),
                         t.fill(),
                         (t.strokeStyle = "rgba(" + x2[0] + "," + x2[1] + "," + x2[2] + ",0.82)"),
                         t.stroke());
