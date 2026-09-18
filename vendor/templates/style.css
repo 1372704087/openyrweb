@@ -2876,6 +2876,38 @@ input[type="range"]:focus {
     cursor: default;
     background-color: transparent;
 }
+/* 右栏子功能:设置页同款 fieldset 分组框(legend=分类名) */
+#ra2web-root .extensions-groups {
+    height: 500px;
+    overflow: auto;
+}
+#ra2web-root .extensions-pane-right fieldset {
+    padding: 8px 12px 10px;
+    margin: 0 0 14px;
+}
+#ra2web-root .extensions-pane-right fieldset legend {
+    padding: 0 6px;
+}
+#ra2web-root .extensions-feature-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+#ra2web-root .extensions-feature-item + .extensions-feature-item {
+    margin-top: 4px;
+}
+#ra2web-root .extensions-feature-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+#ra2web-root .extensions-feature-item.disabled,
+#ra2web-root .extensions-feature-item.disabled:hover {
+    color: gray;
+    cursor: default;
+    background: transparent;
+}
+#ra2web-root .extensions-feature-note {
+    padding: 2px 10px 6px;
+    color: gray;
+}
 #ra2web-root .extensions-feature-list .extensions-feature-row {
     display: flex;
     align-items: center;

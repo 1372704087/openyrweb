@@ -2,8 +2,8 @@
 // deps: ["react","gui/component/List","gui/component/Image","gui/screen/mainMenu/extensions/component/ExtensionsModel"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// 扩展页左右分栏：左列扩展，右列主开关 + 子功能开关（按子分类分组）。
-// Phobos 版本警告画在对局 HUD。
+// 扩展页左右分栏：左列扩展，右列主开关 + 子功能开关（子分类用设置页
+// 同款 fieldset 分组框）。Phobos 版本警告画在对局 HUD。
 
 System.register(
   "gui/screen/mainMenu/extensions/component/ExtensionsOpts",
@@ -45,7 +45,7 @@ System.register(
             function d(e) {
               (m.ExtensionsModel.setMaster(e, !u.master), r(m.ExtensionsModel.snapshot()));
             }
-            // 子功能开关：总开关关闭时置灰不生效（列表内提示行说明）。
+            // 子功能开关：总开关关闭时置灰不生效（分组框内提示行说明）。
             function p(e) {
               u &&
                 u.master &&
@@ -53,11 +53,11 @@ System.register(
             }
             function v(f) {
               return s.createElement(
-                l.ListItem,
+                "div",
                 {
                   key: u.id + "." + f.id,
-                  disabled: !u.master,
-                  tooltip: f.hintKey ? t.get(f.hintKey) : void 0,
+                  className: "extensions-feature-item" + (u.master ? "" : " disabled"),
+                  "data-r-tooltip": f.hintKey ? t.get(f.hintKey) : void 0,
                   onClick: () => p(f),
                 },
                 s.createElement(
@@ -73,18 +73,24 @@ System.register(
                 ),
               );
             }
-            // 子分类：按 groupKey 分组渲染（如「新增或增强的逻辑」），无分组的紧跟主开关。
+            // 子分类分组框：按 groupKey 拆成设置页同款 fieldset（legend=分类名）。
             function g() {
               var o = [],
-                k = [];
+                k2 = [];
               for (var f of u.features.filter((f) => f.groupKey)) {
-                var q = k.find((x) => x.key === f.groupKey);
-                q || k.push((q = { key: f.groupKey, items: [] }));
+                var q = k2.find((x) => x.key === f.groupKey);
+                q || k2.push((q = { key: f.groupKey, items: [] }));
                 q.items.push(f);
               }
-              for (var q2 of k) {
-                o.push(s.createElement(l.ListHeader, { key: u.id + ".group." + q2.key }, t.get(q2.key)));
-                for (var f2 of q2.items) o.push(v(f2));
+              for (var q2 of k2) {
+                o.push(
+                  s.createElement(
+                    "fieldset",
+                    { key: u.id + ".group." + q2.key },
+                    s.createElement("legend", null, t.get(q2.key)),
+                    q2.items.map((f) => v(f)),
+                  ),
+                );
               }
               return o;
             }
@@ -119,42 +125,44 @@ System.register(
                   { className: "extensions-pane extensions-pane-right" },
                   u
                     ? s.createElement(
-                        l.List,
-                        {
-                          title: t.get("TS:Ext.ListTitle"),
-                          className: "extensions-feature-list",
-                        },
+                        "div",
+                        { className: "extensions-groups" },
                         s.createElement(
-                          l.ListItem,
-                          {
-                            key: u.id + ".__master",
-                            tooltip: t.get("STT:Ext." + u.id),
-                            onClick: () => d(u.id),
-                          },
+                          "fieldset",
+                          { key: u.id + ".main" },
+                          s.createElement("legend", null, t.get("TS:Ext.ListTitle")),
                           s.createElement(
-                            "label",
-                            { className: "extensions-feature-row", onClick: (e) => e.stopPropagation() },
-                            s.createElement("input", {
-                              type: "checkbox",
-                              checked: u.master,
-                              onChange: () => d(u.id),
-                            }),
-                            s.createElement("span", { className: "label" }, t.get("TS:Ext.MasterSwitch")),
+                            "div",
+                            {
+                              className: "extensions-feature-item" + (u.master ? "" : " disabled"),
+                              "data-r-tooltip": t.get("STT:Ext." + u.id),
+                              onClick: () => d(u.id),
+                            },
                             s.createElement(
-                              "span",
-                              { className: "info", title: t.get("STT:Ext." + u.id) },
-                              s.createElement(a.Image, { src: "info.png" }),
+                              "label",
+                              { className: "extensions-feature-row", onClick: (e) => e.stopPropagation() },
+                              s.createElement("input", {
+                                type: "checkbox",
+                                checked: u.master,
+                                onChange: () => d(u.id),
+                              }),
+                              s.createElement("span", { className: "label" }, t.get("TS:Ext.MasterSwitch")),
+                              s.createElement(
+                                "span",
+                                { className: "info", title: t.get("STT:Ext." + u.id) },
+                                s.createElement(a.Image, { src: "info.png" }),
+                              ),
                             ),
                           ),
+                          !u.master
+                            ? s.createElement(
+                                "div",
+                                { className: "extensions-feature-note", key: u.id + ".masteroff" },
+                                t.get("TS:Ext.MasterOffHint"),
+                              )
+                            : null,
+                          u.features.filter((f) => !f.groupKey).map((f) => v(f)),
                         ),
-                        !u.master
-                          ? s.createElement(
-                              l.ListHeader,
-                              { key: u.id + ".masteroff" },
-                              t.get("TS:Ext.MasterOffHint"),
-                            )
-                          : null,
-                        u.features.filter((f) => !f.groupKey).map((f) => v(f)),
                         g(),
                       )
                     : null,
