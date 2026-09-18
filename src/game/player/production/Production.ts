@@ -161,14 +161,16 @@ export class Production {
 
   /**
    * 可建造总判定：科技等级 ∈ [0, maxTechLevel]、buildLimit=0 的非 AI
-   * 不可建、被侧栏开关屏蔽的超武不可建、前置与工厂满足。各 [CHEAT]
-   * 开关可分别跳过对应检查。
+   * 不可建（NPatch EnableAIBuildLimitation=yes 时 AI 同样不可建）、被
+   * 侧栏开关屏蔽的超武不可建、前置与工厂满足。各 [CHEAT] 开关可分别
+   * 跳过对应检查。
    */
   isAvailableForProduction(rules: any): boolean {
     return (
       (this.cheatsBypassTechLevel || 0 <= rules.techLevel) &&
       rules.techLevel <= this.maxTechLevel &&
-      (this.cheatsBypassBuildLimits || !(rules.buildLimit === 0 && !this.player.isAi)) &&
+      (this.cheatsBypassBuildLimits ||
+        !(rules.buildLimit === 0 && (!this.player.isAi || this.rules.general.enableAIBuildLimitation))) &&
       !(
         rules.superWeapon &&
         this.rules.getSuperWeapon(rules.superWeapon).disableableFromShell &&

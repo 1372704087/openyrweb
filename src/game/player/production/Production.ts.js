@@ -140,7 +140,10 @@ System.register(
                   // 常规情况下仅科技等级 >= 0 的单位可建造。后续删除作弊时恢复为 0 <= e.techLevel
                   (this.cheatsBypassTechLevel || 0 <= e.techLevel) &&
                   e.techLevel <= this.maxTechLevel &&
-                  (this.cheatsBypassBuildLimits || !(0 === e.buildLimit && !this.player.isAi)) &&
+                  // NPatch EnableAIBuildLimitation=yes：buildLimit=0 对 AI 同样生效
+                  // （缺省 AI 豁免，保持原版"AI 无视不可建造"风格）。
+                  (this.cheatsBypassBuildLimits ||
+                    !(0 === e.buildLimit && (!this.player.isAi || this.rules.general.enableAIBuildLimitation))) &&
                   !(
                     e.superWeapon &&
                     this.rules.getSuperWeapon(e.superWeapon).disableableFromShell &&

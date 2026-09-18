@@ -378,6 +378,9 @@ export class Rules {
     const section = this.ini.getSection("General");
     if (!section) throw new Error("Missing [General] section");
     this.general.readIni(section);
+    // Ares 扩展键 AllowParallelAIQueues 在独立段；缺段时保持缺省（原版并行风格）。
+    const globalControls = this.ini.getSection("GlobalControls");
+    if (globalControls) this.general.readGlobalControls(globalControls);
   }
 
   readAi(): void {

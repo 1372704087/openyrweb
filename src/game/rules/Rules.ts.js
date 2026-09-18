@@ -382,6 +382,9 @@ System.register(
               var e = this.ini.getSection("General");
               if (!e) throw new Error("Missing [General] section");
               this.general.readIni(e);
+              // Ares 扩展键 AllowParallelAIQueues 在独立段；缺段时保持缺省（原版并行风格）。
+              var t = this.ini.getSection("GlobalControls");
+              t && this.general.readGlobalControls(t);
             }
             readAi() {
               var e = this.ini.getSection("AI");

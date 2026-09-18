@@ -141,45 +141,64 @@ export class FactoryTrait {
     // 主工厂正在 Delivering 也可继续，因为多工厂可并行出货）。
     if (object.owner.production && !object.warpedOutTrait.isActive()) {
       const primary = object.owner.production.getPrimaryFactory(this.type);
+      const queue =
+        this.type === FactoryType.BuildingType
+          ? undefined
+          : object.owner.production.getQueueForFactory(this.type);
+      const first =
+        queue && queue.status === QueueStatus.Ready ? queue.getFirst() : undefined;
+      // AI 并行生产开关——三个扩展同功能键的统一归一，仅约束 AI 玩家
+      // （人类保持原版多厂并行风格）：
+      //  - NP2.0  [General] DisableParallelAIQueues（缺省 no）
+      //  - NPatch [General] DisableAIParallelProduction（缺省 no，同义键）
+      //  - Ares   [GlobalControls] AllowParallelAIQueues（缺省 yes，反极性）
+      //  - NP2.0  单位键 DisableAIParallelProduction（仅全局放行时有效）
+      // 任一"禁止"即关闭；只封锁"主厂 Delivering 时其余同类厂并行出货"
+      // 的克隆分支，主厂自身生产与主厂超时空失效时的替位生产不受限。
+      const aiParallelAllowed =
+        !object.owner.isAi ||
+        (!world.rules.general.disableParallelAIQueues &&
+          !world.rules.general.disableAIParallelProduction &&
+          world.rules.general.allowParallelAIQueues &&
+          !(first && first.rules.disableAIParallelProduction));
       if (
         (primary?.warpedOutTrait.isActive() ||
           primary === object ||
-          (primary?.factoryTrait?.deliveringUnit && primary.factoryTrait.type === FactoryType.UnitType)) &&
-        this.type !== FactoryType.BuildingType
+          (aiParallelAllowed &&
+            primary?.factoryTrait?.deliveringUnit &&
+            primary.factoryTrait.type === FactoryType.UnitType)) &&
+        this.type !== FactoryType.BuildingType &&
+        first
       ) {
-        const queue = object.owner.production.getQueueForFactory(this.type);
-        if (queue && queue.status === QueueStatus.Ready) {
-          const first = queue.getFirst();
-          if (this.type === FactoryType.AircraftType) {
-            // 飞行器：在本体或任一有空的停机坪上生产。
-            let produced = this.produceAircraftAt(object, first, world);
-            if (!produced) {
-              for (const building of [...object.owner.buildings].filter(
-                (b: any) => b.factoryTrait?.type === FactoryType.AircraftType && b.helipadTrait,
-              )) {
-                if (produced) break;
-                produced = this.produceAircraftAt(building, first, world);
-              }
-            }
-            if (!produced) return;
-          } else {
-            this.produceGroundUnitAt(object, first, world);
-            // 克隆罐：步兵工厂 Idle 时复制一次产出。
-            if (!this.isCloningVats && this.type === FactoryType.InfantryType) {
-              for (const cloneVat of [...object.owner.buildings].filter(
-                (b: any) => b.factoryTrait && b.rules.cloning,
-              )) {
-                if (cloneVat.factoryTrait.status === FactoryStatus.Idle)
-                  cloneVat.factoryTrait.produceGroundUnitAt(cloneVat, first, world);
-              }
+        if (this.type === FactoryType.AircraftType) {
+          // 飞行器：在本体或任一有空的停机坪上生产。
+          let produced = this.produceAircraftAt(object, first, world);
+          if (!produced) {
+            for (const building of [...object.owner.buildings].filter(
+              (b: any) => b.factoryTrait?.type === FactoryType.AircraftType && b.helipadTrait,
+            )) {
+              if (produced) break;
+              produced = this.produceAircraftAt(building, first, world);
             }
           }
-          object.owner.addUnitsBuilt(first.rules, 1);
-          first.creditsSpent = 0;
-          first.progress = 0;
-          queue.shift(first.rules, 1);
-          if (queue.currentSize) queue.status = QueueStatus.Active;
+          if (!produced) return;
+        } else {
+          this.produceGroundUnitAt(object, first, world);
+          // 克隆罐：步兵工厂 Idle 时复制一次产出。
+          if (!this.isCloningVats && this.type === FactoryType.InfantryType) {
+            for (const cloneVat of [...object.owner.buildings].filter(
+              (b: any) => b.factoryTrait && b.rules.cloning,
+            )) {
+              if (cloneVat.factoryTrait.status === FactoryStatus.Idle)
+                cloneVat.factoryTrait.produceGroundUnitAt(cloneVat, first, world);
+            }
+          }
         }
+        object.owner.addUnitsBuilt(first.rules, 1);
+        first.creditsSpent = 0;
+        first.progress = 0;
+        queue.shift(first.rules, 1);
+        if (queue.currentSize) queue.status = QueueStatus.Active;
       }
     }
   }

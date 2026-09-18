@@ -85,6 +85,11 @@ System.register(
             (f = class {
               constructor() {
                 this.prereqCategories = new Map();
+                // AI 生产扩展开关（NP2.0 / Ares / NPatch 统一归一）缺省值。
+                ((this.disableParallelAIQueues = !1),
+                  (this.disableAIParallelProduction = !1),
+                  (this.allowParallelAIQueues = !0),
+                  (this.enableAIBuildLimitation = !1));
               }
               readIni(e) {
                 ((this.aircraftFogReveal = e.getNumber("AircraftFogReveal")),
@@ -106,6 +111,17 @@ System.register(
                   (this.defaultMirageDisguises = e.getArray("DefaultMirageDisguises")),
                   (this.dMisl = new u.DMislRules().readIni(e)),
                   (this.cMisl = new v.CMislRules().readIni(e)),
+                  // AI 并行生产开关：NP2.0 DisableParallelAIQueues 与 NPatch
+                  // DisableAIParallelProduction 是同功能键（yes = 禁止 AI 多工厂
+                  // 同步生产），缺省 no 保持原版多线风格；Ares 的
+                  // AllowParallelAIQueues 在 [GlobalControls] 段（见
+                  // readGlobalControls），任一"禁止"即生效。
+                  (this.disableAIParallelProduction = e.getBool("DisableAIParallelProduction")),
+                  (this.disableParallelAIQueues = e.getBool("DisableParallelAIQueues")),
+                  // NPatch EnableAIBuildLimitation=yes：AI 生产同样受 BuildLimit
+                  // 约束。本实现在排队与可建判定处直接跳过，不会出现 NPatch
+                  // 文档警告的建筑 BuildLimit 反复"生产-退款-重试"死循环。
+                  (this.enableAIBuildLimitation = e.getBool("EnableAIBuildLimitation")),
                   (this.dropPodWeapon = e.getString("DropPodWeapon")),
                   (this.engineer = e.getString("Engineer")),
                   (this.engineerCaptureLevel = e.getFixed("EngineerCaptureLevel", 0.25)),
@@ -185,6 +201,13 @@ System.register(
                   if (!e.has(i)) throw new Error(`Missing prerequisite category ${i} in [General] section`);
                   this.prereqCategories.set(t, e.getArray(i));
                 }
+              }
+              // 读取 [GlobalControls] 段的 Ares 扩展键（由 Rules.readGeneral 在
+              // readIni 之后调用；段缺失时保持缺省，即原版并行风格）。
+              // AllowParallelAIQueues：是否允许 AI 多工厂并行生产（缺省 yes，
+              // 与 NP2.0/NPatch 的 Disable* 键反极性）。
+              readGlobalControls(e) {
+                this.allowParallelAIQueues = e.getBool("AllowParallelAIQueues", !0);
               }
               getMissileRules(e) {
                 switch (e) {

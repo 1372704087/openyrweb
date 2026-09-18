@@ -184,41 +184,54 @@ System.register(
               }
               if (i.owner.production && !i.warpedOutTrait.isActive()) {
                 let e = i.owner.production.getPrimaryFactory(this.type);
+                // AI 并行生产开关——三个扩展同功能键的统一归一，仅约束 AI
+                // 玩家（人类保持原版多厂并行风格）：NP2.0 [General]
+                // DisableParallelAIQueues、NPatch [General]
+                // DisableAIParallelProduction、Ares [GlobalControls]
+                // AllowParallelAIQueues（反极性）、NP2.0 单位键
+                // DisableAIParallelProduction。任一"禁止"即关闭；只封锁
+                // "主厂 Delivering 时其余同类厂并行出货"的克隆分支，主厂
+                // 自身生产与主厂超时空失效时的替位生产不受限。
+                let l = this.type === h.FactoryType.BuildingType ? void 0 : i.owner.production.getQueueForFactory(this.type);
+                let t = l && l.status === n.QueueStatus.Ready ? l.getFirst() : void 0;
+                let c =
+                  !i.owner.isAi ||
+                  (!r.rules.general.disableParallelAIQueues &&
+                    !r.rules.general.disableAIParallelProduction &&
+                    r.rules.general.allowParallelAIQueues &&
+                    !(t && t.rules.disableAIParallelProduction));
                 if (
                   (e?.warpedOutTrait.isActive() ||
                     e === i ||
-                    (e?.factoryTrait?.deliveringUnit && e.factoryTrait.type === h.FactoryType.UnitType)) &&
-                  this.type !== h.FactoryType.BuildingType
+                    (c && e?.factoryTrait?.deliveringUnit && e.factoryTrait.type === h.FactoryType.UnitType)) &&
+                  this.type !== h.FactoryType.BuildingType &&
+                  t
                 ) {
-                  let e = i.owner.production.getQueueForFactory(this.type);
-                  if (e && e.status === n.QueueStatus.Ready) {
-                    let t = e.getFirst();
-                    if (this.type === h.FactoryType.AircraftType) {
-                      let e = this.produceAircraftAt(i, t, r);
-                      var s;
-                      if (!e)
-                        for (s of [...i.owner.buildings].filter(
-                          (e) => e.factoryTrait?.type === h.FactoryType.AircraftType && e.helipadTrait,
-                        )) {
-                          if (e) break;
-                          e = this.produceAircraftAt(s, t, r);
-                        }
-                      if (!e) return;
-                    } else {
-                      var a;
-                      if (
-                        (this.produceGroundUnitAt(i, t, r),
-                        !this.isCloningVats && this.type === h.FactoryType.InfantryType)
-                      )
-                        for (a of [...i.owner.buildings].filter((e) => e.factoryTrait && e.rules.cloning))
-                          a.factoryTrait.status === M.Idle && a.factoryTrait.produceGroundUnitAt(a, t, r);
-                    }
-                    (i.owner.addUnitsBuilt(t.rules, 1),
-                      (t.creditsSpent = 0),
-                      (t.progress = 0),
-                      e.shift(t.rules, 1),
-                      e.currentSize && (e.status = n.QueueStatus.Active));
+                  if (this.type === h.FactoryType.AircraftType) {
+                    let e = this.produceAircraftAt(i, t, r);
+                    var s;
+                    if (!e)
+                      for (s of [...i.owner.buildings].filter(
+                        (e) => e.factoryTrait?.type === h.FactoryType.AircraftType && e.helipadTrait,
+                      )) {
+                        if (e) break;
+                        e = this.produceAircraftAt(s, t, r);
+                      }
+                    if (!e) return;
+                  } else {
+                    var a;
+                    if (
+                      (this.produceGroundUnitAt(i, t, r),
+                      !this.isCloningVats && this.type === h.FactoryType.InfantryType)
+                    )
+                      for (a of [...i.owner.buildings].filter((e) => e.factoryTrait && e.rules.cloning))
+                        a.factoryTrait.status === M.Idle && a.factoryTrait.produceGroundUnitAt(a, t, r);
                   }
+                  (i.owner.addUnitsBuilt(t.rules, 1),
+                    (t.creditsSpent = 0),
+                    (t.progress = 0),
+                    l.shift(t.rules, 1),
+                    l.currentSize && (l.status = n.QueueStatus.Active));
                 }
               }
             }

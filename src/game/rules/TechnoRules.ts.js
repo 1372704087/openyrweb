@@ -148,6 +148,9 @@ System.register(
                 (this.orePurifier = this.ini.getBool("OrePurifier")),
                 (this.cloning = this.ini.getBool("Cloning")),
               (this.grinding = this.ini.getBool("Grinding")),
+              // NP2.0 扩展键 DisableAIParallelProduction：yes 时该单位 AI 不能
+              // 多线生产（仅在全局 DisableParallelAIQueues=no 时有意义）。
+              (this.disableAIParallelProduction = this.ini.getBool("DisableAIParallelProduction")),
               (this.nukeSilo = this.ini.getBool("NukeSilo")),
               // OpenYRWeb: Industrial Plant (NAINDP) cost-bonus fields. A building with these
               // multipliers reduces the production cost of the matching object category for its

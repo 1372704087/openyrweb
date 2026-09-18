@@ -121,6 +121,8 @@ export class TechnoRules extends ObjectRules {
   orePurifier: boolean;
   cloning: boolean;
   grinding: boolean;
+  /** NP2.0 扩展键：yes 时该单位 AI 不参与多工厂并行生产（仅全局未禁用时生效）。 */
+  disableAIParallelProduction: boolean;
   nukeSilo: boolean;
   /** 原版 YR 键：工业工厂（NAINDP）减价乘数——按对象类别降低己方生产造价（如 UnitsCostBonus=0.75 → 载具七五折）；缺省 1（无折扣），在 ProductionTrait.tickQueue 计算单价时生效。 */
   unitsCostBonus: number;
@@ -506,6 +508,9 @@ export class TechnoRules extends ObjectRules {
     this.orePurifier = this.ini.getBool("OrePurifier");
     this.cloning = this.ini.getBool("Cloning");
     this.grinding = this.ini.getBool("Grinding");
+    // NP2.0 扩展键 DisableAIParallelProduction：yes 时该单位 AI 不能
+    // 多线生产（仅在全局 DisableParallelAIQueues=no 时有意义）。
+    this.disableAIParallelProduction = this.ini.getBool("DisableAIParallelProduction");
     this.nukeSilo = this.ini.getBool("NukeSilo");
     this.unitsCostBonus = this.ini.getFixed("UnitsCostBonus", 1);
     this.infantryCostBonus = this.ini.getFixed("InfantryCostBonus", 1);
