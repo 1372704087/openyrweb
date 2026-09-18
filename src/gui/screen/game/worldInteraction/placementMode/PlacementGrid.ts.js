@@ -151,7 +151,7 @@ System.register(
               // 同色系亮边(对齐 gamemd-master C++ 版 BuildingPlacement::Draw:
               // fill 60,220,60 / 230,60,60 @α0.43;edge 140,255,140 / 255,120,120
               // @α0.82;线宽 1.5)。placeex「使用 place.shp」开启时改用游戏资源
-              // place.shp 原版菱形(纯色 α0.7、无描边)。纹理生成后缓存,开关对
+              // place.shp 原版菱形(纯色不透明、无描边)。纹理生成后缓存,开关对
               // 新一局生效。
               getTileOverlayTextures() {
                 if (!this.textureCache) {
@@ -187,7 +187,7 @@ System.register(
                     let i = p.IsoCoords.tileToScreen(0, 0);
                     i.x += -a.width / 2;
                     var n = u.Coords.ISO_TILE_SIZE / 2;
-                    // shp 形状画布:按本状态着色,原版透明度 α0.7、无描边
+                    // shp 形状画布:按本状态着色,纯色不透明、无描边
                     let f = null;
                     if (v) {
                       f = document.createElement("canvas");
@@ -200,7 +200,7 @@ System.register(
                             ((t.data[4 * e] = y2[0]),
                               (t.data[4 * e + 1] = y2[1]),
                               (t.data[4 * e + 2] = y2[2]),
-                              (t.data[4 * e + 3] = 178));
+                              (t.data[4 * e + 3] = 255));
                         e.putImageData(t, 0, 0);
                       } else f = null;
                     }
