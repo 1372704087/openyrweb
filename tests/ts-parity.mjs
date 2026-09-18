@@ -2951,25 +2951,6 @@ const CONVERTED = [
     ],
   },
   {
-    name: "game/rules/MpDialogSettings",
-    tsjs: "src/game/rules/MpDialogSettings.ts.js",
-    probes: [
-      (ns) => {
-        const rules = new ns.MpDialogSettings().readIni(
-          makeMockIni("G", { MinMoney: "10", Money: "5000", Crates: "yes", MCVRedeploys: "yes", ShortGame: "yes" }),
-        );
-        return {
-          minMoney: rules.minMoney,
-          money: rules.money,
-          crates: rules.crates,
-          mcvRedeploys: rules.mcvRedeploys,
-          shortGame: rules.shortGame,
-          alliesAllowed: rules.alliesAllowed, // 缺省 true
-        };
-      },
-    ],
-  },
-  {
     name: "game/rules/WeaponRules",
     tsjs: "src/game/rules/WeaponRules.ts.js",
     probes: [
@@ -5114,12 +5095,83 @@ const CONVERTED = [
   {
     name: "game/gameobject/locomotor/DriveLocomotor",
     tsjs: "src/game/gameobject/locomotor/DriveLocomotor.ts.js",
-    probes: [(ns) => typeof ns.DriveLocomotor],
+    probes: [
+      (ns) => typeof ns.DriveLocomotor,
+      // 真正驱动 selectNextWaypoint 走「有动量 + 朝向吻合 + 0<转角<90°」的平滑转弯
+      // 分支。该分支的返回值被 MoveTask 当作航点直接读 `.tile`（MoveTask.ts.js:468-473），
+      // 所以返回值的形状本身就是契约：只断言 `typeof ns.DriveLocomotor` 抓不到它。
+      // 朝向常数 270 = FacingUtil.fromMapCoords((2,0)) = (-angleDegFromVec2-90+720)%360。
+      // 若该常数失效，下面的 onCurve 断言会显式抛错 —— 不会静默退化成空探针。
+      (ns, THREE) => {
+        const wp = (rx, ry) => ({ tile: { rx, ry } });
+        const game = { map: { terrain: { getPassableSpeed: () => 3 } }, currentTick: 0 };
+        const makeObj = () => ({
+          tile: { rx: 10, ry: 10 },
+          direction: 270,
+          onBridge: false,
+          rules: { accelerates: false, speedType: 0, rot: 5, accelerationFactor: 0.05 },
+          isInfantry: () => false,
+          moveTrait: { baseSpeed: 4, lastTileSpeed: 3, speedPenalty: 0, velocity: new THREE.Vector2() },
+          position: { getMapPosition: () => new THREE.Vector2(10 * 256 + 128, 10 * 256 + 128) },
+        });
+        const obj = makeObj();
+        const loco = new ns.DriveLocomotor(game);
+        // 用例几何：list[len-1]=L 是目标点、list[len-2]=P 是前一点，object.tile=T。
+        //   L-T=(2,0) → angleDegFromVec2=0 → fromMapCoords=270（故 direction 取 270）
+        //   P-L=(2,1) → angleDegFromVec2=27 → angleDiff=|0-27|=27 ∈ (0,90) ✓
+        const list = [wp(14, 11), wp(12, 10)];
+        const first = loco.selectNextWaypoint(obj, list); // hasMomentum=false → 直线分支
+        const second = loco.selectNextWaypoint(obj, list); // hasMomentum=true → 曲线分支
+        if (!loco.moveOnCurve) throw new Error("probe setup broken: 平滑转弯分支未命中（朝向常数失效？）");
+        return {
+          ctorKeys: Object.keys(new ns.DriveLocomotor(game)),
+          firstKeys: Object.keys(first),
+          firstTile: first.tile,
+          wpType: loco.currentWaypointType,
+          curveReturnKeys: Object.keys(second),
+          curveReturnHasTile: !!second.tile,
+          curveReturnTile: second.tile ?? null,
+          curveLength: Math.round(loco.steerCurve.getLength() * 1000) / 1000,
+        };
+      },
+    ],
   },
   {
     name: "game/gameobject/locomotor/HoverLocomotor",
     tsjs: "src/game/gameobject/locomotor/HoverLocomotor.ts.js",
-    probes: [(ns) => typeof ns.HoverLocomotor],
+    probes: [
+      (ns) => typeof ns.HoverLocomotor,
+      // 构造期键集合与顺序（孪生构造期只有 6 个键：hoverRules / currentSpeed /
+      // distanceTravelled / carryOverDistance / currentWaypointType / nextWaypointDir）
+      // + selectNextWaypoint / onNewWaypoint 的派生量。
+      (ns, THREE) => {
+        const wp = (rx, ry) => ({ tile: { rx, ry } });
+        const loco = new ns.HoverLocomotor({ acceleration: 0.5, brake: 0.5 });
+        const ctorKeys = Object.keys(loco);
+        const obj = {
+          tile: { rx: 10, ry: 10 },
+          direction: 0,
+          onBridge: false,
+          rules: { rot: 4, accelerates: true, speedType: 0 },
+          isInfantry: () => false,
+          moveTrait: { baseSpeed: 6, lastTileSpeed: 4, velocity: new THREE.Vector2() },
+          position: { getMapPosition: () => new THREE.Vector2(2688, 2688) },
+        };
+        const sel = loco.selectNextWaypoint(obj, [wp(11, 10), wp(12, 10)]);
+        const dir = { x: loco.nextWaypointDir.x, y: loco.nextWaypointDir.y };
+        loco.onNewWaypoint(obj, new THREE.Vector2(3200, 2688), {});
+        return {
+          ctorKeys,
+          selReturnKeys: Object.keys(sel),
+          selWpType: loco.currentWaypointType,
+          nextWaypointDir: dir,
+          maxSpeed: loco.maxSpeed,
+          acceleration: loco.acceleration,
+          deceleration: loco.deceleration,
+          totalDistanceToTravel: loco.totalDistanceToTravel,
+        };
+      },
+    ],
   },
   {
     name: "game/type/SpeedType",

@@ -28,17 +28,20 @@ export enum HoverWaypointType {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class HoverLocomotor {
   hoverRules: any;
-  currentSpeed = 0;
-  distanceTravelled = 0;
-  carryOverDistance = 0;
-  currentWaypointType: HoverWaypointType = HoverWaypointType.None;
-  nextWaypointDir = new Vector2();
+  // 字段一律不带初始化器（同 DriveLocomotor）：孪生构造期只有 6 个键 ——
+  // hoverRules / currentSpeed / distanceTravelled / carryOverDistance /
+  // currentWaypointType / nextWaypointDir，全部由构造函数赋值。
+  currentSpeed: number;
+  distanceTravelled: number;
+  carryOverDistance: number;
+  currentWaypointType: HoverWaypointType;
+  nextWaypointDir: Vector2;
   initialPosition: any;
   // 以下由 onNewWaypoint 计算。
-  maxSpeed = 0;
-  acceleration = 0;
-  deceleration = 0;
-  totalDistanceToTravel = 0;
+  maxSpeed: number;
+  acceleration: number;
+  deceleration: number;
+  totalDistanceToTravel: number;
 
   constructor(hoverRules: any) {
     this.hoverRules = hoverRules;

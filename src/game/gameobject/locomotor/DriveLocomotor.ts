@@ -42,12 +42,14 @@ export enum WaypointType {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class DriveLocomotor {
   game: any;
-  hasMomentum = false;
-  moveOnCurve = false;
-  currentSpeed = 0;
-  distanceTravelled = 0;
-  carryOverDistance = 0;
-  currentWaypointType: WaypointType = WaypointType.None;
+  // 字段一律不带初始化器：带初始化器会被 tsc 提到构造函数最前面，既改变
+  // Object.keys() 顺序、又会在构造期多出键；孪生只在构造函数里按上述顺序赋值。
+  hasMomentum: boolean;
+  moveOnCurve: boolean;
+  currentSpeed: number;
+  distanceTravelled: number;
+  carryOverDistance: number;
+  currentWaypointType: WaypointType;
   initialPosition: any;
   steerCurve: any;
   lastPosition: any;
@@ -118,7 +120,7 @@ export class DriveLocomotor {
         this.steerCurve.add(new QuadraticBezierCurveModule.QuadraticBezierCurve(midPoint, lastCenter, endTangent));
         this.steerCurve.add(new LineCurveModule.LineCurve(endTangent, prevCenter));
         this.lastPosition = startPos;
-        return prevCenter;
+        return prevWaypoint;
       }
     } else {
       this.currentWaypointType =

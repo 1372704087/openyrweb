@@ -49,9 +49,6 @@ const DESC = {
 
 
   "game/gameobject/trait/AttackTrait": { class: "AttackTrait", desc: "战斗攻击 trait（目标选择/武器匹配/攻击状态机/开火/机会火/分散火力）。" },
-  "game/gameobject/locomotor/JumpjetLocomotor": { class: "JumpjetLocomotor", desc: "跳跃机移动器（抛物线空中机动/坠毁轨迹/原地盘旋）。" },
-  "game/gameobject/locomotor/MissileLocomotor": { class: "MissileLocomotor", desc: "导弹移动器（直线弹道/抬升/转向/加速度/目标跟踪）。" },
-  "game/gameobject/locomotor/WingedLocomotor": { class: "WingedLocomotor", desc: "飞行器移动器（空中巡航/机场起降/拍照/坠毁轨迹）。" },
 };
 
 function fail(msg) {

@@ -2372,10 +2372,58 @@
   },
   "game/gameobject/locomotor/DriveLocomotor": {
     "0": "function",
-    "1": "undefined"
+    "1": {
+      "ctorKeys": [
+        "game",
+        "hasMomentum",
+        "moveOnCurve",
+        "currentSpeed",
+        "distanceTravelled",
+        "carryOverDistance",
+        "currentWaypointType"
+      ],
+      "firstKeys": [
+        "tile"
+      ],
+      "firstTile": {
+        "rx": 12,
+        "ry": 10
+      },
+      "wpType": 3,
+      "curveReturnKeys": [
+        "tile"
+      ],
+      "curveReturnHasTile": true,
+      "curveReturnTile": {
+        "rx": 14,
+        "ry": 11
+      },
+      "curveLength": 1074.814
+    }
   },
   "game/gameobject/locomotor/HoverLocomotor": {
     "0": "function",
-    "1": "lazy"
+    "1": {
+      "ctorKeys": [
+        "hoverRules",
+        "currentSpeed",
+        "distanceTravelled",
+        "carryOverDistance",
+        "currentWaypointType",
+        "nextWaypointDir"
+      ],
+      "selReturnKeys": [
+        "tile"
+      ],
+      "selWpType": 1,
+      "nextWaypointDir": {
+        "x": -1,
+        "y": 0
+      },
+      "maxSpeed": 6,
+      "acceleration": 0.013333333333333334,
+      "deceleration": 0.013333333333333334,
+      "totalDistanceToTravel": 512
+    }
   }
 }
