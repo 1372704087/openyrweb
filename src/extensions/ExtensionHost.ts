@@ -220,35 +220,24 @@ export class ExtensionHost {
         console.warn(`Extension "${ext.id}" applyToRules failed`, err);
       }
     }
-    // 内置扩展功能开关 → 引擎规则键注入：在 Rules 解析前写入对应段，
-    // 与 INI 作者手写的键等效（源码内置扩展与引擎一体，不受插件命名空间
-    // 隔离约束）。每个扩展只控制自身对应的键，总开关关闭的扩展不写键：
+    // 内置扩展功能开关 → 引擎规则键注入：开关「开」= 读取(注入)该拓展
+    // 自身对应的键；「关」= 不读取键，不写任何键，走默认引擎逻辑。
+    // 总开关关闭的拓展同样不写键：
     //  - ares「AI克隆生产」开 → [GlobalControls] AllowParallelAIQueues=yes
-    //    关 → AllowParallelAIQueues=no（Ares 自身键，反极性）
     //  - npext「AI克隆生产」开 → [General] DisableParallelAIQueues=no
-    //    关 → DisableParallelAIQueues=yes（NPatch 自身键）
     //  - npext「AI超越上限生产」开 → EnableAIBuildLimitation=no
-    //    关 → EnableAIBuildLimitation=yes
-    // 引擎侧统一归一读取（FactoryTrait/Production）：任一禁用键成立即禁止。
-    // 两个拓展总开关都关闭时不写任何键，走默认引擎逻辑。
+    // 引擎侧统一归一读取(FactoryTrait/Production)：注入的键生效时,
+    // AI 多工厂并行生产逻辑被显式启用;未注入时即为默认引擎行为。
     if (ini?.getOrCreateSection) {
       const section = ini.getOrCreateSection("General");
       const globalControls = ini.getOrCreateSection("GlobalControls");
-      if (config.getMaster("ares"))
-        globalControls.set(
-          "AllowParallelAIQueues",
-          config.getFeatureRaw("ares", "aiCloneProduction") ? "yes" : "no",
-        );
+      if (config.getMaster("ares") && config.getFeatureRaw("ares", "aiCloneProduction"))
+        globalControls.set("AllowParallelAIQueues", "yes");
       if (config.getMaster("npext")) {
-        section.set(
-          "DisableParallelAIQueues",
-          config.getFeatureRaw("npext", "aiCloneProduction") ? "no" : "yes",
-        );
-        // 「AI超越上限生产」开 = AI 可超限 → EnableAIBuildLimitation=no(不启用约束)
-        section.set(
-          "EnableAIBuildLimitation",
-          config.getFeatureRaw("npext", "aiOverLimitProduction") ? "no" : "yes",
-        );
+        if (config.getFeatureRaw("npext", "aiCloneProduction"))
+          section.set("DisableParallelAIQueues", "no");
+        if (config.getFeatureRaw("npext", "aiOverLimitProduction"))
+          section.set("EnableAIBuildLimitation", "no");
       }
     }
   }
