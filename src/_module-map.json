@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1320,
+  "moduleCount": 1321,
   "modules": [
     {
       "name": "extensions/ExtensionDefinition",
@@ -13621,6 +13621,7 @@
         "extensions/ExtensionConfig",
         "extensions/ares/AresExtension",
         "extensions/phobos/PhobosExtension",
+        "extensions/npext/NPextExtension",
         "extensions/ExtensionContext",
         "extensions/ExtensionEventBus"
       ],
@@ -13668,6 +13669,12 @@
       "deps": [
         "extensions/phobos/PhobosVersion"
       ],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/npext/NPextExtension",
+      "file": "extensions/npext/NPextExtension.ts.js",
+      "deps": [],
       "bytes": 0
     }
   ]
