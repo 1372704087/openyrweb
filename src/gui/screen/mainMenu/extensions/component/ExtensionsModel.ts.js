@@ -31,6 +31,7 @@ System.register(
                   id: t2.id,
                   labelKey: t2.labelKey,
                   hintKey: t2.hintKey,
+                  groupKey: t2.groupKey,
                   enabled: e.getFeatureRaw(t.id, t2.id),
                 })),
               })),

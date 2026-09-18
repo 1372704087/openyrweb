@@ -2,7 +2,8 @@
 // deps: ["react","gui/component/List","gui/component/Image","gui/screen/mainMenu/extensions/component/ExtensionsModel"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// 扩展页左右分栏：左列扩展，右列仅「启用此拓展」。Phobos 版本警告画在对局 HUD。
+// 扩展页左右分栏：左列扩展，右列主开关 + 子功能开关（按子分类分组）。
+// Phobos 版本警告画在对局 HUD。
 
 System.register(
   "gui/screen/mainMenu/extensions/component/ExtensionsOpts",
@@ -43,6 +44,49 @@ System.register(
             let u = i.extensions.find((e) => e.id === c) || i.extensions[0];
             function d(e) {
               (m.ExtensionsModel.setMaster(e, !u.master), r(m.ExtensionsModel.snapshot()));
+            }
+            // 子功能开关：总开关关闭时置灰不生效（列表内提示行说明）。
+            function p(e) {
+              u &&
+                u.master &&
+                (m.ExtensionsModel.setFeature(u.id, e.id, !e.enabled), r(m.ExtensionsModel.snapshot()));
+            }
+            function v(f) {
+              return s.createElement(
+                l.ListItem,
+                {
+                  key: u.id + "." + f.id,
+                  disabled: !u.master,
+                  tooltip: f.hintKey ? t.get(f.hintKey) : void 0,
+                  onClick: () => p(f),
+                },
+                s.createElement(
+                  "label",
+                  { className: "extensions-feature-row", onClick: (e) => e.stopPropagation() },
+                  s.createElement("input", {
+                    type: "checkbox",
+                    checked: f.enabled,
+                    disabled: !u.master,
+                    onChange: () => p(f),
+                  }),
+                  s.createElement("span", { className: "label" }, t.get(f.labelKey)),
+                ),
+              );
+            }
+            // 子分类：按 groupKey 分组渲染（如「新增或增强的逻辑」），无分组的紧跟主开关。
+            function g() {
+              var o = [],
+                k = [];
+              for (var f of u.features.filter((f) => f.groupKey)) {
+                var q = k.find((x) => x.key === f.groupKey);
+                q || k.push((q = { key: f.groupKey, items: [] }));
+                q.items.push(f);
+              }
+              for (var q2 of k) {
+                o.push(s.createElement(l.ListHeader, { key: u.id + ".group." + q2.key }, t.get(q2.key)));
+                for (var f2 of q2.items) o.push(v(f2));
+              }
+              return o;
             }
             return s.createElement(
               "div",
@@ -103,6 +147,15 @@ System.register(
                             ),
                           ),
                         ),
+                        !u.master
+                          ? s.createElement(
+                              l.ListHeader,
+                              { key: u.id + ".masteroff" },
+                              t.get("TS:Ext.MasterOffHint"),
+                            )
+                          : null,
+                        u.features.filter((f) => !f.groupKey).map((f) => v(f)),
+                        g(),
                       )
                     : null,
                 ),

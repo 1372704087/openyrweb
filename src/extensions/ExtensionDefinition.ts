@@ -23,6 +23,11 @@ export interface ExtensionFeatureDef {
   labelKey: string;
   /** 提示文案 key（可选）。 */
   hintKey?: string;
+  /**
+   * 可选子分类文案 key：设置页按此分组展示（如「新增或增强的逻辑」）；
+   * 无 groupKey 的功能直接跟在主开关后。
+   */
+  groupKey?: string;
   /** 默认是否开启（总开关默认开时生效）。 */
   defaultEnabled?: boolean;
 }

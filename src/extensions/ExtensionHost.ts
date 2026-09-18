@@ -218,6 +218,23 @@ export class ExtensionHost {
         console.warn(`Extension "${ext.id}" applyToRules failed`, err);
       }
     }
+    // 内置扩展功能开关 → 引擎规则键注入：在 Rules 解析前写入 [General]，
+    // 与 INI 作者手写的键等效（源码内置扩展与引擎一体，不受插件命名空间
+    // 隔离约束）。开关缺省开启时不写任何键，保持原版风格：
+    //  - npext「AI克隆生产」关闭      → DisableParallelAIQueues=yes
+    //    （FactoryTrait.onTick 据此禁止 AI 多工厂并行出货）
+    //  - npext「AI超越上限生产」关闭  → EnableAIBuildLimitation=yes
+    //    （Production.isAvailableForProduction 据此让 AI 受 BuildLimit 约束）
+    // 总开关关闭时整个扩展视为未定制，同样不注入。
+    if (ini?.getOrCreateSection) {
+      const section = ini.getOrCreateSection("General");
+      if (config.getMaster("npext")) {
+        if (!config.getFeatureRaw("npext", "aiCloneProduction"))
+          section.set("DisableParallelAIQueues", "yes");
+        if (!config.getFeatureRaw("npext", "aiOverLimitProduction"))
+          section.set("EnableAIBuildLimitation", "yes");
+      }
+    }
   }
 
   // ------------------------------------------------------------------

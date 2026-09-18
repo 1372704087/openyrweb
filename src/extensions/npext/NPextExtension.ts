@@ -42,6 +42,24 @@ export const npextExtension: ExtensionDefinition = {
       hintKey: "STT:Ext.NPext.Feature.Weapons",
       defaultEnabled: true,
     },
+    {
+      // 「AI克隆生产」：关闭后向 [General] 注入 DisableParallelAIQueues=yes，
+      // AI 同一时刻只从一座同类工厂出货（见 ExtensionHost.applyToRules 注入）。
+      id: "aiCloneProduction",
+      labelKey: "TS:Ext.NPext.Feature.AICloneProduction",
+      hintKey: "STT:Ext.NPext.Feature.AICloneProduction",
+      groupKey: "TS:Ext.NPext.Group.EnhancedLogic",
+      defaultEnabled: true,
+    },
+    {
+      // 「AI超越上限生产」：关闭后向 [General] 注入 EnableAIBuildLimitation=yes，
+      // AI 生产受 BuildLimit 约束（Production.isAvailableForProduction 生效点）。
+      id: "aiOverLimitProduction",
+      labelKey: "TS:Ext.NPext.Feature.AIOverLimitProduction",
+      hintKey: "STT:Ext.NPext.Feature.AIOverLimitProduction",
+      groupKey: "TS:Ext.NPext.Group.EnhancedLogic",
+      defaultEnabled: true,
+    },
   ],
   hooks: {
     applyToRules(ctx: ExtensionHookContext) {
