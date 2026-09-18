@@ -253,6 +253,22 @@ html:-moz-full-screen body {
     width: 100%;
 }
 
+#ra2web-root .menu-tooltip .menu-tooltip-text {
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+/* 提示文本溢出提示条时左右往返滚动;--tooltip-shift 为 MenuTooltip 实测的溢出负偏移 */
+#ra2web-root .menu-tooltip .menu-tooltip-text.scroll {
+    animation: menu-tooltip-marquee 9s linear 0.6s infinite alternate;
+}
+
+@keyframes menu-tooltip-marquee {
+    0%, 15% { transform: translateX(0); }
+    85%, 100% { transform: translateX(var(--tooltip-shift, 0px)); }
+}
+
 #ra2web-root .login-wrapper {
     width: 451px;
     height: 500px;
