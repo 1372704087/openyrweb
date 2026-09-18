@@ -244,13 +244,18 @@ html:-moz-full-screen body {
     padding: 10px;
     box-sizing: border-box;
     width: 0;
-    overflow: hidden;
     white-space: nowrap;
 }
 
 #ra2web-root .menu-tooltip.anim {
     transition: width .4s;
     width: 100%;
+}
+
+/* 裁切层 = 内容盒:滚动文本只在本层内滑动,两端各留出与默认位置一致的 padding 缩进 */
+#ra2web-root .menu-tooltip .menu-tooltip-clip {
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #ra2web-root .menu-tooltip .menu-tooltip-text {
