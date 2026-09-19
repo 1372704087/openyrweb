@@ -6258,6 +6258,122 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/AttackTask",
+    tsjs: "src/game/gameobject/task/AttackTask.ts.js",
+    probes: [
+      (ns) => typeof ns.AttackTask,
+      // 构造期键集合 + duplicate/setWeapon/forceAttack/目标更新缓存。
+      (ns, THREE) => {
+        const target = { obj: { tile: { rx: 1, ry: 1 } }, tile: { rx: 1, ry: 1 }, equals: () => false, getBridge: () => undefined };
+        const game = { map: { tileOccupation: {}, tiles: {} } };
+        const task = new ns.AttackTask(game, target, { rules: {} }, { force: false });
+        const dup = task.duplicate();
+        task.setWeapon({ rules: { range: 5 } });
+        task.setForceAttack(true);
+        task.requestTargetUpdate(target);
+        return {
+          ctorKeys: Object.keys(task),
+          dupIsTask: dup instanceof ns.AttackTask,
+          forceOn: task.options.force,
+          weaponRange: task.weapon.rules.range,
+          needsTargetUpdate: task.needsTargetUpdate === target,
+          linesIsAttack: task.targetLinesConfig.isAttack,
+        };
+      },
+      // onStart：无攻击特性抛错；弹药耗尽直接取消。
+      (ns) => {
+        const mkTarget = () => ({ tile: { rx: 0, ry: 0 }, obj: undefined, getBridge: () => undefined });
+        const task = new ns.AttackTask({ map: { tileOccupation: {}, tiles: {} } }, mkTarget(), { rules: {} }, {});
+        let noTraitError = null;
+        try {
+          task.onStart({ name: "E1", ammo: 10 });
+        } catch (e) {
+          noTraitError = e.message;
+        }
+        const task2 = new ns.AttackTask({ map: { tileOccupation: {}, tiles: {} } }, mkTarget(), { rules: {} }, {});
+        const objNoAmmo = { name: "E1", ammo: 0, attackTrait: {} };
+        task2.onStart(objNoAmmo);
+        return { noTraitError, cancelled: task2.status === 4 };
+      },
+      // 取消流程 + FireUp 被瘫痪 + 驻军开火路径（Firing 态直入）。
+      (ns, THREE, mod) => {
+        const AttackState = mod("game/gameobject/trait/AttackTrait").AttackState;
+        const game = {
+          map: { tileOccupation: { getObjectsOnTile: () => [] }, tiles: {} },
+          rules: { general: { prism: { type: "PTOWER", supportModifier: 0.5, supportMax: 3 } } },
+          createTarget: (onBridge, tile) => ({ onBridge, tile }),
+        };
+        const target = {
+          obj: { isTechno: () => true, owner: 2, tile: { rx: 3, ry: 3 }, isDestroyed: false },
+          tile: { rx: 3, ry: 3, onBridgeLandType: null },
+          equals: () => true,
+          getBridge: () => undefined,
+        };
+        const task = new ns.AttackTask(game, target, { rules: {}, type: 0 }, {});
+        // 取消流程（attackState 非 FireUp）→ 立即结束。
+        const soldier = {
+          attackTrait: { attackState: AttackState.CheckRange, isDisabled: () => false },
+          magnetronDragging: undefined,
+          airSpawnTrait: undefined,
+          isInfantry: () => true,
+          isVehicle: () => false,
+          isBuilding: () => false,
+          isUnit: () => true,
+          moveTrait: { isMoving: () => false },
+          transportTrait: undefined,
+          garrisonTrait: undefined,
+          poweredTrait: undefined,
+          berserkTrait: undefined,
+          ammo: 10,
+          zone: 0,
+          tile: { rx: 2, ry: 3, onBridgeLandType: null },
+          rules: { movementZone: 0 },
+        };
+        task.status = 3; // Cancelling
+        const cancelResult = task.onTick(soldier);
+        // FireUp + 被瘫痪 → 结束。
+        soldier.attackTrait.attackState = AttackState.FireUp;
+        soldier.attackTrait.isDisabled = () => true;
+        const disabledResult = task.onTick(soldier);
+        // Firing 态直入：驻军建筑每名驻军开火 → JustFired。
+        const fired = [];
+        const occupantWeapon = {
+          getCooldownTicks: () => 0,
+          targeting: { canTarget: () => true },
+          fire: (t, g, m) => fired.push([t === target, m]),
+        };
+        const building = {
+          attackTrait: { attackState: AttackState.Firing, isDisabled: () => false },
+          magnetronDragging: undefined,
+          airSpawnTrait: undefined,
+          isInfantry: () => false,
+          isVehicle: () => false,
+          isBuilding: () => true,
+          isUnit: () => false,
+          name: "GADUNA",
+          moveTrait: undefined,
+          transportTrait: undefined,
+          garrisonTrait: { isOccupied: () => true, units: [{ armedTrait: { getGarrisonWeapon: () => occupantWeapon } }] },
+          poweredTrait: undefined,
+          berserkTrait: undefined,
+          parasiteableTrait: undefined,
+          ammo: 10,
+          zone: 0,
+          tile: { rx: 2, ry: 3, onBridgeLandType: null },
+          rules: { movementZone: 0 },
+        };
+        const task3 = new ns.AttackTask(game, target, { rules: {}, type: 0 }, {});
+        task3.onTick(building);
+        return {
+          cancelResult,
+          disabledResult,
+          buildingState: building.attackTrait.attackState,
+          fired,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -6876,6 +6992,11 @@ function makeStubFactory(name) {
     // MoveTask 循环依赖无法在迷你运行时复刻），这里注入与生产实现一致的
     // 常量（孪生/转换版取值相同），让 MoveTask 状态机探针能真实驱动。
     // 新旧两个变体共用同一份常量，parity 比较依然严格对等。
+    if (exportName === "AttackTrait") {
+      // AttackState 同理注入（AttackTrait ↔ AttackTask 循环依赖无法在
+      // 迷你运行时复刻；孪生/转换版取值一致）。
+      exports("AttackState", { Idle: 0, CheckRange: 1, PrepareToFire: 2, FireUp: 3, Firing: 4, JustFired: 5 });
+    }
     if (exportName === "MoveTrait") {
       exports("MoveState", { Idle: 0, ReachedNextWaypoint: 1, PlanMove: 2, Moving: 3 });
       exports("MoveResult", { Success: 0, Cancel: 1, CloseEnough: 2, Fail: 3 });

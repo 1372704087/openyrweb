@@ -41,6 +41,7 @@ declare namespace THREE {
     toArray(): number[];
     length(): number;
     lengthSq(): number;
+    equals(v: THREE.Vector3): boolean;
     distanceToSquared(v: THREE.Vector3): number;
     dot(v: THREE.Vector3): number;
     sub(v: THREE.Vector3): this;

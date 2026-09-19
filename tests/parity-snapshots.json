@@ -3320,5 +3320,59 @@
       "overlay": "a",
       "fallback": "s"
     }
+  },
+  "game/gameobject/task/AttackTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "game",
+        "target",
+        "weapon",
+        "options",
+        "moveExecuted",
+        "moveAttempts",
+        "crushApproachFailed",
+        "crushApproachStallTicks",
+        "lastCrushApproachDistance",
+        "rangeCheckCooldown",
+        "lastInRangeTargetPosition",
+        "lastInRangeSelfPosition",
+        "initialIndirectTarget",
+        "forceDropTarget",
+        "rangeHelper",
+        "losHelper",
+        "targetLinesConfig",
+        "needsTargetUpdate"
+      ],
+      "dupIsTask": true,
+      "forceOn": true,
+      "weaponRange": 5,
+      "needsTargetUpdate": true,
+      "linesIsAttack": true
+    },
+    "2": {
+      "noTraitError": "Object E1 has no attack trait",
+      "cancelled": true
+    },
+    "3": {
+      "cancelResult": true,
+      "disabledResult": true,
+      "buildingState": 5,
+      "fired": [
+        [
+          true,
+          1
+        ]
+      ]
+    }
   }
 }
