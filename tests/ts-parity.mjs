@@ -6374,6 +6374,65 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/move/MoveInWeaponRangeTask",
+    tsjs: "src/game/gameobject/task/move/MoveInWeaponRangeTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveInWeaponRangeTask,
+      // 模块导出 STRAFE_CLOSE_ENOUGH=2 + super 参数解析（非 GameObject 目标
+      // 不放行阻断者）。
+      (ns, THREE) => {
+        const tileTarget = { rx: 9, ry: 9 };
+        const task = new ns.MoveInWeaponRangeTask({ map: { tileOccupation: {}, tiles: {} } }, tileTarget, false, { range: 5, rules: {} });
+        return {
+          strafeConst: ns.STRAFE_CLOSE_ENOUGH,
+          superDest: task.$args[1] === tileTarget,
+          noIgnoredBlockers: task.$args[3].ignoredBlockers === undefined,
+          noPathFinderIgnored: task.$args[3].pathFinderIgnoredBlockers === undefined,
+          crushMode: task.crushMode,
+          recalcMinRange: task.recalcMinRange,
+          isTarget: task.target === tileTarget,
+        };
+      },
+      // 飞行语义纯函数：蛇形/轰炸判定、机动返航、crush 接近、延迟取消。
+      (ns, THREE) => {
+        const task = new ns.MoveInWeaponRangeTask(
+          { map: { tileOccupation: {}, tiles: {} } },
+          { tile: { rx: 4, ry: 4 } },
+          false,
+          { range: 6, rules: {}, projectileRules: { iniRot: 5 } },
+        );
+        task.game = { map: { tileOccupation: {} } };
+        task.targetTile = { rx: 4, ry: 4 };
+        task.weapon.projectileRules = { iniRot: 5 };
+        const proto = ns.MoveInWeaponRangeTask.prototype;
+        const fighterFly = { rules: { movementZone: 1, locomotor: 4, fighter: true }, ammo: 3 };
+        const bomberFly = { rules: { movementZone: 1, locomotor: 4, fighter: false } };
+        const ground = { rules: { movementZone: 0, locomotor: 1 } };
+        const crushTask = new ns.MoveInWeaponRangeTask({ map: { tileOccupation: {}, tiles: {} } }, { tile: { rx: 4, ry: 4 } }, false, { range: 5, rules: {} }, true);
+        crushTask.game = { map: { tileOccupation: {} } };
+        crushTask.targetTile = { rx: 4, ry: 4 };
+        const crushClose = proto.isCloseEnoughToDest.call(crushTask, {}, { rx: 4, ry: 4 });
+        const deferTask = new ns.MoveInWeaponRangeTask({ map: { tileOccupation: {}, tiles: {} } }, { tile: {} }, false, { range: 1, rules: {} });
+        deferTask.bomberManeuverTile = { rx: 0, ry: 0 };
+        let cancelThrew = false;
+        try {
+          proto.cancel.call(deferTask);
+        } catch (e) {
+          cancelThrew = true;
+        }
+        return {
+          strafeFighter: proto.shouldAirStrafe.call(task, fighterFly),
+          strafeGround: proto.shouldAirStrafe.call(task, ground),
+          bombingFighter: proto.isBombingRun.call(task, bomberFly),
+          bomberCanReturnNoTile: proto.bomberCanReturn.call(task, { rx: 0, ry: 0 }),
+          crushClose,
+          cancelDeferred: deferTask.cancelRequested === true,
+          cancelThrew,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

@@ -23,6 +23,8 @@ declare namespace THREE {
     lengthSq(): number;
     distanceToSquared(v: THREE.Vector2): number;
     multiplyScalar(scalar: number): this;
+    normalize(): this;
+    floor(): this;
     lerp(v: THREE.Vector2, alpha: number): this;
     round(): this;
     angle(): number;

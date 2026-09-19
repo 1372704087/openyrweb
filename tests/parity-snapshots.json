@@ -3374,5 +3374,26 @@
         ]
       ]
     }
+  },
+  "game/gameobject/task/move/MoveInWeaponRangeTask": {
+    "0": "function",
+    "1": {
+      "strafeConst": 2,
+      "superDest": true,
+      "noIgnoredBlockers": true,
+      "noPathFinderIgnored": true,
+      "crushMode": false,
+      "recalcMinRange": true,
+      "isTarget": true
+    },
+    "2": {
+      "strafeFighter": false,
+      "strafeGround": false,
+      "bombingFighter": false,
+      "bomberCanReturnNoTile": false,
+      "crushClose": true,
+      "cancelDeferred": true,
+      "cancelThrew": false
+    }
   }
 }

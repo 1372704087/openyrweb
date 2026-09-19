@@ -452,7 +452,7 @@ export class AttackTask extends Task {
       // limboLaunch：接管单位当前 MoveTask 强制取消（寄生Unit贴身）。
       let cancelledMoveChild = false;
       if (this.weapon.rules.limboLaunch) {
-        let moveChild = moveInRangeChild;
+        let moveChild: any = moveInRangeChild;
         if (!moveChild) {
           const currentTask = object.unitOrderTrait.getCurrentTask();
           if (currentTask && currentTask !== this && attackTrait.getOpportunityFireTask() === this) {
