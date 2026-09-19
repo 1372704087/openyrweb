@@ -5524,6 +5524,151 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/move/MoveTask",
+    tsjs: "src/game/gameobject/task/move/MoveTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveTask,
+      // 构造期键集合（含 Task 基类键）+ duplicate/setForceMove/updateDestination/
+      // isCloseEnoughToDest 纯函数行为。
+      (ns, THREE) => {
+        const targetTile = { rx: 10, ry: 10 };
+        const task = new ns.MoveTask({ map: { tileOccupation: {} } }, targetTile, false, undefined);
+        const ctorKeys = Object.keys(task);
+        const dup = task.duplicate();
+        task.setForceMove(true);
+        const forceOn = task.options.forceMove;
+        task.setForceMove(false);
+        const forceOff = task.options.forceMove;
+        task.updateDestination([{ tile: { rx: 3, ry: 4 } }], { x: 100, y: 50 });
+        const dest = { x: task.destinationLeptons.x, y: task.destinationLeptons.y };
+        task.options = { closeEnoughTiles: 2 };
+        const closeIn = task.isCloseEnoughToDest({}, { rx: 12, ry: 10 }, 2);
+        const closeOut = task.isCloseEnoughToDest({}, { rx: 13, ry: 10 }, 2);
+        const closeUndef = task.isCloseEnoughToDest({}, { rx: 99, ry: 99 }, undefined);
+        return {
+          ctorKeys,
+          dupIsMoveTask: dup instanceof ns.MoveTask,
+          dupTarget: dup.targetTile === targetTile,
+          forceOn,
+          forceOff,
+          dest,
+          closeIn,
+          closeOut,
+          closeUndef,
+        };
+      },
+      // onStart + 到达收尾：寻路 → 到达判定 → canStopAtTile → Success。
+      (ns, THREE) => {
+        const targetTile = { rx: 5, ry: 5 };
+        const pathNode = { tile: targetTile, onBridge: undefined };
+        const game = {
+          map: {
+            mapBounds: { isWithinBounds: () => true },
+            getObjectsOnTile: () => [],
+            getGroundObjectsOnTile: () => [],
+            terrain: { computePath: () => [pathNode] },
+            tileOccupation: {},
+          },
+        };
+        const task = new ns.MoveTask(game, targetTile, false, undefined);
+        const object = {
+          tile: targetTile,
+          onBridge: false,
+          zone: 0,
+          rules: { movementZone: 0, speedType: 1, dock: [] },
+          isInfantry: () => false,
+          position: { computeSubCellOffset: () => ({ x: 128, y: 128 }) },
+          moveTrait: {
+            currentWaypoint: undefined,
+            locomotor: { ignoresTerrain: false },
+            lastTargetOffset: undefined,
+            lastVelocity: undefined,
+            moveState: 0,
+            velocity: { set: () => {}, length: () => 0, clone: () => ({}) },
+            unreservePathNodes: () => {},
+            isDisabled: () => false,
+            collisionState: 1,
+            reservedPathNodes: [],
+          },
+        };
+        task.onStart(object);
+        const startedState = { moveState: object.moveTrait.moveState, pathLen: task.path.length };
+        const done = task.onTick(object);
+        return {
+          startedState,
+          done,
+          lastMoveResult: object.moveTrait.lastMoveResult,
+          endMoveState: object.moveTrait.moveState,
+          destination: { x: task.destinationLeptons.x, y: task.destinationLeptons.y },
+        };
+      },
+      // 三态全循环：PlanMove（占路）→ Moving（locomotor.tick）→ 到达 Success。
+      // locomotor 用 stub 记录 tick 收到的途经点/目的地坐标。
+      (ns, THREE) => {
+        const targetTile = { rx: 6, ry: 5 };
+        const startTile = { rx: 5, ry: 5 };
+        const pathNodes = [
+          { tile: targetTile, onBridge: undefined },
+          { tile: startTile, onBridge: undefined },
+        ];
+        const occupied = [];
+        const tickArgs = [];
+        const game = {
+          map: {
+            mapBounds: { isWithinBounds: () => true },
+            getObjectsOnTile: () => [],
+            getGroundObjectsOnTile: () => [],
+            terrain: { computePath: () => pathNodes, getPassableSpeed: () => 5, findObstacles: () => [] },
+            tileOccupation: { occupySingleTile: (tile, obj) => occupied.push(tile) },
+          },
+        };
+        const locomotor = {
+          ignoresTerrain: false,
+          onNewWaypoint: () => undefined,
+          tick: (object, waypointLeptons, destLeptons, isCancelled) => {
+            tickArgs.push({
+              waypoint: { x: waypointLeptons.x, y: waypointLeptons.y },
+              dest: { x: destLeptons.x, y: destLeptons.y },
+              isCancelled,
+            });
+            return { distance: { x: 0, y: 0, z: 0, length: () => 0 }, done: true };
+          },
+        };
+        const task = new ns.MoveTask(game, targetTile, false, undefined);
+        const object = {
+          tile: startTile,
+          onBridge: false,
+          zone: 0,
+          rules: { movementZone: 0, speedType: 1, dock: [] },
+          isInfantry: () => false,
+          position: { computeSubCellOffset: () => ({ x: 128, y: 128 }) },
+          moveTrait: {
+            currentWaypoint: undefined,
+            locomotor,
+            lastTargetOffset: undefined,
+            lastVelocity: undefined,
+            moveState: 0,
+            velocity: { set: () => {}, length: () => 0, clone: () => ({}) },
+            unreservePathNodes: () => {},
+            isDisabled: () => false,
+            collisionState: 1,
+            reservedPathNodes: [],
+          },
+        };
+        task.onStart(object);
+        const done = task.onTick(object);
+        return {
+          done,
+          lastMoveResult: object.moveTrait.lastMoveResult,
+          tickArgs,
+          occupiedLen: occupied.length,
+          occupiedTile: occupied[0],
+          reservedLen: object.moveTrait.reservedPathNodes.length,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
@@ -6049,6 +6194,15 @@ function makeStubFactory(name) {
       },
     });
     exports(exportName, proxyClass);
+    // MoveTrait 的三个移动枚举在桩分支里拿不到真实模块（MoveTrait ↔
+    // MoveTask 循环依赖无法在迷你运行时复刻），这里注入与生产实现一致的
+    // 常量（孪生/转换版取值相同），让 MoveTask 状态机探针能真实驱动。
+    // 新旧两个变体共用同一份常量，parity 比较依然严格对等。
+    if (exportName === "MoveTrait") {
+      exports("MoveState", { Idle: 0, ReachedNextWaypoint: 1, PlanMove: 2, Moving: 3 });
+      exports("MoveResult", { Success: 0, Cancel: 1, CloseEnough: 2, Fail: 3 });
+      exports("CollisionState", { Waiting: 0, Resolved: 1 });
+    }
     return { setters: [], execute() {} };
   };
 }

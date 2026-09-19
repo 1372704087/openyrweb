@@ -2632,5 +2632,82 @@
         "z": 0
       }
     }
+  },
+  "game/gameobject/task/move/MoveTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "game",
+        "targetTile",
+        "toBridge",
+        "options",
+        "logger",
+        "destinationLeptons",
+        "currentWaypointLeptons",
+        "needsPathUpdate",
+        "allObstaclesAreBlockers",
+        "blockedPathNodes",
+        "unreachableTargets",
+        "pushTried",
+        "cancelProcessed",
+        "cancelRepositionPending",
+        "targetLinesConfig"
+      ],
+      "dupIsMoveTask": true,
+      "dupTarget": true,
+      "forceOn": true,
+      "dest": {
+        "x": 868,
+        "y": 1074
+      },
+      "closeIn": true,
+      "closeOut": false,
+      "closeUndef": true
+    },
+    "2": {
+      "startedState": {
+        "moveState": 1,
+        "pathLen": 1
+      },
+      "done": true,
+      "lastMoveResult": 0,
+      "endMoveState": 1,
+      "destination": {
+        "x": 1408,
+        "y": 1408
+      }
+    },
+    "3": {
+      "done": true,
+      "lastMoveResult": 0,
+      "tickArgs": [
+        {
+          "waypoint": {
+            "x": 1664,
+            "y": 1408
+          },
+          "dest": {
+            "x": 1664,
+            "y": 1408
+          },
+          "isCancelled": false
+        }
+      ],
+      "occupiedLen": 1,
+      "occupiedTile": {
+        "rx": 6,
+        "ry": 5
+      },
+      "reservedLen": 1
+    }
   }
 }
