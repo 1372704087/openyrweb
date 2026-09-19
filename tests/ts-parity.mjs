@@ -5669,6 +5669,291 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/TurnTask",
+    tsjs: "src/game/gameobject/task/TurnTask.ts.js",
+    probes: [
+      (ns) => typeof ns.TurnTask,
+      // 原地转向：首 tick 的朝向/自转增量 + 转到位后清零并结束。
+      (ns) => {
+        const task = new ns.TurnTask(10);
+        const obj = { direction: 350, spinVelocity: 99, rules: { rot: 8 } };
+        const first = task.onTick(obj);
+        const afterFirst = { direction: obj.direction, spinVelocity: obj.spinVelocity };
+        let ticks = 1;
+        let done = first;
+        while (!done && ticks < 60) {
+          done = task.onTick(obj);
+          ticks++;
+        }
+        return {
+          ctorKeys: Object.keys(task),
+          first,
+          afterFirst,
+          ticks,
+          done,
+          finalDir: obj.direction,
+          finalSpin: obj.spinVelocity,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/MoveInsideTask",
+    tsjs: "src/game/gameobject/task/move/MoveInsideTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveInsideTask,
+      // 走进建筑：目的地取建筑中心；停驻/接近判定跟随"是否站在目标上"。
+      // 注意：trait/task 桩基类会让 new 派生类() 直接返回代理对象（原型方法
+      // 丢失），必须用 prototype.xxx.call(taskProxy) 直调真实方法才能驱动行为。
+      (ns) => {
+        const target = {
+          isBuilding: () => true,
+          centerTile: { rx: 10, ry: 10 },
+          tile: { rx: 9, ry: 9 },
+        };
+        const game = {
+          map: {
+            mapBounds: { isWithinBounds: (t) => t.rx === 10 && t.ry === 10 },
+            tileOccupation: {
+              calculateTilesForGameObject: () => [],
+              isTileOccupiedBy: (tile, tgt) => tile.rx === 10 && tile.ry === 10,
+            },
+          },
+        };
+        const task = new ns.MoveInsideTask(game, target);
+        // 桩基类不会执行真 MoveTask 构造函数，继承字段需在代理上手动补齐。
+        task.game = game;
+        const destTile = task.$args[1];
+        const proto = ns.MoveInsideTask.prototype;
+        return {
+          superDest: { rx: destTile.rx, ry: destTile.ry },
+          superOptions: task.$args[3],
+          isTarget: task.target === target,
+          canStopOn: proto.canStopAtTile.call(task, {}, { rx: 10, ry: 10 }, false),
+          canStopOff: proto.canStopAtTile.call(task, {}, { rx: 3, ry: 3 }, false),
+          closeOn: proto.isCloseEnoughToDest.call(task, {}, { rx: 10, ry: 10 }, 0),
+          closeOff: proto.isCloseEnoughToDest.call(task, {}, { rx: 3, ry: 3 }, 0),
+          reachedOn: (() => {
+            try {
+              return proto.hasReachedDestination.call(task, { tile: { rx: 10, ry: 10 }, onBridge: false });
+            } catch (e) {
+              // 同上：super.hasReachedDestination 桩下必抛，归一化后仍可对比。
+              return "threw";
+            }
+          })(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/MoveTargetTask",
+    tsjs: "src/game/gameobject/task/move/MoveTargetTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveTargetTask,
+      // 追击：super 参数（forceMove+忽略目标本体）、计数刷新与重置、追踪线形状。
+      // 实例方法经 prototype.onTick.call(taskProxy) 直调（见 MoveInsideTask 注释）。
+      (ns) => {
+        const target = {
+          tile: { rx: 8, ry: 8 },
+          onBridge: false,
+          moveTrait: { isIdle: () => false, currentWaypoint: { tile: { rx: 9, ry: 9 }, onBridge: false } },
+        };
+        const task = new ns.MoveTargetTask({}, target);
+        const lines = ns.MoveTargetTask.prototype.getTargetLinesConfig.call(task, {});
+        const obj = { tile: { rx: 0, ry: 0 }, moveTrait: { moveState: 1 } };
+        let ticks = 0;
+        for (let i = 0; i < 15 && task.tilesSinceTargetUpdate < 12; i++) {
+          try {
+            ns.MoveTargetTask.prototype.onTick.call(task, obj);
+          } catch (e) {
+            // 末尾 super.onTick 在桩基类下必抛（两侧一致）；计数已在抛出前更新。
+          }
+          ticks++;
+        }
+        return {
+          superForceMove: task.$args[3].forceMove,
+          superIgnored: task.$args[3].pathFinderIgnoredBlockers[0] === target,
+          superTargetTile: task.$args[1] === target.tile,
+          lines,
+          ticksUntilReset: ticks,
+          counterAfter: task.tilesSinceTargetUpdate,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/AttackMoveTask",
+    tsjs: "src/game/gameobject/task/move/AttackMoveTask.ts.js",
+    probes: [
+      (ns) => typeof ns.AttackMoveTask,
+      // 攻击移动：类型标记/复制/移动中标记已过首途经点。
+      // duplicate/onTick 经 prototype 直调；onTick 末尾的 super.onTick 在桩基类
+      // 下必抛（两侧一致），用 threw 布尔归一化，前置逻辑仍被真实驱动。
+      (ns) => {
+        const targetTile = { rx: 4, ry: 4 };
+        const task = new ns.AttackMoveTask({}, targetTile, false, { a: 1 });
+        // 补齐桩基类缺失的继承字段，让真实方法可运行。
+        task.game = {};
+        task.targetTile = targetTile;
+        task.toBridge = false;
+        task.options = { a: 1 };
+        const proto = ns.AttackMoveTask.prototype;
+        const dup = proto.duplicate.call(task);
+        const obj = { moveTrait: { moveState: 3 } };
+        let r;
+        try {
+          r = proto.onTick.call(task, obj);
+        } catch (e) {
+          r = "threw";
+        }
+        return {
+          isAttackMove: task.isAttackMove,
+          attackPerformed: task.attackPerformed,
+          passedFirstWaypoint: task.passedFirstWaypoint,
+          dupArgs: dup.$args[1] === targetTile && dup.$args[3].a === 1,
+          dupIsAttackMove: dup.isAttackMove === true,
+          onTickMoving: r,
+          passedAfter: task.passedFirstWaypoint,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/MoveNextToTask",
+    tsjs: "src/game/gameobject/task/move/MoveNextToTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveNextToTask,
+      // 走到旁边：中心目的地/粉碎机大门/接近判定/停驻判定。
+      // 实例方法经 prototype 直调（桩基类代理问题，见 MoveInsideTask 注释）。
+      (ns) => {
+        const target = {
+          isBuilding: () => true,
+          centerTile: { rx: 10, ry: 10 },
+          tile: { rx: 9, ry: 9 },
+          rules: {},
+          art: { foundation: { width: 2, height: 2 } },
+        };
+        const grinder = {
+          isBuilding: () => true,
+          tile: { rx: 9, ry: 9 },
+          rules: { grinding: true },
+          art: { foundation: { width: 2, height: 2 } },
+        };
+        const game = {
+          map: {
+            mapBounds: { isWithinBounds: (t) => t.rx >= 8 && t.ry >= 8 },
+            tiles: { getByMapCoords: (rx, ry) => ({ rx, ry }) },
+            tileOccupation: {
+              calculateTilesForGameObject: () => [],
+              isTileOccupiedBy: (tile, tgt) => tile.rx === 10 && tile.ry === 10,
+            },
+          },
+        };
+        const task = new ns.MoveNextToTask(game, target);
+        // 补齐桩基类缺失的继承字段（见 MoveInsideTask 注释）。
+        task.game = game;
+        const destTile = task.$args[1];
+        const proto = ns.MoveNextToTask.prototype;
+        const door = ns.MoveNextToTask.chooseTargetFoundationTile(grinder, game);
+        return {
+          superDest: { rx: destTile.rx, ry: destTile.ry },
+          superOptions: task.$args[3],
+          grinderDoor: { rx: door.rx, ry: door.ry },
+          closeUndef: proto.isCloseEnoughToDest.call(task, {}, { rx: 3, ry: 3 }, undefined),
+          closeNear: proto.isCloseEnoughToDest.call(task, {}, { rx: 11, ry: 10 }, Math.SQRT2),
+          canStopOn: proto.canStopAtTile.call(task, {}, { rx: 10, ry: 10 }, false),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/MoveAsideTask",
+    tsjs: "src/game/gameobject/task/move/MoveAsideTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveAsideTask,
+      // 让路：找到空位 → 解析并挂 MoveTask 子任务（stub 记录目的地与选项）。
+      (ns, THREE) => {
+        const tileAt = (rx, ry) => ({ rx, ry, z: 0, onBridgeLandType: null });
+        const center = tileAt(5, 5);
+        const game = {
+          map: {
+            tiles: { getByMapCoords: (rx, ry) => tileAt(rx, ry) },
+            mapBounds: { isWithinBounds: () => true },
+            terrain: { findObstacles: () => [] },
+            tileOccupation: { getBridgeOnTile: () => undefined },
+          },
+        };
+        const task = new ns.MoveAsideTask(game, new THREE.Vector2(1, 0));
+        const obj = {
+          tile: center,
+          onBridge: false,
+          owner: 1,
+          rules: { movementZone: 0 },
+          isInfantry: () => false,
+          moveTrait: { isDisabled: () => false, collisionState: 1, moveState: 3 },
+        };
+        const r1 = task.onTick(obj);
+        const child = task.children[0];
+        return {
+          ctorKeys: Object.keys(task),
+          r1,
+          resolved: task.resolved,
+          childStub: child && child.$stub,
+          childTarget: child && child.$args ? { rx: child.$args[1].rx, ry: child.$args[1].ry } : null,
+          childStrict: child && child.$args ? child.$args[3].strictCloseEnough : null,
+        };
+      },
+      // 让路：无空位 → 链式推挤同阵营挡路者（各挂 MoveAsideTask）+ 自身等待。
+      (ns, THREE) => {
+        const tileAt = (rx, ry) => ({ rx, ry, z: 0, onBridgeLandType: null });
+        const center = tileAt(5, 5);
+        const pusherTile = tileAt(6, 5);
+        const pushedTasks = [];
+        const pusher = {
+          isUnit: () => true,
+          owner: 1,
+          tile: pusherTile,
+          onBridge: false,
+          isInfantry: () => false,
+          isAircraft: () => false,
+          moveTrait: { collisionState: 1 },
+          unitOrderTrait: { hasTasks: () => false, addTask: (t) => pushedTasks.push(t) },
+        };
+        const game = {
+          map: {
+            tiles: { getByMapCoords: (rx, ry) => tileAt(rx, ry) },
+            mapBounds: { isWithinBounds: () => true },
+            terrain: { findObstacles: () => [{ obj: {} }] },
+            tileOccupation: {
+              getBridgeOnTile: () => undefined,
+              getGroundObjectsOnTile: (t) => (t === pusherTile ? [pusher] : []),
+            },
+          },
+        };
+        const task = new ns.MoveAsideTask(game, new THREE.Vector2(1, 0));
+        const obj = {
+          tile: center,
+          onBridge: false,
+          owner: 1,
+          rules: { movementZone: 0 },
+          isInfantry: () => false,
+          moveTrait: { isDisabled: () => false, collisionState: 1, moveState: 3 },
+        };
+        const r1 = task.onTick(obj);
+        const afterPush = { chainPushIssued: task.chainPushIssued, moveState: obj.moveTrait.moveState, collision: obj.moveTrait.collisionState };
+        const r2 = task.onTick(obj);
+        return {
+          r1,
+          pushedCount: pushedTasks.length,
+          pushedIsMoveAside: pushedTasks[0] instanceof ns.MoveAsideTask,
+          afterPush,
+          r2,
+          childCount: task.children.length,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

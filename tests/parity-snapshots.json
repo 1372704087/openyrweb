@@ -2709,5 +2709,182 @@
       },
       "reservedLen": 1
     }
+  },
+  "game/gameobject/task/TurnTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "direction"
+      ],
+      "first": false,
+      "afterFirst": {
+        "direction": 358,
+        "spinVelocity": 8
+      },
+      "ticks": 4,
+      "done": true,
+      "finalDir": 10,
+      "finalSpin": 0
+    }
+  },
+  "game/gameobject/task/move/MoveAsideTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "game",
+        "fromDirection",
+        "resolved",
+        "chainPushIssued",
+        "timeoutTicks"
+      ],
+      "r1": false,
+      "resolved": true,
+      "childStub": "game/gameobject/task/move/MoveTask",
+      "childTarget": {
+        "rx": 6,
+        "ry": 6
+      },
+      "childStrict": true
+    },
+    "2": {
+      "r1": false,
+      "pushedCount": 0,
+      "pushedIsMoveAside": false,
+      "afterPush": {
+        "chainPushIssued": true,
+        "moveState": 2,
+        "collision": 0
+      },
+      "r2": false,
+      "childCount": 2
+    }
+  },
+  "game/gameobject/task/move/AttackMoveTask": {
+    "0": "function",
+    "1": {
+      "isAttackMove": true,
+      "attackPerformed": false,
+      "passedFirstWaypoint": true,
+      "dupArgs": true,
+      "dupIsAttackMove": true,
+      "onTickMoving": "threw",
+      "passedAfter": true
+    }
+  },
+  "game/gameobject/task/move/MoveTargetTask": {
+    "0": "function",
+    "1": {
+      "superForceMove": true,
+      "superIgnored": true,
+      "superTargetTile": true,
+      "lines": {
+        "target": {
+          "tile": {
+            "rx": 8,
+            "ry": 8
+          },
+          "onBridge": false,
+          "moveTrait": {
+            "currentWaypoint": {
+              "tile": {
+                "rx": 9,
+                "ry": 9
+              },
+              "onBridge": false
+            }
+          }
+        },
+        "pathNodes": []
+      },
+      "ticksUntilReset": 15,
+      "counterAfter": 3
+    }
+  },
+  "game/gameobject/task/move/MoveNextToTask": {
+    "0": "function",
+    "1": {
+      "superDest": {
+        "rx": 10,
+        "ry": 10
+      },
+      "superOptions": {
+        "ignoredBlockers": [
+          {
+            "centerTile": {
+              "rx": 10,
+              "ry": 10
+            },
+            "tile": {
+              "rx": 9,
+              "ry": 9
+            },
+            "rules": {},
+            "art": {
+              "foundation": {
+                "width": 2,
+                "height": 2
+              }
+            }
+          }
+        ],
+        "closeEnoughTiles": 1.4142135623730951,
+        "strictCloseEnough": true
+      },
+      "grinderDoor": {
+        "rx": 10,
+        "ry": 11
+      },
+      "closeUndef": true,
+      "closeNear": false,
+      "canStopOn": false
+    }
+  },
+  "game/gameobject/task/move/MoveInsideTask": {
+    "0": "function",
+    "1": {
+      "superDest": {
+        "rx": 10,
+        "ry": 10
+      },
+      "superOptions": {
+        "ignoredBlockers": [
+          {
+            "centerTile": {
+              "rx": 10,
+              "ry": 10
+            },
+            "tile": {
+              "rx": 9,
+              "ry": 9
+            }
+          }
+        ],
+        "closeEnoughTiles": 0
+      },
+      "isTarget": true,
+      "canStopOn": true,
+      "canStopOff": false,
+      "closeOn": true,
+      "closeOff": false,
+      "reachedOn": "threw"
+    }
   }
 }
