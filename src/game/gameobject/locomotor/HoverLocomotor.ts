@@ -77,8 +77,8 @@ export class HoverLocomotor {
   }
 
   /** 新路径点：计算加速度和减速度（基于 hoverRules 和 baseSpeed）。 */
-  onNewWaypoint(object: any, targetPos: any, world: any): void {
-    const toTarget = new Vector2().copy(targetPos).sub(this.initialPosition);
+  onNewWaypoint(object: any, currentWaypointLeptons: any, _destinationLeptons: any): void {
+    const toTarget = new Vector2().copy(currentWaypointLeptons).sub(this.initialPosition);
     this.distanceTravelled = 0;
     this.totalDistanceToTravel = toTarget.length();
     this.maxSpeed = object.moveTrait.baseSpeed;
@@ -95,10 +95,11 @@ export class HoverLocomotor {
    *  - Normal → 加速至 maxSpeed；
    *  - 转向插值：Normal 且方向即将改变时提前调整朝向。
    */
-  tick(object: any, targetPos: any, world: any): { distance: Vector3; done: boolean } {
+  tick(object: any, currentWaypointLeptons: any, destinationLeptons: any): { distance: Vector3; done: boolean } {
     const pos = object.position.getMapPosition();
-    const toTarget = targetPos.clone().sub(pos);
-    FacingUtilModule.FacingUtil.pointTurretToTarget(object, world);
+    const toTarget = currentWaypointLeptons.clone().sub(pos);
+    // 炮塔指向最终目的地（而非当前途经点）。
+    FacingUtilModule.FacingUtil.pointTurretToTarget(object, destinationLeptons);
     const distToTarget = toTarget.length();
     let maxSpeed = this.maxSpeed;
     if (this.currentWaypointType === HoverWaypointType.Single) {
@@ -137,7 +138,8 @@ export class HoverLocomotor {
     }
     object.moveTrait.velocity.set(velocityWithCarry.x, 0, velocityWithCarry.y);
     this.distanceTravelled += travel;
-    this.carryOverDistance = Math.max(0, this.currentSpeed - travel);
+    // 结转余量基于 travelSpeed（有结转时用结转值，否则用当前速度）。
+    this.carryOverDistance = Math.max(0, travelSpeed - travel);
     return {
       distance: new Vector3(step.x, 0, step.y),
       done: !step.length() || !!this.carryOverDistance,

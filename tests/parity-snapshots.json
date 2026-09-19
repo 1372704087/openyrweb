@@ -2424,6 +2424,213 @@
       "acceleration": 0.013333333333333334,
       "deceleration": 0.013333333333333334,
       "totalDistanceToTravel": 512
+    },
+    "2": {
+      "currentSpeed": 0.013333333333333334,
+      "distanceTravelled": 3,
+      "carryOver": 7,
+      "distance": {
+        "x": 3,
+        "y": 0,
+        "z": 0
+      },
+      "done": true,
+      "velocity": {
+        "x": 33,
+        "y": 0,
+        "z": 40
+      }
+    }
+  },
+  "game/gameobject/locomotor/JumpjetLocomotor": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "game",
+        "allowOutOfBounds",
+        "currentMoveDir",
+        "currentHorizSpeed",
+        "cancelDestLeptons"
+      ],
+      "moveDir": {
+        "x": 0,
+        "y": -1
+      },
+      "cancelDest": {
+        "x": 1000,
+        "y": 1248
+      },
+      "blockerTiles": [
+        "0,0",
+        "1,0"
+      ]
+    },
+    "2": {
+      "plainDir": 94,
+      "plainVec": {
+        "x": 0,
+        "y": -10,
+        "z": 0
+      },
+      "tiltDir": 94,
+      "tiltVec": {
+        "x": -0.5829669220712695,
+        "y": -10,
+        "z": 4.148025186457426
+      },
+      "tiltPitch": 2.25,
+      "crashTick": 1,
+      "orbitRadius": 30,
+      "orbitAngle": 8,
+      "velocityY": -10
+    },
+    "3": {
+      "direction": 352,
+      "spinVelocity": -8,
+      "horizSpeed": 0,
+      "distance": {
+        "x": 0,
+        "y": 10,
+        "z": 0
+      },
+      "done": false
+    },
+    "4": {
+      "moved": [
+        [
+          0,
+          30,
+          0
+        ],
+        [
+          "elev",
+          3
+        ]
+      ],
+      "zone": 1
+    }
+  },
+  "game/gameobject/locomotor/WingedLocomotor": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "game",
+        "allowOutOfBounds",
+        "lastDestLeptons",
+        "currentMoveDir",
+        "currentHorizSpeed",
+        "maneuverType",
+        "deceleratingToTurn",
+        "cancelDestLeptons"
+      ],
+      "horizSpeed": 50,
+      "cancelDest": {
+        "x": 1000,
+        "y": 1248
+      }
+    },
+    "2": {
+      "roll1": 7,
+      "roll2": 14,
+      "pitch2": 14,
+      "vec1": {
+        "x": 30,
+        "y": -30,
+        "z": 40
+      },
+      "vec2Y": -30
+    },
+    "3": {
+      "zone": 1,
+      "direction": 270,
+      "roll": 0,
+      "pitch": -2,
+      "horizSpeed": 2,
+      "maneuverType": 0,
+      "distance": {
+        "x": 2,
+        "y": -30,
+        "z": 0
+      },
+      "done": false
+    },
+    "4": {
+      "moved": [
+        [
+          0,
+          30,
+          0
+        ],
+        [
+          "elev",
+          5
+        ]
+      ],
+      "pitch": 2,
+      "roll": 4,
+      "zone": 1
+    }
+  },
+  "game/gameobject/locomotor/MissileLocomotor": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "game",
+        "missileRules",
+        "flightPhase",
+        "targetPosition",
+        "cruiseAltitude"
+      ],
+      "selReturnIsLast": true,
+      "flightPhase": 0,
+      "targetPosition": {
+        "x": 1408,
+        "y": 0,
+        "z": 1408
+      },
+      "cruiseAltitude": 128
+    },
+    "2": {
+      "flightPhase": 0,
+      "done": false,
+      "distance": {
+        "x": 0,
+        "y": 4.974453181863183,
+        "z": -29.584705770743295
+      },
+      "velocityY": 4.974453181863183,
+      "direction": 0
+    },
+    "3": {
+      "phaseAfterCascade": 2,
+      "done1": false,
+      "done2": true,
+      "velocity2": {
+        "x": 23,
+        "y": -105,
+        "z": 23
+      },
+      "pitch": -3
+    },
+    "4": {
+      "flightPhase": 2,
+      "done": false,
+      "hasDescentCurve": true,
+      "travelled": 80,
+      "distance": {
+        "x": 56.437,
+        "y": 5.402,
+        "z": 56.437
+      }
+    },
+    "5": {
+      "destroyed": 1,
+      "done": true,
+      "distance": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
     }
   }
 }

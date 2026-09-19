@@ -5171,6 +5171,356 @@ const CONVERTED = [
           totalDistanceToTravel: loco.totalDistanceToTravel,
         };
       },
+      // tick 的结转余量路径：剩余距离不足一 tick 时，吃不完的移动量按
+      // travelSpeed（结转优先，而非 currentSpeed）结转到 carryOverDistance。
+      (ns, THREE) => {
+        const loco = new ns.HoverLocomotor({ acceleration: 0.5, brake: 0.5 });
+        const wp = (rx, ry) => ({ tile: { rx, ry } });
+        const obj = {
+          tile: { rx: 10, ry: 10 },
+          direction: 0,
+          rules: { rot: 4 },
+          isInfantry: () => false,
+          moveTrait: { baseSpeed: 6, lastTileSpeed: 4, velocity: new THREE.Vector3(30, 0, 40) },
+          position: { getMapPosition: () => new THREE.Vector2(3197, 2688) },
+        };
+        loco.selectNextWaypoint(obj, [wp(11, 10), wp(12, 10)]);
+        loco.onNewWaypoint(obj, new THREE.Vector2(3200, 2688), new THREE.Vector2(3200, 2688));
+        // 模拟前一 tick 剩 10 leptons 未走完、目标只剩 3 leptons：
+        // 本 tick 只走 3，剩 10-3=7 结转（若误用 currentSpeed 会得到 0）。
+        loco.carryOverDistance = 10;
+        const r = loco.tick(obj, new THREE.Vector2(3200, 2688), new THREE.Vector2(3200, 2688));
+        return {
+          currentSpeed: loco.currentSpeed,
+          distanceTravelled: loco.distanceTravelled,
+          carryOver: loco.carryOverDistance,
+          distance: { x: r.distance.x, y: r.distance.y, z: r.distance.z },
+          done: r.done,
+          velocity: { x: obj.moveTrait.velocity.x, y: obj.moveTrait.velocity.y, z: obj.moveTrait.velocity.z },
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/locomotor/JumpjetLocomotor",
+    tsjs: "src/game/gameobject/locomotor/JumpjetLocomotor.ts.js",
+    probes: [
+      (ns) => typeof ns.JumpjetLocomotor,
+      // 构造期键集合 + onNewWaypoint 的朝向换算 + 取消落点/障碍扫描两个纯函数。
+      (ns, THREE) => {
+        const loco = new ns.JumpjetLocomotor({
+          events: { dispatch: () => {} },
+          map: {
+            isWithinBounds: () => true,
+            clampWithinBounds: (t) => t,
+            tiles: { getByMapCoords: (x, y) => (x === 1 && y === 0 ? { rx: 1, ry: 0, z: 0 } : null) },
+            getGroundObjectsOnTile: () => [],
+          },
+        });
+        const obj = { direction: 0, zone: 1 };
+        loco.onNewWaypoint(obj, null, null);
+        const moveDir = { x: loco.currentMoveDir.x, y: loco.currentMoveDir.y };
+        const cancelDest = loco.computeCancelDest({ rx: 3, ry: 4 }, new THREE.Vector2(1000, 480));
+        const tiles = loco.findTilesToCheckForBlockers(
+          { rx: 0, ry: 0, z: 0 },
+          new THREE.Vector2(0, 0),
+          new THREE.Vector2(256, 0),
+          512,
+        );
+        return {
+          ctorKeys: Object.keys(loco),
+          moveDir,
+          cancelDest: { x: cancelDest.x, y: cancelDest.y },
+          blockerTiles: tiles.map((t) => `${t.rx},${t.ry}`),
+        };
+      },
+      // tickCrash 两个分支：普通直线下坠 + tiltCrash 螺旋轨道（首 tick 初始化）。
+      (ns, THREE) => {
+        const plainObj = { rules: { jumpjetCrash: 5, tiltCrashJumpjet: false }, direction: 100 };
+        const plain = ns.JumpjetLocomotor.tickCrash(plainObj, null, {});
+        const crashState = {};
+        const tiltObj = {
+          rules: { jumpjetCrash: 5, tiltCrashJumpjet: true },
+          direction: 100,
+          position: { worldPosition: { x: 99, z: 77 } },
+          moveTrait: { velocity: new THREE.Vector3() },
+        };
+        const tilt = ns.JumpjetLocomotor.tickCrash(tiltObj, null, crashState);
+        return {
+          plainDir: plainObj.direction,
+          plainVec: { x: plain.x, y: plain.y, z: plain.z },
+          tiltDir: tiltObj.direction,
+          tiltVec: { x: tilt.x, y: tilt.y, z: tilt.z },
+          tiltPitch: tiltObj.crashPitch,
+          crashTick: crashState.crashTick,
+          orbitRadius: crashState.orbitRadius,
+          orbitAngle: crashState.orbitAngle,
+          velocityY: tiltObj.moveTrait.velocity.y,
+        };
+      },
+      // tick 首个爬升 tick：起飞后先垂直爬升、水平速度清零。
+      (ns, THREE) => {
+        const loco = new ns.JumpjetLocomotor({
+          events: { dispatch: () => {} },
+          map: {
+            isWithinBounds: () => true,
+            clampWithinBounds: (t) => t,
+            tiles: { getByMapCoords: () => null },
+            getGroundObjectsOnTile: () => [],
+          },
+        });
+        const obj = {
+          tile: { rx: 0, ry: 0, z: 0 },
+          zone: 1,
+          direction: 0,
+          rules: { jumpjetSpeed: 20, jumpjetTurnRate: 8, jumpjetClimb: 10, jumpjetHeight: 128 },
+          isVehicle: () => true,
+          moveTrait: { velocity: new THREE.Vector3() },
+          position: { getMapPosition: () => new THREE.Vector2(0, 0), worldPosition: { y: 0 } },
+        };
+        const result = loco.tick(obj, new THREE.Vector2(512, 0), new THREE.Vector2(512, 0), false);
+        return {
+          direction: obj.direction,
+          spinVelocity: obj.spinVelocity,
+          horizSpeed: loco.currentHorizSpeed,
+          distance: { x: result.distance.x, y: result.distance.y, z: result.distance.z },
+          done: result.done,
+        };
+      },
+      // tickStationary：balloonHover 永不落地 → 向"障碍顶+悬浮高"爬升。
+      (ns, THREE) => {
+        const moved = [];
+        const obj = {
+          tile: { rx: 0, ry: 0, z: 2, onBridgeLandType: null },
+          tileElevation: 3,
+          zone: 1,
+          rules: { balloonHover: true, jumpjetHeight: 128, jumpjetClimb: 30 },
+          position: {
+            worldPosition: { x: 0, y: 0, z: 0 },
+            moveByLeptons3: (v) => moved.push([v.x, v.y, v.z]),
+          },
+          moveTrait: { handleElevationChange: (prev) => moved.push(["elev", prev]) },
+        };
+        ns.JumpjetLocomotor.tickStationary(obj, {
+          map: { getGroundObjectsOnTile: () => [] },
+          events: { dispatch: () => {} },
+        });
+        return { moved, zone: obj.zone };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/locomotor/MissileLocomotor",
+    tsjs: "src/game/gameobject/locomotor/MissileLocomotor.ts.js",
+    probes: [
+      (ns) => typeof ns.MissileLocomotor,
+      // 构造期键集合 + selectNextWaypoint 的目标点/巡航高度缓存。
+      (ns, THREE) => {
+        const loco = new ns.MissileLocomotor(
+          { map: { tileOccupation: { getBridgeOnTile: () => null } } },
+          { altitude: 128 },
+        );
+        const wp = { tile: { rx: 5, ry: 5, z: 0 } };
+        const sel = loco.selectNextWaypoint({}, [wp]);
+        return {
+          ctorKeys: Object.keys(loco),
+          selReturnIsLast: sel === wp,
+          flightPhase: loco.flightPhase,
+          targetPosition: { x: loco.targetPosition.x, y: loco.targetPosition.y, z: loco.targetPosition.z },
+          cruiseAltitude: loco.cruiseAltitude,
+        };
+      },
+      // Boost 首个 tick：按朝向初始化速度 + 俯仰角上仰，阶段保持 Boost。
+      (ns, THREE) => {
+        const loco = new ns.MissileLocomotor(
+          { events: { dispatch: () => {} }, map: { tileOccupation: { getBridgeOnTile: () => null }, isWithinHardBounds: () => true } },
+          { altitude: 128, acceleration: 30, lazyCurve: false },
+        );
+        loco.selectNextWaypoint({}, [{ tile: { rx: 5, ry: 5, z: 0 } }]);
+        const obj = {
+          zone: 1,
+          direction: 0,
+          pitch: 10,
+          rules: { speed: 100, rot: 8 },
+          position: { worldPosition: new THREE.Vector3(0, 10, 0) },
+          moveTrait: { velocity: new THREE.Vector3() },
+        };
+        const r = loco.tick(obj, null, null);
+        return {
+          flightPhase: loco.flightPhase,
+          done: r.done,
+          distance: { x: r.distance.x, y: r.distance.y, z: r.distance.z },
+          velocityY: obj.moveTrait.velocity.y,
+          direction: obj.direction,
+        };
+      },
+      // 非 lazy 导弹一个 tick 贯穿 Boost→Midcourse→Terminal，再一发直接命中：
+      // 命中时速度 = 目标向量 - 弹体长度（addScalar 各分量同减）。
+      (ns, THREE) => {
+        const loco = new ns.MissileLocomotor(
+          { events: { dispatch: () => {} }, map: { tileOccupation: { getBridgeOnTile: () => null }, isWithinHardBounds: () => true } },
+          { altitude: 1, acceleration: 200, lazyCurve: false, bodyLength: 5 },
+        );
+        loco.selectNextWaypoint({}, [{ tile: { rx: 0, ry: 0, z: 0 } }]);
+        const obj = {
+          zone: 1,
+          direction: 0,
+          pitch: 10,
+          rules: { speed: 300, rot: 10 },
+          position: { worldPosition: new THREE.Vector3(100, 100, 100) },
+          moveTrait: { velocity: new THREE.Vector3() },
+        };
+        const r1 = loco.tick(obj, null, null);
+        const phaseAfterCascade = loco.flightPhase;
+        const r2 = loco.tick(obj, null, null);
+        return {
+          phaseAfterCascade,
+          done1: r1.done,
+          done2: r2.done,
+          velocity2: { x: r2.distance.x, y: r2.distance.y, z: r2.distance.z },
+          pitch: obj.pitch,
+        };
+      },
+      // lazyCurve 导弹：一个 tick 内构造下降贝塞尔曲线并沿曲线飞行。
+      (ns, THREE) => {
+        const loco = new ns.MissileLocomotor(
+          { events: { dispatch: () => {} }, map: { tileOccupation: { getBridgeOnTile: () => null }, isWithinHardBounds: () => true } },
+          { altitude: 1, acceleration: 80, speed: 160, bodyLength: 10, lazyCurve: true },
+        );
+        loco.selectNextWaypoint({}, [{ tile: { rx: 4, ry: 4, z: 0 } }]);
+        const obj = {
+          zone: 1,
+          direction: 0,
+          pitch: 5,
+          rules: { speed: 160, rot: 8 },
+          position: { worldPosition: new THREE.Vector3(500, 200, 500) },
+          moveTrait: { velocity: new THREE.Vector3() },
+        };
+        const r = loco.tick(obj, null, null);
+        return {
+          flightPhase: loco.flightPhase,
+          done: r.done,
+          hasDescentCurve: !!loco.descentCurve,
+          travelled: loco.descentTravelled,
+          distance: {
+            x: Math.round(r.distance.x * 1000) / 1000,
+            y: Math.round(r.distance.y * 1000) / 1000,
+            z: Math.round(r.distance.z * 1000) / 1000,
+          },
+        };
+      },
+      // 飞出硬边界 → destroyObject + 零向量 + done。
+      (ns, THREE) => {
+        const destroyed = [];
+        const loco = new ns.MissileLocomotor(
+          {
+            events: { dispatch: () => {} },
+            destroyObject: (o) => destroyed.push(o),
+            map: { tileOccupation: { getBridgeOnTile: () => null }, isWithinHardBounds: () => false },
+          },
+          { altitude: 1, acceleration: 30, lazyCurve: false },
+        );
+        loco.selectNextWaypoint({}, [{ tile: { rx: 5, ry: 5, z: 0 } }]);
+        const obj = {
+          zone: 1,
+          direction: 0,
+          pitch: 10,
+          rules: { speed: 100, rot: 8 },
+          position: { worldPosition: new THREE.Vector3(0, 10, 0) },
+          moveTrait: { velocity: new THREE.Vector3() },
+        };
+        const r = loco.tick(obj, null, null);
+        return { destroyed: destroyed.length, done: r.done, distance: { x: r.distance.x, y: r.distance.y, z: r.distance.z } };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/locomotor/WingedLocomotor",
+    tsjs: "src/game/gameobject/locomotor/WingedLocomotor.ts.js",
+    probes: [
+      (ns) => typeof ns.WingedLocomotor,
+      // 构造期键集合 + onNewWaypoint 的动量继承 + 取消落点计算。
+      (ns, THREE) => {
+        const loco = new ns.WingedLocomotor({});
+        const obj = { moveTrait: { velocity: new THREE.Vector3(30, 0, 40) } };
+        loco.onNewWaypoint(obj, null, null);
+        const cancelDest = loco.computeCancelDest({ rx: 3, ry: 4 }, new THREE.Vector2(1000, 480));
+        return {
+          ctorKeys: Object.keys(loco),
+          horizSpeed: loco.currentHorizSpeed,
+          cancelDest: { x: cancelDest.x, y: cancelDest.y },
+        };
+      },
+      // tickCrash：随机滚转/俯仰增量被 crashState 缓存（二次调用不再随机），
+      // 水平速度保留 + 固定 30/tick 下坠。
+      (ns, THREE) => {
+        const world = { generateRandomInt: () => 7 };
+        const crashState = {};
+        const obj = { roll: 0, pitch: 0, moveTrait: { velocity: new THREE.Vector3(30, 0, 40) } };
+        const r1 = ns.WingedLocomotor.tickCrash(obj, world, crashState);
+        const roll1 = obj.roll;
+        const r2 = ns.WingedLocomotor.tickCrash(obj, world, crashState);
+        return {
+          roll1,
+          roll2: obj.roll,
+          pitch2: obj.pitch,
+          vec1: { x: r1.x, y: r1.y, z: r1.z },
+          vec2Y: r2.y,
+        };
+      },
+      // 地面起飞首 tick：直线机动（None）+ 降到巡航高度 + 机头俯仰平滑。
+      (ns, THREE) => {
+        const loco = new ns.WingedLocomotor({
+          currentTick: 0,
+          events: { dispatch: () => {} },
+          rules: { general: { flightLevel: 176 } },
+          map: { isWithinBounds: () => true, clampWithinBounds: (t) => t, tileOccupation: { getBridgeOnTile: () => null } },
+        });
+        const obj = {
+          tile: { rx: 0, ry: 0, z: 0, onBridgeLandType: null },
+          zone: 0,
+          onBridge: false,
+          direction: 270,
+          roll: 0,
+          pitch: 0,
+          rules: { speed: 40, rot: 8, flightLevel: 100, pitchAngle: 10, pitchSpeed: 0.25 },
+          position: { getMapPosition: () => new THREE.Vector2(0, 0), worldPosition: { y: 200 } },
+          moveTrait: { velocity: new THREE.Vector3() },
+        };
+        const r = loco.tick(obj, null, new THREE.Vector2(512, 0), false);
+        return {
+          zone: obj.zone,
+          direction: obj.direction,
+          roll: obj.roll,
+          pitch: obj.pitch,
+          horizSpeed: loco.currentHorizSpeed,
+          maneuverType: loco.maneuverType,
+          distance: { x: r.distance.x, y: r.distance.y, z: r.distance.z },
+          done: r.done,
+        };
+      },
+      // tickStationary：landable=no → 爬回巡航高度（rules.flightLevel 优先），
+      // 机头随爬升俯仰、机翼回平。
+      (ns, THREE) => {
+        const moved = [];
+        const obj = {
+          zone: 1,
+          tile: { rx: 0, ry: 0, z: 0, onBridgeLandType: null },
+          tileElevation: 5,
+          pitch: 0,
+          roll: 8,
+          rules: { landable: false, flightLevel: 150, pitchAngle: 10, pitchSpeed: 0.25 },
+          unitOrderTrait: { getCurrentTask: () => null },
+          position: { worldPosition: { y: 0 }, moveByLeptons3: (v) => moved.push([v.x, v.y, v.z]) },
+          moveTrait: { handleElevationChange: (prev) => moved.push(["elev", prev]) },
+        };
+        ns.WingedLocomotor.tickStationary(obj, {
+          rules: { general: { flightLevel: 176 } },
+          map: { tileOccupation: { getBridgeOnTile: () => null }, getGroundObjectsOnTile: () => [] },
+          events: { dispatch: () => {} },
+        });
+        return { moved, pitch: obj.pitch, roll: obj.roll, zone: obj.zone };
+      },
     ],
   },
   {
