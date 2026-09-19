@@ -2886,5 +2886,100 @@
       "closeOff": false,
       "reachedOn": "threw"
     }
+  },
+  "game/gameobject/task/InfiltrateBuildingTask": {
+    "0": "function",
+    "1": {
+      "unspawned": 1,
+      "agentCalled": true,
+      "eventDispatched": true
+    }
+  },
+  "game/gameobject/task/WaitForBuildUpTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove"
+      ],
+      "cancellable": false,
+      "childrenCount": 2,
+      "child0Ticks": 1800,
+      "setStatusCalls": [
+        [
+          1,
+          true
+        ]
+      ]
+    }
+  },
+  "game/gameobject/task/PlantC4Task": {
+    "0": "function",
+    "1": {
+      "allowedInvuln": false,
+      "allowedOk": true,
+      "chargeTicks": 225,
+      "chargeBy": {
+        "owner": {
+          "id": 7
+        },
+        "obj": 1
+      },
+      "onEnterResult": false,
+      "linesIsAttack": true,
+      "eventCount": 1
+    }
+  },
+  "game/gameobject/task/move/MoveOutsideTask": {
+    "0": "function",
+    "1": {
+      "superDest": true,
+      "superIgnored": true,
+      "isTarget": true,
+      "cancellable": false,
+      "canStopOutside": "threw",
+      "canStopInside": false
+    }
+  },
+  "game/gameobject/task/morph/DeployIntoTask": {
+    "0": "function",
+    "1": {
+      "noDeployError": "Object type \"robot\" doesn't deploy into anything",
+      "startOk": "threw",
+      "morphInto": {
+        "name": "TELAB"
+      },
+      "getObjectCalls": [
+        [
+          "TELAB",
+          2
+        ]
+      ],
+      "tickCancel": true,
+      "tickNormal": "threw"
+    }
+  },
+  "game/gameobject/task/morph/UndeployIntoTask": {
+    "0": "function",
+    "1": {
+      "noUndeployError": "Object type \"turretlab\" doesn't undeploy into anything",
+      "startOk": "threw",
+      "morphInto": {
+        "name": "TENK"
+      },
+      "getObjectCalls": [
+        [
+          "TENK",
+          7
+        ]
+      ]
+    }
   }
 }

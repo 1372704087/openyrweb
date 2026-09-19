@@ -5954,6 +5954,218 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/move/MoveOutsideTask",
+    tsjs: "src/game/gameobject/task/move/MoveOutsideTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MoveOutsideTask,
+      // 走出目标：目的地默认目标 tile、不可取消、停驻要求离开目标格。
+      (ns) => {
+        const target = { tile: { rx: 7, ry: 7 } };
+        const game = {
+          map: { tileOccupation: { isTileOccupiedBy: (tile, tgt) => tile.rx === 7 && tile.ry === 7 } },
+        };
+        const task = new ns.MoveOutsideTask(game, target);
+        task.game = game;
+        const proto = ns.MoveOutsideTask.prototype;
+        return {
+          superDest: task.$args[1] === target.tile,
+          superIgnored: task.$args[3].ignoredBlockers[0] === target,
+          isTarget: task.target === target,
+          cancellable: task.cancellable,
+          canStopOutside: (() => {
+            try {
+              return proto.canStopAtTile.call(task, {}, { rx: 8, ry: 7 }, false);
+            } catch (e) {
+              // 未占用分支要调 super.canStopAtTile，桩基类下必抛（两侧一致）。
+              return "threw";
+            }
+          })(),
+          canStopInside: proto.canStopAtTile.call(task, {}, { rx: 7, ry: 7 }, false),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/morph/DeployIntoTask",
+    tsjs: "src/game/gameobject/task/morph/DeployIntoTask.ts.js",
+    probes: [
+      (ns) => typeof ns.DeployIntoTask,
+      // 部署变形：缺 deploysInto 抛错；正常时解析建筑类型；取消短路返回完成。
+      (ns) => {
+        const getObjectCalls = [];
+        const game = { rules: { getObject: (name, type) => (getObjectCalls.push([name, type]), { name }) } };
+        const task = new ns.DeployIntoTask(game);
+        task.game = game;
+        const proto = ns.DeployIntoTask.prototype;
+        let noDeployError = null;
+        try {
+          proto.onStart.call(task, { name: "robot", rules: {} });
+        } catch (e) {
+          noDeployError = e.message;
+        }
+        let startOk;
+        try {
+          proto.onStart.call(task, { name: "robot", rules: { deploysInto: "TELAB" } });
+        } catch (e) {
+          // 末尾 super.onStart 在桩基类下必抛（两侧一致）；morphInto 已在抛出前赋值。
+          startOk = "threw";
+        }
+        let tickCancel;
+        try {
+          task.isCancelling = () => true;
+          tickCancel = proto.onTick.call(task, {});
+        } catch (e) {
+          tickCancel = "threw";
+        }
+        let tickNormal;
+        try {
+          task.isCancelling = () => false;
+          tickNormal = proto.onTick.call(task, {});
+        } catch (e) {
+          tickNormal = "threw";
+        }
+        return {
+          noDeployError,
+          startOk: startOk ?? "completed",
+          morphInto: task.morphInto,
+          getObjectCalls,
+          tickCancel,
+          tickNormal,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/morph/UndeployIntoTask",
+    tsjs: "src/game/gameobject/task/morph/UndeployIntoTask.ts.js",
+    probes: [
+      (ns) => typeof ns.UndeployIntoTask,
+      // 解除部署：缺 undeploysInto 抛错；正常时解析载具类型。
+      (ns) => {
+        const getObjectCalls = [];
+        const game = { rules: { getObject: (name, type) => (getObjectCalls.push([name, type]), { name }) } };
+        const task = new ns.UndeployIntoTask(game);
+        task.game = game;
+        const proto = ns.UndeployIntoTask.prototype;
+        let noUndeployError = null;
+        try {
+          proto.onStart.call(task, { name: "turretlab", rules: {} });
+        } catch (e) {
+          noUndeployError = e.message;
+        }
+        let startOk;
+        try {
+          proto.onStart.call(task, { name: "turretlab", rules: { undeploysInto: "TENK" } });
+        } catch (e) {
+          // 末尾 super.onStart 在桩基类下必抛（两侧一致）；morphInto 已在抛出前赋值。
+          startOk = "threw";
+        }
+        return {
+          noUndeployError,
+          startOk: startOk ?? "completed",
+          morphInto: task.morphInto,
+          getObjectCalls,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/InfiltrateBuildingTask",
+    tsjs: "src/game/gameobject/task/InfiltrateBuildingTask.ts.js",
+    probes: [
+      (ns) => typeof ns.InfiltrateBuildingTask,
+      // 潜入：资格判定（可潜/可间谍/未毁/敌对）+ 进建筑效果（消失+事件）。
+      (ns) => {
+        const dispatched = [];
+        const unspawned = [];
+        const target = { rules: { spyable: true, infiltrate: false }, isDestroyed: false, owner: 2 };
+        const game = {
+          areFriendly: () => false,
+          unspawnObject: (o) => unspawned.push(o),
+          events: { dispatch: (e) => dispatched.push(e) },
+        };
+        const task = new ns.InfiltrateBuildingTask(game, target);
+        task.game = game;
+        task.target = target;
+        const proto = ns.InfiltrateBuildingTask.prototype;
+        const allowedNoInfiltrate = proto.isAllowed.call(task, { owner: 1, rules: {} });
+        target.rules.infiltrate = true;
+        const allowedOk = proto.isAllowed.call(task, { owner: 1, rules: {} });
+        const spy = { owner: 1, rules: {}, agentTrait: { infiltrate: (o, t, g) => dispatched.push(["agent", t]) } };
+        proto.onEnter.call(task, spy);
+        return {
+          allowedNoInfiltrate,
+          allowedOk,
+          unspawned: unspawned.length,
+          agentCalled: dispatched.some((d) => Array.isArray(d) && d[0] === "agent"),
+          eventDispatched: dispatched.some((d) => !Array.isArray(d)),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/WaitForBuildUpTask",
+    tsjs: "src/game/gameobject/task/WaitForBuildUpTask.ts.js",
+    probes: [
+      (ns) => typeof ns.WaitForBuildUpTask,
+      // 建造等待组（全真类）：子任务构成 + 回调把建筑切到 Ready + 不可取消。
+      (ns) => {
+        const calls = [];
+        const building = { setBuildStatus: (status, b) => calls.push([status, b === building]) };
+        const task = new ns.WaitForBuildUpTask(2, building);
+        const child0 = task.children[0];
+        const cbTask = task.children[1];
+        cbTask.cb(building);
+        return {
+          ctorKeys: Object.keys(task),
+          cancellable: task.cancellable,
+          childrenCount: task.children.length,
+          child0Ticks: child0.ticks,
+          setStatusCalls: calls,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/PlantC4Task",
+    tsjs: "src/game/gameobject/task/PlantC4Task.ts.js",
+    probes: [
+      (ns) => typeof ns.PlantC4Task,
+      // C4：资格判定（无敌保护拦截）+ 安放引信 tick 换算与归属记录。
+      (ns, THREE) => {
+        const dispatched = [];
+        const charges = [];
+        const target = {
+          isDestroyed: false,
+          invulnerableTrait: { isActive: () => true },
+          c4ChargeTrait: { setCharge: (ticks, by) => charges.push([ticks, by]) },
+        };
+        const game = {
+          rules: { combatDamage: { c4Delay: 0.25 } },
+          events: { dispatch: (e) => dispatched.push(e) },
+        };
+        const task = new ns.PlantC4Task(game, target);
+        task.game = game;
+        task.target = target;
+        const proto = ns.PlantC4Task.prototype;
+        const allowedInvuln = proto.isAllowed.call(task, {});
+        target.invulnerableTrait.isActive = () => false;
+        const allowedOk = proto.isAllowed.call(task, {});
+        const onEnterResult = proto.onEnter.call(task, { owner: { id: 7 }, obj: 1 });
+        const lines = proto.getTargetLinesConfig.call(task, {});
+        return {
+          allowedInvuln,
+          allowedOk,
+          chargeTicks: charges[0] ? charges[0][0] : null,
+          chargeBy: charges[0] ? charges[0][1].obj : null,
+          onEnterResult,
+          linesIsAttack: lines.isAttack,
+          eventCount: dispatched.length,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
