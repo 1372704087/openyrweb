@@ -6556,6 +6556,110 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/MagnetronDragTask",
+    tsjs: "src/game/gameobject/task/MagnetronDragTask.ts.js",
+    probes: [
+      (ns) => typeof ns.MagnetronDragTask,
+      // 构造期键集合 + onStart 三条中止路径（受害者无效/缺特性/已被拖拽）。
+      (ns, THREE) => {
+        const task = new ns.MagnetronDragTask({ map: {}, events: { dispatch: () => {} } }, { tile: {} }, {}, undefined);
+        const ctorKeys = Object.keys(task);
+        const task2 = new ns.MagnetronDragTask({ events: { dispatch: () => {} } }, undefined, {}, undefined);
+        task2.onStart({});
+        const abortedNoVictim = task2._aborted;
+        const task3 = new ns.MagnetronDragTask({ events: { dispatch: () => {} } }, { magnetronDraggedBy: { x: 1 } }, {}, undefined);
+        task3.onStart({});
+        const abortedAlreadyDragged = task3._aborted;
+        return { ctorKeys, abortedNoVictim, abortedAlreadyDragged };
+      },
+      // onStart 成功：升空（zone=Air）+ 双向链接 + LiftOff 事件 + MoveTrait 休眠。
+      (ns, THREE) => {
+        const dispatched = [];
+        const victim = {
+          tile: { z: 0, landType: 0 },
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: true,
+          magnetronDraggedBy: undefined,
+          moveTrait: { moveState: 3, velocity: { set: (x, y, z2) => {} } },
+          unitOrderTrait: {},
+          position: { worldPosition: { y: 0 } },
+        };
+        const magnetron = {};
+        const task = new ns.MagnetronDragTask(
+          { events: { dispatch: (e) => dispatched.push(e.constructor.name) } },
+          victim,
+          magnetron,
+          undefined,
+        );
+        task.onStart({});
+        return {
+          zoneAir: victim.zone === 1,
+          onBridgeOff: victim.onBridge === false,
+          liftedOff: dispatched.includes("ObjectLiftOffEvent"),
+          draggedBy: victim.magnetronDraggedBy === magnetron,
+          dragging: magnetron.magnetronDragging === victim,
+          moveStateIdle: victim.moveTrait.moveState === 0,
+          locomotorCleared: victim.moveTrait.locomotor === undefined,
+        };
+      },
+      // 光束断裂 → 重力坠落全流程：约 10 tick 触地，恢复 zone + Land 事件。
+      (ns, THREE) => {
+        const dispatched = [];
+        const victim = {
+          tile: { z: 0, landType: undefined },
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 1,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          healthTrait: { getHitPoints: () => 100, maxHitPoints: 100, inflictDamage: () => {} },
+          moveTrait: { moveState: 0 },
+          unitOrderTrait: {},
+          position: {
+            worldY: 200,
+            get worldPosition() {
+              const self = this;
+              return { y: self.worldY };
+            },
+            setAbsoluteElevationWorld: function (v) {
+              this.worldY = v;
+            },
+            getMapPosition: () => ({ x: 0, y: 0 }),
+          },
+        };
+        const magnetron = { unitOrderTrait: { getTasks: () => [] } };
+        const task = new ns.MagnetronDragTask(
+          {
+            map: { tileOccupation: { getGroundObjectsOnTile: () => [] } },
+            events: { dispatch: (e) => dispatched.push(e.constructor.name) },
+            rules: { combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true } },
+          },
+          victim,
+          magnetron,
+          undefined,
+        );
+        task.onStart({});
+        // 无活跃 AttackTask → 光束断裂 → 坠落；驱动到触地。
+        let ticks = 0;
+        let done = false;
+        while (!done && ticks < 60) {
+          done = task.onTick({});
+          ticks++;
+        }
+        return {
+          done,
+          ticks,
+          finalY: victim.position.worldY,
+          zoneGround: victim.zone === 0,
+          landed: dispatched.includes("ObjectLandEvent"),
+          droppedFlag: task._dropped,
+        };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [
