@@ -558,17 +558,18 @@ const CONVERTED = [
       (ns) =>
         new ns.Country({ multiplay: true, multiplayPassive: true }).isPlayable(),
       (ns) => new ns.Country({ multiplay: false, multiplayPassive: false }).isPlayable(),
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const country = new ns.Country({
           veteranAircraft: ["A-10"],
           veteranInfantry: [],
           veteranUnits: ["Grizzly"],
         });
         return [
-          country.hasVeteranUnit(ns.ObjectType.Vehicle, "Grizzly"),
-          country.hasVeteranUnit(ns.ObjectType.Aircraft, "A-10"),
-          country.hasVeteranUnit(ns.ObjectType.Infantry, "GI"),
-          country.hasVeteranUnit(ns.ObjectType.Vehicle, "Rhino"),
+          country.hasVeteranUnit(ObjectType.Vehicle, "Grizzly"),
+          country.hasVeteranUnit(ObjectType.Aircraft, "A-10"),
+          country.hasVeteranUnit(ObjectType.Infantry, "GI"),
+          country.hasVeteranUnit(ObjectType.Vehicle, "Rhino"),
         ];
       },
       (ns) => {
@@ -590,7 +591,8 @@ const CONVERTED = [
     name: "game/PlayerList",
     tsjs: "src/game/PlayerList.ts.js",
     probes: [
-      (ns) => {
+      (ns, THREE, mod) => {
+        const SideType = mod("game/SideType").SideType;
         const mk = (name, opts = {}) => ({
           name,
           isObserver: !!opts.observer,
@@ -602,7 +604,7 @@ const CONVERTED = [
           },
         });
         const list = new ns.PlayerList();
-        const bob = mk("Bob", { neutral: true, side: ns.SideType.Civilian });
+        const bob = mk("Bob", { neutral: true, side: SideType.Civilian });
         const alice = mk("Alice");
         const carl = mk("Carl", { observer: true });
         list.addPlayer(bob);
@@ -714,8 +716,9 @@ const CONVERTED = [
       },
       (ns) => {
         // 撤回：非发起方被拒；发起方本人成功撤回
+        // （三名玩家：canFormAlliance 现要求结盟后仍留有敌方关系）
         const mk = (name) => ({ name, isAi: false, isObserver: false, isCombatant: () => true });
-        const players = [mk("A"), mk("B")];
+        const players = [mk("A"), mk("B"), mk("C")];
         const alliances = new ns.Alliances({
           getCombatants: () => players,
           getPlayerNumber: (p) => players.indexOf(p),
@@ -784,10 +787,11 @@ const CONVERTED = [
           color: player.color.asHexString(),
         };
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const SideType = mod("game/SideType").SideType;
         const neutralCountry = {
           isPlayable: () => false,
-          side: ns.SideType.Civilian,
+          side: SideType.Civilian,
           hasVeteranUnit: () => false,
         };
         const player = new ns.Player("Civ", neutralCountry);
@@ -812,23 +816,24 @@ const CONVERTED = [
         out.push(player.credits);
         return out;
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const player = new ns.Player("Bob");
-        const building = { id: 7, type: ns.ObjectType.Building, name: "GAPOWR" };
+        const building = { id: 7, type: ObjectType.Building, name: "GAPOWR" };
         player.addOwnedObject(building);
         const afterAdd = {
           buildings: player.buildings.size,
           byId: player.getOwnedObjectById(7)?.name,
-          byType: player.getOwnedObjectsByType(ns.ObjectType.Building).length,
+          byType: player.getOwnedObjectsByType(ObjectType.Building).length,
           owner: building.owner === player,
         };
-        const infantry = { id: 8, type: ns.ObjectType.Infantry, name: "GI" };
+        const infantry = { id: 8, type: ObjectType.Infantry, name: "GI" };
         player.addOwnedObject(infantry);
-        const limboed = { id: 9, type: ns.ObjectType.Infantry, name: "LIMBO", limboData: {} };
+        const limboed = { id: 9, type: ObjectType.Infantry, name: "LIMBO", limboData: {} };
         player.addOwnedObject(limboed);
         const withLimbo = {
-          typeNoLimbo: player.getOwnedObjectsByType(ns.ObjectType.Infantry).length,
-          typeWithLimbo: player.getOwnedObjectsByType(ns.ObjectType.Infantry, true).length,
+          typeNoLimbo: player.getOwnedObjectsByType(ObjectType.Infantry).length,
+          typeWithLimbo: player.getOwnedObjectsByType(ObjectType.Infantry, true).length,
           allNoLimbo: player.getOwnedObjects().length,
           allWithLimbo: player.getOwnedObjects(true).length,
         };
@@ -847,29 +852,31 @@ const CONVERTED = [
           afterClear: player.getOwnedObjects(true).length + player.objectsById.size,
         };
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const player = new ns.Player("Bob");
-        player.addUnitsBuilt({ type: ns.ObjectType.Vehicle, name: "Heavy Tank", buildLimit: -1 }, 3);
-        player.addUnitsBuilt({ type: ns.ObjectType.Vehicle, name: "Rhino", buildLimit: 5 }, 2);
-        player.addUnitsBuilt({ type: ns.ObjectType.Infantry, name: "GI", buildLimit: 10 }, 4);
+        player.addUnitsBuilt({ type: ObjectType.Vehicle, name: "Heavy Tank", buildLimit: -1 }, 3);
+        player.addUnitsBuilt({ type: ObjectType.Vehicle, name: "Rhino", buildLimit: 5 }, 2);
+        player.addUnitsBuilt({ type: ObjectType.Infantry, name: "GI", buildLimit: 10 }, 4);
         return {
-          vehicleBuilt: player.getUnitsBuilt(ns.ObjectType.Vehicle),
+          vehicleBuilt: player.getUnitsBuilt(ObjectType.Vehicle),
           totalBuilt: player.getUnitsBuilt(),
           limitedHeavy: player.getLimitedUnitsBuilt("Heavy Tank"),
           limitedRhino: player.getLimitedUnitsBuilt("Rhino"),
           missing: player.getLimitedUnitsBuilt("Nothing"),
         };
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const player = new ns.Player("Bob");
-        player.addUnitsKilled(ns.ObjectType.Infantry, 5);
-        player.addUnitsKilled(ns.ObjectType.Infantry, 2);
-        player.addUnitsKilled(ns.ObjectType.Vehicle, 1);
-        player.addUnitsLost(ns.ObjectType.Infantry, 3);
+        player.addUnitsKilled(ObjectType.Infantry, 5);
+        player.addUnitsKilled(ObjectType.Infantry, 2);
+        player.addUnitsKilled(ObjectType.Vehicle, 1);
+        player.addUnitsLost(ObjectType.Infantry, 3);
         return {
-          killedInf: player.getUnitsKilled(ns.ObjectType.Infantry),
+          killedInf: player.getUnitsKilled(ObjectType.Infantry),
           killedTotal: player.getUnitsKilled(),
-          lostInf: player.getUnitsLost(ns.ObjectType.Infantry),
+          lostInf: player.getUnitsLost(ObjectType.Infantry),
           lostTotal: player.getUnitsLost(),
         };
       },
@@ -896,10 +903,11 @@ const CONVERTED = [
           return e.message;
         }
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const country = {
           isPlayable: () => true,
-          hasVeteranUnit: (type, name) => type === ns.ObjectType.Vehicle && name === "Rhino",
+          hasVeteranUnit: (type, name) => type === ObjectType.Vehicle && name === "Rhino",
         };
         const player = new ns.Player("Bob", country);
         player.production = {
@@ -907,8 +915,8 @@ const CONVERTED = [
           getFactoryTypeForQueueType: () => 2,
           hasVeteranType: (q) => q === 9,
         };
-        const rules = { type: ns.ObjectType.Vehicle, name: "Rhino" };
-        const rulesOther = { type: ns.ObjectType.Vehicle, name: "Apoc" };
+        const rules = { type: ObjectType.Vehicle, name: "Rhino" };
+        const rulesOther = { type: ObjectType.Vehicle, name: "Apoc" };
         return {
           viaCountry: player.canProduceVeteran(rules),
           viaProduction: player.canProduceVeteran(rulesOther),
@@ -1051,8 +1059,9 @@ const CONVERTED = [
     name: "game/gameobject/GameObject",
     tsjs: "src/game/gameobject/GameObject.ts.js",
     probes: [
-      (ns) => {
-        const object = new ns.GameObject(ns.ObjectType.Terrain, "T01", { uiName: "Tree" }, {});
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const object = new ns.GameObject(ObjectType.Terrain, "T01", { uiName: "Tree" }, {});
         return {
           type: object.type,
           name: object.name,
@@ -1067,28 +1076,35 @@ const CONVERTED = [
           deathType: object.deathType,
         };
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const NotifyTick = mod("game/gameobject/trait/interface/NotifyTick").NotifyTick;
+        const NotifySpawn = mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn;
+        const NotifyUnspawn = mod("game/gameobject/trait/interface/NotifyUnspawn").NotifyUnspawn;
+        const NotifyDestroy = mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy;
+        const NotifyOwnerChange = mod("game/gameobject/trait/interface/NotifyOwnerChange").NotifyOwnerChange;
+        const NotifyAttack = mod("game/gameobject/trait/interface/NotifyAttack").NotifyAttack;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         // 生命周期广播：挂载带 Symbol 钩子的 trait 并逐一触发
-        const object = new ns.GameObject(ns.ObjectType.Vehicle, "HTK", {}, {});
+        const object = new ns.GameObject(ObjectType.Vehicle, "HTK", {}, {});
         const calls = [];
         const trait = {
           owner: null,
-          [ns.NotifyTick.onTick](self, world) {
+          [NotifyTick.onTick](self, world) {
             calls.push(["tick", world, self === object]);
           },
-          [ns.NotifySpawn.onSpawn](self, world) {
+          [NotifySpawn.onSpawn](self, world) {
             calls.push(["spawn", world]);
           },
-          [ns.NotifyUnspawn.onUnspawn](self, world) {
+          [NotifyUnspawn.onUnspawn](self, world) {
             calls.push(["unspawn", world]);
           },
-          [ns.NotifyDestroy.onDestroy](self, damage, warhead, attacker) {
+          [NotifyDestroy.onDestroy](self, damage, warhead, attacker) {
             calls.push(["destroy", damage, warhead, attacker]);
           },
-          [ns.NotifyOwnerChange.onChange](self, oldOwner, newOwner) {
+          [NotifyOwnerChange.onChange](self, oldOwner, newOwner) {
             calls.push(["owner", oldOwner, newOwner]);
           },
-          [ns.NotifyAttack.onAttack](self, a, b) {
+          [NotifyAttack.onAttack](self, a, b) {
             calls.push(["attack", a, b]);
           },
         };
@@ -1105,11 +1121,18 @@ const CONVERTED = [
           cachedTick: object.cachedTraits.tick.length,
         };
       },
-      (ns) => {
+      (ns, THREE, mod) => {
+        const NotifyTick = mod("game/gameobject/trait/interface/NotifyTick").NotifyTick;
+        const NotifySpawn = mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn;
+        const NotifyUnspawn = mod("game/gameobject/trait/interface/NotifyUnspawn").NotifyUnspawn;
+        const NotifyDestroy = mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy;
+        const NotifyOwnerChange = mod("game/gameobject/trait/interface/NotifyOwnerChange").NotifyOwnerChange;
+        const NotifyAttack = mod("game/gameobject/trait/interface/NotifyAttack").NotifyAttack;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         // addTrait 的 tick 缓存只登记实现了 NotifyTick 的 trait
-        const object = new ns.GameObject(ns.ObjectType.Building, "GAPILE", {}, {});
+        const object = new ns.GameObject(ObjectType.Building, "GAPILE", {}, {});
         object.addTrait({});
-        object.addTrait({ [ns.NotifyTick.onTick]: () => {} });
+        object.addTrait({ [NotifyTick.onTick]: () => {} });
         const hashWithTrait = (() => {
           object.id = 5;
           object.position = {
@@ -1269,7 +1292,8 @@ const CONVERTED = [
     tsjs: "src/game/gameobject/Techno.ts.js",
     probes: [
       // 规则标志快照 + 便捷读取器降级
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const rules = {
           explodes: true,
           radarInvisible: true,
@@ -1280,7 +1304,7 @@ const CONVERTED = [
           cost: 500,
           sight: 8,
         };
-        const techno = new ns.Techno(ns.ObjectType.Vehicle, "HTK", rules, {});
+        const techno = new ns.Techno(ObjectType.Vehicle, "HTK", rules, {});
         return {
           explodes: techno.explodes,
           crusher: techno.crusher,
@@ -1295,9 +1319,10 @@ const CONVERTED = [
         };
       },
       // 碾压判定矩阵
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const rules = { crusher: true, omniCrusher: true, cost: 1, sight: 1 };
-        const tank = new ns.Techno(ns.ObjectType.Vehicle, "HTK", rules, {});
+        const tank = new ns.Techno(ObjectType.Vehicle, "HTK", rules, {});
         const mkTarget = (props) => ({ rules: {}, ...props });
         const crushableInf = mkTarget({ rules: { crushable: true } });
         const wallBuilding = mkTarget({ rules: { crushable: true, wall: true }, isBuilding: () => true });
@@ -1315,9 +1340,10 @@ const CONVERTED = [
         ];
       },
       // 非碾压车；警戒复位
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const rules = { crusher: false, omniCrusher: false, cost: 1, sight: 1, defaultToGuardArea: false };
-        const car = new ns.Techno(ns.ObjectType.Vehicle, "CAR", rules, {});
+        const car = new ns.Techno(ObjectType.Vehicle, "CAR", rules, {});
         const crushResult = car.canCrushObject({ rules: { crushable: true } });
         car.guardMode = true;
         car.guardArea = { x: 1 };
@@ -1325,13 +1351,15 @@ const CONVERTED = [
         return { crushResult, guardMode: car.guardMode, guardArea: car.guardArea === undefined ? "undef" : "set" };
       },
       // 超时空离场 tick 分流：仅 ticksWhenWarpedOut 的 trait 被驱动
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const NotifyTick = mod("game/gameobject/trait/interface/NotifyTick").NotifyTick;
         const rules = { crusher: false, omniCrusher: false, cost: 1, sight: 1 };
-        const techno = new ns.Techno(ns.ObjectType.Vehicle, "HTK", rules, {});
+        const techno = new ns.Techno(ObjectType.Vehicle, "HTK", rules, {});
         const calls = [];
         techno.warpedOutTrait = { isActive: () => true };
-        techno.addTrait({ [ns.NotifyTick.onTick]: () => calls.push("always") });
-        techno.addTrait({ ticksWhenWarpedOut: true, [ns.NotifyTick.onTick]: () => calls.push("warped") });
+        techno.addTrait({ [NotifyTick.onTick]: () => calls.push("always") });
+        techno.addTrait({ ticksWhenWarpedOut: true, [NotifyTick.onTick]: () => calls.push("warped") });
         techno.update("W");
         techno.warpedOutTrait = { isActive: () => false };
         techno.update("W");
@@ -1381,13 +1409,14 @@ const CONVERTED = [
         return { storage: rules.storage, hasCargo: !!slave.harvesterTrait };
       },
       // 姿态读写与压制覆盖（压制 trait 为真实旧实现）
-      (ns) => {
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
         const rules = { crashable: false, fearless: false, agent: false, engineer: false, storage: 0, slaved: false };
         const gi = ns.Infantry.factory("GI", rules, {}, {});
         const initial = gi.stance;
-        gi.stance = ns.StanceType.Deployed;
+        gi.stance = StanceType.Deployed;
         const deployed = gi.stance;
-        gi.stance = ns.StanceType.None;
+        gi.stance = StanceType.None;
         return [initial, deployed, gi.stance];
       },
     ],
@@ -1397,7 +1426,10 @@ const CONVERTED = [
     tsjs: "src/game/gameobject/Vehicle.ts.js",
     probes: [
       // 最简出厂（地面坦克）：沉没判定（非海军 → 沉）、Ground 区
-      (ns) => {
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const rules = {
           naval: false,
           underwater: false,
@@ -1410,7 +1442,7 @@ const CONVERTED = [
           consideredAircraft: false,
           landable: false,
           parasiteable: false,
-          locomotor: ns.LocomotorType.Vehicle,
+          locomotor: LocomotorType.Vehicle,
           powered: false,
           poweredUnit: false,
           prerequisite: [],
@@ -1426,7 +1458,10 @@ const CONVERTED = [
         };
       },
       // 潜艇：水下 → SubmergibleTrait + Water 区 + 不沉（海军且未超重）
-      (ns) => {
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const rules = {
           naval: true,
           underwater: true,
@@ -1439,7 +1474,7 @@ const CONVERTED = [
           consideredAircraft: false,
           landable: false,
           parasiteable: false,
-          locomotor: ns.LocomotorType.Ship,
+          locomotor: LocomotorType.Ship,
           powered: false,
           poweredUnit: false,
           prerequisite: [],
@@ -1448,7 +1483,10 @@ const CONVERTED = [
         return { isSinker: sub.isSinker, zone: sub.zone, traitCount: sub.traits.getAll().length };
       },
       // IFV：运兵 + gunner → GunnerTrait；UI 名带模式前缀
-      (ns) => {
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const rules = {
           naval: false,
           underwater: false,
@@ -1461,7 +1499,7 @@ const CONVERTED = [
           consideredAircraft: false,
           landable: false,
           parasiteable: false,
-          locomotor: ns.LocomotorType.Vehicle,
+          locomotor: LocomotorType.Vehicle,
           powered: false,
           poweredUnit: false,
           prerequisite: [],
@@ -1474,7 +1512,10 @@ const CONVERTED = [
         return { hasGunner: !!ifv.gunnerTrait, hasTransport: !!ifv.transportTrait, uiName };
       },
       // 机器人坦克：poweredUnit + 前置 → RobotControlTrait；悬浮移动器
-      (ns) => {
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const rules = {
           naval: false,
           underwater: false,
@@ -1487,7 +1528,7 @@ const CONVERTED = [
           consideredAircraft: false,
           landable: false,
           parasiteable: false,
-          locomotor: ns.LocomotorType.Hover,
+          locomotor: LocomotorType.Hover,
           powered: false,
           poweredUnit: true,
           prerequisite: ["GACSPH"],
@@ -1496,7 +1537,10 @@ const CONVERTED = [
         return { hasRobotControl: !!robot.robotControlTrait, traitCount: robot.traits.getAll().length };
       },
       // 体素倾斜 + 摇晃：Vehicle/Chrono + voxel → TilterTrait；命中摇晃 34 tick
-      (ns) => {
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const base = {
           naval: false,
           underwater: false,
@@ -1509,7 +1553,7 @@ const CONVERTED = [
           consideredAircraft: false,
           landable: false,
           parasiteable: false,
-          locomotor: ns.LocomotorType.Vehicle,
+          locomotor: LocomotorType.Vehicle,
           powered: false,
           poweredUnit: false,
           prerequisite: [],
@@ -1524,7 +1568,10 @@ const CONVERTED = [
         return { hasTilt, rocking, cleared: voxel.rocking === undefined };
       },
       // 采矿车：harvester → HarvesterTrait + 乘员 + 寄生 + 体素倾斜
-      (ns) => {
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const rules = {
           naval: false,
           underwater: false,
@@ -1537,7 +1584,7 @@ const CONVERTED = [
           consideredAircraft: false,
           landable: false,
           parasiteable: true,
-          locomotor: ns.LocomotorType.Vehicle,
+          locomotor: LocomotorType.Vehicle,
           powered: false,
           poweredUnit: false,
           prerequisite: [],
@@ -1673,7 +1720,10 @@ const CONVERTED = [
         };
       },
       // 出厂组装矩阵（桩类 $args 记录构造参数，可断言传入值）
-      (ns) => {
+      (ns, THREE, mod) => {
+        // 孪生 TechnoRules 不导出 FactoryType，按孪生私有枚举取值内联
+        const FactoryType = { None: 0, BuildingType: 1, InfantryType: 2, UnitType: 3, NavalUnitType: 4, AircraftType: 5 };
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const world = { audioVisual: { conditionRed: "red" }, general: { engineerTechSecureTime: 45 } };
         const art = { foundation: { width: 2, height: 2 }, dockingOffsets: [1, 2] };
         const rules = {
@@ -1692,7 +1742,7 @@ const CONVERTED = [
           overpowerable: true,
           powered: true,
           power: -100,
-          factory: ns.FactoryType.BuildingType,
+          factory: FactoryType.BuildingType,
           cloning: false,
           superWeapon: "ChronoStorm",
           numberOfDocks: 1,
@@ -1818,7 +1868,8 @@ const CONVERTED = [
     tsjs: "src/game/WeaponTargeting.ts.js",
     probes: [
       // 普通武器：打敌方可瞄准、友方拒绝、隐形拒绝
-      (ns) => {
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
         const self = {
           name: "GTANK",
           owner: { name: "P1" },
@@ -1831,60 +1882,64 @@ const CONVERTED = [
           areFriendly: (a, b) => a.owner === b.owner,
           alliances: { haveSharedIntel: () => false },
         };
-        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, projectileRules, weaponRules, warheadRules, self, { prism: { type: "PRISM" } });
-        const enemy = { isTechno: () => true, isUnit: () => true, owner: { name: "P2" }, zone: 0, tileElevation: 0 };
-        const friend = { isTechno: () => true, isUnit: () => true, owner: { name: "P1" }, zone: 0, tileElevation: 0 };
-        const cloaked = { isTechno: () => true, isUnit: () => true, owner: { name: "P2" }, zone: 0, tileElevation: 0, cloakableTrait: { isCloaked: () => true } };
+        const targeting = new ns.WeaponTargeting(WeaponType.Primary, projectileRules, weaponRules, warheadRules, self, { prism: { type: "PRISM" } });
+        const enemy = { isTechno: () => true, isUnit: () => true, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, owner: { name: "P2" }, zone: 0, tileElevation: 0 };
+        const friend = { isTechno: () => true, isUnit: () => true, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, owner: { name: "P1" }, zone: 0, tileElevation: 0 };
+        const cloaked = { isTechno: () => true, isUnit: () => true, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, owner: { name: "P2" }, zone: 0, tileElevation: 0, cloakableTrait: { isCloaked: () => true } };
         const tile = { landType: 0 }; // LandType.Clear
         return [
-          targeting.canTarget(enemy, game, false, false, false),
-          targeting.canTarget(friend, game, false, false, false),
-          targeting.canTarget(cloaked, game, false, false, false),
+          targeting.canTarget(enemy, tile, game, false, false),
+          targeting.canTarget(friend, tile, game, false, false),
+          targeting.canTarget(cloaked, tile, game, false, false),
         ];
       },
       // 区域策略：对空弹体打空中目标、副武器专属对空不打地面
-      (ns) => {
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
         const self = {
           name: "AATANK",
           owner: { name: "P1" },
           rules: { attackCursorOnFriendlies: false, navalTargeting: 5, landTargeting: 0 },
         };
         const projectileRules = { isAntiGround: false, isAntiAir: true };
-        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, projectileRules, { damage: 10 }, {}, self, { prism: { type: "PRISM" } });
-        const airUnit = { isUnit: () => true, isTechno: () => true, owner: { name: "P2" }, zone: 1 };
-        const groundUnit = { isUnit: () => true, isTechno: () => true, owner: { name: "P2" }, zone: 0 };
+        const targeting = new ns.WeaponTargeting(WeaponType.Primary, projectileRules, { damage: 10 }, {}, self, { prism: { type: "PRISM" } });
+        const airUnit = { isUnit: () => true, isTechno: () => true, isInfantry: () => false, isAircraft: () => true, isVehicle: () => false, owner: { name: "P2" }, zone: 1 };
+        const groundUnit = { isUnit: () => true, isTechno: () => true, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, owner: { name: "P2" }, zone: 0 };
         return [
-          targeting.canTarget(airUnit, { areFriendly: () => false, alliances: { haveSharedIntel: () => false } }, false, false, false),
+          targeting.canTarget(airUnit, { landType: 0 }, { areFriendly: () => false, alliances: { haveSharedIntel: () => false } }, false, false),
           targeting.canTargetZone(airUnit, null),
           targeting.canTargetZone(groundUnit, { landType: 0 }),
         ];
       },
       // 海军策略枚举逐值
-      (ns) => {
-        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, {}, {}, {}, { rules: {} }, { prism: { type: "PRISM" } });
+      (ns, THREE, mod) => {
+        const NavalTargeting = mod("game/type/NavalTargeting").NavalTargeting;
+        const WeaponType = mod("game/WeaponType").WeaponType;
+        const targeting = new ns.WeaponTargeting(WeaponType.Primary, {}, {}, {}, { rules: {} }, { prism: { type: "PRISM" } });
         const submergedSub = { isVehicle: () => true, submergibleTrait: { isSubmerged: () => true } };
         const surfacedShip = { isVehicle: () => true, submergibleTrait: { isSubmerged: () => false } };
         const organic = { isTechno: () => true, rules: { organic: true, naval: true } };
         return [
-          targeting.canTargetNaval(ns.NavalTargeting.UnderwaterNever, null, submergedSub, 0),
-          targeting.canTargetNaval(ns.NavalTargeting.UnderwaterOnly, null, submergedSub, 0),
-          targeting.canTargetNaval(ns.NavalTargeting.UnderwaterOnly, null, surfacedShip, 0),
-          targeting.canTargetNaval(ns.NavalTargeting.OrganicSecondary, null, organic, 1),
-          targeting.canTargetNaval(ns.NavalTargeting.SealSpecial, null, organic, 1),
-          targeting.canTargetNaval(ns.NavalTargeting.NavalAllEquivalent, null, null, 0),
-          targeting.canTargetNaval(ns.NavalTargeting.NavalNone, null, null, 0),
+          targeting.canTargetNaval(NavalTargeting.UnderwaterNever, null, submergedSub, 0),
+          targeting.canTargetNaval(NavalTargeting.UnderwaterOnly, null, submergedSub, 0),
+          targeting.canTargetNaval(NavalTargeting.UnderwaterOnly, null, surfacedShip, 0),
+          targeting.canTargetNaval(NavalTargeting.OrganicSecondary, null, organic, 1),
+          targeting.canTargetNaval(NavalTargeting.SealSpecial, null, organic, 1),
+          targeting.canTargetNaval(NavalTargeting.NavalAllEquivalent, null, null, 0),
+          targeting.canTargetNaval(NavalTargeting.NavalNone, null, null, 0),
         ];
       },
       // 治疗武器（负伤害）：只指向受损友军
-      (ns) => {
-        const self = { name: "MEDIC", owner: { name: "P1" }, rules: { attackCursorOnFriendlies: false } };
-        const targeting = new ns.WeaponTargeting(ns.WeaponType.Primary, { isAntiGround: true }, { damage: -20 }, {}, self, { prism: { type: "PRISM" } });
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
+        const self = { name: "MEDIC", owner: { name: "P1" }, rules: { attackCursorOnFriendlies: false, landTargeting: 0, navalTargeting: 5 }, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, isTechno: () => true, isUnit: () => true };
+        const targeting = new ns.WeaponTargeting(WeaponType.Primary, { isAntiGround: true }, { damage: -20 }, {}, self, { prism: { type: "PRISM" } });
         const game = { areFriendly: () => true, alliances: { haveSharedIntel: () => true } };
-        const hurtFriend = { isTechno: () => true, isUnit: () => true, owner: { name: "P1" }, healthTrait: { health: 40 }, zone: 0 };
-        const fullFriend = { isTechno: () => true, isUnit: () => true, owner: { name: "P1" }, healthTrait: { health: 100 }, zone: 0 };
+        const hurtFriend = { isTechno: () => true, isUnit: () => true, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, owner: { name: "P1" }, healthTrait: { health: 40 }, zone: 0 };
+        const fullFriend = { isTechno: () => true, isUnit: () => true, isInfantry: () => false, isAircraft: () => false, isVehicle: () => false, owner: { name: "P1" }, healthTrait: { health: 100 }, zone: 0 };
         return [
-          targeting.canTarget(hurtFriend, game, false, false, false),
-          targeting.canTarget(fullFriend, game, false, false, false),
+          targeting.canTarget(hurtFriend, { landType: 0 }, game, false, false),
+          targeting.canTarget(fullFriend, { landType: 0 }, game, false, false),
         ];
       },
     ],
@@ -1911,17 +1966,23 @@ const CONVERTED = [
         ns.Weapon.occupyROFMultiplier,
       ],
       // 冷却与连发计数
-      (ns) => {
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
         const weaponRules = { rof: 50, burst: 3, burstDelay: [7, 8], name: "Test", spawner: false, limboLaunch: false, decloakToFire: false, revealOnFire: false, iniSpeed: 30 };
         const gameObject = {
           name: "GTANK",
           rules: { distributedFire: false, radialFireSegments: 0, burstDelay: [7, 8] },
+          isInfantry: () => false,
+          isTechno: () => true,
+          isUnit: () => true,
+          isBuilding: () => false,
+          isVehicle: () => false,
           isAircraft: () => false,
           isUnit: () => true,
           crateBonuses: { firepower: 1.5 },
           ammoTrait: { ammo: 10 },
         };
-        const weapon = new ns.Weapon(ns.WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Shell" }, null, null);
+        const weapon = new ns.Weapon(WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Shell" }, null, null);
         weapon.resetCooldown();
         const cooldown = weapon.getCooldownTicks();
         weapon.tick();
@@ -1980,7 +2041,8 @@ const CONVERTED = [
         return { cooldown, afterTick, expireZero: weapon.getCooldownTicks(), firedOnce, secondBurstLeft: weapon.burstsLeft, secondIndex: weapon.burstIndex, dispatched: dispatched.length };
       },
       // 工厂参数表机器验证：(name, weaponType, gameObject, gameRules, flh?)
-      (ns) => {
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
         const weaponRules = {
           name: "Maverick3",
           warhead: "WH",
@@ -2006,9 +2068,15 @@ const CONVERTED = [
           name: "A10",
           owner: { name: "P1" },
           rules: { attackCursorOnFriendlies: false, navalTargeting: 5, landTargeting: 0 },
+          isInfantry: () => false,
+          isTechno: () => true,
+          isUnit: () => true,
+          isBuilding: () => false,
+          isVehicle: () => false,
+          isAircraft: () => false,
         };
         const flh = { forward: 1, lateral: 2, vertical: 3 };
-        const weapon = ns.Weapon.factory("Maverick3", ns.WeaponType.Primary, gameObject, gameRules, flh);
+        const weapon = ns.Weapon.factory("Maverick3", WeaponType.Primary, gameObject, gameRules, flh);
         return {
           type: weapon.type,
           gameObjectIsSame: weapon.gameObject === gameObject,
@@ -2018,13 +2086,14 @@ const CONVERTED = [
           flhIsSame: weapon.flh === flh,
           targetingWired:
             weapon.targeting.gameObject === gameObject &&
-            weapon.targeting.weaponType === ns.WeaponType.Primary &&
+            weapon.targeting.weaponType === WeaponType.Primary &&
             weapon.targeting.warheadRules === warheadIni,
-          defaultFlhWhenAbsent: !!ns.Weapon.factory("Maverick3", ns.WeaponType.Primary, gameObject, gameRules).flh,
+          defaultFlhWhenAbsent: !!ns.Weapon.factory("Maverick3", WeaponType.Primary, gameObject, gameRules).flh,
         };
       },
       // fire 的两层越界语义：三维越界仍入场/派发；空射 guard 失败全跳过
-      (ns) => {
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
         const boundsResults = [true, false]; // 第一次（平面位置）通过，第二次（三维合成）越界
         const created = [];
         const spawned = [];
@@ -2038,8 +2107,12 @@ const CONVERTED = [
         const gameObject = {
           name: "GTANK",
           rules: { distributedFire: false, radialFireSegments: 0, burstDelay: [] },
+          isInfantry: () => false,
+          isBuilding: () => false,
+          isVehicle: () => false,
           isAircraft: () => false,
           isUnit: () => true,
+          isTechno: () => true,
           crateBonuses: { firepower: 1 },
           position: {
             getMapPosition: () => ({ x: 0, y: 0, clone: () => ({ sub: () => ({}) }) }),
@@ -2049,7 +2122,7 @@ const CONVERTED = [
           },
           art: { turretOffset: 0 },
         };
-        const weapon = new ns.Weapon(ns.WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Shell" }, { clone: () => ({ forward: 10, lateral: 0, vertical: 2 }) }, null);
+        const weapon = new ns.Weapon(WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Shell" }, { clone: () => ({ forward: 10, lateral: 0, vertical: 2 }) }, null);
         const game = {
           createProjectile: () => {
             const proj = {
@@ -2085,7 +2158,8 @@ const CONVERTED = [
         };
       },
       // 空射 guard 失败：prepareLaunch 返回空 → 完全不发射
-      (ns) => {
+      (ns, THREE, mod) => {
+        const WeaponType = mod("game/WeaponType").WeaponType;
         const created = [];
         let burstsTouched = false;
         const weaponRules = {
@@ -2108,7 +2182,7 @@ const CONVERTED = [
           },
           art: { turretOffset: 0 },
         };
-        const weapon = new ns.Weapon(ns.WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Bomb" }, { clone: () => ({ forward: 0, lateral: 0, vertical: 0 }) }, null);
+        const weapon = new ns.Weapon(WeaponType.Primary, gameObject, weaponRules, { rules: {} }, { name: "Bomb" }, { clone: () => ({ forward: 0, lateral: 0, vertical: 0 }) }, null);
         weapon.fire({ obj: null }, {
           createProjectile: () => created.push(1),
           map: { isWithinHardBounds: () => true },
@@ -2152,18 +2226,20 @@ const CONVERTED = [
         ];
       },
       // computeDamage：装甲衰减 / 墙免疫 / 取整方向
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ArmorType = mod("game/type/ArmorType").ArmorType;
         const mk = (props) => ({
           isTechno: () => false, isOverlay: () => false, isTerrain: () => false,
           isBuilding: () => false, isUnit: () => false, isInfantry: () => false, isAircraft: () => false,
           stance: 0,
+          invulnerableTrait: { isActive: () => false },
           ...props,
         });
-        const verses = new Map([[ns.ArmorType.Heavy, 0.5], [ns.ArmorType.Wood, 2]]);
+        const verses = new Map([[ArmorType.Heavy, 0.5], [ArmorType.Wood, 2]]);
         const warhead = new ns.Warhead({ proneDamage: 0.5, verses, wallAbsoluteDestroyer: false, wall: false, wood: false });
-        const techno = mk({ isTechno: () => true, rules: { armor: ns.ArmorType.Heavy }, veteranTrait: null, crateBonuses: { armor: 1 } });
+        const techno = mk({ isTechno: () => true, rules: { armor: ArmorType.Heavy }, veteranTrait: null, crateBonuses: { armor: 1 } });
         const halfVerses = warhead.computeDamage(100, techno, { gameOpts: {} });
-        const wall = mk({ isBuilding: () => true, rules: { wall: true, armor: ns.ArmorType.Wood } });
+        const wall = mk({ isBuilding: () => true, rules: { wall: true, armor: ArmorType.Wood } });
         const wallZero = warhead.computeDamage(100, wall, { gameOpts: {} });
         const woodWarhead = new ns.Warhead({ proneDamage: 0.5, verses, wallAbsoluteDestroyer: false, wall: false, wood: true });
         const wallWood = woodWarhead.computeDamage(100, wall, { gameOpts: {} });
@@ -2393,12 +2469,13 @@ const CONVERTED = [
     name: "game/rules/general/V3RocketRules",
     tsjs: "src/game/rules/general/V3RocketRules.ts.js",
     probes: [
-      (ns) => {
+      (ns, THREE, mod) => {
+        const MissileRules = mod("game/rules/general/MissileRules").MissileRules;
         const rules = new ns.V3RocketRules().readIni(
           makeMockIni("G", { V3RocketType: "V3", V3RocketDamage: "200", V3RocketLazyCurve: "yes" }),
         );
         return {
-          isMissile: rules instanceof ns.MissileRules,
+          isMissile: rules instanceof MissileRules,
           type: rules.type,
           damage: rules.damage,
           lazyCurve: rules.lazyCurve,
@@ -2411,9 +2488,10 @@ const CONVERTED = [
     name: "game/rules/general/DMislRules",
     tsjs: "src/game/rules/general/DMislRules.ts.js",
     probes: [
-      (ns) => {
+      (ns, THREE, mod) => {
+        const MissileRules = mod("game/rules/general/MissileRules").MissileRules;
         const rules = new ns.DMislRules().readIni(makeMockIni("G", { DMislType: "DM", DMislPauseFrames: "5" }));
-        return { type: rules.type, pauseFrames: rules.pauseFrames, isMissile: rules instanceof ns.MissileRules };
+        return { type: rules.type, pauseFrames: rules.pauseFrames, isMissile: rules instanceof MissileRules };
       },
     ],
   },
@@ -2481,7 +2559,8 @@ const CONVERTED = [
     tsjs: "src/game/rules/general/ParadropRules.ts.js",
     probes: [
       // 编队过滤（数量>0）+ 阵营映射 + 必填运载机
-      (ns) => {
+      (ns, THREE, mod) => {
+        const SideType = mod("game/SideType").SideType;
         const rules = new ns.ParadropRules().readIni(
           makeMockIni("G", {
             AllyParaDropInf: "GI,GGI,SPY",
@@ -2499,9 +2578,9 @@ const CONVERTED = [
         return {
           ally: rules.allyParaDrop,
           amer: rules.amerParaDrop.length,
-          byGdi: rules.getParadropSquads(ns.SideType.GDI)[0].inf,
-          byNod: rules.getParadropSquads(ns.SideType.Nod)[0].inf,
-          byThird: rules.getParadropSquads(ns.SideType.ThirdSide)[0].inf,
+          byGdi: rules.getParadropSquads(SideType.GDI)[0].inf,
+          byNod: rules.getParadropSquads(SideType.Nod)[0].inf,
+          byThird: rules.getParadropSquads(SideType.ThirdSide)[0].inf,
           plane: rules.paradropPlane,
           radius: rules.paradropRadius,
         };
@@ -2720,8 +2799,10 @@ const CONVERTED = [
     name: "game/rules/AiRules",
     tsjs: "src/game/rules/AiRules.ts.js",
     probes: [
-      (ns) => {
-        const rules = new ns.AiRules().readIni(
+      (ns, THREE, mod) => {
+        // 孪生 readIni 只写 this 不返回值，须先实例化再读
+        const rules = new ns.AiRules();
+        rules.readIni(
           makeMockIni("G", { BuildPower: "GAPOWR", BuildRefinery: "GAREFN", BuildTech: "GATECH", TiberiumNearScan: "9" }),
         );
         return {
@@ -2739,7 +2820,8 @@ const CONVERTED = [
     tsjs: "src/game/rules/LandRules.ts.js",
     probes: [
       // 段内凡 SpeedType 名的键都登记为通行系数；Foot 在 Track=0 时禁行
-      (ns) => {
+      (ns, THREE, mod) => {
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
         const rules = new ns.LandRules();
         rules.readIni({
           getBool: () => false,
@@ -2754,12 +2836,12 @@ const CONVERTED = [
           ]),
         });
         return {
-          footBlockedByTrackZero: rules.getSpeedModifier(ns.SpeedType.Foot),
-          wheel: rules.getSpeedModifier(ns.SpeedType.Wheel),
-          water: rules.getSpeedModifier(ns.SpeedType.Float), // 未登记 → 1
+          footBlockedByTrackZero: rules.getSpeedModifier(SpeedType.Foot),
+          wheel: rules.getSpeedModifier(SpeedType.Wheel),
+          water: rules.getSpeedModifier(SpeedType.Float), // 未登记 → 1
           trackNonZeroCase: (() => {
-            rules.speedModifiers.set(ns.SpeedType.Track, 50);
-            return rules.getSpeedModifier(ns.SpeedType.Foot);
+            rules.speedModifiers.set(SpeedType.Track, 50);
+            return rules.getSpeedModifier(SpeedType.Foot);
           })(),
         };
       },
@@ -2769,8 +2851,10 @@ const CONVERTED = [
     name: "game/rules/RadiationRules",
     tsjs: "src/game/rules/RadiationRules.ts.js",
     probes: [
-      (ns) => {
-        const rules = new ns.RadiationRules().readIni(
+      (ns, THREE, mod) => {
+        // 同 AiRules：readIni 无返回值
+        const rules = new ns.RadiationRules();
+        rules.readIni(
           makeMockIni("G", { RadDurationMultiple: "100", RadLevelMax: "2", RadColor: "0,255,0" }),
         );
         return {
@@ -2883,14 +2967,15 @@ const CONVERTED = [
     tsjs: "src/game/rules/ProjectileRules.ts.js",
     probes: [
       // 继承 ObjectRules 通用键 + 弹体专属键 + ROT/Acceleration 换算
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const ini = {
           name: "Shell",
           getString: (k) => ({ ShrapnelWeapon: "SHRAP" }[k] ?? ""),
           getBool: (k, d) => ({ Arcing: true, Inviso: true, AA: true, AG: false, Vertical: false }[k] ?? d ?? false),
           getNumber: (k, d) => ({ ROT: "128", Acceleration: "0", Inaccurate: 5 }[k] ?? d ?? 0),
         };
-        const rules = new ns.ProjectileRules(ns.ObjectType.Projectile, ini, -1);
+        const rules = new ns.ProjectileRules(ObjectType.Projectile, ini, -1);
         return {
           name: rules.name,
           arcing: rules.arcing,
@@ -2934,13 +3019,14 @@ const CONVERTED = [
     name: "game/rules/ObjectRulesFactory",
     tsjs: "src/game/rules/ObjectRulesFactory.ts.js",
     probes: [
-      (ns) => {
-        const mkIni = (name) => ({ name, getString: () => "", getBool: (k, d) => d, getNumber: () => 0 });
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const mkIni = (name) => ({ ...makeMockIni(name, {}), getString: () => "" });
         const general = { unitsUnsellable: false, returnStructures: false };
-        const factory = ns.ObjectRulesFactory;
-        const techno = factory.create(ns.ObjectType.Infantry, mkIni("E1"), null, general);
-        const overlay = factory.create(ns.ObjectType.Overlay, mkIni("GASMOKE"), null);
-        const fallback = factory.create(ns.ObjectType.VoxelAnim, mkIni("X"), null);
+        const factory = new ns.ObjectRulesFactory();
+        const techno = factory.create(ObjectType.Infantry, mkIni("E1"), general, null);
+        const overlay = factory.create(ObjectType.Overlay, mkIni("GASMOKE"), general);
+        const fallback = factory.create(ObjectType.VoxelAnim, mkIni("X"), general);
         return {
           techno: techno.constructor.name,
           technoType: techno.type,
@@ -3047,7 +3133,9 @@ const CONVERTED = [
     tsjs: "src/game/rules/Rules.ts.js",
     probes: [
       // 全链路 init：最小 rulesmd.ini → 类型表/规则表/武器清单/全局参数
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const Weapon = mod("game/Weapon").Weapon;
         const sections = {
           AudioVisual: { ConditionRed: "75" },
           CombatDamage: { SplashList: "s1", BerserkROFMultiplier: "0.4", ForceShieldRadius: "8" },
@@ -3078,6 +3166,8 @@ const CONVERTED = [
           CrateRules: {},
           ElevationModel: { ElevationIncrement: "3" },
           MultiplayerDialogSettings: { Money: "5000" },
+          Radiation: {},
+          Powerups: {},
           BuildingTypes: { "0": "GACNST" },
           InfantryTypes: { "0": "E1" },
           VehicleTypes: { "0": "HTK" },
@@ -3111,15 +3201,15 @@ const CONVERTED = [
         return {
           buildings: rules.buildingTypes.size,
           infantry: rules.infantryTypes.size,
-          hasWall: rules.hasObject("GAWALL", ns.ObjectType.Overlay),
+          hasWall: rules.hasObject("GAWALL", ObjectType.Overlay),
           wallId: rules.getOverlayId("GAWALL"),
           countrySide: rules.getCountry("Americans").side,
           mpCountries: rules.getMultiplayerCountries().length,
           weaponList: rules.weaponTypes.size,
-          nukeInList: [...rules.weaponTypes.values()].includes(ns.Weapon.NUKE_PAYLOAD_NAME),
+          nukeInList: [...rules.weaponTypes.values()].includes(Weapon.NUKE_PAYLOAD_NAME),
           dropPodInList: [...rules.weaponTypes.values()].includes("PODWH"),
           missileV3: rules.general.getMissileRules("V3") === rules.general.v3Rocket,
-          bunkerPropagated: ns.Weapon.berserkROFMultiplier, // CombatDamage 写入 Weapon 静态字段
+          bunkerPropagated: Weapon.berserkROFMultiplier, // CombatDamage 写入 Weapon 静态字段
           fsRadiusFromGeneral: rules.combatDamage.forceShieldRadius, // [General] 搬运 → 9
           particles: rules.particleTypes.size,
           goldColor: rules.colors.get("Gold") !== undefined,
@@ -3137,7 +3227,7 @@ const CONVERTED = [
             PrerequisiteRadar: "D", PrerequisiteTech: "E", PrerequisiteProc: "F",
             ParadropPlane: "P", V3RocketType: "V3", DMislType: "DM", CMislType: "CM", PrismType: "GAPRIS",
           },
-          AI: {}, CrateRules: {}, ElevationModel: {}, MultiplayerDialogSettings: {},
+          AI: {}, CrateRules: {}, ElevationModel: {}, MultiplayerDialogSettings: {}, Radiation: {}, Powerups: {}, Colors: {},
           BuildingTypes: {}, InfantryTypes: {}, VehicleTypes: {}, AircraftTypes: {},
           TerrainTypes: {}, SmudgeTypes: {}, Animations: {}, VoxelAnims: {}, OverlayTypes: {},
           Colors: {}, Countries: {}, Warheads: {}, Tiberiums: {}, SuperWeaponTypes: {},
@@ -3313,7 +3403,7 @@ const CONVERTED = [
     tsjs: "src/game/player/production/Production.ts.js",
     probes: [
       // factory + 队列类型映射 + 前置校验 + Secret Lab 授予
-      (ns) => {
+      (ns, THREE, mod) => {
         const player = {
           name: "P1",
           isAi: false,
@@ -3334,7 +3424,7 @@ const CONVERTED = [
           mpDialogSettings: { techLevel: 10 },
           general: {
             maximumQueuedObjects: 30,
-            prereqCategories: new ns.Map ? new Map() : null,
+            prereqCategories: new Map(),
           },
           getSuperWeapon: () => ({ disableableFromShell: false, type: 0 }),
         };
@@ -3350,12 +3440,13 @@ const CONVERTED = [
         };
       },
       // 队列类型映射
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const production = ns.Production ? new ns.Production(null, 10, {}, null, []) : null;
         return [
-          production.getQueueTypeForObject({ type: ns.ObjectType.Infantry }),
-          production.getQueueTypeForObject({ type: ns.ObjectType.Vehicle, naval: true }),
-          production.getQueueTypeForObject({ type: ns.ObjectType.Building, buildCat: ns.BuildCat ? ns.BuildCat.Combat : 0 }),
+          production.getQueueTypeForObject({ type: ObjectType.Infantry }),
+          production.getQueueTypeForObject({ type: ObjectType.Vehicle, naval: true }),
+          production.getQueueTypeForObject({ type: ObjectType.Building, buildCat: ns.BuildCat ? ns.BuildCat.Combat : 0 }),
           production.getFactoryTypeForQueueType(ns.QueueType ? ns.QueueType.Infantry : 2),
         ];
       },
@@ -3597,11 +3688,12 @@ const CONVERTED = [
     name: "game/gameobject/task/system/TaskGroup",
     tsjs: "src/game/gameobject/task/system/TaskGroup.ts.js",
     probes: [
-      (ns) => {
-        const taskA = new (class extends ns.Task {})();
-        const taskB = new (class extends ns.Task {})();
+      (ns, THREE, mod) => {
+        const Task = mod("game/gameobject/task/system/Task").Task;
+        const taskA = new (class extends Task {})();
+        const taskB = new (class extends Task {})();
         const group = new ns.TaskGroup(taskA, taskB);
-        return { children: group.children.length, isTask: group instanceof ns.Task };
+        return { children: group.children.length, isTask: group instanceof Task };
       },
     ],
   },
@@ -6258,13 +6350,14 @@ const CONVERTED = [
       (ns) => ns.ObjectRules.iniRotToDegsPerTick(256),
       (ns) => ns.ObjectRules.iniRotToDegsPerTick(64),
       (ns) => ns.ObjectRules.IMAGE_NONE,
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
         const ini = {
           name: "E1",
           getString: (k) => ({ UIName: "STSNAME|E1", Image: "null" }[k]),
           getBool: (k, d) => d,
         };
-        const rules = new ns.ObjectRules(ns.ObjectType.Infantry, ini);
+        const rules = new ns.ObjectRules(ObjectType.Infantry, ini);
         return {
           name: rules.name,
           imageName: rules.imageName, // Image="null" → 回落段落名
@@ -6282,9 +6375,11 @@ const CONVERTED = [
     probes: [
       (ns) => ns.TechnoRules.MAX_SIGHT + "/" + ns.BuildCat.Power + "/" + ns.FactoryType.AircraftType,
       // 步兵最小段落：一串缺省值（可碾压、Chrono 移动器、Foot 速度类型等）
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Infantry,
+          ObjectType.Infantry,
           makeMockIni("E1", { Strength: 100, Cost: 200 }),
           -1,
           { unitsUnsellable: false, returnStructures: false },
@@ -6308,9 +6403,11 @@ const CONVERTED = [
         };
       },
       // 建筑最小段落：Statue 移动器、无速度类型、建筑缺省（可修复、不可训练等）
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Building,
+          ObjectType.Building,
           makeMockIni("GAPILE", { Strength: 400, Power: -50 }),
           -1,
           { unitsUnsellable: false, returnStructures: true },
@@ -6328,12 +6425,14 @@ const CONVERTED = [
         };
       },
       // 载具：缺省移动器 Chrono 下按是否碾压给 Track/Wheel；速度封顶 256
-      (ns) => {
-        const crusher = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("HTK", { Crusher: "yes", Speed: 110 }), -1, {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
+        const crusher = new ns.TechnoRules(ObjectType.Vehicle, makeMockIni("HTK", { Crusher: "yes", Speed: 110 }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
-        const normal = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("RHINO", { Speed: 110 }), -1, {
+        const normal = new ns.TechnoRules(ObjectType.Vehicle, makeMockIni("RHINO", { Speed: 110 }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
@@ -6344,9 +6443,11 @@ const CONVERTED = [
         };
       },
       // 武器槽：none 归一化为 undefined；精英槽缺失回落普通槽
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Infantry,
+          ObjectType.Infantry,
           makeMockIni("GGI", {
             Primary: "M1Carbine",
             Secondary: "none",
@@ -6369,9 +6470,11 @@ const CONVERTED = [
         };
       },
       // 老兵/精英能力集合：精英 = 老兵 ∪ EliteAbilities
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Vehicle,
+          ObjectType.Vehicle,
           makeMockIni("HTK", { VeteranAbilities: "FASTER,STRONGER", EliteAbilities: "C4" }),
           -1,
           { unitsUnsellable: false, returnStructures: false },
@@ -6379,13 +6482,15 @@ const CONVERTED = [
         return {
           veteran: rules.veteranAbilities.size,
           elite: rules.eliteAbilities.size,
-          hasC4: rules.eliteAbilities.has(ns.VeteranAbility.C4),
+          hasC4: rules.eliteAbilities.has(VeteranAbility.C4),
         };
       },
       // 盖特阶段阈值：未声明的阶段为 +∞
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Building,
+          ObjectType.Building,
           makeMockIni("GTGCTRK", { IsGattling: "yes", WeaponStages: 3, Stage1: 40, Stage2: 80, EliteStage1: 30 }),
           -1,
           { unitsUnsellable: false, returnStructures: false },
@@ -6394,9 +6499,11 @@ const CONVERTED = [
         return { stages: fmt(rules.stageThresholds), eliteStages: fmt(rules.eliteStageThresholds) };
       },
       // IFV 炮塔映射：*TurretWeapon 的值作为键、*TurretIndex 作为值
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Vehicle,
+          ObjectType.Vehicle,
           makeMockIni("IFV", {
             Gunner: "yes",
             StingerTurretWeapon: "55",
@@ -6409,28 +6516,32 @@ const CONVERTED = [
         return Array.from(rules.turretIndexesByIfvMode.entries());
       },
       // Factory=UnitType + Naval=yes → 归入海军船坞
-      (ns) => {
-        const naval = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("SUB", { Factory: "UnitType", Naval: "yes" }), -1, {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
+        const naval = new ns.TechnoRules(ObjectType.Vehicle, makeMockIni("SUB", { Factory: "UnitType", Naval: "yes" }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
-        const land = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("TNK", { Factory: "UnitType" }), -1, {
+        const land = new ns.TechnoRules(ObjectType.Vehicle, makeMockIni("TNK", { Factory: "UnitType" }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
         return [naval.factory, land.factory];
       },
       // AIBasePlanningSide：合法序号保留，越界/未填为 undefined
-      (ns) => {
-        const valid = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("A", { AIBasePlanningSide: 2 }), -1, {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
+        const valid = new ns.TechnoRules(ObjectType.Building, makeMockIni("A", { AIBasePlanningSide: 2 }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
-        const invalid = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("B", { AIBasePlanningSide: 99 }), -1, {
+        const invalid = new ns.TechnoRules(ObjectType.Building, makeMockIni("B", { AIBasePlanningSide: 99 }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
-        const absent = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("C", {}), -1, {
+        const absent = new ns.TechnoRules(ObjectType.Building, makeMockIni("C", {}), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
@@ -6441,24 +6552,28 @@ const CONVERTED = [
         ];
       },
       // 视野截断：Sight 上限 11、工程师建筑强制 6
-      (ns) => {
-        const big = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("A", { Sight: 99 }), -1, {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
+        const big = new ns.TechnoRules(ObjectType.Vehicle, makeMockIni("A", { Sight: 99 }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
-        const engineer = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("B", { NeedsEngineer: "yes", Sight: 99 }), -1, {
+        const engineer = new ns.TechnoRules(ObjectType.Building, makeMockIni("B", { NeedsEngineer: "yes", Sight: 99 }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
         return [big.sight, engineer.sight];
       },
       // 矿奴字段：SlavesNumber/Slaves 双拼写 + 数量兜底
-      (ns) => {
-        const declared = new ns.TechnoRules(ns.ObjectType.Building, makeMockIni("YAREFN", { SlavesNumber: "3" }), -1, {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
+        const declared = new ns.TechnoRules(ObjectType.Building, makeMockIni("YAREFN", { SlavesNumber: "3" }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
-        const named = new ns.TechnoRules(ns.ObjectType.Vehicle, makeMockIni("YASLMN", { Slaves: "YSLAV" }), -1, {
+        const named = new ns.TechnoRules(ObjectType.Vehicle, makeMockIni("YASLMN", { Slaves: "YSLAV" }), -1, {
           unitsUnsellable: false,
           returnStructures: false,
         });
@@ -6468,9 +6583,11 @@ const CONVERTED = [
         };
       },
       // 受伤冒烟挂点：y/z 对调 + z/√2 坐标换算
-      (ns) => {
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const VeteranAbility = mod("game/gameobject/unit/VeteranAbility").VeteranAbility;
         const rules = new ns.TechnoRules(
-          ns.ObjectType.Building,
+          ObjectType.Building,
           makeMockIni("GACNST", { DamageSmokeOffset: "10,20,30" }),
           -1,
           { unitsUnsellable: false, returnStructures: false },
@@ -6635,7 +6752,71 @@ function makeSystem() {
     register: (name, deps, factory) => defs.set(name, { deps, factory }),
     get,
   };
+  system._defs = defs;
+  system._instances = instances;
   return system;
+}
+
+/**
+ * 同步实例化 mini 运行时里的模块（get() 的同步版，供探针的 mod() 访问器用）。
+ * 叶子模块（枚举等）无循环依赖，语义与异步 get() 一致（含桩/惰性分支）。
+ */
+function syncInstantiate(system, name) {
+  const defs = system._defs;
+  const instances = system._instances;
+  if (instances.has(name)) return instances.get(name);
+  const def = defs.get(name);
+  if (!def) {
+    if (/^game\/gameobject\/(trait|task)\//.test(name)) {
+      defs.set(name, { deps: [], factory: makeStubFactory(name) });
+      return syncInstantiate(system, name);
+    }
+    const lazyTwin = "src/" + name + ".ts.js";
+    const lazyCompiled = "build/ts-modules/" + name + ".js";
+    if (existsSync(join(ROOT, lazyTwin))) {
+      loadFile(system, lazyTwin);
+      return syncInstantiate(system, name);
+    }
+    if (existsSync(join(ROOT, lazyCompiled))) {
+      loadFile(system, lazyCompiled);
+      return syncInstantiate(system, name);
+    }
+    throw new Error("module not registered (mod): " + name);
+  }
+  const ns = {};
+  instances.set(name, ns);
+  const exports = (key, value) => {
+    ns[key] = value;
+    return value;
+  };
+  const ret = def.factory(exports, { id: name });
+  for (let i = 0; i < def.deps.length; i++) ret.setters[i](syncInstantiate(system, def.deps[i]));
+  ret.execute();
+  return ns;
+}
+
+/**
+ * 探针的 mod(name) 访问器：取本变体运行时里的依赖模块实例。
+ * 背景：部分旧探针假设被测模块会重导出依赖枚举（如 ns.ObjectType），
+ * 实际孪生/转换版都不导出，导致两侧同错的假绿快照；探针应改用
+ * mod("engine/type/ObjectType").ObjectType 显式取枚举。
+ */
+function makeMod(system) {
+  const cache = new Map();
+  return (name) => {
+    if (cache.has(name)) return cache.get(name);
+    if (!system._instances.has(name)) {
+      // loadFile 经全局 System.register 注册，必须先切到本变体的运行时。
+      globalThis.System = system;
+      const twin = "src/" + name + ".ts.js";
+      const file = existsSync(join(ROOT, twin)) ? twin : "build/ts-modules/" + name + ".js";
+      if (!existsSync(join(ROOT, file))) throw new Error("mod(): missing module " + name);
+      loadFile(system, file);
+    }
+    const value = syncInstantiate(system, name);
+    cache.set(name, value);
+    return value;
+  };
 }
 
 function loadFile(sys, relPath) {
@@ -6782,6 +6963,10 @@ function makeMockIni(name, entries) {
       const value = get(key);
       return value === undefined ? [] : String(value).split(",");
     },
+    getFixedArray: (key) => {
+      const value = get(key);
+      return value === undefined ? [] : String(value).split(",").map((part) => parseFloat(part));
+    },
     getEnum: (key, enumObj, defaultValue) => {
       const value = get(key);
       if (value === undefined) return defaultValue;
@@ -6880,15 +7065,18 @@ async function main() {
     const hasTwin = existsSync(join(ROOT, twinPath));
 
     const newSys = await instantiate("build/ts-modules/" + mod.name + ".js");
+    const newMod = makeMod(newSys);
     const newNs = await newSys.get(mod.name);
-    const oldNs = hasTwin ? await (await instantiate(twinPath)).get(mod.name) : null;
+    const oldSys = hasTwin ? await instantiate(twinPath) : null;
+    const oldNs = oldSys ? await oldSys.get(mod.name) : null;
+    const oldMod = oldSys ? makeMod(oldSys) : null;
 
     if (!hasTwin) console.log(`  ${mod.name}: twin deleted — snapshot track only`);
 
     mod.probes.forEach((probe, i) => {
       let newV, newErr;
       try {
-        newV = probe(newNs, globalThis.THREE);
+        newV = probe(newNs, globalThis.THREE, newMod);
       } catch (e) {
         newErr = String(e);
       }
@@ -6901,7 +7089,7 @@ async function main() {
       if (hasTwin) {
         let oldV, oldErr;
         try {
-          oldV = probe(oldNs, globalThis.THREE);
+          oldV = probe(oldNs, globalThis.THREE, oldMod);
         } catch (e) {
           oldErr = String(e);
         }
@@ -6923,7 +7111,7 @@ async function main() {
         if (hasTwin) {
           let oldV, oldErr;
           try {
-            oldV = probe(oldNs, globalThis.THREE);
+            oldV = probe(oldNs, globalThis.THREE, oldMod);
           } catch (e) {
             oldErr = String(e);
           }

@@ -419,121 +419,6 @@
     "4": false,
     "5": true
   },
-  "game/Country": {
-    "0": {
-      "id": 0,
-      "side": 3,
-      "name": "Americans",
-      "playable": true
-    },
-    "1": false,
-    "2": false,
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "4": "Cannot read properties of undefined (reading 'Overlay')",
-    "5": "Soviets"
-  },
-  "game/PlayerList": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Civilian')"
-    },
-    "1": "RangeError: Player #0 out of bounds",
-    "2": "Player with name \"Nobody\" not found",
-    "3": "Player X not found"
-  },
-  "game/Alliances": {
-    "0": "0/1",
-    "1": {
-      "afterRequest": {
-        "status": 0,
-        "found": true,
-        "allied": false
-      },
-      "formed": true,
-      "alliesOfA": [
-        "B"
-      ],
-      "hash": 214582783,
-      "state": [
-        [
-          "B",
-          "A",
-          1
-        ]
-      ],
-      "sharedIntelAB": true,
-      "sharedIntelAC": false
-    },
-    "2": [
-      "Player Bot is not a human combatant.",
-      "There is no pending alliance request for player B from player A",
-      "There is no alliance between player A and player B"
-    ],
-    "3": {
-      "__error__": "Error: There is no pending alliance request for player A from player B"
-    },
-    "4": [
-      true,
-      true,
-      2,
-      "no-throw"
-    ],
-    "5": {
-      "observer": true,
-      "self": true,
-      "emptyHash": 2166136261
-    }
-  },
-  "game/Player": {
-    "0": {
-      "name": "Bob",
-      "credits": 0,
-      "score": 0,
-      "isObserver": true,
-      "isNeutral": false,
-      "combatant": false,
-      "color": "#ff0000"
-    },
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Civilian')"
-    },
-    "2": [
-      "RangeError: Can't set credits to a negative value",
-      12345
-    ],
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
-    },
-    "4": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "5": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
-    },
-    "6": {
-      "emptyHash": 84696351,
-      "traitHash": 175541448,
-      "noHashTrait": 292984781
-    },
-    "7": {
-      "name": "Bob",
-      "credits": 0,
-      "traits": {
-        "Object": {
-          "hp": 1
-        }
-      }
-    },
-    "8": "Cannot read properties of undefined (reading 'Vehicle')",
-    "9": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "10": {
-      "disposed": 11,
-      "ok": true
-    }
-  },
   "util/event": {
     "0": [
       [
@@ -659,17 +544,6 @@
         "width": 2,
         "height": 2
       }
-    }
-  },
-  "game/gameobject/GameObject": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Terrain')"
-    },
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
     }
   },
   "game/gameobject/ObjectPosition": {
@@ -860,55 +734,6 @@
     "1": 2,
     "2": 6
   },
-  "game/rules/ObjectRules": {
-    "0": 256,
-    "1": 256,
-    "2": 360,
-    "3": 90,
-    "4": "none",
-    "5": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
-    }
-  },
-  "game/rules/TechnoRules": {
-    "0": "11/3/5",
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
-    },
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
-    },
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "4": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
-    },
-    "5": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "6": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
-    },
-    "7": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "8": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "9": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
-    },
-    "10": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "11": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
-    },
-    "12": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Building')"
-    }
-  },
   "game/gameobject/unit/VeteranLevel": {
     "0": 0,
     "1": 2,
@@ -940,74 +765,6 @@
       "firepower": 1,
       "armor": 1,
       "speed": 1
-    }
-  },
-  "game/gameobject/Techno": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    }
-  },
-  "game/gameobject/Infantry": {
-    "0": {
-      "name": "GI",
-      "isUnit": true,
-      "isInfantry": true,
-      "isTechno": true,
-      "traitCount": 2,
-      "hasMove": true,
-      "hasSuppression": false,
-      "hasIdle": true,
-      "zone": 0,
-      "infDeath": 1,
-      "subCells": [
-        2,
-        4,
-        3
-      ]
-    },
-    "1": {
-      "hasCrashable": true,
-      "hasSuppression": true,
-      "hasAgent": true,
-      "hasCast": true,
-      "hasCargo": true,
-      "traitCount": 7
-    },
-    "2": {
-      "storage": 3,
-      "hasCargo": true
-    },
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Deployed')"
-    }
-  },
-  "game/gameobject/Vehicle": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Ship')"
-    },
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Hover')"
-    },
-    "4": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
-    },
-    "5": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Vehicle')"
     }
   },
   "game/gameobject/trait/interface/NotifyBuildStatus": {
@@ -1049,154 +806,9 @@
       "fighterTraitCount": 2
     }
   },
-  "game/gameobject/Building": {
-    "0": [
-      0,
-      1,
-      2
-    ],
-    "1": {
-      "isBuilding": true,
-      "status": 0,
-      "traitCount": 0,
-      "foundation": {
-        "width": 3,
-        "height": 3
-      },
-      "offset": [
-        384,
-        384
-      ],
-      "isTechno": true
-    },
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'BuildingType')"
-    },
-    "3": {
-      "hasOilDerrick": true,
-      "wallC4": false,
-      "wallTrait": true,
-      "natbnkBunker": false,
-      "namedBunker": true
-    },
-    "4": {
-      "tasksAdded": 1,
-      "disabledLog": [
-        true,
-        true,
-        true
-      ],
-      "dispatched": [
-        [
-          "?",
-          1
-        ]
-      ],
-      "status": 1
-    },
-    "5": {
-      "withUnit": "APOC",
-      "fallback": "SNIPE"
-    },
-    "6": {
-      "grinding": 1,
-      "orePile": 0.9995
-    }
-  },
   "game/WeaponInfo": {
     "0": 0,
     "1": "object"
-  },
-  "game/WeaponTargeting": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    },
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    },
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    },
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    }
-  },
-  "game/Weapon": {
-    "0": [
-      96,
-      null,
-      null,
-      60
-    ],
-    "1": [
-      "NukePayload",
-      0.5,
-      0,
-      2,
-      1.2,
-      5,
-      1.2
-    ],
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    },
-    "3": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    },
-    "4": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    },
-    "5": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Primary')"
-    }
-  },
-  "game/Warhead": {
-    "0": [
-      "Special",
-      "HE"
-    ],
-    "1": [
-      true,
-      false,
-      false,
-      false,
-      false,
-      true
-    ],
-    "2": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Heavy')"
-    },
-    "3": {
-      "c4Anim": "a3",
-      "c4AnimMatched": "a3",
-      "lowDamage": "a0",
-      "lightning": "BOLT",
-      "splashAnim": "splash2"
-    },
-    "4": {
-      "dispatched": 1,
-      "radCreated": 0,
-      "anim": "dispatched"
-    },
-    "5": {
-      "tasks": 2,
-      "panicked": true
-    },
-    "6": {
-      "type": 0,
-      "speed": "Inf",
-      "isThisWarhead": true,
-      "range": 0
-    },
-    "7": {
-      "normalResult": true,
-      "normalDestroy": 1,
-      "mutateResult": true,
-      "mutateDestroy": 1,
-      "bruteSpawned": 1,
-      "mutateInfDeath": 0,
-      "aliveResult": false
-    }
   },
   "game/rules/general/RepairRules": {
     "0": {
@@ -1245,16 +857,6 @@
   "game/rules/general/MissileRules": {
     "0": 0
   },
-  "game/rules/general/V3RocketRules": {
-    "0": {
-      "__error__": "TypeError: Right-hand side of 'instanceof' is not an object"
-    }
-  },
-  "game/rules/general/DMislRules": {
-    "0": {
-      "__error__": "TypeError: Right-hand side of 'instanceof' is not an object"
-    }
-  },
   "game/rules/general/VeteranRules": {
     "0": {
       "sightFloored": 1,
@@ -1278,16 +880,6 @@
       60,
       3,
       "RangeError: No event duration is defined for type undefined"
-    ]
-  },
-  "game/rules/general/ParadropRules": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'GDI')"
-    },
-    "1": [
-      "RangeError",
-      "Missing rules [General]->ParadropPlane",
-      "Unhandled side type \"99\""
     ]
   },
   "game/rules/GeneralRules": {
@@ -1355,21 +947,6 @@
       "value": 50
     }
   },
-  "game/rules/AiRules": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'buildPower')"
-    }
-  },
-  "game/rules/LandRules": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Foot')"
-    }
-  },
-  "game/rules/RadiationRules": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'radDurationMultiple')"
-    }
-  },
   "game/rules/ElevationModelRules": {
     "0": [
       2,
@@ -1411,11 +988,6 @@
       ]
     }
   },
-  "game/rules/ProjectileRules": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Projectile')"
-    }
-  },
   "game/rules/WarheadRules": {
     "0": {
       "name": "HE",
@@ -1429,11 +1001,6 @@
         0.8,
         0.6
       ]
-    }
-  },
-  "game/rules/ObjectRulesFactory": {
-    "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
     }
   },
   "game/rules/WeaponRules": {
@@ -1468,15 +1035,6 @@
   },
   "game/rules/CombatDamageRules": {
     "0": {}
-  },
-  "game/rules/Rules": {
-    "0": {
-      "__error__": "Error: Missing [Radiation] section"
-    },
-    "1": {
-      "__error__": "Error: Missing [Radiation] section"
-    },
-    "2": "Missing [AudioVisual] section"
   },
   "game/type/SuperWeaponType": {
     "0": 1,
@@ -1625,14 +1183,6 @@
     },
     "1": "Can't remove non-existent item"
   },
-  "game/player/production/Production": {
-    "0": {
-      "__error__": "TypeError: ns.Map is not a constructor"
-    },
-    "1": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'Infantry')"
-    }
-  },
   "game/trait/ProductionTrait": {
     "0": {
       "available": 2,
@@ -1741,11 +1291,6 @@
       "artNameTypes": [
         "GAPILE"
       ]
-    }
-  },
-  "game/gameobject/task/system/TaskGroup": {
-    "0": {
-      "__error__": "TypeError: Class extends value undefined is not a constructor or null"
     }
   },
   "gui/screen/options/GeneralOptions": {
@@ -2980,6 +2525,800 @@
           7
         ]
       ]
+    }
+  },
+  "game/Country": {
+    "0": {
+      "id": 0,
+      "side": 3,
+      "name": "Americans",
+      "playable": true
+    },
+    "1": false,
+    "2": false,
+    "3": [
+      true,
+      true,
+      false,
+      false
+    ],
+    "4": "Cannot read properties of undefined (reading 'Overlay')",
+    "5": "Soviets"
+  },
+  "game/PlayerList": {
+    "0": {
+      "at": "Alice",
+      "byName": "Alice",
+      "number": 2,
+      "combatants": [
+        "Alice"
+      ],
+      "nonNeutral": [
+        "Alice",
+        "Carl"
+      ],
+      "civilian": "Bob",
+      "all": 3
+    },
+    "1": "RangeError: Player #0 out of bounds",
+    "2": "Player with name \"Nobody\" not found",
+    "3": "Player X not found"
+  },
+  "game/Player": {
+    "0": {
+      "name": "Bob",
+      "credits": 0,
+      "score": 0,
+      "isObserver": true,
+      "isNeutral": false,
+      "combatant": false,
+      "color": "#ff0000"
+    },
+    "1": {
+      "neutral": true,
+      "neutralObserver": false,
+      "combatantNeutral": false,
+      "combatantIs": true
+    },
+    "2": [
+      "RangeError: Can't set credits to a negative value",
+      12345
+    ],
+    "3": {
+      "afterAdd": {
+        "buildings": 1,
+        "byId": "GAPOWR",
+        "byType": 1,
+        "owner": true
+      },
+      "withLimbo": {
+        "typeNoLimbo": 1,
+        "typeWithLimbo": 2,
+        "allNoLimbo": 2,
+        "allWithLimbo": 3
+      },
+      "removeError": "GameObject GAPOWR does not belong to player Bob",
+      "afterClear": 0
+    },
+    "4": {
+      "vehicleBuilt": 5,
+      "totalBuilt": 9,
+      "limitedHeavy": 3,
+      "limitedRhino": 0,
+      "missing": 0
+    },
+    "5": {
+      "killedInf": 7,
+      "killedTotal": 8,
+      "lostInf": 3,
+      "lostTotal": 3
+    },
+    "6": {
+      "emptyHash": 84696351,
+      "traitHash": 175541448,
+      "noHashTrait": 292984781
+    },
+    "7": {
+      "name": "Bob",
+      "credits": 0,
+      "traits": {
+        "Object": {
+          "hp": 1
+        }
+      }
+    },
+    "8": "Cannot read properties of undefined (reading 'Vehicle')",
+    "9": {
+      "viaCountry": true,
+      "viaProduction": false
+    },
+    "10": {
+      "disposed": 11,
+      "ok": true
+    }
+  },
+  "game/gameobject/Techno": {
+    "0": {
+      "explodes": true,
+      "crusher": true,
+      "omniCrusher": true,
+      "purchaseValue": 500,
+      "guardMode": true,
+      "primary": "none",
+      "veteranLevel": 0,
+      "sight": 8,
+      "isTechno": true,
+      "isBuilding": false
+    },
+    "1": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "2": {
+      "crushResult": false,
+      "guardMode": false,
+      "guardArea": "undef"
+    },
+    "3": [
+      "warped",
+      "always",
+      "warped"
+    ]
+  },
+  "game/gameobject/Infantry": {
+    "0": {
+      "name": "GI",
+      "isUnit": true,
+      "isInfantry": true,
+      "isTechno": true,
+      "traitCount": 2,
+      "hasMove": true,
+      "hasSuppression": false,
+      "hasIdle": true,
+      "zone": 0,
+      "infDeath": 1,
+      "subCells": [
+        2,
+        4,
+        3
+      ]
+    },
+    "1": {
+      "hasCrashable": true,
+      "hasSuppression": true,
+      "hasAgent": true,
+      "hasCast": true,
+      "hasCargo": true,
+      "traitCount": 7
+    },
+    "2": {
+      "storage": 3,
+      "hasCargo": true
+    },
+    "3": [
+      0,
+      3,
+      0
+    ]
+  },
+  "game/rules/general/V3RocketRules": {
+    "0": {
+      "isMissile": true,
+      "type": "V3",
+      "damage": 200,
+      "lazyCurve": true
+    }
+  },
+  "game/rules/general/DMislRules": {
+    "0": {
+      "type": "DM",
+      "pauseFrames": 5,
+      "isMissile": true
+    }
+  },
+  "game/rules/general/ParadropRules": {
+    "0": {
+      "ally": [
+        {
+          "inf": "GI",
+          "num": 6
+        },
+        {
+          "inf": "GGI",
+          "num": 3
+        }
+      ],
+      "amer": 1,
+      "byGdi": "GI",
+      "byNod": "SHK",
+      "byThird": "INIT",
+      "plane": "PDPLANE",
+      "radius": 6
+    },
+    "1": [
+      "RangeError",
+      "Missing rules [General]->ParadropPlane",
+      "Unhandled side type \"99\""
+    ]
+  },
+  "game/rules/LandRules": {
+    "0": {
+      "footBlockedByTrackZero": 0,
+      "wheel": 0,
+      "water": 1,
+      "trackNonZeroCase": 0
+    }
+  },
+  "game/rules/ProjectileRules": {
+    "0": {
+      "name": "Shell",
+      "arcing": true,
+      "isAntiAir": true,
+      "isAntiGround": false,
+      "rotDegs": 180,
+      "imageName": "Shell"
+    }
+  },
+  "game/gameobject/task/system/TaskGroup": {
+    "0": {
+      "children": 2,
+      "isTask": true
+    }
+  },
+  "game/rules/ObjectRules": {
+    "0": 256,
+    "1": 256,
+    "2": 360,
+    "3": 90,
+    "4": "none",
+    "5": {
+      "name": "E1",
+      "imageName": "E1",
+      "crushable": true,
+      "legalTarget": true,
+      "uiName": "STSNAME|E1",
+      "index": -1
+    }
+  },
+  "game/rules/TechnoRules": {
+    "0": "11/3/5",
+    "1": {
+      "crushable": true,
+      "locomotor": 2,
+      "speedType": 0,
+      "speed": null,
+      "movementZone": 9,
+      "pip": 0,
+      "pipScale": 0,
+      "sight": 1,
+      "trainable": true,
+      "isHuman": true,
+      "factory": 0,
+      "buildLimit": "Inf",
+      "eliteAbilities": 0,
+      "unsellable": false,
+      "returnable": false
+    },
+    "2": {
+      "locomotor": 0,
+      "speedType": "none",
+      "repairable": true,
+      "clickRepairable": true,
+      "tooBig": true,
+      "trainable": false,
+      "crushable": false,
+      "returnable": true,
+      "power": -50
+    },
+    "3": {
+      "crusherSpeedType": 1,
+      "normalSpeedType": 2,
+      "speedCapped": 256
+    },
+    "4": {
+      "primary": "M1Carbine",
+      "secondary": "none",
+      "elitePrimary": "MissileLauncher",
+      "weapon1": "Flak",
+      "eliteWeapon1Fallback": "Flak",
+      "weapon2": "MG",
+      "eliteWeapon2": "set"
+    },
+    "5": {
+      "veteran": 2,
+      "elite": 3,
+      "hasC4": true
+    },
+    "6": {
+      "stages": [
+        40,
+        80,
+        "Inf"
+      ],
+      "eliteStages": [
+        30,
+        "Inf",
+        "Inf"
+      ]
+    },
+    "7": [
+      [
+        55,
+        2
+      ]
+    ],
+    "8": [
+      4,
+      3
+    ],
+    "9": [
+      2,
+      "undef",
+      "undef"
+    ],
+    "10": [
+      11,
+      6
+    ],
+    "11": {
+      "declared": [
+        true,
+        3,
+        "SLAV"
+      ],
+      "named": [
+        true,
+        4,
+        "YSLAV"
+      ]
+    },
+    "12": [
+      10,
+      21.21,
+      20
+    ]
+  },
+  "game/Alliances": {
+    "0": "0/1",
+    "1": {
+      "afterRequest": {
+        "status": 0,
+        "found": true,
+        "allied": false
+      },
+      "formed": true,
+      "alliesOfA": [
+        "B"
+      ],
+      "hash": 214582783,
+      "state": [
+        [
+          "B",
+          "A",
+          1
+        ]
+      ],
+      "sharedIntelAB": true,
+      "sharedIntelAC": false
+    },
+    "2": [
+      "Player Bot is not a human combatant.",
+      "There is no pending alliance request for player B from player A",
+      "There is no alliance between player A and player B"
+    ],
+    "3": [
+      "There is no pending alliance request for player A from player A",
+      0
+    ],
+    "4": [
+      true,
+      true,
+      2,
+      "no-throw"
+    ],
+    "5": {
+      "observer": true,
+      "self": true,
+      "emptyHash": 2166136261
+    }
+  },
+  "game/gameobject/GameObject": {
+    "0": {
+      "type": 6,
+      "name": "T01",
+      "isTerrain": true,
+      "isOverlay": false,
+      "isBuilding": false,
+      "isUnit": false,
+      "isTechno": false,
+      "foundation": {
+        "width": 1,
+        "height": 1
+      },
+      "uiName": "Tree",
+      "spawned": false,
+      "deathType": 1
+    },
+    "1": {
+      "calls": [
+        [
+          "tick",
+          "W1",
+          true
+        ],
+        [
+          "spawn",
+          "W"
+        ],
+        [
+          "attack",
+          "tgt",
+          "src"
+        ],
+        [
+          "owner",
+          "old",
+          "new"
+        ],
+        [
+          "destroy",
+          "dmg",
+          "wh",
+          "atk"
+        ],
+        [
+          "unspawn",
+          "W"
+        ]
+      ],
+      "spawnedAfterUnspawn": false,
+      "cachedTick": 1
+    },
+    "2": {
+      "cachedTick": 0,
+      "hashWithTrait": 379445599,
+      "stateId": 5,
+      "disposed": true
+    }
+  },
+  "game/gameobject/Vehicle": {
+    "0": {
+      "isSinker": true,
+      "zone": 0,
+      "isVehicle": true,
+      "isUnit": true,
+      "traitCount": 2,
+      "rockingTicksConst": 34
+    },
+    "1": {
+      "isSinker": false,
+      "zone": 2,
+      "traitCount": 3
+    },
+    "2": {
+      "hasGunner": true,
+      "hasTransport": true,
+      "uiName": "name:IFV"
+    },
+    "3": {
+      "hasRobotControl": true,
+      "traitCount": 5
+    },
+    "4": {
+      "hasTilt": [
+        true,
+        false
+      ],
+      "rocking": {
+        "ticksLeft": 34,
+        "factor": 0.5
+      },
+      "cleared": true
+    },
+    "5": {
+      "hasHarvester": true,
+      "hasCrewed": true,
+      "hasParasiteable": true,
+      "hasTilter": true
+    }
+  },
+  "game/gameobject/Building": {
+    "0": [
+      0,
+      1,
+      2
+    ],
+    "1": {
+      "isBuilding": true,
+      "status": 0,
+      "traitCount": 0,
+      "foundation": {
+        "width": 3,
+        "height": 3
+      },
+      "offset": [
+        384,
+        384
+      ],
+      "isTechno": true
+    },
+    "2": {
+      "hasGarrison": true,
+      "transportIsGarrison": true,
+      "hasSecure": true,
+      "hasC4": true,
+      "hasDelayedKill": true,
+      "hasCrewed": true,
+      "hasTurret": true,
+      "hasOverpowered": true,
+      "hasPowered": true,
+      "factoryArgs": [
+        1,
+        false
+      ],
+      "hasSuperWeapon": true,
+      "hasDock": true,
+      "dockArgs": [
+        1,
+        [
+          1,
+          2
+        ]
+      ],
+      "hasHelipad": true,
+      "hasUnitRepair": true,
+      "hasUnitReload": true,
+      "hasHospitalHeal": true,
+      "hasRally": true,
+      "hasFreeUnit": true,
+      "hasGap": [
+        12
+      ],
+      "hasPsychicDetector": true,
+      "traitCount": 20
+    },
+    "3": {
+      "hasOilDerrick": true,
+      "wallC4": false,
+      "wallTrait": true,
+      "natbnkBunker": false,
+      "namedBunker": true
+    },
+    "4": {
+      "tasksAdded": 1,
+      "disabledLog": [
+        true,
+        true,
+        true
+      ],
+      "dispatched": [
+        [
+          "?",
+          1
+        ]
+      ],
+      "status": 1
+    },
+    "5": {
+      "withUnit": "APOC",
+      "fallback": "SNIPE"
+    },
+    "6": {
+      "grinding": 1,
+      "orePile": 0.9995
+    }
+  },
+  "game/Warhead": {
+    "0": [
+      "Special",
+      "HE"
+    ],
+    "1": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    "2": {
+      "halfVerses": 50,
+      "wallZero": 0,
+      "wallWood": 100,
+      "wallAbs": null,
+      "negative": -30
+    },
+    "3": {
+      "c4Anim": "a3",
+      "c4AnimMatched": "a3",
+      "lowDamage": "a0",
+      "lightning": "BOLT",
+      "splashAnim": "splash2"
+    },
+    "4": {
+      "dispatched": 1,
+      "radCreated": 0,
+      "anim": "dispatched"
+    },
+    "5": {
+      "tasks": 2,
+      "panicked": true
+    },
+    "6": {
+      "type": 0,
+      "speed": "Inf",
+      "isThisWarhead": true,
+      "range": 0
+    },
+    "7": {
+      "normalResult": true,
+      "normalDestroy": 1,
+      "mutateResult": true,
+      "mutateDestroy": 1,
+      "bruteSpawned": 1,
+      "mutateInfDeath": 0,
+      "aliveResult": false
+    }
+  },
+  "game/rules/AiRules": {
+    "0": {
+      "buildPower": [
+        "GAPOWR"
+      ],
+      "buildRefinery": [
+        "GAREFN"
+      ],
+      "farScan": 50,
+      "nearScan": 9,
+      "slaveMiner": []
+    }
+  },
+  "game/rules/RadiationRules": {
+    "0": {
+      "duration": 100,
+      "levelMax": 2,
+      "color": [
+        0,
+        255,
+        0
+      ],
+      "warhead": ""
+    }
+  },
+  "game/player/production/Production": {
+    "0": {
+      "queueTypes": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4
+      ],
+      "structuresSize": 1,
+      "infantrySize": 31,
+      "aircraftSize": 0
+    },
+    "1": [
+      2,
+      5,
+      1,
+      2
+    ]
+  },
+  "game/WeaponTargeting": {
+    "0": [
+      true,
+      true,
+      false
+    ],
+    "1": [
+      true,
+      true,
+      true
+    ],
+    "2": [
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false
+    ],
+    "3": [
+      true,
+      false
+    ]
+  },
+  "game/rules/Rules": {
+    "0": {
+      "buildings": 1,
+      "infantry": 1,
+      "hasWall": true,
+      "wallId": 0,
+      "countrySide": 0,
+      "mpCountries": 0,
+      "weaponList": 5,
+      "nukeInList": true,
+      "dropPodInList": true,
+      "missileV3": true,
+      "bunkerPropagated": 0.5,
+      "fsRadiusFromGeneral": 9,
+      "particles": 1,
+      "goldColor": true,
+      "landRock": true,
+      "superWeapon": 7
+    },
+    "1": {
+      "weaponCached": true,
+      "warheadCachedLower": true,
+      "projectileCached": true
+    },
+    "2": "Missing [AudioVisual] section"
+  },
+  "game/Weapon": {
+    "0": [
+      96,
+      null,
+      null,
+      60
+    ],
+    "1": [
+      "NukePayload",
+      0.5,
+      0,
+      2,
+      1.2,
+      5,
+      1.2
+    ],
+    "2": {
+      "cooldown": 50,
+      "afterTick": 49,
+      "expireZero": 8,
+      "firedOnce": {
+        "burstsLeft": 2,
+        "burstIndex": 0,
+        "useBurstDelay": true,
+        "cooldown": 7,
+        "baseDamage": 3,
+        "spawned": 1
+      },
+      "secondBurstLeft": 1,
+      "secondIndex": 1,
+      "dispatched": 2
+    },
+    "3": {
+      "type": 0,
+      "gameObjectIsSame": true,
+      "rulesIsSame": true,
+      "warheadRulesIsSame": true,
+      "projectileIsSame": true,
+      "flhIsSame": true,
+      "targetingWired": true,
+      "defaultFlhWhenAbsent": true
+    },
+    "4": {
+      "spawnedDespiteWorldOob": true,
+      "moveByLeptons3Skipped": true,
+      "eventDispatched": true
+    },
+    "5": {
+      "nothingFired": true,
+      "burstsUntouched": true
+    }
+  },
+  "game/rules/ObjectRulesFactory": {
+    "0": {
+      "techno": "b",
+      "technoType": 3,
+      "overlay": "a",
+      "fallback": "s"
     }
   }
 }

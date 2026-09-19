@@ -85,7 +85,7 @@ export class WeaponTargeting {
     } else if (this.weaponRules.drainWeapon) {
       // 4. 吸血武器：仅敌方 Drainable 建筑，且未被其他单位正在抽取。
       this.targetChecks.push(
-        (target, _game, game) =>
+        (target, _tile, game) =>
           !!(
             target?.isBuilding() &&
             target.rules?.drainable &&
@@ -96,7 +96,7 @@ export class WeaponTargeting {
     } else if (this.weaponRules.damage < 0) {
       // 5. 负伤害（治疗）：仅己方受损单位，且不跨飞行器/地面类别。
       this.targetChecks.push(
-        (target, _game, game) =>
+        (target, _tile, game) =>
           !!(
             target !== this.gameObject &&
             target?.isUnit() &&
@@ -117,13 +117,13 @@ export class WeaponTargeting {
       } else {
         // 禁止把非心灵控制武器指向己方 techno（非强制攻击时）。
         this.targetChecks.push(
-          (target, _game, game, forceFlag) =>
+          (target, _tile, game, forceFlag) =>
             !((!forceFlag || this.warheadRules.mindControl) && target?.isTechno() && game.areFriendly(target, this.gameObject)),
         );
       }
       // 隐形单位不可被瞄准，除非与持有者共享情报（盟友/观察者）。
       this.targetChecks.push(
-        (target, _game, game) =>
+        (target, _tile, game) =>
           !(
             target?.isTechno() &&
             target.cloakableTrait?.isCloaked() &&
@@ -162,8 +162,8 @@ export class WeaponTargeting {
   }
 
   /** 依次执行全部判定谓词。 */
-  canTarget(target: any, game: any, flagA: boolean, flagB: boolean, supportFlag: boolean): boolean {
-    return this.targetChecks.every((check) => check(target, game, flagA, flagB, supportFlag));
+  canTarget(target: any, tile: any, game: any, forceAttack: boolean, supportFlag: boolean): boolean {
+    return this.targetChecks.every((check) => check(target, tile, game, forceAttack, supportFlag));
   }
 
   /**
