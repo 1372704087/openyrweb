@@ -6433,6 +6433,129 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/gameobject/task/SlaveGatherTask",
+    tsjs: "src/game/gameobject/task/SlaveGatherTask.ts.js",
+    probes: [
+      (ns) => typeof ns.SlaveGatherTask,
+      // 构造期键集合 + 取消即结束。
+      (ns) => {
+        const task = new ns.SlaveGatherTask({ map: {} }, { tile: {} });
+        task.status = 3; // Cancelling
+        const slave = {};
+        const r = task.onTick(slave);
+        return { ctorKeys: Object.keys(task), initialState: 0, useChildTargetLines: task.useChildTargetLines, cancelResult: r };
+      },
+      // SEEKING_ORE 没矿：矿车形态（载具）直接寻路跟车（stub MoveTask 记录目的地）。
+      (ns, THREE, mod) => {
+        const slaveTile = { rx: 5, ry: 5, z: 0, onBridge: null };
+        const minerTile = { rx: 10, ry: 10, z: 0 };
+        const game = {
+          map: {
+            tiles: { getByMapCoords: () => undefined },
+            mapBounds: { isWithinBounds: () => true },
+            terrain: { getIslandIdMap: () => undefined, getPassableSpeed: () => 0, findObstacles: () => [] },
+            getGroundObjectsOnTile: () => [],
+          },
+          rules: { general: { slaveMinerSlaveScan: 8 } },
+        };
+        const miner = { isVehicle: () => true, tile: minerTile, isDisposed: false, isDestroyed: false };
+        const task = new ns.SlaveGatherTask(game, miner);
+        const slave = { tile: slaveTile, onBridge: null, rules: { speedType: 0, storage: 3 }, harvesterTrait: { isEmpty: () => true } };
+        const r = task.onTick(slave);
+        const child = task.children[0];
+        return {
+          r,
+          state: task.state,
+          childStub: child && child.$stub,
+          childTarget: child && child.$args ? child.$args[1] === minerTile : null,
+          childIgnoresMiner: child && child.$args ? child.$args[3].ignoredBlockers[0] === miner : null,
+        };
+      },
+      // SEEKING_ORE 找到唯一矿格：锁定矿格 → MOVING_TO_ORE（走过去）。
+      (ns, THREE, mod) => {
+        const TiberiumTrait = mod("game/gameobject/trait/TiberiumTrait").TiberiumTrait;
+        const slaveTile = { rx: 5, ry: 5, z: 0, onBridge: null };
+        const oreTile = { rx: 6, ry: 5, z: 0, landType: mod("game/type/LandType").LandType.Tiberium };
+        const stubTrait = { rules: { value: 100 }, getBailCount: () => 3 };
+        const overlay = { isOverlay: () => true, isTiberium: () => true, traits: new Map([[TiberiumTrait, stubTrait]]) };
+        const tiles = { getByMapCoords: (x, y) => (x === oreTile.rx && y === oreTile.ry ? oreTile : x === slaveTile.rx && y === slaveTile.ry ? slaveTile : undefined) };
+        const game = {
+          map: {
+            tiles,
+            mapBounds: { isWithinBounds: () => true },
+            terrain: { getIslandIdMap: () => undefined, getPassableSpeed: () => 5, findObstacles: () => [] },
+            getGroundObjectsOnTile: (t) => (t === oreTile ? [overlay] : []),
+          },
+          rules: { general: { slaveMinerSlaveScan: 4 } },
+        };
+        const miner = { tile: { rx: 0, ry: 0 }, isDisposed: false, isDestroyed: false };
+        const task = new ns.SlaveGatherTask(game, miner);
+        const slave = { tile: slaveTile, onBridge: null, rules: { speedType: 0, storage: 3 }, harvesterTrait: { isEmpty: () => true } };
+        const r = task.onTick(slave);
+        const child = task.children[0];
+        return {
+          r,
+          state: task.state,
+          oreTileLocked: task.oreTile === oreTile,
+          oreLockedFlag: slave._oreLocked,
+          childTarget: child && child.$args ? child.$args[1] === oreTile : null,
+        };
+      },
+      // HARVESTING：采一捆入账（矿采尽触发 unspawnObject）→ 转返程。
+      (ns, THREE, mod) => {
+        const TiberiumTrait = mod("game/gameobject/trait/TiberiumTrait").TiberiumTrait;
+        const slaveTile = { rx: 5, ry: 5, z: 0, onBridge: null };
+        let bailCount = 1;
+        const stubTrait = { rules: { value: 50 }, getBailCount: () => bailCount, collectBail: () => (bailCount-- > 0 ? "RIPARIUS" : undefined) };
+        const overlay = { isOverlay: () => true, isTiberium: () => true, traits: new Map([[TiberiumTrait, stubTrait]]) };
+        const unspawned = [];
+        const game = {
+          map: {
+            tiles: { getByMapCoords: () => undefined },
+            mapBounds: { isWithinBounds: () => true },
+            terrain: { getPassableSpeed: () => 5, findObstacles: () => [] },
+            getGroundObjectsOnTile: (t) => (t === slaveTile ? [overlay] : []),
+          },
+          rules: { general: { harvestRate: 0.5 } },
+          unspawnObject: (o) => unspawned.push(o),
+        };
+        const miner = { tile: { rx: 0, ry: 0 }, isDisposed: false, isDestroyed: false };
+        const task = new ns.SlaveGatherTask(game, miner);
+        task.state = 2; // HARVESTING
+        const slave = { tile: slaveTile, onBridge: null, rules: { speedType: 0, storage: 3 } };
+        const r = task.onTick(slave);
+        return {
+          r,
+          state: task.state,
+          cargo: task.cargo,
+          cargoCount: task.cargoCount,
+          unspawned: unspawned.length,
+          isCarrying: slave.isCarrying,
+        };
+      },
+      // _dump：按捆组合计价 + 精炼机加成 + AI 难度系数入账。
+      (ns) => {
+        const owner = {
+          isAi: true,
+          aiDifficulty: 0,
+          credits: 0,
+          creditsGained: 0,
+          buildings: new Set([{ rules: { orePurifier: true }, poweredTrait: undefined }]),
+          powerTrait: undefined,
+        };
+        const miner = { owner, isDisposed: false, isDestroyed: false };
+        const game = {
+          rules: { general: { purifierBonus: 0.25 }, getTiberium: (t) => (t === "RIPARIUS" ? { value: 50 } : { value: 0 }) },
+        };
+        const task = new ns.SlaveGatherTask(game, miner);
+        const slave = { harvesterTrait: { getBails: () => [["RIPARIUS", 2]], empty: () => {} } };
+        task._dump(slave);
+        // base = 2×50 = 100；1 精炼机 → +floor(100×0.25)=25 → 125；AI 简单 ×2 → 250
+        return { credits: owner.credits, creditsGained: owner.creditsGained, emptied: true, cargoReset: task.cargo === undefined && task.cargoCount === 0 };
+      },
+    ],
+  },
+  {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
     probes: [

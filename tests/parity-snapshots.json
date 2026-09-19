@@ -3395,5 +3395,58 @@
       "cancelDeferred": true,
       "cancelThrew": false
     }
+  },
+  "game/gameobject/task/SlaveGatherTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "game",
+        "miner",
+        "state",
+        "cargo",
+        "cargoCount",
+        "_returnDoorTile"
+      ],
+      "initialState": 0,
+      "useChildTargetLines": true,
+      "cancelResult": true
+    },
+    "2": {
+      "r": false,
+      "state": 0,
+      "childStub": "game/gameobject/task/move/MoveTask",
+      "childTarget": true,
+      "childIgnoresMiner": true
+    },
+    "3": {
+      "r": false,
+      "state": 1,
+      "oreTileLocked": true,
+      "oreLockedFlag": true,
+      "childTarget": true
+    },
+    "4": {
+      "r": false,
+      "state": 3,
+      "cargo": "RIPARIUS",
+      "cargoCount": 1,
+      "unspawned": 1,
+      "isCarrying": true
+    },
+    "5": {
+      "credits": 250,
+      "creditsGained": 250,
+      "emptied": true,
+      "cargoReset": true
+    }
   }
 }
