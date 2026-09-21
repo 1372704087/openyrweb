@@ -3654,7 +3654,9 @@
     },
     "4": {
       "flyRaw": "tile",
-      "groundRaw": "threw"
+      "groundRaw": "tile",
+      "groundRx": 0,
+      "groundRy": 0
     },
     "5": {
       "done": true,

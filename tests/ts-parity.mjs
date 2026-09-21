@@ -5763,45 +5763,68 @@ const CONVERTED = [
           isCancelling: task.isCancelling(),
         };
       },
-      // findRelocationTile：飞行单位用 RandomTileFinder（需 stub game）。
+      // findRelocationTile：飞行 RandomTileFinder；地面岛屿连通 + MovePositionHelper。
       (ns) => {
+        const islandMap = { get: () => 1 };
         const game = {
           map: {
             tiles: {
-              getByMapCoords: (x, y) => (x === 0 && y === 0 ? { rx: x, ry: y, z: 0 } : null),
+              getByMapCoords: (x, y) =>
+                x >= 0 && x <= 8 && y >= 0 && y <= 8 ? { rx: x, ry: y, z: 0, onBridgeLandType: null } : null,
             },
             mapBounds: { isWithinBounds: () => true },
             tileOccupation: {
               getGroundObjectsOnTile: () => [],
               getBridgeOnTile: () => null,
             },
-            terrain: { getPassableSpeed: () => 5, findObstacles: () => [] },
+            terrain: {
+              getPassableSpeed: () => 5,
+              findObstacles: () => [],
+              getIslandIdMap: () => islandMap,
+            },
           },
           // RandomTileFinder 将 game 本身当作 rng
           prng: { generateRandomInt: (a) => a },
           generateRandomInt: (a) => a,
         };
-        const task = new ns.MoveTask(game, { rx: 1, ry: 1 }, false, undefined);
+        const task = new ns.MoveTask(game, { rx: 1, ry: 1, z: 0 }, false, undefined);
         task.game = game;
-        task.targetTile = { rx: 1, ry: 1 };
+        task.targetTile = { rx: 1, ry: 1, z: 0 };
+        task.options = {};
+        task.unreachableTargets = [];
+        task.canStopAtTile = () => true;
         task.isCloseEnoughToDest = () => true;
-        const flyObj = { rules: { movementZone: 6 } }; // Fly
-        const groundObj = { rules: { movementZone: 0 } };
+        const fromTile = { rx: 0, ry: 0, z: 0 };
+        const flyObj = {
+          rules: { movementZone: 6, locomotor: 0 },
+          isInfantry: () => false,
+          getFoundation: () => ({ width: 1, height: 1 }),
+        };
+        const groundObj = {
+          tile: { rx: 0, ry: 0, z: 0 },
+          onBridge: false,
+          zone: 0,
+          rules: { movementZone: 0, speedType: 1 },
+          isInfantry: () => false,
+          crusher: false,
+        };
         let flyResult;
         let groundResult;
         try {
-          flyResult = ns.MoveTask.prototype.findRelocationTile.call(task, { rx: 0, ry: 0 }, false, flyObj);
+          flyResult = ns.MoveTask.prototype.findRelocationTile.call(task, fromTile, null, flyObj);
         } catch (e) {
           flyResult = "threw";
         }
         try {
-          groundResult = ns.MoveTask.prototype.findRelocationTile.call(task, { rx: 0, ry: 0 }, false, groundObj);
+          groundResult = ns.MoveTask.prototype.findRelocationTile.call(task, fromTile, null, groundObj);
         } catch (e) {
           groundResult = "threw";
         }
         return {
           flyRaw: flyResult === null ? "null" : typeof flyResult === "string" ? flyResult : "tile",
           groundRaw: groundResult === null ? "null" : typeof groundResult === "string" ? groundResult : "tile",
+          groundRx: groundResult && typeof groundResult === "object" ? groundResult.rx : null,
+          groundRy: groundResult && typeof groundResult === "object" ? groundResult.ry : null,
         };
       },
       // 三态全循环：PlanMove（占路）→ Moving（locomotor.tick）→ 到达 Success。
