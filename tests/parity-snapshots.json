@@ -4641,5 +4641,657 @@
       "childStatus": 1,
       "tickReturns": "undefined"
     }
+  },
+  "game/order/Order": {
+    "0": {
+      "orderType": true,
+      "targetOptional": true,
+      "minimapAllowed": true,
+      "singleSelectionRequired": false,
+      "terminal": false,
+      "feedbackIsNone": true,
+      "srcBound": true,
+      "tgtBound": true,
+      "setChain": true,
+      "isValid": true,
+      "isAllowed": true,
+      "onAddEmpty": true,
+      "ptrDefault": true,
+      "ptrMini": true
+    },
+    "1": [
+      "orderType",
+      "targetOptional",
+      "minimapAllowed",
+      "singleSelectionRequired",
+      "terminal",
+      "feedbackType"
+    ]
+  },
+  "game/order/OrderFeedbackType": {
+    "0": {
+      "none": 0,
+      "move": 1,
+      "attack": 2,
+      "enter": 3,
+      "capture": 4,
+      "special": 5,
+      "secondary": 6,
+      "revMove": "Move",
+      "revCapture": "Capture",
+      "keyCount": 14
+    },
+    "1": {
+      "ctorNone": true,
+      "sameModule": true,
+      "moveMatches": true
+    }
+  },
+  "game/order/orderPriorities": {
+    "0": [
+      "Occupy",
+      "Dock",
+      "Attack",
+      "Capture",
+      "Repair",
+      "EnterTransport",
+      "PlaceBomb",
+      "Deploy",
+      "Gather"
+    ],
+    "1": {
+      "len": 9,
+      "firstOccupy": true,
+      "lastGather": true,
+      "hasAttack": true,
+      "hasDock": true,
+      "noMove": true,
+      "indexOfDeploy": 7
+    }
+  },
+  "game/order/OrderFactory": {
+    "0": {
+      "move": {
+        "orderType": 0,
+        "forceMove": false,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 1,
+        "hasGame": true,
+        "hasMap": true,
+        "hasSel": true
+      },
+      "forceMove": {
+        "orderType": 1,
+        "forceMove": true,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 1,
+        "hasGame": true,
+        "hasMap": true,
+        "hasSel": true
+      },
+      "attack": {
+        "orderType": 2,
+        "forceAttack": false,
+        "ivanBombAllowed": false,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "forceAttack": {
+        "orderType": 3,
+        "forceAttack": true,
+        "ivanBombAllowed": true,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "placeBomb": {
+        "orderType": 2,
+        "forceAttack": false,
+        "ivanBombAllowed": true,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "attackMove": {
+        "orderType": 4,
+        "forceAttack": false,
+        "ivanBombAllowed": true,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 1,
+        "hasGame": true,
+        "hasMap": true,
+        "hasSel": false
+      },
+      "deploy": {
+        "orderType": 9,
+        "targeted": true,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": false,
+        "singleSelectionRequired": true,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "deploySelected": {
+        "orderType": 10,
+        "targeted": false,
+        "terminal": false,
+        "targetOptional": true,
+        "minimapAllowed": false,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "guard": {
+        "orderType": 5,
+        "targeted": false,
+        "terminal": true,
+        "targetOptional": true,
+        "minimapAllowed": false,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "guardArea": {
+        "orderType": 6,
+        "targeted": true,
+        "terminal": true,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 1,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "cheer": {
+        "orderType": 12,
+        "terminal": false,
+        "targetOptional": true,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": false,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "stop": {
+        "orderType": 11,
+        "terminal": false,
+        "targetOptional": true,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "capture": {
+        "orderType": 7,
+        "terminal": true,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 4,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "occupy": {
+        "orderType": 8,
+        "terminal": true,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 4,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "dock": {
+        "orderType": 13,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 1,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "gather": {
+        "orderType": 14,
+        "terminal": false,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 1,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "repair": {
+        "orderType": 15,
+        "terminal": true,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 4,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "scatter": {
+        "orderType": 16,
+        "terminal": false,
+        "targetOptional": true,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 0,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "enterTransport": {
+        "orderType": 17,
+        "terminal": true,
+        "targetOptional": false,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 3,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      },
+      "unloadAll": {
+        "orderType": 19,
+        "terminal": true,
+        "targetOptional": true,
+        "minimapAllowed": true,
+        "singleSelectionRequired": false,
+        "feedbackType": 3,
+        "hasGame": true,
+        "hasMap": false,
+        "hasSel": false
+      }
+    },
+    "1": {
+      "unknown": 20,
+      "err": "Unhandled order type undefined",
+      "errHasUnhandled": true
+    }
+  },
+  "game/order/AttackOrder": {
+    "0": {
+      "aType": true,
+      "fType": true,
+      "nType": true,
+      "aIvan": true,
+      "fIvan": true,
+      "nIvan": false,
+      "flags": [
+        false,
+        true,
+        false
+      ],
+      "isC4": [
+        false,
+        false
+      ],
+      "targetOptional": false,
+      "feedbackNone": true,
+      "hasRangeHelper": true,
+      "hasLosHelper": true
+    },
+    "1": {
+      "validNoTrait": false,
+      "allowedNoTraitThrew": "threw",
+      "noAir": null,
+      "airHitSame": true,
+      "airMiss": null,
+      "normalStub": "game/gameobject/task/AttackTask",
+      "normalArgsWeapon": true,
+      "c4TargetSame": true,
+      "feedbackAfterInvalidStillNone": true
+    }
+  },
+  "game/order/AttackMoveOrder": {
+    "0": {
+      "orderTypeAttackMove": true,
+      "targetOptional": false,
+      "feedbackMove": true,
+      "mapSame": true,
+      "forceAttack": false,
+      "ivanBombAllowed": true,
+      "hasGame": true
+    },
+    "1": {
+      "validScan": true,
+      "allowedScan": true,
+      "scanStub": "game/gameobject/task/move/AttackMoveTask",
+      "scanTile": true,
+      "scanOpts": {
+        "closeEnoughTiles": 3
+      },
+      "isTargettedYes": true,
+      "tgtStub": "game/gameobject/task/move/AttackMoveTargetTask",
+      "tgtArgsLen": 3,
+      "validLocked": false
+    }
+  },
+  "game/order/DeployOrder": {
+    "0": {
+      "aTypeDeploy": true,
+      "bTypeSelected": true,
+      "aTargeted": true,
+      "bTargeted": false,
+      "aTargetOptional": false,
+      "bTargetOptional": true,
+      "aSingle": true,
+      "bSingle": false,
+      "minimap": false,
+      "aHasPointer": true
+    },
+    "1": {
+      "validInf": true,
+      "allowedInf": true,
+      "procLen": 1,
+      "cbIsFn": true,
+      "validWrongTarget": false,
+      "validCheer": false,
+      "validBld": true,
+      "onAddBld": false,
+      "calls": [
+        [
+          "primary",
+          true
+        ]
+      ]
+    }
+  },
+  "game/order/CaptureOrder": {
+    "0": {
+      "orderType": true,
+      "targetOptional": false,
+      "terminal": true,
+      "feedbackCapture": true,
+      "hasGame": true,
+      "hasPointer": true
+    },
+    "1": {
+      "validEng": true,
+      "allowed": true,
+      "procLen": 1,
+      "procStub": "game/gameobject/task/CaptureBuildingTask",
+      "procTarget": true,
+      "validNonEng": false,
+      "validFriendly": false,
+      "onAddEmpty": true
+    }
+  },
+  "game/order/CheerOrder": {
+    "0": {
+      "orderTypeCheer": true,
+      "ptr": true,
+      "allowed": true
+    },
+    "1": {
+      "vNone": true,
+      "vGuard": true,
+      "vCheer": false,
+      "vNotInf": false,
+      "procLen": 1,
+      "procStub": "game/gameobject/task/CheerTask"
+    }
+  },
+  "game/order/EnterTransportOrder": {
+    "0": {
+      "orderType": true,
+      "targetOptional": false,
+      "terminal": true,
+      "feedbackEnter": true,
+      "hasGame": true
+    },
+    "1": {
+      "valid": true,
+      "allowed": true,
+      "passTarget": true,
+      "blockHasCb": true,
+      "allowedAir": false,
+      "onAddEmpty": true
+    }
+  },
+  "game/order/GatherOrder": {
+    "0": {
+      "orderType": true,
+      "targetOptional": false,
+      "feedbackMove": true,
+      "ptrFull": true,
+      "ptrMini": true
+    },
+    "1": {
+      "validOre": true,
+      "allowed": true,
+      "validNotOre": false,
+      "validNoHarv": false,
+      "validDisabled": false,
+      "procStub": "game/gameobject/task/harvester/GatherOreTask",
+      "procTile": true
+    }
+  },
+  "game/order/GuardAreaOrder": {
+    "0": {
+      "gType": true,
+      "aType": true,
+      "gTargeted": false,
+      "aTargeted": true,
+      "gTargetOptional": true,
+      "aTargetOptional": false,
+      "gMinimap": false,
+      "aMinimap": true,
+      "terminal": true,
+      "gFeedback": true,
+      "aFeedback": true
+    },
+    "1": {
+      "validUnit": true,
+      "allowed": true,
+      "procLen": 2,
+      "procStubs": [
+        "game/gameobject/task/move/MoveTask",
+        "cb"
+      ],
+      "validGarrison": true,
+      "validPlain": false,
+      "harvestStubs": [
+        "game/gameobject/task/move/MoveTask",
+        "cb",
+        "game/gameobject/task/harvester/GatherOreTask"
+      ]
+    }
+  },
+  "game/order/OccupyOrder": {
+    "0": {
+      "orderType": true,
+      "targetOptional": false,
+      "terminal": true,
+      "feedbackCapture": true
+    },
+    "1": {
+      "validNotSpawned": false,
+      "isRecycle": true,
+      "validRecycle": true,
+      "allowedRecycle": true,
+      "validHosp": true,
+      "validGarrison": false,
+      "garrisonStub": "game/gameobject/task/GarrisonBuildingTask"
+    }
+  },
+  "game/order/RepairOrder": {
+    "0": {
+      "orderType": true,
+      "targetOptional": false,
+      "terminal": true,
+      "feedbackCapture": true
+    },
+    "1": {
+      "validHut": true,
+      "allowedHut": true,
+      "procStub": "game/gameobject/task/RepairBuildingTask",
+      "procTarget": true,
+      "validFriendly": true,
+      "allowedFriendly": true,
+      "validFull": true,
+      "allowedFull": false,
+      "validCab": true,
+      "allowedCab": true,
+      "validNonEng": false
+    }
+  },
+  "game/order/ScatterOrder": {
+    "0": {
+      "orderType": true,
+      "ptr": true,
+      "allowed": true
+    },
+    "1": {
+      "vInf": true,
+      "vVeh": true,
+      "vFly": false,
+      "vDisabled": false,
+      "vBld": false,
+      "noTargetErrHasScatter": true,
+      "procStub": "game/gameobject/task/ScatterTask",
+      "procOpts": {
+        "tile": {
+          "id": "s"
+        },
+        "toBridge": true
+      }
+    }
+  },
+  "game/order/StopOrder": {
+    "0": {
+      "orderType": true,
+      "hasGame": true,
+      "ptr": true
+    },
+    "1": {
+      "valid": true,
+      "allowed": true,
+      "hasCb": true,
+      "penaltyAfterCb": 0,
+      "penaltyOnAdd": 0.5,
+      "penaltySkip": 0.1,
+      "resets": [
+        [
+          "repair",
+          true,
+          true
+        ],
+        [
+          "factory",
+          true,
+          true
+        ]
+      ]
+    }
+  },
+  "game/order/UnloadAllOrder": {
+    "0": {
+      "orderType": true,
+      "targetOptional": true,
+      "terminal": true,
+      "feedbackEnter": true,
+      "ptr": true
+    },
+    "1": {
+      "validFull": true,
+      "allowedFull": true,
+      "procLen": 1,
+      "procSoft": true,
+      "validEmpty": false,
+      "validNoBio": false,
+      "validDestroyed": false,
+      "onAdd": true
+    }
+  },
+  "game/order/MoveOrder": {
+    "0": {
+      "aTypeMove": true,
+      "bTypeForce": true,
+      "aForce": false,
+      "bForce": true,
+      "targetOptionalBoth": true,
+      "feedbackMove": true,
+      "gameSame": true,
+      "mapSame": true,
+      "selSame": true
+    },
+    "1": {
+      "validEmpty": true,
+      "allowedEmpty": true,
+      "processStub": "game/gameobject/task/move/MoveTask",
+      "processTile": true,
+      "processBridge": false,
+      "processOpts": {
+        "closeEnoughTiles": 2,
+        "forceMove": false
+      },
+      "validBldNoRally": false,
+      "enemyBlock": true,
+      "followFalse": false,
+      "processFStub": "game/gameobject/task/move/MoveToBlockTask",
+      "followTrue": true,
+      "processFollowStub": "game/gameobject/task/move/MoveTargetTask",
+      "onAddEmpty": true
+    }
+  },
+  "game/order/DockOrder": {
+    "0": {
+      "orderTypeDock": true,
+      "targetOptional": false,
+      "feedbackMove": true,
+      "hasGame": true
+    },
+    "1": {
+      "validNotBld": false,
+      "validBunker": true,
+      "allowedBunker": true,
+      "allowedBusy": false,
+      "busyLen": 0,
+      "refineryStub": "game/gameobject/task/harvester/ReturnOreTask"
+    }
   }
 }

@@ -5035,6 +5035,1467 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/order/Order",
+    tsjs: "src/game/order/Order.ts.js",
+    probes: [
+      // 构造默认字段 + set 链式 + 基类 isValid/isAllowed/onAdd/getPointerType
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const PT = mod("engine/type/PointerType").PointerType;
+        const o = new ns.Order(OrderType.Move);
+        const src = { id: "src" };
+        const tgt = { id: "tgt" };
+        const ret = o.set(src, tgt);
+        return {
+          orderType: o.orderType === OrderType.Move,
+          targetOptional: o.targetOptional,
+          minimapAllowed: o.minimapAllowed,
+          singleSelectionRequired: o.singleSelectionRequired,
+          terminal: o.terminal,
+          feedbackIsNone: o.feedbackType === OFT.None,
+          srcBound: o.sourceObject === src,
+          tgtBound: o.target === tgt,
+          setChain: ret === o,
+          isValid: o.isValid(),
+          isAllowed: o.isAllowed(),
+          onAddEmpty: o.onAdd([], false),
+          ptrDefault: o.getPointerType(false) === PT.Default,
+          ptrMini: o.getPointerType(true) === PT.Mini,
+        };
+      },
+      // Object.keys 字段顺序（无初始化器提升）
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const o = new ns.Order(OrderType.Attack);
+        return Object.keys(o);
+      },
+    ],
+  },
+  {
+    name: "game/order/OrderFeedbackType",
+    tsjs: "src/game/order/OrderFeedbackType.ts.js",
+    probes: [
+      (ns) => {
+        const e = ns.OrderFeedbackType;
+        return {
+          none: e.None,
+          move: e.Move,
+          attack: e.Attack,
+          enter: e.Enter,
+          capture: e.Capture,
+          special: e.SpecialAttack,
+          secondary: e.SecondaryWeaponAttack,
+          revMove: e[e.Move],
+          revCapture: e[e.Capture],
+          keyCount: Object.keys(e).length,
+        };
+      },
+      // 与 Order 构造器使用的 None 对齐（经 mod 取值，不写死数字）
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const o = new (mod("game/order/Order").Order)(OrderType.Move);
+        return {
+          ctorNone: o.feedbackType === OFT.None,
+          sameModule: OFT.None === ns.OrderFeedbackType.None,
+          moveMatches: ns.OrderFeedbackType.Move === OFT.Move,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/orderPriorities",
+    tsjs: "src/game/order/orderPriorities.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        return ns.orderPriorities.map((v) => OrderType[v]);
+      },
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        return {
+          len: ns.orderPriorities.length,
+          firstOccupy: ns.orderPriorities[0] === OrderType.Occupy,
+          lastGather: ns.orderPriorities[ns.orderPriorities.length - 1] === OrderType.Gather,
+          hasAttack: ns.orderPriorities.includes(OrderType.Attack),
+          hasDock: ns.orderPriorities.includes(OrderType.Dock),
+          noMove: !ns.orderPriorities.includes(OrderType.Move),
+          indexOfDeploy: ns.orderPriorities.indexOf(OrderType.Deploy),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/OrderFactory",
+    tsjs: "src/game/order/OrderFactory.ts.js",
+    probes: [
+      // create() 各分支：以字段签名区分具体指令类（禁 constructor.name）
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {}, tiles: {} } };
+        const map = {};
+        const sel = { isSelected: () => false };
+        const f = new ns.OrderFactory(game, map);
+        const sig = (o) => ({
+          orderType: o.orderType,
+          forceMove: o.forceMove,
+          forceAttack: o.forceAttack,
+          ivanBombAllowed: o.ivanBombAllowed,
+          targeted: o.targeted,
+          terminal: o.terminal,
+          targetOptional: o.targetOptional,
+          minimapAllowed: o.minimapAllowed,
+          singleSelectionRequired: o.singleSelectionRequired,
+          feedbackType: o.feedbackType,
+          hasGame: o.game === game,
+          hasMap: o.map === map,
+          hasSel: o.unitSelection === sel,
+        });
+        return {
+          move: sig(f.create(OrderType.Move, sel)),
+          forceMove: sig(f.create(OrderType.ForceMove, sel)),
+          attack: sig(f.create(OrderType.Attack)),
+          forceAttack: sig(f.create(OrderType.ForceAttack)),
+          placeBomb: sig(f.create(OrderType.PlaceBomb)),
+          attackMove: sig(f.create(OrderType.AttackMove)),
+          deploy: sig(f.create(OrderType.Deploy)),
+          deploySelected: sig(f.create(OrderType.DeploySelected)),
+          guard: sig(f.create(OrderType.Guard)),
+          guardArea: sig(f.create(OrderType.GuardArea)),
+          cheer: sig(f.create(OrderType.Cheer)),
+          stop: sig(f.create(OrderType.Stop)),
+          capture: sig(f.create(OrderType.Capture)),
+          occupy: sig(f.create(OrderType.Occupy)),
+          dock: sig(f.create(OrderType.Dock)),
+          gather: sig(f.create(OrderType.Gather)),
+          repair: sig(f.create(OrderType.Repair)),
+          scatter: sig(f.create(OrderType.Scatter)),
+          enterTransport: sig(f.create(OrderType.EnterTransport)),
+          unloadAll: sig(f.create(OrderType.UnloadAll)),
+        };
+      },
+      // 未识别 OrderType 抛错（错误消息用枚举反查，不写死字符串）
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const f = new ns.OrderFactory({ map: {} }, {});
+        const unknown = OrderType.UnloadAll + 1;
+        let err = null;
+        try {
+          f.create(unknown);
+        } catch (e) {
+          err = String(e && e.message);
+        }
+        return { unknown, err, errHasUnhandled: !!err && err.indexOf("Unhandled") === 0 };
+      },
+    ],
+  },
+  {
+    name: "game/order/MoveOrder",
+    tsjs: "src/game/order/MoveOrder.ts.js",
+    probes: [
+      // 构造：Move/ForceMove 类型与字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const map = { id: "map" };
+        const sel = { isSelected: () => false };
+        const a = new ns.MoveOrder(game, map, sel);
+        const b = new ns.MoveOrder(game, map, sel, true);
+        return {
+          aTypeMove: a.orderType === OrderType.Move,
+          bTypeForce: b.orderType === OrderType.ForceMove,
+          aForce: a.forceMove,
+          bForce: b.forceMove,
+          targetOptionalBoth: a.targetOptional === false && b.targetOptional === false,
+          feedbackMove: a.feedbackType === OFT.Move && b.feedbackType === OFT.Move,
+          gameSame: a.game === game,
+          mapSame: a.map === map,
+          selSame: a.unitSelection === sel,
+        };
+      },
+      // isValid / isAllowed / isEnemyBuildingBlock / isFollowMove / process
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const tile = { id: "tile", landType: 0 };
+        const bridge = { id: "br" };
+        const game = {
+          map: {
+            tileOccupation: {},
+            getObjectsOnTile: () => [],
+            getGroundObjectsOnTile: () => [],
+          },
+          mapShroudTrait: { getPlayerShroud: () => null },
+          rules: { general: { closeEnough: 2 } },
+          gameOpts: { mcvRepacks: true },
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+        };
+        const map = { getObjectsOnTile: () => [] };
+        const sel = { isSelected: (o) => o === undefined || o.__selected === true };
+        const srcUnit = {
+          isBuilding: () => false,
+          isUnit: () => true,
+          isInfantry: () => false,
+          isVehicle: () => true,
+          owner: "P1",
+          tile,
+          rules: {
+            undeploysInto: undefined,
+            constructionYard: false,
+            speedType: 1,
+            movementZone: MovementZone.Walk,
+            moveToShroud: true,
+            consideredAircraft: false,
+          },
+          moveTrait: { isDisabled: () => false, isIdle: () => true },
+          rallyTrait: undefined,
+        };
+        const targetEmpty = { tile, obj: undefined, getBridge: () => false };
+        const o1 = new ns.MoveOrder(game, map, sel);
+        o1.set(srcUnit, targetEmpty);
+        const validEmpty = o1.isValid();
+        const allowedEmpty = o1.isAllowed();
+        const tasks = o1.process();
+        const t0 = tasks && tasks[0];
+
+        // 建筑无 undeploysInto 且无 rally → isValid false
+        const bld = {
+          ...srcUnit,
+          isBuilding: () => true,
+          isUnit: () => false,
+          isVehicle: () => false,
+          rules: { ...srcUnit.rules, undeploysInto: undefined },
+        };
+        const oB = new ns.MoveOrder(game, map, sel);
+        oB.set(bld, targetEmpty);
+        const validBldNoRally = oB.isValid();
+
+        // forceMove + 载具 + 敌方建筑 → isEnemyBuildingBlock
+        // isFollowMove 也会读 obj.isInfantry — 敌建筑 mock 补齐方法
+        const enemyBld = {
+          isBuilding: () => true,
+          isInfantry: () => false,
+          isVehicle: () => false,
+          isTechno: () => true,
+          owner: "P2",
+        };
+        const oF = new ns.MoveOrder(game, map, sel, true);
+        oF.set(srcUnit, { tile, obj: enemyBld, getBridge: () => false });
+        const enemyBlock = oF.isEnemyBuildingBlock();
+        const followFalse = oF.isFollowMove();
+        const processF = oF.process();
+        const pf0 = processF && processF[0];
+
+        // forceMove + 移动中步兵 → isFollowMove
+        // isEnemyBuildingBlock 先读 obj.isBuilding — 补齐避免 mock 假错
+        const movingInf = {
+          isInfantry: () => true,
+          isVehicle: () => false,
+          isBuilding: () => false,
+          isTechno: () => true,
+          owner: "P2",
+          moveTrait: { isIdle: () => false },
+        };
+        const oFollow = new ns.MoveOrder(game, map, sel, true);
+        oFollow.set(srcUnit, { tile, obj: movingInf, getBridge: () => true });
+        const followTrue = oFollow.isFollowMove();
+        const processFollow = oFollow.process();
+        const pFollow0 = processFollow && processFollow[0];
+
+        // onAdd：空 tasks 且 valid/allowed → true
+        const onAddEmpty = o1.onAdd([], false);
+        return {
+          validEmpty,
+          allowedEmpty,
+          processStub: t0 && t0.$stub,
+          processTile: t0 && t0.$args && t0.$args[1] === tile,
+          processBridge: t0 && t0.$args && t0.$args[2],
+          processOpts: t0 && t0.$args && t0.$args[3],
+          validBldNoRally,
+          enemyBlock,
+          followFalse,
+          processFStub: pf0 && pf0.$stub,
+          followTrue,
+          processFollowStub: pFollow0 && pFollow0.$stub,
+          processFollowBridge: pFollow0 && pFollow0.$args && pFollow0.$args[2],
+          onAddEmpty,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/AttackOrder",
+    tsjs: "src/game/order/AttackOrder.ts.js",
+    probes: [
+      // 构造：Attack/ForceAttack/PlaceBomb 选项与 RangeHelper/LosHelper
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {}, tiles: {} } };
+        const a = new ns.AttackOrder(game);
+        const f = new ns.AttackOrder(game, { forceAttack: true });
+        const n = new ns.AttackOrder(game, { noIvanBomb: true });
+        return {
+          aType: a.orderType === OrderType.Attack,
+          fType: f.orderType === OrderType.ForceAttack,
+          nType: n.orderType === OrderType.Attack,
+          aIvan: a.ivanBombAllowed,
+          fIvan: f.ivanBombAllowed,
+          nIvan: n.ivanBombAllowed,
+          flags: [a.forceAttack, f.forceAttack, n.forceAttack],
+          isC4: [a.isC4, f.isC4],
+          targetOptional: a.targetOptional,
+          feedbackNone: a.feedbackType === OFT.None,
+          hasRangeHelper: !!a.rangeHelper,
+          hasLosHelper: !!a.losHelper,
+        };
+      },
+      // isValid 早退 / selectAirstrikeWeapon / process 任务分支
+      (ns, THREE, mod) => {
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: {},
+            getGroundObjectsOnTile: () => [],
+            isWithinBounds: () => true,
+          },
+          mapShroudTrait: { getPlayerShroud: () => null },
+          rules: { general: {}, combatDamage: {} },
+          isValidTarget: () => true,
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+        };
+        const tile = { id: "t" };
+        const o = new ns.AttackOrder(game);
+        // 无 attackTrait → isValid false
+        const bare = { isBuilding: () => false, isUnit: () => true, owner: "P1", tile };
+        o.set(bare, { tile, obj: undefined, getBridge: () => false });
+        const validNoTrait = o.isValid();
+        const allowedNoTraitThrew = (() => {
+          try {
+            return o.isAllowed();
+          } catch (e) {
+            return "threw";
+          }
+        })();
+
+        // selectAirstrikeWeapon：无 airstrikeTrait → null
+        const noAir = ns.AttackOrder.prototype.selectAirstrikeWeapon.call(o, bare, { obj: {} });
+        const weapon = {
+          name: "Mig",
+          rules: { migAttackCursor: true, damage: 100 },
+          warhead: { rules: {} },
+        };
+        const airUnit = { airstrikeTrait: {}, secondaryWeapon: weapon };
+        const bldTarget = { obj: { isBuilding: () => true } };
+        const notBld = { obj: { isBuilding: () => false } };
+        const airHit = ns.AttackOrder.prototype.selectAirstrikeWeapon.call(o, airUnit, bldTarget);
+        const airMiss = ns.AttackOrder.prototype.selectAirstrikeWeapon.call(o, airUnit, notBld);
+
+        // process：常规 AttackTask（桩）vs isC4 → PlantC4Task（预注册真类）
+        const normalWeapon = { name: "W", rules: { damage: 50 }, warhead: { rules: {} } };
+        const atkTrait = {
+          isDisabled: () => false,
+          selectWeaponVersus: () => normalWeapon,
+        };
+        const unit = {
+          isBuilding: () => false,
+          isUnit: () => true,
+          isInfantry: () => false,
+          isVehicle: () => false,
+          isTechno: () => true,
+          owner: "P1",
+          tile,
+          c4: false,
+          attackTrait: atkTrait,
+          moveTrait: { isDisabled: () => false },
+          rules: { voiceSecondaryWeaponAttack: false },
+          secondaryWeapon: undefined,
+        };
+        const o2 = new ns.AttackOrder(game);
+        o2.set(unit, { tile, obj: undefined, getBridge: () => false });
+        o2.isC4 = false;
+        const procNormal = o2.process();
+        const pn = procNormal && procNormal[0];
+        o2.isC4 = true;
+        const c4Target = { id: "bld" };
+        o2.set(unit, { tile, obj: c4Target, getBridge: () => false });
+        const procC4 = o2.process();
+        const pc = procC4 && procC4[0];
+        return {
+          validNoTrait,
+          allowedNoTraitThrew,
+          noAir,
+          airHitSame: airHit === weapon,
+          airMiss,
+          normalStub: pn && pn.$stub,
+          normalArgsWeapon: pn && pn.$args && pn.$args[2] === normalWeapon,
+          c4TargetSame: pc && (pc.target === c4Target || (pc.$args && pc.$args[1] === c4Target)),
+          c4Stub: pc && pc.$stub,
+          feedbackAfterInvalidStillNone: o2.feedbackType === OFT.None || o2.feedbackType === OFT.Attack || o2.feedbackType === OFT.SpecialAttack,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/AttackMoveOrder",
+    tsjs: "src/game/order/AttackMoveOrder.ts.js",
+    probes: [
+      // 构造：AttackMove 覆写 + 反馈 Move
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {}, tiles: {} } };
+        const map = { id: "m" };
+        const o = new ns.AttackMoveOrder(game, map);
+        return {
+          orderTypeAttackMove: o.orderType === OrderType.AttackMove,
+          targetOptional: o.targetOptional,
+          feedbackMove: o.feedbackType === OFT.Move,
+          mapSame: o.map === map,
+          forceAttack: o.forceAttack,
+          ivanBombAllowed: o.ivanBombAllowed,
+          hasGame: o.game === game,
+        };
+      },
+      // isValid / isTargetted / process 扫图 vs 目标
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const tile = { id: "tile" };
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: {},
+            getGroundObjectsOnTile: () => [],
+            isWithinBounds: () => true,
+          },
+          mapShroudTrait: { getPlayerShroud: () => null },
+          rules: { general: { closeEnough: 3 }, combatDamage: {} },
+          isValidTarget: () => true,
+          areFriendly: () => false,
+        };
+        const map = { terrain: { getPassableSpeed: () => 1 } };
+        const unit = {
+          isBuilding: () => false,
+          isUnit: () => true,
+          isInfantry: () => false,
+          isVehicle: () => true,
+          isTechno: () => true,
+          owner: "P1",
+          tile,
+          c4: false,
+          attackTrait: {
+            isDisabled: () => false,
+            selectWeaponVersus: () => ({ name: "W", rules: { damage: 1 }, warhead: { rules: {} } }),
+          },
+          moveTrait: { isDisabled: () => false, isIdle: () => true },
+          rules: {
+            preventAttackMove: false,
+            moveToShroud: true,
+            movementZone: MovementZone.Walk,
+            speedType: 0,
+            consideredAircraft: false,
+            locomotor: 0,
+          },
+        };
+        const o = new ns.AttackMoveOrder(game, map);
+        const scanTarget = { tile, obj: undefined, getBridge: () => false };
+        o.set(unit, scanTarget);
+        const isTargettedScan = o.isTargetted();
+        const validScan = o.isValid();
+        const allowedScan = o.isAllowed();
+        const procScan = o.process();
+        const ps = procScan && procScan[0];
+
+        const techno = { isTechno: () => true, isBuilding: () => true, isDestroyed: false, isCrashing: false, healthTrait: { health: 80 } };
+        const tgtTarget = { tile, obj: techno, getBridge: () => false };
+        const o2 = new ns.AttackMoveOrder(game, map);
+        o2.set(unit, tgtTarget);
+        const isTargettedYes = o2.isTargetted();
+        const procTgt = o2.process();
+        const pt = procTgt && procTgt[0];
+
+        // preventAttackMove → isValid false
+        const locked = { ...unit, rules: { ...unit.rules, preventAttackMove: true } };
+        const o3 = new ns.AttackMoveOrder(game, map);
+        o3.set(locked, scanTarget);
+        const validLocked = o3.isValid();
+        return {
+          isTargettedScan,
+          validScan,
+          allowedScan,
+          scanStub: ps && ps.$stub,
+          scanTile: ps && ps.$args && ps.$args[1] === tile,
+          scanOpts: ps && ps.$args && ps.$args[3],
+          isTargettedYes,
+          tgtStub: pt && pt.$stub,
+          tgtArgsLen: pt && pt.$args && pt.$args.length,
+          validLocked,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/DeployOrder",
+    tsjs: "src/game/order/DeployOrder.ts.js",
+    probes: [
+      // 构造：targeted=true/false 的 orderType 与旗标
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const game = { map: { tileOccupation: {} } };
+        const a = new ns.DeployOrder(game, true);
+        const b = new ns.DeployOrder(game, false);
+        return {
+          aTypeDeploy: a.orderType === OrderType.Deploy,
+          bTypeSelected: b.orderType === OrderType.DeploySelected,
+          aTargeted: a.targeted,
+          bTargeted: b.targeted,
+          aTargetOptional: a.targetOptional,
+          bTargetOptional: b.targetOptional,
+          aSingle: a.singleSelectionRequired,
+          bSingle: b.singleSelectionRequired,
+          minimap: a.minimapAllowed,
+          aHasPointer: typeof a.getPointerType === "function",
+        };
+      },
+      // isValid 步兵 deployer / process CallbackTask / onAdd 建筑 primary factory
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
+        const game = {
+          map: { tileOccupation: {}, terrain: { getPassableSpeed: () => 1 } },
+          events: { dispatch: () => {} },
+        };
+        const tile = { id: "t" };
+        const deployerTrait = {
+          isDeployed: () => false,
+          toggleDeployed: () => {},
+          setDeployed: () => {},
+        };
+        const inf = {
+          isInfantry: () => true,
+          isVehicle: () => false,
+          isBuilding: () => false,
+          isUnit: () => true,
+          stance: StanceType.None,
+          deployerTrait,
+          owner: "P1",
+          tile,
+        };
+        const o = new ns.DeployOrder(game, true);
+        o.set(inf, { obj: inf, tile });
+        const validInf = o.isValid();
+        const allowedInf = o.isAllowed();
+        const proc = o.process();
+        const p0 = proc && proc[0];
+        const cbIsFn = p0 && typeof p0.cb === "function";
+
+        // targeted 时目标必须是自身
+        const other = { id: "other" };
+        o.set(inf, { obj: other, tile });
+        const validWrongTarget = o.isValid();
+
+        // Cheer 姿态步兵 deployer → isValid false
+        const cheerInf = { ...inf, stance: StanceType.Cheer };
+        o.set(cheerInf, { obj: cheerInf, tile });
+        const validCheer = o.isValid();
+
+        // 建筑 factory onAdd → setPrimaryFactory + false
+        const calls = [];
+        const bld = {
+          isInfantry: () => false,
+          isVehicle: () => false,
+          isBuilding: () => true,
+          isUnit: () => false,
+          rules: { factory: true },
+          owner: {
+            production: { isPrimaryFactory: () => false, setPrimaryFactory: (u) => calls.push(["primary", u === bld]) },
+          },
+        };
+        const oB = new ns.DeployOrder(game, false);
+        oB.set(bld, { tile });
+        const validBld = oB.isValid();
+        const onAddBld = oB.onAdd([], false);
+        return {
+          validInf,
+          allowedInf,
+          procLen: proc && proc.length,
+          cbIsFn,
+          validWrongTarget,
+          validCheer,
+          validBld,
+          onAddBld,
+          calls,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/CaptureOrder",
+    tsjs: "src/game/order/CaptureOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.CaptureOrder(game);
+        return {
+          orderType: o.orderType === OrderType.Capture,
+          targetOptional: o.targetOptional,
+          terminal: o.terminal,
+          feedbackCapture: o.feedbackType === OFT.Capture,
+          hasGame: o.game === game,
+          hasPointer: typeof o.getPointerType === "function",
+        };
+      },
+      // isValid 工程师占领 / process CaptureBuildingTask / onAdd
+      (ns, THREE, mod) => {
+        const game = {
+          map: { tileOccupation: {} },
+          gameOpts: { multiEngineer: false },
+          rules: { general: { engineerCaptureLevel: 0.5, engineerAlwaysCaptureTech: false } },
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+        };
+        const o = new ns.CaptureOrder(game);
+        const eng = {
+          isInfantry: () => true,
+          isUnit: () => true,
+          isBuilding: () => false,
+          owner: "P1",
+          rules: { engineer: true },
+        };
+        const bld = {
+          isBuilding: () => true,
+          isDestroyed: false,
+          isTechno: () => true,
+          owner: "P2",
+          rules: { capturable: true, needsEngineer: false },
+        };
+        const target = { obj: bld, tile: { id: "b" } };
+        o.set(eng, target);
+        const validEng = o.isValid();
+        const allowed = o.isAllowed();
+        const proc = o.process();
+        const p0 = proc && proc[0];
+        const procTarget = p0 && (p0.target === bld || (p0.$args && p0.$args[1] === bld));
+
+        // 非工程师
+        const nonEng = { ...eng, rules: { engineer: false } };
+        o.set(nonEng, target);
+        const validNonEng = o.isValid();
+
+        // 友军建筑不可占
+        o.set(eng, target);
+        bld.__friendly = true;
+        // areFriendly(source, target) — CaptureOrder calls areFriendly(this.sourceObject, this.target.obj)
+        const validFriendly = o.isValid();
+        bld.__friendly = false;
+
+        // onAdd 无既有任务 → true
+        const onAddEmpty = o.onAdd([], false);
+        return {
+          validEng,
+          allowed,
+          procLen: proc && proc.length,
+          procStub: p0 && p0.$stub,
+          procTarget,
+          validNonEng,
+          validFriendly,
+          onAddEmpty,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/CheerOrder",
+    tsjs: "src/game/order/CheerOrder.ts.js",
+    probes: [
+      // 构造 + 光标/类型
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const PT = mod("engine/type/PointerType").PointerType;
+        const o = new ns.CheerOrder();
+        return {
+          orderTypeCheer: o.orderType === OrderType.Cheer,
+          ptr: o.getPointerType(false) === PT.NoAction,
+          allowed: o.isAllowed(),
+        };
+      },
+      // isValid 步兵姿态分支 + process CheerTask
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
+        const o = new ns.CheerOrder();
+        const mk = (infantry, stance) => ({
+          isInfantry: () => infantry,
+          isUnit: () => true,
+          stance,
+        });
+        o.set(mk(true, StanceType.None), undefined);
+        const vNone = o.isValid();
+        o.set(mk(true, StanceType.Guard), undefined);
+        const vGuard = o.isValid();
+        o.set(mk(true, StanceType.Cheer), undefined);
+        const vCheer = o.isValid();
+        o.set(mk(false, StanceType.None), undefined);
+        const vNotInf = o.isValid();
+        const proc = o.process();
+        const p0 = proc && proc[0];
+        return {
+          vNone,
+          vGuard,
+          vCheer,
+          vNotInf,
+          procLen: proc && proc.length,
+          procStub: p0 && p0.$stub,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/DockOrder",
+    tsjs: "src/game/order/DockOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.DockOrder(game);
+        return {
+          orderTypeDock: o.orderType === OrderType.Dock,
+          targetOptional: o.targetOptional,
+          feedbackMove: o.feedbackType === OFT.Move,
+          hasGame: o.game === game,
+        };
+      },
+      // isValid 非建筑/坦克碉堡 isAllowed + process 分支
+      (ns, THREE, mod) => {
+        const BuildStatus = mod("game/gameobject/Building").BuildStatus;
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+        };
+        const o = new ns.DockOrder(game);
+        const unit = {
+          isUnit: () => true,
+          isVehicle: () => true,
+          isBuilding: () => false,
+          owner: "P1",
+          // process 里 sourceObject.rules.dock.includes — 必须补齐
+          rules: { dock: [], refinery: false },
+          healthTrait: { health: 100 },
+        };
+        const notBld = { isBuilding: () => false, isDestroyed: false, dockTrait: {} };
+        o.set(unit, { obj: notBld, tile: { id: "t" } });
+        const validNotBld = o.isValid();
+
+        const bunker = {
+          isBuilding: () => true,
+          isDestroyed: false,
+          dockTrait: { isValidUnitForDock: () => true, isDocked: () => false, getAvailableDockCount: () => 1, hasReservedDockForUnit: () => false },
+          buildStatus: BuildStatus.Ready,
+          warpedOutTrait: { isActive: () => false },
+          tankBunkerTrait: { bunkeredVehicle: undefined, canVehicleEnter: () => true },
+          rules: { refinery: false, dock: [] },
+          unitRepairTrait: undefined,
+          name: "GABUNK",
+          __friendly: true,
+        };
+        o.set(unit, { obj: bunker, tile: { id: "b" } });
+        const validBunker = o.isValid();
+        const allowedBunker = o.isAllowed();
+        const procBunker = o.process();
+        const pb = procBunker && procBunker[0];
+
+        // 坦克碉堡已占用 → isAllowed false → process []
+        bunker.tankBunkerTrait.bunkeredVehicle = { id: "tank" };
+        const allowedBusy = o.isAllowed();
+        const procBusy = o.process();
+
+        // 矿场 + 矿车 → ReturnOreTask
+        const refinery = {
+          isBuilding: () => true,
+          isDestroyed: false,
+          dockTrait: { isValidUnitForDock: () => true, isDocked: () => false, getAvailableDockCount: () => 2, hasReservedDockForUnit: () => false },
+          buildStatus: BuildStatus.Ready,
+          warpedOutTrait: { isActive: () => false },
+          tankBunkerTrait: undefined,
+          rules: { refinery: true, dock: [] },
+          unitRepairTrait: undefined,
+          name: "GAREFN",
+          __friendly: true,
+        };
+        const harvester = { ...unit, harvesterTrait: {} };
+        o.set(harvester, { obj: refinery, tile: { id: "r" } });
+        const procRef = o.process();
+        const pr = procRef && procRef[0];
+        return {
+          validNotBld,
+          validBunker,
+          allowedBunker,
+          bunkerStub: pb && pb.$stub,
+          allowedBusy,
+          busyLen: procBusy && procBusy.length,
+          refineryStub: pr && pr.$stub,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/EnterTransportOrder",
+    tsjs: "src/game/order/EnterTransportOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.EnterTransportOrder(game);
+        return {
+          orderType: o.orderType === OrderType.EnterTransport,
+          targetOptional: o.targetOptional,
+          terminal: o.terminal,
+          feedbackEnter: o.feedbackType === OFT.Enter,
+          hasGame: o.game === game,
+        };
+      },
+      // isValid / isAllowed / process 可通行 vs 需驶近
+      (ns, THREE, mod) => {
+        const ZoneType = mod("game/gameobject/unit/ZoneType").ZoneType;
+        const MoveState = mod("game/gameobject/trait/MoveTrait").MoveState;
+        const passable = { v: 1 };
+        const game = {
+          map: {
+            tileOccupation: {},
+            terrain: { getPassableSpeed: () => passable.v },
+          },
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+        };
+        const source = {
+          isInfantry: () => true,
+          isVehicle: () => false,
+          isUnit: () => true,
+          zone: ZoneType.Ground,
+          owner: "P1",
+          rules: { speedType: 0 },
+          onBridge: false,
+          mindControllableTrait: undefined,
+          mindControllerTrait: undefined,
+        };
+        const transport = {
+          isVehicle: () => true,
+          isBuilding: () => false,
+          isDestroyed: false,
+          zone: ZoneType.Ground,
+          owner: "P1",
+          __friendly: true,
+          transportTrait: { unitFitsInside: () => true },
+          moveTrait: { moveState: MoveState.Idle },
+          warpedOutTrait: { isActive: () => false },
+          tile: { id: "veh" },
+        };
+        const o = new ns.EnterTransportOrder(game);
+        o.set(source, { obj: transport, tile: transport.tile });
+        const valid = o.isValid();
+        const allowed = o.isAllowed();
+        passable.v = 2;
+        const procPass = o.process();
+        const pPass = procPass && procPass[0];
+        passable.v = 0;
+        const procBlock = o.process();
+        const pBlock = procBlock && procBlock[0];
+
+        // 空中目标 → isAllowed false
+        const airT = { ...transport, zone: ZoneType.Air };
+        o.set(source, { obj: airT, tile: airT.tile });
+        const allowedAir = o.isAllowed();
+
+        const onAddEmpty = o.onAdd([], false);
+        return {
+          valid,
+          allowed,
+          passStub: pPass && pPass.$stub,
+          passTarget: pPass && (pPass.target === transport || (pPass.$args && pPass.$args[1] === transport)),
+          blockStub: pBlock && pBlock.$stub,
+          blockHasCb: pBlock && typeof pBlock.cb === "function",
+          allowedAir,
+          onAddEmpty,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/GatherOrder",
+    tsjs: "src/game/order/GatherOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const PT = mod("engine/type/PointerType").PointerType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.GatherOrder(game);
+        return {
+          orderType: o.orderType === OrderType.Gather,
+          targetOptional: o.targetOptional,
+          feedbackMove: o.feedbackType === OFT.Move,
+          ptrFull: o.getPointerType(false) === PT.AttackNoRange,
+          ptrMini: o.getPointerType(true) === PT.AttackMini,
+        };
+      },
+      // isValid 矿车/矿区矩阵 + process GatherOreTask
+      (ns, THREE, mod) => {
+        const game = {
+          map: { tileOccupation: {} },
+          mapShroudTrait: { getPlayerShroud: () => ({ isShrouded: () => false }) },
+        };
+        const o = new ns.GatherOrder(game);
+        const tile = { id: "ore" };
+        const harvester = {
+          isVehicle: () => true,
+          isInfantry: () => false,
+          isUnit: () => true,
+          harvesterTrait: {},
+          moveTrait: { isDisabled: () => false },
+          owner: "P1",
+        };
+        const oreTarget = { obj: undefined, tile, isOre: true };
+        const notOre = { obj: undefined, tile, isOre: false };
+        o.set(harvester, oreTarget);
+        const validOre = o.isValid();
+        const allowed = o.isAllowed();
+        o.set(harvester, notOre);
+        const validNotOre = o.isValid();
+
+        const noHarv = { ...harvester, harvesterTrait: undefined };
+        o.set(noHarv, oreTarget);
+        const validNoHarv = o.isValid();
+
+        const disabled = { ...harvester, moveTrait: { isDisabled: () => true } };
+        o.set(disabled, oreTarget);
+        const validDisabled = o.isValid();
+
+        o.set(harvester, oreTarget);
+        const proc = o.process();
+        const p0 = proc && proc[0];
+        return {
+          validOre,
+          allowed,
+          validNotOre,
+          validNoHarv,
+          validDisabled,
+          procStub: p0 && p0.$stub,
+          procTile: p0 && p0.$args && p0.$args[1] === tile,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/GuardAreaOrder",
+    tsjs: "src/game/order/GuardAreaOrder.ts.js",
+    probes: [
+      // 构造：Guard vs GuardArea
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const g = new ns.GuardAreaOrder(game, false);
+        const a = new ns.GuardAreaOrder(game, true);
+        return {
+          gType: g.orderType === OrderType.Guard,
+          aType: a.orderType === OrderType.GuardArea,
+          gTargeted: g.targeted,
+          aTargeted: a.targeted,
+          gTargetOptional: g.targetOptional,
+          aTargetOptional: a.targetOptional,
+          gMinimap: g.minimapAllowed,
+          aMinimap: a.minimapAllowed,
+          terminal: g.terminal,
+          gFeedback: g.feedbackType === OFT.None,
+          aFeedback: a.feedbackType === OFT.Move,
+        };
+      },
+      // isValid 单位/驻军建筑 + process 扫图任务列表
+      (ns, THREE, mod) => {
+        const game = {
+          map: { tileOccupation: {} },
+          mapShroudTrait: { getPlayerShroud: () => null },
+          rules: { general: { closeEnough: 1 } },
+        };
+        const unit = {
+          isUnit: () => true,
+          isBuilding: () => false,
+          isVehicle: () => true,
+          isInfantry: () => false,
+          harvesterTrait: undefined,
+          moveTrait: { isDisabled: () => false, lastMoveResult: undefined },
+          rules: { moveToShroud: true },
+          owner: "P1",
+          guardMode: false,
+        };
+        const tile = { id: "g" };
+        const o = new ns.GuardAreaOrder(game, true);
+        o.set(unit, { tile, obj: undefined, getBridge: () => false });
+        const validUnit = o.isValid();
+        const allowed = o.isAllowed();
+        const proc = o.process();
+
+        // 驻军建筑可 Guard；普通建筑不可
+        const garrisonBld = {
+          isUnit: () => false,
+          isBuilding: () => true,
+          garrisonTrait: { units: [] },
+          moveTrait: undefined,
+          rules: { moveToShroud: true },
+          owner: "P1",
+        };
+        const plainBld = {
+          isUnit: () => false,
+          isBuilding: () => true,
+          garrisonTrait: undefined,
+          rules: { moveToShroud: true },
+          owner: "P1",
+        };
+        const oG = new ns.GuardAreaOrder(game, false);
+        oG.set(garrisonBld, undefined);
+        const validGarrison = oG.isValid();
+        oG.set(plainBld, undefined);
+        const validPlain = oG.isValid();
+
+        // 矿车警戒 → 挂采矿循环 Callback/Gather
+        const harvester = {
+          ...unit,
+          isVehicle: () => true,
+          harvesterTrait: { lastOreSite: "x", isFull: () => false },
+        };
+        const oH = new ns.GuardAreaOrder(game, true);
+        oH.set(harvester, { tile, obj: undefined, getBridge: () => false });
+        const procH = oH.process();
+        return {
+          validUnit,
+          allowed,
+          procLen: proc && proc.length,
+          procStubs: proc && proc.map((t) => t.$stub || (typeof t.cb === "function" ? "cb" : "other")),
+          validGarrison,
+          validPlain,
+          harvestStubs: procH && procH.map((t) => t.$stub || (typeof t.cb === "function" ? "cb" : "other")),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/OccupyOrder",
+    tsjs: "src/game/order/OccupyOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.OccupyOrder(game);
+        return {
+          orderType: o.orderType === OrderType.Occupy,
+          targetOptional: o.targetOptional,
+          terminal: o.terminal,
+          feedbackCapture: o.feedbackType === OFT.Capture,
+        };
+      },
+      // isUnitRecycle / isValid 医院 vs 驻军 / process 分支
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const civilian = { id: "civ" };
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+          getCivilianPlayer: () => civilian,
+          sellTrait: { computeRefundValue: () => 50 },
+        };
+        const o = new ns.OccupyOrder(game);
+        const soldier = {
+          isUnit: () => true,
+          isInfantry: () => true,
+          isVehicle: () => false,
+          owner: { id: "P1" },
+          rules: { engineer: false, occupier: true, movementZone: MovementZone.Walk, locomotor: LocomotorType.Walk, infiltrate: false },
+          healthTrait: { health: 80 },
+          mindControllableTrait: undefined,
+          mindControllerTrait: undefined,
+        };
+        const notSpawned = {
+          isSpawned: false,
+          isBuilding: () => true,
+        };
+        o.set(soldier, { obj: notSpawned, tile: { id: "t" } });
+        const validNotSpawned = o.isValid();
+
+        // 回收：同 owner + grinding + 非工程师
+        const grinder = {
+          isSpawned: true,
+          isBuilding: () => true,
+          owner: soldier.owner,
+          rules: { cloning: false, grinding: true, maxNumberOccupants: 5, spyable: false, infiltrate: false },
+          hospitalTrait: undefined,
+          garrisonTrait: undefined,
+        };
+        const recycleUnit = { ...soldier, rules: { ...soldier.rules, engineer: false } };
+        const isRecycle = ns.OccupyOrder.prototype.isUnitRecycle.call(o, recycleUnit, grinder);
+        o.set(recycleUnit, { obj: grinder, tile: { id: "g" } });
+        const validRecycle = o.isValid();
+        const allowedRecycle = o.isAllowed();
+        const procRecycle = o.process();
+        const pr = procRecycle && procRecycle[0];
+
+        // 医院：friendly + infantry
+        const hospital = {
+          isSpawned: true,
+          isBuilding: () => true,
+          owner: { id: "P1" },
+          rules: { cloning: false, grinding: false, maxNumberOccupants: 0, spyable: false },
+          hospitalTrait: {},
+          garrisonTrait: undefined,
+          __friendly: true,
+        };
+        const hospUnit = { ...soldier, healthTrait: { health: 50 } };
+        o.set(hospUnit, { obj: hospital, tile: { id: "h" } });
+        const validHosp = o.isValid();
+        const procHosp = o.process();
+        const ph = procHosp && procHosp[0];
+
+        // 驻军建筑 process → Garrison/EnterTransport 桩
+        const garrison = {
+          isSpawned: true,
+          isBuilding: () => true,
+          owner: { id: "P2" },
+          rules: { cloning: false, grinding: false, maxNumberOccupants: 6, spyable: false, occupier: true, infantryAbsorb: false, isBaseDefense: false },
+          hospitalTrait: undefined,
+          garrisonTrait: { canBeOccupied: () => true, units: [] },
+        };
+        o.set(soldier, { obj: garrison, tile: { id: "gb" } });
+        const validGarrison = o.isValid();
+        const procGarrison = o.process();
+        const pg = procGarrison && procGarrison[0];
+        return {
+          validNotSpawned,
+          isRecycle,
+          validRecycle,
+          allowedRecycle,
+          recycleStub: pr && pr.$stub,
+          validHosp,
+          hospStub: ph && ph.$stub,
+          validGarrison,
+          garrisonStub: pg && pg.$stub,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/RepairOrder",
+    tsjs: "src/game/order/RepairOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.RepairOrder(game);
+        return {
+          orderType: o.orderType === OrderType.Repair,
+          targetOptional: o.targetOptional,
+          terminal: o.terminal,
+          feedbackCapture: o.feedbackType === OFT.Capture,
+        };
+      },
+      // isValid / isAllowed / process
+      (ns, THREE, mod) => {
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => !!a.__friendly || !!b.__friendly,
+        };
+        const o = new ns.RepairOrder(game);
+        const eng = {
+          isInfantry: () => true,
+          isUnit: () => true,
+          owner: "P1",
+          rules: { engineer: true },
+        };
+        const nonCombatant = { isCombatant: () => false };
+        const garrisonHut = {
+          isBuilding: () => true,
+          isDestroyed: false,
+          owner: nonCombatant,
+          garrisonTrait: { units: [] },
+          cabHutTrait: undefined,
+          rules: { repairable: true },
+          healthTrait: { health: 40 },
+        };
+        o.set(eng, { obj: garrisonHut, tile: { id: "h" } });
+        const validHut = o.isValid();
+        const allowedHut = o.isAllowed();
+        const proc = o.process();
+        const p0 = proc && proc[0];
+
+        // 友军建筑 + repairable + health<100
+        const friendlyBld = {
+          isBuilding: () => true,
+          isDestroyed: false,
+          owner: { isCombatant: () => true },
+          garrisonTrait: undefined,
+          cabHutTrait: undefined,
+          rules: { repairable: true },
+          healthTrait: { health: 80 },
+          __friendly: true,
+        };
+        o.set(eng, { obj: friendlyBld, tile: { id: "f" } });
+        const validFriendly = o.isValid();
+        const allowedFriendly = o.isAllowed();
+
+        // 满血友军建筑 → isValid true 但 isAllowed false
+        const fullBld = { ...friendlyBld, healthTrait: { health: 100 } };
+        o.set(eng, { obj: fullBld, tile: { id: "full" } });
+        const validFull = o.isValid();
+        const allowedFull = o.isAllowed();
+
+        // 桥舱 canRepairBridge
+        const cab = {
+          isBuilding: () => true,
+          isDestroyed: false,
+          owner: nonCombatant,
+          garrisonTrait: undefined,
+          cabHutTrait: { canRepairBridge: () => true },
+          rules: { repairable: false },
+          healthTrait: { health: 10 },
+        };
+        o.set(eng, { obj: cab, tile: { id: "c" } });
+        const validCab = o.isValid();
+        const allowedCab = o.isAllowed();
+
+        const nonEng = { ...eng, rules: { engineer: false } };
+        o.set(nonEng, { obj: friendlyBld, tile: { id: "f" } });
+        const validNonEng = o.isValid();
+        return {
+          validHut,
+          allowedHut,
+          procStub: p0 && p0.$stub,
+          procTarget: p0 && (p0.target === garrisonHut || (p0.$args && p0.$args[1] === garrisonHut)),
+          validFriendly,
+          allowedFriendly,
+          validFull,
+          allowedFull,
+          validCab,
+          allowedCab,
+          validNonEng,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/ScatterOrder",
+    tsjs: "src/game/order/ScatterOrder.ts.js",
+    probes: [
+      // 构造 + 光标
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const PT = mod("engine/type/PointerType").PointerType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.ScatterOrder(game);
+        return {
+          orderType: o.orderType === OrderType.Scatter,
+          ptr: o.getPointerType(false) === PT.NoAction,
+          allowed: o.isAllowed(),
+        };
+      },
+      // isValid 矩阵 + process 有/无 target
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.ScatterOrder(game);
+        const mk = (kind, fly, disabled) => ({
+          isInfantry: () => kind === "inf",
+          isVehicle: () => kind === "veh",
+          isUnit: () => kind !== "bld",
+          isBuilding: () => kind === "bld",
+          rules: { movementZone: fly ? MovementZone.Fly : MovementZone.Walk },
+          moveTrait: { isDisabled: () => disabled },
+        });
+        o.set(mk("inf", false, false), undefined);
+        const vInf = o.isValid();
+        o.set(mk("veh", false, false), undefined);
+        const vVeh = o.isValid();
+        o.set(mk("veh", true, false), undefined);
+        const vFly = o.isValid();
+        o.set(mk("inf", false, true), undefined);
+        const vDisabled = o.isValid();
+        o.set(mk("bld", false, false), undefined);
+        const vBld = o.isValid();
+
+        let noTargetErr = null;
+        try {
+          o.process();
+        } catch (e) {
+          noTargetErr = String(e && e.message);
+        }
+        const tile = { id: "s" };
+        o.set(mk("inf", false, false), { tile, getBridge: () => true });
+        const proc = o.process();
+        const p0 = proc && proc[0];
+        return {
+          vInf,
+          vVeh,
+          vFly,
+          vDisabled,
+          vBld,
+          noTargetErrHasScatter: !!noTargetErr && noTargetErr.indexOf("scatter") >= 0,
+          procStub: p0 && p0.$stub,
+          procOpts: p0 && p0.$args && p0.$args[1],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/StopOrder",
+    tsjs: "src/game/order/StopOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const PT = mod("engine/type/PointerType").PointerType;
+        const game = { map: {} };
+        const o = new ns.StopOrder(game);
+        return {
+          orderType: o.orderType === OrderType.Stop,
+          hasGame: o.game === game,
+          ptr: o.getPointerType(false) === PT.NoAction,
+        };
+      },
+      // isValid + process CallbackTask 执行 speedPenalty + onAdd 速度惩罚
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const game = { map: {} };
+        const o = new ns.StopOrder(game);
+        const techo = { isTechno: () => true };
+        o.set(techo, undefined);
+        const valid = o.isValid();
+        const allowed = o.isAllowed();
+        const proc = o.process();
+        const p0 = proc && proc[0];
+        const hasCb = p0 && typeof p0.cb === "function";
+        // 驱动 CallbackTask：载具 → speedPenalty=0
+        const veh = {
+          isUnit: () => true,
+          isBuilding: () => false,
+          isTechno: () => true,
+          rules: { locomotor: LocomotorType.Vehicle },
+          moveTrait: { speedPenalty: 0.9 },
+        };
+        if (hasCb) p0.cb(veh);
+        const penaltyAfterCb = veh.moveTrait.speedPenalty;
+
+        // onAdd：有既有任务的载具 → speedPenalty=0.5；skip 时不改
+        const veh2 = {
+          isUnit: () => true,
+          isBuilding: () => false,
+          rules: { locomotor: LocomotorType.Vehicle },
+          moveTrait: { speedPenalty: 0 },
+        };
+        o.set(veh2, undefined);
+        o.onAdd([{ id: 1 }], false);
+        const penaltyOnAdd = veh2.moveTrait.speedPenalty;
+        const veh3 = {
+          isUnit: () => true,
+          isBuilding: () => false,
+          rules: { locomotor: LocomotorType.Vehicle },
+          moveTrait: { speedPenalty: 0.1 },
+        };
+        o.set(veh3, undefined);
+        o.onAdd([{ id: 1 }], true);
+        const penaltySkip = veh3.moveTrait.speedPenalty;
+
+        // 建筑 + rally → resetRallyPoint
+        const resets = [];
+        const bld = {
+          isUnit: () => false,
+          isBuilding: () => true,
+          isTechno: () => true,
+          rallyTrait: { getRallyPoint: () => ({ id: "r" }) },
+          unitRepairTrait: { resetRallyPoint: (u, g) => resets.push(["repair", u === bld, g === game]) },
+          factoryTrait: { resetRallyPoint: (u, g) => resets.push(["factory", u === bld, g === game]) },
+        };
+        o.set(bld, undefined);
+        o.onAdd([], false);
+        return {
+          valid,
+          allowed,
+          hasCb,
+          penaltyAfterCb,
+          penaltyOnAdd,
+          penaltySkip,
+          resets,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/order/UnloadAllOrder",
+    tsjs: "src/game/order/UnloadAllOrder.ts.js",
+    probes: [
+      // 构造字段
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const OFT = mod("game/order/OrderFeedbackType").OrderFeedbackType;
+        const PT = mod("engine/type/PointerType").PointerType;
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.UnloadAllOrder(game);
+        return {
+          orderType: o.orderType === OrderType.UnloadAll,
+          targetOptional: o.targetOptional,
+          terminal: o.terminal,
+          feedbackEnter: o.feedbackType === OFT.Enter,
+          ptr: o.getPointerType(false) === PT.NoAction,
+        };
+      },
+      // isValid 生化反应堆 + process EvacuateTransportTask + onAdd 恒 true
+      (ns, THREE, mod) => {
+        const game = { map: { tileOccupation: {} } };
+        const o = new ns.UnloadAllOrder(game);
+        const mkBld = (opts) => ({
+          isDestroyed: !!opts.destroyed,
+          isBuilding: () => true,
+          isUnit: () => false,
+          bioReactorPowerTrait: opts.bio ? {} : undefined,
+          garrisonTrait: opts.units ? { units: opts.units } : undefined,
+        });
+        o.set(mkBld({ bio: true, units: [{ id: 1 }] }), undefined);
+        const validFull = o.isValid();
+        const allowedFull = o.isAllowed();
+        const proc = o.process();
+        const p0 = proc && proc[0];
+
+        o.set(mkBld({ bio: true, units: [] }), undefined);
+        const validEmpty = o.isValid();
+        o.set(mkBld({ bio: false, units: [{ id: 1 }] }), undefined);
+        const validNoBio = o.isValid();
+        o.set(mkBld({ bio: true, units: [{ id: 1 }], destroyed: true }), undefined);
+        const validDestroyed = o.isValid();
+        o.set(mkBld({ bio: true, units: [{ id: 1 }] }), undefined);
+        const onAdd = o.onAdd();
+        return {
+          validFull,
+          allowedFull,
+          procLen: proc && proc.length,
+          procSoft: p0 && p0.soft,
+          procStub: p0 && p0.$stub,
+          validEmpty,
+          validNoBio,
+          validDestroyed,
+          onAdd,
+        };
+      },
+    ],
+  },
+  {
     name: "game/order/OrderType",
     tsjs: "src/game/order/OrderType.ts.js",
     probes: [
