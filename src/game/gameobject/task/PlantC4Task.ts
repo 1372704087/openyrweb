@@ -15,16 +15,16 @@
  */
 import { GameSpeed } from "game/GameSpeed"; // 已转换
 import * as EnterObjectEventModule from "game/event/EnterObjectEvent"; // 未转换（any-shim）
-import * as EnterBuildingTaskModule from "game/gameobject/task/EnterBuildingTask"; // 未转换（any-shim）
+import { EnterBuildingTask } from "game/gameobject/task/EnterBuildingTask"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export class PlantC4Task extends EnterBuildingTaskModule.EnterBuildingTask {
+export class PlantC4Task extends EnterBuildingTask {
   /** 安放资格：目标未摧毁且未处于无敌保护。 */
   isAllowed(object: any): boolean {
     return !this.target.isDestroyed && !this.target.invulnerableTrait.isActive();
   }
 
-  /** 进建筑：挂 C4 定时炸药并广播进入事件。 */
+  /** 进建筑：挂 C4 定时炸药；返回 false = 父类视为拒绝进入 → MoveOutside 退出。 */
   onEnter(object: any): boolean {
     const fuseTicks = Math.floor(60 * this.game.rules.combatDamage.c4Delay * GameSpeed.BASE_TICKS_PER_SECOND);
     this.target.c4ChargeTrait.setCharge(fuseTicks, { player: object.owner, obj: object });

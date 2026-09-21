@@ -12,10 +12,10 @@
  * 完全一致）。两个文件并存期间，本文件才是修改目标。
  */
 import * as BuildingInfiltrationEventModule from "game/event/BuildingInfiltrationEvent"; // 未转换（any-shim）
-import * as EnterBuildingTaskModule from "game/gameobject/task/EnterBuildingTask"; // 未转换（any-shim）
+import { EnterBuildingTask } from "game/gameobject/task/EnterBuildingTask"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export class InfiltrateBuildingTask extends EnterBuildingTaskModule.EnterBuildingTask {
+export class InfiltrateBuildingTask extends EnterBuildingTask {
   /** 潜入资格：可潜入 + 可间谍 + 未摧毁 + 敌对目标。 */
   isAllowed(object: any): boolean {
     return (
@@ -26,7 +26,7 @@ export class InfiltrateBuildingTask extends EnterBuildingTaskModule.EnterBuildin
     );
   }
 
-  /** 进建筑：间谍消失并触发潜入效果，广播潜入事件（无返回值）。 */
+  /** 进建筑：间谍消失并触发潜入效果，广播潜入事件（返回 undefined → 父类结束任务）。 */
   onEnter(object: any): void {
     this.game.unspawnObject(object);
     object.agentTrait?.infiltrate(object, this.target, this.game);

@@ -2432,14 +2432,6 @@
       "reachedOn": "threw"
     }
   },
-  "game/gameobject/task/InfiltrateBuildingTask": {
-    "0": "function",
-    "1": {
-      "unspawned": 1,
-      "agentCalled": true,
-      "eventDispatched": true
-    }
-  },
   "game/gameobject/task/WaitForBuildUpTask": {
     "0": "function",
     "1": {
@@ -2463,23 +2455,6 @@
           true
         ]
       ]
-    }
-  },
-  "game/gameobject/task/PlantC4Task": {
-    "0": "function",
-    "1": {
-      "allowedInvuln": false,
-      "allowedOk": true,
-      "chargeTicks": 225,
-      "chargeBy": {
-        "owner": {
-          "id": 7
-        },
-        "obj": 1
-      },
-      "onEnterResult": false,
-      "linesIsAttack": true,
-      "eventCount": 1
     }
   },
   "game/gameobject/task/move/MoveOutsideTask": {
@@ -3531,6 +3506,176 @@
       "waterDeathType": 5,
       "waterDeathTypeIsSink": true,
       "amphWaterDestroyed": false
+    }
+  },
+  "game/gameobject/task/EnterHospitalTask": {
+    "0": "function",
+    "1": {
+      "sickOk": true,
+      "healthyNo": true,
+      "flyerNo": true,
+      "enemyNo": true
+    },
+    "2": {
+      "throwMsg": "Target X is not a valid hospital",
+      "queuedState": 0,
+      "directState": 2,
+      "withQ": {
+        "pathNodes": [
+          {
+            "tile": {
+              "rx": 1,
+              "ry": 2
+            }
+          }
+        ]
+      },
+      "noQTarget": true
+    }
+  },
+  "game/gameobject/task/EnterTankBunkerTask": {
+    "0": "function",
+    "1": {
+      "preventOppFire": true,
+      "isValid": true,
+      "notSpawned": true
+    },
+    "2": {
+      "pushedCount": 1,
+      "cancelledWhenNoTile": true,
+      "cancelEnd": true,
+      "deadEnd": true,
+      "waitChildren": false
+    }
+  },
+  "game/gameobject/task/EnterTransportTask": {
+    "0": "function",
+    "1": {
+      "okUnit": true,
+      "airNo": true,
+      "mcNo": true,
+      "absorbOk": true,
+      "absorbFull": true
+    },
+    "2": {
+      "throwMsg": "Unit TRUCK is not a valid transport",
+      "queuedState": 0,
+      "directState": 2,
+      "withQNodes": 1,
+      "noQTarget": true
+    }
+  },
+  "game/gameobject/task/EvacuateTransportTask": {
+    "0": "function",
+    "1": {
+      "preventLanding": true,
+      "passengerState": 1,
+      "forced": 2,
+      "emptyState": 0,
+      "throwMsg": "Object \"NO\" is not a valid transport",
+      "waitTicksBase": 15
+    },
+    "2": {
+      "hardDestroyed": true,
+      "softSkip": true,
+      "unitTile": true,
+      "transportCleared": true
+    }
+  },
+  "game/gameobject/task/EnterBuildingTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "game",
+        "target",
+        "enterDelaySeconds",
+        "state",
+        "rangeHelper"
+      ],
+      "stateInitial": true,
+      "enterDelay": true,
+      "preventOppFire": true,
+      "hasIsAllowed": "undefined",
+      "hasOnEnter": "undefined",
+      "lines": {
+        "target": {
+          "rules": {}
+        },
+        "pathNodes": []
+      }
+    },
+    "2": {
+      "cancelledInitial": true,
+      "movingOut": true,
+      "disabled": true
+    },
+    "3": {
+      "doorRx": 11,
+      "doorRy": 12,
+      "isDoorTile": true
+    },
+    "4": {
+      "okResult1": true,
+      "okResult2": true,
+      "okEnterCalls": 2,
+      "okOutsideAfterSuccess": 0,
+      "rejResult": false,
+      "rejState": 4,
+      "outsideTotal": 1
+    }
+  },
+  "game/gameobject/task/InfiltrateBuildingTask": {
+    "0": "function",
+    "1": {
+      "unspawned": 1,
+      "agentCalled": true,
+      "eventDispatched": true
+    }
+  },
+  "game/gameobject/task/PlantC4Task": {
+    "0": "function",
+    "1": {
+      "allowedInvuln": false,
+      "allowedOk": true,
+      "chargeTicks": 225,
+      "chargeBy": {
+        "owner": {
+          "id": 7
+        },
+        "obj": 1
+      },
+      "onEnterResult": false,
+      "linesIsAttack": true,
+      "eventCount": 1
+    }
+  },
+  "game/gameobject/task/EnterRecyclerTask": {
+    "0": "function",
+    "1": {
+      "isSubclass": true,
+      "hasIsAllowed": "function",
+      "hasOnEnter": "function",
+      "grinderOk": true,
+      "flyNo": true,
+      "engineerNo": true,
+      "foreignNo": true
+    },
+    "2": {
+      "ownerCredits": 250,
+      "unspawned": true,
+      "disposed": true,
+      "grindTicks": 600,
+      "eventCount": 3,
+      "enterTick": true
     }
   }
 }

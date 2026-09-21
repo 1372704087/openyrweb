@@ -6172,6 +6172,7 @@ const CONVERTED = [
         const unspawned = [];
         const target = { rules: { spyable: true, infiltrate: false }, isDestroyed: false, owner: 2 };
         const game = {
+          map: { tileOccupation: {} },
           areFriendly: () => false,
           unspawnObject: (o) => unspawned.push(o),
           events: { dispatch: (e) => dispatched.push(e) },
@@ -6233,6 +6234,7 @@ const CONVERTED = [
           c4ChargeTrait: { setCharge: (ticks, by) => charges.push([ticks, by]) },
         };
         const game = {
+          map: { tileOccupation: {} },
           rules: { combatDamage: { c4Delay: 0.25 } },
           events: { dispatch: (e) => dispatched.push(e) },
         };
@@ -6552,6 +6554,545 @@ const CONVERTED = [
         task._dump(slave);
         // base = 2×50 = 100；1 精炼机 → +floor(100×0.25)=25 → 125；AI 简单 ×2 → 250
         return { credits: owner.credits, creditsGained: owner.creditsGained, emptied: true, cargoReset: task.cargo === undefined && task.cargoCount === 0 };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/EnterBuildingTask",
+    tsjs: "src/game/gameobject/task/EnterBuildingTask.ts.js",
+    probes: [
+      (ns) => typeof ns.EnterBuildingTask,
+      (ns) => {
+        const game = { map: { tileOccupation: {} } };
+        const task = new ns.EnterBuildingTask(game, { rules: {} }, 2);
+        return {
+          ctorKeys: Object.keys(task),
+          stateInitial: task.state === 0,
+          enterDelay: task.enterDelaySeconds === 2,
+          preventOppFire: task.preventOpportunityFire === false,
+          hasIsAllowed: typeof task.isAllowed,
+          hasOnEnter: typeof task.onEnter,
+          lines: task.getTargetLinesConfig({}),
+        };
+      },
+      // onTick：Initial + 取消 → 结束；MovingOut → 结束；moveTrait 禁用 → 结束。
+      (ns) => {
+        const game = { map: { tileOccupation: { isTileOccupiedBy: () => false } }, events: { dispatch: () => {} } };
+        const task = new ns.EnterBuildingTask(game, { rules: {} }, 0);
+        task.status = 3; // Cancelling
+        const cancelledInitial = task.onTick({ moveTrait: { isDisabled: () => false } });
+        const task2 = new ns.EnterBuildingTask(game, { rules: {} }, 0);
+        task2.state = 4; // MovingOut
+        const movingOut = task2.onTick({ moveTrait: { isDisabled: () => false } });
+        const task3 = new ns.EnterBuildingTask(game, { rules: {} }, 0);
+        const disabled = task3.onTick({ moveTrait: { isDisabled: () => true } });
+        return { cancelledInitial, movingOut, disabled };
+      },
+      // findGrinderDoor：2x2 建筑在 (10,10)，单位在下方 → 选下边中点。
+      (ns) => {
+        const doorTile = { rx: 11, ry: 12 };
+        const tiles = {
+          getByMapCoords: (x, y) =>
+            x === 11 && y === 12 ? doorTile : x === 11 && y === 9 ? { rx: 11, ry: 9 } : null,
+        };
+        const game = {
+          map: {
+            tiles,
+            mapBounds: { isWithinBounds: () => true },
+            tileOccupation: {},
+          },
+        };
+        const target = {
+          tile: { rx: 10, ry: 10 },
+          art: { foundation: { width: 2, height: 2 } },
+          rules: {},
+        };
+        const task = new ns.EnterBuildingTask(game, target, 0);
+        const door = task.findGrinderDoor({ tile: { rx: 11, ry: 14 } });
+        return { doorRx: door && door.rx, doorRy: door && door.ry, isDoorTile: door === doorTile };
+      },
+      // onEnter 语义：undefined → onTick 结束且只进一次；false → MovingOut 退出。
+      (ns) => {
+        const dispatched = [];
+        const outsidePushed = [];
+        function makeGame() {
+          return {
+            map: { tileOccupation: { isTileOccupiedBy: () => true } },
+            events: { dispatch: (e) => dispatched.push(e) },
+          };
+        }
+        function makeUnit() {
+          return { moveTrait: { isDisabled: () => false }, tile: { rx: 1, ry: 1 } };
+        }
+        const okTask = new ns.EnterBuildingTask(makeGame(), { rules: {} }, 0);
+        okTask.isAllowed = () => true;
+        let okEnterCalls = 0;
+        okTask.onEnter = () => {
+          okEnterCalls++;
+        };
+        okTask.children = { length: 0, push: (t) => outsidePushed.push(t) };
+        const okResult1 = okTask.onTick(makeUnit());
+        const okOutsideAfterSuccess = outsidePushed.length;
+        const okResult2 = okTask.onTick(makeUnit());
+        const rejTask = new ns.EnterBuildingTask(makeGame(), { rules: {} }, 0);
+        rejTask.isAllowed = () => true;
+        rejTask.onEnter = () => false;
+        rejTask.children = { length: 0, push: (t) => outsidePushed.push(t) };
+        const rejResult = rejTask.onTick(makeUnit());
+        return {
+          okResult1,
+          okResult2,
+          okEnterCalls,
+          okOutsideAfterSuccess,
+          rejResult,
+          rejState: rejTask.state,
+          outsideTotal: outsidePushed.length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/EnterHospitalTask",
+    tsjs: "src/game/gameobject/task/EnterHospitalTask.ts.js",
+    probes: [
+      (ns) => typeof ns.EnterHospitalTask,
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const hospital = {
+          name: "HOSP",
+          hospitalTrait: {},
+          warpedOutTrait: { isActive: () => false },
+          ammoTrait: undefined,
+          isDestroyed: false,
+        };
+        const game = { areFriendly: (a, b) => a.friendly && b.friendly, friendly: true };
+        const task = new ns.EnterHospitalTask(game, { ...hospital, friendly: true });
+        const sick = {
+          rules: { movementZone: MovementZone.Infantry },
+          healthTrait: { health: 50 },
+          friendly: true,
+        };
+        const healthy = {
+          rules: { movementZone: MovementZone.Infantry },
+          healthTrait: { health: 100 },
+          friendly: true,
+        };
+        const flyer = {
+          rules: { movementZone: MovementZone.Fly },
+          healthTrait: { health: 50 },
+          friendly: true,
+        };
+        const enemy = {
+          rules: { movementZone: MovementZone.Infantry },
+          healthTrait: { health: 50 },
+          friendly: false,
+        };
+        return {
+          sickOk: task.isAllowed(sick),
+          healthyNo: !task.isAllowed(healthy),
+          flyerNo: !task.isAllowed(flyer),
+          enemyNo: !task.isAllowed(enemy),
+        };
+      },
+      (ns) => {
+        const game = { areFriendly: () => true };
+        const noHosp = new ns.EnterHospitalTask(game, { name: "X" });
+        let throwMsg = null;
+        try {
+          noHosp.onStart({});
+        } catch (e) {
+          throwMsg = e.message;
+        }
+        const queued = { addToHealQueue: () => 2 };
+        const t1 = new ns.EnterHospitalTask(game, { name: "H", hospitalTrait: queued, isDestroyed: false });
+        t1.onStart({});
+        const direct = { addToHealQueue: () => 0 };
+        const t2 = new ns.EnterHospitalTask(game, { name: "H", hospitalTrait: direct, isDestroyed: false });
+        t2.onStart({});
+        const target = { name: "H" };
+        const t3 = new ns.EnterHospitalTask(game, target);
+        t3.queueingTile = { rx: 1, ry: 2 };
+        const withQ = t3.getTargetLinesConfig({});
+        t3.queueingTile = undefined;
+        const noQ = t3.getTargetLinesConfig({});
+        return {
+          throwMsg,
+          queuedState: t1.state,
+          directState: t2.state,
+          withQ,
+          noQTarget: noQ.target === target,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/EnterRecyclerTask",
+    tsjs: "src/game/gameobject/task/EnterRecyclerTask.ts.js",
+    probes: [
+      (ns) => typeof ns.EnterRecyclerTask,
+      (ns, THREE, mod) => {
+        const Parent = mod("game/gameobject/task/EnterBuildingTask").EnterBuildingTask;
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const BuildStatus = mod("game/gameobject/Building").BuildStatus;
+        const refunds = new Map();
+        const game = {
+          map: { tileOccupation: {} },
+          sellTrait: {
+            computeRefundValue: (u) => (refunds.has(u) ? refunds.get(u) : 0),
+          },
+          events: { dispatch: () => {} },
+          unspawnObject: (u) => {
+            u._unspawned = true;
+          },
+        };
+        const owner = { credits: 0 };
+        const task = new ns.EnterRecyclerTask(game, {
+          rules: { grinding: true },
+          owner,
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+        });
+        const grinderUnit = {
+          rules: {
+            movementZone: MovementZone.Normal,
+            locomotor: LocomotorType.Vehicle,
+            engineer: false,
+          },
+          isInfantry: () => false,
+          owner,
+        };
+        refunds.set(grinderUnit, 100);
+        const fly = {
+          rules: { movementZone: MovementZone.Fly, locomotor: LocomotorType.Vehicle, engineer: false },
+          isInfantry: () => false,
+          owner,
+        };
+        const engineer = {
+          rules: {
+            movementZone: MovementZone.Infantry,
+            locomotor: LocomotorType.Infantry,
+            engineer: true,
+          },
+          isInfantry: () => true,
+          owner,
+        };
+        const otherOwner = { credits: 0 };
+        const foreign = {
+          rules: {
+            movementZone: MovementZone.Normal,
+            locomotor: LocomotorType.Vehicle,
+            engineer: false,
+          },
+          isInfantry: () => false,
+          owner: otherOwner,
+        };
+        refunds.set(foreign, 50);
+        return {
+          isSubclass: task instanceof Parent,
+          hasIsAllowed: typeof task.isAllowed,
+          hasOnEnter: typeof task.onEnter,
+          grinderOk: task.isAllowed(grinderUnit) === true,
+          flyNo: task.isAllowed(fly) === false,
+          engineerNo: task.isAllowed(engineer) === false,
+          foreignNo: task.isAllowed(foreign) === false,
+        };
+      },
+      (ns, THREE, mod) => {
+        const BuildStatus = mod("game/gameobject/Building").BuildStatus;
+        const dispatched = [];
+        const owner = { credits: 0 };
+        const refunds = new Map();
+        const game = {
+          map: { tileOccupation: {} },
+          sellTrait: { computeRefundValue: (u) => refunds.get(u) || 0 },
+          events: { dispatch: (e) => dispatched.push(e) },
+          unspawnObject: (u) => {
+            u._unspawned = true;
+          },
+        };
+        const target = {
+          rules: { grinding: true },
+          owner,
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+        };
+        const task = new ns.EnterRecyclerTask(game, target);
+        const unit = {
+          transportTrait: undefined,
+          dispose() {
+            this._disposed = true;
+          },
+        };
+        refunds.set(unit, 250);
+        task.onEnter(unit);
+        // 父类契约：onEnter 返回 undefined → onTick 结束任务。
+        const tickTask = new ns.EnterRecyclerTask(
+          {
+            map: { tileOccupation: { isTileOccupiedBy: () => true } },
+            sellTrait: { computeRefundValue: (u) => refunds.get(u) || 0 },
+            events: { dispatch: (e) => dispatched.push(e) },
+            unspawnObject: (u) => {
+              u._unspawned = true;
+            },
+          },
+          // 非 grinding：避免走 Grinder 门口分支（需要 art.foundation）。
+          { rules: {}, owner: { credits: 0 }, isDestroyed: false, buildStatus: BuildStatus.Ready },
+        );
+        tickTask.isAllowed = () => true;
+        tickTask.children = { length: 0, push: () => {} };
+        const enterTick = tickTask.onTick({
+          moveTrait: { isDisabled: () => false },
+          tile: { rx: 0, ry: 0 },
+          transportTrait: undefined,
+          dispose() {
+            this._disposed = true;
+          },
+        });
+        return {
+          ownerCredits: owner.credits,
+          unspawned: unit._unspawned === true,
+          disposed: unit._disposed === true,
+          grindTicks: target._grindingAnimTicks,
+          eventCount: dispatched.length,
+          enterTick,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/EnterTankBunkerTask",
+    tsjs: "src/game/gameobject/task/EnterTankBunkerTask.ts.js",
+    probes: [
+      (ns) => typeof ns.EnterTankBunkerTask,
+      (ns) => {
+        const game = { map: { tileOccupation: {} }, areFriendly: () => true };
+        const task = new ns.EnterTankBunkerTask(game, { rules: {} });
+        return {
+          preventOppFire: task.preventOpportunityFire === false,
+          isValid: task.isValidTarget({ isSpawned: true }, {}),
+          notSpawned: !task.isValidTarget({ isSpawned: false }, {}),
+        };
+      },
+      (ns, THREE, mod) => {
+        const Coords = mod("game/Coords").Coords;
+        const entryTile = { rx: 12, ry: 10 };
+        const pushed = [];
+        const target = {
+          tile: { rx: 10, ry: 10 },
+          getFoundation: () => ({ width: 3, height: 2 }),
+          position: {
+            getMapPosition: () => ({
+              x: 10 * Coords.LEPTONS_PER_TILE + 128,
+              y: 10 * Coords.LEPTONS_PER_TILE + 128,
+            }),
+          },
+          isSpawned: true,
+          isDestroyed: false,
+        };
+        const game = {
+          map: {
+            tiles: {
+              getByMapCoords: (x, y) => (x === 12 && y === 10 ? entryTile : null),
+            },
+            tileOccupation: {},
+          },
+          areFriendly: () => true,
+        };
+        const task = new ns.EnterTankBunkerTask(game, target);
+        // monkey-patch children.push to capture without loading MoveTask
+        task.children = {
+          length: 0,
+          push: (t) => {
+            pushed.push(t);
+            task.children.length = pushed.length;
+            return pushed.length;
+          },
+        };
+        task.onStart({});
+        const missing = new ns.EnterTankBunkerTask(
+          {
+            map: {
+              tiles: { getByMapCoords: () => null },
+              tileOccupation: {},
+            },
+          },
+          target,
+        );
+        missing.onStart({});
+        // onTick: cancelling ends; target destroyed ends; children present waits.
+        const t2 = new ns.EnterTankBunkerTask(game, target);
+        t2.status = 3;
+        const cancelEnd = t2.onTick({});
+        const t3 = new ns.EnterTankBunkerTask(game, { ...target, isDestroyed: true });
+        const deadEnd = t3.onTick({});
+        const t4 = new ns.EnterTankBunkerTask(game, target);
+        t4.children.push({});
+        const waitChildren = t4.onTick({});
+        return {
+          pushedCount: pushed.length,
+          cancelledWhenNoTile: missing.status === 4,
+          cancelEnd,
+          deadEnd,
+          waitChildren,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/EnterTransportTask",
+    tsjs: "src/game/gameobject/task/EnterTransportTask.ts.js",
+    probes: [
+      (ns) => typeof ns.EnterTransportTask,
+      (ns, THREE, mod) => {
+        const ZoneType = mod("game/gameobject/unit/ZoneType").ZoneType;
+        const MoveState = mod("game/gameobject/trait/MoveTrait").MoveState;
+        const game = { areFriendly: () => true };
+        const transport = {
+          rules: {},
+          isDestroyed: false,
+          isCrashing: false,
+          zone: ZoneType.Ground,
+          transportTrait: { unitFitsInside: () => true },
+          moveTrait: { moveState: MoveState.Idle },
+          warpedOutTrait: { isActive: () => false },
+        };
+        const task = new ns.EnterTransportTask(game, transport);
+        const okUnit = {
+          zone: ZoneType.Ground,
+          mindControllableTrait: undefined,
+          mindControllerTrait: undefined,
+        };
+        const airUnit = { zone: ZoneType.Air };
+        const mcUnit = { zone: ZoneType.Ground, mindControllableTrait: { isActive: () => true } };
+        const absorb = {
+          rules: { infantryAbsorb: true },
+          isDestroyed: false,
+          garrisonTrait: { canBeOccupied: () => true, units: [], maxOccupants: 5 },
+        };
+        const tAbsorb = new ns.EnterTransportTask(game, absorb);
+        return {
+          okUnit: task.isAllowed(okUnit),
+          airNo: !task.isAllowed(airUnit),
+          mcNo: !task.isAllowed(mcUnit),
+          absorbOk: tAbsorb.isAllowed({}),
+          absorbFull: !new ns.EnterTransportTask(game, {
+            rules: { infantryAbsorb: true },
+            isDestroyed: false,
+            garrisonTrait: {
+              canBeOccupied: () => true,
+              units: [1, 2, 3],
+              maxOccupants: 3,
+            },
+          }).isAllowed({}),
+        };
+      },
+      (ns) => {
+        const game = { areFriendly: () => true, map: { tileOccupation: {} } };
+        const bad = new ns.EnterTransportTask(game, { name: "TRUCK" });
+        let throwMsg = null;
+        try {
+          bad.onStart({});
+        } catch (e) {
+          throwMsg = e.message;
+        }
+        const queued = { addToLoadQueue: () => 1, tile: { rx: 1, ry: 1 } };
+        const t1 = new ns.EnterTransportTask(game, {
+          name: "APC",
+          transportTrait: queued,
+          tile: queued.tile,
+        });
+        t1.onStart({});
+        const direct = { addToLoadQueue: () => 0, tile: { rx: 2, ry: 2 } };
+        const t2 = new ns.EnterTransportTask(game, {
+          name: "APC",
+          transportTrait: direct,
+          tile: direct.tile,
+        });
+        t2.onStart({});
+        const target = { name: "APC" };
+        const t3 = new ns.EnterTransportTask(game, target);
+        t3.queueingNode = { tile: { rx: 3, ry: 3 }, onBridge: false };
+        const withQ = t3.getTargetLinesConfig({});
+        t3.queueingNode = undefined;
+        const noQ = t3.getTargetLinesConfig({});
+        return {
+          throwMsg,
+          queuedState: t1.state,
+          directState: t2.state,
+          withQNodes: withQ.pathNodes.length,
+          noQTarget: noQ.target === target,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/EvacuateTransportTask",
+    tsjs: "src/game/gameobject/task/EvacuateTransportTask.ts.js",
+    probes: [
+      (ns) => typeof ns.EvacuateTransportTask,
+      (ns, THREE, mod) => {
+        const GameSpeed = mod("game/GameSpeed").GameSpeed;
+        const game = {};
+        const task = new ns.EvacuateTransportTask(game, false);
+        const transport = {
+          name: "APC",
+          transportTrait: { units: [{ id: 1 }, { id: 2 }] },
+          rules: { gunner: false },
+        };
+        task.onStart(transport);
+        const passengerState = task.evacState;
+        const t2 = new ns.EvacuateTransportTask(game, true);
+        t2.forceEvac();
+        const forced = t2.evacState;
+        const t3 = new ns.EvacuateTransportTask(game, false);
+        t3.onStart({ name: "X", transportTrait: { units: [] }, rules: {} });
+        const emptyState = t3.evacState;
+        let throwMsg = null;
+        try {
+          new ns.EvacuateTransportTask(game, false).onStart({ name: "NO" });
+        } catch (e) {
+          throwMsg = e.message;
+        }
+        return {
+          preventLanding: task.preventLanding === false,
+          passengerState,
+          forced,
+          emptyState,
+          throwMsg,
+          waitTicksBase: GameSpeed.BASE_TICKS_PER_SECOND,
+        };
+      },
+      (ns) => {
+        const destroyed = [];
+        const game = {
+          destroyObject: (u, info) => {
+            destroyed.push({ u, info });
+            u.isDestroyed = true;
+          },
+        };
+        const task = new ns.EvacuateTransportTask(game, false);
+        const unit = {
+          position: {},
+          owner: { id: "p" },
+        };
+        const transport = {
+          tile: { rx: 5, ry: 5 },
+          tileElevation: 3,
+          onBridge: false,
+          zone: 0,
+          rules: {},
+        };
+        const hard = task.evacuateUnit(unit, transport, null);
+        const softTask = new ns.EvacuateTransportTask(game, true);
+        const unit2 = { position: {}, owner: { id: "p" } };
+        const soft = softTask.evacuateUnit(unit2, transport, null);
+        return {
+          hardDestroyed: hard === true && destroyed.length === 1,
+          softSkip: soft === false && destroyed.length === 1,
+          unitTile: unit.position.tile === transport.tile,
+          transportCleared: unit.transport === undefined,
+        };
       },
     ],
   },
@@ -7303,6 +7844,10 @@ const RECON_DEPS = [
   "game/WeaponType",
   "game/gameobject/unit/VeteranAbility",
   // 已转换的 task 系统：必须预注册，否则被 trait/task 桩规则吞掉
+  // （makeStubFactory 会把未注册的 game/gameobject/task|trait/** 换成空桩，
+  //  子类 extends 桩后 instanceof/onEnter/isAllowed 全部失效 → 假绿）。
+  // 注意：不要预载 move/* —— 一批旧探针以「MoveTask 被桩化」为基线
+  // （childStub 等）；仅登记进入建筑/载具族及其父类。
   "game/gameobject/task/system/TaskStatus",
   "game/gameobject/task/system/Task",
   "game/gameobject/task/system/TaskGroup",
@@ -7310,6 +7855,14 @@ const RECON_DEPS = [
   "game/gameobject/task/system/WaitTicksTask",
   "game/gameobject/task/system/WaitMinutesTask",
   "game/gameobject/task/morph/PackBuildingTask",
+  "game/gameobject/task/EnterBuildingTask",
+  "game/gameobject/task/EnterHospitalTask",
+  "game/gameobject/task/EnterRecyclerTask",
+  "game/gameobject/task/EnterTankBunkerTask",
+  "game/gameobject/task/EnterTransportTask",
+  "game/gameobject/task/EvacuateTransportTask",
+  "game/gameobject/task/InfiltrateBuildingTask",
+  "game/gameobject/task/PlantC4Task",
 ];
 
 // three r94 UMD: expose it globally the same way index.html does for the
