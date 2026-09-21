@@ -4325,5 +4325,321 @@
       "guardDone": false,
       "guardStance": 5
     }
+  },
+  "game/gameobject/task/ParadropTask": {
+    "0": {
+      "gameSame": true,
+      "done": false,
+      "moved": [
+        [
+          0,
+          -5,
+          0
+        ]
+      ],
+      "elevChanges": [
+        [
+          10,
+          true
+        ]
+      ],
+      "stance": 4,
+      "infDeath": 1
+    },
+    "1": {
+      "done": true,
+      "tileElevation": 0,
+      "stance": 0,
+      "infDeath": 1
+    },
+    "2": {
+      "done": true,
+      "tileElevation": 3,
+      "stance": 0,
+      "infDeath": 0,
+      "destroyed": [
+        [
+          "GI",
+          null,
+          true
+        ]
+      ]
+    }
+  },
+  "game/gameobject/task/MoveToDockTask": {
+    "0": {
+      "noDock": "Target object \"X\" is not a valid dock",
+      "reservedStatus": 3,
+      "freeStatus": 3,
+      "reservedAt": [
+        [
+          "HTK",
+          2
+        ]
+      ],
+      "padStatus": 0,
+      "padCancelled": true,
+      "queueStatus": 1
+    },
+    "1": {
+      "docked": {
+        "calls": [],
+        "status": 0
+      },
+      "active": {
+        "calls": [
+          [
+            "undock",
+            "U1"
+          ],
+          [
+            "unreserve",
+            "U1"
+          ]
+        ],
+        "status": 0
+      },
+      "dead": {
+        "calls": [],
+        "status": 0
+      }
+    },
+    "2": {
+      "cancelDone": true,
+      "invDone": true,
+      "qDone": false,
+      "qChildren": [
+        {
+          "stub": "game/gameobject/task/move/MoveTask",
+          "hasCb": true
+        },
+        {
+          "stub": null,
+          "hasCb": true
+        }
+      ],
+      "qStatus": 1,
+      "afterFailStatus": 0,
+      "afterCloseStatus": 1,
+      "wDone": false,
+      "wTicks": 15,
+      "wStub": null,
+      "dDone": true,
+      "dStatus": 5,
+      "dCalls": [
+        [
+          "unreserve",
+          "HAR"
+        ],
+        [
+          "dock",
+          "HAR",
+          1
+        ]
+      ],
+      "preferredAirport": true
+    },
+    "3": {
+      "valid": false,
+      "invalidSpawn": false,
+      "invalidFoe": false,
+      "flyOk": true,
+      "groundOk": true,
+      "bridgeBlocked": false,
+      "zBlocked": false
+    }
+  },
+  "game/gameobject/task/AirstrikeAttackTask": {
+    "0": {
+      "gameSame": true,
+      "targetSame": true,
+      "weaponSame": true,
+      "optionsEmpty": true,
+      "phaseApproaching": true,
+      "fired": false,
+      "walkDone": false,
+      "preventOpp": true,
+      "preventLanding": true,
+      "linesIsAttack": true,
+      "linesTarget": true,
+      "linesPathNodes": [],
+      "rangeHelperTileOcc": true,
+      "getWeaponSame": true,
+      "getLinesSame": true
+    },
+    "1": {
+      "noTrait": {
+        "status": 4,
+        "optionsForce": true
+      },
+      "notReady": {
+        "status": 4
+      },
+      "inRange": {
+        "status": 0,
+        "phase": 1,
+        "fired": true,
+        "updates": [
+          [
+            true,
+            "BORIS",
+            null,
+            0
+          ]
+        ],
+        "dispatched": [
+          {
+            "soundId": "BorisVoice",
+            "type": 59
+          }
+        ]
+      },
+      "outOfRange": {
+        "phase": 0,
+        "fired": false,
+        "updates": 0,
+        "dispatched": [
+          {
+            "soundId": "BorisVoice",
+            "type": 59
+          }
+        ]
+      }
+    },
+    "2": {
+      "cancelling": true,
+      "noTrait": true,
+      "destroyed": true,
+      "firingDone": true,
+      "walkFire": true,
+      "firedAfterWalk": true,
+      "walkUpdates": [
+        [
+          null,
+          true
+        ]
+      ],
+      "approach": false,
+      "approachWalkDone": true,
+      "approachChildBlocking": false,
+      "approachChildStub": "game/gameobject/task/move/MoveInWeaponRangeTask",
+      "hasDuplicate": true,
+      "hasUpdateLines": true
+    },
+    "3": {
+      "withObj": {
+        "target": true,
+        "pathNodes": [],
+        "isAttack": true
+      },
+      "withoutObj": {
+        "pathNodes": [
+          {
+            "tile": {
+              "rx": 8,
+              "ry": 8
+            },
+            "onBridge": "BRIDGE"
+          }
+        ],
+        "isAttack": false
+      },
+      "fireDead": false,
+      "fireInvalid": false,
+      "fireTile": true,
+      "firedAfterTile": true,
+      "updates": [
+        [
+          null,
+          4
+        ]
+      ],
+      "dupSameGame": true,
+      "dupSameTarget": true,
+      "dupSameWeapon": true,
+      "dupFiredReset": true,
+      "dupPhase": true
+    }
+  },
+  "game/gameobject/task/system/TargetLinesConfig": {
+    "0": {
+      "cloneShallow": true,
+      "cloneUndefined": true,
+      "cloneKeys": "isAttack,pathNodes,target"
+    },
+    "1": {
+      "bothNull": true,
+      "aNull": false,
+      "sameShape": true,
+      "sameRef": true,
+      "diffAttack": false,
+      "diffNodes": false
+    },
+    "2": {
+      "nullCfg": false,
+      "empty": false,
+      "withNodes": true,
+      "withTarget": true,
+      "both": true
+    }
+  },
+  "game/gameobject/task/system/TaskRunner": {
+    "0": {
+      "afterStart": {
+        "status": 1,
+        "onStartCalls": [
+          true
+        ]
+      },
+      "restartErr": "Attempted to start a task with status 1",
+      "running": 1,
+      "finished": 2
+    },
+    "1": {
+      "blocked": false,
+      "unspawned": false,
+      "notStartedErr": "Attempted tick on a non-started task"
+    },
+    "2": {
+      "afterOk": {
+        "ok": true,
+        "status": 2,
+        "log": [
+          "tick",
+          "end"
+        ]
+      },
+      "cancelStatus": 4,
+      "cancelLog": [
+        "tick",
+        "end"
+      ],
+      "cDone": true,
+      "c2Done": false,
+      "c2Status": 3,
+      "idleDone": true
+    },
+    "3": {
+      "after1": {
+        "allDone1": false,
+        "remaining": 1,
+        "aStatus": 2,
+        "bStatus": 1
+      },
+      "after2": {
+        "allDone2": false,
+        "remaining": 1,
+        "cStatus": 1,
+        "dStatus": 2
+      },
+      "allDone3": true,
+      "remaining3": 0,
+      "weirdErr": "Unhandled task status undefined",
+      "waitDone": false,
+      "parentWaiting": true,
+      "parentStatus": 1,
+      "childStatus": 1,
+      "tickReturns": "undefined"
+    }
   }
 }

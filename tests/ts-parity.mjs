@@ -9962,6 +9962,958 @@ const CONVERTED = [
       },
     ],
   },
+  {
+    name: "game/gameobject/task/ParadropTask",
+    tsjs: "src/game/gameobject/task/ParadropTask.ts.js",
+    probes: [
+      // 下落分支：高度未到 → moveByLeptons3 下压 + handleElevationChange，返回 false
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
+        const InfDeathType = mod("game/gameobject/infantry/InfDeathType").InfDeathType;
+        const moved = [];
+        const elevChanges = [];
+        const game = {
+          rules: { general: { parachuteMaxFallRate: 5 } },
+          map: {
+            tileOccupation: { getBridgeOnTile: () => ({ tileElevation: 0 }) },
+            terrain: { getPassableSpeed: () => 3 },
+          },
+          destroyObject: () => {
+            throw new Error("must not destroy while falling");
+          },
+        };
+        const task = new ns.ParadropTask(game);
+        task.game = game;
+        const object = {
+          tile: { onBridgeLandType: null },
+          tileElevation: 10,
+          stance: StanceType.Paradrop,
+          infDeathType: InfDeathType.Gunfire,
+          position: { moveByLeptons3: (v) => moved.push([v.x, v.y, v.z]) },
+          moveTrait: {
+            handleElevationChange: (e, g) => elevChanges.push([e, g === game]),
+          },
+          rules: { speedType: 0 },
+          isInfantry: () => true,
+          onBridge: false,
+        };
+        const done = ns.ParadropTask.prototype.onTick.call(task, object);
+        return {
+          gameSame: task.game === game,
+          done,
+          moved,
+          elevChanges,
+          stance: object.stance,
+          infDeath: object.infDeathType,
+        };
+      },
+      // 落地成功：高度到位 + 可通行 → elevation 写入、stance=None、返回 true
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
+        const InfDeathType = mod("game/gameobject/infantry/InfDeathType").InfDeathType;
+        const game = {
+          rules: { general: { parachuteMaxFallRate: 5 } },
+          map: {
+            tileOccupation: { getBridgeOnTile: () => ({ tileElevation: 0 }) },
+            terrain: { getPassableSpeed: () => 2 },
+          },
+          destroyObject: () => {
+            throw new Error("must not destroy when passable");
+          },
+        };
+        const task = new ns.ParadropTask(game);
+        task.game = game;
+        const object = {
+          tile: { onBridgeLandType: null },
+          tileElevation: 0,
+          stance: StanceType.Paradrop,
+          infDeathType: InfDeathType.Gunfire,
+          position: { tileElevation: undefined, moveByLeptons3: () => {} },
+          moveTrait: { handleElevationChange: () => {} },
+          rules: { speedType: 0 },
+          isInfantry: () => false,
+          onBridge: false,
+        };
+        const done = ns.ParadropTask.prototype.onTick.call(task, object);
+        return {
+          done,
+          tileElevation: object.position.tileElevation,
+          stance: object.stance,
+          infDeath: object.infDeathType,
+        };
+      },
+      // 桥面目标 + 不可通行 → 取桥 elevation，infDeath=None，destroyObject(obj, undefined, true)
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
+        const InfDeathType = mod("game/gameobject/infantry/InfDeathType").InfDeathType;
+        const destroyed = [];
+        const game = {
+          rules: { general: { parachuteMaxFallRate: 5 } },
+          map: {
+            tileOccupation: {
+              getBridgeOnTile: (tile) => ({ tileElevation: tile.bridgeZ }),
+            },
+            terrain: { getPassableSpeed: () => 0 },
+          },
+          destroyObject: (obj, a, b) => destroyed.push([obj.tag, a, b]),
+        };
+        const task = new ns.ParadropTask(game);
+        task.game = game;
+        const object = {
+          tile: { onBridgeLandType: 1, bridgeZ: 3 },
+          tileElevation: 3,
+          stance: StanceType.Paradrop,
+          infDeathType: InfDeathType.Virus,
+          position: { tileElevation: undefined },
+          moveTrait: { handleElevationChange: () => {} },
+          rules: { speedType: 1 },
+          isInfantry: () => true,
+          onBridge: true,
+          tag: "GI",
+        };
+        const done = ns.ParadropTask.prototype.onTick.call(task, object);
+        return {
+          done,
+          tileElevation: object.position.tileElevation,
+          stance: object.stance,
+          infDeath: object.infDeathType,
+          destroyed,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/MoveToDockTask",
+    tsjs: "src/game/gameobject/task/MoveToDockTask.ts.js",
+    probes: [
+      // onStart 状态机：无 dock 抛错 / 已预留 / 空位预留 / 直升机坪 cancel / 排队
+      (ns) => {
+        const proto = ns.MoveToDockTask.prototype;
+        const out = {};
+        const g0 = {};
+        const t0 = new ns.MoveToDockTask(g0, { name: "X" });
+        t0.game = g0;
+        try {
+          proto.onStart.call(t0, {});
+          out.noDock = "no-throw";
+        } catch (e) {
+          out.noDock = e.message;
+        }
+        const reservedDock = {
+          name: "A",
+          dockTrait: {
+            hasReservedDockForUnit: () => true,
+            getFirstAvailableDockNumber: () => 99,
+          },
+        };
+        const t1 = new ns.MoveToDockTask(g0, reservedDock);
+        t1.game = g0;
+        proto.onStart.call(t1, {});
+        out.reservedStatus = t1.dockingStatus;
+        const reservedAt = [];
+        const freeDock = {
+          name: "B",
+          dockTrait: {
+            hasReservedDockForUnit: () => false,
+            getFirstAvailableDockNumber: () => 2,
+            reserveDockAt: (obj, n) => reservedAt.push([obj.tag, n]),
+          },
+        };
+        const unit = { tag: "HTK" };
+        const t2 = new ns.MoveToDockTask(g0, freeDock);
+        t2.game = g0;
+        proto.onStart.call(t2, unit);
+        out.freeStatus = t2.dockingStatus;
+        out.reservedAt = reservedAt;
+        const pad = {
+          name: "P",
+          helipadTrait: {},
+          dockTrait: {
+            hasReservedDockForUnit: () => false,
+            getFirstAvailableDockNumber: () => undefined,
+          },
+        };
+        const t3 = new ns.MoveToDockTask(g0, pad);
+        t3.game = g0;
+        proto.onStart.call(t3, {});
+        out.padStatus = t3.dockingStatus;
+        out.padCancelled = t3.status === 4;
+        const queueDock = {
+          name: "Q",
+          dockTrait: {
+            hasReservedDockForUnit: () => false,
+            getFirstAvailableDockNumber: () => undefined,
+          },
+        };
+        const t4 = new ns.MoveToDockTask(g0, queueDock);
+        t4.game = g0;
+        proto.onStart.call(t4, {});
+        out.queueStatus = t4.dockingStatus;
+        return out;
+      },
+      // onEnd：非 Docked 且目标存活 → undock+unreserve；恒复位 Idle
+      (ns) => {
+        const proto = ns.MoveToDockTask.prototype;
+        const calls = [];
+        const mkTarget = (spawned) => ({
+          isSpawned: spawned,
+          dockTrait: {
+            undockUnit: (o) => calls.push(["undock", o.tag]),
+            unreserveDockForUnit: (o) => calls.push(["unreserve", o.tag]),
+          },
+        });
+        const unit = { tag: "U1" };
+        const t1 = new ns.MoveToDockTask({}, mkTarget(true));
+        t1.game = {};
+        t1.dockingStatus = 5; // Docked
+        proto.onEnd.call(t1, unit);
+        const docked = { calls: calls.slice(), status: t1.dockingStatus };
+        calls.length = 0;
+        const t2 = new ns.MoveToDockTask({}, mkTarget(true));
+        t2.game = {};
+        t2.dockingStatus = 3; // MoveToDock
+        proto.onEnd.call(t2, unit);
+        const active = { calls: calls.slice(), status: t2.dockingStatus };
+        calls.length = 0;
+        const t3 = new ns.MoveToDockTask({}, mkTarget(false));
+        t3.game = {};
+        t3.dockingStatus = 3;
+        proto.onEnd.call(t3, unit);
+        return {
+          docked,
+          active,
+          dead: { calls: calls.slice(), status: t3.dockingStatus },
+        };
+      },
+      // onTick：cancelling/invalid 结束；排队挂 MoveTask 桩+Callback；WaitForTurn 无位挂 WaitMinutes；已在 dock 上直接入位
+      (ns, THREE, mod) => {
+        const MoveResult = mod("game/gameobject/trait/MoveTrait").MoveResult;
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const proto = ns.MoveToDockTask.prototype;
+        const queueTile = { rx: 8, ry: 8, z: 0, onBridgeLandType: null };
+        const dockTile = { rx: 5, ry: 5, z: 0, onBridgeLandType: null };
+        const dockCalls = [];
+        const target = {
+          name: "DOCK",
+          isSpawned: true,
+          tile: { rx: 5, ry: 5, z: 0 },
+          getFoundation: () => ({ width: 2, height: 2 }),
+          helipadTrait: { isPad: true },
+          dockTrait: {
+            hasReservedDockForUnit: () => false,
+            getFirstAvailableDockNumber: () => undefined,
+            reserveDockAt: () => {},
+            getReservedDockForUnit: () => 1,
+            getDockTile: () => dockTile,
+            unreserveDockForUnit: (o) => dockCalls.push(["unreserve", o.tag]),
+            dockUnitAt: (o, n) => dockCalls.push(["dock", o.tag, n]),
+            undockUnit: () => {},
+          },
+        };
+        const objectTile = { rx: 5, ry: 5, z: 0, onBridgeLandType: null };
+        const game = {
+          areFriendly: () => true,
+          afterTick: () => {},
+          map: {
+            mapBounds: { isWithinBounds: () => true },
+            tiles: {
+              getByMapCoords: (x, y) =>
+                x === 7 && y === 7 ? queueTile : { rx: x, ry: y, z: 0 },
+            },
+            tileOccupation: { isTileOccupiedBy: () => false },
+            terrain: {
+              getPassableSpeed: () => 3,
+              getIslandIdMap: () => ({ get: () => 7 }),
+              findObstacles: () => [],
+            },
+          },
+        };
+        const tCancel = new ns.MoveToDockTask(game, target);
+        tCancel.game = game;
+        tCancel.status = 3; // Cancelling
+        const cancelDone = proto.onTick.call(tCancel, { tile: objectTile });
+        const tInv = new ns.MoveToDockTask(game, { ...target, isSpawned: false });
+        tInv.game = game;
+        tInv.dockingStatus = 3;
+        const invDone = proto.onTick.call(tInv, { tile: objectTile });
+        const tQ = new ns.MoveToDockTask(game, target);
+        tQ.game = game;
+        tQ.dockingStatus = 1; // MoveToQueueingTile
+        const unit = {
+          tag: "U",
+          tile: { rx: 4, ry: 4, z: 0, onBridgeLandType: null },
+          rules: { movementZone: MovementZone.Normal, speedType: 0 },
+          isInfantry: () => false,
+          onBridge: false,
+          moveTrait: { lastMoveResult: MoveResult.Fail },
+        };
+        const qDone = proto.onTick.call(tQ, unit);
+        const qChildren = tQ.children.map((c) => ({
+          stub: c.$stub || null,
+          hasCb: typeof c.cb === "function",
+          ticks: c.ticks,
+        }));
+        const qCb = tQ.children.find((c) => typeof c.cb === "function");
+        qCb.cb(unit); // Fail → cancel
+        const afterFailStatus = tQ.status;
+        const tQ2 = new ns.MoveToDockTask(game, target);
+        tQ2.game = game;
+        tQ2.dockingStatus = 1;
+        const unitClose = {
+          ...unit,
+          tile: { rx: 4, ry: 4, z: 0, onBridgeLandType: null },
+          moveTrait: { lastMoveResult: MoveResult.CloseEnough },
+        };
+        proto.onTick.call(tQ2, unitClose);
+        tQ2.children.find((c) => typeof c.cb === "function").cb(unitClose);
+        const afterCloseStatus = tQ2.dockingStatus;
+        const emptyDock = {
+          ...target,
+          dockTrait: { ...target.dockTrait, getFirstAvailableDockNumber: () => undefined },
+        };
+        const tW = new ns.MoveToDockTask(game, emptyDock);
+        tW.game = game;
+        tW.dockingStatus = 2; // WaitForTurn
+        const wDone = proto.onTick.call(tW, { tile: dockTile });
+        const wChild = tW.children[0];
+        const tD = new ns.MoveToDockTask(game, target);
+        tD.game = game;
+        tD.dockingStatus = 3; // MoveToDock，unit 已在 dock tile
+        const air = {
+          tag: "HAR",
+          tile: dockTile,
+          isAircraft: () => true,
+          airportBoundTrait: { preferredAirport: null },
+        };
+        const dDone = proto.onTick.call(tD, air);
+        return {
+          cancelDone,
+          invDone,
+          qDone,
+          qChildren,
+          qStatus: tQ.dockingStatus,
+          afterFailStatus,
+          afterCloseStatus,
+          wDone,
+          wTicks: wChild && wChild.ticks,
+          wStub: (wChild && wChild.$stub) || null,
+          dDone,
+          dStatus: tD.dockingStatus,
+          dCalls: dockCalls,
+          preferredAirport: air.airportBoundTrait.preferredAirport === target,
+        };
+      },
+      // isValidTarget / isValidQueueingTile 边界（枚举经 mod 取真值）
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const proto = ns.MoveToDockTask.prototype;
+        const targetTile = { rx: 5, ry: 5, z: 0 };
+        const target = { isSpawned: true, tile: targetTile };
+        const game = {
+          areFriendly: (a, b) => a.owner === b.owner,
+          map: {
+            tileOccupation: { isTileOccupiedBy: () => false },
+            terrain: {
+              getPassableSpeed: () => 3,
+              getIslandIdMap: () => ({ get: () => 1 }),
+              findObstacles: () => [],
+            },
+          },
+        };
+        const task = new ns.MoveToDockTask(game, target);
+        task.game = game;
+        task.target = target;
+        const okTile = { rx: 6, ry: 6, z: 0, onBridgeLandType: null };
+        const bridgeTile = { rx: 6, ry: 6, z: 0, onBridgeLandType: 2 };
+        const highZ = { rx: 6, ry: 6, z: 3, onBridgeLandType: null };
+        const unit = {
+          owner: "P1",
+          tile: { rx: 4, ry: 4, z: 0 },
+          rules: { movementZone: MovementZone.Normal, speedType: 0 },
+          isInfantry: () => false,
+          onBridge: false,
+        };
+        return {
+          valid: proto.isValidTarget.call(task, target, unit),
+          invalidSpawn: proto.isValidTarget.call(
+            task,
+            { ...target, isSpawned: false },
+            unit,
+          ),
+          invalidFoe: proto.isValidTarget.call(task, target, {
+            ...unit,
+            owner: "P2",
+          }),
+          flyOk: proto.isValidQueueingTile.call(task, okTile, {
+            ...unit,
+            rules: { movementZone: MovementZone.Fly, speedType: 0 },
+          }),
+          groundOk: proto.isValidQueueingTile.call(task, okTile, unit),
+          bridgeBlocked: proto.isValidQueueingTile.call(task, bridgeTile, unit),
+          zBlocked: proto.isValidQueueingTile.call(task, highZ, unit),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/AirstrikeAttackTask",
+    tsjs: "src/game/gameobject/task/AirstrikeAttackTask.ts.js",
+    probes: [
+      // 构造：字段 / targetLinesConfig / prevent 标志 / rangeHelper 持有 tileOccupation
+      (ns) => {
+        const tileOccupation = { tag: "TO" };
+        const game = { map: { tileOccupation } };
+        const target = {
+          obj: { tile: { rx: 1, ry: 1 }, isDestroyed: false },
+          tile: { rx: 1, ry: 1 },
+          getBridge: () => undefined,
+        };
+        const weapon = { rules: { range: 5 } };
+        const task = new ns.AirstrikeAttackTask(game, target, weapon);
+        task.game = game;
+        const proto = ns.AirstrikeAttackTask.prototype;
+        return {
+          gameSame: task.game === game,
+          targetSame: task.target === target,
+          weaponSame: task.weapon === weapon,
+          optionsEmpty: Object.keys(task.options).length === 0,
+          phaseApproaching: task.phase === 0,
+          fired: task.fired,
+          walkDone: task._walkDone,
+          preventOpp: task.preventOpportunityFire,
+          preventLanding: task.preventLanding,
+          linesIsAttack: task.targetLinesConfig.isAttack,
+          linesTarget: task.targetLinesConfig.target === target.obj,
+          linesPathNodes: task.targetLinesConfig.pathNodes,
+          rangeHelperTileOcc:
+            !!task.rangeHelper && task.rangeHelper.tileOccupation === tileOccupation,
+          getWeaponSame: proto.getWeapon.call(task) === weapon,
+          getLinesSame:
+            proto.getTargetLinesConfig.call(task) === task.targetLinesConfig,
+        };
+      },
+      // onStart：无 trait / 未就绪 → cancel；在射程 → 立刻 fire + 语音；射程外 → Approaching
+      (ns, THREE, mod) => {
+        const proto = ns.AirstrikeAttackTask.prototype;
+        const dispatched = [];
+        const mkGame = () => ({
+          map: { tileOccupation: {} },
+          events: {
+            dispatch: (e) => dispatched.push({ soundId: e.soundId, type: e.type }),
+          },
+          isValidTarget: () => true,
+          rules: {},
+        });
+        const target = {
+          obj: undefined,
+          tile: { rx: 0, ry: 0 },
+          getBridge: () => undefined,
+        };
+        const g1 = mkGame();
+        const t1 = new ns.AirstrikeAttackTask(g1, target, { rules: {} }, { force: true });
+        t1.game = g1;
+        proto.onStart.call(t1, {
+          airstrikeTrait: undefined,
+          rules: {},
+          tile: { rx: 0, ry: 0 },
+        });
+        const noTrait = { status: t1.status, optionsForce: t1.options.force };
+        const g2 = mkGame();
+        const t2 = new ns.AirstrikeAttackTask(g2, target, { rules: {} });
+        t2.game = g2;
+        proto.onStart.call(t2, {
+          airstrikeTrait: { isReady: () => false },
+          rules: {},
+          tile: { rx: 0, ry: 0 },
+        });
+        const notReady = { status: t2.status };
+        dispatched.length = 0;
+        const g3 = mkGame();
+        const t3 = new ns.AirstrikeAttackTask(g3, target, { rules: {} });
+        t3.game = g3;
+        t3.rangeHelper = { isInWeaponRange: () => true };
+        const updates = [];
+        const boris = {
+          airstrikeTrait: {
+            isReady: () => true,
+            update: (g, self, obj, tile) =>
+              updates.push([g === g3, self.tag, obj, tile.rx]),
+          },
+          rules: { voiceSecondaryWeaponAttack: "BorisVoice" },
+          tile: { rx: 9, ry: 9 },
+          tag: "BORIS",
+        };
+        proto.onStart.call(t3, boris);
+        const inRange = {
+          status: t3.status,
+          phase: t3.phase,
+          fired: t3.fired,
+          updates,
+          dispatched: dispatched.slice(),
+        };
+        dispatched.length = 0;
+        const g4 = mkGame();
+        const t4 = new ns.AirstrikeAttackTask(g4, target, { rules: {} });
+        t4.game = g4;
+        t4.rangeHelper = { isInWeaponRange: () => false };
+        const updates4 = [];
+        proto.onStart.call(t4, {
+          airstrikeTrait: {
+            isReady: () => true,
+            update: () => updates4.push(1),
+          },
+          rules: { voiceSecondaryWeaponAttack: "BorisVoice" },
+          tile: { rx: 9, ry: 9 },
+        });
+        return {
+          noTrait,
+          notReady,
+          inRange,
+          outOfRange: {
+            phase: t4.phase,
+            fired: t4.fired,
+            updates: updates4.length,
+            dispatched: dispatched.slice(),
+          },
+        };
+      },
+      // onTick：cancelling/无 trait/已毁/Firing → true；_walkDone 进射程 fire；射程外挂走位子任务
+      (ns) => {
+        const proto = ns.AirstrikeAttackTask.prototype;
+        const game = {
+          map: { tileOccupation: {} },
+          events: { dispatch: () => {} },
+          isValidTarget: () => true,
+          rules: {},
+        };
+        const target = {
+          obj: undefined,
+          tile: { rx: 2, ry: 2 },
+          getBridge: () => undefined,
+        };
+        const t1 = new ns.AirstrikeAttackTask(game, target, { rules: {} });
+        t1.game = game;
+        t1.status = 3; // Cancelling
+        const cancelling = proto.onTick.call(t1, { airstrikeTrait: {} });
+        const t2 = new ns.AirstrikeAttackTask(game, target, { rules: {} });
+        t2.game = game;
+        const noTrait = proto.onTick.call(t2, {});
+        const t3 = new ns.AirstrikeAttackTask(game, target, { rules: {} });
+        t3.game = game;
+        const destroyed = proto.onTick.call(t3, {
+          airstrikeTrait: {},
+          isDestroyed: true,
+        });
+        const t4 = new ns.AirstrikeAttackTask(game, target, { rules: {} });
+        t4.game = game;
+        t4.phase = 1; // Firing
+        const firingDone = proto.onTick.call(t4, {
+          airstrikeTrait: {},
+          isDestroyed: false,
+        });
+        const updates = [];
+        const t5 = new ns.AirstrikeAttackTask(game, target, { rules: {} });
+        t5.game = game;
+        t5._walkDone = true;
+        t5.rangeHelper = { isInWeaponRange: () => false };
+        const walkFire = proto.onTick.call(t5, {
+          airstrikeTrait: {
+            update: (g, self, obj, tile) => updates.push([obj, tile === target.tile]),
+          },
+          isDestroyed: false,
+          isCrashing: false,
+        });
+        const t6 = new ns.AirstrikeAttackTask(game, target, { rules: {} });
+        t6.game = game;
+        t6.rangeHelper = { isInWeaponRange: () => false };
+        const approach = proto.onTick.call(t6, {
+          airstrikeTrait: {
+            update: () => {
+              throw new Error("must not fire while approaching");
+            },
+          },
+          isDestroyed: false,
+          isCrashing: false,
+        });
+        const child0 = t6.children[0];
+        return {
+          cancelling,
+          noTrait,
+          destroyed,
+          firingDone,
+          walkFire,
+          firedAfterWalk: t5.fired,
+          walkUpdates: updates,
+          approach,
+          approachWalkDone: t6._walkDone,
+          approachChildBlocking: child0 && child0.blocking,
+          approachChildStub: (child0 && child0.$stub) || null,
+          hasDuplicate: typeof proto.duplicate === "function",
+          hasUpdateLines: typeof proto.updateTargetLines === "function",
+        };
+      },
+      // updateTargetLines / _fire 失效目标 / duplicate 语义
+      (ns) => {
+        const proto = ns.AirstrikeAttackTask.prototype;
+        const game = {
+          map: { tileOccupation: {} },
+          events: { dispatch: () => {} },
+          isValidTarget: (o) => !o.invalid,
+          rules: {},
+        };
+        const objTarget = { tile: { rx: 3, ry: 3 }, isDestroyed: false };
+        const target = {
+          obj: objTarget,
+          tile: objTarget.tile,
+          getBridge: () => "BR",
+        };
+        const task = new ns.AirstrikeAttackTask(
+          game,
+          target,
+          { rules: { range: 4 } },
+          { force: false },
+        );
+        task.game = game;
+        proto.updateTargetLines.call(task, target, true);
+        const withObj = {
+          target: task.targetLinesConfig.target === objTarget,
+          pathNodes: task.targetLinesConfig.pathNodes,
+          isAttack: task.targetLinesConfig.isAttack,
+        };
+        const tileOnly = {
+          obj: null,
+          tile: { rx: 8, ry: 8 },
+          getBridge: () => "BRIDGE",
+        };
+        proto.updateTargetLines.call(task, tileOnly, false);
+        const withoutObj = {
+          pathNodes: task.targetLinesConfig.pathNodes,
+          isAttack: task.targetLinesConfig.isAttack,
+        };
+        const updates = [];
+        task.target = {
+          obj: { isDestroyed: true, tile: { rx: 1, ry: 1 } },
+          tile: { rx: 1, ry: 1 },
+        };
+        const fireDead = proto._fire.call(task, {
+          airstrikeTrait: { update: () => updates.push("nope") },
+        });
+        task.target = {
+          obj: { isDestroyed: false, invalid: true, tile: { rx: 1, ry: 1 } },
+          tile: { rx: 1, ry: 1 },
+        };
+        const fireInvalid = proto._fire.call(task, {
+          airstrikeTrait: { update: () => updates.push("nope2") },
+        });
+        task.target = { obj: null, tile: { rx: 4, ry: 4 }, getBridge: () => undefined };
+        const fireTile = proto._fire.call(task, {
+          airstrikeTrait: {
+            update: (g, self, obj, tile) => updates.push([obj, tile.rx]),
+          },
+        });
+        // duplicate 会走构造器 updateTargetLines(target,true)：obj=null 时必须有 getBridge
+        const dup = proto.duplicate.call(task);
+        return {
+          withObj,
+          withoutObj,
+          fireDead,
+          fireInvalid,
+          fireTile,
+          firedAfterTile: task.fired,
+          updates,
+          dupSameGame: dup.game === task.game,
+          dupSameTarget: dup.target === task.target,
+          dupSameWeapon: dup.weapon === task.weapon,
+          dupFiredReset: dup.fired === false,
+          dupPhase: dup.phase === 0,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/TargetLinesConfig",
+    tsjs: "src/game/gameobject/task/system/TargetLinesConfig.ts.js",
+    probes: [
+      // cloneConfig：浅拷贝保留引用；null/undefined → undefined
+      (ns) => {
+        const pathNodes = [{ tile: { rx: 1, ry: 2 } }];
+        const target = { id: 9 };
+        const config = { isAttack: true, pathNodes, target };
+        const cloned = ns.cloneConfig(config);
+        const none = ns.cloneConfig(null);
+        return {
+          cloneShallow:
+            cloned !== config &&
+            cloned.isAttack === config.isAttack &&
+            cloned.pathNodes === pathNodes &&
+            cloned.target === target,
+          cloneUndefined: none === undefined,
+          cloneKeys: Object.keys(cloned).sort().join(","),
+        };
+      },
+      // configsAreEqual：双空 true；按 isAttack/pathNodes/target 引用比较
+      (ns) => {
+        const pathNodes = ["p"];
+        const target = { t: 1 };
+        const a = { isAttack: true, pathNodes, target };
+        const b = { isAttack: true, pathNodes, target };
+        const c = { isAttack: false, pathNodes, target };
+        const d = { isAttack: true, pathNodes: ["other"], target };
+        return {
+          bothNull: ns.configsAreEqual(null, undefined),
+          aNull: ns.configsAreEqual(a, null),
+          sameShape: ns.configsAreEqual(a, b),
+          sameRef: ns.configsAreEqual(a, a),
+          diffAttack: ns.configsAreEqual(a, c),
+          diffNodes: ns.configsAreEqual(a, d),
+        };
+      },
+      // configHasTarget：pathNodes 或 target 任一非空即 true
+      (ns) => {
+        return {
+          nullCfg: ns.configHasTarget(null),
+          empty: ns.configHasTarget({ pathNodes: [] }),
+          withNodes: ns.configHasTarget({ pathNodes: [{}] }),
+          withTarget: ns.configHasTarget({ pathNodes: [], target: {} }),
+          both: ns.configHasTarget({ pathNodes: [1], target: {} }),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/system/TaskRunner",
+    tsjs: "src/game/gameobject/task/system/TaskRunner.ts.js",
+    probes: [
+      // startTask：NotStarted → Running + onStart；重复 start 抛错
+      (ns, THREE, mod) => {
+        const TaskStatus = mod("game/gameobject/task/system/TaskStatus").TaskStatus;
+        const runner = new ns.TaskRunner();
+        const onStartCalls = [];
+        const task = {
+          status: TaskStatus.NotStarted,
+          onStart: (w) => onStartCalls.push(w === "W"),
+        };
+        runner.startTask(task, "W");
+        const afterStart = { status: task.status, onStartCalls };
+        let restartErr = null;
+        try {
+          runner.startTask(task, "W");
+        } catch (e) {
+          restartErr = e.message;
+        }
+        return {
+          afterStart,
+          restartErr,
+          running: TaskStatus.Running,
+          finished: TaskStatus.Finished,
+        };
+      },
+      // tickTask：blocking 子任务未完成 / world 未 spawn / NotStarted 抛错
+      (ns, THREE, mod) => {
+        const TaskStatus = mod("game/gameobject/task/system/TaskStatus").TaskStatus;
+        const runner = new ns.TaskRunner();
+        const world = { isSpawned: true };
+        const t1 = {
+          status: TaskStatus.Running,
+          children: [
+            {
+              blocking: true,
+              status: TaskStatus.Running,
+              children: [],
+              onTick: () => false,
+              isRunning: () => true,
+              isCancelling: () => false,
+              onStart: () => {},
+              waitingForChildrenToFinish: false,
+            },
+          ],
+          isRunning: () => true,
+          isCancelling: () => false,
+          onTick: () => {
+            throw new Error("parent onTick must not run while blocking child unfinished");
+          },
+          onEnd: () => {},
+          waitingForChildrenToFinish: false,
+        };
+        const blocked = runner.tickTask(t1, world);
+        const t2 = {
+          status: TaskStatus.Running,
+          children: [],
+          isRunning: () => true,
+          isCancelling: () => false,
+          onTick: () => true,
+        };
+        const unspawned = runner.tickTask(t2, { isSpawned: false });
+        const t3 = { status: TaskStatus.NotStarted, children: [] };
+        let notStartedErr = null;
+        try {
+          runner.tickTask(t3, world);
+        } catch (e) {
+          notStartedErr = e.message;
+        }
+        return { blocked, unspawned, notStartedErr };
+      },
+      // tickTask 成功/取消路径：Finished vs Cancelled vs onTick false
+      (ns, THREE, mod) => {
+        const TaskStatus = mod("game/gameobject/task/system/TaskStatus").TaskStatus;
+        const runner = new ns.TaskRunner();
+        const world = { isSpawned: true };
+        const log = [];
+        const okTask = {
+          status: TaskStatus.Running,
+          children: [],
+          isRunning: () => true,
+          isCancelling: () => false,
+          waitingForChildrenToFinish: false,
+          onTick: () => {
+            log.push("tick");
+            return true;
+          },
+          onEnd: () => {
+            log.push("end");
+          },
+        };
+        const ok = runner.tickTask(okTask, world);
+        const afterOk = { ok, status: okTask.status, log: log.slice() };
+        const cLog = [];
+        const cTask = {
+          status: TaskStatus.Cancelling,
+          children: [],
+          isRunning: () => false,
+          isCancelling: () => true,
+          waitingForChildrenToFinish: false,
+          onTick: () => {
+            cLog.push("tick");
+            return true;
+          },
+          onEnd: () => {
+            cLog.push("end");
+          },
+        };
+        const cDone = runner.tickTask(cTask, world);
+        const c2 = {
+          status: TaskStatus.Cancelling,
+          children: [],
+          isRunning: () => false,
+          isCancelling: () => true,
+          waitingForChildrenToFinish: false,
+          onTick: () => false,
+          onEnd: () => {},
+        };
+        const c2Done = runner.tickTask(c2, world);
+        const idle = {
+          status: TaskStatus.Finished,
+          children: [],
+          isRunning: () => false,
+          isCancelling: () => false,
+        };
+        const idleDone = runner.tickTask(idle, world);
+        return {
+          afterOk,
+          cancelStatus: cTask.status,
+          cancelLog: cLog,
+          cDone,
+          c2Done,
+          c2Status: c2.status,
+          idleDone,
+        };
+      },
+      // tickChildren：完成 splice / blocking 中断 / Cancelled 移除 / 未处理状态抛错 / waitingForChildrenToFinish
+      (ns, THREE, mod) => {
+        const TaskStatus = mod("game/gameobject/task/system/TaskStatus").TaskStatus;
+        const runner = new ns.TaskRunner();
+        const world = { isSpawned: true };
+        const mkRun = (tickResult, blocking) => ({
+          status: TaskStatus.NotStarted,
+          children: [],
+          blocking,
+          isRunning: () => true,
+          isCancelling: () => false,
+          waitingForChildrenToFinish: false,
+          onStart: () => {},
+          onTick: () => tickResult,
+          onEnd: () => {},
+        });
+        const a = mkRun(true, false);
+        const b = mkRun(false, true);
+        const tasks = [a, b];
+        const allDone1 = runner.tickChildren(tasks, world);
+        const after1 = {
+          allDone1,
+          remaining: tasks.length,
+          aStatus: a.status,
+          bStatus: b.status,
+        };
+        const c = mkRun(false, false);
+        const d = mkRun(true, false);
+        const tasks2 = [c, d];
+        const allDone2 = runner.tickChildren(tasks2, world);
+        const after2 = {
+          allDone2,
+          remaining: tasks2.length,
+          cStatus: c.status,
+          dStatus: d.status,
+        };
+        const cancelled = {
+          status: TaskStatus.Cancelled,
+          children: [],
+          blocking: true,
+          isRunning: () => false,
+          isCancelling: () => false,
+        };
+        const tasks3 = [cancelled];
+        const allDone3 = runner.tickChildren(tasks3, world);
+        const weird = {
+          status: 99,
+          children: [],
+          blocking: true,
+          isRunning: () => false,
+          isCancelling: () => false,
+        };
+        let weirdErr = null;
+        try {
+          runner.tickChildren([weird], world);
+        } catch (e) {
+          weirdErr = e.message;
+        }
+        const child = {
+          status: TaskStatus.NotStarted,
+          children: [],
+          blocking: false,
+          isRunning: () => true,
+          isCancelling: () => false,
+          waitingForChildrenToFinish: false,
+          onStart: () => {},
+          onTick: () => false,
+          onEnd: () => {},
+        };
+        const parent = {
+          status: TaskStatus.Running,
+          children: [child],
+          blocking: true,
+          isRunning: () => true,
+          isCancelling: () => false,
+          waitingForChildrenToFinish: false,
+          onTick: () => true,
+          onEnd: () => {},
+        };
+        const waitDone = runner.tickTask(parent, world);
+        const tickResult = runner.tick([], world);
+        return {
+          after1,
+          after2,
+          allDone3,
+          remaining3: tasks3.length,
+          weirdErr,
+          waitDone,
+          parentWaiting: parent.waitingForChildrenToFinish,
+          parentStatus: parent.status,
+          childStatus: child.status,
+          tickReturns: tickResult === undefined ? "undefined" : tickResult,
+        };
+      },
+    ],
+  },
 ];
 
 /** Modules registered from the reconstructed sources to satisfy imports. */
