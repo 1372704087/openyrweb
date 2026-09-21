@@ -40,7 +40,13 @@ System.register(
 	                }
 	                var ft = i.map.tiles.getByMapCoords(bRx + fw, bRy + fh);
 	                if (ft && i.map.mapBounds.isWithinBounds(ft)) candidates.push(ft);
-	                if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
+	                if (candidates.length) {
+	                  var idx =
+	                    game.prng && game.prng.generateRandomInt
+	                      ? game.prng.generateRandomInt(0, candidates.length)
+	                      : 0;
+	                  return candidates[idx];
+	                }
 	              }
 	              // OpenYRWeb: Grinder (Grinding=yes) — walk to the middle of the front
 	              // (south) edge, the building's door, so units enter from the front

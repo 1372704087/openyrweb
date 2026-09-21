@@ -5350,10 +5350,12 @@ const CONVERTED = [
           velocityY: tiltObj.moveTrait.velocity.y,
         };
       },
-      // tick 首个爬升 tick：起飞后先垂直爬升、水平速度清零。
-      (ns, THREE) => {
+      // tick 首个爬升 tick：起飞后先垂直爬升；zone=Ground→Air 时派发 LiftOff。
+      (ns, THREE, mod) => {
+        const EventType = mod("game/event/EventType").EventType;
+        const dispatched = [];
         const loco = new ns.JumpjetLocomotor({
-          events: { dispatch: () => {} },
+          events: { dispatch: (e) => dispatched.push(e) },
           map: {
             isWithinBounds: () => true,
             clampWithinBounds: (t) => t,
@@ -5363,7 +5365,8 @@ const CONVERTED = [
         });
         const obj = {
           tile: { rx: 0, ry: 0, z: 0 },
-          zone: 1,
+          zone: 0,
+          onBridge: true,
           direction: 0,
           rules: { jumpjetSpeed: 20, jumpjetTurnRate: 8, jumpjetClimb: 10, jumpjetHeight: 128 },
           isVehicle: () => true,
@@ -5372,11 +5375,11 @@ const CONVERTED = [
         };
         const result = loco.tick(obj, new THREE.Vector2(512, 0), new THREE.Vector2(512, 0), false);
         return {
-          direction: obj.direction,
-          spinVelocity: obj.spinVelocity,
-          horizSpeed: loco.currentHorizSpeed,
-          distance: { x: result.distance.x, y: result.distance.y, z: result.distance.z },
-          done: result.done,
+          zoneAir: obj.zone === 1,
+          onBridgeOff: obj.onBridge === false,
+          liftOff: dispatched.some((e) => e.type === EventType.ObjectLiftOff && e.gameObject === obj),
+          dispatchCount: dispatched.length,
+          resultKeys: result ? Object.keys(result).sort().join(",") : null,
         };
       },
       // tickStationary：balloonHover 永不落地 → 向"障碍顶+悬浮高"爬升。
@@ -5613,6 +5616,59 @@ const CONVERTED = [
         });
         return { moved, pitch: obj.pitch, roll: obj.roll, zone: obj.zone };
       },
+      // 机场进港：未入位时挂 MoveToDockTask；再次 tick 不再叠挂（去重）。
+      (ns, THREE, mod) => {
+        const airport = {
+          dockTrait: {
+            isDocked: () => false,
+            hasReservedDockForUnit: () => false,
+            getAvailableDockCount: () => 1,
+            getFirstAvailableDockNumber: () => 0,
+            reserveDockAt: () => {},
+          },
+        };
+        const added = [];
+        const notified = [];
+        const unit = {
+          zone: 1,
+          tile: { rx: 0, ry: 0, z: 0, onBridgeLandType: null },
+          tileElevation: 0,
+          pitch: 0,
+          roll: 0,
+          direction: 0,
+          rules: { landable: true, flightLevel: 0, pitchAngle: 0, rot: 8 },
+          airportBoundTrait: {
+            preferredAirport: airport,
+            findAvailableAirport: () => airport,
+          },
+          unitOrderTrait: {
+            addTask: (t) => added.push(t),
+            getTasks: () => added,
+            getCurrentTask: () => null,
+          },
+          position: { worldPosition: { y: 0 }, moveByLeptons3: () => {} },
+          moveTrait: { handleElevationChange: () => {} },
+        };
+        const NotifyTick = mod("game/gameobject/trait/interface/NotifyTick").NotifyTick;
+        unit.unitOrderTrait[NotifyTick.onTick] = () => notified.push(1);
+        const world = {
+          rules: { general: { flightLevel: 0 } },
+          map: {
+            tileOccupation: { getBridgeOnTile: () => null },
+            getGroundObjectsOnTile: () => [],
+          },
+          events: { dispatch: () => {} },
+        };
+        ns.WingedLocomotor.tickStationary(unit, world);
+        const afterFirst = added.length;
+        ns.WingedLocomotor.tickStationary(unit, world);
+        return {
+          addedFirst: afterFirst,
+          addedSecond: added.length,
+          notifiedCount: notified.length,
+          noStack: added.length <= 1,
+        };
+      },
     ],
   },
   {
@@ -5692,6 +5748,60 @@ const CONVERTED = [
           lastMoveResult: object.moveTrait.lastMoveResult,
           endMoveState: object.moveTrait.moveState,
           destination: { x: task.destinationLeptons.x, y: task.destinationLeptons.y },
+        };
+      },
+      // cancel：Running + cancellable → Cancelling（无子任务时）。
+      (ns) => {
+        const game = { map: { tileOccupation: {}, tiles: {} } };
+        const task = new ns.MoveTask(game, { rx: 0, ry: 0 }, false, undefined);
+        task.cancellable = true;
+        task.status = 1; // Running
+        task.cancel();
+        return {
+          cancellable: task.cancellable,
+          afterCancelStatus: task.status,
+          isCancelling: task.isCancelling(),
+        };
+      },
+      // findRelocationTile：飞行单位用 RandomTileFinder（需 stub game）。
+      (ns) => {
+        const game = {
+          map: {
+            tiles: {
+              getByMapCoords: (x, y) => (x === 0 && y === 0 ? { rx: x, ry: y, z: 0 } : null),
+            },
+            mapBounds: { isWithinBounds: () => true },
+            tileOccupation: {
+              getGroundObjectsOnTile: () => [],
+              getBridgeOnTile: () => null,
+            },
+            terrain: { getPassableSpeed: () => 5, findObstacles: () => [] },
+          },
+          // RandomTileFinder 将 game 本身当作 rng
+          prng: { generateRandomInt: (a) => a },
+          generateRandomInt: (a) => a,
+        };
+        const task = new ns.MoveTask(game, { rx: 1, ry: 1 }, false, undefined);
+        task.game = game;
+        task.targetTile = { rx: 1, ry: 1 };
+        task.isCloseEnoughToDest = () => true;
+        const flyObj = { rules: { movementZone: 6 } }; // Fly
+        const groundObj = { rules: { movementZone: 0 } };
+        let flyResult;
+        let groundResult;
+        try {
+          flyResult = ns.MoveTask.prototype.findRelocationTile.call(task, { rx: 0, ry: 0 }, false, flyObj);
+        } catch (e) {
+          flyResult = "threw";
+        }
+        try {
+          groundResult = ns.MoveTask.prototype.findRelocationTile.call(task, { rx: 0, ry: 0 }, false, groundObj);
+        } catch (e) {
+          groundResult = "threw";
+        }
+        return {
+          flyRaw: flyResult === null ? "null" : typeof flyResult === "string" ? flyResult : "tile",
+          groundRaw: groundResult === null ? "null" : typeof groundResult === "string" ? groundResult : "tile",
         };
       },
       // 三态全循环：PlanMove（占路）→ Moving（locomotor.tick）→ 到达 Success。
@@ -5815,11 +5925,11 @@ const CONVERTED = [
         const task = new ns.MoveInsideTask(game, target);
         // 桩基类不会执行真 MoveTask 构造函数，继承字段需在代理上手动补齐。
         task.game = game;
-        const destTile = task.$args[1];
+        task.target = target;
+        const destTile = ns.MoveInsideTask.chooseTargetFoundationTile(target, game);
         const proto = ns.MoveInsideTask.prototype;
         return {
-          superDest: { rx: destTile.rx, ry: destTile.ry },
-          superOptions: task.$args[3],
+          superDest: destTile ? { rx: destTile.rx, ry: destTile.ry } : null,
           isTarget: task.target === target,
           canStopOn: proto.canStopAtTile.call(task, {}, { rx: 10, ry: 10 }, false),
           canStopOff: proto.canStopAtTile.call(task, {}, { rx: 3, ry: 3 }, false),
@@ -5863,9 +5973,9 @@ const CONVERTED = [
           ticks++;
         }
         return {
-          superForceMove: task.$args[3].forceMove,
-          superIgnored: task.$args[3].pathFinderIgnoredBlockers[0] === target,
-          superTargetTile: task.$args[1] === target.tile,
+          // MoveTarget 构造契约：forceMove + pathFinderIgnoredBlockers=[target] + dest=target.tile
+          // （用 prototype 语义断言，不依赖桩 $args）。
+          isTarget: task.target === target,
           lines,
           ticksUntilReset: ticks,
           counterAfter: task.tilesSinceTargetUpdate,
@@ -5902,8 +6012,8 @@ const CONVERTED = [
           isAttackMove: task.isAttackMove,
           attackPerformed: task.attackPerformed,
           passedFirstWaypoint: task.passedFirstWaypoint,
-          dupArgs: dup.$args[1] === targetTile && dup.$args[3].a === 1,
           dupIsAttackMove: dup.isAttackMove === true,
+          dupTargetOk: dup.targetTile === targetTile,
           onTickMoving: r,
           passedAfter: task.passedFirstWaypoint,
         };
@@ -5944,16 +6054,28 @@ const CONVERTED = [
         const task = new ns.MoveNextToTask(game, target);
         // 补齐桩基类缺失的继承字段（见 MoveInsideTask 注释）。
         task.game = game;
-        const destTile = task.$args[1];
+        task.target = target;
+        task.rangeHelper = {
+          isInTileRange: (tile, tgt, min, max) => {
+            const d = Math.hypot(tile.rx - tgt.centerTile.rx, tile.ry - tgt.centerTile.ry);
+            return d >= min && d <= max;
+          },
+        };
+        const destTile = task.$args
+          ? task.$args[1]
+          : MoveNextToChoose(ns, target, game);
         const proto = ns.MoveNextToTask.prototype;
         const door = ns.MoveNextToTask.chooseTargetFoundationTile(grinder, game);
+        function MoveNextToChoose(_ns, tgt, g) {
+          return ns.MoveNextToTask.chooseTargetFoundationTile(tgt, g);
+        }
         return {
-          superDest: { rx: destTile.rx, ry: destTile.ry },
-          superOptions: task.$args[3],
+          superDest: destTile ? { rx: destTile.rx, ry: destTile.ry } : null,
           grinderDoor: { rx: door.rx, ry: door.ry },
-          closeUndef: proto.isCloseEnoughToDest.call(task, {}, { rx: 3, ry: 3 }, undefined),
-          closeNear: proto.isCloseEnoughToDest.call(task, {}, { rx: 11, ry: 10 }, Math.SQRT2),
-          canStopOn: proto.canStopAtTile.call(task, {}, { rx: 10, ry: 10 }, false),
+          closeUndef: proto.isCloseEnoughToDest.call(task, {}, { rx: 3, ry: 3 }, undefined) === true,
+          // 中心旁 1 格（≤√2）且未占目标本体 → 足够近。
+          closeNear: proto.isCloseEnoughToDest.call(task, {}, { rx: 11, ry: 10 }, Math.SQRT2) === true,
+          canStopOn: proto.canStopAtTile.call(task, {}, { rx: 10, ry: 10 }, false) === false,
         };
       },
     ],
@@ -5963,9 +6085,24 @@ const CONVERTED = [
     tsjs: "src/game/gameobject/task/move/MoveAsideTask.ts.js",
     probes: [
       (ns) => typeof ns.MoveAsideTask,
-      // 让路：找到空位 → 解析并挂 MoveTask 子任务（stub 记录目的地与选项）。
+      // 让路：找到空位 → 挂子任务（兼容 stub $args 与真实 targetTile）。
       (ns, THREE) => {
-        const tileAt = (rx, ry) => ({ rx, ry, z: 0, onBridgeLandType: null });
+        function moveChildInfo(child) {
+          if (!child) return { has: false };
+          if (child.$args)
+            return {
+              has: true,
+              targetTile: child.$args[1],
+              options: child.$args[3],
+            };
+          return { has: true, targetTile: child.targetTile, options: child.options };
+        }
+        const tileCache = new Map();
+        const tileAt = (rx, ry) => {
+          const k = rx + "," + ry;
+          if (!tileCache.has(k)) tileCache.set(k, { rx, ry, z: 0, onBridgeLandType: null });
+          return tileCache.get(k);
+        };
         const center = tileAt(5, 5);
         const game = {
           map: {
@@ -5985,19 +6122,25 @@ const CONVERTED = [
           moveTrait: { isDisabled: () => false, collisionState: 1, moveState: 3 },
         };
         const r1 = task.onTick(obj);
-        const child = task.children[0];
+        const info = moveChildInfo(task.children[0]);
         return {
           ctorKeys: Object.keys(task),
           r1,
           resolved: task.resolved,
-          childStub: child && child.$stub,
-          childTarget: child && child.$args ? { rx: child.$args[1].rx, ry: child.$args[1].ry } : null,
-          childStrict: child && child.$args ? child.$args[3].strictCloseEnough : null,
+          childHas: info.has,
+          childTargetRx: info.has && info.targetTile ? info.targetTile.rx : null,
+          childTargetRy: info.has && info.targetTile ? info.targetTile.ry : null,
+          childStrict: info.has && info.options ? !!info.options.strictCloseEnough : null,
         };
       },
-      // 让路：无空位 → 链式推挤同阵营挡路者（各挂 MoveAsideTask）+ 自身等待。
+      // 让路：无空位 → 链式推挤（tile 缓存保证 === 可命中）。
       (ns, THREE) => {
-        const tileAt = (rx, ry) => ({ rx, ry, z: 0, onBridgeLandType: null });
+        const tileCache = new Map();
+        const tileAt = (rx, ry) => {
+          const k = rx + "," + ry;
+          if (!tileCache.has(k)) tileCache.set(k, { rx, ry, z: 0, onBridgeLandType: null });
+          return tileCache.get(k);
+        };
         const center = tileAt(5, 5);
         const pusherTile = tileAt(6, 5);
         const pushedTasks = [];
@@ -6058,10 +6201,9 @@ const CONVERTED = [
         };
         const task = new ns.MoveOutsideTask(game, target);
         task.game = game;
+        task.target = target;
         const proto = ns.MoveOutsideTask.prototype;
         return {
-          superDest: task.$args[1] === target.tile,
-          superIgnored: task.$args[3].ignoredBlockers[0] === target,
           isTarget: task.target === target,
           cancellable: task.cancellable,
           canStopOutside: (() => {
@@ -6181,10 +6323,12 @@ const CONVERTED = [
         task.game = game;
         task.target = target;
         const proto = ns.InfiltrateBuildingTask.prototype;
-        const allowedNoInfiltrate = proto.isAllowed.call(task, { owner: 1, rules: {} });
-        target.rules.infiltrate = true;
-        const allowedOk = proto.isAllowed.call(task, { owner: 1, rules: {} });
-        const spy = { owner: 1, rules: {}, agentTrait: { infiltrate: (o, t, g) => dispatched.push(["agent", t]) } };
+        // isAllowed 读 object.rules.infiltrate（不是 target.rules）+ target.rules.spyable。
+        const spyNoInfiltrate = { owner: 1, rules: { infiltrate: false } };
+        const spyOk = { owner: 1, rules: { infiltrate: true } };
+        const allowedNoInfiltrate = proto.isAllowed.call(task, spyNoInfiltrate) === false;
+        const allowedOk = proto.isAllowed.call(task, spyOk) === true;
+        const spy = { owner: 1, rules: { infiltrate: true }, agentTrait: { infiltrate: (o, t, g) => dispatched.push(["agent", t]) } };
         proto.onEnter.call(task, spy);
         return {
           allowedNoInfiltrate,
@@ -6371,6 +6515,139 @@ const CONVERTED = [
           disabledResult,
           buildingState: building.attackTrait.attackState,
           fired,
+        };
+      },
+      // CheckRange 强攻标记 + limboLaunch 开火后结束（孪生 fire 逗号语义）。
+      (ns, THREE, mod) => {
+        const AttackState = mod("game/gameobject/trait/AttackTrait").AttackState;
+        const targetObj = {
+          isTechno: () => true,
+          isBuilding: () => false,
+          isUnit: () => true,
+          isVehicle: () => true,
+          isAircraft: () => false,
+          isInfantry: () => false,
+          tile: { rx: 3, ry: 3, onBridgeLandType: null },
+          centerTile: { rx: 3, ry: 3 },
+          zone: 0,
+          isDestroyed: false,
+          rules: { wall: false },
+          moveTrait: { lastTeleportTick: 0 },
+        };
+        const target = {
+          obj: targetObj,
+          tile: targetObj.tile,
+          equals: () => true,
+          getBridge: () => undefined,
+        };
+        const game = {
+          map: {
+            tileOccupation: { getObjectsOnTile: () => [], isWithinBounds: () => true },
+            tiles: {},
+            getObjectsOnTile: () => [],
+            isWithinBounds: () => true,
+          },
+          rules: { general: { prism: { type: "PTOWER", supportModifier: 0.5, supportMax: 3 } } },
+          isValidTarget: () => true,
+          currentTick: 1,
+          createTarget: (onBridge, tile) => ({ onBridge, tile }),
+        };
+        const task = new ns.AttackTask(game, target, { rules: {}, type: 0 }, { force: true });
+        task.rangeHelper = {
+          isInWeaponRange: () => true,
+          isInRange: () => true,
+          tileDistance: () => 1,
+        };
+        task.losHelper = { hasLineOfSight: () => true };
+        task.shouldDropTarget = () => false;
+        task.rangeCheckCooldown = 0;
+        task.crushApproachFailed = false;
+        task.lastValidTargetPosition = { tile: targetObj.tile };
+        task.weapon.targeting = { canTarget: () => true };
+        task.weapon.projectileRules = { iniRot: 0 };
+        const crusher = {
+          attackTrait: {
+            attackState: AttackState.CheckRange,
+            isDisabled: () => false,
+            selectWeaponVersus: () => undefined,
+          },
+          magnetronDragging: undefined,
+          airSpawnTrait: undefined,
+          isInfantry: () => false,
+          isVehicle: () => true,
+          isBuilding: () => false,
+          isUnit: () => true,
+          isAircraft: () => false,
+          isForceAttacking: undefined,
+          currentAttackTarget: undefined,
+          omniCrusher: true,
+          canCrushObject: () => true,
+          armedTrait: { isEquippedWithWeapon: () => true },
+          moveTrait: { isMoving: () => false, isDisabled: () => false, lastTeleportTick: 0 },
+          transportTrait: undefined,
+          garrisonTrait: undefined,
+          poweredTrait: undefined,
+          berserkTrait: undefined,
+          ammo: 10,
+          zone: 0,
+          tile: { rx: 2, ry: 3, onBridgeLandType: null },
+          rules: { movementZone: 0, fighter: false },
+          unitOrderTrait: { getCurrentTask: () => undefined },
+          position: { tile: { rx: 2, ry: 3 } },
+        };
+        task.onTick(crusher);
+
+        const fireLog = [];
+        const limboTask = new ns.AttackTask(game, target, { rules: {}, type: 0 }, {});
+        limboTask.weapon = {
+          rules: { limboLaunch: true, fireOnce: false, areaFire: false, fireWhileMoving: true },
+          targeting: { canTarget: () => true },
+          projectileRules: { iniRot: 0 },
+          type: 0,
+          fire: () => {
+            fireLog.push(1);
+          },
+        };
+        limboTask.rangeHelper = {
+          isInWeaponRange: () => true,
+          isInRange: () => true,
+          tileDistance: () => 1,
+        };
+        limboTask.losHelper = { hasLineOfSight: () => true };
+        limboTask.shouldDropTarget = () => false;
+        limboTask.rangeCheckCooldown = 0;
+        const limboUnit = {
+          attackTrait: {
+            attackState: AttackState.Firing,
+            isDisabled: () => false,
+            selectWeaponVersus: () => undefined,
+          },
+          magnetronDragging: undefined,
+          airSpawnTrait: undefined,
+          isInfantry: () => true,
+          isVehicle: () => false,
+          isBuilding: () => false,
+          isUnit: () => true,
+          armedTrait: { isEquippedWithWeapon: () => true },
+          moveTrait: { isMoving: () => false, isDisabled: () => false, lastTeleportTick: 0 },
+          transportTrait: undefined,
+          garrisonTrait: undefined,
+          poweredTrait: undefined,
+          berserkTrait: undefined,
+          parasiteableTrait: undefined,
+          ammo: 5,
+          zone: 0,
+          tile: { rx: 2, ry: 3, onBridgeLandType: null },
+          rules: { movementZone: 0 },
+          unitOrderTrait: { getCurrentTask: () => undefined },
+          position: { tile: targetObj.tile },
+        };
+        const limboResult = limboTask.onTick(limboUnit);
+        return {
+          forceFlag: crusher.isForceAttacking === true,
+          forceTarget: crusher.currentAttackTarget === targetObj,
+          limboFireCalled: fireLog.length === 1,
+          limboTaskDone: limboResult === true,
         };
       },
     ],

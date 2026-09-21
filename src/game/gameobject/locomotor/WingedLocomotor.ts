@@ -134,7 +134,24 @@ export class WingedLocomotor {
           }
           if (airport) {
             // 排队进港任务并立刻 tick 一次（本帧就处理）。
-            object.unitOrderTrait.addTask(new MoveToDockTaskModule.MoveToDockTask(world, airport));
+            // 去重：任务链里已有 MoveToDock 时不再叠挂，避免 Idle 每 tick 重复 addTask。
+            const alreadyQueued = (() => {
+              try {
+                const tasks = object.unitOrderTrait?.getTasks?.() || [];
+                return tasks.some((t: any) => {
+                  if (!t) return false;
+                  if (t instanceof MoveToDockTaskModule.MoveToDockTask) return true;
+                  // harness 桩实例：$stub 记录规范名
+                  if (t.$stub === "game/gameobject/task/MoveToDockTask") return true;
+                  return t.constructor?.name === "MoveToDockTask";
+                });
+              } catch {
+                return false;
+              }
+            })();
+            if (!alreadyQueued) {
+              object.unitOrderTrait.addTask(new MoveToDockTaskModule.MoveToDockTask(world, airport));
+            }
             object.unitOrderTrait[NotifyTickModule.NotifyTick.onTick](object, world);
           } else {
             // 无处可降 → 坠毁。

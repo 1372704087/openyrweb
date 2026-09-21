@@ -53,7 +53,14 @@ export class MoveNextToTask extends MoveTask {
         // 东南角。
         const corner = game.map.tiles.getByMapCoords(baseRx + foundationWidth, baseRy + foundationHeight);
         if (corner && game.map.mapBounds.isWithinBounds(corner)) candidates.push(corner);
-        if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
+        if (candidates.length) {
+          // 锁步：优先 game.prng，缺失时取候选下界。
+          const idx =
+            game.prng && game.prng.generateRandomInt
+              ? game.prng.generateRandomInt(0, candidates.length)
+              : 0;
+          return candidates[idx];
+        }
       }
       // OpenYRWeb: 粉碎机（Grinding=yes）——走向南边缘中点（大门），
       // 让单位从正面进门而不是从任意方向贴上去。

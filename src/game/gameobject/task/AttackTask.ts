@@ -520,8 +520,10 @@ export class AttackTask extends Task {
       // OpenYRWeb：AreaFire=yes 的武器打自己所在格（毒气从自身位置扩散，
       // 如混沌无人机），与原版部署后区域火力一致。
       const areaFireTarget = this.weapon.rules.areaFire ? this.game.createTarget(undefined, object.position.tile) : this.target;
-      const fireResult = this.weapon.fire(areaFireTarget, this.game, damageMultiplier);
-      if (fireResult) return true;
+      // 孪生：(fire(...), cancelledMoveChild) ? 结束 : fireOnce/passive/JustFired。
+      // Weapon.fire 返回 void；limboLaunch 取消走位后应结束任务。
+      this.weapon.fire(areaFireTarget, this.game, damageMultiplier);
+      if (cancelledMoveChild) return true;
       if (this.weapon.rules.fireOnce && !this.weapon.rules.drainWeapon) return true;
       if (this.options.passive && object.rules.distributedFire) return true;
       attackTrait.attackState = AttackState.JustFired;
@@ -644,6 +646,9 @@ export class AttackTask extends Task {
       // OpenYRWeb：碾压攻击（原版 yrmd sub_7414E0）——Crusher 直接开上
       // 可碾压的地面目标（战斗要塞碾步兵/坦克/墙；强制攻击友方墙也算）。
       // 空中目标排除；OmniCrusher 任意距离都碾，普通 Crusher 仅贴身碾。
+      // 与孪生一致：每 tick 写入强攻标记，供碾压逻辑处理友军目标。
+      object.isForceAttacking = !!this.options.force;
+      object.currentAttackTarget = this.options.force ? this.target.obj : undefined;
       crushTarget = !!(
         targetObj &&
         (!targetObj.isBuilding() || targetObj.rules.wall) &&

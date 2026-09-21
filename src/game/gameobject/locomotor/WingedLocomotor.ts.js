@@ -109,8 +109,22 @@ System.register(
                             (s.airportBoundTrait.preferredAirport = e),
                             e && ((l = e.dockTrait.getFirstAvailableDockNumber()), e.dockTrait.reserveDockAt(s, l))),
                           void (e
-                            ? (s.unitOrderTrait.addTask(new d.MoveToDockTask(a, e)),
-                              s.unitOrderTrait[g.NotifyTick.onTick](s, a))
+                            ? (function (s2, world, airport2) {
+                                var queued = !1;
+                                try {
+                                  var tasks = s2.unitOrderTrait && s2.unitOrderTrait.getTasks && s2.unitOrderTrait.getTasks();
+                                  if (tasks)
+                                    for (var ti = 0; ti < tasks.length; ti++) {
+                                      var tt = tasks[ti];
+                                      if (tt && (tt instanceof d.MoveToDockTask || tt.$stub === "game/gameobject/task/MoveToDockTask" || (tt.constructor && tt.constructor.name === "MoveToDockTask"))) {
+                                        queued = !0;
+                                        break;
+                                      }
+                                    }
+                                } catch (er) {}
+                                if (!queued) s2.unitOrderTrait.addTask(new d.MoveToDockTask(world, airport2));
+                                s2.unitOrderTrait[g.NotifyTick.onTick](s2, world);
+                              })(s, a, e)
                             : s.crashableTrait.crash(void 0))
                         );
                     }
