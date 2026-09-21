@@ -6380,56 +6380,147 @@ const CONVERTED = [
     tsjs: "src/game/gameobject/task/move/MoveInWeaponRangeTask.ts.js",
     probes: [
       (ns) => typeof ns.MoveInWeaponRangeTask,
-      // 模块导出 STRAFE_CLOSE_ENOUGH=2 + super 参数解析（非 GameObject 目标
-      // 不放行阻断者）。
-      (ns, THREE) => {
-        const tileTarget = { rx: 9, ry: 9 };
-        const task = new ns.MoveInWeaponRangeTask({ map: { tileOccupation: {}, tiles: {} } }, tileTarget, false, { range: 5, rules: {} });
+      (ns) => typeof ns.STRAFE_CLOSE_ENOUGH,
+      // 模块常量 + 纯函数语义（原型 call + 手工 this，不依赖 ctor 继承链）。
+      (ns, THREE, mod) => {
+        const MovementZone = mod("game/type/MovementZone").MovementZone;
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const proto = ns.MoveInWeaponRangeTask.prototype;
+
+        function dist2(a, b) {
+          return Math.hypot((a.rx || 0) - (b.rx || 0), (a.ry || 0) - (b.ry || 0));
+        }
+        function forge(fields) {
+          return Object.assign(Object.create(proto), {
+            target: { tile: { rx: 4, ry: 4 }, centerTile: { rx: 4, ry: 4 }, isBuilding: () => false },
+            targetTile: { rx: 4, ry: 4 },
+            weapon: { range: 6, rules: {}, projectileRules: { iniRot: 5 } },
+            crushMode: false,
+            runCompleted: false,
+            bomberManeuverTile: undefined,
+            cancelRequested: false,
+            rangeHelper: { tileDistance: dist2 },
+            losHelper: { hasLineOfSight: () => true },
+            game: { map: { tileOccupation: {}, tiles: {}, rules: {} } },
+            isCancelling: () => false,
+          }, fields);
+        }
+
+        const fighterFly = {
+          rules: { movementZone: MovementZone.Fly, locomotor: LocomotorType.Aircraft, fighter: true },
+          ammo: 3,
+        };
+        const bomberFly = {
+          rules: { movementZone: MovementZone.Fly, locomotor: LocomotorType.Aircraft, fighter: false },
+          ammo: 1,
+        };
+        const ground = {
+          rules: { movementZone: MovementZone.Infantry, locomotor: LocomotorType.Infantry },
+        };
+
+        const strafeSelf = forge({
+          weapon: { range: 6, rules: {}, projectileRules: { iniRot: 5 } },
+        });
+        const bomberSelf = forge({
+          weapon: { range: 6, rules: {}, projectileRules: { iniRot: 0 } },
+        });
+
+        const crushSelf = forge({
+          crushMode: true,
+          targetTile: { rx: 4, ry: 4 },
+          rangeHelper: { tileDistance: dist2 },
+        });
+
+        const deferSelf = forge({
+          bomberManeuverTile: { rx: 0, ry: 0 },
+          cancelRequested: false,
+        });
+        proto.cancel.call(deferSelf);
+
+        const noManeuverSelf = forge({ bomberManeuverTile: undefined });
+        const nearSelf = forge({
+          bomberManeuverTile: { rx: 4, ry: 4 },
+          rangeHelper: { tileDistance: dist2 },
+        });
+        const farSelf = forge({
+          bomberManeuverTile: { rx: 20, ry: 20 },
+          rangeHelper: { tileDistance: dist2 },
+        });
+
+        // hasReachedDestination：战机蛇形+有弹 → 短路 false（不依赖 MoveTask super）。
+        let reachResult;
+        try {
+          const t = Object.create(proto);
+          Object.assign(t, forge({ runCompleted: false }));
+          t.shouldAirStrafe = () => true;
+          reachResult = proto.hasReachedDestination.call(t, fighterFly);
+        } catch (e) {
+          reachResult = "threw:" + String(e.message).slice(0, 40);
+        }
+
+        // completeRun：exitTile 改道 + 抑制 minRange。
+        const runSelf = forge({
+          runCompleted: false,
+          recalcMinRange: true,
+          options: {},
+          weapon: { range: 6, rules: {}, projectileRules: { iniRot: 5 } },
+          game: {
+            map: {
+              tiles: {
+                getMapSize: () => ({ width: 64, height: 64 }),
+                getByMapCoords: (x, y) => ({ rx: x, ry: y }),
+                getPlaceholderTile: (x, y) => ({ rx: x, ry: y }),
+              },
+            },
+          },
+        });
+        runSelf.updateTarget = function (tile) {
+          this._updated = tile;
+        };
+        // completeRun 的 object 参数需要 rules（isBombingRun 判定）。
+        const runPlane = {
+          rules: { movementZone: MovementZone.Fly, locomotor: LocomotorType.Aircraft },
+          position: { getMapPosition: () => ({ x: 0, y: 0 }) },
+          direction: 0,
+        };
+        proto.completeRun.call(runSelf, runPlane, { tile: { rx: 10, ry: 10 } }, { rx: 2, ry: 2 });
+
+        // findRangeApproachTile：from(0,4) target(8,4) range=5 → 接近点 (4,4)。
+        const approachTile = { rx: 4, ry: 4 };
+        const approachSelf = forge({
+          weapon: { range: 5, rules: {} },
+          game: {
+            map: {
+              tiles: { getByMapCoords: (x, y) => (x === 4 && y === 4 ? approachTile : null) },
+              isWithinBounds: () => true,
+            },
+          },
+        });
+        const approach = proto.findRangeApproachTile.call(
+          approachSelf,
+          { rx: 0, ry: 4 },
+          { rx: 8, ry: 4 },
+        );
+
         return {
           strafeConst: ns.STRAFE_CLOSE_ENOUGH,
-          superDest: task.$args[1] === tileTarget,
-          noIgnoredBlockers: task.$args[3].ignoredBlockers === undefined,
-          noPathFinderIgnored: task.$args[3].pathFinderIgnoredBlockers === undefined,
-          crushMode: task.crushMode,
-          recalcMinRange: task.recalcMinRange,
-          isTarget: task.target === tileTarget,
-        };
-      },
-      // 飞行语义纯函数：蛇形/轰炸判定、机动返航、crush 接近、延迟取消。
-      (ns, THREE) => {
-        const task = new ns.MoveInWeaponRangeTask(
-          { map: { tileOccupation: {}, tiles: {} } },
-          { tile: { rx: 4, ry: 4 } },
-          false,
-          { range: 6, rules: {}, projectileRules: { iniRot: 5 } },
-        );
-        task.game = { map: { tileOccupation: {} } };
-        task.targetTile = { rx: 4, ry: 4 };
-        task.weapon.projectileRules = { iniRot: 5 };
-        const proto = ns.MoveInWeaponRangeTask.prototype;
-        const fighterFly = { rules: { movementZone: 1, locomotor: 4, fighter: true }, ammo: 3 };
-        const bomberFly = { rules: { movementZone: 1, locomotor: 4, fighter: false } };
-        const ground = { rules: { movementZone: 0, locomotor: 1 } };
-        const crushTask = new ns.MoveInWeaponRangeTask({ map: { tileOccupation: {}, tiles: {} } }, { tile: { rx: 4, ry: 4 } }, false, { range: 5, rules: {} }, true);
-        crushTask.game = { map: { tileOccupation: {} } };
-        crushTask.targetTile = { rx: 4, ry: 4 };
-        const crushClose = proto.isCloseEnoughToDest.call(crushTask, {}, { rx: 4, ry: 4 });
-        const deferTask = new ns.MoveInWeaponRangeTask({ map: { tileOccupation: {}, tiles: {} } }, { tile: {} }, false, { range: 1, rules: {} });
-        deferTask.bomberManeuverTile = { rx: 0, ry: 0 };
-        let cancelThrew = false;
-        try {
-          proto.cancel.call(deferTask);
-        } catch (e) {
-          cancelThrew = true;
-        }
-        return {
-          strafeFighter: proto.shouldAirStrafe.call(task, fighterFly),
-          strafeGround: proto.shouldAirStrafe.call(task, ground),
-          bombingFighter: proto.isBombingRun.call(task, bomberFly),
-          bomberCanReturnNoTile: proto.bomberCanReturn.call(task, { rx: 0, ry: 0 }),
-          crushClose,
-          cancelDeferred: deferTask.cancelRequested === true,
-          cancelThrew,
+          strafeFighter: proto.shouldAirStrafe.call(strafeSelf, fighterFly) === true,
+          strafeGround: proto.shouldAirStrafe.call(strafeSelf, ground) === false,
+          strafeNoFighterRule: proto.shouldAirStrafe.call(strafeSelf, bomberFly) === false,
+          bombingFighter: proto.isBombingRun.call(bomberSelf, bomberFly) === true,
+          // isBombingRun 读 this.weapon 的 ROT；应用蛇形任务的 weapon（iniRot>1）。
+          bombingStrafeRot: proto.isBombingRun.call(strafeSelf, fighterFly) === false,
+          bomberCanReturnNoTile: proto.bomberCanReturn.call(noManeuverSelf, { rx: 0, ry: 0 }) === true,
+          bomberCanReturnNear: proto.bomberCanReturn.call(nearSelf, { rx: 4, ry: 4 }) === true,
+          bomberCanReturnFar: proto.bomberCanReturn.call(farSelf, { rx: 0, ry: 0 }) === false,
+          crushClose: proto.isCloseEnoughToDest.call(crushSelf, {}, { rx: 4, ry: 4 }) === true,
+          crushFar: proto.isCloseEnoughToDest.call(crushSelf, {}, { rx: 10, ry: 10 }) === false,
+          cancelDeferred: deferSelf.cancelRequested === true,
+          fighterReachBlocked: reachResult === false,
+          runCompletedFlag: runSelf.runCompleted === true,
+          runSuppressedMinRange: runSelf.recalcMinRange === false,
+          runExitTile: !!(runSelf._updated && runSelf._updated.rx === 2 && runSelf._updated.ry === 2),
+          approachTileOk: approach === approachTile,
         };
       },
     ],

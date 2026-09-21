@@ -3350,27 +3350,6 @@
       ]
     }
   },
-  "game/gameobject/task/move/MoveInWeaponRangeTask": {
-    "0": "function",
-    "1": {
-      "strafeConst": 2,
-      "superDest": true,
-      "noIgnoredBlockers": true,
-      "noPathFinderIgnored": true,
-      "crushMode": false,
-      "recalcMinRange": true,
-      "isTarget": true
-    },
-    "2": {
-      "strafeFighter": false,
-      "strafeGround": false,
-      "bombingFighter": false,
-      "bomberCanReturnNoTile": false,
-      "crushClose": true,
-      "cancelDeferred": true,
-      "cancelThrew": false
-    }
-  },
   "game/gameobject/task/MagnetronDragTask": {
     "0": "function",
     "1": {
@@ -3701,6 +3680,29 @@
       "creditsGained": 250,
       "emptied": true,
       "cargoReset": true
+    }
+  },
+  "game/gameobject/task/move/MoveInWeaponRangeTask": {
+    "0": "function",
+    "1": "number",
+    "2": {
+      "strafeConst": 2,
+      "strafeFighter": true,
+      "strafeGround": true,
+      "strafeNoFighterRule": true,
+      "bombingFighter": true,
+      "bombingStrafeRot": true,
+      "bomberCanReturnNoTile": true,
+      "bomberCanReturnNear": true,
+      "bomberCanReturnFar": true,
+      "crushClose": true,
+      "crushFar": true,
+      "cancelDeferred": true,
+      "fighterReachBlocked": true,
+      "runCompletedFlag": true,
+      "runSuppressedMinRange": true,
+      "runExitTile": true,
+      "approachTileOk": true
     }
   }
 }

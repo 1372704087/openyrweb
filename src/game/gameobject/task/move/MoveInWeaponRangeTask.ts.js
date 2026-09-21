@@ -70,8 +70,14 @@ System.register(
         },
       ],
       execute: function () {
-        (e("STRAFE_CLOSE_ENOUGH", 2),
-          (f = class extends i.MoveTask {
+        // Lockstep-safe RNG: prefer game.prng; deterministic fallback.
+        function randFloat(game, fallback) {
+          if (game && game.prng && game.prng.generateRandomInt)
+            return game.prng.generateRandomInt(0, 10000) / 10000;
+          return fallback;
+        }
+        e("STRAFE_CLOSE_ENOUGH", 2);
+        f = class extends i.MoveTask {
             constructor(e, t, i, r, crushMode = !1) {
               (super(e, t instanceof n.GameObject ? (t.isBuilding() ? t.centerTile : t.tile) : t, i, {
                 // OpenYRWeb: crush-on-attack drives onto the crushable target's OWN tile,
@@ -154,7 +160,10 @@ System.register(
                 a = approachRange / s,
                 n = Math.round(t.rx - i * a),
                 h = Math.round(t.ry - r * a);
-              var o = this.game.map.tiles[n] && this.game.map.tiles[n][h];
+              // TileCollection is a flat tilesByRxy array — must use getByMapCoords.
+              var o = this.game.map.tiles.getByMapCoords
+                ? this.game.map.tiles.getByMapCoords(n, h)
+                : null;
               return o && this.game.map.isWithinBounds(o) ? o : null;
             }
             cancel() {
@@ -385,12 +394,12 @@ System.register(
                 // two-plane strike does not converge onto the same spot and fly in
                 // formation; each MiG approaches the building from its own side.
                 if (void 0 === this._strafeTargetOffset) {
-                  var offsetAngle = Math.random() * Math.PI * 2;
-                  var offsetDist = (1 + Math.random() * 2) * o.Coords.LEPTONS_PER_TILE;
+                  var offsetAngle = randFloat(this.game, 0) * Math.PI * 2;
+                  var offsetDist = (1 + randFloat(this.game, 0) * 2) * o.Coords.LEPTONS_PER_TILE;
                   this._strafeTargetOffset = new m.Vector2(Math.cos(offsetAngle), Math.sin(offsetAngle)).multiplyScalar(
                     offsetDist,
                   );
-                  this._strafePhase = Math.random() * Math.PI * 2;
+                  this._strafePhase = randFloat(this.game, 0) * Math.PI * 2;
                 }
                 var weaveCenter = tgtPos.clone().add(this._strafeTargetOffset);
                 var weaveDiff = weaveCenter.sub(planePos);
@@ -508,8 +517,8 @@ System.register(
                 return e.getNextTile();
               }
             }
-          }),
-          e("MoveInWeaponRangeTask", f));
+          };
+        e("MoveInWeaponRangeTask", f);
       },
     };
   },

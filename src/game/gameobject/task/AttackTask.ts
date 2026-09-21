@@ -34,7 +34,7 @@ import { Task } from "game/gameobject/task/system/Task"; // 已转换
 import * as RangeHelperModule from "game/gameobject/unit/RangeHelper"; // 未转换（any-shim）
 import { WaitMinutesTask } from "game/gameobject/task/system/WaitMinutesTask"; // 已转换
 import { WeaponType } from "game/WeaponType"; // 已转换
-import * as MoveInWeaponRangeTaskModule from "game/gameobject/task/move/MoveInWeaponRangeTask"; // 未转换（any-shim）
+import * as MoveInWeaponRangeTaskModule from "game/gameobject/task/move/MoveInWeaponRangeTask"; // 已转换
 import * as FacingUtilModule from "game/gameobject/unit/FacingUtil"; // 已转换
 import { TurnTask } from "game/gameobject/task/TurnTask"; // 已转换
 import { WaitTicksTask } from "game/gameobject/task/system/WaitTicksTask"; // 已转换

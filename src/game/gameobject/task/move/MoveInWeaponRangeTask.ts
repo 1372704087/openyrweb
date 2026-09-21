@@ -18,6 +18,8 @@
  * STRAFE_CLOSE_ENOUGH=2：战机蛇形时"足够近"的格距阈值（模块级导出，
  * 与孪生一致对外可见）。
  *
+ * 锁步：蛇形侧偏/相位优先用 game.prng，缺失时确定性回退。
+ *
  * 由 game/gameobject/task/move/MoveInWeaponRangeTask.ts.js 重写为 TS
  * （行为完全一致）。两个文件并存期间，本文件才是修改目标。
  */
@@ -38,6 +40,15 @@ import { Vector2 } from "game/math/Vector2"; // 已转换
 
 /** 战机蛇形接近的"足够近"格距阈值。 */
 export const STRAFE_CLOSE_ENOUGH = 2;
+
+/** 锁步安全随机：优先 game.prng，缺失时返回确定性默认值。 */
+function randFloat(game: any, fallback: number): number {
+  if (game && game.prng && game.prng.generateRandomInt) {
+    // [0, 1) 近似：用整数随机铺满
+    return game.prng.generateRandomInt(0, 10000) / 10000;
+  }
+  return fallback;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class MoveInWeaponRangeTask extends MoveTask {
@@ -152,7 +163,8 @@ export class MoveInWeaponRangeTask extends MoveTask {
     const ratio = approachRange / distance;
     const rx = Math.round(targetTile.rx - dx * ratio);
     const ry = Math.round(targetTile.ry - dy * ratio);
-    const tile = this.game.map.tiles[rx] && this.game.map.tiles[rx][ry];
+    // TileCollection 是 tilesByRxy 扁平数组，必须走 getByMapCoords。
+    const tile = this.game.map.tiles.getByMapCoords ? this.game.map.tiles.getByMapCoords(rx, ry) : null;
     return tile && this.game.map.isWithinBounds(tile) ? tile : null;
   }
 
@@ -401,10 +413,11 @@ export class MoveInWeaponRangeTask extends MoveTask {
       // 每架飞机瞄自己的点——随机侧偏与独立摆动相位，多机编队不会
       // 收敛到同一点；每架米格从自己的方向进入。
       if (undefined === this._strafeTargetOffset) {
-        const offsetAngle = Math.random() * Math.PI * 2;
-        const offsetDist = (1 + Math.random() * 2) * Coords.LEPTONS_PER_TILE;
+        // 无 prng 时确定性侧偏：正东 1 格、相位 0（可复现的编队进入）。
+        const offsetAngle = randFloat(this.game, 0) * Math.PI * 2;
+        const offsetDist = (1 + randFloat(this.game, 0) * 2) * Coords.LEPTONS_PER_TILE;
         this._strafeTargetOffset = new Vector2(Math.cos(offsetAngle), Math.sin(offsetAngle)).multiplyScalar(offsetDist);
-        this._strafePhase = Math.random() * Math.PI * 2;
+        this._strafePhase = randFloat(this.game, 0) * Math.PI * 2;
       }
       const weaveCenter = targetPos.clone().add(this._strafeTargetOffset);
       const weaveDiff = weaveCenter.sub(planePos);
