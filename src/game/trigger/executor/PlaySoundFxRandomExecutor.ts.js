@@ -1,4 +1,4 @@
-// === OpenYRWeb: 随机播放音效动作 (PlaySoundFxRandomExecutor) ===
+// === 随机播放音效动作 (PlaySoundFxRandomExecutor) ===
 // 动作 100: PlaySoundFxRandom — 从参数中随机挑选一个音效播放。
 // 参数: params[1..7] = 候选音效名列表（"0" 视为空）。
 // 与原版一致，随机选择并派发 TriggerSoundFxEvent。

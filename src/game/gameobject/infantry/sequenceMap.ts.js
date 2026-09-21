@@ -135,7 +135,7 @@ System.register(
                         ? e.audioVisual.infantryVirus
                         : t === o.InfDeathType.Mutate
                         ? e.audioVisual.infantryMutate
-                        : // OpenYRWeb: InfDeath=10 (vanilla BruteWH). Plays [AudioVisual]
+                        : // InfDeath=10 (vanilla BruteWH). Plays [AudioVisual]
                           // InfantryBrute (BRUTDIE) — the victim is torn apart/flung by a Brute.
                           t === o.InfDeathType.YuriDeath
                           ? e.audioVisual.infantryBrute

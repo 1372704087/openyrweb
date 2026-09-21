@@ -1,4 +1,4 @@
-// === OpenYRWeb: 敌人在区域内条件 (EnemyInZoneCondition) ===
+// === 敌人在区域内条件 (EnemyInZoneCondition) ===
 // 事件 35: EnemyInZone — 当触发阵营的敌对单位进入 [Zone] 定义的区域时触发。
 // 参数: params[1] = 区域索引（对应地图 [Zone] 节，0 基），
 //       params[2] = 阵营 ID（0 表示触发触发器自身所属阵营）。

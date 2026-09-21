@@ -39,7 +39,7 @@ System.register(
       ],
       execute: function () {
         ((l = class {
-          // OpenYRWeb: a building with a BioReactorPowerTrait (ExtraPower= + InfantryAbsorb=yes,
+          // a building with a BioReactorPowerTrait (ExtraPower= + InfantryAbsorb=yes,
           // e.g. Yuri Bio Reactor) has its FULL power output — base Power scaled by health PLUS the
           // per-garrison ExtraPower bonus — owned and reconciled by that trait. The base-game logic
           // below must NOT also add/update/remove the base slice, or the two owners desync (the

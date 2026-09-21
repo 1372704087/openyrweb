@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyUnspawn","game/gameobject/trait/interface/NotifyDestroy"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Floating Disc (DISCUS) drain logic (YR). Attached to units whose weapon
+// Floating Disc (DISCUS) drain logic (YR). Attached to units whose weapon
 // is marked DrainWeapon=yes (vanilla: the Yuri Floating Disc). When the DrainWeapon
 // strikes a Drainable=yes building the drain starts:
 //   - Refinery / Slave Miner → every DrainMoneyFrameDelay ticks, DrainMoneyAmount credits
@@ -75,13 +75,13 @@ System.register(
               if (!t || !t.isBuilding || !t.isBuilding() || !t.rules.drainable) {
                 return;
               }
-              // OpenYRWeb: reject drain on friendly/own buildings to prevent infinite
+              // reject drain on friendly/own buildings to prevent infinite
               // attach-detach loop (weapon hits → startDrain → power drops → tick detach
               // via areFriendly → power restores → weapon fires again → repeat).
               if (t.owner === e.owner || a.areFriendly(t, e)) {
                 return;
               }
-              // OpenYRWeb: reject drain if another disc is already draining this building.
+              // reject drain if another disc is already draining this building.
               // This prevents multiple Floating Discs from draining the same building
               // simultaneously (targeting check in WeaponTargeting prevents the weapon from
               // firing, but this is a defense-in-depth guard for the drain path).
@@ -100,9 +100,9 @@ System.register(
                 (this.drainTicksLeft = 1), // siphon on the first eligible tick
                 // Mark the building as drained so PowerTrait/defenses can suppress it.
                 (t.drainedBy = e);
-              // OpenYRWeb: draining a power plant overrides the owner's displayed power to 0.
+              // draining a power plant overrides the owner's displayed power to 0.
               t.rules.power > 0 && t.owner?.powerTrait && t.owner.powerTrait.drainPowerOverride++;
-              // OpenYRWeb: suppress the building's power contribution while draining.
+              // suppress the building's power contribution while draining.
               a && t.owner?.powerTrait?.updateFrom(t, "update", a);
             }
             // Detach from the current drain target: clear our state and the building's
@@ -111,9 +111,9 @@ System.register(
               if (this.drainTarget && !this.drainTarget.isDisposed && !this.drainTarget.isDestroyed) {
                 var wasPowerPlant = this.drainTarget.rules.power > 0;
                 this.drainTarget.drainedBy = void 0;
-                // OpenYRWeb: restore the building's power contribution when the drain ends.
+                // restore the building's power contribution when the drain ends.
                 e && this.drainTarget.owner?.powerTrait?.updateFrom(this.drainTarget, "update", e);
-                // OpenYRWeb: release the global power-override counter if this was a power plant.
+                // release the global power-override counter if this was a power plant.
                 if (wasPowerPlant && this.drainTarget.owner?.powerTrait) {
                   this.drainTarget.owner.powerTrait.drainPowerOverride = Math.max(0, this.drainTarget.owner.powerTrait.drainPowerOverride - 1);
                   e && this.drainTarget.owner.powerTrait.updateLevel(e);
@@ -151,7 +151,7 @@ System.register(
               // (switched target, given a move order, or AttackTask ended).
               if (!this._isStillAttacking(e, target)) {
                 var ct = e.attackTrait?.currentTarget;
-                // OpenYRWeb: if there IS a new ongoing attack on a different
+                // if there IS a new ongoing attack on a different
                 // target within primary weapon range, keep draining — the disc
                 // fires its primary weapon (DiskLaser) while staying over the
                 // drain building, matching vanilla YR behavior. This handles
@@ -222,12 +222,12 @@ System.register(
                   }
                 }
               }
-              // OpenYRWeb: while draining, auto-fire the primary weapon (laser) at nearby
+              // while draining, auto-fire the primary weapon (laser) at nearby
               // enemies within range. The disc stays parked over the drain target and
               // independently engages hostile units — just like in vanilla YR.
               this._autoFirePrimary(e, t);
             }
-            // OpenYRWeb: auto-fire the primary weapon (laser) at nearby enemies while draining,
+            // auto-fire the primary weapon (laser) at nearby enemies while draining,
             // using the game's passive target acquisition system (same as standby/guard mode).
             // Runs at most once every 10 ticks to keep CPU cost reasonable.
             _autoFirePrimary(e, t) {

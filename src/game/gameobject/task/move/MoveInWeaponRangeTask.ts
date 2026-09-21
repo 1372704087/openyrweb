@@ -9,7 +9,7 @@
  *    建筑中心格（碟形放电条件）；
  *  - 最小射程重定位（recalcMinRange）：站得太近时用 bresenham 找一个
  *    既在射程带内又有视线的新落点（Chrono 移动器特殊处理）；
- *  - 战斗机蛇形接近（OpenYRWeb）：每机独立的随机侧偏与摆动相位，
+ * - 战斗机蛇形接近：每机独立的随机侧偏与摆动相位，
  *    幅度随接近收敛，投弹后直线返回出口/基地后方点；
  *  - 轰炸机动（isBombingRun）：弹道 ROT<=1 的飞机投弹后沿 bresenham
  *    反向找机动格飞过去再返航（bomberManeuverTile 状态机）；
@@ -56,11 +56,11 @@ export class MoveInWeaponRangeTask extends MoveTask {
   target: any;
   /** 使用的武器（射程/弹道参数的来源）。 */
   weapon: any;
-  /** OpenYRWeb：碾压模式——开上目标本体格而非停在射程。 */
+  /** 碾压模式——开上目标本体格而非停在射程。 */
   crushMode: boolean;
   recalcMinRange: boolean;
   cancelRequested: boolean;
-  /** OpenYRWeb：战机已开火 → 停止无限蛇形，当前跑位飞完即收。 */
+  /** 战机已开火 → 停止无限蛇形，当前跑位飞完即收。 */
   runCompleted: boolean;
   bomberInitialLock: boolean;
   rangeHelper: any;
@@ -79,7 +79,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
       (target as any) instanceof GameObject ? ((target as any).isBuilding() ? (target as any).centerTile : (target as any).tile) : target,
       toBridge,
       {
-        // OpenYRWeb：碾压攻击要开上可碾压目标的本体格，移动路径校验
+        // 碾压攻击要开上可碾压目标的本体格，移动路径校验
         // 也必须把目标放行为非阻断（读 options.ignoredBlockers 而非
         // pathFinderIgnoredBlockers）——否则目标格在最后接近段过不了
         // 通行检查，走位永远重规划，碾压单位停在旁边既不碾也不打。
@@ -91,12 +91,12 @@ export class MoveInWeaponRangeTask extends MoveTask {
     );
     this.target = target;
     this.weapon = weapon;
-    // OpenYRWeb：碾压模式——必须开到受害者格上（贴近/同格）让
+    // 碾压模式——必须开到受害者格上（贴近/同格）让
     // MoveTrait 的碾压生效，而不是停在射程边缘。
     this.crushMode = crushMode;
     this.recalcMinRange = true;
     this.cancelRequested = false;
-    // OpenYRWeb：战机打完最后一发时置位——停止无限蛇形改目标，
+    // 战机打完最后一发时置位——停止无限蛇形改目标，
     // 让当前跑位自然飞完并自行返航。
     this.runCompleted = false;
     this.bomberInitialLock = false;
@@ -112,7 +112,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
   onStart(object: any): void {
     const target = this.target;
     const map = this.game.map;
-    // OpenYRWeb：碾压模式必须开上可碾压建筑的本体格触发碾压——
+    // 碾压模式必须开上可碾压建筑的本体格触发碾压——
     // 绝不能把目的地改到建筑旁边的格（那正是碾压单位停在墙边
     // 既不碾也不打的原因）。
     if ((target as any) instanceof GameObject && (target as any).isBuilding() && object.rules.movementZone !== MovementZone.Fly && !this.crushMode) {
@@ -133,7 +133,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
         this.updateTarget(nearbyTile, false);
       }
     }
-    // OpenYRWeb：吸血武器打建筑——永远对中 centerTile（碟必须悬停在
+    // 吸血武器打建筑——永远对中 centerTile（碟必须悬停在
     // 建筑中心正上方才开火，AttackTask Firing 态也会强制此条件）。
     // DiskLaser / 普通气球悬浮走标准接近路径（接近到射程→完成→
     // AttackTask 取消走位并开火），与坦克/光棱一致。
@@ -231,7 +231,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
 
   /**
    * 停驻判定：
-   *  - 地面单位不能停在目标占用格上（OpenYRWeb：碾压单位除外——它
+   * - 地面单位不能停在目标占用格上（碾压单位除外——它
    *    开上受害者本体验碾压）；目标是移动中的同 subcell 单位也不停；
    *  - 地面单位走父类通用停驻检查；空中单位检查同格静止飞机数；
    *  - 轰炸跑位必须能返航；非取消状态下必须真的"足够接近"。
@@ -240,7 +240,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
     if (
       object.zone !== ZoneType.Air &&
       (this.target as any) instanceof GameObject &&
-      // OpenYRWeb：碾压单位（战斗要塞）可以停在可碾压目标身上——
+      // 碾压单位（战斗要塞）可以停在可碾压目标身上——
       // 开上去碾，而不是停在半路。
       !object.canCrushObject(this.target) &&
       this.game.map.tileOccupation.isTileOccupiedBy(tile, this.target) &&
@@ -275,11 +275,11 @@ export class MoveInWeaponRangeTask extends MoveTask {
    *  - 步兵：按 subcell/tile 偏移计算三维距离（isInRange3/2）+ 视线。
    */
   isCloseEnoughToDest(object: any, tile: any): boolean {
-    // OpenYRWeb：碾压模式——站上受害者格才算（MoveTrait 在进格时碾压）。
+    // 碾压模式——站上受害者格才算（MoveTrait 在进格时碾压）。
     if (this.crushMode) return this.rangeHelper.tileDistance(tile, this.targetTile) <= 0.5;
-    // OpenYRWeb：战机跑位已结束（已开火）——只需到达目的地格。
+    // 战机跑位已结束（已开火）——只需到达目的地格。
     if (this.runCompleted && !this.isBombingRun(object)) return this.rangeHelper.tileDistance(tile, this.targetTile) <= 1;
-    // OpenYRWeb：吸血武器打建筑——只有中格才算（AttackTask Firing 亦强制）。
+    // 吸血武器打建筑——只有中格才算（AttackTask Firing 亦强制）。
     if (this.weapon.rules.drainWeapon && this.target?.isBuilding?.() && object.rules.balloonHover && !object.rules.hoverAttack) {
       return (
         tile.rx === this.target.centerTile.rx &&
@@ -345,7 +345,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
   }
 
   /**
-   * OpenYRWeb：战机跑位收尾——已开火，停止无限蛇形改目标，并在仍在
+   * 战机跑位收尾——已开火，停止无限蛇形改目标，并在仍在
    * 移动时转向下一个目的地（机翼保持压坡，不会减速急停后猛转）：
    *  - 空袭米格改道出口 tile 直线飞离；
    *  - 其他战机绕到目标后方的点返航。
@@ -386,7 +386,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
   }
 
   onTick(object: any): boolean {
-    // OpenYRWeb：crushMode 直线开上受害者——不做最小射程重定位
+    // crushMode 直线开上受害者——不做最小射程重定位
     // （否则会把碾压单位从可碾压目标上拉走）。
     if (this.recalcMinRange && !this.crushMode) {
       this.recalcMinRange = false;
@@ -399,7 +399,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
         this.updateTarget(minRangeTile, !!minRangeTile.onBridgeLandType);
       }
     }
-    // OpenYRWeb：原版式蛇形接近——飞机不是一条直线飞向目标，目的地
+    // 原版式蛇形接近——飞机不是一条直线飞向目标，目的地
     // 是目标点 + 横向正弦偏移（幅度随接近收敛），像 Z 字波一样反复
     // 调向、左右压坡、逐步逼近。投弹后直线返回基地方向的出口。
     if (this.shouldAirStrafe(object) && !this.isCancelling() && !this.runCompleted && (object.ammo || 0) > 0) {
@@ -480,7 +480,7 @@ export class MoveInWeaponRangeTask extends MoveTask {
       this.cancelRequested = false;
       this.cancel();
     }
-    // OpenYRWeb：气球悬浮不做中途硬停。碟形 DiskLaser 像坦克一样接近
+    // 气球悬浮不做中途硬停。碟形 DiskLaser 像坦克一样接近
     // 到射程（hasReachedDestination → 完成 → AttackTask 取消走位开火）；
     // 旧的射程边中途停会让碟徘徊；基洛夫（垂直投弹）必须持续飞行。
     return !!(this.isBombingRun(object) && this.isCancelling() && this.forceCancel(object)) || super.onTick(object);

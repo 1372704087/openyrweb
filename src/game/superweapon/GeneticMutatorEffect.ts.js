@@ -2,7 +2,7 @@
 // deps: ["game/map/tileFinder/RadialTileFinder","game/Warhead","game/superweapon/SuperWeaponEffect","engine/type/ObjectType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Genetic Mutator superweapon effect (YR). Vanilla behaviour:
+// Genetic Mutator superweapon effect (YR). Vanilla behaviour:
 //   - Kills infantry with infDeathType=Mutate (9), triggering the infantry renderer
 //     to play GENDEATH (InfantryMutate) as the death animation
 //   - After the GENDEATH animation finishes (detected via _genDeathAnimDone flag),
@@ -82,7 +82,7 @@ System.register(
                       subCell: u.position.subCell,
                     });
                     u.infDeathType = 9;
-                    // OpenYRWeb: record the caster's player color so the GENDEATH
+                    // record the caster's player color so the GENDEATH
                     // (InfantryMutate) transform anim renders in the caster's faction color
                     // instead of the victim's. Read by Infantry renderable onRemove
                     // when infDeathType=9.

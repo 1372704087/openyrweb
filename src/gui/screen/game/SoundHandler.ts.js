@@ -127,7 +127,7 @@ System.register(
           .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainDetected")
           .set(h.SuperWeaponType.ChronoSphere, "EVA_ChronosphereDetected")
           .set(h.SuperWeaponType.LightningStorm, "EVA_WeatherDeviceReady")
-          // OpenYRWeb: YR superweapon EVA — Psychic Dominator detection.
+          // YR superweapon EVA — Psychic Dominator detection.
           .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorDetected")),
           (X = new Map()
             .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearMissileReady")
@@ -136,25 +136,25 @@ System.register(
             .set(h.SuperWeaponType.LightningStorm, "EVA_LightningStormReady")
             .set(h.SuperWeaponType.ParaDrop, "EVA_ReinforcementsReady")
             .set(h.SuperWeaponType.AmerParaDrop, "EVA_ReinforcementsReady")
-            // OpenYRWeb: YR superweapon EVA — Psychic Dominator + Force Shield ready.
+            // YR superweapon EVA — Psychic Dominator + Force Shield ready.
             .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorReady")
             .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldReady")
-            // OpenYRWeb: Psychic Reveal EVA ready sound.
+            // Psychic Reveal EVA ready sound.
             .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")
-            // OpenYRWeb: Spy Plane ready EVA (Soviet Radar Tower support power).
+            // Spy Plane ready EVA (Soviet Radar Tower support power).
             .set(h.SuperWeaponType.SpyPlane, "EVA_SpyPlaneReady")),
           (J = new Map()
             .set(h.SuperWeaponType.MultiMissile, "EVA_NuclearMissileLaunched")
             .set(h.SuperWeaponType.IronCurtain, "EVA_IronCurtainActivated")
             .set(h.SuperWeaponType.ChronoSphere, "EVA_ChronosphereActivated")
             .set(h.SuperWeaponType.LightningStorm, "EVA_LightningStormCreated")
-            // OpenYRWeb: YR superweapon EVA — Psychic Dominator + Force Shield activated.
+            // YR superweapon EVA — Psychic Dominator + Force Shield activated.
             .set(h.SuperWeaponType.PsychicDominator, "EVA_PsychicDominatorActivated")
             .set(h.SuperWeaponType.ForceShield, "EVA_ForceShieldActivated")
-            // OpenYRWeb: Psychic Reveal — vanilla YR has no separate "activated" EVA (the event was
+            // Psychic Reveal — vanilla YR has no separate "activated" EVA (the event was
             // added too late), so the Ready sfx (spsyread) is reused at activation, per evamd.ini.
             .set(h.SuperWeaponType.PsychicReveal, "EVA_PsychicRevealReady")
-            // OpenYRWeb: Spy Plane activated EVA — "Spy plane en route" (evamd.ini EVA_SpyPlaneEnRoute).
+            // Spy Plane activated EVA — "Spy plane en route" (evamd.ini EVA_SpyPlaneEnRoute).
             .set(h.SuperWeaponType.SpyPlane, "EVA_SpyPlaneEnRoute")),
           (ee = new Map().set(h.SuperWeaponType.MultiMissile, N.SoundKey.DigSound)),
           (te = new Map().set(h.SuperWeaponType.LightningStorm, "TXT_LIGHTNING_STORM_APPROACHING")),
@@ -172,7 +172,7 @@ System.register(
             [Q.PowerupType.Firepower, "EVA_UnitFirePowerUpgraded"],
             [Q.PowerupType.Speed, "EVA_UnitSpeedUpgraded"],
           ])),
-          // OpenYRWeb: capture SuperWeaponType enum before the class shadows the module-level `h`.
+          // capture SuperWeaponType enum before the class shadows the module-level `h`.
           _ST = h,
           e(
             "SoundHandler",
@@ -242,7 +242,7 @@ System.register(
                     var t = r.unit,
                       isUndeploy = "undeploy" === r.deployType,
                       e;
-                    // OpenYRWeb: slave miners use the unit/building's own
+                    // slave miners use the unit/building's own
                     // DeploySound=/PackupSound= directly.
                     if (t.rules.slaveMiner) {
                       e = isUndeploy
@@ -271,20 +271,20 @@ System.register(
                     // The continuous beam visual is handled by MagnetronBeamPlugin; pulsing fire sounds
                     // every ROF feel wrong.
                     if (s.magnetronDragging) break;
-                    // OpenYRWeb: Spawner weapons (CruiseLauncher, V3Launcher, DredLauncher) don't
+                    // Spawner weapons (CruiseLauncher, V3Launcher, DredLauncher) don't
                     // play Report at fire time. The spawned missile (CMISL, V3Rocket, DMISL) plays
                     // AuxSound1 via ObjectLiftOffEvent when it actually lifts off, keeping the
                     // sound synced with the visual and avoiding Sound.ts.js limit collisions.
                     if (i.rules.spawner) break;
-                    // OpenYRWeb: DiskLaser weapons fire their Report sound when the beam phase
+                    // DiskLaser weapons fire their Report sound when the beam phase
                     // begins (after ring charging), not at WeaponFire time.
                     if (i.rules.isDiskLaser) break;
-                    // OpenYRWeb: DrainWeapon (e.g. DiskDrain) suppresses Report to avoid
+                    // DrainWeapon (e.g. DiskDrain) suppresses Report to avoid
                     // overlapping with the DISKRAY animation's StartSound=FloatingDiscStealLoop.
                     if (i.rules.drainWeapon) break;
                     var a = i.rules.report;
                     if (a.length) {
-                      // OpenYRWeb: 原版不会在这里打断前一个武器音效，
+                      // 原版不会在这里打断前一个武器音效，
                       // 让每个 Report 音效完整播放；否则磁电光束这类按 ROF 触发的效果会听起来断断续续。
                       // s.__weaponFireSound && s.__weaponFireSound.isPlaying() && s.__weaponFireSound.stop();
                       (n = r.weapon.warhead.rules.electricAssault ? 0.25 : 1);
@@ -361,13 +361,13 @@ System.register(
                       ((l = J.get(h)) && this.eva.play(l, !0),
                       (c = ee.get(h)) &&
                         ((l = r.atTile), this.worldSound.playEffect(c, H.Coords.tile3dToWorld(l.rx, l.ry, l.z), u)));
-                    // OpenYRWeb: Play StartSound from the super weapon's rules (e.g. ForceShieldStarting).
+                    // Play StartSound from the super weapon's rules (e.g. ForceShieldStarting).
                     if (void 0 !== h) {
                       var _fsStartRules = [...this.game.rules.superWeaponRules.values()].find(function (r) { return r.type === h; });
                       _fsStartRules && _fsStartRules.startSound &&
                         ((l = r.atTile), this.worldSound.playEffect(_fsStartRules.startSound, H.Coords.tile3dToWorld(l.rx, l.ry, l.z), u));
                     }
-                    // OpenYRWeb: Play Psychic Dominator activation sound directly from AudioVisual
+                    // Play Psychic Dominator activation sound directly from AudioVisual
                     // config (PsychicDominatorActivateSound=).
                     if (h === _ST.SuperWeaponType.PsychicDominator) {
                       var _domSnd = this.game.rules.audioVisual.dominatorActivateSound;
@@ -425,7 +425,7 @@ System.register(
                                       ? (i = N.SoundKey.BombAttachSound)
                                       : t.fromWeapon.warhead.rules.mindControl &&
                                         (i = N.SoundKey.YuriMindControlSound)),
-                        // OpenYRWeb: Mastermind that died from brain overload uses its special sound.
+                        // Mastermind that died from brain overload uses its special sound.
                         t._mindOverloadDeath && (i = this.game.rules.audioVisual.masterMindOverloadDeathSound || i),
                         i)
                       ) {
@@ -453,7 +453,7 @@ System.register(
                       e.isBuilding() &&
                         e.rules.spySat &&
                         this.worldSound.playEffect(N.SoundKey.SpySatDeactivationSound, e, e.owner);
-                      // OpenYRWeb: play SlavesFreeSound when a Slave Miner is destroyed (liberation)
+                      // play SlavesFreeSound when a Slave Miner is destroyed (liberation)
                       if (e._slavesLiberated) {
                         var freeSound = this.game.rules.general.slavesFreeSound;
                         freeSound && this.worldSound.playEffect(freeSound, e, e.owner);
@@ -463,7 +463,7 @@ System.register(
                   case L.EventType.ObjectOwnerChange:
                     {
                       let e = r.target;
-                      // OpenYRWeb: play MindClearedSound when a mind-controlled unit is released.
+                      // play MindClearedSound when a mind-controlled unit is released.
                       if (e._mindCleared) {
                         e._mindCleared = !1;
                         var clearedSound = this.game.rules.audioVisual.mindClearedSound;
@@ -513,7 +513,7 @@ System.register(
                     var v = r.target;
                     v.owner === this.player &&
                       this.eva.play(
-                        // OpenYRWeb: Secret Lab (CASLAB) grants a random unit — vanilla YR
+                        // Secret Lab (CASLAB) grants a random unit — vanilla YR
                         // announces it with the "New Technology Acquired" EVA message.
                         v.rules.secretLab
                           ? "EVA_NewTechnologyAcquired"
@@ -722,7 +722,7 @@ System.register(
                     k = r.label;
                     this.messageList.addSystemMessage(this.strings.get(k), this.player ?? "grey");
                     break;
-                  // OpenYRWeb: Robot Tank (ROBOT) power state change — play ActivateSound/DeactivateSound + EVA announcement.
+                  // Robot Tank (ROBOT) power state change — play ActivateSound/DeactivateSound + EVA announcement.
                   case L.EventType.RobotPowerStateChange: {
                     var robo = r.gameObject;
                     if (robo && !robo.isDestroyed) {
@@ -791,7 +791,7 @@ System.register(
                     t = !this.lastFeedbackTime || 250 <= e - this.lastFeedbackTime;
                   if ((t && (this.lastFeedbackTime = e), r)) {
                     if (t) {
-                      // OpenYRWeb: Support VoiceSelectDeactivated for paralyzed units.
+                      // Support VoiceSelectDeactivated for paralyzed units.
                       let e = i.map((e) => {
                         var paralyzed = e.robotControlTrait?.isParalyzed();
                         return paralyzed && e.rules.voiceSelectDeactivated
@@ -861,7 +861,7 @@ System.register(
                       t && this.messageList.addUiFeedbackMessage(t);
                     } else this.messageList.addUiFeedbackMessage(this.strings.get("Msg:NothingSelected"));
                   } else
-                    // OpenYRWeb: also respect VoiceSelectDeactivated for single-click selection.
+                    // also respect VoiceSelectDeactivated for single-click selection.
                     !t ||
                       ((t = i.find((e) => {
                         var paralyzed = e.robotControlTrait?.isParalyzed();

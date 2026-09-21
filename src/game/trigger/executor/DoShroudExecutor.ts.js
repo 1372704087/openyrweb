@@ -1,4 +1,4 @@
-// === OpenYRWeb: 制造迷雾动作 (DoShroudExecutor) ===
+// === 制造迷雾动作 (DoShroudExecutor) ===
 // 动作 80: DoShroud — 在指定路径点周围对触发阵营制造迷雾。
 // 参数: params[6] = 路径点编号(AZ 编码), params[1] = 迷雾半径(格, 0 用默认 3)。
 // 实现: 复用 MapShroud.unrevealAround 将该区域标为 Unexplored。

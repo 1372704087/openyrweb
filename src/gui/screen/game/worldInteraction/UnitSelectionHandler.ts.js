@@ -62,7 +62,7 @@ System.register(
                   }));
               }
               addToSelection(t) {
-                // OpenYRWeb: `slaved` slaves (SLAV) are unselectable, EXCEPT freed/liberated
+                // `slaved` slaves (SLAV) are unselectable, EXCEPT freed/liberated
                 // slaves (SlaveMinerTrait._liberateSlaves sets `liberated=true` on the instance,
                 // not the shared rules) which become selectable infantry under their liberator.
                 if (t.rules.selectable && !(t.rules.slaved && !t.liberated)) {

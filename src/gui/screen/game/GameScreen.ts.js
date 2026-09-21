@@ -551,7 +551,7 @@ System.register(
                 (t = new le.MapFile(s)));
               var f = de.MapSupport.check(t, this.strings);
               if (f) return void this.handleError(f, f);
-              // OpenYRWeb: 校验占用出生点的玩家数不超过地图出生点数，避免 "Map has fewer starting locations than players" 崩溃
+              // 校验占用出生点的玩家数不超过地图出生点数，避免 "Map has fewer starting locations than players" 崩溃
               // 占用规则与 GameOptRandomGen.generateStartLocations 一致：非观战玩家各占 1 个，
               // 观战者仅在其 startPos 固定时额外占 1 个（会写入固定位置列表）。
               var gsAll = (g.humanPlayers || []).concat(g.aiPlayers || []).filter(function (pl) { return !!pl; }),
@@ -577,7 +577,7 @@ System.register(
               this.disposables.add(() => this.gameLoader.clearStaticCaches()),
               !i.isCancelled())
             ) {
-              // OpenYRWeb: decode map preview for loading screen
+              // decode map preview for loading screen
               try {
                 var pg = t.decodePreviewImage();
                 var pv = document.createElement("canvas");
@@ -724,7 +724,7 @@ System.register(
               if (!i.isCancelled()) {
                 let { game: i, theater: e, hudSide: t, cameoFilenames: r } = u;
                 ((this.game = i),
-                  // OpenYRWeb debug-only: expose the live game for headless verification.
+                  // debug-only: expose the live game for headless verification.
                   // Removed before any public release. No-op when undefined.
                   ((typeof window !== "undefined" ? (window.__yrwebGame = i) : 0),
                   this.disposables.add(() => {
@@ -1238,7 +1238,7 @@ System.register(
               })),
               this.uiAnimationLoop.stop(),
               this.gameAnimationLoop.start(),
-              // OpenYRWeb: 触发器 DisableUserInput/EnableUserInput 桥接 —
+              // 触发器 DisableUserInput/EnableUserInput 桥接 —
               // 轮询 game.inputLocked 状态并同步 WorldInteraction（锁定期间玩家无法操控单位）。
               // 菜单打开时挂起同步，避免与菜单自身的 setEnabled 冲突。
               ((this.inputLockSyncSuspended = !1),
@@ -1275,7 +1275,7 @@ System.register(
                   this.disposeAttackTargetMarkers();
                 })));
           }
-          // OpenYRWeb: 触发器 MoveAndCenterView — 相机平滑移动到指定路点（参考临时源码 smoothstep 动画）
+          // 触发器 MoveAndCenterView — 相机平滑移动到指定路点（参考临时源码 smoothstep 动画）
           moveCameraToWaypoint(e, t) {
             let n = this.playerUi?.worldInteraction;
             if (!n || !this.game) return;
@@ -1298,7 +1298,7 @@ System.register(
             requestAnimationFrame(h);
             this.disposables.add(() => (c = !0));
           }
-          // OpenYRWeb: 触发器 FlashSmall/Medium/Large/FlashTeam — 高亮指定单元（对齐临时源码 renderable.highlight）
+          // 触发器 FlashSmall/Medium/Large/FlashTeam — 高亮指定单元（对齐临时源码 renderable.highlight）
           flashUnits(e, t) {
             if (!e || !e.length || !this.game) return;
             for (var id of e) {
@@ -1312,7 +1312,7 @@ System.register(
               } catch (_) {}
             }
           }
-          // OpenYRWeb: 脚本化小队攻击指定路点 — 目标标记渲染（脉冲红色光环）
+          // 脚本化小队攻击指定路点 — 目标标记渲染（脉冲红色光环）
           updateAttackTargetMarkers() {
             let e = this.game;
             if (!e) return;
@@ -1379,7 +1379,7 @@ System.register(
               mm.mesh.material?.dispose?.();
             }
           }
-          // OpenYRWeb: 战役加载画面信息（参考临时源码 UKe / CampaignScreen 任务表）
+          // 战役加载画面信息（参考临时源码 UKe / CampaignScreen 任务表）
           buildCampaignLoadingInfo(e) {
             var parts = String(e.campaignId || "").split("-"),
               side = parts[0] || "training",
@@ -1417,7 +1417,7 @@ System.register(
           initUi(i, r, s, e, t, a, n, o) {
             let { worldViewInitResult: l, messageList: c, chatHistory: h, minimap: u } = o;
             var { worldScene: d, worldSound: g, superWeaponFxHandler: p, beaconFxHandler: m, renderableManager: f } = l;
-            // OpenYRWeb: 触发器 Flash* 高亮单元用（按 gameObject 查渲染实体）
+            // 触发器 Flash* 高亮单元用（按 gameObject 查渲染实体）
             this.renderableManager = f;
             let y = new M.SoundHandler(r, g, n, this.sound, r.events, c, this.strings, i);
             if (

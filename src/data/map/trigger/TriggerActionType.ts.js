@@ -1,4 +1,4 @@
-// === OpenYRWeb: 触发动作类型枚举 (TriggerActionType) ===
+// === 触发动作类型枚举 (TriggerActionType) ===
 // 涵盖 RA2 原版 + Yuri's Revenge 扩展的所有动作类型
 // 枚举值对应原版 INI 地图文件中 [Actions] 节的 ActionType 数字 ID
 // deps: []

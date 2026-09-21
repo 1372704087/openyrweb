@@ -44,7 +44,7 @@ System.register("Config", [], function (e, t) {
           get gameResArchiveUrl() {
             return this.generalData.getString("gameResArchiveUrl");
           }
-          // OpenYRWeb: the YR expansion archive URL (paired with gameResArchiveUrl for the
+          // the YR expansion archive URL (paired with gameResArchiveUrl for the
           // one-click "download both exes + extract the 6 mix files" flow).
           get gameResExpansionArchiveUrl() {
             return this.generalData.getString("gameResExpansionArchiveUrl");

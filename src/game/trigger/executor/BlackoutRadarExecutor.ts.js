@@ -1,4 +1,4 @@
-// === OpenYRWeb: 雷达黑屏动作 (BlackoutRadarExecutor) ===
+// === 雷达黑屏动作 (BlackoutRadarExecutor) ===
 // 动作 139: BlackoutRadar — 使触发阵营的雷达暂时失效。
 // deps: ["game/trigger/TriggerExecutor"]
 // Note: variable/type names are minified approximations of the original TypeScript.

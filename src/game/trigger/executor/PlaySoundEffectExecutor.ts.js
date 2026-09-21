@@ -1,4 +1,4 @@
-// === OpenYRWeb: 播放音效动作(non-localized) (PlaySoundEffectExecutor) ===
+// === 播放音效动作(non-localized) (PlaySoundEffectExecutor) ===
 // 动作 85: PlaySoundEffect — 播放全局音效（音效名不经本地化）。
 // 与动作 19 (PlaySoundFx) 在引擎内走同一事件通道。
 // deps: ["game/event/TriggerSoundFxEvent","game/trigger/TriggerExecutor"]

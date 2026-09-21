@@ -1,7 +1,7 @@
 // === Reconstructed SystemJS module: engine/renderable/fx/MagBeamFx ===
 // deps: ["game/Coords"]
 //
-// OpenYRWeb (2026-07-08): CPU-driven vertex color wave effect.
+// (2026-07-08): CPU-driven vertex color wave effect.
 // Uses MeshBasicMaterial with vertexColors + AdditiveBlending.
 // Sawtooth wave with soft-edge pulse overlay on continuous base beam.
 // Screen-space physical-length uvx, fixed interval, max 6 pulses.

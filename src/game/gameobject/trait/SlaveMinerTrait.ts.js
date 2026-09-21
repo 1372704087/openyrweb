@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyUnspawn","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyOwnerChange","engine/type/ObjectType","game/map/tileFinder/RadialTileFinder","game/gameobject/task/SlaveGatherTask","game/gameobject/task/move/MoveTask","game/gameobject/task/morph/UndeployIntoTask","game/type/LandType","game/gameobject/trait/TiberiumTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: SlaveMiner economy (YR Yuri faction). Attached to a building whose rules have
+// SlaveMiner economy (YR Yuri faction). Attached to a building whose rules have
 // Slaves=<infantry>. The building acts as a refinery: it owns a pool of slave infantry that
 // walk to ore, harvest one bail, and walk back to dump (credits += value). Slaves that die are
 // respawned after SlaveRegenRate seconds (mirrors AirSpawnTrait's regen model).
@@ -91,7 +91,7 @@ System.register(
               // NotifyUnspawn) so we can free slaves to the destroyer. Vanilla YR liberates
               // slaves to the House that killed the Slave Miner.
               this._liberator = void 0;
-              // OpenYRWeb: set true by MorphIntoTask just before unspawning the miner, so
+              // set true by MorphIntoTask just before unspawning the miner, so
               // NotifyUnspawn knows this is a deploy/undeploy morph (NOT a destroy/sell) and
               // silently recalls the slaves instead of liberating them to the civilian player.
               this._morphInFlight = !1;
@@ -104,7 +104,7 @@ System.register(
               // Respawn countdown timer (game ticks). Set to ~1s (15 ticks @ speed 6) by
               // scheduleSlaveRespawn(). When it reaches 0, a new slave is spawned at the door.
               this._respawnTicksLeft = 0;
-              // OpenYRWeb: counter for auto-undeploy triggered by slaves. Increments each
+              // counter for auto-undeploy triggered by slaves. Increments each
               // tick when no slave has recently found ore. Reset by any slave finding ore.
               // When it reaches SlaveMinerKickFrameDelay, the building undeploys.
               // Start at a large negative value so a freshly-built building doesn't
@@ -147,7 +147,7 @@ System.register(
             // behaviour (ModEnc/Enslaves): a freed slave becomes a normal infantry under the
             // liberator's control.
             //
-            // OpenYRWeb: mark each freed slave with `liberated = true` so the selection handler
+            // mark each freed slave with `liberated = true` so the selection handler
             // lets the new owner select/command it. We must NOT mutate the shared `rules.slaved`
             // flag (TechnoRules is shared per type), so a per-instance flag is the only safe way
             // to make a freed slave selectable while still-enslaved slaves remain unselectable.
@@ -164,7 +164,7 @@ System.register(
               this.slaves = [];
             }
             [n.NotifySpawn.onSpawn](e, t) {
-              // OpenYRWeb (2026-06-30, REVERSED): on deploy (vehicle→building) the slaves that
+              // (2026-06-30, REVERSED): on deploy (vehicle→building) the slaves that
               // were following the vehicle are claimed here and their SlaveGatherTask.miner is
               // repointed at this building (so they dump at the building's adjacent tile = walk
               // through the door). The slaves are already on the map (they followed the vehicle);
@@ -270,7 +270,7 @@ System.register(
                   (this.regenTicksLeft = 0), this._spawnOneSlave(t, e);
                 }
               } else this.regenTicksLeft = 0;
-              // OpenYRWeb: auto-undeploy when no slave has found ore for too long.
+              // auto-undeploy when no slave has found ore for too long.
               // We check the slaves directly: if any slave is carrying ore (isCarrying)
               // or is actively harvesting (isHarvesting), ore is clearly available and
               // we reset the counter. Only when ALL slaves are idle/searching and the
@@ -296,12 +296,12 @@ System.register(
                 }
               }
             }
-            // OpenYRWeb: capture the destroyer so onUnspawn can free slaves to them. Vanilla YR
+            // capture the destroyer so onUnspawn can free slaves to them. Vanilla YR
             // liberates enslaved workers to the House that killed their Slave Miner.
             [d.NotifyDestroy.onDestroy](e, t, i) {
               this._liberator = i && i.player ? i.player : void 0;
             }
-            // OpenYRWeb: slaves follow the miner on owner-change (mind-control / capture). They
+            // slaves follow the miner on owner-change (mind-control / capture). They
             // are property of the miner; vanilla transfers them with it.
             [oc.NotifyOwnerChange.onChange](e, t, i) {
               // `t`=oldOwner, `i`=game. After changeObjectOwner, e.owner is already the new
@@ -313,7 +313,7 @@ System.register(
               }
             }
             [r.NotifyUnspawn.onUnspawn](e, t) {
-              // OpenYRWeb: deploy/undeploy morph — silently recall slaves (no liberation).
+              // deploy/undeploy morph — silently recall slaves (no liberation).
               // MorphIntoTask sets _morphInFlight=true just before unspawning the miner.
               //
               // IMPORTANT: do NOT clear _morphInFlight here. Object-level NotifyUnspawn (this
@@ -323,7 +323,7 @@ System.register(
               // War Factory build to be cancelled when the Slave Miner undeploys. The flag is
               // per-morph and the building is about to be disposed, so leaving it set is safe.
               if (this._morphInFlight) {
-                // OpenYRWeb (2026-06-30, REVERSED @ yrmd.exe): on undeploy (building→vehicle) the
+                // (2026-06-30, REVERSED @ yrmd.exe): on undeploy (building→vehicle) the
                 // slaves do NOT vanish and are NOT teleported — the SlaveManager persists across
                 // the morph and the slaves stay on the map, following the new vehicle form.
                 // We hand the slave pool to the morph target via game._pendingMinerSlaves; the

@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyOwnerChange"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: YR Tech Hospital self-heal logic (InfantryGainSelfHeal / UnitsGainSelfHeal).
+// YR Tech Hospital self-heal logic (InfantryGainSelfHeal / UnitsGainSelfHeal).
 // When a building with InfantryGainSelfHeal>0 or UnitsGainSelfHeal>0 is owned by a player,
 // all of the owner's infantry/units on the map are periodically healed without needing to
 // enter the building. Only the build owner benefits — neutral/unowned buildings do nothing.

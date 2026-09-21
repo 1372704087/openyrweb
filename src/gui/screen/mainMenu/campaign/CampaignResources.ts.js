@@ -1,4 +1,4 @@
-// === OpenYRWeb: 离线战役资源门 (CampaignResources) ===
+// === 离线战役资源门 (CampaignResources) ===
 // 适配临时源码的 CampaignResources 接口，但不做 CDN manifest 下载：
 //   - inspect(): 检测本地 VFS 是否已包含战役地图（maps01/maps02/mapsmd03 等 MIX 内的 .map）
 //   - install(): 离线模式下无法自动下载，由 CampaignScreen 引导用户去“存储”页导入 Mix

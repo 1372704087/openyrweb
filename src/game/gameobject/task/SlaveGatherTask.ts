@@ -155,7 +155,7 @@ export class SlaveGatherTask extends Task {
   }
 
   /**
-   * 收尾：任何退出路径都清掉收割/搬运/锁矿标志（OpenYRWeb：取消中
+   * 收尾：任何退出路径都清掉收割/搬运/锁矿标志（取消中
    * 的奴隶如果不清 isHarvesting 会无限循环挖掘动画）。
    */
   onEnd(object: any): void {
@@ -317,7 +317,7 @@ export class SlaveGatherTask extends Task {
         const tiberiumTrait = overlay && overlay.traits ? overlay.traits.get(TiberiumTraitModule.TiberiumTrait) : undefined;
         if (tiberiumTrait && 0 < tiberiumTrait.getBailCount()) {
           const bailType = tiberiumTrait.collectBail();
-          // OpenYRWeb：防最后一捆崩溃——collectBail() 对矿堆最后一捆返回
+          // 防最后一捆崩溃——collectBail() 对矿堆最后一捆返回
           // undefined；只统计非 undefined 的捆（与 GatherOreTask 一致）。
           if (bailType !== undefined) {
             this.cargo = bailType;

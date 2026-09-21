@@ -211,7 +211,7 @@ System.register(
                 (c.modHash = c.computeModHash()));
             }
             static patchAudioVisualRules(i) {
-              // OpenYRWeb: YR-only engine — this AudioVisual merge always runs.
+              // YR-only engine — this AudioVisual merge always runs.
               {
                 let t = i.getSection("General");
                 if (t) {
@@ -312,7 +312,7 @@ System.register(
               return c.ai;
             }
             static getFileNameVariant(e) {
-              // OpenYRWeb: YR-only engine. Always return the "md" variant (rulesmd.ini,
+              // YR-only engine. Always return the "md" variant (rulesmd.ini,
               // artmd.ini, etc.). RA2 support has been dropped — the base game's data still
               // loads (ra2.mix is mounted) but the engine never reads the non-md INI names.
               return e.replace(/\.([^.]+)$/, "md.$1");
@@ -324,7 +324,7 @@ System.register(
               var e = this.getIni("soundcd.ini");
               const t = this.getIni(this.getFileNameVariant("sound.ini"));
               var s = t.clone().mergeWith(e);
-              // OpenYRWeb: also merge sound sections referenced by [AudioVisual] fields from
+              // also merge sound sections referenced by [AudioVisual] fields from
               // the rules files. Some mods define new sound sections (e.g. [PsychicDominatorActivate]
               // with Sounds=$spsydom) directly in rulesmd.ini without adding them to soundmd.ini's
               // [SoundList]. We directly look up known [AudioVisual] fields, get the sound section
@@ -486,7 +486,7 @@ System.register(
             replayDir: "replays",
           }),
           (O.supportedMapTypes = new Map([
-            // OpenYRWeb: YR-only. RA2 map types dropped.
+            // YR-only. RA2 map types dropped.
             [x.EngineType.YurisRevenge, ["mpr", "map", "yrm"]],
           ])),
           (O.images = new g.LazyResourceCollection((e) => new i.ShpFile(e))),
@@ -502,7 +502,7 @@ System.register(
           (O.palettes = new g.LazyResourceCollection((e) => new a.Palette(e))),
           (O.theaters = new Map()),
           (O.theaterSettings = new Map()
-            // OpenYRWeb: YR-only. RA2 theater entry dropped (YR's md-named entries cover the
+            // YR-only. RA2 theater entry dropped (YR's md-named entries cover the
             // shared Temperate/Snow/Urban theaters plus the YR-exclusive NewUrban/Desert/Lunar).
             .set(x.EngineType.YurisRevenge, [
               {

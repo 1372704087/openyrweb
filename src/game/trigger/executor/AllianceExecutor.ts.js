@@ -1,4 +1,4 @@
-// === OpenYRWeb: 结盟动作 (AllianceExecutor) ===
+// === 结盟动作 (AllianceExecutor) ===
 // 动作 37: Alliance/MakeAlly — 使触发器的所属阵营与指定阵营结盟（Formed）。
 // 参考临时源码：params[1] = 目标阵营 ID（-1 表示任意）；先按 country.id 匹配，
 // 再按地图 [Houses] 索引（campaignHouses）匹配，最后按 13+索引 匹配。

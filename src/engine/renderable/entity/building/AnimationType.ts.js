@@ -30,9 +30,9 @@ System.register("engine/renderable/entity/building/AnimationType", [], function 
         (e[(e.SPECIAL_SHOOT = 17)] = "SPECIAL_SHOOT"),
         (e[(e.FACTORY_UNDER_DOOR = 18)] = "FACTORY_UNDER_DOOR"),
         (e[(e.FACTORY_UNDER_ROOF_DOOR = 19)] = "FACTORY_UNDER_ROOF_DOOR"),
-        // OpenYRWeb: Tank Bunker — exit animation (walls going down, SpecialAnimThree).
+        // Tank Bunker — exit animation (walls going down, SpecialAnimThree).
         (e[(e.SPECIAL_UNDOCKING = 20)] = "SPECIAL_UNDOCKING"),
-        // OpenYRWeb: Grinder (Grinding=yes) — grind animation (SpecialAnim) played
+        // Grinder (Grinding=yes) — grind animation (SpecialAnim) played
         // while a unit is being recycled.
         (e[(e.SPECIAL_GRIND = 21)] = "SPECIAL_GRIND"));
     },

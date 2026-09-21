@@ -82,7 +82,7 @@ System.register(
                   (n.onBridge = e.onBridge),
                   (n.position.tile = e.tile),
                   (n.deathType = e.deathType),
-                  // OpenYRWeb: clear transport back-reference (transport is dying).
+                  // clear transport back-reference (transport is dying).
                   (n.transport = void 0),
                   t.destroyObject(n, i, !0));
             else this.spawnSurvivors(t);
@@ -99,7 +99,7 @@ System.register(
                       : 0),
                     (i.onBridge = t.onBridge),
                     (i.zone = e.map.getTileZone(t.tile, !t.onBridge)),
-                    // OpenYRWeb: clear transport back-reference (surviving eject).
+                    // clear transport back-reference (surviving eject).
                     (i.transport = void 0),
                     e.unlimboObject(i, t.tile),
                     i.unitOrderTrait.addTask(new s.ScatterTask(e)));
@@ -112,7 +112,7 @@ System.register(
                     (i.position.tile = t.tile),
                     i.zone === o.ZoneType.Water && (i.deathType = l.DeathType.Sink),
                     i.armedTrait?.deathWeapon && (i.armedTrait.deathWeapon = void 0),
-                    // OpenYRWeb: clear transport back-reference (drowning eject).
+                    // clear transport back-reference (drowning eject).
                     (i.transport = void 0),
                     e.destroyObject(i, { player: i.owner }));
               e.events.dispatch(new a.LeaveTransportEvent(t));

@@ -2,7 +2,7 @@
 // deps: ["game/superweapon/SuperWeaponEffect"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb (2026-06-30): Psychic Reveal — Yuri's map-reveal mini-superweapon, unlocked by
+// (2026-06-30): Psychic Reveal — Yuri's map-reveal mini-superweapon, unlocked by
 // building the Psychic Sensor (YAGGNT). When activated, it PERMANENTLY reveals a circular area
 // of shroud (PsychicRevealRadius tiles) around the activation tile for the activating player.
 // Implementation mirrors the RevealAroundWaypointExecutor trigger

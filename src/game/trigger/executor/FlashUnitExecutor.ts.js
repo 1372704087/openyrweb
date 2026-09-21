@@ -1,4 +1,4 @@
-// === OpenYRWeb: 单元高亮/闪烁执行器 (FlashUnitExecutor) ===
+// === 单元高亮/闪烁执行器 (FlashUnitExecutor) ===
 // 动作 64/65/66 (FlashSmall/Medium/Large) + 74 (FlashTeam): 高亮地图上的单元
 // 以吸引玩家注意（RA2 战役演出常用）。
 // 参考临时源码：flashTeam -> ui.flashTeam -> 逐个 renderable.highlight()。

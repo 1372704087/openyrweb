@@ -2,7 +2,7 @@
 // deps: []
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: YR-only engine. The enum keeps YurisRevenge as the sole active value; the
+// YR-only engine. The enum keeps YurisRevenge as the sole active value; the
 // historical AutoDetect/TiberianSun/Firestorm/RedAlert2 entries have been removed since RA2
 // support is no longer maintained. The numeric value (4) is preserved for binary compat
 // with any persisted state.

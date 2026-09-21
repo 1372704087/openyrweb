@@ -1,4 +1,4 @@
-// === OpenYRWeb: 卸载所有运输工具动作 (UnloadAllExecutor) ===
+// === 卸载所有运输工具动作 (UnloadAllExecutor) ===
 // 动作 86: UnloadAll — 使触发器的所属阵营所有运输载具/可进驻建筑卸载乘客。
 // 复用 EvacuateTransportTask（与战斗要塞/生化反应炉同一卸载机制）。
 // deps: ["game/gameobject/task/EvacuateTransportTask","game/trigger/TriggerExecutor"]

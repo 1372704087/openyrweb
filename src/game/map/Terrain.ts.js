@@ -144,7 +144,7 @@ System.register(
                   _dy = Math.abs(t - r);
                 _useBidirectional = 16 <= _dx + _dy + (Math.SQRT2 - 2) * Math.min(_dx, _dy);
               }
-              // OpenYRWeb: an OmniCrusher (e.g. Battle Fortress) paths THROUGH the objects it
+              // an OmniCrusher (e.g. Battle Fortress) paths THROUGH the objects it
               // can crush (vehicles, etc.) instead of routing around them, matching vanilla YR.
               // The passability graph is cached per crush mode so other units keep the
               // normal behavior.
@@ -337,7 +337,7 @@ System.register(
             }
             isBlockerObject(t, i, e, r, s, mover) {
               if (t.rules.crushable && [d.SpeedType.Track, d.SpeedType.Hover].includes(r)) return !1;
-              // OpenYRWeb: an OmniCrusher (e.g. Battle Fortress) can drive over objects it
+              // an OmniCrusher (e.g. Battle Fortress) can drive over objects it
               // would crush that aren't normally crushable (vehicles), unless the object is
               // OmniCrushResistant. Vanilla YR: OmniCrusher trumps Crushable=no, and
               // OmniCrushResistant trumps OmniCrusher. `mover` may be the unit itself or the
@@ -357,7 +357,7 @@ System.register(
                 if (t.rules.gate) return !1;
                 var a = t.art.foundation;
                 let e = t.rules.numberImpassableRows;
-                // OpenYRWeb: war factories must block their full foundation for all
+                // war factories must block their full foundation for all
                 // units. The original code used width-1 for vehicles and did not
                 // override NumberImpassableRows, leaving most columns passable on
                 // 5-wide factories (GAWEAP etc). ExitFactoryTask handles the exit
@@ -379,7 +379,7 @@ System.register(
                     t.isBridgePlaceholder()))
               );
             }
-            // OpenYRWeb: vanilla YR OmniCrusher target test. An OmniCrusher can drive over
+            // vanilla YR OmniCrusher target test. An OmniCrusher can drive over
             // infantry/walls (already crushable) and vehicles; OmniCrushResistant objects
             // and regular (non-wall) buildings are NOT crushable by an OmniCrusher.
             // Invulnerable objects (Iron Curtain / Force Shield) are NOT drive-over
@@ -405,7 +405,7 @@ System.register(
                         i.moveTrait.reservedPathNodes.find(
                           (e) => e.tile === t.tile && !!e.onBridge == !!t.onBridge,
                         ))) ||
-                    // OpenYRWeb: a Track/Hover mover treats everything it can actually crush
+                    // a Track/Hover mover treats everything it can actually crush
                     // (incl. OmniCrusher targets) as a pass-through obstacle, so MoveTask can
                     // crush it instead of being blocked.
                     ([d.SpeedType.Track, d.SpeedType.Hover].includes(s) &&

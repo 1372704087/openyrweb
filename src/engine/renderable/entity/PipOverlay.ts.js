@@ -115,7 +115,7 @@ System.register(
             6: a.SelectionLevel.Selected,
           }),
           (M = new Map()
-            // OpenYRWeb: YR-only — health-pip texture indices for YR (16/17/18). RA2 entry dropped.
+            // YR-only — health-pip texture indices for YR (16/17/18). RA2 entry dropped.
             .set(
               w.EngineType.YurisRevenge,
               new Map().set(b.HealthLevel.Green, 16).set(b.HealthLevel.Yellow, 17).set(b.HealthLevel.Red, 18),
@@ -165,7 +165,7 @@ System.register(
                   (this.lastPowerInfo = !1),
                   (this.lastPowerVal = -1),
                   (this.lastDrainVal = -1),
-                  // OpenYRWeb: Tech Hospital healing indicator state tracking
+                  // Tech Hospital healing indicator state tracking
                   (this.lastHasTechHospital = !1),
                   (this.lastBeingHealed = !1),
                   // Flash timer: starts at ~200ms when a heal pulse raises HP; the icon fades
@@ -553,7 +553,7 @@ System.register(
               createPipsSprite(s, t, a = !1) {
                 if (!this.objectIsOpaqueToViewer()) {
                   let i = [];
-                  // OpenYRWeb: YR-only — pip indices are the YR values (13/14).
+                  // YR-only — pip indices are the YR values (13/14).
                   var n = 13,
                     o = 14,
                     l = R.pips2File.getImage(a ? n : 0).width,
@@ -737,7 +737,7 @@ System.register(
                   return ((e.matrixAutoUpdate = !1), (e.renderOrder = 999996), (e.receiveShadow = !1), e);
                 }
               }
-              // OpenYRWeb: check if this unit's owner has a Tech Hospital building
+              // check if this unit's owner has a Tech Hospital building
               _hasTechHospital() {
                 var t = this.gameObject;
                 if (!t.owner || !t.owner.buildings) return !1;
@@ -748,7 +748,7 @@ System.register(
                 }
                 return !1;
               }
-              // OpenYRWeb: check if this unit is actively being healed (injured + has Tech Hospital)
+              // check if this unit is actively being healed (injured + has Tech Hospital)
               _isBeingHealed() {
                 return this.gameObject.healthTrait.health < 100 && this._hasTechHospital();
               }
@@ -831,7 +831,7 @@ System.register(
                     this.invalidatedElements[4] &&
                       i >= A[4] &&
                       ((this.invalidatedElements[4] = void 0), this.updatePrimaryFactorySprite(r)));
-                  // OpenYRWeb: show power info overlay for power-generating buildings
+                  // show power info overlay for power-generating buildings
                   r = t.isBuilding() && 0 < t.rules.power && !!t.owner?.powerTrait;
                   var pv = r ? t.owner.powerTrait.power : -1,
                     dv = r ? t.owner.powerTrait.drain : -1;
@@ -855,7 +855,7 @@ System.register(
                       : (this.unitCastBarSprite?.update(e),
                         this.lastVeteranLevel !== t.veteranLevel &&
                           ((this.lastVeteranLevel = t.veteranLevel), this.updateVeteranIndicatorSprite(t)),
-                        // OpenYRWeb: Tech Hospital healing indicator — steady when full, blinks on each heal pulse
+                        // Tech Hospital healing indicator — steady when full, blinks on each heal pulse
                         (t.isInfantry() || t.isVehicle()) && (function() {
                           // Gate on viewer relationship so enemies never see the heal icon
                           var _has = this._hasTechHospital() && !this.objectIsOpaqueToViewer();
@@ -1067,7 +1067,7 @@ System.register(
                   let i = [],
                     e = void 0;
                   var s, a;
-                  // OpenYRWeb: PipScale=MindControl — green/red pips for controlled targets.
+                  // PipScale=MindControl — green/red pips for controlled targets.
                   if (t.rules.pipScale === ps.PipScale.MindControl) {
                     var total = t.mindControllerTrait.getTargets().length,
                       safe = t.mindControllerTrait.maxCapacity,
@@ -1098,7 +1098,7 @@ System.register(
                         (e = t.rules.spawnsNumber)),
                     e && (r = this.createPipsSprite(i, e)));
                 } else if (
-                  // OpenYRWeb: infantry with a cargo trait (SlaveMiner slaves, SLAV). Renders
+                  // infantry with a cargo trait (SlaveMiner slaves, SLAV). Renders
                   // ore/gems pips exactly like the vehicle harvester branch above. Slaves are
                   // forced to Storage=3 so the pip scale matches the expected 3-cell cargo.
                   t.isInfantry() &&
@@ -1153,7 +1153,7 @@ System.register(
                   }
                   this.rootObj.add(this.healthBar);
                 }
-                // OpenYRWeb: re-evaluate healing indicator when health bar is refreshed (health changed)
+                // re-evaluate healing indicator when health bar is refreshed (health changed)
                 (this.gameObject.isInfantry() || this.gameObject.isVehicle()) &&
                   (function() {
                     var _has = this._hasTechHospital() && !this.objectIsOpaqueToViewer();
@@ -1185,7 +1185,7 @@ System.register(
                   this.behindAnim?.dispose(),
                   this.debugLabel?.dispose(),
                   this.powerInfoSprite && (this.rootObj.remove(this.powerInfoSprite), (this.powerInfoSprite = void 0)),
-                  // OpenYRWeb: clean up healing indicator + its dedicated material
+                  // clean up healing indicator + its dedicated material
                   this.healingIndicator && (this.rootObj.remove(this.healingIndicator), (this.healingIndicator = void 0)),
                   this.healingMaterial && (this.healingMaterial.dispose(), (this.healingMaterial = void 0)),
                   (this.animFactory = void 0));

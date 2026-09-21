@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/task/system/Task","game/gameobject/task/move/MoveTask","game/map/tileFinder/RadialTileFinder","game/type/LandType","game/gameobject/task/system/WaitMinutesTask","game/gameobject/trait/TiberiumTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Slave economy loop for SlaveMiner slaves (YR Yuri faction). A self-contained state
+// Slave economy loop for SlaveMiner slaves (YR Yuri faction). A self-contained state
 // machine driven by one slave infantry unit (SLAV). Reuses MoveTask (A* pathfinding) as a CHILD
 // task (this.children.push), matching how the vanilla GatherOreTask drives movement — the earlier
 // version erroneously pushed MoveTask onto the unit's own order queue, so the slave never waited
@@ -182,7 +182,7 @@ System.register(
               }
               return bestTile;
             }
-            // OpenYRWeb: on any exit (cancel / miner destroyed / liberation), drop the harvest
+            // on any exit (cancel / miner destroyed / liberation), drop the harvest
             // anim flag so the slave stops playing the Shovel digging sequence. Without this, a
             // slave cancelled mid-harvest would keep the isHarvesting flag and loop the dig anim.
             onEnd(t) {
@@ -324,7 +324,7 @@ System.register(
                   var ta = a && a.traits ? a.traits.get(b.TiberiumTrait) : void 0;
                   if (ta && 0 < ta.getBailCount()) {
                     var bailType = ta.collectBail();
-                    // OpenYRWeb: guard the last-bail crash. collectBail() returns undefined for the
+                    // guard the last-bail crash. collectBail() returns undefined for the
                     // final bail of a patch; the earlier code stored cargo=undefined and later
                     // threw in getTiberium(undefined). Only count non-undefined bail types, exactly
                     // like GatherOreTask does (void 0 === s || r.addBails(s,1)).

@@ -273,9 +273,9 @@ System.register(
               switch (e) {
                 case c.ObjectType.Building:
                   n = h.Building.factory(t, s, i, a, this.tiles, this.bridges);
-                  // OpenYRWeb: attach SlaveMinerTrait to buildings with Slaves= (YR Yuri economy).
+                  // attach SlaveMinerTrait to buildings with Slaves= (YR Yuri economy).
                   n.rules.slaveMiner && ((n.slaveMinerTrait = new SM.SlaveMinerTrait()), n.traits.add(n.slaveMinerTrait));
-                  // OpenYRWeb: attach BioReactorPowerTrait to buildings with ExtraPower= (Bio Reactor
+                  // attach BioReactorPowerTrait to buildings with ExtraPower= (Bio Reactor
                   // power scaling per garrisoned infantry). Requires the building to be garrisonable,
                   // which InfantryAbsorb=yes now also enables (see TechnoRules.canBeOccupied).
                   n.rules.extraPower &&
@@ -287,7 +287,7 @@ System.register(
                   break;
                 case c.ObjectType.Vehicle:
                   n = m.Vehicle.factory(t, s, a, i, this.tileOccupation);
-                  // OpenYRWeb: attach SlaveMinerVehicleTrait to the undeployed Slave Miner vehicle
+                  // attach SlaveMinerVehicleTrait to the undeployed Slave Miner vehicle
                   // (YASLMN) so it proactively seeks ore and deploys (morphs into YAREFN) like
                   // vanilla YR, and so a manual move onto ore deploys on arrival. Attached when the
                   // vehicle can deploy (DeploysInto=) AND is a SlaveMiner. SlavesNumber may live on
@@ -337,7 +337,7 @@ System.register(
                 n.isTechno() &&
                   ((n.rules.primary || n.rules.secondary || n.rules.weaponCount || n.rules.explodes || (n.garrisonTrait && !n.bioReactorPowerTrait)) &&
                     ((n.armedTrait = new k.ArmedTrait(n, i)), n.traits.add(n.armedTrait)),
-                  // OpenYRWeb: Gattling escalation. Technos with IsGattling=yes (and WeaponCount>1)
+                  // Gattling escalation. Technos with IsGattling=yes (and WeaponCount>1)
                   // that are NOT gunners (IFV turret swap) advance weapon stage while firing. Gunners
                   // use GunnerTrait (driven by transported passenger ifvMode) instead.
                   n.rules.isGattling &&
@@ -345,9 +345,9 @@ System.register(
                     !n.rules.gunner &&
                     n.armedTrait &&
                     ((n.gattlingTrait = new GT.GattlingTrait(n)), n.traits.add(n.gattlingTrait)),
-                  // OpenYRWeb: Floating Disc (DISCUS) drain. Harvester units that are also armed
+                  // Floating Disc (DISCUS) drain. Harvester units that are also armed
                   // (vanilla: the Yuri Floating Disc) get a DrainTrait so attacking a Drainable
-                  // OpenYRWeb (2026-06-30, REVERSED): attach DrainTrait to any unit whose primary
+                  // (2026-06-30, REVERSED): attach DrainTrait to any unit whose primary
                   // or secondary weapon is marked DrainWeapon=yes (vanilla Floating Disc / DISCUS).
                   // REVERSED from yrmd.exe: DrainWeapon is a per-weapon flag; the disc's building-
                   // attack weapon carries it, so when it strikes a Drainable=yes building the
@@ -392,7 +392,7 @@ System.register(
                     ((n.mindControllableTrait = new _.MindControllableTrait(n)), n.traits.add(n.mindControllableTrait)),
                   ((e) => {
                     if (e) {
-                      // OpenYRWeb: use weapon-level InfiniteMindControl=yes flag for overload
+                      // use weapon-level InfiniteMindControl=yes flag for overload
                       // behavior; falls back to unit-level MindControlOverload INI field.
                       var _overload = n.rules.mindControlOverload || e.rules.infiniteMindControl;
                       n.mindControllerTrait = new U.MindControllerTrait(n, e.rules.damage, _overload);
@@ -400,17 +400,17 @@ System.register(
                     }
                   })([n.primaryWeapon, n.secondaryWeapon].find((e) => e?.warhead.rules.mindControl)),
                   n.rules.spawns && ((n.airSpawnTrait = new V.AirSpawnTrait()), n.traits.add(n.airSpawnTrait)),
-                  // OpenYRWeb: AirstrikeTrait — attached to units with AirstrikeTeam > 0 (vanilla
+                  // AirstrikeTrait — attached to units with AirstrikeTeam > 0 (vanilla
                   // Boris). Manages MiG plane spawning, laser designator state, and airstrike
                   // cooldown. Boris calls MiGs via his secondary weapon (Flare) on buildings.
                   n.rules.airstrikeTeam > 0 && n.rules.airstrikeTeamType &&
                     ((n.airstrikeTrait = new AST.AirstrikeTrait()), n.traits.add(n.airstrikeTrait)),
                   n.rules.maxDebris && n.traits.add(new W.SpawnDebrisTrait()),
-                  // OpenYRWeb: BerserkTrait — attached to all techno units so they can
+                  // BerserkTrait — attached to all techno units so they can
                   // be affected by Psychedelic=yes warheads (Chaos Drone gas).
                   !n.rules.immuneToPsionics &&
                     ((n.berserkTrait = new BK.BerserkTrait(n)), n.traits.add(n.berserkTrait)),
-                  // OpenYRWeb: Chaos Drone releases nerve gas on death.
+                  // Chaos Drone releases nerve gas on death.
                   n.name === "CAOS" && n.armedTrait && n.armedTrait.primaryWeapon && (n.armedTrait.deathWeapon = n.armedTrait.primaryWeapon)),
                 n.isTechno() || n.isOverlay() || n.isTerrain())
               ) {

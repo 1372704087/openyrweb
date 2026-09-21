@@ -206,7 +206,7 @@ System.register(
                   new C.MixFile(new f.DataStream(g.pop(T.ResourceType.Cameo))),
                   this.cdnResourceLoader.getResourceFileName(T.ResourceType.Cameo),
                 ),
-                // OpenYRWeb: cameocd.mix is the upstream product's custom unit-cameo override
+                // cameocd.mix is the upstream product's custom unit-cameo override
                 // pack (a CD-specific asset, like ra2cd.mix). We do NOT ship it (AGENTS.md §4.2).
                 // The base cameo.mix (from game data / CDN) is already loaded above, so this
                 // override is optional. Make its absence non-fatal instead of throwing
@@ -305,7 +305,7 @@ System.register(
                   (await this.workerHostApi.waitForTasks(), s?.throwIfCancelled());
                 } catch (e) {
                   if (e instanceof b.OperationCanceledError) throw e;
-                  // OpenYRWeb: the worker intentionally rejects these jobs (WORKER_UNAVAILABLE),
+                  // the worker intentionally rejects these jobs (WORKER_UNAVAILABLE),
                   // routing to the main-thread WAV decoder (WavFile.decodeData via wavefile).
                   // That fallback is fully functional, so demote the expected reject to debug
                   // and only surface genuinely unexpected errors at error level.
@@ -367,7 +367,7 @@ System.register(
               );
             }
             async loadBotsLib() {
-              // OpenYRWeb: AI ships in the main bundle now (game/bot/BotsLib exports
+              // AI ships in the main bundle now (game/bot/BotsLib exports
               // IraqBot). No external sp-bots bundle dependency.
               let e;
               try {
@@ -397,7 +397,7 @@ System.register(
                   v.Engine.getActiveEngine() === s.EngineType.YurisRevenge &&
                     t === S.SideType.ThirdSide &&
                     (await v.Engine.vfs.addMixFile("sidec02md.mix")));
-              // OpenYRWeb: sidec01cd.mix / sidec02cd.mix are the upstream product's custom
+              // sidec01cd.mix / sidec02cd.mix are the upstream product's custom
               // side-UI override packs (CD-specific, like cameocd.mix). Not shipped (AGENTS.md
               // §4.2); the base sidec0X.mix above already provides the UI. Optional load.
               await (async () => {
@@ -559,7 +559,7 @@ System.register(
                   (await this.workerHostApi.waitForTasks(), n?.throwIfCancelled());
                 } catch (e) {
                   if (e instanceof b.OperationCanceledError) throw e;
-                  // OpenYRWeb: see prepareSounds — the worker rejects on purpose
+                  // see prepareSounds — the worker rejects on purpose
                   // (WORKER_UNAVAILABLE); VXL geometries are built on the main thread on
                   // demand via VxlGeometryPool.get() -> VxlGeometryMonotoneBuilder, so models
                   // still render. Only the pre-load cache is skipped.

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 更改照明状态动作 (ChangeLightingExecutor) ===
+// === 更改照明状态动作 (ChangeLightingExecutor) ===
 // 动作 52: ChangeLighting — 切换地图环境光照（params[1]=0 变暗 / 1 恢复）。
 // 通过 MapLightingTrait.setTargetAmbientIntensity 平滑过渡。
 // deps: ["game/trigger/TriggerExecutor"]

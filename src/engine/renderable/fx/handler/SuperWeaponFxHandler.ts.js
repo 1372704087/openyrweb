@@ -90,7 +90,7 @@ System.register(
                         e.setPosition(t);
                       },
                     );
-                  // OpenYRWeb: Psychic Dominator — show red screen tint FIRST, then play the
+                  // Psychic Dominator — show red screen tint FIRST, then play the
                   // giant Yuri head animation (FirstAnim) at a moderate sky height (flightLevel).
                   // The SecondAnim (ground ring) and actual damage/capture are triggered later
                   // by DominatorEffect when its onTick reaches DominatorFireAtPercentage.

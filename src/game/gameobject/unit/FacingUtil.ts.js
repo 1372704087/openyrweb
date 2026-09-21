@@ -36,7 +36,7 @@ System.register("game/gameobject/unit/FacingUtil", ["game/math/Vector2", "game/m
           static toWorldDeg(e) {
             return -(e + 90);
           }
-          // OpenYRWeb: shared turret facing logic — reused by DriveLocomotor and HoverLocomotor
+          // shared turret facing logic — reused by DriveLocomotor and HoverLocomotor
           static pointTurretToTarget(unit, destinationLeptons) {
             if (unit.turretTrait) {
               var targetPos;

@@ -34,7 +34,7 @@ System.register(
         },
       ],
       execute: function () {
-        // OpenYRWeb: Virus sniper toxic cloud. The engine has no YR particle engine, so the
+        // Virus sniper toxic cloud. The engine has no YR particle engine, so the
         // cloud is simulated as per-tile damage sources. ALL tuning values come from the
         // vanilla md config instead of being hardcoded here:
         //   [VIRUSD]      SpawnsParticle=VirusCloud1 NumParticles=3  (artmd.ini death anim)

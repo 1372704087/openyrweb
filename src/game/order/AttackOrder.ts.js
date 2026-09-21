@@ -84,7 +84,7 @@ System.register(
           getPointerType(e, t) {
             if (!this.isAllowed()) return e ? s.PointerType.NoActionMini : s.PointerType.NoAction;
             if (this.isC4) return s.PointerType.C4;
-            // OpenYRWeb: Boris airstrike cursor — when the selected weapon has MigAttackCursor=yes
+            // Boris airstrike cursor — when the selected weapon has MigAttackCursor=yes
             // and the target is a building (valid airstrike target), show the AirStrike pointer.
             var i = this.selectAirstrikeWeapon(this.sourceObject, this.target);
             if (!i) i = this.sourceObject.attackTrait?.selectWeaponVersus(
@@ -140,11 +140,11 @@ System.register(
             ))
               return !1;
             if (e === this.sourceObject) return !1;
-            // OpenYRWeb: Boris airstrike — check if the unit has AirstrikeTrait and the target
+            // Boris airstrike — check if the unit has AirstrikeTrait and the target
             // is a building. If so, check if the airstrike is ready (cooldown, etc.).
             var airstrikeWeapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
             if (airstrikeWeapon && e?.isBuilding() && this.sourceObject.airstrikeTrait) {
-              // OpenYRWeb: the airstrike is for enemy buildings — friendly buildings can
+              // the airstrike is for enemy buildings — friendly buildings can
               // only be targeted with a force-attack (Ctrl), while bridge repair huts
               // (cab huts) are never targetable, matching the normal weapon behaviour.
               if (e.cabHutTrait || (!this.forceAttack && this.game.areFriendly(e, this.sourceObject))) return false;
@@ -160,7 +160,7 @@ System.register(
               this.game,
               this.forceAttack,
             );
-            // OpenYRWeb: if the selected weapon is the secondary weapon and the unit
+            // if the selected weapon is the secondary weapon and the unit
             // has VoiceSecondaryWeaponAttack configured, use the dedicated feedback
             // type so the sound handler plays the correct voice line.
             t &&
@@ -199,7 +199,7 @@ System.register(
           }
           process() {
             if (this.isC4) return [new h.PlantC4Task(this.game, this.target.obj)];
-            // OpenYRWeb: Boris airstrike — if the unit has AirstrikeTrait and the target is a
+            // Boris airstrike — if the unit has AirstrikeTrait and the target is a
             // building, create an AirstrikeAttackTask instead of a normal AttackTask. This
             // makes Boris point his laser designator at the building and spawn MiG planes.
             var airstrikeWeapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
@@ -208,7 +208,7 @@ System.register(
               // voice ("MiG's on the way") plays later when the MiGs spawn.
               return [new AST.AirstrikeAttackTask(this.game, this.target, airstrikeWeapon, { force: this.forceAttack })];
             }
-            // OpenYRWeb: deploy-fire units undeploy before attacking
+            // deploy-fire units undeploy before attacking
             var src = this.sourceObject;
             src.isUnit() && src.deployerTrait?.isDeployed() && src.deployerTrait.setDeployed(!1);
             var e = src.attackTrait.selectWeaponVersus(
@@ -219,7 +219,7 @@ System.register(
             );
             return [new a.AttackTask(this.game, this.target, e, { force: this.forceAttack })];
           }
-          // OpenYRWeb: selectAirstrikeWeapon — returns the unit's secondary weapon if it has
+          // selectAirstrikeWeapon — returns the unit's secondary weapon if it has
           // MigAttackCursor=yes and the unit has AirstrikeTrait (Boris). Returns null if not
           // applicable. This is used to intercept building attacks and redirect to AirstrikeAttackTask.
           selectAirstrikeWeapon(unit, target) {

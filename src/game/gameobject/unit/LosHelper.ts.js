@@ -43,7 +43,7 @@ System.register("game/gameobject/unit/LosHelper", ["util/bresenham", "game/type/
                 for ({ x: l, y: c } of g.bresenham(h.rx, h.ry, u.rx, u.ry)) {
                   var d = this.tiles.getByMapCoords(l, c);
                   if (!d) return !1;
-                  // OpenYRWeb: the target's OWN tile must not block LOS to the target —
+                  // the target's OWN tile must not block LOS to the target —
                   // a wall building sets its tile's landType to Wall, so without this
                   // exemption a unit could never acquire LOS on a wall target (vanilla
                   // YR allows firing at walls). Walls BETWEEN attacker and target still

@@ -1,6 +1,6 @@
 // === Reconstructed SystemJS module: gui/component/ErrorDetailsBoxApi ===
 // deps: ["gui/HtmlReactElement","util/disposable/CompositeDisposable","gui/component/ErrorDetailsDialog"]
-// OpenYRWeb: 详细错误信息弹窗 API。
+// 详细错误信息弹窗 API。
 // 管理 ErrorDetailsDialog 组件的创建、显示和销毁。
 
 System.register(

@@ -310,7 +310,7 @@ System.register(
               if (s.isLaser) {
                 let e = this.gameObject.position.worldPosition.clone(),
                   t = new THREE.Vector3();
-                // OpenYRWeb: a building's PrimaryFirePixelOffset/SecondaryFirePixelOffset is
+                // a building's PrimaryFirePixelOffset/SecondaryFirePixelOffset is
                 // applied in Weapon.fire, so the projectile already spawns at the building's
                 // firing point and the laser source needs no pixel-offset correction here.
                 // Only the Prism network support beam (secondary) still raises BOTH endpoints
@@ -346,7 +346,7 @@ System.register(
                 (e = 1 / this.gameSpeed.value),
                 (e = new v.RadBeamFx(this.camera, c, h, i, e, 1)),
                 r.addEffect(e)),
-              // OpenYRWeb: DiskLaser ring-laser charge + beam effect (Floating Disc primary weapon).
+              // DiskLaser ring-laser charge + beam effect (Floating Disc primary weapon).
               // Vanilla YR disk laser draws a circle of LaserInnerColor/LaserOuterColor or
               // IsHouseColor around the firing point, charges CW+CCW arcs, then fires beam.
               s.isDiskLaser &&
@@ -363,7 +363,7 @@ System.register(
                 c.add(t)),
                 (h = this.gameObject.target.getWorldCoords().clone()),
                 (i = s.laserDuration / m.GameSpeed.BASE_TICKS_PER_SECOND / this.gameSpeed.value),
-                // OpenYRWeb: track the firer so the ring follows the moving disc during charge.
+                // track the firer so the ring follows the moving disc during charge.
                 (this._diskFirer = this.gameObject.fromObject),
                 (this._diskFlhOffset = t.clone()),
                 (e = {
@@ -418,7 +418,7 @@ System.register(
                 }),
                 (e = new I.DiskLaserFx(c, h, this.camera, e)),
                 r.addEffect(e)),
-              // OpenYRWeb: Magnetron beam rendering is handled by MagnetronBeamPlugin,
+              // Magnetron beam rendering is handled by MagnetronBeamPlugin,
               // which provides a continuous beam for both vehicle dragging and building attacks.
               this.objectArt.useLineTrail &&
                   ((e = new THREE.Color().fromArray(this.objectArt.lineTrailColor.map((e) => e / 255))),

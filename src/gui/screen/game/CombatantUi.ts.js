@@ -302,7 +302,7 @@ System.register(
                       this.soundHandler.handleAvailableObjectsUpdate(this.player.production.getAvailableObjects()));
                   }),
                 ),
-                // OpenYRWeb: rebuild the sidebar when a building is destroyed. LeaveRubble
+                // rebuild the sidebar when a building is destroyed. LeaveRubble
                 // buildings (e.g. the Secret Lab CASLAB) keep their game object on the map as
                 // a rubble blocker after being destroyed, so the world-level onObjectRemoved
                 // never fires and without this the sidebar would keep showing a Secret Lab
@@ -786,7 +786,7 @@ System.register(
                 ? this.handleInvalidCommand(this.strings.get("MSG:PlanningModeNoDeploy"))
                 : this.pushOrder(y.OrderType.DeploySelected, void 0);
             }
-            // OpenYRWeb: Unload all garrisoned infantry from selected bio reactors (LIFO drain).
+            // Unload all garrisoned infantry from selected bio reactors (LIFO drain).
             handleUnloadAll() {
               if (this.planningMode.isActive()) {
                 this.handleInvalidCommand(this.strings.get("MSG:PlanningModeNoDeploy"));

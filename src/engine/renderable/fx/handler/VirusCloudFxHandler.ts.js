@@ -31,7 +31,7 @@ System.register(
         e(
           "VirusCloudFxHandler",
           (n = class {
-            // OpenYRWeb: Virus sniper toxic cloud visuals. Each game-side gas particle maps
+            // Virus sniper toxic cloud visuals. Each game-side gas particle maps
             // to one looping puff using the md-config particle Image (TXGASG by default) —
             // a raw particle SHP with no art.ini entry, so the fallback ObjectArt defaults
             // to LoopCount=1. The handler forces infinite looping (structural: the puff must

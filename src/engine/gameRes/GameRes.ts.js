@@ -246,7 +246,7 @@ System.register(
                   );
                 ((i = new y.GameResConfig(this.appConfig.gameresBaseUrl ?? "")), (n = !0));
                 let t;
-                // OpenYRWeb one-click sentinel: download both exes + extract the 6 mixes.
+                // one-click sentinel: download both exes + extract the 6 mixes.
                 let oneClick = e && "object" == typeof e && !0 === e.oneClick;
                 if (oneClick) t = x.GameResSource.Archive;
                 else if (e)
@@ -260,7 +260,7 @@ System.register(
                 if (((i.source = t), t !== x.GameResSource.Cdn))
                   try {
                     if (!c) throw new T.NoStorageError("No storage adapters available");
-                    // OpenYRWeb: one-click = import RA2 exe then YR exe sequentially. Each
+                    // one-click = import RA2 exe then YR exe sequentially. Each
                     // GameResImporter.import() fetches its URL and extracts ONLY the required
                     // mix files (7z x <archive> <mixFile> per wanted file). RA2 exe yields
                     // ra2/language/multi.mix; YR exe yields ra2md/langmd/multimd/expandmd01.mix.
@@ -348,7 +348,7 @@ System.register(
               );
             }
             async lookForGameFiles(e) {
-              // OpenYRWeb: YR-only engine. The required game-data set is fixed (the RA2 base
+              // YR-only engine. The required game-data set is fixed (the RA2 base
               // archives plus the YR expansion archives — YR depends on RA2's base data). No
               // engine-type probing is needed since the engine is always YurisRevenge.
               let t = [
@@ -426,7 +426,7 @@ System.register(
             }
             async loadResources(t, i, e) {
               f.Engine.initGameResSource(i.source);
-              // OpenYRWeb: YR-only engine — no auto-detection needed. The engine type is fixed
+              // YR-only engine — no auto-detection needed. The engine type is fixed
               // at YurisRevenge by Application at boot, so the YR archives are always loaded.
               let r;
               if (i.isCdn()) {
@@ -459,7 +459,7 @@ System.register(
               );
             }
             async checkMixesIntegrity(r) {
-              // OpenYRWeb: YR-only — always validate both the RA2 base archives and the YR
+              // YR-only — always validate both the RA2 base archives and the YR
               // expansion archives (YR depends on RA2's base data).
               let e = new Map([
                 ["ra2.mix", ["E7BA3BE", "5DC70844"]],
@@ -508,7 +508,7 @@ System.register(
               }
             }
             async loadCustomMix(e) {
-              // OpenYRWeb: instead of loading a bundled ra2cd.mix (the upstream product's
+              // instead of loading a bundled ra2cd.mix (the upstream product's
               // custom-asset container), load the engine-required INI overrides as standalone
               // files from res/cd-overrides/ and inject them into the VFS as a MemArchive.
               // These are engine data (YR bug-fixes, multiplayer-mode definitions), not branding.
@@ -528,7 +528,7 @@ System.register(
               //                            in loadRules() and required by the rules checksum.
               // (menulogo.png / creditscd.txt were also in ra2cd.mix but are pure branding —
               // intentionally NOT shipped; see AGENTS.md §4.2/§8.)
-              // OpenYRWeb: also inject the Chinese ra2md.csf (if available) to enable
+              // also inject the Chinese ra2md.csf (if available) to enable
               // Traditional Chinese (zh-TW) localization regardless of the user's
               // original game assets. This CSF takes priority over any English CSF
               // in the mounted mix files because engine-overrides is added first.
@@ -649,7 +649,7 @@ System.register(
                 ["cce_ir.pcx"],
               ];
               let r = await this.convertImagesToPng(f.Engine.vfs, e);
-              // OpenYRWeb: menulogo.png is an upstream-branding asset (originally in ra2cd.mix)
+              // menulogo.png is an upstream-branding asset (originally in ra2cd.mix)
               // that we deliberately do NOT ship (AGENTS.md §4.2/§8). The engine hard-coded an
               // unconditional vfs.openFile here, which threw FileNotFoundError and aborted init.
               // Make it optional: if absent, --res-menu-logo simply stays unset and the neutral
@@ -658,7 +658,7 @@ System.register(
                 r.set("menulogo.png", f.Engine.vfs.openFile("menulogo.png").asFile("image/png"));
               } catch (e) {
                 if (!(e instanceof k.FileNotFoundError)) throw e;
-                // OpenYRWeb: expected — menulogo.png is an upstream branding asset we don't ship.
+                // expected — menulogo.png is an upstream branding asset we don't ship.
                 // The neutral CSS fallback (style.css) is used; keep this quiet (debug only).
                 console.debug('Image "menulogo.png" not found in browser FS (branding asset intentionally not shipped).');
               }

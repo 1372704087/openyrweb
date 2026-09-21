@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifyUnspawn","game/event/PowerChangeEvent","game/trait/interface/NotifyPower","game/gameobject/trait/interface/NotifyOwnerChange"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Bio Reactor (YAPOWR, Yuri faction) power scaling. A building with ExtraPower= and
+// Bio Reactor (YAPOWR, Yuri faction) power scaling. A building with ExtraPower= and
 // InfantryAbsorb=yes gains ExtraPower output per garrisoned infantry (vanilla YR: Bio Reactor =
 // 150 base + 100/infantry, up to Passengers=5 → 650 max). The base Power scales with building
 // health exactly like every other power plant.

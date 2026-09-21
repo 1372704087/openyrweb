@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/unit/VeteranLevel","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyAttack","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/AttackTrait","game/gameobject/task/AttackTask"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Gattling weapon escalation (YR). Attached to technos with IsGattling=yes.
+// Gattling weapon escalation (YR). Attached to technos with IsGattling=yes.
 //
 // Vanilla YR behaviour:
 //   - Weapons are arranged in (Stage*2) AG / (Stage*2+1) AA pairs.
@@ -83,7 +83,7 @@ System.register(
             _updateWeapon(e, t) {
               var i = this.gameObject;
               i.armedTrait?.selectGattlingStage(this.stage, this._isElite());
-              // OpenYRWeb: AttackTask captures its weapon at creation time. When the Gattling
+              // AttackTask captures its weapon at creation time. When the Gattling
               // stage advances we swap the ArmedTrait primary/secondary pair, but the running
               // AttackTask keeps firing the old Weapon instance, so stage 1/2 still play the
               // stage 0 sound and damage. Re-select the weapon for any active AttackTask so

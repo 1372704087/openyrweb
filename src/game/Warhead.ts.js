@@ -141,7 +141,7 @@ System.register(
               if (0 < e && t.isTechno() && t.invulnerableTrait.isActive()) return 0;
               if (t.isAircraft() && t.missileSpawnTrait && t.zone !== k.ZoneType.Air) return 0;
               if (!i.gameOpts.destroyableBridges && t.isOverlay() && t.bridgeTrait) return 0;
-              // OpenYRWeb: DrainWeapon damage suppression is handled in detonate() using
+              // DrainWeapon damage suppression is handled in detonate() using
               // T.rules.drainWeapon (weapon-level). It is NOT done here in computeDamage
               // because WarheadRules does not have a drainWeapon property (drainWeapon is
               // a weapon-level flag in vanilla YR). See the detonate() method where the
@@ -180,7 +180,7 @@ System.register(
             // module-level `s` alias of engine/type/ObjectType (dep #14) and made
             // `s.ObjectType.Infantry` below throw. Renamed to match the TS source.
             inflictDamage(e, t, i, r, isPrimary = !1) {
-              // OpenYRWeb: Tank Bunker damage redirection. If the target is a vehicle
+              // Tank Bunker damage redirection. If the target is a vehicle
               // docked inside a Tank Bunker and the warhead doesn't have
               // PenetratesBunker=yes, redirect the damage to the bunker building.
               // The bunker absorbs the hit instead of the vehicle (ModEnc/PenetratesBunker).
@@ -199,7 +199,7 @@ System.register(
                 t.isTechno() && !this.rules.temporal && this.supressOrScatterTarget(t, r),
                 !a.health &&
                   (t.isInfantry() && (t.infDeathType = this.rules.infDeath),
-                  // OpenYRWeb: Virus sniper toxic cloud. InfDeath=8 (InfantryVirus=VIRUSD)
+                  // Virus sniper toxic cloud. InfDeath=8 (InfantryVirus=VIRUSD)
                   // kills spawn a lingering VirusGas cloud at the victim's tile. Only human
                   // (non-NotHuman) infantry do so — NotHuman victims play Die1, not VIRUSD,
                   // and release no gas (vanilla YR). Infantry killed by the gas itself carry
@@ -211,7 +211,7 @@ System.register(
                     8 === this.rules.infDeath &&
                     r.virusCloudTrait?.createCloud(t.tile, t.position?.worldPosition, r),
                   this.rules.temporal && (t.deathType = n.DeathType.Temporal),
-                  // OpenYRWeb: Genetic Mutator transform. A warhead with InfDeath=Mutate (9) that
+                  // Genetic Mutator transform. A warhead with InfDeath=Mutate (9) that
                   // kills convertible infantry spawns a Brute under the attacker's owner instead
                   // of leaving a corpse. Mirrors the ParadropTask/BridgeTrait idiom of suppressing
                   // the death anim (infDeathType=None) before silent destroy. Brute unit type is
@@ -245,14 +245,14 @@ System.register(
                   (e.moveTrait.isIdle() || e.suppressionTrait?.isSuppressed()) &&
                   e.suppressionTrait?.suppress();
             }
-            // OpenYRWeb: Magnetron locomotor-beam drag. Called from detonate() (delegated
+            // Magnetron locomotor-beam drag. Called from detonate() (delegated
             // because detonate's params shadow the module aliases). The drag itself is a
             // MagnetronDragTask that sets victim zone=Air (vanilla YR: IsLocomotor swaps
             // victim Locomotor= to Jumpjet, making it an air unit), lifts it to cruise
             // height, drags it toward the Magnetron, then drops it on a random nearby
             // tile. `game`=t, `target`=e, `attacker`=i (un-shadowed here).
             _dragVehicleTo(e, t, i) {
-              // OpenYRWeb: Vanilla YR Magnetron drag. Push a MagnetronDragTask that
+              // Vanilla YR Magnetron drag. Push a MagnetronDragTask that
               // lifts the victim (zone→Air, vulnerable to AA), flies it toward the
               // Magnetron, then drops it on a random nearby unoccupied tile. The drag
               // persists as long as the Magnetron's AttackTask targets this victim —
@@ -277,7 +277,7 @@ System.register(
               }
               e.unitOrderTrait.addTaskToFront(new Md.MagnetronDragTask(t, e, i));
             }
-            // OpenYRWeb: Genetic Mutator transform helper. Spawns a Brute under the attacker's
+            // Genetic Mutator transform helper. Spawns a Brute under the attacker's
             // owner at the victim's tile, then silently destroys the victim (no death anim).
             _mutateInfantryToBrute(e, t, i) {
               var r = t?.player ?? e.owner,
@@ -366,12 +366,12 @@ System.register(
                   }
               let R = !1,
                 P;
-              // OpenYRWeb: Psychedelic (Chaos Drone gas) warhead — apply berserk instead of damage.
+              // Psychedelic (Chaos Drone gas) warhead — apply berserk instead of damage.
               // The weapon's Damage value is the berserk duration in frames (e.g. 600 = ~10 game seconds).
               // Verses armor multiplier scales the duration. ImmuneToPsionics units are skipped by canDamage().
               if (this.rules.psychicDamage) {
                 for (m of x)
-                  // OpenYRWeb: Chaos Drone gas only affects enemy units, not own faction or allies
+                  // Chaos Drone gas only affects enemy units, not own faction or allies
                   if (!m.isDestroyed && !m.isCrashing && m.isTechno() && m.berserkTrait &&
                       b && m.owner !== b && !r.alliances.areAllied(m.owner, b)) {
                     // Base berserk duration = weapon Damage value (e.g. 600 frames).
@@ -398,14 +398,14 @@ System.register(
               } else
               for (m of x)
                 if (!m.isDestroyed && !m.isCrashing) {
-                  // OpenYRWeb: Magnetron locomotor beam. Delegated to a helper method because
+                  // Magnetron locomotor beam. Delegated to a helper method because
                   // detonate()'s params shadow the module-level aliases (r=game, m=target, etc.),
                   // so the ScatterTask class can't be referenced inline. See _dragVehicleTo.
                   if (this.rules.isLocomotor && m.isVehicle() && m.moveTrait && !m.moveTrait.isDisabled() && v) {
                     this._dragVehicleTo(m, r, v);
                     continue;
                   }
-                  // OpenYRWeb: DrainWeapon trigger. When a DrainWeapon=yes warhead strikes a
+                  // DrainWeapon trigger. When a DrainWeapon=yes warhead strikes a
                   // Drainable=yes building, start (or refresh) the drain on the attacker's
                   // DrainTrait instead of dealing normal damage. T.rules.drainWeapon (weapon-level,
                   // WeaponRules) is used here — this.rules.drainWeapon (warhead-level, WarheadRules)
@@ -473,7 +473,7 @@ System.register(
               T = T.rules.radLevel;
               T && E && r.mapRadiationTrait.createRadSite(t, T, E + 1);
               T = d ? void 0 : R ? r.rules.audioVisual.weaponNullifyAnim : this.pickExplodeAnim(e, P, a, r, w);
-              // OpenYRWeb: DiskLaser weapons have their own ring-laser visual effect;
+              // DiskLaser weapons have their own ring-laser visual effect;
               // suppress the standard warhead impact explosion anim.
               l?.weapon?.rules?.isDiskLaser && (T = void 0);
               if (!R && a === k.ZoneType.Ground) {

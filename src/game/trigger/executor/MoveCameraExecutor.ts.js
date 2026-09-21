@@ -1,4 +1,4 @@
-// === OpenYRWeb: 移动并居中视野执行器 (MoveCameraExecutor) ===
+// === 移动并居中视野执行器 (MoveCameraExecutor) ===
 // 动作 48 (MoveAndCenterView): 将玩家视野平滑移动到指定路点。
 // 参考临时源码（werhd.min.js @2653200）：moveCameraToWaypoint 平滑插值（smoothstep）。
 // 实现方式：设置 game.pendingCameraMove，GUI 层（GameScreen）轮询消费并驱动相机动画。

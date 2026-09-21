@@ -1,6 +1,6 @@
 // === Reconstructed SystemJS module: gui/component/ErrorDetailsDialog ===
 // deps: ["react","gui/component/Dialog"]
-// OpenYRWeb: 详细错误信息弹窗组件。
+// 详细错误信息弹窗组件。
 // 在原有 Dialog 基础上增加可展开的"详细信息"区域，包含错误类型、堆栈、
 // 受影响文件、附加上下文等，支持一键复制详细信息和下载日志文件。
 

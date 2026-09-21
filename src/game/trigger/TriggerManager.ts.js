@@ -135,7 +135,7 @@ System.register(
               for (var [i, r] of this.triggerInstances) r.trigger.tag.id === e && t.push(i);
               for (var s of t) this.destroyTrigger(s);
             }
-            // OpenYRWeb: 动态注册/解绑标记目标（ScenarioTeamRuntime 队伍 tag 调用）。
+            // 动态注册/解绑标记目标（ScenarioTeamRuntime 队伍 tag 调用）。
             // targetsByTag 的数组与 createTriggerInstance 里 setTargets 传入的是同一引用，
             // 因此 push/splice 会自动同步到已创建触发实例的 conditions.targets / instances.targets；
             // 额外的 remainingTargets 维护 OnceAll 语义。

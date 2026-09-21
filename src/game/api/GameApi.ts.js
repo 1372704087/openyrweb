@@ -253,7 +253,7 @@ System.register(
               return __classPrivateFieldGet(this, n, "f").ai.getIni();
             }
             addAttackTargetMarker(e, t, i) {
-              // OpenYRWeb: 脚本化小队攻击指定路点时登记目标标记（GUI 层渲染）
+              // 脚本化小队攻击指定路点时登记目标标记（GUI 层渲染）
               var g = __classPrivateFieldGet(this, n, "f");
               g.attackTargetMarkers = g.attackTargetMarkers || [];
               g.attackTargetMarkers.push({

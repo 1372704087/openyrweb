@@ -80,7 +80,7 @@ System.register(
         f = class extends i.MoveTask {
             constructor(e, t, i, r, crushMode = !1) {
               (super(e, t instanceof n.GameObject ? (t.isBuilding() ? t.centerTile : t.tile) : t, i, {
-                // OpenYRWeb: crush-on-attack drives onto the crushable target's OWN tile,
+                // crush-on-attack drives onto the crushable target's OWN tile,
                 // so the target must be ignored as a blocker by the move path-validation
                 // too — it reads options.ignoredBlockers, NOT pathFinderIgnoredBlockers.
                 // Without this, the wall's tile fails the passability check on the final
@@ -92,13 +92,13 @@ System.register(
               }),
                 (this.target = t),
                 (this.weapon = r),
-                // OpenYRWeb: crush-on-attack — the crusher must drive ONTO the victim's
+                // crush-on-attack — the crusher must drive ONTO the victim's
                 // tile (adjacent/same tile) rather than stopping at weapon range, so the
                 // MoveTrait crush kicks in.
                 (this.crushMode = crushMode),
                 (this.recalcMinRange = !0),
                 (this.cancelRequested = !1),
-                // OpenYRWeb: set when the plane has fired its last weapon — the
+                // set when the plane has fired its last weapon — the
                 // endless fighter strafing retarget is stopped so the current
                 // pass can finish and the run completes on its own.
                 (this.runCompleted = !1),
@@ -109,7 +109,7 @@ System.register(
             onStart(i) {
               let e = this.target,
                 r = this.game.map;
-              // OpenYRWeb: crush-on-attack (crushMode) must drive ONTO the crushable
+              // crush-on-attack (crushMode) must drive ONTO the crushable
               // building's own tile so the MoveTrait crush fires — never redirect the
               // destination to a tile near the building (that is what parked the crusher
               // adjacent to a wall, neither crushing nor firing).
@@ -129,7 +129,7 @@ System.register(
                   ).getNextTile();
                 s && this.rangeHelper.tileDistance(e, s) > Math.SQRT2 && this.updateTarget(s, !1);
               }
-              // OpenYRWeb: DrainWeapon on a building — always redirect to centerTile.
+              // DrainWeapon on a building — always redirect to centerTile.
               // The disc must hover exactly above the building's center for the drain
               // weapon to fire (enforced in AttackTask's Firing state).
               // Note: DiskLaser / normal balloonHover use the standard MoveInWeaponRange
@@ -202,7 +202,7 @@ System.register(
               return e.getNextTile();
             }
             hasReachedDestination(e) {
-              // OpenYRWeb: a fighter still weaving toward its target (bombs not yet
+              // a fighter still weaving toward its target (bombs not yet
               // dropped) must not "arrive" mid-run — if the move child finishes
               // early, the AttackTask's ammo=0 path has no move task to redirect
               // (a is null), so the plane would return to the exit in a straight
@@ -215,7 +215,7 @@ System.register(
               if (
                 t.zone !== h.ZoneType.Air &&
                 this.target instanceof n.GameObject &&
-                // OpenYRWeb: a crusher (Battle Fortress) may stop ON a crushable target —
+                // a crusher (Battle Fortress) may stop ON a crushable target —
                 // it drives onto the victim and crushes it instead of stopping short.
                 !t.canCrushObject(this.target) &&
                 this.game.map.tileOccupation.isTileOccupiedBy(e, this.target) &&
@@ -239,16 +239,16 @@ System.register(
               );
             }
             isCloseEnoughToDest(e, t) {
-              // OpenYRWeb: crush-on-attack — only "close enough" once the crusher is on
+              // crush-on-attack — only "close enough" once the crusher is on
               // the victim's tile (the MoveTrait crushes on tile entry), not merely in
               // weapon range.
               if (this.crushMode) return this.rangeHelper.tileDistance(t, this.targetTile) <= 0.5;
-              // OpenYRWeb: the fighter's run is over (it already fired) — it only
+              // the fighter's run is over (it already fired) — it only
               // needs to reach its destination tile; weapon-range checks no longer
               // apply. Bombers keep their own bombing-run logic.
               if (this.runCompleted && !this.isBombingRun(e))
                 return this.rangeHelper.tileDistance(t, this.targetTile) <= 1;
-              // OpenYRWeb: DrainWeapon on a building — only "close enough" on centerTile
+              // DrainWeapon on a building — only "close enough" on centerTile
               // (AttackTask Firing also enforces this). DiskLaser / other balloonHover
               // use the standard weapon-range path below (same as tanks/prisms); the
               // old range-1 + mid-flight stop caused disc to loiter at the range edge.
@@ -318,7 +318,7 @@ System.register(
                 (this.options.pathFinderIgnoredBlockers = e instanceof n.GameObject ? [e] : void 0));
             }
             completeRun(e, target, exitTile) {
-              // OpenYRWeb: the fighter already fired its weapon mid-run. Stop the endless
+              // the fighter already fired its weapon mid-run. Stop the endless
               // strafing retarget and turn toward the plane's next destination WHILE still
               // moving (the WingedLocomotor banks at speed), so it does not decelerate to a
               // stop right after firing and then make an abrupt turn:
@@ -360,7 +360,7 @@ System.register(
               this.updateTarget(tile, !1);
             }
             onTick(s) {
-              // OpenYRWeb: crushMode drives straight onto the victim — no min-range
+              // crushMode drives straight onto the victim — no min-range
               // repositioning that could pull the crusher off the crushable target.
               if (this.recalcMinRange && !this.crushMode) {
                 this.recalcMinRange = !1;
@@ -370,7 +370,7 @@ System.register(
                   this.updateTarget(e, !!e.onBridgeLandType);
                 }
               }
-              // OpenYRWeb: vanilla-style weaving approach — the plane does not fly
+              // vanilla-style weaving approach — the plane does not fly
               // a single straight line at the target. Its destination is the
               // target point plus a lateral (perpendicular) sine-wave offset whose
               // amplitude shrinks as the plane closes in, so the approach weaves
@@ -460,7 +460,7 @@ System.register(
                     (this.recalcMinRange = !0),
                     (this.bomberQueuedTargetTile = void 0))),
                 this.cancelRequested && (this.bomberManeuverTile || ((this.cancelRequested = !1), this.cancel())),
-                // OpenYRWeb: no mid-flight hard-stop for balloonHover. Disc DiskLaser
+                // no mid-flight hard-stop for balloonHover. Disc DiskLaser
                 // approaches to weapon range like a tank (hasReachedDestination →
                 // complete → AttackTask cancels move and fires). The old stop-at-range
                 // made disc loiter at the edge; Kirov (vertical bombs) must keep flying.

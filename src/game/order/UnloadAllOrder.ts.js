@@ -2,7 +2,7 @@
 // deps: ["game/order/Order","game/order/OrderType","engine/type/PointerType","game/order/OrderFeedbackType","game/gameobject/task/EvacuateTransportTask"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Bio Reactor (YAPOWR) "Unload All" sidebar command. The player selects a friendly bio
+// Bio Reactor (YAPOWR) "Unload All" sidebar command. The player selects a friendly bio
 // reactor that has absorbed infantry inside, presses Ctrl+E, and the building drains everyone LIFO
 // (last in, first out) via the SAME EvacuateTransportTask the Battle Fortress uses — one infantry
 // at a time, spawned on an exit tile outside the footprint.

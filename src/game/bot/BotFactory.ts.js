@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/bot/BotFactory ===
-// OpenYRWeb: 遭遇战每个难度档位对应一个 Bot 实现
+// 遭遇战每个难度档位对应一个 Bot 实现
 //   简单 → DummyBot / 原版AI(Easy)
 //   普通 → IraqBot / 原版AI(Medium)
 //   困难 → 原版AI(Brutal)
@@ -43,13 +43,13 @@ System.register("game/bot/BotFactory", ["game/gameopts/GameOpts", "game/bot/Dumm
             this.botsLib = e;
           }
           create(e) {
-            // OpenYRWeb: 战役人类阵营没有常规 AI，但需要脚本小队引擎
+            // 战役人类阵营没有常规 AI，但需要脚本小队引擎
             // （CreateTeam 等触发器动作对任意阵营都可用，参考临时源码 scenarioTeamRuntime）。
             if (!e.isAi) {
               if (e.isCampaign) return new a.ScenarioTeamBot(e.name, e.country.name);
               throw new Error(`Player "${e.name}" is not an AI`);
             }
-            // OpenYRWeb: 战役 AI 不使用遭遇战 AI（OriginalAiBot / IraqBot 等），
+            // 战役 AI 不使用遭遇战 AI（OriginalAiBot / IraqBot 等），
             // 统一使用 ScenarioTeamBot —— 只执行地图/触发器创建的脚本小队，不做自主生产与进攻。
             if (e.isCampaign) return new a.ScenarioTeamBot(e.name, e.country.name);
             switch (e.aiDifficulty) {

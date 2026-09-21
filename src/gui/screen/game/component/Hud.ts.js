@@ -201,7 +201,7 @@ System.register(
           init() {
             const i = this.palettes.get("sidebar.pal");
             if (!i) throw new Error('Missing palette "sidebar.pal"');
-            // OpenYRWeb: YR-only — the engine check is always true; keep the Yuri-side
+            // YR-only — the engine check is always true; keep the Yuri-side
             // (ThirdSide) styling branch for Yuri faction UI.
             var e = this.sideType === Y.SideType.ThirdSide,
               t = this.getImage("credits.shp"),

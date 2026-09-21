@@ -72,7 +72,7 @@ System.register(
               var n = t.tile;
               let e = this.game.getConstructionWorker(t.owner);
               if (!e.canPlaceAt(this.morphInto.name, n, { ignoreAdjacent: !0, ignoreObjects: [t] })) return !0;
-              // OpenYRWeb: mark slave-miner morph so its SlaveMinerTrait.NotifyUnspawn silently
+              // mark slave-miner morph so its SlaveMinerTrait.NotifyUnspawn silently
               // recalls slaves instead of liberating them to the civilian player on a mere
               // deploy/undeploy (the building is being re-spawned as another form, not sold).
               // VEHICLE→BUILDING (deploy): the vehicle holds slaves inside (SlaveMinerVehicleTrait);

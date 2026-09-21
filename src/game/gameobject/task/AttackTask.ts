@@ -15,7 +15,7 @@
  *    开火且本体继续）、区域火力（areaFire 打自身格）——最后普通开火；
  *  - JustFired（刚开火）：转 PrepareToFire 继续下一轮。
  *
- * 特色机制（原版行为 + OpenYRWeb 扩展）：
+ * 特色机制（原版行为 + 扩展）：
  *  - 碾压攻击（attack-to-crush，yrmd sub_7414E0）：Crusher 对可碾压
  *    目标直接开过去边走边碾（火+碾并行），带停滞守卫（40 tick 没接近
  *    就放弃碾压改普通射击）；OmniCrusher 全程碾压、普通 Crusher 仅贴身；
@@ -74,11 +74,11 @@ export class AttackTask extends Task {
   options: any;
   moveExecuted: boolean;
   moveAttempts: number;
-  /** OpenYRWeb：碾压接近失败（目标开不上去）→ 后续改普通射击。 */
+  /** 碾压接近失败（目标开不上去）→ 后续改普通射击。 */
   crushApproachFailed: boolean;
-  /** OpenYRWeb：碾压接近停滞 tick 计数（40 tick 没接近就放弃碾压）。 */
+  /** 碾压接近停滞 tick 计数（40 tick 没接近就放弃碾压）。 */
   crushApproachStallTicks: number;
-  /** OpenYRWeb：上一次碾压接近的距离（判断是否在接近）。 */
+  /** 上一次碾压接近的距离（判断是否在接近）。 */
   lastCrushApproachDistance: number;
   rangeCheckCooldown: number;
   /** PrepareToFire 稳定性复查：上次入射程时的目标/自己位置。 */
@@ -110,10 +110,10 @@ export class AttackTask extends Task {
     this.options = options;
     this.moveExecuted = false;
     this.moveAttempts = 0;
-    // OpenYRWeb：碾压接近失败（目标不可达）时置位，让单位回退到普通
+    // 碾压接近失败（目标不可达）时置位，让单位回退到普通
     // 射击而不是死循环。
     this.crushApproachFailed = false;
-    // OpenYRWeb：碾压接近进度守卫——追踪碾压走位任务是否真的在缩短
+    // 碾压接近进度守卫——追踪碾压走位任务是否真的在缩短
     // 与可碾压目标（墙）的距离。停滞（停在目标旁却开不上去）就放弃
     // 碾压，回退普通射击。
     this.crushApproachStallTicks = 0;
@@ -281,7 +281,7 @@ export class AttackTask extends Task {
   /**
    * 任务收尾：清强攻状态与当前目标、炮塔回正、攻击状态归 Idle、
    * 光棱主塔收束支持塔、limboLaunch 恢复被动扫描冷却、熄火标志、
-   * 重置连发；OpenYRWeb：仅对盖特拉克单位停掉循环开火音效
+   * 重置连发；仅对盖特拉克单位停掉循环开火音效
    * （多份 Report 实例逐个停，避免截断单发音效）。
    */
   onEnd(object: any): void {
@@ -297,7 +297,7 @@ export class AttackTask extends Task {
     if (this.weapon.rules.limboLaunch) object.attackTrait.expirePassiveScanCooldown();
     if (object.isInfantry() || object.isVehicle()) object.isFiring = false;
     if (this.weapon.hasBurstsLeft()) this.weapon.resetBursts();
-    // OpenYRWeb：攻击结束时停掉循环武器音效。只有盖特拉克单位才做
+    // 攻击结束时停掉循环武器音效。只有盖特拉克单位才做
     // （__weaponFireSound 对所有带 Report 的武器都会设置，一刀切会
     // 截断单发音效；盖特拉克可能同时有多份实例，全部遍历停止）。
     try {
@@ -383,7 +383,7 @@ export class AttackTask extends Task {
           this.target.obj?.isBuilding() &&
           !(object.tile.rx === this.target.obj.centerTile.rx && object.tile.ry === this.target.obj.centerTile.ry)
         ) {
-          // OpenYRWeb：吸血武器必须停在建筑中心格（碟形飞行器放电）。
+          // 吸血武器必须停在建筑中心格（碟形飞行器放电）。
           attackTrait.attackState = AttackState.CheckRange;
           return this.onTick(object);
         }
@@ -392,7 +392,7 @@ export class AttackTask extends Task {
           this.shouldDropTarget(this.target.obj, object) ||
           (magDragging
             ? false
-            : // OpenYRWeb：狂暴单位绕过 canTarget（可攻击包括友方在内的一切单位）。
+            : // 狂暴单位绕过 canTarget（可攻击包括友方在内的一切单位）。
               !object.berserkTrait?.isBerserk() &&
               !this.weapon.targeting.canTarget(
                 this.target.obj,
@@ -439,7 +439,7 @@ export class AttackTask extends Task {
         return true;
       }
       if (object.ammo === 0) {
-        // OpenYRWeb：战斗机打完最后一发时不要就地取消走位任务（会让飞机
+        // 战斗机打完最后一发时不要就地取消走位任务（会让飞机
         // 急停悬停）——completeRun 让攻击跑位自然飞过目标；非战斗机保留
         // 原版的延迟取消（轰炸机先飞完机动格）。
         if (object.rules.fighter && moveInRangeChild) {
@@ -470,7 +470,7 @@ export class AttackTask extends Task {
         }
         cancelledMoveChild = true;
       }
-      // OpenYRWeb：驻军建筑——每名驻军用自己的武器独立开火（各自 ROF）。
+      // 驻军建筑——每名驻军用自己的武器独立开火（各自 ROF）。
       if (object.isBuilding() && object.garrisonTrait && object.garrisonTrait.isOccupied()) {
         for (const occupant of object.garrisonTrait.units) {
           const occupantWeapon = occupant.armedTrait?.getGarrisonWeapon();
@@ -485,13 +485,13 @@ export class AttackTask extends Task {
         attackTrait.attackState = AttackState.JustFired;
         return false;
       }
-      // OpenYRWeb：OpenTopped 运载具（战斗要塞）——乘员独立开火，本体
+      // OpenTopped 运载具（战斗要塞）——乘员独立开火，本体
       // 武器继续走普通开火路径（不 return）；行进间也可开火。乘员加成
       // 在 Weapon.fire / 射程计算内部通过 transport 回引实现。
       if (object.transportTrait && object.rules.openTopped && object.transportTrait.units.length) {
         const openToppedTarget = this.target.obj || this.target.tile;
         for (const passenger of object.transportTrait.units) {
-          // OpenYRWeb：用 OpenTransportWeapon（GGI 在要塞上用导弹而非机枪）。
+          // 用 OpenTransportWeapon（GGI 在要塞上用导弹而非机枪）。
           const passengerWeapon = passenger.armedTrait?.getOpenToppedWeapon();
           if (
             passengerWeapon &&
@@ -512,12 +512,12 @@ export class AttackTask extends Task {
           return false;
         }
       }
-      // OpenYRWeb：FireWhileMoving=no——必须完全停稳才能开火（碟形
+      // FireWhileMoving=no——必须完全停稳才能开火（碟形
       // 飞行器放电 ROF=50）；移动中保持 Firing 等待，不消耗弹药。
       if (!this.weapon.rules.fireWhileMoving && object.moveTrait && object.moveTrait.isMoving()) return false;
-      // OpenYRWeb：断电的建筑防御无法开火（被碟形飞行器吸电/低电力）。
+      // 断电的建筑防御无法开火（被碟形飞行器吸电/低电力）。
       if (object.isBuilding() && object.poweredTrait && !object.poweredTrait.isPoweredOn()) return false;
-      // OpenYRWeb：AreaFire=yes 的武器打自己所在格（毒气从自身位置扩散，
+      // AreaFire=yes 的武器打自己所在格（毒气从自身位置扩散，
       // 如混沌无人机），与原版部署后区域火力一致。
       const areaFireTarget = this.weapon.rules.areaFire ? this.game.createTarget(undefined, object.position.tile) : this.target;
       // 孪生：(fire(...), cancelledMoveChild) ? 结束 : fireOnce/passive/JustFired。
@@ -551,7 +551,7 @@ export class AttackTask extends Task {
       targetObj = targetObj.replacedBy;
       this.onTargetChange(object);
     }
-    // OpenYRWeb：接近途中目标被毁 → 立即中止（飞机直奔出口而不是飞到
+    // 接近途中目标被毁 → 立即中止（飞机直奔出口而不是飞到
     // 废墟上空才转向）。
     if (targetObj && targetObj.isDestroyed) {
       this.cancel();
@@ -559,7 +559,7 @@ export class AttackTask extends Task {
     }
     let targetValid = this.game.isValidTarget(targetObj) && !this.shouldDropTarget(targetObj, object);
     if (targetValid && !magDragging) {
-      // OpenYRWeb：狂暴单位绕过 canTarget。
+      // 狂暴单位绕过 canTarget。
       let canAttack =
         object.berserkTrait?.isBerserk() ||
         this.weapon.targeting.canTarget(targetObj, this.target.tile, this.game, !!this.options.force, !!this.options.passive);
@@ -600,7 +600,7 @@ export class AttackTask extends Task {
     if (attackTrait.attackState === AttackState.CheckRange) {
       // 有效目标用其本体，丢失时用最后有效位置。
       const approachTile = this.target.obj ? (targetValid ? this.target.obj : this.lastValidTargetPosition.tile) : this.target.tile;
-      // OpenYRWeb：OpenTopped 乘员在 CheckRange（接近中）也每 tick 独立
+      // OpenTopped 乘员在 CheckRange（接近中）也每 tick 独立
       // 开火——必须在射程冷却 early-return 之前（否则车体接近途中乘员
       // 永远打不了）。
       if (targetValid && !magDragging && object.transportTrait && object.rules.openTopped && object.transportTrait.units.length) {
@@ -629,7 +629,7 @@ export class AttackTask extends Task {
             : this.target.obj.tile
           : this.lastValidTargetPosition.tile
         : this.target.tile;
-      // OpenYRWeb：磁电拖拽跳过最小射程（目标在被拖进来，不需要后退），
+      // 磁电拖拽跳过最小射程（目标在被拖进来，不需要后退），
       // 但仍检查最大射程（目标被超时空传送走就追或结束）。
       let inRange: boolean;
       if (magDragging) {
@@ -637,13 +637,13 @@ export class AttackTask extends Task {
       } else {
         inRange = this.rangeHelper.isInWeaponRange(object, approachTile, this.weapon, this.game.rules);
       }
-      // OpenYRWeb：吸血武器必须停在建筑中心格——即使射程覆盖也强制
+      // 吸血武器必须停在建筑中心格——即使射程覆盖也强制
       // 重新定位，避免 Firing 检查打回 CheckRange 造成死循环。
       if (inRange && this.weapon.rules.drainWeapon && this.target.obj?.isBuilding()) {
         const centerTile = this.target.obj.centerTile;
         inRange = object.tile.rx === centerTile.rx && object.tile.ry === centerTile.ry;
       }
-      // OpenYRWeb：碾压攻击（原版 yrmd sub_7414E0）——Crusher 直接开上
+      // 碾压攻击（原版 yrmd sub_7414E0）——Crusher 直接开上
       // 可碾压的地面目标（战斗要塞碾步兵/坦克/墙；强制攻击友方墙也算）。
       // 空中目标排除；OmniCrusher 任意距离都碾，普通 Crusher 仅贴身碾。
       // 与孪生一致：每 tick 写入强攻标记，供碾压逻辑处理友军目标。
@@ -664,7 +664,7 @@ export class AttackTask extends Task {
         ? !inRange || !this.losHelper.hasLineOfSight(object, approachTile, this.weapon) || !moveInRangeChild
         : !inRange ||
           !this.losHelper.hasLineOfSight(object, approachTile, this.weapon) ||
-          // OpenYRWeb：飞机轰炸接近（基洛夫垂直投弹、战斗机蛇形）——
+          // 飞机轰炸接近（基洛夫垂直投弹、战斗机蛇形）——
           // 气球悬浮碟走普通坦克路径。
           (object.isAircraft() && !moveInRangeChild && (this.weapon.projectileRules.iniRot <= 1 || object.rules.fighter));
       if (needsApproach) {
@@ -675,7 +675,7 @@ export class AttackTask extends Task {
               const shouldRetarget =
                 targetValid &&
                 this.target.obj &&
-                // OpenYRWeb：碾压攻击在目标移动时立即改目标（追当前 tile
+                // 碾压攻击在目标移动时立即改目标（追当前 tile
                 // 而不是先开到旧坐标再掉头）；普通攻击按距离阈值改。
                 (crushTarget
                   ? this.target.obj.tile !== this.lastSelfMoveTargetTile
@@ -684,7 +684,7 @@ export class AttackTask extends Task {
                 moveInRangeChild.retarget(this.target.obj, !!this.target.getBridge());
                 this.lastSelfTileBeforeMove = object.tile;
                 this.lastSelfMoveTargetTile = this.target.obj?.tile ?? this.target.tile;
-                // OpenYRWeb：碾压任务刚改目标，本 tick 等它执行。
+                // 碾压任务刚改目标，本 tick 等它执行。
                 if (crushTarget) return false;
               } else {
                 // 超出拴绳距离 → 取消接近并结束（被动攻击防追出太远）。
@@ -702,7 +702,7 @@ export class AttackTask extends Task {
                     ((object.moveTrait.baseSpeed + targetSpeed) / Coords.LEPTONS_PER_TILE),
                 );
                 if (0 < catchUpTicks) this.rangeCheckCooldown = Math.min(GameSpeed.BASE_TICKS_PER_SECOND, catchUpTicks);
-                // OpenYRWeb：碾压接近停滞守卫——40 tick 没接近就放弃碾压，
+                // 碾压接近停滞守卫——40 tick 没接近就放弃碾压，
                 // 让 moveAttempts 回退逻辑接管（改普通射击）。
                 const currentDistance = this.rangeHelper.tileDistance(object, approachTile);
                 if (undefined === this.lastCrushApproachDistance || currentDistance < this.lastCrushApproachDistance) {
@@ -753,7 +753,7 @@ export class AttackTask extends Task {
             return true;
           }
           if (this.moveAttempts > MAX_MOVE_ATTEMPTS) {
-            // OpenYRWeb：碾压目标开不上去 → 回退普通射击（不要终止任务，
+            // 碾压目标开不上去 → 回退普通射击（不要终止任务，
             // 否则贴墙的碾压单位既不碾也不打）；重置计数。
             this.crushApproachFailed = true;
             this.moveAttempts = 0;
@@ -770,7 +770,7 @@ export class AttackTask extends Task {
           this.lastSelfMoveTargetTile = moveTarget instanceof GameObject ? moveTarget.tile : moveTarget;
           return this.onTick(object);
         }
-        // OpenYRWeb：holdGround 的 OpenTopped 运载具——本体够不着但乘员
+        // holdGround 的 OpenTopped 运载具——本体够不着但乘员
         // 可能够得着：保持 CheckRange 让乘员继续开火（不结束任务）。
         if (object.transportTrait && object.rules.openTopped && object.transportTrait.units.length) {
           for (const passenger of object.transportTrait.units) {
@@ -789,7 +789,7 @@ export class AttackTask extends Task {
       // 就位：重置走位计数；取消接近任务转 PrepareToFire。
       this.moveExecuted = false;
       this.moveAttempts = 0;
-      // OpenYRWeb：入射程后取消接近任务并开火（坦克/光棱同款）。碟形
+      // 入射程后取消接近任务并开火（坦克/光棱同款）。碟形
       // 飞行器不能保留走位任务（会在射程边缘徘徊）。战斗机/召唤物保留
       // 走位子任务让跑位飞完；飞行单位低于最小射程时保留（继续拉开）；
       // 碾压攻击保留走位让火+碾并行。
@@ -825,7 +825,7 @@ export class AttackTask extends Task {
     const targetWorldCoords = this.target.getWorldCoords();
     const selfWorldPosition = object.position.worldPosition;
     // 位置稳定性复查：目标和自己相对上次入射程时都没挪窝才算站定
-    // （OpenYRWeb：碾压攻击免检——边开边碾）。
+    // （碾压攻击免检——边开边碾）。
     if (
       !crushTarget &&
       !(
@@ -897,7 +897,7 @@ export class AttackTask extends Task {
   /**
    * 是否应丢弃当前目标：强丢了（limboLaunch 落点预搜失败）、目标已
    * 被寄生/无敌（limboLaunch）、目标被超时空冻结且自己不是碾压单位
-   * （OpenYRWeb：碾压是绝对击杀，可碾碎冻结目标）、或目标易主。
+   * （碾压是绝对击杀，可碾碎冻结目标）、或目标易主。
    */
   shouldDropTarget(target: any, attacker: any): boolean {
     if (this.forceDropTarget) return true;
@@ -910,7 +910,7 @@ export class AttackTask extends Task {
     if (
       target.warpedOutTrait.isInvulnerable() &&
       !this.weapon.warhead.rules.temporal &&
-      // OpenYRWeb：碾压单位攻击可碾压目标时不因目标被冻结而丢弃
+      // 碾压单位攻击可碾压目标时不因目标被冻结而丢弃
       // （原版：碾过被超时空军团冻结的目标直接摧毁）；非碾压单位仍丢弃。
       !(attacker?.isUnit() && attacker.crusher && attacker.canCrushObject(target))
     ) {

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 消除迷雾动作 (DoUnshroudExecutor) ===
+// === 消除迷雾动作 (DoUnshroudExecutor) ===
 // 动作 81: DoUnshroud — 在指定路径点周围对触发阵营揭示地图。
 // 参数: params[6] = 路径点编号(AZ 编码), params[1] = 揭示半径(格, 0 用默认 3)。
 // 实现: 复用 MapShroud.revealAround 将该区域标为 Explored。

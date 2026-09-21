@@ -1,4 +1,4 @@
-// OpenYRWeb: renders a CONTINUOUS purple tractor beam from this unit (a Magnetron) to the
+// renders a CONTINUOUS purple tractor beam from this unit (a Magnetron) to the
 // vehicle it is currently lifting/dragging. Replaces the per-shot RadBeamFx flicker (each
 // MagneticBeam hit only spawned a ~1-frame RadBeamFx, so a locked Magnetron looked like a
 // stuttering "spam" of beams rather than a steady tractor beam).
@@ -7,7 +7,7 @@
 // refreshed every render frame, disposed when the drag link ends. The drag link is read from
 // the game object's `magnetronDragging` field (set/cleared by MagnetronDragTask).
 //
-// OpenYRWeb (2026-07-06): Now uses MagBeamFx with MagnaBeam parameters from the Magnetron's
+// (2026-07-06): Now uses MagBeamFx with MagnaBeam parameters from the Magnetron's
 // IsMagBeam weapon rules instead of the old hardcoded MindControlLinkFx. This gives the
 // continuous tractor beam the full wave/pulse/glow pipeline matching the per-shot beam.
 // deps: ["engine/renderable/fx/MagBeamFx", "game/Coords"]

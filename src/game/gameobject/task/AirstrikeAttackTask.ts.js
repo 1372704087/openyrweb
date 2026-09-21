@@ -55,7 +55,7 @@ System.register(
             this.options = options || {};
             this.phase = Phase.Approaching;
             this.fired = false;
-            // OpenYRWeb: set once the walk-into-range task has been created; after it
+            // set once the walk-into-range task has been created; after it
             // completes (Boris is stationary at the range edge) the flare is fired.
             this._walkDone = false;
             this.rangeHelper = new s.RangeHelper(game.map.tileOccupation);
@@ -117,7 +117,7 @@ System.register(
               if (voice) {
                 this.game.events.dispatch(new v.TriggerSoundFxEvent(voice, gameObject.tile));
               }
-              // OpenYRWeb: use the standard weapon-range check (footprint-aware,
+              // use the standard weapon-range check (footprint-aware,
               // the same one the primary weapon and the MoveInWeaponRangeTask use)
               // so Boris walks fully into the Flare's range before firing.
               if (this.rangeHelper.isInWeaponRange(gameObject, targetObj || targetTile, this.weapon, this.game.rules)) {

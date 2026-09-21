@@ -2,7 +2,7 @@
 // deps: ["gui/screen/mainMenu/ScreenType","engine/sound/Music","gui/screen/mainMenu/MainMenuScreen","gui/screen/mainMenu/MainMenuRoute","engine/MapDigest","react","gui/jsx/jsx","gui/jsx/HtmlView"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Campaign screen — side selection, difficulty, mission list, and game startup.
+// Campaign screen — side selection, difficulty, mission list, and game startup.
 
 System.register(
   "gui/screen/mainMenu/campaign/CampaignScreen",

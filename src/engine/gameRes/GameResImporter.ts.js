@@ -139,7 +139,7 @@ System.register(
                 ((this.appConfig = e), (this.strings = t), (this.sentry = i));
               }
               async import(l, c, e, h) {
-                // OpenYRWeb: YR-only engine. No engine-type probing — `e` is always
+                // YR-only engine. No engine-type probing — `e` is always
                 // YurisRevenge (set by Application at boot). The import copy list is the fixed
                 // YR set: the RA2 base archives (which YR depends on) plus the YR expansion
                 // archives.
@@ -245,7 +245,7 @@ System.register(
                       } catch (e) {
                         if (44 !== e.errno) throw e;
                         if (d.has(t)) {
-                          // OpenYRWeb: optional mix missing. For thememd.mix (YR expansion BGM)
+                          // optional mix missing. For thememd.mix (YR expansion BGM)
                           // this means the Yuri's Revenge soundtrack won't play — worth telling
                           // the user, but not a warning (the base game still works). info-level
                           // keeps it visible without crying wolf on every launch.
@@ -295,7 +295,7 @@ System.register(
                     } catch (e) {
                       if (e instanceof O.FileNotFoundError) {
                         if (d.has(s)) {
-                          // OpenYRWeb: see the archive-path branch above — optional mix skip.
+                          // see the archive-path branch above — optional mix skip.
                           console.info(`Optional mix "${s}" not found - skipping.` + (s.toLowerCase() === "thememd.mix" ? " (Yuris Revenge expansion music will be unavailable; base RA2 music still plays.)" : ""));
                           continue;
                         }
@@ -343,12 +343,12 @@ System.register(
                     n = await i.getOrCreateDirectory(n, !0);
                   await this.importMusic(t, n, (e) => r(s.get("ts:import_importing_pg", a, e)));
                 } else if (
-                  // OpenYRWeb: YR-only — the language archive is always langmd.mix.
+                  // YR-only — the language archive is always langmd.mix.
                   a === "langmd.mix"
                 ) {
                   r(s.get("ts:import_importing_long", a));
                   var o = new c.MixFile(t.stream);
-                  // OpenYRWeb: YR-only — splash image + video import always run.
+                  // YR-only — splash image + video import always run.
                   ((n = await this.importSplashImage(o, i)), r(void 0, n)),
                     await this.importVideo(o, i);
                 }

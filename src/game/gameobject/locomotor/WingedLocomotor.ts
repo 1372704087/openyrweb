@@ -8,7 +8,7 @@
  *  - HoverStrafe（悬停扫射）：近距离/被取消/对准时进入，机身指向
  *    攻击目标（或待命朝向 270°/机位朝向 0°），推进方向仍朝目的地。
  *
- * 三种姿态动画（原版 YR 行为的 OpenYRWeb 补全）：
+ * 三种姿态动画（原版 YR 行为的补全）：
  *  - 压坡转弯：转弯剩余角越大压坡越深（上限 ≈29.75°，dbl_B44310），
  *    固定速率进出坡度，不瞬间贴地；
  *  - 机翼摆动：飞行中叠加 sin(frame%20 × 0.314) × 1.5 的轻微滚转振荡；
@@ -301,12 +301,12 @@ export class WingedLocomotor {
     const bodyResult = FacingUtilModule.FacingUtil.tick(object.direction, bodyFacing, object.rules.rot);
     object.direction = bodyResult.facing;
     const turnDelta = bodyResult.delta;
-    // 压坡转弯（OpenYRWeb：原版 YR 行为）：目标坡度由剩余转角决定
+    // 压坡转弯（原版 YR 行为）：目标坡度由剩余转角决定
     // （大转弯深坡、小转弯浅坡），上限 dbl_B44310 ≈ 29.75°，±4/tick 进出坡。
     const targetRoll =
       Math.sign(turnDelta) * Math.max(10, Math.min((((bodyFacing - bodyResult.facing + 540) % 360) - 180) * 0.5, 29.75));
     object.roll += Math.max(-4, Math.min(4, targetRoll - object.roll));
-    // 机翼摆动（OpenYRWeb：原版 sub_4CF830）：飞行中叠加轻微滚转振荡，
+    // 机翼摆动（原版 sub_4CF830）：飞行中叠加轻微滚转振荡，
     // 让机翼在平飞时也略有摇晃。
     if (this.currentHorizSpeed > 0) {
       object.roll += Math.sin((this.game.currentTick % 20) * 0.3141592653589793) * 1.5;
@@ -338,13 +338,13 @@ export class WingedLocomotor {
     let climbZ = 0;
     let horizontalSpeed = 0;
     let verticalSettled = true;
-    // 巡航高度跟随（OpenYRWeb：全程不俯冲，只做 ±30/tick 的垂直修正）。
+    // 巡航高度跟随（全程不俯冲，只做 ±30/tick 的垂直修正）。
     if (cruiseAltitude !== currentY) {
       const heightDiff = Math.abs(cruiseAltitude - currentY);
       climbZ = Math.sign(cruiseAltitude - currentY) * Math.min(30, heightDiff);
       verticalSettled = heightDiff <= 30;
     }
-    // 机头俯仰随垂直速度（OpenYRWeb：原版行为）——爬升抬头、俯冲低头，
+    // 机头俯仰随垂直速度（原版行为）——爬升抬头、俯冲低头，
     // 上限 PitchAngle，由 PitchSpeed 平滑；PitchAngle=0（如 MiG）保持水平。
     const targetPitch = object.rules.pitchAngle ? (climbZ / 30) * object.rules.pitchAngle : 0;
     const pitchRate = Math.max(1, (object.rules.pitchSpeed || 0.25) * 8);

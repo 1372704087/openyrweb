@@ -48,7 +48,7 @@ System.register(
 	                  return candidates[idx];
 	                }
 	              }
-	              // OpenYRWeb: Grinder (Grinding=yes) — walk to the middle of the front
+	              // Grinder (Grinding=yes) — walk to the middle of the front
 	              // (south) edge, the building's door, so units enter from the front
 	              // instead of any direction.
 	              if (t.rules?.grinding) {

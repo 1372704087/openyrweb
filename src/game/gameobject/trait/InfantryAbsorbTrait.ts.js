@@ -1,7 +1,7 @@
 // === Reconstructed SystemJS module: game/gameobject/trait/InfantryAbsorbTrait ===
 // deps: ["game/gameobject/trait/GarrisonTrait","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifySell","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyOwnerChange","game/gameobject/task/EvacuateTransportTask"]
 //
-// OpenYRWeb: Bio Reactor (YABIOP, Yuri faction) — InfantryAbsorb=yes buildings reuse
+// Bio Reactor (YABIOP, Yuri faction) — InfantryAbsorb=yes buildings reuse
 // the SAME enter/exit mechanism as Battle Fortress (the transport system), instead of a
 // bespoke garrison queue. This trait doubles as the building's transportTrait: it
 // implements the TransportTrait container interface (loadQueue / unitFitsInside /

@@ -2,7 +2,7 @@
 // deps: ["game/Coords"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: renders a curved line between source and target with camera-facing plane
+// renders a curved line between source and target with camera-facing plane
 // dots at both endpoints.
 
 System.register("engine/renderable/fx/MindControlLinkFx", ["game/Coords"], function (e, t) {

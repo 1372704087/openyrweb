@@ -1,4 +1,4 @@
-// === OpenYRWeb: 用户输入锁定执行器 (UserInputExecutor) ===
+// === 用户输入锁定执行器 (UserInputExecutor) ===
 // 动作 46 (DisableUserInput) / 47 (EnableUserInput): 锁定/解锁玩家对单位的操控。
 // 战役过场/任务演出期间锁定输入，防止玩家乱点。
 // 实现方式：设置 game.inputLocked 状态，GUI 层（GameScreen）每帧轮询该状态

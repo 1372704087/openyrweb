@@ -37,7 +37,7 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
               (this.emEffect = this.rules.getBool("EMEffect")),
               (this.infDeath = this.rules.getEnumNumeric("InfDeath", i.InfDeathType, i.InfDeathType.None)),
               (this.ivanBomb = this.rules.getBool("IvanBomb")),
-              // OpenYRWeb: IsLocomotor=yes marks the Magnetron's LocomotorBeam warhead. Such a
+              // IsLocomotor=yes marks the Magnetron's LocomotorBeam warhead. Such a
               // warhead does no normal damage — instead it drags the hit vehicle toward the
               // firing unit (handled in Warhead.detonate). Vanilla YR uses this for the
               // Magnetron (YTNK) primary weapon MagneticBeam (Warhead=LocomotorBeam).
@@ -50,7 +50,7 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
               (this.parasite = this.rules.getBool("Parasite")),
               (this.percentAtMax = this.rules.getNumber("PercentAtMax", 1)),
               (this.proneDamage = this.rules.getFixed("ProneDamage", 1)),
-              // OpenYRWeb: vanilla YR uses "Psychedelic" as the INI key for the chaos/berserk
+              // vanilla YR uses "Psychedelic" as the INI key for the chaos/berserk
               // effect (Chaos Drone gas). We read both "Psychedelic" (vanilla) and "PsychicDamage"
               // (legacy fallback) for compatibility.
               (this.psychicDamage = this.rules.getBool("Psychedelic") || this.rules.getBool("PsychicDamage")),
@@ -58,7 +58,7 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
               (this.rocker = this.rules.getBool("Rocker")),
               (this.sonic = this.rules.getBool("Sonic")),
               (this.temporal = this.rules.getBool("Temporal")),
-              // OpenYRWeb: PenetratesBunker=yes (Warheads, default no) — when a warhead with this
+              // PenetratesBunker=yes (Warheads, default no) — when a warhead with this
               // flag hits a vehicle inside a Tank Bunker, the damage affects the vehicle directly
               // instead of being absorbed by the bunker. Usually set on aircraft weapons.
               // See ModEnc/PenetratesBunker.
@@ -68,7 +68,7 @@ System.register("game/rules/WarheadRules", ["game/gameobject/infantry/InfDeathTy
               (this.wallAbsoluteDestroyer = this.rules.getBool("WallAbsoluteDestroyer")),
               (this.wall = this.rules.getBool("Wall")),
               (this.wood = this.rules.getBool("Wood")),
-              // OpenYRWeb: Airstrike=yes marks the warhead used by Boris's Flare weapon
+              // Airstrike=yes marks the warhead used by Boris's Flare weapon
               // (AirstrikeFlare). When this warhead hits a building, it triggers the MiG
               // airstrike sequence instead of dealing normal damage. Vanilla YR uses this
               // flag on Boris's secondary weapon (Flare → Warhead=AirstrikeFlare).

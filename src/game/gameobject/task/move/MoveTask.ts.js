@@ -282,7 +282,7 @@ System.register(
                     this.allObstaclesAreBlockers || l.length
                       ? (e) => this.nodeIsBlockedForPathfinding(e, t, o, l)
                       : void 0,
-                  // OpenYRWeb: pass the mover so OmniCrushers (Battle Fortress) path
+                  // pass the mover so OmniCrushers (Battle Fortress) path
                   // through the vehicles they can crush, like vanilla YR.
                   mover: t,
                 },
@@ -546,7 +546,7 @@ System.register(
                           (s.moveTrait.moveState = w.MoveState.ReachedNextWaypoint),
                           this.onTick(s)
                         );
-                      // OpenYRWeb: use the full vanilla crush decision so OmniCrushers
+                      // use the full vanilla crush decision so OmniCrushers
                       // (Battle Fortress) can also path through/crush vehicles, while
                       // OmniCrushResistant targets still block them. The inner check keeps
                       // the original Crusher=yes requirement for actually passing through.
@@ -554,7 +554,7 @@ System.register(
                         if (
                           [S.SpeedType.Track, S.SpeedType.Hover].includes(s.rules.speedType) &&
                           s.crusher &&
-                          // OpenYRWeb: force-attacking a friendly crushable target (wall or
+                          // force-attacking a friendly crushable target (wall or
                           // unit) — drive straight over it instead of pushing it aside.
                           (!l.obj.isTechno() ||
                             !this.game.areFriendly(l.obj, s) ||
@@ -825,7 +825,7 @@ System.register(
                           (e) =>
                             e.isUnit() &&
                             e.onBridge === !!t.onBridge &&
-                            // OpenYRWeb: scatter only from units this crusher can actually
+                            // scatter only from units this crusher can actually
                             // crush (SCATTER veterans flee real threats, incl. OmniCrushers).
                             s.canCrushObject(e) &&
                             e.veteranTrait?.hasVeteranAbility(I.VeteranAbility.SCATTER) &&

@@ -83,7 +83,7 @@ System.register(
               tick(e, t, i) {
                 var pos = e.position.getMapPosition();
                 let r = t.clone().sub(pos);
-                // OpenYRWeb: point turret toward final destination while moving (like DriveLocomotor does)
+                // point turret toward final destination while moving (like DriveLocomotor does)
                 g.FacingUtil.pointTurretToTarget(e, i);
                 var s = r.length(),
                   i = this.maxSpeed;

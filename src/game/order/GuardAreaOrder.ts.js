@@ -71,7 +71,7 @@ System.register(
           isValid() {
             var e = this.sourceObject;
             return (
-              // OpenYRWeb: garrisoned buildings (bunkers/huts) can receive Guard too — they
+              // garrisoned buildings (bunkers/huts) can receive Guard too — they
               // have no unit moveTrait, but a selected garrisoned building should be able to
               // cancel its current attack and hold ground (vanilla YR behaviour). Plain
               // buildings without a garrison still reject Guard.
@@ -94,7 +94,7 @@ System.register(
             const e = this.sourceObject;
             let i = [];
             return (
-              // OpenYRWeb: only units move to the guard-area tile — buildings (incl.
+              // only units move to the guard-area tile — buildings (incl.
               // garrisoned ones) cannot move, they just hold ground where they are.
               t &&
                 e.isUnit() &&

@@ -22,7 +22,7 @@ System.register("gui/component/GameResForm", ["react", "classnames"], function (
           closable: e,
           strings: i,
           defaultArchiveUrl: t,
-          // OpenYRWeb one-click: when both URLs are configured, show a prominent button that
+          // one-click: when both URLs are configured, show a prominent button that
           // downloads both exes and auto-extracts the 6 required mix files.
           oneClickRa2Url: ra2Url,
           oneClickYrUrl: yrUrl,
@@ -56,7 +56,7 @@ System.register("gui/component/GameResForm", ["react", "classnames"], function (
               null,
               e && p.default.createElement("div", { className: "close-button", onClick: o }),
               p.default.createElement("div", { className: "title" }, i.get("ts:gameres_locate_title")),
-              // OpenYRWeb: one-click download+extract button (shown only when both URLs are set).
+              // one-click download+extract button (shown only when both URLs are set).
               ra2Url && yrUrl &&
                 p.default.createElement(
                   "div",
@@ -76,7 +76,7 @@ System.register("gui/component/GameResForm", ["react", "classnames"], function (
                     ),
                   ),
                 ),
-              // OpenYRWeb: slimmed manual-import section. Drag/drop still works on this box,
+              // slimmed manual-import section. Drag/drop still works on this box,
               // but the example images + URL form were removed for a cleaner layout.
               p.default.createElement(
                 "div",

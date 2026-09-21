@@ -1,7 +1,7 @@
 // === Reconstructed SystemJS module: game/gameobject/task/GarrisonBuildingTask ===
 // deps: ["game/event/BuildingGarrisonEvent","game/gameobject/task/EnterBuildingTask"]
 //
-// OpenYRWeb: GarrisonBuildingTask — standard garrison-building entry. Infantry walk to the
+// GarrisonBuildingTask — standard garrison-building entry. Infantry walk to the
 // building (EnterBuildingTask state machine: MovingNear → MovingIn via MoveInsideTask), then
 // are limbo'd into garrisonTrait.units. InfantryAbsorb=yes buildings (bio reactor) no longer
 // route here — they reuse the Battle Fortress transport entry (EnterTransportTask) instead —
@@ -51,7 +51,7 @@ System.register(
               this.game.events.dispatch(new i.BuildingGarrisonEvent(this.target));
             }
             t.units.push(e);
-            // OpenYRWeb: back-reference so the occupant's weapon can apply garrison bonuses
+            // back-reference so the occupant's weapon can apply garrison bonuses
             // (OccupyWeaponRange / OccupyDamageMultiplier / OccupyROFMultiplier) while inside
             // (see Weapon.get range / get rof / fire). Cleared on evacuation/destruction.
             (e.garrisonedAt = this.target);

@@ -1,4 +1,4 @@
-// OpenYRWeb: renders the Boris airstrike designator laser as a persistent beam from Boris
+// renders the Boris airstrike designator laser as a persistent beam from Boris
 // to the targeted structure. Pattern mirrors MindControlLinkPlugin/MagnetronBeamPlugin.
 // In vanilla YR the laser is a hardcoded engine feature of the airstrike manager —
 // a continuous red beam from the unit's FLH to the target, with brightness flickering

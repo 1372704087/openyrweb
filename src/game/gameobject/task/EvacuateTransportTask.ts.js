@@ -101,7 +101,7 @@ System.register(
               if (!t.length || (e.rules.gunner && 1 === t.length && this.evacState !== g.All)) return !0;
               var i = t[t.length - 1],
                 r = this.findValidEvacTarget(e, i);
-              // OpenYRWeb: buildings (InfantryAbsorb bio reactor) are stationary — never issue
+              // buildings (InfantryAbsorb bio reactor) are stationary — never issue
               // a TurnTask that would rotate the building; only turning units rotate.
               if (r && !this.turnPerformed && e.moveTrait) {
                 this.turnPerformed = !0;
@@ -113,7 +113,7 @@ System.register(
                 : !(++this.evacTries <= 3) || (this.children.push(new c.WaitMinutesTask(0.05)), !1);
             }
             evacuateUnit(e, t, i) {
-              // OpenYRWeb: InfantryAbsorb buildings (bio reactor) keep occupants in the garrison
+              // InfantryAbsorb buildings (bio reactor) keep occupants in the garrison
               // container (garrisonTrait.units) — track that so we clear the right back-ref.
               var isAbsorb = t.rules?.infantryAbsorb;
               if (!i)
@@ -123,7 +123,7 @@ System.register(
                     (e.position.tileElevation = t.tileElevation),
                     (e.onBridge = t.onBridge),
                     (e.zone = t.zone),
-                    // OpenYRWeb: clear transport back-reference on destructive evacuate.
+                    // clear transport back-reference on destructive evacuate.
                     (e.transport = void 0),
                     isAbsorb && (e.garrisonedAt = void 0),
                     this.game.destroyObject(e, { player: e.owner }),
@@ -134,9 +134,9 @@ System.register(
                 (e.position.tileElevation = r.onBridge?.tileElevation ?? 0),
                 (e.onBridge = !!r.onBridge),
                 (e.zone = this.game.map.getTileZone(r.tile, !r.onBridge)),
-                // OpenYRWeb: clear transport back-reference on normal evacuate.
+                // clear transport back-reference on normal evacuate.
                 (e.transport = void 0),
-                // OpenYRWeb: InfantryAbsorb buildings (bio reactor) — clear the garrison
+                // InfantryAbsorb buildings (bio reactor) — clear the garrison
                 // back-ref and notify garrison listeners (leave sound) like a normal garrison
                 // building.
                 isAbsorb && ((e.garrisonedAt = void 0), this.game.events.dispatch(new f.BuildingEvacuateEvent(t))),

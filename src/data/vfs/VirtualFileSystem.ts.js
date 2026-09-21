@@ -108,7 +108,7 @@ System.register(
               return t;
             }
             async loadImplicitMixFiles(e) {
-              // OpenYRWeb: YR-only engine. Both the *md.mix (YR) and the base .mix (RA2, which
+              // YR-only engine. Both the *md.mix (YR) and the base .mix (RA2, which
               // YR depends on) archives are always mounted. addMixFile silently skips any
               // archive not present in the install. The `e` (engineType) arg is retained for
               // signature compatibility but is always YurisRevenge now.
@@ -144,7 +144,7 @@ System.register(
                 await this.addMixFile("mapsmd03.mix"));
             }
             async loadExtraMixFiles(i) {
-              // OpenYRWeb: YR-only — always pick up both expand##.mix and expandmd##.mix (plus
+              // YR-only — always pick up both expand##.mix and expandmd##.mix (plus
               // ecache/elocal), and register both .mmx and .yro archive extensions.
               let r = new Set();
               for await (var e of this.rfs.getEntries()) r.add(e.toLowerCase());

@@ -91,7 +91,7 @@ System.register(
                 (n = this.props.rules.colors.get(i)?.asHexString() ?? "#fff")),
                 (this.color = n));
               let o = p.get(a);
-              // OpenYRWeb: graceful fallback if the country-specific loading screen art is absent
+              // graceful fallback if the country-specific loading screen art is absent
               // (e.g. Yuri's ls800yuri.shp may be missing from some user YR installs). Fall back to
               // the US loading screen (always present in RA2 data) so the game still loads instead
               // of throwing "Missing image" and aborting onEnter. Non-fatal: cosmetic only.
@@ -104,9 +104,9 @@ System.register(
                   ? e.isCdn()
                     ? (this.bgHtmlImg = e.getCdnBaseUrl() + "ls/" + o.replace(".shp", ".png"))
                     : ((this.bgSpriteImg = o),
-                      // OpenYRWeb: YR-only — loading-screen palette always sourced from m.get(a).
+                      // YR-only — loading-screen palette always sourced from m.get(a).
                       (this.bgSpritePal = m.get(a)),
-                      // OpenYRWeb: graceful fallback if the country-specific palette is absent
+                      // graceful fallback if the country-specific palette is absent
                       // (e.g. Confederation's mplsc.apl may be missing from some user YR installs).
                       this.bgSpritePal &&
                         !e.isCdn() &&

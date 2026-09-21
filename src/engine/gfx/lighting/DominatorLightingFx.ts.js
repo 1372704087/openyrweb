@@ -2,7 +2,7 @@
 // deps: ["engine/gfx/lighting/LightingFx"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Psychic Dominator red screen tint. When the Dominator fires, the screen
+// Psychic Dominator red screen tint. When the Dominator fires, the screen
 // gets a red ambient tint that lasts through the full animation sequence (FirstAnim
 // head + SecondAnim ground ring). Timing covers up to ~10s of hold to accommodate
 // the entire animation cycle. The tint is a mild red (green/blue lowered to 0.35

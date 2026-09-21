@@ -1,4 +1,4 @@
-// === OpenYRWeb: 宣告胜负动作 (WinLoseExecutor) ===
+// === 宣告胜负动作 (WinLoseExecutor) ===
 // 动作 1 Win(胜利者是…) / 2 Lose(失败者是…) / 67 DeclareWinning / 68 DeclareLosing。
 // 参数: params[0] = 目标阵营索引（地图 [Houses] 顺序）。
 //   Win   → 目标阵营获胜，其余非中立阵营判负，结束游戏。

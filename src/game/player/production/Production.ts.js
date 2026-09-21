@@ -215,7 +215,7 @@ System.register(
                   } else if (-1 === t.indexOf(r)) return !1;
                 return !!this.meetsStolenTech(e);
               }
-              // OpenYRWeb: Secret Lab grant (vanilla BuildingClass::GetSecretProduction +
+              // Secret Lab grant (vanilla BuildingClass::GetSecretProduction +
               // sidebar cameo enumeration). Returns true when the player owns a fully-built
               // SecretLab=yes building whose granted production object is `e`. Ownership-based:
               // whoever controls the lab can build its bonus object (re-capture transfers the
@@ -265,7 +265,7 @@ System.register(
               getFactoryCount(e) {
                 return this.factoryCounts.get(e) ?? 0;
               }
-              // OpenYRWeb: Industrial Plant (NAINDP) cost bonus. Scans the player's buildings
+              // Industrial Plant (NAINDP) cost bonus. Scans the player's buildings
               // for cost-bonus fields (UnitsCostBonus, InfantryCostBonus, etc.) and returns the
               // product of all applicable multipliers for the given object type. Returns 1 when no
               // discount applies.

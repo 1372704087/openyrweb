@@ -1,4 +1,4 @@
-// === OpenYRWeb: 创建建筑动作 (CreateBuildingExecutor) ===
+// === 创建建筑动作 (CreateBuildingExecutor) ===
 // 动作 125: CreateBuilding — 为触发器所属阵营在指定路径点生成建筑。
 // 参数约定：params[1]=建筑类型名，params[6]=路径点（与其它路径点动作一致）。
 // 参考临时源码枚举 CreateBuilding=125；临时源码未实现，本工程给出可用实现。

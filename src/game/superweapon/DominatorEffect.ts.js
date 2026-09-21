@@ -2,7 +2,7 @@
 // deps: ["game/map/tileFinder/RadialTileFinder","game/Warhead","game/superweapon/SuperWeaponEffect","game/event/TriggerAnimEvent","game/GameSpeed","game/Coords"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Psychic Dominator superweapon effect (YR). On fire it:
+// Psychic Dominator superweapon effect (YR). On fire it:
 //   1. Plays DominatorFirstAnim immediately (giant Yuri head in sky).
 //   2. Waits until DominatorFireAtPercentage of FirstAnim's duration has elapsed.
 //   3. At that fire point: detonates the DominatorWarhead (area damage to buildings),

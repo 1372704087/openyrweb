@@ -244,9 +244,9 @@ System.register(
                     r.push(new b.MoveSoundFxPlugin(e, n, this.worldSound))),
                   r.push(new w.ChronoSparkleFxPlugin(e, this.rules.audioVisual.chronoSparkle1)),
                   (e.mindControllerTrait || e.mindControllableTrait) && r.push(new C.MindControlLinkPlugin(e, s, this.alliances, this.localPlayer, this.camera)),
-                  // OpenYRWeb: continuous Magnetron tractor beam while dragging a target.
+                  // continuous Magnetron tractor beam while dragging a target.
                   e.isUnit() && r.push(new Mb.MagnetronBeamPlugin(e)),
-                  // OpenYRWeb: Boris airstrike designator laser — plugin checks
+                  // Boris airstrike designator laser — plugin checks
                   // airstrikeTrait.targetObject and renders a persistent red beam.
                   e.isInfantry() && r.push(new Al.AirstrikeLaserPlugin(e)));
                 let t;
@@ -301,7 +301,7 @@ System.register(
                   )),
                     e.rules.damageParticleSystems.length &&
                       r.push(new M.DamageSmokePlugin(e, this.art, this.theater, this.imageFinder, this.gameSpeed)),
-                    // OpenYRWeb: Robot Tank electric spark effect when paralyzed.
+                    // Robot Tank electric spark effect when paralyzed.
                     // Attached to vehicles with PoweredUnit=yes or Powered=yes (e.g. ROBO)
                     // that have a RobotControlTrait. The plugin spawns SparkFx periodically
                     // when the control center is offline.
@@ -353,7 +353,7 @@ System.register(
                     a,
                     this.worldSound,
                   )),
-                    // OpenYRWeb: HarvesterPlugin (OREGATH spark) is NOT attached to enslaved
+                    // HarvesterPlugin (OREGATH spark) is NOT attached to enslaved
                     // infantry — vanilla YR slaves do NOT show the OREGATH ground sparkle while
                     // mining; only the body Shovel digging sequence plays. The spark is exclusive
                     // to vehicle harvesters (HARV). harvesterTrait.status is still set by

@@ -77,7 +77,7 @@ System.register(
                 (this.preventOpportunityFire = !1));
             }
             isAllowed(e) {
-              // OpenYRWeb: InfantryAbsorb buildings (bio reactor) keep garrison-style entry
+              // InfantryAbsorb buildings (bio reactor) keep garrison-style entry
               // criteria — the entering unit must be friendly to the building owner, capacity
               // is via maxOccupants, and mind-controlled infantry ARE allowed in (vanilla YR
               // Absorb: they get absorbed and their controller is freed on entry). Units that
@@ -96,7 +96,7 @@ System.register(
                 e.zone !== n.ZoneType.Air &&
                 this.target.zone !== n.ZoneType.Air &&
                 this.target.transportTrait.unitFitsInside(e) &&
-                // OpenYRWeb: stationary targets (InfantryAbsorb buildings) have no moveTrait —
+                // stationary targets (InfantryAbsorb buildings) have no moveTrait —
                 // treat them as always idle, matching the building's fixed position.
                 (this.target.moveTrait?.moveState ?? o.MoveState.Idle) === o.MoveState.Idle &&
                 !this.target.warpedOutTrait.isActive() &&
@@ -189,7 +189,7 @@ System.register(
                     this.game.events.dispatch(new a.EnterTransportEvent(this.target)),
                     this.game.events.dispatch(new d.EnterObjectEvent(this.target, n)),
                     this.target.transportTrait.units.push(n),
-                    // OpenYRWeb: InfantryAbsorb buildings (bio reactor) share the transport
+                    // InfantryAbsorb buildings (bio reactor) share the transport
                     // container with the garrison system, so record the garrison back-ref and
                     // notify garrison listeners (enter sound / building frame) like a normal
                     // garrison building. Regular transports keep the passenger back-ref that

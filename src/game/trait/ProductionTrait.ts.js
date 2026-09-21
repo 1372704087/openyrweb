@@ -96,7 +96,7 @@ System.register(
             var i;
             e.isBuilding() && e.owner.production
               ? (
-                // OpenYRWeb: Slave Miner deploy/undeploy morph must NOT cancel in-progress
+                // Slave Miner deploy/undeploy morph must NOT cancel in-progress
                 // production. MorphIntoTask sets slaveMinerTrait._morphInFlight=true before
                 // unspawning; in that case the building re-spawns as the other form shortly
                 // (YAREFN<->YASLMN), so prerequisites remain satisfiable in spirit. Skip
@@ -155,7 +155,7 @@ System.register(
                     .filter((e) => e.helipadTrait)
                     .reduce((e, t) => e + t.dockTrait.numberOfDocks, 0),
                   t = i.getOwnedObjectsByType(ObjectType.ObjectType.Aircraft, !0);
-                /* OpenYRWeb: count owned aircraft that consume Airforce Command
+                /* count owned aircraft that consume Airforce Command
                    production capacity: anything that came out of the factory
                    (isProducedAircraft — this includes Spawned=yes types built
                    via cheats), plus non-spawned types (e.g. starting aircraft).
@@ -163,12 +163,12 @@ System.register(
                    planes) are Spawned=yes and were never produced, so they must
                    not consume the aircraft production capacity. */
                 var n = t.filter((e) => e.isProducedAircraft || !e.rules.spawned).length;
-                /* OpenYRWeb: set _maxSize directly to avoid the setter's
+                /* set _maxSize directly to avoid the setter's
                    side-effect of truncating the items array. Do NOT touch
                    q.size — push/remove manage it. */
                 var q = i.production.getQueueForFactory(TechnoRules.FactoryType.AircraftType);
                 q._maxSize = Math.max(0, e - n);
-                /* OpenYRWeb: notify the queue after _maxSize changes so the
+                /* notify the queue after _maxSize changes so the
                    sidebar (CombatantSidebarModel) picks up the new value and
                    re-enables/disables the production button accordingly. */
                 q.notifyUpdated();
@@ -186,7 +186,7 @@ System.register(
                 n = t.rules.wall ? 1 / this.rules.general.wallBuildSpeedCoefficient : 1,
                 o = this.baseBuildSpeed * l * c * n,
                 l = t.creditsEach,
-                // OpenYRWeb: 秒建造作弊（speedCheat）开启时 1 tick 内完成建造，不再保留
+                // 秒建造作弊（speedCheat）开启时 1 tick 内完成建造，不再保留
                 // 54 tick（一个建造帧，约 3.6s）的最短计时；未开启时维持原版行为：
                 // 建造时间取整到 54 tick 的整数倍，且最短一个建造帧
                 c = this.speedCheat.value ? 1 : l ? MathUtil.floorTo((l / o) * t.rules.buildTimeMultiplier, 54) : 54,

@@ -73,7 +73,7 @@ System.register(
                         },
                         onBrowseFolder: async () => {
                           try {
-                            // OpenYRWeb: allow the automated test harness to inject a synthetic
+                            // allow the automated test harness to inject a synthetic
                             // FileSystemDirectoryHandle (window.__yrwebSyntheticDirHandle) so the
                             // folder picker can be driven headlessly. When unset, the real native
                             // picker is used. No-op in normal play.
@@ -96,7 +96,7 @@ System.register(
                         onDownloadArchive: async (e) => {
                           (s(), i(e));
                         },
-                        // OpenYRWeb: one-click download both exes + auto-extract the 6 mixes.
+                        // one-click download both exes + auto-extract the 6 mixes.
                         onOneClickDownload: async () => {
                           (s(), i({ oneClick: !0 }));
                         },

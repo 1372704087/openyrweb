@@ -1,7 +1,7 @@
 // === Reconstructed SystemJS module: game/gameobject/trait/TankBunkerTrait ===
 // deps: ["game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/gameobject/trait/interface/NotifyDamage","game/gameobject/trait/interface/NotifySell","game/type/LocomotorType","game/type/SpeedType","util/math"]
 //
-// OpenYRWeb: Tank Bunker trait (vanilla YR Bunker=yes). Attached to buildings that have
+// Tank Bunker trait (vanilla YR Bunker=yes). Attached to buildings that have
 // Bunker=yes + NumberOfDocks=1. Works alongside DockTrait — the vehicle physically drives
 // onto the dock tile and stays visible (unlike infantry garrison which limboes the unit).
 //

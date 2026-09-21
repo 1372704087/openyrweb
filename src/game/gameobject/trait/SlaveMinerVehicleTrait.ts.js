@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/trait/interface/NotifySpawn","game/gameobject/trait/interface/NotifyTick","game/gameobject/trait/interface/NotifyDestroy","game/map/tileFinder/RadialTileFinder","game/type/LandType","game/gameobject/trait/TiberiumTrait","game/gameobject/task/move/MoveTask","game/gameobject/task/morph/DeployIntoTask","game/gameobject/task/SlaveGatherTask","engine/type/ObjectType"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: Slave Miner VEHICLE (YASLMN, Yuri faction) auto-deploy AI.
+// Slave Miner VEHICLE (YASLMN, Yuri faction) auto-deploy AI.
 //
 // Vanilla YR behaviour (REVERSED @ yrmd.exe, 2026-06-30):
 //   The Slave Miner vehicle is NOT a normal harvester — it is a deployable refinery. When built
@@ -19,7 +19,7 @@
 //   The SlaveManager (FUN_006af6c0 / FUN_006afd60 cluster) drives individual SLAVES once the
 //   building is deployed; the VEHICLE's seek-and-deploy is a FootClass/unit-level mission that
 //   reuses the same ore-detection primitive (Tiberium overlay scan). We mirror that here with the
-//   engine's existing RadialTileFinder + MoveTask + DeployIntoTask, since OpenYRWeb has no single
+// engine's existing RadialTileFinder + MoveTask + DeployIntoTask, since  has no single
 //   SlaveManager driver class (slaves run their own SlaveGatherTask instead).
 //
 // Trigger model (NotifyTick):
@@ -98,7 +98,7 @@ System.register(
               this.scanCooldown = 0;
               this._playerLockTicks = 0;
               this._aiTaskingIsFactory = !1;
-              // OpenYRWeb (2026-06-30, REVERSED): slaves ride INSIDE the vehicle (off the map).
+              // (2026-06-30, REVERSED): slaves ride INSIDE the vehicle (off the map).
               // Populated either at spawn (claiming the pool handed over from the undeployed
               // building via game._pendingMinerSlaves) or by SlaveMinerTrait.NotifyUnspawn. The
               // vehicle's NotifyTick seeks ore + deploys; when it deploys, _stashSlavesForMorph
@@ -140,7 +140,7 @@ System.register(
                 }
               } catch (err) {}
             }
-            // OpenYRWeb: called by MorphIntoTask just before the vehicle morphs into the
+            // called by MorphIntoTask just before the vehicle morphs into the
             // deployed building. The slaves stay on the map; we just hand the pool to the new
             // building via game._pendingMinerSlaves. The building's SlaveMinerTrait.NotifySpawn
             // claims it and repoints the slaves' gather task at the building (so they walk to
@@ -154,7 +154,7 @@ System.register(
               } catch (err) {}
               this.slaves = [];
             }
-            // OpenYRWeb (YR-correct): when the vehicle is destroyed/sold, its slaves (which are
+            // (YR-correct): when the vehicle is destroyed/sold, its slaves (which are
             // following it on the map) are NOT liberated to the destroyer — they are the Slave
             // Miner's property and perish with the vehicle form (vanilla: a packed/undeployed
             // Slave Miner's workforce is not freed; only the deployed-building form liberates on

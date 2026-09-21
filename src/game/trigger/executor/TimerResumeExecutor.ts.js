@@ -1,4 +1,4 @@
-// === OpenYRWeb: 恢复计时器动作 (TimerResumeExecutor) ===
+// === 恢复计时器动作 (TimerResumeExecutor) ===
 // 动作 105: TimerResume — 恢复被暂停的任务计时器。
 // 复用 CountdownTimer.start()。
 // deps: ["game/trigger/TriggerExecutor"]

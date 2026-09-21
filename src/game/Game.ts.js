@@ -382,7 +382,7 @@ System.register(
                   this.rules.mpDialogSettings.alliesAllowed && this.createInitialTeams(),
                   this.botManager.init(this),
                   this.triggers.init(this),
-                  // OpenYRWeb: 战役场景小队运行时（参考临时源码 cQe）
+                  // 战役场景小队运行时（参考临时源码 cQe）
                   this.gameOpts.campaignId &&
                     this.map.getScenarioTeams &&
                     ((this.scenarioTeamRuntime = new ab.ScenarioTeamRuntime(this, this.map)),
@@ -424,7 +424,7 @@ System.register(
                   this.createInitialMapSmudges(t.smudges),
                   this.createInitialMapTechnos(t.technos));
               }
-              // OpenYRWeb: Secret Lab bonus assignment (vanilla ScenarioClass::
+              // Secret Lab bonus assignment (vanilla ScenarioClass::
               // GenerateSecretLabBonuses). Called once at map load: enumerates every
               // SecretLab=yes building placed on the map (in map order) and draws a unique
               // pseudo-random bonus for each from the [General] SecretInfantry/SecretUnits/
@@ -631,7 +631,7 @@ System.register(
                   : (console.warn(`Map object '${e}' has no rules section. Skipping.`), !1);
               }
               applyInitialUnitMission(e, t) {
-                // OpenYRWeb: 处理地图初始单位的 Mission 字段（参考临时源码 initializeMapUnit）：
+                // 处理地图初始单位的 Mission 字段（参考临时源码 initializeMapUnit）：
                 //   sleep/wait/harmless/stop -> 原地待命（挂超长等待任务，同时阻止被动索敌）
                 //   guard/area guard -> 守卫当前位置区域（AttackTrait 被动索敌接管）
                 //   attack/hunt -> 保持默认被动索敌攻击
@@ -907,7 +907,7 @@ System.register(
                 const i = t.owner;
                 (i && i.removeOwnedObject(t),
                   e.addOwnedObject(t),
-                  // OpenYRWeb: mark garrison buildings as "captured from civilian" when they become
+                  // mark garrison buildings as "captured from civilian" when they become
                   // civilian-owned. This allows them to flip back to civilian when emptied later.
                   // Player-built garrison buildings never get this flag, so they stay player-owned.
                   t.garrisonTrait && e === this.getCivilianPlayer() && (t.wasCapturedFromCivilian = !0),
@@ -957,7 +957,7 @@ System.register(
                       let i = t[0];
                       if (i.isTechno() && i.owner !== this.localPlayer) {
                         let t = this.mapShroudTrait.getPlayerShroud(this.localPlayer);
-                        // OpenYRWeb: 战役玩家 shroud 缺失时防御（国家不可玩导致 isNeutral 未建 shroud 的场景）
+                        // 战役玩家 shroud 缺失时防御（国家不可玩导致 isNeutral 未建 shroud 的场景）
                         if (!t)
                           console.warn(
                             `[OpenYRWeb] Missing shroud for local player "${this.localPlayer.name}" ` +

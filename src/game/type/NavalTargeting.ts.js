@@ -17,7 +17,7 @@ System.register("game/type/NavalTargeting", [], function (t, e) {
         (e[(e.SealSpecial = 4)] = "SealSpecial"),
         (e[(e.NavalAll = 5)] = "NavalAll"),
         (e[(e.NavalNone = 6)] = "NavalNone"),
-        // OpenYRWeb: YR added value 7. Per ModEnc, NavalTargeting=5 and 7 are functionally
+        // YR added value 7. Per ModEnc, NavalTargeting=5 and 7 are functionally
         // identical (the game treats any unrecognised value the same as NAVAL_ALL). The
         // vanilla YR rulesmd.ini uses 7 in a few places, so we register it to silence the
         // "not an accepted enum value" warning without changing behaviour.

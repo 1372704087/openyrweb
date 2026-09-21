@@ -102,18 +102,18 @@ System.register(
                 (this.cost = this.ini.getNumber("Cost")),
                 (this.points = this.ini.getNumber("Points")),
                 (this.power = this.ini.getNumber("Power")),
-                // OpenYRWeb: Bio Reactor (YAPOWR) power-boost. InfantryAbsorb=yes + ExtraPower=
+                // Bio Reactor (YAPOWR) power-boost. InfantryAbsorb=yes + ExtraPower=
                 // means each garrisoned infantry adds ExtraPower to the building's output.
                 // BioReactorPowerTrait recomputes total = base Power + (occupants * ExtraPower)
                 // and pushes it through the player's PowerTrait whenever garrison changes.
                 (this.extraPower = this.ini.getNumber("ExtraPower")),
                 (this.powered = this.ini.getBool("Powered")),
-                // OpenYRWeb: PoweredUnit=yes — YR tag for units (vehicles/infantry) that require
+                // PoweredUnit=yes — YR tag for units (vehicles/infantry) that require
                 // their prerequisite building to have power. Unlike Powered (buildings), this is
                 // not about the power grid — the unit is paralyzed when its prereq building loses
                 // power or is destroyed. Used by Robot Tank (ROBOT) via RobotControlTrait.
                 (this.poweredUnit = this.ini.getBool("PoweredUnit")),
-                // OpenYRWeb: PowersUnit= — building tag (YR exe hardcoded) specifying which
+                // PowersUnit= — building tag (YR exe hardcoded) specifying which
                 // unit type this building provides operational power to. Used with PoweredUnit=yes
                 // on the unit side. E.g. GAROBO has PowersUnit=ROBO, ROBO has PoweredUnit=yes.
                 // RobotControlTrait scans owner buildings for a powered building whose powersUnit
@@ -152,7 +152,7 @@ System.register(
               // 多线生产（仅在全局 DisableParallelAIQueues=no 时有意义）。
               (this.disableAIParallelProduction = this.ini.getBool("DisableAIParallelProduction")),
               (this.nukeSilo = this.ini.getBool("NukeSilo")),
-              // OpenYRWeb: Industrial Plant (NAINDP) cost-bonus fields. A building with these
+              // Industrial Plant (NAINDP) cost-bonus fields. A building with these
               // multipliers reduces the production cost of the matching object category for its
               // owner (e.g. NAINDP UnitsCostBonus=0.75 → vehicles cost 75%). Defaults to 1 (no
               // discount) so only buildings that set the keys have any effect. Applied in
@@ -178,7 +178,7 @@ System.register(
                 (this.weaponsFactory = this.ini.getBool("WeaponsFactory")),
                 (this.helipad = this.ini.getBool("Helipad")),
                 (this.hospital = this.ini.getBool("Hospital")),
-                // OpenYRWeb: YR Tech Hospital self-heal flags. InfantryGainSelfHeal/UnitsGainSelfHeal
+                // YR Tech Hospital self-heal flags. InfantryGainSelfHeal/UnitsGainSelfHeal
                 // are numeric multipliers (default 0 = disabled). When > 0, the building periodically
                 // heals all of the owner's infantry/units on the map. See TechHospitalHealTrait.
                 (this.infantryGainSelfHeal = this.ini.getNumber("InfantryGainSelfHeal", 0)),
@@ -206,7 +206,7 @@ System.register(
                 (this.deploysInto = this.ini.getString("DeploysInto")),
                 (this.deployTime = this.ini.getNumber("DeployTime")),
                 (this.capturable = this.ini.getBool("Capturable")),
-                // OpenYRWeb: SecretLab=yes (BuildingTypes, vanilla YR). Marks a building as a
+                // SecretLab=yes (BuildingTypes, vanilla YR). Marks a building as a
                 // Tech Secret Lab (CASLAB): capturing it grants the owner the ability to build
                 // a pseudo-random object assigned at map load. See GeneralRules.secretInfantry/
                 // secretUnits/secretBuildings and Game.assignSecretLabBonuses.
@@ -245,7 +245,7 @@ System.register(
                 (this.elitePrimary = this.parseWeaponName(this.ini.getString("ElitePrimary"))),
                 (this.eliteSecondary = this.parseWeaponName(this.ini.getString("EliteSecondary"))),
                 (this.weaponCount = this.ini.getNumber("WeaponCount")),
-                // OpenYRWeb: Gattling weapon system parameters (vanilla YR). IsGattling enables
+                // Gattling weapon system parameters (vanilla YR). IsGattling enables
                 // the stage-based weapon pair system; WeaponStages defines how many phases exist;
                 // StageX/EliteStageX are timer thresholds; RateUp/RateDown control spin-up/down.
                 // Keep these as expressions (not statements) so the minified comma-expression in
@@ -273,11 +273,11 @@ System.register(
                 (this.immune = this.ini.getBool("Immune")),
                 (this.immuneToRadiation = this.ini.getBool("ImmuneToRadiation")),
                 (this.immuneToPsionics = this.ini.getBool("ImmuneToPsionics")),
-                // OpenYRWeb: ImmuneToPoison=yes (InfantryTypes, vanilla YR). Units with this flag
+                // ImmuneToPoison=yes (InfantryTypes, vanilla YR). Units with this flag
                 // take no damage from poison gas warheads (Poison=yes) such as [VirusGas] used by
                 // the Virus sniper's toxic clouds. The Virus (VIRUS) unit itself is immune.
                 (this.immuneToPoison = this.ini.getBool("ImmuneToPoison")),
-                // OpenYRWeb: MindControlOverload — enables infinite mind control with self-damage
+                // MindControlOverload — enables infinite mind control with self-damage
                 // when exceeding the weapon's Damage (safe capacity). Used by Mastermind (MIND).
                 (this.mindControlOverload = this.ini.getBool("MindControlOverload", !1)),
                 (this.typeImmune = this.ini.getBool("TypeImmune")),
@@ -288,16 +288,16 @@ System.register(
                 (this.idleRate = this.ini.getNumber("IdleRate", 0)),
                 (this.noSpawnAlt = this.ini.getBool("NoSpawnAlt")),
                 (this.crusher = this.ini.getBool("Crusher")),
-                // OpenYRWeb: OmniCrusher (vanilla YR). Requires Crusher=yes to take effect.
+                // OmniCrusher (vanilla YR). Requires Crusher=yes to take effect.
                 // Lets the unit crush objects that are not normally crushable (Crushable=no),
                 // such as vehicles. Battle Fortress (BFRT) uses Crusher=yes + OmniCrusher=yes.
                 (this.omniCrusher = this.ini.getBool("OmniCrusher")),
-                // OpenYRWeb: OpenTopped (vanilla YR). Passengers inside this transport can fire
+                // OpenTopped (vanilla YR). Passengers inside this transport can fire
                 // their own weapons through gun ports. Battle Fortress (BFRT) uses OpenTopped=yes.
                 // Passengers gain OpenToppedRangeBonus (+2 tiles) and OpenToppedDamageMultiplier
                 // (x1.2) from [CombatDamage]. The transport's own weapon fires independently.
                 (this.openTopped = this.ini.getBool("OpenTopped")),
-                // OpenYRWeb: OpenTransportWeapon (vanilla YR). Selects which weapon a
+                // OpenTransportWeapon (vanilla YR). Selects which weapon a
                 // passenger uses while inside an OpenTopped transport (e.g. Battle
                 // Fortress). 0=Primary, 1=Secondary, -1=decide normally (Primary).
                 // Guardian GI (GGI) uses OpenTransportWeapon=1 so it fires its
@@ -346,10 +346,10 @@ System.register(
                 (this.isHuman = !this.ini.getBool("NotHuman")),
                 (this.organic = this.type === s.ObjectType.Infantry || this.ini.getBool("Organic")),
                 (this.occupier = this.ini.getBool("Occupier")),
-                // OpenYRWeb: Bunker=yes (BuildingTypes) — marks this building as a Tank Bunker that
+                // Bunker=yes (BuildingTypes) — marks this building as a Tank Bunker that
                 // allows VehicleTypes to enter for protection. YR-only flag. See ModEnc/Bunker.
                 (this.bunker = this.ini.getBool("Bunker")),
-                // OpenYRWeb: Bunkerable=yes/no (VehicleTypes, default yes) — determines whether this
+                // Bunkerable=yes/no (VehicleTypes, default yes) — determines whether this
                 // vehicle can enter a Tank Bunker. Vehicles with Locomotor=Hover or Fly default to no.
                 // Also requires a turret or OmniFire=yes weapon. See ModEnc/Bunkerable.
                 (this.bunkerable = this.ini.getBool("Bunkerable", !0)),
@@ -377,7 +377,7 @@ System.register(
                 (this.weight = this.ini.getNumber("Weight")),
                 (this.accelerates = this.ini.getBool("Accelerates")),
                 (this.accelerationFactor = this.ini.getNumber("AccelerationFactor", 0.03)),
-                // OpenYRWeb: Boris airstrike team parameters (vanilla YR). When Boris uses
+                // Boris airstrike team parameters (vanilla YR). When Boris uses
                 // his secondary weapon (Flare) on a building, MiG planes are summoned from the
                 // map edge to bomb the target. AirstrikeTeam/EliteAirstrikeTeam control how many
                 // planes; AirstrikeTeamType/EliteAirstrikeTeamType specify the aircraft type;
@@ -402,7 +402,7 @@ System.register(
                 (this.burstDelay = this.parseBurstDelay()),
                 (this.vhpScan = this.ini.getEnum("VHPScan", f.VhpScan, f.VhpScan.None, !0)),
                 (this.pip = this.ini.getEnum("Pip", o.PipColor, o.PipColor.Green, !0)),
-                // OpenYRWeb: PipScale — determines the type of pips shown below units.
+                // PipScale — determines the type of pips shown below units.
                 (this.pipScale = this.ini.getEnum("PipScale", P.PipScale, P.PipScale.None, !0)),
                 (this.passengers = this.ini.getNumber("Passengers")),
                 (this.gunner = this.ini.getBool("Gunner")),
@@ -425,12 +425,12 @@ System.register(
                 (this.psychicDetectionRadius = this.ini.getNumber("PsychicDetectionRadius")),
                 (this.hasRadialIndicator = this.ini.getBool("HasRadialIndicator")),
                 (this.harvester = this.ini.getBool("Harvester")),
-                // OpenYRWeb: Drainable=yes marks buildings whose output can be siphoned by a
+                // Drainable=yes marks buildings whose output can be siphoned by a
                 // Floating Disc (DISCUS) hovering over them — refineries, slave miners, power
                 // plants, and powered base defenses (vanilla YR). Parsed but the drain behaviour
                 // itself lives in DrainTrait (attached to Harvester units). See ModEnc/Harvester.
                 (this.drainable = this.ini.getBool("Drainable")),
-                // OpenYRWeb: SlaveMiner economy (YR Yuri faction). In vanilla YR the Slave Miner
+                // SlaveMiner economy (YR Yuri faction). In vanilla YR the Slave Miner
                 // (YAREFN building / YASLMN vehicle) is identified by SlavesNumber= (the count of
                 // SLAV workers it spawns) plus an optional SlaveRegenRate=. The worker type is the
                 // hardcoded SLAV infantry (the rulesmd never names it per-building). We expose both
@@ -448,7 +448,7 @@ System.register(
                 (this.radarInvisible = this.ini.getBool("RadarInvisible")),
                 (this.revealToAll = this.ini.getBool("RevealToAll")),
                 (this.selectable = !(this.type === s.ObjectType.Aircraft && !i) && this.ini.getBool("Selectable", !0)),
-                // OpenYRWeb: Slaved=yes marks units spawned by a Slave Miner (SLAV). Such units
+                // Slaved=yes marks units spawned by a Slave Miner (SLAV). Such units
                 // are player-owned and may be visually selected, but cannot receive movement /
                 // attack / stop orders — they run their automated SlaveGatherTask harvest loop
                 // exclusively. Mirrors vanilla YR behaviour for slaves. Checked in the order
@@ -474,7 +474,7 @@ System.register(
                 (this.jumpjetTurnRate = g.ObjectRules.iniRotToDegsPerTick(this.ini.getNumber("JumpJetTurnRate", 4))),
                 (this.jumpjetWobbles = this.ini.getNumber("JumpjetWobbles", 0.15)),
                 (this.pitchSpeed = this.ini.getNumber("PitchSpeed", 0.25)),
-                // OpenYRWeb: PitchAngle is read straight from INI (vanilla default 20).
+                // PitchAngle is read straight from INI (vanilla default 20).
                 // It used to be derived from PitchSpeed (`PitchSpeed >= 1 → 0`), which
                 // wrongly zeroed it for fighters like the Black Eagle (PitchSpeed=1.1).
                 (this.pitchAngle = this.ini.getNumber("PitchAngle", 20)),
@@ -557,7 +557,7 @@ System.register(
               return this.parseWeaponName(this.ini.getString("Weapon" + (e + 1)));
             }
             getEliteWeaponAtIndex(e) {
-              // OpenYRWeb: fall back to the non-elite WeaponN when EliteWeaponN is absent/none.
+              // fall back to the non-elite WeaponN when EliteWeaponN is absent/none.
               // Vanilla YR uses the corresponding non-elite weapon for elite units if no elite
               // override is defined; without this, an elite gattling with an incomplete
               // EliteWeaponN table would resolve to undefined and break.

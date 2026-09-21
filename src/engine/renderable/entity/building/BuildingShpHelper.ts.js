@@ -59,7 +59,7 @@ System.register(
                         e = this.imageFinder.find(n, r.useTheaterExtension);
                       } catch (e) {
                         if (e instanceof a.ImageFinder.MissingImageError) {
-                          // OpenYRWeb: an optional animation SHP is missing from the user's game
+                          // an optional animation SHP is missing from the user's game
                           // data (e.g. a production/activation frame, a snow-theater variant).
                           // The building still renders (main image + other anim layers); this is
                           // a common data-completeness issue, not an engine error. Demote to debug

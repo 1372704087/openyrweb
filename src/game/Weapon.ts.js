@@ -121,21 +121,21 @@ System.register(
                   this.gameObject.primaryWeapon
                   ? Math.min(this.gameObject.primaryWeapon.rules.range, this.rules.range)
                   : this.rules.range;
-                // OpenYRWeb: Tank Bunker weapon range bonus (BunkerWeaponRangeBonus, default 0).
+                // Tank Bunker weapon range bonus (BunkerWeaponRangeBonus, default 0).
                 // The bonus is in tiles (from [CombatDamage]BunkerWeaponRangeBonus), same unit as
                 // rules.range. Do NOT multiply by LEPTONS_PER_TILE — range comparisons divide
                 // distance by LEPTONS_PER_TILE, so range values must stay in tile units.
                 if (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait) {
                   baseRange += S.bunkerWeaponRangeBonus;
                 }
-                // OpenYRWeb: OpenTopped transport range bonus (OpenToppedRangeBonus, default 2).
+                // OpenTopped transport range bonus (OpenToppedRangeBonus, default 2).
                 // Passengers firing from an OpenTopped=yes transport (e.g. Battle Fortress) get
                 // a bonus to their weapon range. The passenger's gameObject.transport back-ref
                 // is set in EnterTransportTask and cleared on exit/destruction.
                 if (this.gameObject.transport && this.gameObject.transport.rules.openTopped) {
                   baseRange += S.openToppedRangeBonus;
                 }
-                // OpenYRWeb: OccupyWeaponRange (vanilla YR [CombatDamage], default 5) overrides
+                // OccupyWeaponRange (vanilla YR [CombatDamage], default 5) overrides
                 // the range of any weapon fired by an infantry with Occupier=yes while occupying
                 // a building (ModEnc). A fixed value is needed because two different occupants
                 // may have different weapon ranges — the short-range guy would otherwise make
@@ -153,12 +153,12 @@ System.register(
                 let e = this.rules.rof;
                 return (
                   this.gameObject.veteranTrait && (e *= this.gameObject.veteranTrait.getVeteranRofMultiplier()),
-                  // OpenYRWeb: berserk units fire faster (BerserkROFMultiplier, default 0.5 = 2x speed).
+                  // berserk units fire faster (BerserkROFMultiplier, default 0.5 = 2x speed).
                   this.gameObject.berserkTrait?.isBerserk() && (e *= S.berserkROFMultiplier),
-                  // OpenYRWeb: Tank Bunker ROF multiplier (BunkerROFMultiplier, default 1).
+                  // Tank Bunker ROF multiplier (BunkerROFMultiplier, default 1).
                   // Divide so values > 1 INCREASE fire rate (matching YR docs: larger = faster).
                   this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait && (e /= S.bunkerROFMultiplier),
-                  // OpenYRWeb: OccupyROFMultiplier (vanilla YR [CombatDamage], default 1.2) —
+                  // OccupyROFMultiplier (vanilla YR [CombatDamage], default 1.2) —
                   // multiplier to ROF of any weapon fired by an infantry while occupying a
                   // building (ModEnc). Divide so values > 1 INCREASE fire rate.
                   this.gameObject.garrisonedAt && (e /= S.occupyROFMultiplier),
@@ -191,7 +191,7 @@ System.register(
               }
               fire(s, a, e = 1) {
                 let n = this.gameObject,
-                  // OpenYRWeb: when a passenger fires from an OpenTopped transport (e.g.
+                  // when a passenger fires from an OpenTopped transport (e.g.
                   // Battle Fortress), use the transport's position/direction/tile as the
                   // fire origin — the passenger is limboed and its own position is stale.
                   // Same for a garrisoned infantry (Occupier=yes, e.g. inside a Battle
@@ -211,7 +211,7 @@ System.register(
                       (this.burstIndex = 0),
                       t
                         ? (this.burstsLeft = o)
-                        // OpenYRWeb: aircraft honour the config Burst too (vanilla YR).
+                        // aircraft honour the config Burst too (vanilla YR).
                         // This used to be hardcoded per category (fighter=1 shot), which
                         // made the MiG fire only one of its two Maverick3 missiles.
                         : this.gameObject.isAircraft()
@@ -222,7 +222,7 @@ System.register(
                       (t && 0 < o
                         ? (this.cooldownTicks = this.rules.iniSpeed)
                         : this.gameObject.isAircraft()
-                          ? // OpenYRWeb: aircraft burst shots fire back-to-back (a volley,
+                          ? // aircraft burst shots fire back-to-back (a volley,
                             // one per tick) instead of waiting a full ROF between missiles.
                             // The ROF still applies after the volley (resetBursts).
                             (this.cooldownTicks = 0)
@@ -247,17 +247,17 @@ System.register(
                   i.isAircraft() ||
                     (i.baseDamageMultiplier =
                       e * (this.gameObject.isUnit() ? this.gameObject.crateBonuses.firepower : 1) *
-                      // OpenYRWeb: Tank Bunker damage multiplier (BunkerDamageMultiplier, default 1).
+                      // Tank Bunker damage multiplier (BunkerDamageMultiplier, default 1).
                       // Multiplies weapon damage when the vehicle is inside a Tank Bunker.
                       (this.gameObject.bunkeredAt && this.gameObject.bunkeredAt.tankBunkerTrait ? S.bunkerDamageMultiplier : 1) *
-                      // OpenYRWeb: OpenTopped damage multiplier (OpenToppedDamageMultiplier, default 1.2).
+                      // OpenTopped damage multiplier (OpenToppedDamageMultiplier, default 1.2).
                       // Multiplies passenger weapon damage when firing from an OpenTopped transport.
                       (this.gameObject.transport && this.gameObject.transport.rules.openTopped ? S.openToppedDamageMultiplier : 1) *
-                      // OpenYRWeb: OccupyDamageMultiplier (vanilla YR [CombatDamage], default 1.2).
+                      // OccupyDamageMultiplier (vanilla YR [CombatDamage], default 1.2).
                       // Multiplies weapon damage while the infantry is occupying a building.
                       (this.gameObject.garrisonedAt ? S.occupyDamageMultiplier : 1));
                   let r = this.flh.clone();
-                  // OpenYRWeb: when a passenger fires from an OpenTopped transport, use the
+                  // when a passenger fires from an OpenTopped transport, use the
                   // transport's AlternateFLH (gun-port positions) instead of the passenger's
                   // own FLH. Each passenger slot (0-based) maps to AlternateFLH0, AlternateFLH1,
                   // ... on the transport (e.g. BFRT: 0=(45,190,90), 1=(45,-190,90), ...).
@@ -293,7 +293,7 @@ System.register(
                         ((h = p.Coords.screenDistanceToWorld(fireOrigin.rules.turretAnimX, fireOrigin.rules.turretAnimY)),
                         (c = fireOrigin.getFoundationCenterOffset()),
                         i.position.moveByLeptons(-c.x + h.x, -c.y + h.y)));
-                    // OpenYRWeb: buildings may define PrimaryFirePixelOffset / SecondaryFirePixelOffset
+                    // buildings may define PrimaryFirePixelOffset / SecondaryFirePixelOffset
                     // (vanilla art.ini) as a fixed firing point instead of an FLH — e.g. the Maya
                     // Pyramid (CAMEX01) has no FLH and fires from "0,-80". The offset is a screen-pixel
                     // offset from the building's base centre: X → ground offset (screen-horizontal),
@@ -314,7 +314,7 @@ System.register(
                       if (pf.length) {
                         let px = p.Coords.screenDistanceToWorld(pf[0], 0);
                         e.add(new f.Vector2(px.x, px.y));
-                        // OpenYRWeb: building PrimaryFirePixelOffset/SecondaryFirePixelOffset.
+                        // building PrimaryFirePixelOffset/SecondaryFirePixelOffset.
                         // - Weapon WITH an FLH (Prism Tower: PrimaryFireFLH=0,0,378 +
                         //   PrimaryFireDualOffset=true): the FLH already positions the firing
                         //   point, and the pixel offset is a small screen-space correction.
@@ -343,7 +343,7 @@ System.register(
                       e?.isShrouded(fireOrigin.tile, fireOrigin.tileElevation) && e.revealTemporarily(fireOrigin);
                     }
                     (this.rules.decloakToFire && this.gameObject.cloakableTrait?.uncloak(a),
-                      // OpenYRWeb: dispatch the fire event with the fire origin (the OpenTopped
+                      // dispatch the fire event with the fire origin (the OpenTopped
                       // transport / garrison building) instead of the limboed shooter. SoundHandler
                       // plays the weapon Report at the event object's position; the passenger's own
                       // position is frozen where it entered the transport and can be far away or
@@ -355,7 +355,7 @@ System.register(
               }
               getMuzzleFacing() {
                 let e = this.gameObject,
-                  // OpenYRWeb: when firing from an OpenTopped transport, use the transport's
+                  // when firing from an OpenTopped transport, use the transport's
                   // facing (and turret if it has one) so the muzzle direction follows the
                   // vehicle's orientation as it moves and turns. A garrisoned infantry uses
                   // the building's facing (buildings cannot turn — vanilla YR behaviour).
@@ -374,19 +374,19 @@ System.register(
             }),
           ),
           (S.NUKE_PAYLOAD_NAME = "NukePayload"),
-          // OpenYRWeb: berserk fire-rate multiplier (vanilla YR [CombatDamage] BerserkROFMultiplier=0.5).
+          // berserk fire-rate multiplier (vanilla YR [CombatDamage] BerserkROFMultiplier=0.5).
           // Set from CombatDamageRules during game initialization. Default 0.5 = 2x fire rate.
           (S.berserkROFMultiplier = 0.5),
-          // OpenYRWeb: Tank Bunker weapon bonus multipliers (vanilla YR [CombatDamage]).
+          // Tank Bunker weapon bonus multipliers (vanilla YR [CombatDamage]).
           // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
           (S.bunkerDamageMultiplier = 1),
           (S.bunkerROFMultiplier = 1),
           (S.bunkerWeaponRangeBonus = 0),
-          // OpenYRWeb: OpenTopped (Battle Fortress) passenger firing bonuses (vanilla YR [CombatDamage]).
+          // OpenTopped (Battle Fortress) passenger firing bonuses (vanilla YR [CombatDamage]).
           // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.
           (S.openToppedRangeBonus = 2),
           (S.openToppedDamageMultiplier = 1.2),
-          // OpenYRWeb: garrisoned-infantry firing bonuses (vanilla YR [CombatDamage]).
+          // garrisoned-infantry firing bonuses (vanilla YR [CombatDamage]).
           // OccupyWeaponRange overrides the range while occupying a building (default 5);
           // OccupyDamageMultiplier / OccupyROFMultiplier scale damage / ROF (default 1.2).
           // Set from CombatDamageRules during game initialization. Defaults match vanilla YR.

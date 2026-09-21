@@ -1,7 +1,7 @@
 // === Reconstructed SystemJS module: engine/renderable/fx/DiskLaserFx ===
 // deps: ["three.meshline","game/Coords"]
 //
-// OpenYRWeb (2026-07-15): Floating Disc DiskLaser ring charge + beam effect.
+// (2026-07-15): Floating Disc DiskLaser ring charge + beam effect.
 // Ring geometry: mathematically a perfect circle (appears elliptical due to
 // isometric projection). The ring is NOT a continuous closed loop — it is
 // two short arc segments (each 60°/2-of-12 segments) that travel from the

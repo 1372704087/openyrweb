@@ -1,4 +1,4 @@
-// === OpenYRWeb: 战役场景小队运行时 (ScenarioTeamRuntime) ===
+// === 战役场景小队运行时 (ScenarioTeamRuntime) ===
 // 完整移植临时源码 werhd.min.js 的 cQe 类（战役动作脚本执行系统）：
 //   - 小队生命周期：createTeam / reinforceTeam / destroyTeam / allToHunt / startInstance
 //   - 脚本执行：executeScriptAction 覆盖全部 YR ScriptTypes 动作（Tt 枚举）

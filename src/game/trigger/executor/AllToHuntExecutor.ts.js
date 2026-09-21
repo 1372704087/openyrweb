@@ -1,4 +1,4 @@
-// === OpenYRWeb: 全部搜索动作 (AllToHuntExecutor) ===
+// === 全部搜索动作 (AllToHuntExecutor) ===
 // 动作 6: AllToHunt — 触发阵营所有战斗单位取消当前任务，向敌方发起攻击移动。
 // 参考临时源码 scenarioTeamRuntime.allToHunt：清空任务并 queueHunt。
 // 本项目用 AttackMove 到首个敌方出生点/可见敌方位置近似实现。

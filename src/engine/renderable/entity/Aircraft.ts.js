@@ -103,7 +103,7 @@ System.register(
             init() {
               ((this.paletteRemaps = [...this.rules.colors.values()].map((e) => this.palette.clone().remap(e))),
                 this.palette.remap(this.gameObject.owner.color),
-                // OpenYRWeb: pre-add full red-tinted berserk palette
+                // pre-add full red-tinted berserk palette
                 (() => {
                   this.__berserkPalette = this.palette.clone();
                   for (var _i = 0; _i < this.__berserkPalette.colors.length; _i++) {
@@ -192,7 +192,7 @@ System.register(
                   (n = (e ? this.highlightAnimRunner.getValue() : 0) || s),
                   (a = this.lighting.getAmbientIntensity()),
                   d.ExtraLightHelper.multiplyVxl(this.extraLight, this.baseExtraLight, a, n)));
-              // OpenYRWeb: berserk palette switch — use full red-tinted palette.
+              // berserk palette switch — use full red-tinted palette.
               (() => {
                 var _bs = !!this.gameObject.berserkTrait?.isBerserk();
                 if (_bs !== this.__wasBerserk) {
@@ -245,7 +245,7 @@ System.register(
                         (e.rotateOnAxis(this.objectArt.rotors[t].axis, this.rotorSpeeds[t]), e.updateMatrix()));
                   }));
             }
-            // OpenYRWeb: 只有真正升空的单位才走影子副本 —— 停在地面时保持主体的实时投影，
+            // 只有真正升空的单位才走影子副本 —— 停在地面时保持主体的实时投影，
             // 避免起飞/降落瞬间出现"两个影子"。
             updateShadowProxy() {
               if (!this.shadowProxy) return;
@@ -269,7 +269,7 @@ System.register(
               e.add(i);
               let r = (this.posObj = new THREE.Object3D());
               ((r.matrixAutoUpdate = !1), r.add(e), t.add(r),
-                // OpenYRWeb: 空中单位的阴影偏移随飞行高度线性放大（光源约 46° 斜射，
+                // 空中单位的阴影偏移随飞行高度线性放大（光源约 46° 斜射，
                 // 偏移 ≈ 高度 × 1.047），入侵者/黑鹰这类 FlightLevel=1500 的飞机会偏出约 6 格。
                 // 改用"影子副本"：主体不再投影，改由这份被限制在低位的不可见克隆投影，
                 // 偏移因此封顶在约 1 格。详见 VxlShadowProxy。

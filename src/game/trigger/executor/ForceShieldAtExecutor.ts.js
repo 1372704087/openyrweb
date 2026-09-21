@@ -1,4 +1,4 @@
-// === OpenYRWeb: 力场盾动作 (ForceShieldAtExecutor) ===
+// === 力场盾动作 (ForceShieldAtExecutor) ===
 // 动作 112: ForceShieldAt — 在指定路径点对触发阵营施加力场盾效果。
 // 复用超级武器通道 SuperWeaponsTrait.activateEffect(ForceShield)。
 // 参数: params[6] = 路径点编号(AZ 编码)。

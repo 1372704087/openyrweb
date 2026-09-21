@@ -56,7 +56,7 @@ System.register(
               (this.c4 = this.rules.c4),
               (this.crusher = this.rules.crusher),
               (this.omniCrusher = this.rules.omniCrusher),
-              // OpenYRWeb: crush-tilt (vanilla YR "TiltsWhenCrushes" = IsTilter). While the
+              // crush-tilt (vanilla YR "TiltsWhenCrushes" = IsTilter). While the
               // vehicle crushes a target its body pitches up (front lifts). Value is in
               // DEGREES; positive = nose up on mainObj's local X axis (in-engine verified).
               // crushTilt eases toward crushTiltTarget every tick, so both the rise and the
@@ -64,7 +64,7 @@ System.register(
               (this.crushTilt = 0),
               (this.crushTiltTarget = 0),
               (this.crushTiltTimer = 0),
-              // OpenYRWeb: force-attack state, set by AttackTask while it is force-attacking
+              // force-attack state, set by AttackTask while it is force-attacking
               // a crushable target. Lets the crush logic run over friendly units/walls that
               // are being force-attacked (vanilla YR: force-attacking a friendly wall or
               // unit drives over and crushes it).
@@ -77,7 +77,7 @@ System.register(
           resetGuardModeToIdle() {
             ((this.guardMode = this.defaultToGuardArea), (this.guardArea = void 0));
           }
-          // OpenYRWeb: vanilla YR crush decision ("Who crushes whom", ModEnc).
+          // vanilla YR crush decision ("Who crushes whom", ModEnc).
           //  - Crusher=yes can crush Crushable=yes objects (infantry, wall-class buildings).
           //  - OmniCrusher=yes (requires Crusher=yes) additionally crushes Crushable=no
           //    objects (vehicles etc.) unless the victim is OmniCrushResistant=yes,

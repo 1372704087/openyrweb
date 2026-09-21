@@ -138,7 +138,7 @@ System.register(
                 (this.label = "infantry_" + e.rules.name),
                 (this.paletteRemaps = [...this.rules.colors.values()].map((e) => this.palette.clone().remap(e))),
                 (this.palette = this.palette.remap(this.gameObject.owner.color)),
-                // OpenYRWeb: pre-add full red-tinted berserk palette
+                // pre-add full red-tinted berserk palette
                 (() => {
                   this.__berserkPalette = this.palette.clone();
                   for (var _i = 0; _i < this.__berserkPalette.colors.length; _i++) {
@@ -235,7 +235,7 @@ System.register(
                     this.baseExtraLight,
                     this.highlightAnimRunner.getValue(),
                   )));
-              // OpenYRWeb: berserk palette switch — use full red-tinted palette.
+              // berserk palette switch — use full red-tinted palette.
               (() => {
                 var _bs = !!this.gameObject.berserkTrait?.isBerserk();
                 if (_bs !== this.__wasBerserk) {
@@ -584,7 +584,7 @@ System.register(
                   let i = this.art.getAnimation(r);
                   if (
                     ((this.deathAnimRenderable = t.createAnim(r, void 0, !0)),
-                    // OpenYRWeb: GENDEATH (InfantryMutate) uses unit palette (unitsno/unittem/uniturb)
+                    // GENDEATH (InfantryMutate) uses unit palette (unitsno/unittem/uniturb)
                     // rather than the default animation palette (anim.pal). Override the death
                     // anim's palette with the unit palette remapped to the CASTER's player color
                     // (recorded by GeneticMutatorEffect as _mutateCasterColor) so the transform
@@ -608,7 +608,7 @@ System.register(
                   (this.renderableManager = t),
                   new Promise((e) => {
                     this.deathPromiseResolve = () => {
-                      // OpenYRWeb: signal Genetic Mutator effect that this infantry's
+                      // signal Genetic Mutator effect that this infantry's
                       // GENDEATH death animation (infDeathType=Mutate) has finished.
                       if (this.gameObject && 9 === this.gameObject.infDeathType) {
                         this.gameObject._genDeathAnimDone = !0;

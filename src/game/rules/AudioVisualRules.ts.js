@@ -18,7 +18,7 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.ambientChangeStep = e.getNumber("AmbientChangeStep")),
               (this.behind = e.getString("Behind")),
               (this.benderOfSpoons = e.getString("BenderOfSpoons") || void 0),
-              // OpenYRWeb: berserk unit tint color (vanilla YR [AudioVisual] BerserkColor).
+              // berserk unit tint color (vanilla YR [AudioVisual] BerserkColor).
               // Applied as a remap tint to units affected by Psychedelic=yes warhead (Chaos Drone gas).
               // Default is a reddish-purple (255,0,255 in vanilla YR). Format: r,g,b (0-255).
               (this.berserkColor = e.getNumberArray("BerserkColor")),
@@ -46,12 +46,12 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.flamingInfantry = e.getString("FlamingInfantry")),
               (this.infantryHeadPop = e.getString("InfantryHeadPop")),
               (this.infantryNuked = e.getString("InfantryNuked")),
-              // OpenYRWeb: YR death anims. Virus (sniper), Mutate (Genetic Mutator transform fx),
+              // YR death anims. Virus (sniper), Mutate (Genetic Mutator transform fx),
               // Brute (the unit spawned by Mutate). Strings preserved by Engine.patchAudioVisualRules.
               (this.infantryVirus = e.getString("InfantryVirus")),
               (this.infantryMutate = e.getString("InfantryMutate")),
               (this.infantryBrute = e.getString("InfantryBrute")),
-              // OpenYRWeb: Psychic Dominator data (SuperWeapon=Type=PsychicDominator). The Dominator
+              // Psychic Dominator data (SuperWeapon=Type=PsychicDominator). The Dominator
               // mind-controls organic enemy units in DominatorCaptureRange then detonates the
               // DominatorWarhead for damage. Anim/charge strings preserved by patchAudioVisualRules.
               (this.dominatorWarhead = e.getString("DominatorWarhead")),
@@ -60,27 +60,27 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.dominatorFirstAnim = e.getString("DominatorFirstAnim")),
               (this.dominatorSecondAnim = e.getString("DominatorSecondAnim")),
               (this.dominatorFireAtPercentage = e.getNumber("DominatorFireAtPercentage", 100)),
-              // OpenYRWeb: activation sound for the Psychic Dominator (played when the super
+              // activation sound for the Psychic Dominator (played when the super
               // weapon fires). Configured via [AudioVisual] DominatorActivateSound= in INI.
               (this.dominatorActivateSound = e.getString("PsychicDominatorActivateSound") || void 0),
-              // OpenYRWeb: Genetic Mutator warhead names (vanilla YR [AudioVisual]).
+              // Genetic Mutator warhead names (vanilla YR [AudioVisual]).
               // MutateWarhead is used when [General] MutateExplosion=no (3x3 cell area);
               // MutateExplosionWarhead is used when MutateExplosion=yes (CellSpread area).
               (this.mutateWarhead = e.getString("MutateWarhead")),
               (this.mutateExplosionWarhead = e.getString("MutateExplosionWarhead")),
-              // OpenYRWeb: Mastermind overload death + mind-control release sounds.
+              // Mastermind overload death + mind-control release sounds.
               (this.masterMindOverloadDeathSound = e.getString("MasterMindOverloadDeathSound")),
               (this.mindClearedSound = e.getString("MindClearedSound")),
               (this.bunkerWallsUpSound = e.getString("BunkerWallsUpSound") || void 0),
               (this.bunkerWallsDownSound = e.getString("BunkerWallsDownSound") || void 0),
               (this.ironCurtainInvokeAnim = e.getString("IronCurtainInvokeAnim")),
-              // OpenYRWeb (2026-07-25): Force Shield invoke animation (vanilla YR [AudioVisual]).
+              // (2026-07-25): Force Shield invoke animation (vanilla YR [AudioVisual]).
               // Played at the activation tile when Force Shield is deployed. Default FORCSHLD.
               (this.forceShieldInvokeAnim = e.getString("ForceShieldInvokeAnim")),
-              // OpenYRWeb (2026-07-25): Force Shield invulnerability color (palette index).
+              // (2026-07-25): Force Shield invulnerability color (palette index).
               // Vanilla YR [AudioVisual] ForceShieldColor=6 (blue/cyan tint).
               (this.forceShieldColor = e.getNumber("ForceShieldColor", 6)),
-              // OpenYRWeb: Boris airstrike voice lines (vanilla YR [AudioVisual]).
+              // Boris airstrike voice lines (vanilla YR [AudioVisual]).
               // AirstrikeAttackVoice — "MiG's on the way" (when MiGs spawn; Boris's line).
               // AirstrikeTargetAcquiredSound — "Target acquired!" (when a MiG opens fire).
               // AirstrikeDeathSound — "I'm going down!" / "I won't make it!" (shot down).
@@ -89,11 +89,11 @@ System.register("game/rules/AudioVisualRules", [], function (e, t) {
               (this.airstrikeTargetAcquiredSound = e.getString("AirstrikeTargetAcquiredSound") || void 0),
               (this.airstrikeDeathSound = e.getString("AirstrikeDeathSound") || void 0),
               (this.airstrikeAbortSound = e.getString("AirstrikeAbortSound") || void 0),
-              // OpenYRWeb (2026-08-09): Grinder (Grinding=yes) grind sound (vanilla YR
+              // (2026-08-09): Grinder (Grinding=yes) grind sound (vanilla YR
               // [AudioVisual] EnterGrinderSound=, e.g. GrinderGrinding). Played while a
               // unit is being recycled; also falls back to the SpecialAnim's Report=.
               (this.enterGrinderSound = e.getString("EnterGrinderSound") || void 0),
-              // OpenYRWeb (2026-08-08): Spy Plane camera sound + cadence (vanilla YR
+              // (2026-08-08): Spy Plane camera sound + cadence (vanilla YR
               // [AudioVisual]). SpyPlaneCamera is played each time the plane takes a
               // picture; SpyPlaneCameraFrames is how often (in ticks) it does so while
               // in the process of photographing the target area.

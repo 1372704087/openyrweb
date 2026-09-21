@@ -200,7 +200,7 @@ System.register(
             endAnimationLoop() {
               this.animation?.endLoopAndPlayToEnd();
             }
-            // OpenYRWeb: set the animation to play 'e' more full loops then stop.
+            // set the animation to play 'e' more full loops then stop.
             // Resets the loop counter so the count starts fresh from wherever
             // the animation currently is.
             playRemainingLoops(e) {

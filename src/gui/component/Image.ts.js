@@ -31,7 +31,7 @@ System.register(
         },
       ],
       execute: function () {
-        // OpenYRWeb: upstream-engine UI icons (originally in ra2cd.mix) that we deliberately
+        // upstream-engine UI icons (originally in ra2cd.mix) that we deliberately
         // do not ship — they are decorative and have CSS/layout fallbacks. Missing entries
         // for these are expected, so suppress the "not found in VFS" warning for them.
         const OPTIONAL_IMAGES = new Set(["info.png"]);
@@ -69,7 +69,7 @@ System.register(
               } else
                 t = o.cdnBaseUrl
                   ? o.cdnBaseUrl + n.src.substring(0, n.src.lastIndexOf(".")) + ".png"
-                  : // OpenYRWeb: a few UI icons (e.g. info.png) are upstream-engine custom
+                  : // a few UI icons (e.g. info.png) are upstream-engine custom
                     // assets that originally lived in ra2cd.mix, which we do not distribute
                     // (AGENTS.md §8). They are decorative and have graceful fallbacks, so a
                     // missing entry here is expected — stay quiet instead of flooding console.

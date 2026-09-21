@@ -55,7 +55,7 @@ System.register(
             let { viewport: e, screenSize: t, sideType: i, images: r, innerRef: s } = this.props,
               a = "lg";
             ((t.width < 1024 || t.height < 768) && (a = "md"), (t.width < 800 || t.height < 600) && (a = "sm"));
-            // OpenYRWeb: YR-only — engine check always true; keep Yuri-side (ThirdSide) styling.
+            // YR-only — engine check always true; keep Yuri-side (ThirdSide) styling.
             var n = i === g.SideType.ThirdSide,
               o = n ? `bkgd${a}y.shp` : `bkgd${a}.shp`,
               l = n ? "uibkgdy.pal" : "uibkgd.pal",

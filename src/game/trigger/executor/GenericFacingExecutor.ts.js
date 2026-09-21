@@ -1,4 +1,4 @@
-// === OpenYRWeb: 设置朝向动作 (GenericFacingExecutor) ===
+// === 设置朝向动作 (GenericFacingExecutor) ===
 // 动作 78: GenericFacing — 将触发阵营所有存活单位朝向设置为指定方向。
 // 参数：params[1] 为 0-7 方向（与脚本 ForceFacing 一致）。
 // deps: ["game/trigger/TriggerExecutor"]

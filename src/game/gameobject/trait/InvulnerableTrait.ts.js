@@ -22,11 +22,11 @@ System.register(
         ((s = class {
           constructor() {
             ((this.timer = new i.Timer()),
-              // OpenYRWeb: tracks whether invulnerability came from Force Shield (for visual tint).
+              // tracks whether invulnerability came from Force Shield (for visual tint).
               (this.isForceShield = !1),
-              // OpenYRWeb: independent timer for Force Shield expiration (not reset by Iron Curtain).
+              // independent timer for Force Shield expiration (not reset by Iron Curtain).
               (this.fsTimer = new i.Timer()),
-              // OpenYRWeb: version counters increment on each apply — lets renderer detect re-applies.
+              // version counters increment on each apply — lets renderer detect re-applies.
               (this._version = 0), (this._fsVersion = 0));
           }
           isActive() {

@@ -119,7 +119,7 @@ System.register(
               let e = new c.EventsApi(t.events);
               var i, r;
               for (i of t.getCombatants().filter((e) => e.isAi)) this.bots.set(i, this.botFactory.create(i));
-              // OpenYRWeb: 战役人类阵营没有常规 AI Bot，但也需要脚本小队引擎
+              // 战役人类阵营没有常规 AI Bot，但也需要脚本小队引擎
               // （CreateTeam 等触发器动作对任意阵营都可用，参考临时源码 scenarioTeamRuntime）。
               for (i of t.getCombatants().filter((e) => e.isCampaign && !e.isAi))
                 this.bots.set(i, this.botFactory.create(i));
@@ -177,7 +177,7 @@ System.register(
                 r && this.actionLogger.debug(`(${t.player.name})@${e.currentTick}: ` + r);
               }
               for (i of e.getCombatants().filter((e) => e.isAi)) this.bots.get(i).onGameTick(this.gameApi);
-              // OpenYRWeb: 战役人类阵营的脚本小队 Bot 同样需要每 tick 推进队伍状态
+              // 战役人类阵营的脚本小队 Bot 同样需要每 tick 推进队伍状态
               for (i of e.getCombatants().filter((e) => e.isCampaign && !e.isAi))
                 this.bots.get(i).onGameTick(this.gameApi);
               // 自动Flush AI聊天消息到Game队列（单机模式），供GUI层消费

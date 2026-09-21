@@ -1,4 +1,4 @@
-// === OpenYRWeb: 迷雾触发动作 (ShroudFxExecutor) ===
+// === 迷雾触发动作 (ShroudFxExecutor) ===
 // 处理按路径点揭示/延伸黑幕的动作：
 //   18 RevealAllUnits  → 揭示路径点周围（revealTriggerRadius）给所有作战方
 //   31 ExtendShroud    → 逐单元延伸黑幕（同样揭示一圈，半径略小）

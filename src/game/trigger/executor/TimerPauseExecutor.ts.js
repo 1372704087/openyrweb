@@ -1,4 +1,4 @@
-// === OpenYRWeb: 暂停计时器动作 (TimerPauseExecutor) ===
+// === 暂停计时器动作 (TimerPauseExecutor) ===
 // 动作 104: TimerPause — 暂停任务计时器（保留剩余时间，仅停止递减）。
 // 复用 CountdownTimer.stop()（其仅置 running=false，ticks 保留）。
 // deps: ["game/trigger/TriggerExecutor"]

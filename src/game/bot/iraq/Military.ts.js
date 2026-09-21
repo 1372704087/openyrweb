@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/bot/iraq/Military ===
-// OpenYRWeb IraqBot — 军事子系统：3狗探全图、集结、集团 attack-move、集中火力微操、
+// IraqBot — 军事子系统：3狗探全图、集结、集团 attack-move、集中火力微操、
 // DESO 展开、被入侵防守。战术目标严格来自 getVisibleUnits("enemy")（引擎按我方 fog 过滤）。
 // deps: ["game/api/index", "game/bot/iraq/Util"]
 System.register(

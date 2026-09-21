@@ -1,4 +1,4 @@
-// === OpenYRWeb: 更改联盟关系动作 (ChangeAllianceExecutor) ===
+// === 更改联盟关系动作 (ChangeAllianceExecutor) ===
 // 动作 89: ChangeAlliance — 在两个阵营之间建立/解除联盟。
 // 参数: params[1] = 阵营 A 的国家 ID, params[2] = 阵营 B 的国家 ID,
 //       params[3] = 1 建立联盟 / 0 解除联盟。

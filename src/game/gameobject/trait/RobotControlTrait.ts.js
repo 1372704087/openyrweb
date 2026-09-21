@@ -34,7 +34,7 @@ System.register(
         },
       ],
       execute: function () {
-        // OpenYRWeb: Robot Control Center (GACSPH) / Robot Tank (ROBOT) symbiosis.
+        // Robot Control Center (GACSPH) / Robot Tank (ROBOT) symbiosis.
         //
         // In vanilla YR the Robot Tank has Powered=yes and its operation depends on the
         // Robot Control Center building (GACSPH). When the control center is destroyed,

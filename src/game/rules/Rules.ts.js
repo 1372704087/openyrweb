@@ -132,7 +132,7 @@ System.register(
                 (this.superWeaponTypes = new Map()),
                 (this.countryTypes = new Map()),
                 (this.weaponTypes = new Map()),
-                // OpenYRWeb: [Particles] list (vanilla YR particle types, e.g. VirusCloud1).
+                // [Particles] list (vanilla YR particle types, e.g. VirusCloud1).
                 // The engine has no full YR particle engine, but the virus sniper toxic cloud
                 // reads its tuning values (Damage/MaxDC/MaxEC/Image/Warhead/...) from these
                 // rulesmd.ini sections instead of hardcoding them.
@@ -349,7 +349,7 @@ System.register(
             readCombatDamage() {
               var e = this.ini.getSection("CombatDamage");
               if (!e) throw new Error("Missing [CombatDamage] section");
-              // OpenYRWeb (2026-07-25): Force Shield parameters live in [General] in vanilla YR's
+              // (2026-07-25): Force Shield parameters live in [General] in vanilla YR's
               // rulesmd.ini (ForceShieldRadius, ForceShieldDuration, ForceShieldBlackoutDuration),
               // but the code reads them from [CombatDamage]. Patch them across so they're not lost.
               var genSec = this.ini.getSection("General");
@@ -361,14 +361,14 @@ System.register(
                 }
               }
               this.combatDamage.readIni(e);
-              // OpenYRWeb: Propagate Tank Bunker weapon bonus multipliers to the Weapon module.
+              // Propagate Tank Bunker weapon bonus multipliers to the Weapon module.
               C.Weapon.bunkerDamageMultiplier = this.combatDamage.bunkerDamageMultiplier;
               C.Weapon.bunkerROFMultiplier = this.combatDamage.bunkerROFMultiplier;
               C.Weapon.bunkerWeaponRangeBonus = this.combatDamage.bunkerWeaponRangeBonus;
-              // OpenYRWeb: Propagate OpenTopped (Battle Fortress) passenger firing bonuses.
+              // Propagate OpenTopped (Battle Fortress) passenger firing bonuses.
               C.Weapon.openToppedRangeBonus = this.combatDamage.openToppedRangeBonus;
               C.Weapon.openToppedDamageMultiplier = this.combatDamage.openToppedDamageMultiplier;
-              // OpenYRWeb: Propagate garrisoned-infantry firing bonuses (OccupyWeapon/EliteOccupyWeapon).
+              // Propagate garrisoned-infantry firing bonuses (OccupyWeapon/EliteOccupyWeapon).
               C.Weapon.occupyWeaponRange = this.combatDamage.occupyWeaponRange;
               C.Weapon.occupyDamageMultiplier = this.combatDamage.occupyDamageMultiplier;
               C.Weapon.occupyROFMultiplier = this.combatDamage.occupyROFMultiplier;
@@ -421,7 +421,7 @@ System.register(
                   : this.logger?.debug(`Non-string type found in rules section [${i}]. Skipping.`);
               });
             }
-            // OpenYRWeb: read the [Particles] list (id=name) and store each particle's
+            // read the [Particles] list (id=name) and store each particle's
             // rulesmd.ini section so the virus cloud simulation can be tuned from config.
             readParticleTypes() {
               let e = this.ini.getSection("Particles");

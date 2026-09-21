@@ -26,26 +26,26 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.burst = this.rules.getNumber("Burst", 1)),
               (this.cellRangefinding = this.rules.getBool("CellRangefinding")),
               (this.damage = this.rules.getNumber("Damage")),
-              // OpenYRWeb (2026-06-30, REVERSED): DrainWeapon=yes marks a weapon that, when it
+              // (2026-06-30, REVERSED): DrainWeapon=yes marks a weapon that, when it
               // strikes a Drainable=yes building, drains power/money instead of dealing damage
               // (vanilla Floating Disc / DISCUS uses this). REVERSED from yrmd.exe: DrainWeapon is
               // a per-weapon boolean parsed in WeaponTypeClass::ReadINI (@ 0x00849470).
               (this.drainWeapon = this.rules.getBool("DrainWeapon")),
               (this.decloakToFire = this.rules.getBool("DecloakToFire", !0)),
               (this.fireOnce = this.rules.getBool("FireOnce")),
-              // OpenYRWeb: FireWhileMoving (vanilla YR weapon flag). When=no, the unit must be
+              // FireWhileMoving (vanilla YR weapon flag). When=no, the unit must be
               // fully stationary to fire this weapon (vanilla: DiskDrain on the Floating Disc).
               // Default=yes — most weapons can fire while moving.
               (this.fireWhileMoving = this.rules.getBool("FireWhileMoving", !0)),
               (this.isAlternateColor = this.rules.getBool("IsAlternateColor")),
               (this.isElectricBolt = this.rules.getBool("IsElectricBolt")),
               (this.isHouseColor = this.rules.getBool("IsHouseColor")),
-              // OpenYRWeb: IsMagBeam=yes marks a weapon that should render the magnetic tractor
+              // IsMagBeam=yes marks a weapon that should render the magnetic tractor
               // beam visual. The actual drag logic additionally requires the weapon's warhead to
               // have IsLocomotor=yes. This lets rulesmd.ini keep IsMagBeam=yes on MagneShake for
               // other purposes without it accidentally drawing the tractor beam.
               (this.isMagBeam = this.rules.getBool("IsMagBeam")),
-              // OpenYRWeb (2026-07-06): MagnaBeam parameters for dedicated Magnetron beam rendering.
+              // (2026-07-06): MagnaBeam parameters for dedicated Magnetron beam rendering.
               // These control the visual appearance of the magnetic tractor beam: colour, alpha,
               // width, wave distortion, pulse/flicker, glow halo, and blending mode.
               // Parsed from weapon INI section (e.g. [MagneticBeam]) to replace the old hardcoded
@@ -79,13 +79,13 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.magnaBeamEndAnim = this.rules.getString("MagnaBeamEndAnim") || void 0),
               (this.magnaBeamAnimScale = this.rules.getNumber("MagnaBeamAnimScale", 1.0)),
               (this.isLaser = this.rules.getBool("IsLaser")),
-              // OpenYRWeb: DiskLaser=yes enables the Floating Disc ring-laser charge effect.
+              // DiskLaser=yes enables the Floating Disc ring-laser charge effect.
               // Draws a circle of radius 240 leptons centred at the FLH position, with two
               // arcs charging CW+CCW from the opposite point toward the point nearest the
               // target. When charge completes, a beam fires from the nearest point to target.
               // Vanilla sources: WeaponTypeClass::ReadINI in yrmd.exe, ModEnc DiskLaser page.
               (this.isDiskLaser = this.rules.getBool("DiskLaser")),
-              // OpenYRWeb: Phobos extension. Customisable ring radius in leptons.
+              // Phobos extension. Customisable ring radius in leptons.
               // Default 240 matches vanilla YR hardcoded radius.
               (this.diskLaserRadius = this.rules.getNumber("DiskLaser.Radius", 240)),
               // DiskLaser inner beam colour. Vanilla default (216,0,184) — magenta.
@@ -103,7 +103,7 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.name = this.rules.name),
               (this.neverUse = this.rules.getBool("NeverUse")),
               (this.omniFire = this.rules.getBool("OmniFire")),
-              // OpenYRWeb: InfiniteMindControl=yes marks a mind-control weapon that has no hard
+              // InfiniteMindControl=yes marks a mind-control weapon that has no hard
               // capacity cap — the controller can acquire unlimited targets, but takes escalating
               // overload self-damage when exceeding its safe capacity (weapon Damage). Vanilla YR
               // Mastermind (MIND) uses this behavior; Yuri Clone / Yuri X do not.
@@ -116,7 +116,7 @@ System.register("game/rules/WeaponRules", ["game/rules/ObjectRules"], function (
               (this.revealOnFire = this.rules.getBool("RevealOnFire", !0)),
               (this.rof = this.rules.getNumber("ROF")),
               (this.sabotageCursor = this.rules.getBool("SabotageCursor")),
-              // OpenYRWeb: MigAttackCursor=yes marks Boris's Flare weapon. When this weapon
+              // MigAttackCursor=yes marks Boris's Flare weapon. When this weapon
               // targets a building, the cursor changes to AirStrike and an AirstrikeAttackTask
               // is created instead of a normal AttackTask. Vanilla YR uses this flag on Boris's
               // secondary weapon to trigger MiG airstrike calls.

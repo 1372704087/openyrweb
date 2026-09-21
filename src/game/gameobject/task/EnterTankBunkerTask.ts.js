@@ -1,7 +1,7 @@
 // === Reconstructed SystemJS module: game/gameobject/task/EnterTankBunkerTask ===
 // deps: ["game/gameobject/task/system/Task","game/gameobject/task/move/MoveTask","game/gameobject/task/TurnTask","game/Coords","game/math/Vector2"]
 //
-// OpenYRWeb: Vehicle enters a Tank Bunker — drives to the building center,
+// Vehicle enters a Tank Bunker — drives to the building center,
 // turns to face the bunker's orientation, then docks to be absorbed.
 
 System.register(

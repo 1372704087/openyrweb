@@ -1,4 +1,4 @@
-// === OpenYRWeb: 敌对动作 (EnemyExecutor) ===
+// === 敌对动作 (EnemyExecutor) ===
 // 动作 38: Enemy/MakeEnemy — 使触发器的所属阵营与指定阵营解除联盟（成为敌人）。
 // 参考临时源码：params[1] = 目标阵营 ID（-1 表示任意）；解析方式同 AllianceExecutor。
 // deps: ["game/Alliances","game/trigger/TriggerExecutor"]

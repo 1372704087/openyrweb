@@ -111,7 +111,7 @@ System.register(
                     i.production.isAvailableForProduction(r) &&
                     ((n = Math.min(s.maxSize - s.currentSize, s.maxItemQuantity - a, t)),
                     0 < (o = Math.min(this.quantity, n)) &&
-                      // OpenYRWeb: apply Industrial Plant (NAINDP) cost bonus to the per-item
+                      // apply Industrial Plant (NAINDP) cost bonus to the per-item
                       // cost when queueing. getCostBonusMultiplier scans the player's buildings
                       // for UnitsCostBonus/InfantryCostBonus/etc. and returns the cheapest factor
                       // (1 = no discount). Rounded to an integer cost like the vanilla engine.

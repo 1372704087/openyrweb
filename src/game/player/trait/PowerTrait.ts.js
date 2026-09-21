@@ -55,7 +55,7 @@ System.register(
               setBlackoutFor(e, t) {
                 var i = 0 < this.blackoutFrames;
                 ((this.blackoutFrames = e), i || this.updateLevel(t));
-                // OpenYRWeb: force display power to 0 during blackout so the sidebar updates.
+                // force display power to 0 during blackout so the sidebar updates.
                 this.drainPowerOverride = e > 0 ? 1 : 0;
                 t.traits.filter(o.NotifyPower).forEach((e) => {
                   e[o.NotifyPower.onPowerChange](this.player, t);
@@ -64,9 +64,9 @@ System.register(
               }
               updateBlackout(e) {
                 0 < this.blackoutFrames && (this.blackoutFrames--, this.blackoutFrames <= 0 && this.updateLevel(e));
-                // OpenYRWeb: clear drainPowerOverride when blackout expires.
+                // clear drainPowerOverride when blackout expires.
                 0 >= this.blackoutFrames && (this.drainPowerOverride = 0);
-                // OpenYRWeb: always dispatch PowerChangeEvent so the sidebar HUD updates.
+                // always dispatch PowerChangeEvent so the sidebar HUD updates.
                 e.traits.filter(o.NotifyPower).forEach((t) => {
                   t[o.NotifyPower.onPowerChange](this.player, e);
                 });
@@ -81,7 +81,7 @@ System.register(
                   if (s < 0) ("add" !== i && "remove" !== i) || (this.drain += "add" === i ? -s : s);
                   else {
                     let e = 0;
-                    // OpenYRWeb: a drained power plant contributes zero power so the owner's
+                    // a drained power plant contributes zero power so the owner's
                     // total drops and Low Power is triggered.
                     var effectiveS = t.drainedBy ? 0 : s;
                     if ("add" === i) {

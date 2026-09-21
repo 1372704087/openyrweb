@@ -1,4 +1,4 @@
-// === OpenYRWeb: 摧毁全部动作 (DestroyAllExecutor) ===
+// === 摧毁全部动作 (DestroyAllExecutor) ===
 // 动作 119 DestroyAll / 120 DestroyAllBuildings / 121 DestroyAllLandUnits / 122 DestroyAllNavalUnits。
 // 按触发器所属阵营（houseName）销毁其所有存活单位/建筑。
 // 参考临时源码 kx：all / buildings / land-units / naval-units 四种范围。

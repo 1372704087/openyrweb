@@ -92,7 +92,7 @@ System.register(
                   var s;
                   i.includes(r)
                     ? ((s = t.getNumber(r)), this.changeHotKey(r, s))
-                    : // OpenYRWeb: keyboardmd.ini (shipped inside the user's langmd.mix) contains
+                    : // keyboardmd.ini (shipped inside the user's langmd.mix) contains
                       // Westwood map-editor / debug leftovers (CopyBlock, PasteBlock, FileNew,
                       // FileOpen, FileSave, MultiplayerDebug, ForceLose) that were never part of
                       // the released KeyCommandType enum and have no handler here. They are dead

@@ -514,7 +514,7 @@ export class MagnetronDragTask extends Task {
   }
 
   /**
-   * OpenYRWeb：安全销毁无 limboData 的 techno 对象。game.destroyObject
+   * 安全销毁无 limboData 的 techno 对象。game.destroyObject
    * 强制要求 techno 有 limboData，但被磁电拖拽的单位（zone=Air）并未
    * 经过 limbo 流程，直接调用会抛异常——回退为手动标记销毁并从世界移除。
    */

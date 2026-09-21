@@ -1,6 +1,6 @@
 // === Reconstructed SystemJS module: ErrorHandler ===
 // deps: []
-// OpenYRWeb: 全局错误处理器。
+// 全局错误处理器。
 // 支持基本错误弹窗（MessageBoxApi）和详细错误弹窗（ErrorDetailsBoxApi）。
 
 System.register("ErrorHandler", [], function (e, t) {

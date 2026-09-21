@@ -533,7 +533,7 @@ System.register(
               (n.init(), this.disposables.add(n));
               let o = (this.pointer = oe.Pointer.factory(
                 G.Engine.getImages().get(
-                  // OpenYRWeb: YR-only — mouse cursor is always mouse.sha.
+                  // YR-only — mouse cursor is always mouse.sha.
                   "mouse.sha",
                 ),
                 G.Engine.getPalettes().get("mousepal.pal"),

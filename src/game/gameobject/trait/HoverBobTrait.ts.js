@@ -55,7 +55,7 @@ System.register(
               a.Coords.worldToTileHeight(t.rules.general.hover.height);
           }
           [i.NotifyTick.onTick](e, t) {
-            // OpenYRWeb: When disabled (e.g. Robot Tank paralyzed), stay at ground level.
+            // When disabled (e.g. Robot Tank paralyzed), stay at ground level.
             if (this.disabled) {
               var hbGround =
                 e.onBridge ? (t.map.tileOccupation.getBridgeOnTile(e.tile)?.tileElevation ?? 0) : 0;

@@ -90,7 +90,7 @@ System.register(
           [o.NotifyTick.onTick]() {
             for (let t = 0; t < this.numberOfDocks; t++) {
               var e = this.unitsByDockNumber[t];
-              /* OpenYRWeb: undock units without DockableTrait (e.g. SPYP) that
+              /* undock units without DockableTrait (e.g. SPYP) that
                  are destroyed — the DockableTrait.onUnspawn cleanup is missing. */
               e && (e.isDestroyed || e.isDisposed || e.tile !== this.getDockTile(t)) && this.undockUnit(e);
             }
@@ -177,7 +177,7 @@ System.register(
               throw new RangeError(`Index ${e} exceeds available docks (${this.numberOfDocks})`);
             var t = this.building.position.getMapPosition(),
               i = this.getDockOffset(e);
-            // OpenYRWeb: Tank Bunker DockingOffset fix. The original artmd.ini stores
+            // Tank Bunker DockingOffset fix. The original artmd.ini stores
             // DockingOffset as an unused placeholder at -1,-1,0 in TILE units.
             // Override with an offset that targets the rightmost column of the foundation
             // (the entrance side), which is passable due to NumberImpassableRows.
@@ -194,7 +194,7 @@ System.register(
           }
           isValidUnitForDock(e) {
             return (
-              // OpenYRWeb: Tank Bunker — vehicles with Bunkerable=yes can dock at Bunker=yes buildings.
+              // Tank Bunker — vehicles with Bunkerable=yes can dock at Bunker=yes buildings.
               // Validation (locomotor, turret, weapon, size, parasite) is delegated to TankBunkerTrait.
               (this.building.tankBunkerTrait && e.isVehicle() && this.building.tankBunkerTrait.canVehicleEnter(e)) ||
               (((this.building.unitRepairTrait &&
@@ -209,7 +209,7 @@ System.register(
             if (t > this.numberOfDocks - 1)
               throw new RangeError(`Index ${t} exceeds available docks (${this.numberOfDocks})`);
             if (this.unitsByDockNumber[t]) throw new Error("Another unit is already docked at dock #" + t);
-            /* OpenYRWeb: some aircraft (e.g. spy plane) may lack DockableTrait;
+            /* some aircraft (e.g. spy plane) may lack DockableTrait;
                occupy the dock slot anyway and skip the back-reference. */
             let i = e.traits.find(a.DockableTrait);
             (this.unitsByDockNumber[t] = e), i && (i.dock = this.building);
@@ -218,7 +218,7 @@ System.register(
             if (e > this.numberOfDocks - 1)
               throw new RangeError(`Index ${e} exceeds available docks (${this.numberOfDocks})`);
             let t = this.unitsByDockNumber[e];
-            /* OpenYRWeb: guard against units without DockableTrait. */
+            /* guard against units without DockableTrait. */
             t && ((this.unitsByDockNumber[e] = void 0), (d => d && (d.dock = void 0))(t.traits.find(a.DockableTrait)));
           }
           undockUnit(e) {

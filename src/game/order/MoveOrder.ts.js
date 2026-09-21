@@ -94,7 +94,7 @@ System.register(
           }
           getPointerType(e) {
             let t = this.isAllowed();
-            // OpenYRWeb: bunkered vehicles show default arrow cursor instead of NoMove/NoAction
+            // bunkered vehicles show default arrow cursor instead of NoMove/NoAction
             if (!t && this.sourceObject.bunkeredAt) {
               return o.PointerType.Default;
             }
@@ -165,7 +165,7 @@ System.register(
           }
           process() {
             const e = this.sourceObject;
-            // OpenYRWeb: deploy-fire units undeploy before moving
+            // deploy-fire units undeploy before moving
             e.isUnit() && e.deployerTrait?.isDeployed() && e.deployerTrait.setDeployed(!1);
             if (!e.isBuilding() || !e.rallyTrait?.getRallyPoint()) {
               var t = this.game.rules.general.closeEnough;

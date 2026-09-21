@@ -1,4 +1,4 @@
-// === OpenYRWeb: 战役脚本小队 Bot (ScenarioTeamBot) ===
+// === 战役脚本小队 Bot (ScenarioTeamBot) ===
 // 为战役中没有常规 AI Bot 的阵营（人类玩家）提供脚本小队能力：
 // CreateTeam/DestroyTeam 等触发器动作创建的队伍由 AiEngine 招募并执行脚本。
 // 该 Bot 只做队伍管理，不做生产/展开/自主进攻，避免劫持玩家单位。

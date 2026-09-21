@@ -3,7 +3,7 @@
  *
  * 继承 MoveTask，与 MoveInsideTask 相对的"停在目标边上"：
  *  - 目的地默认取建筑中心 tile（中心越界回退地基内首个合法格）；
- *    OpenYRWeb 扩展：infantryAbsorb 建筑（步兵吸收，如兵营集结）
+ * 扩展：infantryAbsorb 建筑（步兵吸收，如兵营集结）
  *    走向前/东南边缘的随机一格（从门口聚而不是堆到建筑背面）；
  *    grinding 建筑（粉碎机）走正南边缘中点（大门），让单位从正面进；
  *  - 目标本体加入 ignoredBlockers；closeEnoughTiles = √2
@@ -62,7 +62,7 @@ export class MoveNextToTask extends MoveTask {
           return candidates[idx];
         }
       }
-      // OpenYRWeb: 粉碎机（Grinding=yes）——走向南边缘中点（大门），
+      // 粉碎机（Grinding=yes）——走向南边缘中点（大门），
       // 让单位从正面进门而不是从任意方向贴上去。
       if (target.rules?.grinding) {
         const grindWidth = target.art.foundation.width;

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 文本通知动作 (TextNotificationExecutor) ===
+// === 文本通知动作 (TextNotificationExecutor) ===
 // 动作 83: TextNotification — 显示非本地化文本通知。
 // 与动作 11 (TextTrigger) 在引擎内走同一事件通道。
 // deps: ["game/event/TriggerTextEvent","game/trigger/TriggerExecutor"]

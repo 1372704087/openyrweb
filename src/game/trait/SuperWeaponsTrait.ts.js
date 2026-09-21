@@ -196,30 +196,30 @@ System.register(
                   if (!a) throw new Error("Missing tile2 action param");
                   t.push(new b.ChronoSphereEffect(o, i, s, a));
                   break;
-                // OpenYRWeb: YR superweapons. Both are single-click targeted (no tile2).
+                // YR superweapons. Both are single-click targeted (no tile2).
                 case g.SuperWeaponType.PsychicDominator:
                   t.push(new Dm.DominatorEffect(o, i, s));
                   break;
                 case g.SuperWeaponType.GeneticMutator:
-                  // OpenYRWeb: Genetic Mutator resolves its warhead from [AudioVisual]
+                  // Genetic Mutator resolves its warhead from [AudioVisual]
                   // MutateWarhead/MutateExplosionWarhead based on [General] MutateExplosion.
                   // No WeaponType parameter needed — effect reads AudioVisual rules directly.
                   t.push(new Gm.GeneticMutatorEffect(o, i, s));
                   break;
-                // OpenYRWeb (2026-06-30, REVERSED): Force Shield — shields buildings within
+                // (2026-06-30, REVERSED): Force Shield — shields buildings within
                 // ForceShieldRadius for ForceShieldDuration frames (invulnerability, same mechanism
                 // as Iron Curtain), at the cost of blacking out the owner's power for
                 // ForceShieldBlackoutDuration frames. Single-click targeted (no tile2).
                 case g.SuperWeaponType.ForceShield:
                   t.push(new Fs.ForceShieldEffect(o, i, s));
                   break;
-                // OpenYRWeb (2026-06-30): Psychic Reveal — permanently reveals a circular area
+                // (2026-06-30): Psychic Reveal — permanently reveals a circular area
                 // of shroud (PsychicRevealRadius) around the activation tile for the activating
                 // player. Single-click targeted (no tile2). Unlocked by the Psychic Sensor (YAGGNT).
                 case g.SuperWeaponType.PsychicReveal:
                   t.push(new Pr.PsychicRevealEffect(o, i, s));
                   break;
-                // OpenYRWeb (2026-08-08): Spy Plane — Soviet Radar Tower (NARADR)
+                // (2026-08-08): Spy Plane — Soviet Radar Tower (NARADR)
                 // support power. A recon plane (SPYP) flies in from a random map
                 // edge, photographs the area around the target (revealing shroud),
                 // and exits the opposite side. Single-click targeted (no tile2).

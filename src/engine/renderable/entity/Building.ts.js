@@ -146,9 +146,9 @@ System.register(
           .set(M.AnimationType.SUPER_CHARGE_END, M.AnimationType.IDLE)
           .set(M.AnimationType.FACTORY_DEPLOYING, M.AnimationType.IDLE)
           .set(M.AnimationType.FACTORY_ROOF_DEPLOYING, M.AnimationType.IDLE)
-          // OpenYRWeb: Tank Bunker exit animation → back to IDLE when done.
+          // Tank Bunker exit animation → back to IDLE when done.
           .set(M.AnimationType.SPECIAL_UNDOCKING, M.AnimationType.IDLE)
-          // OpenYRWeb: Grinder — if the grind animation stops on its own (one-shot
+          // Grinder — if the grind animation stops on its own (one-shot
           // SpecialAnim), fall back to IDLE instead of leaving the building bare.
           .set(M.AnimationType.SPECIAL_GRIND, M.AnimationType.IDLE)),
           (l = new Map()
@@ -160,9 +160,9 @@ System.register(
             .set(M.AnimationType.SPECIAL_REPAIR_END, [M.AnimationType.SPECIAL, 2])
             .set(M.AnimationType.SPECIAL_DOCKING, [M.AnimationType.SPECIAL, 0])
             .set(M.AnimationType.SPECIAL_SHOOT, [M.AnimationType.SPECIAL, 0])
-            // OpenYRWeb: Tank Bunker exit — maps to SpecialAnimThree (NATBNK_A2, reverse/going-down).
+            // Tank Bunker exit — maps to SpecialAnimThree (NATBNK_A2, reverse/going-down).
             .set(M.AnimationType.SPECIAL_UNDOCKING, [M.AnimationType.SPECIAL, 2])
-            // OpenYRWeb: Grinder — maps to SpecialAnim (grind animation).
+            // Grinder — maps to SpecialAnim (grind animation).
             .set(M.AnimationType.SPECIAL_GRIND, [M.AnimationType.SPECIAL, 0])
             .set(M.AnimationType.FACTORY_DEPLOYING, [M.AnimationType.FACTORY_DEPLOYING, 0])
             .set(M.AnimationType.FACTORY_UNDER_DOOR, [M.AnimationType.FACTORY_DEPLOYING, 1])
@@ -200,15 +200,15 @@ System.register(
                   (this.repairStartRequested = !1),
                   (this.highlightAnimRunner = new k.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new B.InvulnerableAnimRunner(this.gameSpeed)),
-                  // OpenYRWeb: laser-target red pulse runner — mirrors the Force
+                  // laser-target red pulse runner — mirrors the Force
                   // Shield pulse. Produces a sine value in [-0.5, -0.1] which is
                   // used to modulate brightness; the red tint is lerped on top.
                   // steps=60, rate=10 → 60 frames per cycle at 10 fps = 6s period.
                   (this.laserTargetAnimRunner = new B.InvulnerableAnimRunner(this.gameSpeed, -0.5, -0.1, 60, 10)),
                   (this._wasLaserTarget = !1),
-                  // OpenYRWeb: must init lastInvulnerable=false to prevent false "invuln ended" flash on newly constructed buildings (undefined !== false triggers t=true).
+                  // must init lastInvulnerable=false to prevent false "invuln ended" flash on newly constructed buildings (undefined !== false triggers t=true).
                   (this.lastInvulnerable = !1),
-                  // OpenYRWeb: init lastSuperWeaponAlmostCharged=false so the charge-anim
+                  // init lastSuperWeaponAlmostCharged=false so the charge-anim
                   // check after construction completes does not treat the initial state as
                   // a change (which would endLoop the IDLE animation).
                   (this.lastSuperWeaponAlmostCharged = !1),
@@ -435,7 +435,7 @@ System.register(
                   var r = this.highlightAnimRunner.shouldUpdate(),
                     s = this.gameObject.invulnerableTrait.isActive(),
                     t = s !== this.lastInvulnerable;
-                  // OpenYRWeb: start flash for ANY new invulnerability application (IC or FS) via version counter.
+                  // start flash for ANY new invulnerability application (IC or FS) via version counter.
                   void 0 === this._invulnFlashTimer && (this._invulnFlashTimer = (this._invulnFlashPlayed = 0, 0));
                   var _vNow = this.gameObject.invulnerableTrait._version;
                   void 0 === this._lastInvulnV && (this._lastInvulnV = _vNow);
@@ -445,14 +445,14 @@ System.register(
                     this._fsEndFlashEndTimer = 0;
                   }
                   this._lastInvulnV = _vNow;
-                  // OpenYRWeb: FS end flash — independent of invulnerability state (for IC overlap).
+                  // FS end flash — independent of invulnerability state (for IC overlap).
                   var _fsNow = this.gameObject.invulnerableTrait.isForceShieldActive();
                   void 0 === this._lastFSActive && (this._lastFSActive = _fsNow);
                   if (!_fsNow && this._lastFSActive) {
                     !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
                   }
                   this._lastFSActive = _fsNow;
-                  // OpenYRWeb: generic end flash when invulnerability expires (IC and FS).
+                  // generic end flash when invulnerability expires (IC and FS).
                   if (t && !s) {
                     !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
                   }
@@ -477,7 +477,7 @@ System.register(
                     var _tgtShp = this.baseShpExtraLight.clone();
                     x.ExtraLightHelper.multiplyVxl(_tgtVxl, this.baseVxlExtraLight, _amb_f, _nV);
                     x.ExtraLightHelper.multiplyShp(_tgtShp, this.baseShpExtraLight, _nV);
-                    // OpenYRWeb: FS blue glow for start flash target.
+                    // FS blue glow for start flash target.
                     if (this.gameObject.invulnerableTrait.isForceShieldActive()) {
                       var _fsTint = new THREE.Vector3(0, 0, 255);
                       _tgtVxl.lerp(_fsTint, 0.2);
@@ -498,11 +498,11 @@ System.register(
                       (s = this.lighting.getAmbientIntensity()),
                       x.ExtraLightHelper.multiplyVxl(this.vxlExtraLight, this.baseVxlExtraLight, s, n),
                       x.ExtraLightHelper.multiplyShp(this.shpExtraLight, this.baseShpExtraLight, n),
-                      // OpenYRWeb: FS blue glow during pulsing.
+                      // FS blue glow during pulsing.
                       this.gameObject.invulnerableTrait.isForceShieldActive() &&
                         (this.vxlExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2),
                         this.shpExtraLight.lerp(new THREE.Vector3(0, 0, 255), 0.2))));
-                  // OpenYRWeb: red pulsing tint while being laser-designated by a
+                  // red pulsing tint while being laser-designated by a
                   // Boris airstrike. Mirrors the Force Shield pulse: the runner's
                   // sine value darkens/brightens the building, then a red tint is
                   // lerped on top so the building visibly pulses red.
@@ -613,7 +613,7 @@ System.register(
                             : this.endCurrentAnimation(),
                           (this.repairStartRequested = !1))));
                   let e = this.gameObject.superWeaponTrait?.getSuperWeapon(this.gameObject);
-                  // OpenYRWeb: only reflect the superweapon charge/ready animation once the
+                  // only reflect the superweapon charge/ready animation once the
                   // building is fully built — otherwise an instantly-ready superweapon
                   // (e.g. "无限超武" cheat) would override the BUILDUP animation on the
                   // first frame and skip the construction sequence.
@@ -634,7 +634,7 @@ System.register(
                       (this.setAnimation(M.AnimationType.SPECIAL_REPAIR_START, i), (this.repairStartRequested = !1)),
                     this.muzzleAnims && this.updateMuzzleAnims(i),
                     this.updateDrainAnim(i),
-                    // OpenYRWeb: Grinder (Grinding=yes) — play the SpecialAnim (grind
+                    // Grinder (Grinding=yes) — play the SpecialAnim (grind
                     // animation) while a unit is being ground; return to IDLE once the
                     // animation completes naturally (SPECIAL_GRIND → IDLE via the j map
                     // when it stops) or the safety counter runs out. Uses the dedicated
@@ -646,7 +646,7 @@ System.register(
                       this.objectRules.grinding &&
                       this.hasAnimation(M.AnimationType.SPECIAL) &&
                       (()=>{const cnt=this.gameObject._grindingAnimTicks??0;const fresh=cnt>(this._lastGrindCnt??0);this._lastGrindCnt=cnt;if(cnt>0){if(fresh){this._grindingActive=!0;if(this.currentAnimType!==M.AnimationType.SPECIAL_GRIND)this.setAnimation(M.AnimationType.SPECIAL_GRIND,i)}}else if(this._grindingActive){this._grindingActive=!1;if(this.currentAnimType===M.AnimationType.SPECIAL_GRIND)this.setAnimation(M.AnimationType.IDLE,i)}})(),
-                    // OpenYRWeb: Grinder (Grinding=yes) with an IdleAnimTwo — the IdleAnimTwo
+                    // Grinder (Grinding=yes) with an IdleAnimTwo — the IdleAnimTwo
                     // is the building's sole idle display (a full-building art that replaces
                     // the body), so in the idle state hide the body and every other animation
                     // layer and show only it. Re-applied each frame so transient re-shows
@@ -664,7 +664,7 @@ System.register(
                           (this.setAnimationVisibility(M.AnimationType.ACTIVE, !1),
                             this.setAnimationVisibility(M.AnimationType.IDLE, !1, 0),
                             this.setAnimationVisibility(M.AnimationType.IDLE, !0, 1))),
-                    // OpenYRWeb: 精炼厂倒矿"矿石到达"动画——每次新倒矿（gameobject._refineryOrePile 累计倒矿量上涨）切到
+                    // 精炼厂倒矿"矿石到达"动画——每次新倒矿（gameobject._refineryOrePile 累计倒矿量上涨）切到
                     // SPECIAL_DOCKING 完整播一次建筑自带的一次性 SpecialAnim（GAREFNOR/NAREFNOR），播完回 IDLE。
                     !this.gameObject.isDestroyed &&
                       this.objectRules.refinery &&
@@ -732,7 +732,7 @@ System.register(
                       h === p.DamageType.DESTROYED &&
                       this.objectRules.explosion.length &&
                       this.createExplosionAnims(this.renderableManager)),
-                    // OpenYRWeb: Tank Bunker — track bunkered vehicle changes.
+                    // Tank Bunker — track bunkered vehicle changes.
                     // Must be outside the (c||d||g) guard because the bunker has no wallTrait/garrisonTrait
                     // and the guard short-circuits after the first frame.
                     (function(t, self) {
@@ -828,7 +828,7 @@ System.register(
               updateDrainAnim(e) {
                 if (this.gameObject.isDestroyed) return this.clearDrainAnim();
 
-                // OpenYRWeb: Y offset below the disc so the animation sits just beneath
+                // Y offset below the disc so the animation sits just beneath
                 // the flying disc's model rather than at its exact center.
                 const DRAIN_ANIM_Y_OFFSET = 0;
 
@@ -1355,7 +1355,7 @@ System.register(
               }
               setActiveAnimationVisible() {
                 let e = this.animArtProps.getByType(M.AnimationType.ACTIVE);
-                // OpenYRWeb: 精炼厂矿堆（GAREFNL1-4 槽）——游戏数据通常只带 GAREFNL1 一个 shp，
+                // 精炼厂矿堆（GAREFNL1-4 槽）——游戏数据通常只带 GAREFNL1 一个 shp，
                 // 且原版倒矿钱直达玩家、塔 tier 恒 0，故精炼厂固定只渲染第 0 槽（GAREFNL1），
                 // 避免设置到缺失的 GAREFNL2/3/4 触发 "No image file found"。
                 (this.objectRules.refinery && (e = [e[0]]),
@@ -1523,7 +1523,7 @@ System.register(
                       break;
                     }
                   case M.AnimationType.SPECIAL_GRIND:
-                    // OpenYRWeb: Grinder (Grinding=yes) — play the SpecialAnim (grind
+                    // Grinder (Grinding=yes) — play the SpecialAnim (grind
                     // animation) in place of the normal ActiveAnim while a unit is being
                     // ground. Non-grinding buildings fall through to IDLE as before.
                     if (this.objectRules.grinding && this.hasAnimation(M.AnimationType.SPECIAL)) {
@@ -1533,7 +1533,7 @@ System.register(
                       this.setAnimationVisibility(i, !0, r);
                       r = this.animObjects.get(i)[r];
                       this.animations.get(r).start(t);
-                      // OpenYRWeb: play the grinder's grind sound ([AudioVisual]
+                      // play the grinder's grind sound ([AudioVisual]
                       // EnterGrinderSound=, vanilla YR). The SpecialAnim's Report= sound
                       // is handled by setAnimationVisibility for game data that defines it.
                       this.rules.audioVisual.enterGrinderSound &&

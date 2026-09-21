@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/bot/iraq/Economy ===
-// OpenYRWeb IraqBot — 经济/建造/生产子系统。
+// IraqBot — 经济/建造/生产子系统。
 // 序列：电→兵营→矿→重工；重工后矿车:重工=2:1 + 纯犀牛不断；雷达+辐射对策。
 // 反作弊：指令走 actionsApi（生产/建造），引擎强校验 prereq/BuildLimit/canPlaceAt/造价。
 // 健壮性：所有 isAvailableForProduction 调用前先确认 rules 对象存在，避免 undefined 抛错崩溃。

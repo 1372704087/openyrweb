@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/bot/iraq/IraqBot ===
-// OpenYRWeb IraqBot — 竞技级伊拉克 1v1 AI（专精 Tour of Egypt）。
+// IraqBot — 竞技级伊拉克 1v1 AI（专精 Tour of Egypt）。
 // 打法：电→兵营→矿→重工 序列 → 3狗探全图 → 重工后1矿车+纯犀牛不断 →
 //       按经济补矿/补重工 → 攒够犀牛集团平推。雷达+辐射仅作步兵海对策。不追高科。
 // 反作弊：所有 enemy 信息来自 getVisibleUnits("enemy")（引擎按我方 fog 过滤），

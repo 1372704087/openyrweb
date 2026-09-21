@@ -2,7 +2,7 @@
 // deps: ["game/superweapon/SuperWeaponEffect","engine/type/ObjectType","game/gameobject/unit/ZoneType","game/gameobject/unit/FacingUtil","game/gameobject/task/move/MoveTask","game/gameobject/task/system/CallbackTask","game/math/Vector2","game/Coords","game/event/TriggerSoundFxEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb (2026-08-08): Spy Plane — the Soviet Radar Tower (NARADR) support
+// (2026-08-08): Spy Plane — the Soviet Radar Tower (NARADR) support
 // power (SuperWeaponType.SpyPlane=8, [SpyPlaneSpecial]). A recon plane (SPYP)
 // flies in from a random map edge, passes over the targeted tile, and takes
 // photographs as it flies by (FlyBy — it never slows down). Each photograph

@@ -147,7 +147,7 @@ System.register(
             }
             [r.NotifyTick.onTick](e, t) {
               var i;
-              // OpenYRWeb: crush-tilt — ease crushTilt toward crushTiltTarget every tick.
+              // crush-tilt — ease crushTilt toward crushTiltTarget every tick.
               // The target stays 20° just long enough for the nose to rise (fresh crushes
               // refresh it), then drops to 0 right after the crushed unit is destroyed so
               // the settle follows immediately, with the same smooth transition as the rise.
@@ -227,19 +227,19 @@ System.register(
                     .getGroundObjectsOnTile(a.tile)
                     .filter(
                       (e) =>
-                        // OpenYRWeb: bridge overlays must never be treated as crushable
+                        // bridge overlays must never be treated as crushable
                         // targets — a Crusher/OmniCrusher (e.g. Battle Fortress) driving
                         // onto a bridge tile would otherwise destroy the bridge and
                         // trigger the bridge domino chain. Pathfinding (isOmniCrushTarget)
                         // already excludes bridges, so this keeps crush behavior consistent.
                         !(e.isOverlay() && e.isBridge?.()) &&
                         (!e.isUnit() || e.onBridge === a.onBridge) &&
-                        // OpenYRWeb: use the full vanilla crush decision (Crusher/Crushable/
+                        // use the full vanilla crush decision (Crusher/Crushable/
                         // OmniCrusher/OmniCrushResistant) instead of Crushable alone, so
                         // OmniCrushers (e.g. Battle Fortress) can crush vehicles too.
                         a.canCrushObject(e) &&
                         !(e.isInfantry() && e.stance === p.StanceType.Paradrop) &&
-                        // OpenYRWeb: force-attacked friendly crushable targets (walls/units)
+                        // force-attacked friendly crushable targets (walls/units)
                         // are driven over and crushed — vanilla YR force-attacking a
                         // friendly wall or unit crushes it.
                         (!(e.isTechno() && !i) ||
@@ -248,7 +248,7 @@ System.register(
                     ))
                     c.isDestroyed ||
                       (c.isInfantry() && (c.infDeathType = u.InfDeathType.None),
-                      // OpenYRWeb: vanilla YR "TiltsWhenCrushes" (=IsTilter): while crushing a
+                      // vanilla YR "TiltsWhenCrushes" (=IsTilter): while crushing a
                       // vehicle or a wall the crusher body pitches up (front lifts). Positive
                       // pitch on mainObj's local X axis = nose up. Sets the TARGET angle; the
                       // actual crushTilt eases toward it every tick in onTick. The hold is
@@ -261,7 +261,7 @@ System.register(
                         ((c.isOverlay() || c.isBuilding()) && c.rules.wall || c.isVehicle()) &&
                         ((a.crushTiltTarget = 20), (a.crushTiltTimer = 8)),
                       (c.deathType = d.DeathType.Crush),
-                      // OpenYRWeb: 车辆被碾压走 [CombatDamage] CrushWarhead 绝对伤害
+                      // 车辆被碾压走 [CombatDamage] CrushWarhead 绝对伤害
                       // （vanilla YR: Crush = "absolute damage", 无视护甲/HP 直接判定摧毁）。
                       // 目标 HP 归零后由 Warhead 走正常死亡/爆炸流程，同时按弹头 AnimList
                       // 在目标位置播放爆炸动画（与 detonate 同链路，经 WarheadDetonateFxHandler）。

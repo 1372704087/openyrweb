@@ -1,4 +1,4 @@
-// === OpenYRWeb: 触发器"未实现"类型注册表 (TriggerSupport) ===
+// === 触发器"未实现"类型注册表 (TriggerSupport) ===
 // 记录已加入枚举、但引擎尚未实现真实逻辑的事件/动作类型。
 //   - 占位事件 -> NoEventCondition（永不触发，安全默认，避免触发器开局误触发）
 //   - 占位动作 -> NoActionExecutor（无操作）
@@ -22,7 +22,7 @@ System.register("data/map/trigger/TriggerSupport", [], function (t, e) {
           33, // SelectedByPlayer: 被玩家选中（无选择事件钩子）
         ]),
         // 未实现的动作类型（占位 NoActionExecutor，无操作）
-        // OpenYRWeb: 所有已枚举动作现均有执行器（SuperWeaponFx/ShroudFx/UnloadAll/Sabotage/
+        // 所有已枚举动作现均有执行器（SuperWeaponFx/ShroudFx/UnloadAll/Sabotage/
         // ChangeLighting/Misc 等），故此表已清空；Misc 类动作在触发时打印 debug 日志。
         placeholderActionTypes: new Set([]),
       });

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 科技建筑被占领条件 (TechBuildingCapturedCondition) ===
+// === 科技建筑被占领条件 (TechBuildingCapturedCondition) ===
 // 事件 24: TechBuildingCaptured — 当 Capturable=yes 的科技建筑被占领时触发。
 // 参数: params[1] = 占领方阵营 ID（0 表示任意阵营占领都触发）。
 // 实现: 监听 BuildingCaptureEvent（SecureProgressTrait/CaptureBuildingTask 派发，

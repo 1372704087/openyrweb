@@ -2,7 +2,7 @@
 // deps: ["gui/screen/mainMenu/ScreenType","gui/FullScreen","engine/sound/Music","gui/screen/options/component/getHumanReadableKey","gui/component/MessageBoxApi","gui/screen/mainMenu/MainMenuScreen","gui/screen/mainMenu/MainMenuRoute"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb 主菜单：Custom Match → 多人大廳（登录 → 大厅 → 建房/加入，连接 WoL 服务器）。
+// 主菜单：Custom Match → 多人大廳（登录 → 大厅 → 建房/加入，连接 WoL 服务器）。
 // Demo → 遭遇戰（沿用原 Skirmish 路径）。Quick Match / Mods 保持移除（C++ 服务端暂未实现匹配队列）。
 
 System.register(

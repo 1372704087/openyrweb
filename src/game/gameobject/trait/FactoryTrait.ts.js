@@ -170,7 +170,7 @@ System.register(
                     return;
                   this.buildingProductionTicks = void 0;
                 } else if (!this.unitHasClearedFactory(this.deliveringUnit, i, r)) {
-                  // OpenYRWeb: anti-stall safety. If a produced unit cannot clear the factory
+                  // anti-stall safety. If a produced unit cannot clear the factory
                   // exit for an extended period (e.g. exit tile blocked by terrain/units), the
                   // factory would stay in Delivering forever and queue no more units. After a
                   // generous timeout (~10s = 150 ticks at BASE_TICKS_PER_SECOND=15), release the
@@ -309,7 +309,7 @@ System.register(
               var s = r.getFirstAvailableDockNumber();
               if (void 0 === s) return !1;
               let a = i.createUnitForPlayer(t.rules, e.owner);
-              /* OpenYRWeb: mark aircraft that leave the production queue so the
+              /* mark aircraft that leave the production queue so the
                  aircraft production capacity (updateAircraftQueueMaxSize) can
                  tell "produced" aircraft from "summoned" ones (airstrike MiGs,
                  paradrop planes, carrier planes). Even a Spawned=yes type built
@@ -397,7 +397,7 @@ System.register(
               );
             }
             computeWarFactoryExitCoords(e) {
-              // OpenYRWeb: spawn the produced vehicle at the geometric center of the
+              // spawn the produced vehicle at the geometric center of the
               // factory foundation (matching original YR behavior). ExitFactoryTask
               // then drives the unit to the external rally point, ignoring the factory
               // building as a blocker (ignoredBlockers).
@@ -406,7 +406,7 @@ System.register(
             }
             computeWarFactoryInternalRallyCoords(e) {
               var t = e.getFoundation();
-              // OpenYRWeb: the internal rally point must be OUTSIDE the building foundation so
+              // the internal rally point must be OUTSIDE the building foundation so
               // the produced vehicle can actually stop there (ExitFactoryTask.canStopAtTile blocks
               // factory tiles). The original used rx+width-1 (right edge), but for wide foundations
               // (e.g. YAWEAP is 5x3) that tile is still inside the foundation. Using rx+width

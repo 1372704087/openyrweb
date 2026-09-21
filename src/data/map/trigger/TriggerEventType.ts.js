@@ -1,4 +1,4 @@
-// === OpenYRWeb: 触发事件类型枚举 (TriggerEventType) ===
+// === 触发事件类型枚举 (TriggerEventType) ===
 // 涵盖 RA2 原版 + Yuri's Revenge 扩展的所有事件类型
 // 枚举值对应原版 INI 地图文件中 [Events] 节的 EventType 数字 ID
 // deps: []

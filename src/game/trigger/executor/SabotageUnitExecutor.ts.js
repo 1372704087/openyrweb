@@ -1,4 +1,4 @@
-// === OpenYRWeb: 破坏单位动作 (SabotageUnitExecutor) ===
+// === 破坏单位动作 (SabotageUnitExecutor) ===
 // 动作 87: SabotageUnit — 破坏指定路径点区域（3x3）的敌方技术单位。
 // 简化实现：对路径点所在格及邻近格（曼哈顿距离 ≤1）的敌方单位直接销毁。
 // deps: ["game/trigger/TriggerExecutor"]

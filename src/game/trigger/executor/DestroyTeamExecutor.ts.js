@@ -1,4 +1,4 @@
-// === OpenYRWeb: 摧毁小队动作 (DestroyTeamExecutor) ===
+// === 摧毁小队动作 (DestroyTeamExecutor) ===
 // 动作 5 (RA2) / 77 (YR): DestroyTeam — 将同名活跃小队标记为完成并停止脚本推进。
 // 单位本身保留在地图上（原版 DestroyTeam 只解散小队/回收脚本控制）。
 // 参考临时源码 scenarioTeamRuntime.destroyTeam：释放所有同名队伍实例。

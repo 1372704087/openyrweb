@@ -148,7 +148,7 @@ System.register(
                   (this.lowPowerPenaltyModifier = e.getNumber("LowPowerPenaltyModifier", 1)),
                   (this.minLowPowerProductionSpeed = e.getFixed("MinLowPowerProductionSpeed", 0.5)),
                   (this.maxLowPowerProductionSpeed = e.getFixed("MaxLowPowerProductionSpeed", 1)),
-                  // OpenYRWeb: Genetic Mutator mode flag (vanilla YR [General] MutateExplosion=yes).
+                  // Genetic Mutator mode flag (vanilla YR [General] MutateExplosion=yes).
                   // When true, the Genetic Mutator uses the MutateExplosionWarhead (with CellSpread);
                   // when false, it uses the 3x3-cell MutateWarhead.
                   (this.mutateExplosion = e.getBool("MutateExplosion")),
@@ -165,7 +165,7 @@ System.register(
                   (this.radar = new i.RadarRules().readIni(e)),
                   (this.refundPercent = g.clamp(e.getNumber("RefundPercent"), 0, 1)),
                   (this.repair = new r.RepairRules().readIni(e)),
-                  // OpenYRWeb: Secret Lab bonus pools (vanilla YR [General] Secret Lab Section).
+                  // Secret Lab bonus pools (vanilla YR [General] Secret Lab Section).
                   // When a SecretLab=yes building (CASLAB) is captured, the owner gains the
                   // ability to build ONE pseudo-random object drawn from the concatenation of
                   // these three lists (infantry first, then units, then buildings). The draw
@@ -173,7 +173,7 @@ System.register(
                   (this.secretInfantry = e.getArray("SecretInfantry")),
                   (this.secretUnits = e.getArray("SecretUnits")),
                   (this.secretBuildings = e.getArray("SecretBuildings")),
-                  // OpenYRWeb: YR Tech Hospital self-heal global parameters.
+                  // YR Tech Hospital self-heal global parameters.
                   // SelfHealInfantryFrames/SelfHealUnitFrames: ticks between self-heal pulses.
                   // SelfHealInfantryAmount/SelfHealUnitAmount: HP healed per tick per multiplier.
                   (this.selfHealInfantryFrames = e.getNumber("SelfHealInfantryFrames", 50)),

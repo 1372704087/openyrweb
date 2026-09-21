@@ -590,12 +590,12 @@ System.register(
                     n?.isTechno() &&
                     n.mindControllableTrait &&
                     !n.mindControllableTrait?.isActive() &&
-                    // OpenYRWeb: harvesters (Harvester=yes) cannot be mind-controlled in vanilla YR.
+                    // harvesters (Harvester=yes) cannot be mind-controlled in vanilla YR.
                     !n.rules.harvester &&
                     !o.areFriendly(n, this.fromObject) &&
                     r.canDamage(n, l, s) &&
                     !n.invulnerableTrait.isActive() &&
-                    // OpenYRWeb: mind control respects Verses. Controller has 0% against building
+                    // mind control respects Verses. Controller has 0% against building
                     // armors (Yuri Clone/Mastermind cannot control buildings); ControllerBuilding
                     // has 100% (Yuri X can control buildings).
                     0 < r.rules.verses.get(n.rules.armor) &&

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 闪烁指定类型建筑动作 (FlashBuildingsOfTypeExecutor) ===
+// === 闪烁指定类型建筑动作 (FlashBuildingsOfTypeExecutor) ===
 // 动作 131: FlashBuildingsOfType — 高亮触发阵营指定类型建筑（战役演出常用）。
 // 参数：params[1]=建筑类型名；为空时高亮该阵营所有建筑。
 // deps: ["game/trigger/TriggerExecutor"]

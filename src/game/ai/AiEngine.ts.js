@@ -222,7 +222,7 @@ System.register("game/ai/AiEngine", [
         console.log("[AiEngine] Spawn team " + teamType.name + " (TF=" + teamType.taskForce + ")");
       };
 
-      // OpenYRWeb: 战役援军/CreateReinforcement 专用 — 用已经直接生成的单位建立小队。
+      // 战役援军/CreateReinforcement 专用 — 用已经直接生成的单位建立小队。
       // 与 spawnTeam 的区别：不经过招募阶段，单位已经由触发器创建并放置在地图上。
       AiEngine.prototype.spawnTeamWithUnits = function (teamType, tick, unitIds) {
         var at = new ActiveTeam(teamType);
@@ -250,7 +250,7 @@ System.register("game/ai/AiEngine", [
         return at;
       };
 
-      // OpenYRWeb: DestroyTeam 动作 — 将同名活跃小队标记为完成并停止脚本推进。
+      // DestroyTeam 动作 — 将同名活跃小队标记为完成并停止脚本推进。
       // 单位本身保留在地图上（原版 DestroyTeam 只解散小队/回收脚本控制）。
       AiEngine.prototype.destroyTeam = function (teamName) {
         if (!teamName) return 0;

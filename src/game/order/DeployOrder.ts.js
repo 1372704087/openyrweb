@@ -82,7 +82,7 @@ System.register(
               (e.isVehicle() && e.transportTrait) ||
               (e.isBuilding() && e.rules.factory && !e.owner.production?.isPrimaryFactory(e)) ||
               (e.isBuilding() && e.garrisonTrait?.units.length) ||
-              // OpenYRWeb: bunkered vehicle can deploy to exit (select tank + press D).
+              // bunkered vehicle can deploy to exit (select tank + press D).
               (e.isUnit() && e.bunkeredAt?.tankBunkerTrait?.bunkeredVehicle === e)
             );
           }
@@ -103,7 +103,7 @@ System.register(
             }
             if (t.isBuilding() && t.rules.factory) return !0;
             if (t.isBuilding() && t.garrisonTrait?.units.length) return !0;
-            // OpenYRWeb: bunkered vehicle can deploy to exit (select tank + press D).
+            // bunkered vehicle can deploy to exit (select tank + press D).
             if (t.isUnit() && t.bunkeredAt?.tankBunkerTrait?.bunkeredVehicle === t) return !0;
             throw new Error("Shouldn't reach this point. Missed a case.");
           }
@@ -133,7 +133,7 @@ System.register(
                       : e.isUnit() && e.bunkeredAt
                         ? [
                             new o.CallbackTask(() => {
-                              // OpenYRWeb: Tank Bunker evacuation — eject the bunkered vehicle.
+                              // Tank Bunker evacuation — eject the bunkered vehicle.
                               // source can be the bunker building or the bunkered tank itself.
                               var bunker = e.isBuilding() ? e : e.bunkeredAt;
                               var v = bunker?.tankBunkerTrait?.bunkeredVehicle;

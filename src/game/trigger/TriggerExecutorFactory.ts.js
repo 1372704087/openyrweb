@@ -538,7 +538,7 @@ System.register(
                   return new ad.TimerResumeExecutor(e, t);
                 case i.TriggerActionType.ForceShieldAt:
                   return new ab.ForceShieldAtExecutor(e, t);
-                // ========== OpenYRWeb 补充实现 ==========
+                // ==========  补充实现 ==========
                 case i.TriggerActionType.RevealAllUnits:
                   return new Xa.ShroudFxExecutor(e, t, "reveal-all-units");
                 case i.TriggerActionType.ExtendShroud:

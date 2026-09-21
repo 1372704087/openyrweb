@@ -1,4 +1,4 @@
-// === OpenYRWeb: 解除触发器动作 (DisarmTriggerExecutor) ===
+// === 解除触发器动作 (DisarmTriggerExecutor) ===
 // 动作 90: DisarmTrigger — 解除指定触发器，使其不再被触发。
 // 复用 TriggerManager.setTriggerEnabled(id, false)（与 DisableTrigger 同路径）。
 // 参数: params[1] = 触发器 ID。

@@ -19,7 +19,7 @@ System.register(
         },
       ],
       execute: function () {
-        // OpenYRWeb: Electric spark effect for paralyzed Robot Tanks.
+        // Electric spark effect for paralyzed Robot Tanks.
         // When the RobotControlTrait reports paralyzed (control center offline/destroyed),
         // this plugin periodically spawns SparkFx at the vehicle's position to simulate
         // electrical short-circuiting. Sparks are white, short-lived (0.4s), and spawn

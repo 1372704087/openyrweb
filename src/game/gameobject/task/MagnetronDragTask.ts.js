@@ -2,7 +2,7 @@
 // deps: ["game/gameobject/task/system/Task","game/map/tileFinder/RandomTileFinder","game/type/LocomotorType","game/Coords","game/math/Vector2","game/math/Vector3","game/gameobject/unit/ZoneType","game/gameobject/trait/MoveTrait","game/gameobject/task/move/MoveTask","game/event/ObjectLandEvent","game/event/ObjectLiftOffEvent","game/gameobject/common/DeathType","game/type/LandType","game/type/SpeedType","game/gameobject/locomotor/JumpjetLocomotor","game/Warhead","game/gameobject/trait/AttackTrait"]
 // 注意：变量/类型名是原始 TypeScript 的精简近似。
 //
-// OpenYRWeb: 磁电坦克磁场光束拖拽（原版尤里复仇行为还原）。
+// 磁电坦克磁场光束拖拽（原版尤里复仇行为还原）。
 //
 // 原版 YR 行为参考（ModEnc / CnC Wiki 考证）：
 //   - IsLocomotor=yes 弹头命中载具后，临时将目标的 Locomotor 替换为 Jumpjet，
@@ -514,7 +514,7 @@ System.register(
               } catch (err) {}
             }
 
-            // OpenYRWeb: 安全销毁无 limboData 的 techno 对象。
+            // 安全销毁无 limboData 的 techno 对象。
             // game.destroyObject 强制要求 techno 有 limboData，但被磁电拖拽的单位
             // （zone=Air）并未经过 limbo 流程，直接调用会抛异常。
             _forceDestroyObject(obj, game, attackerInfo) {

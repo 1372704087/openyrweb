@@ -1,4 +1,4 @@
-// === OpenYRWeb: 援军动作 (CreateReinforcementExecutor) ===
+// === 援军动作 (CreateReinforcementExecutor) ===
 // 动作 7 CreateReinforcement / 75 ReinforceTeam — 按地图 [TeamTypes]/[TaskForces]
 // 直接生成单位到指定路径点（不经过招募），并把生成单位交给 AI 引擎执行脚本。
 // 参考临时源码（werhd.min.js @2760481 reinforceTeam / @2795037 spawnTaskForce）：

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 建立小队动作 (CreateTeamExecutor) ===
+// === 建立小队动作 (CreateTeamExecutor) ===
 // 动作 4 (RA2) / 76 (YR): CreateTeam — 按地图 [TeamTypes] 定义创建作战小队。
 // 参考临时源码（werhd.min.js @1705013 / @2751183）：
 //   - teamId 取 params[1]，空/"0"/"none"/"<none>" 视为无效；

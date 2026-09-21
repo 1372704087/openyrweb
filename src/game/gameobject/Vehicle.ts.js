@@ -115,7 +115,7 @@ System.register(
                 [f.LocomotorType.Vehicle, f.LocomotorType.Chrono].includes(t.locomotor) &&
                   i.isVoxel &&
                   ((a.tilterTrait = new T.TilterTrait()), a.traits.add(a.tilterTrait)),
-                // OpenYRWeb: Robot Control Center (GACSPH) / Robot Tank (ROBOT) symbiosis.
+                // Robot Control Center (GACSPH) / Robot Tank (ROBOT) symbiosis.
                 // Units with Powered=yes or PoweredUnit=yes (e.g. ROBOT) get a RobotControlTrait
                 // that paralyzes them when their prerequisite control-center building is
                 // offline/destroyed. The trait scans owner.buildings each tick for an operational

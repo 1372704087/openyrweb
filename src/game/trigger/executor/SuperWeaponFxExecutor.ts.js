@@ -1,4 +1,4 @@
-// === OpenYRWeb: 超武特效触发动作 (SuperWeaponFxExecutor) ===
+// === 超武特效触发动作 (SuperWeaponFxExecutor) ===
 // 处理多个按路径点目标施放超武的动作：
 //   58  MeteorStrike    → MultiMissile
 //   84  ChronoWarp     → ChronoWarp

@@ -162,7 +162,7 @@ System.register(
                     ? new ia.InfantryAbsorbTrait(n, t.maxNumberOccupants)
                     : new og.OccupiableGarrisonTrait(n, i.audioVisual.conditionRed, t.maxNumberOccupants)),
                   n.traits.add(n.garrisonTrait)),
-                // OpenYRWeb: InfantryAbsorb buildings (bio reactor) reuse the Battle Fortress
+                // InfantryAbsorb buildings (bio reactor) reuse the Battle Fortress
                 // transport enter/exit mechanism — the garrison trait doubles as the
                 // building's transportTrait (same `units` container + load queue), so
                 // EnterTransportTask / EvacuateTransportTask operate on it directly.
@@ -193,12 +193,12 @@ System.register(
                   (t.unitRepair || t.unitReload) &&
                     ((n.unitRepairTrait = new v.UnitRepairTrait()), n.traits.add(n.unitRepairTrait)),
                   t.unitReload && ((n.unitReloadTrait = new E.UnitReloadTrait()), n.traits.add(n.unitReloadTrait))),
-                // OpenYRWeb: Tank Bunker (Bunker=yes or known building "NATBNK") — allows
+                // Tank Bunker (Bunker=yes or known building "NATBNK") — allows
                 // vehicles to enter for protection. Works alongside DockTrait; TankBunkerTrait
                 // handles damage redirection, weapon bonuses, and entry validation.
                 (t.bunker || "NATBNK" === t.name) && ((n.tankBunkerTrait = new TB.TankBunkerTrait(n)), n.traits.add(n.tankBunkerTrait)),
                 t.hospital && ((n.hospitalTrait = new A.HospitalTrait()), n.traits.add(n.hospitalTrait)),
-                // OpenYRWeb: YR Tech Hospital self-heal (InfantryGainSelfHeal / UnitsGainSelfHeal).
+                // YR Tech Hospital self-heal (InfantryGainSelfHeal / UnitsGainSelfHeal).
                 // Attached alongside the classic HospitalTrait — both can coexist on the same
                 // building. The classic trait handles enter-to-heal (queue + ammo); this trait
                 // handles the map-wide auto-heal for all friendly infantry/units.
@@ -223,7 +223,7 @@ System.register(
                 (this.direction = 0),
                 (this._buildStatus = k.BuildUp),
                 (this.lastBuildStatus = this.buildStatus),
-                // OpenYRWeb: Secret Lab map-assigned bonus object name (e.g. "SNIPE"). Set by
+                // Secret Lab map-assigned bonus object name (e.g. "SNIPE"). Set by
                 // Game.assignSecretLabBonuses at map load for SecretLab=yes buildings. Only
                 // applies when the building rules don't define a per-building override.
                 (this.secretProduction = void 0));
@@ -231,7 +231,7 @@ System.register(
             isBuilding() {
               return !0;
             }
-            // OpenYRWeb: Secret Lab granted production (vanilla BuildingClass::GetSecretProduction).
+            // Secret Lab granted production (vanilla BuildingClass::GetSecretProduction).
             // Per-building overrides take priority; otherwise falls back to the map-assigned
             // random bonus. The owner can build this object while the lab is owned (see
             // Production.isSecretLabGranted).
@@ -252,10 +252,10 @@ System.register(
               );
             }
             update(e) {
-              // OpenYRWeb: Grinder grind-animation counter (set by EnterRecyclerTask while a
+              // Grinder grind-animation counter (set by EnterRecyclerTask while a
               // unit is being ground; the renderable plays SpecialAnim while it is > 0).
               0 < (this._grindingAnimTicks ?? 0) && this._grindingAnimTicks--;
-              // OpenYRWeb: 精炼厂倒矿触发计数——每次倒矿 +1，渲染器据此播放"矿石到达"动画(GAREFNOR)。
+              // 精炼厂倒矿触发计数——每次倒矿 +1，渲染器据此播放"矿石到达"动画(GAREFNOR)。
               // 这里轻微衰减让计数值在两次倒矿间回落，便于渲染器以"计数值上涨"判定为新一次倒矿。
               0 < (this._refineryOrePile ?? 0) && (this._refineryOrePile = Math.max(0, this._refineryOrePile - 0.0005));
               (this.buildStatus !== k.BuildUp ||

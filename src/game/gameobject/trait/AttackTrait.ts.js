@@ -124,7 +124,7 @@ System.register(
               let t = [e.primaryWeapon, e.secondaryWeapon],
                 i = e.armedTrait?.getDeployFireWeapon();
               return (
-                // OpenYRWeb: only exclude the area-fire deploy weapon when actually
+                // only exclude the area-fire deploy weapon when actually
                 // deployed (DeployerTrait handles cooldown). When not deployed, the
                 // weapon fires through AttackTask and its cooldown must be respected.
                 i?.rules.areaFire && !i.rules.fireOnce && e.deployerTrait?.isDeployed() && (t = t.filter((e) => e !== i)),
@@ -153,7 +153,7 @@ System.register(
                     : void 0
                   : [e.primaryWeapon, e.secondaryWeapon].find((e) => e !== t && !e?.rules.neverUse) ?? e.primaryWeapon;
               } else if (e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()) {
-                // OpenYRWeb: garrisoned buildings use occupants' OccupyWeapon (vanilla YR:
+                // garrisoned buildings use occupants' OccupyWeapon (vanilla YR:
                 // GI fires its UCPara weapon while occupying). Defaults to Primary if unset.
                 // Return the first available weapon from any occupant.
                 for (var occupant of e.garrisonTrait.units) {
@@ -217,7 +217,7 @@ System.register(
                             : e.secondaryWeapon?.rules.neverUse ? e.primaryWeapon : e.secondaryWeapon,
                       ])
                     : e.isBuilding() && e.garrisonTrait && e.garrisonTrait.isOccupied()
-                      ? // OpenYRWeb: garrisoned buildings use each occupant's OccupyWeapon
+                      ? // garrisoned buildings use each occupant's OccupyWeapon
                         // (vanilla YR: GI fires its UCPara weapon while occupying).
                         (() => {
                           var weapons = [];
@@ -232,7 +232,7 @@ System.register(
                         : e.isBuilding() && e.overpoweredTrait
                           ? [e.overpoweredTrait.getWeapon()]
                           : e.isVehicle() && e.rules.openTopped && e.transportTrait && e.transportTrait.units.length
-                            ? // OpenYRWeb: OpenTopped transport (e.g. Battle Fortress) — the
+                            ? // OpenTopped transport (e.g. Battle Fortress) — the
                               // vehicle's own weapons PLUS each passenger's
                               // OpenTransportWeapon (vanilla YR: Guardian GI fires its
                               // MissileLauncher from the BF instead of the M60 MG), so
@@ -277,7 +277,7 @@ System.register(
               return !0;
             }
             checkArmor(e, t, i) {
-              // OpenYRWeb: mind-control warheads follow their Verses just like normal weapons.
+              // mind-control warheads follow their Verses just like normal weapons.
               // Controller (Yuri Clone/Mastermind) has 0% against building armors -> cannot target
               // buildings. ControllerBuilding (Yuri X) has 100% against all armors -> can target
               // buildings. IvanBomb/bombDisarm/nukeMaker still bypass verses.
@@ -292,7 +292,7 @@ System.register(
             }
             [d.NotifyTick.onTick](a, n) {
               if (!this.isDisabled()) {
-                // OpenYRWeb: berserk auto-attack. Berserk units continuously scan for
+                // berserk auto-attack. Berserk units continuously scan for
                 // any nearby techno (including allies) and attack it. They ignore
                 // normal opportunity-fire, retaliate, and guard-mode logic.
                 if (a.berserkTrait?.isBerserk()) {
@@ -418,7 +418,7 @@ System.register(
                 (this.opportunityFireTask = void 0));
             }
             shouldPassiveAcquire(e) {
-              // OpenYRWeb: garrisoned buildings (e.g. a civilian hut with infantry inside)
+              // garrisoned buildings (e.g. a civilian hut with infantry inside)
               // count their occupants' weapons as their own for passive target acquisition
               // — vanilla YR buildings auto-fire at enemies with the garrison's weapons even
               // though the building itself has no Primary/Secondary weapon.
@@ -436,7 +436,7 @@ System.register(
               if (e.isUnit() && t) {
                 if (e.unitOrderTrait.hasTasks() && e.unitOrderTrait.getTasks()[0].preventOpportunityFire) return !1;
               } else if (e.unitOrderTrait.hasTasks()) {
-                // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) keep passively
+                // OpenTopped transports (e.g. Battle Fortress) keep passively
                 // scanning while executing other tasks (moving/guarding) so their
                 // passengers can fire on the move (vanilla YR: BF passengers shoot while
                 // the vehicle drives). The acquired target becomes an opportunityFireTask
@@ -447,10 +447,10 @@ System.register(
               return !0;
             }
             shouldRetaliate(e, t, i, r, s) {
-              // OpenYRWeb: garrisoned buildings count their occupants' weapons as their own
+              // garrisoned buildings count their occupants' weapons as their own
               // for retaliation, matching vanilla YR (a hut with infantry fights back).
               var garrisoned = e.isBuilding() && e.garrisonTrait?.isOccupied();
-              // OpenYRWeb: berserk units always retaliate (they treat everyone as hostile).
+              // berserk units always retaliate (they treat everyone as hostile).
               if (e.berserkTrait?.isBerserk()) {
                 if (i < 1 || !e.rules.canRetaliate || (!e.primaryWeapon && !garrisoned) ||
                     (e.ammoTrait && !e.ammoTrait.ammo && e.rules.manualReload) ||
@@ -485,9 +485,9 @@ System.register(
               );
             }
             scanForTarget(e, t, i, r, s, a = !1) {
-              // OpenYRWeb: unit being dragged by Magnetron cannot attack.
+              // unit being dragged by Magnetron cannot attack.
               if (e.magnetronDraggedBy) return {};
-              // OpenYRWeb: berserk units target ALL nearby technos (including allies).
+              // berserk units target ALL nearby technos (including allies).
               if (e.berserkTrait?.isBerserk()) return this.scanForBerserkTarget(e, t, i, r, s, a);
               let n = {},
                 o = Number.NEGATIVE_INFINITY;
@@ -514,7 +514,7 @@ System.register(
                   (h = this.computeThreat(d, e, u, h, i.rules.general.threat)) > o &&
                     ((n = { target: d, weapon: u }), (o = h)));
               }
-              // OpenYRWeb: OpenTopped transports — if the normal scan found no target
+              // OpenTopped transports — if the normal scan found no target
               // (vehicle's own weapon out of range), scan again using passenger weapon
               // ranges. A sniper (range 8+2=10) inside a BF (MG range 5.75) can passively
               // acquire a target the MG cannot reach.
@@ -535,7 +535,7 @@ System.register(
                   if (!this.canPassiveAcquire(d, i) || !i.isValidTarget(d)) continue;
                   var psgArmor = d.isTechno() ? d.rules.armor : void 0;
                   for (var psg2 of e.transportTrait.units) {
-                    // OpenYRWeb: use OpenTransportWeapon (GGI fires its MissileLauncher
+                    // use OpenTransportWeapon (GGI fires its MissileLauncher
                     // from the BF, not the M60 MG).
                     var psgWeapon = psg2.armedTrait?.getOpenToppedWeapon();
                     if (
@@ -572,7 +572,7 @@ System.register(
                 !e.rules.civilian &&
                 (!e.rules.insignificant || (e.isBuilding() && e.garrisonTrait?.isOccupied())) &&
                 (1 < e.rules.threatPosed ||
-                  // OpenYRWeb: garrisoned buildings that actually shoot back (battle bunker,
+                  // garrisoned buildings that actually shoot back (battle bunker,
                   // civilian huts) count as passive threats — but InfantryAbsorb buildings
                   // (Bio Reactor) absorb soldiers WITHOUT gaining weapons, so they must not be
                   // auto-acquired just for being occupied (vanilla YR: ThreatPosed 0, attacked
@@ -583,7 +583,7 @@ System.register(
                   e.name === t.rules.general.paradrop.paradropPlane)
               );
             }
-            // OpenYRWeb: Berserk unit target acquisition. A berserk unit will attack ANY
+            // Berserk unit target acquisition. A berserk unit will attack ANY
             // nearby enemy unit (including allies), ignoring normal targeting rules. It does
             // NOT attack buildings — vanilla YR behavior.
             // It cannot target itself, or invulnerable units.
@@ -595,7 +595,7 @@ System.register(
                 !e.isBuilding() &&
                 !e.invulnerableTrait.isActive() &&
                 !e.warpedOutTrait.isInvulnerable() &&
-                // OpenYRWeb: berserk units do not attack the source unit (Chaos Drone) that caused the berserk
+                // berserk units do not attack the source unit (Chaos Drone) that caused the berserk
                 e !== t.berserkTrait?.berserkSource
               );
             }
@@ -613,7 +613,7 @@ System.register(
               for (const d of this.scanTechnosAround(e, c, i)) {
                 if (!this.canBerserkAcquire(d, e)) continue;
                 var h,
-                  // OpenYRWeb: berserk bypasses weapon targeting (canTarget) to allow
+                  // berserk bypasses weapon targeting (canTarget) to allow
                   // attacking all units including friendlies. Pick the first weapon from
                   // the available list that can damage the target (armor check only).
                   u = l.find((w) => w && this.checkArmor(w.warhead.rules, d.isTechno() ? d.rules.armor : void 0, !0));
@@ -626,9 +626,9 @@ System.register(
                   (a || this.losHelper.hasLineOfSight(e, d, u)) &&
                   ((h = this.rangeHelper.distance3(e, d) / y.Coords.LEPTONS_PER_TILE),
                   (h = this.computeThreat(d, e, u, h, i.rules.general.threat)),
-                  // OpenYRWeb: berserk units prioritize attacking friendly (ally) units
+                  // berserk units prioritize attacking friendly (ally) units
                   i.areFriendly(e, d) && (h += 1e7),
-                  // OpenYRWeb: add random jitter so berserk units spread targets instead of focusing one
+                  // add random jitter so berserk units spread targets instead of focusing one
                   h += i.generateRandomInt(0, 9999),
                   h > o && ((n = { target: d, weapon: u }), (o = h)));
               }
@@ -647,7 +647,7 @@ System.register(
                 (n += (i.warhead.rules.verses.get(e.rules.armor) ?? 0) * s.myEffectivenessCoefficientDefault),
                 (n += (e.healthTrait.health / 100) * s.targetStrengthCoefficientDefault),
                 (n += r * s.targetDistanceCoefficientDefault),
-                // OpenYRWeb: Gattling units (Gattling tank, Gattling cannon) passively prefer
+                // Gattling units (Gattling tank, Gattling cannon) passively prefer
                 // air targets over ground targets, matching vanilla YR AA behavior. The bonus is
                 // gated behind t.gattlingTrait so other units are unaffected.
                 (n += t.gattlingTrait && e.isAircraft() ? 5e5 : 0),

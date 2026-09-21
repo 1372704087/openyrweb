@@ -340,7 +340,7 @@ export class MoveTask extends Task {
           this.allObstaclesAreBlockers || blockedNodes.length
             ? (node: any) => this.nodeIsBlockedForPathfinding(node, object, ignoredBlockers, blockedNodes)
             : undefined,
-        // OpenYRWeb: 把移动者传给寻路器，让 OmniCrusher（战斗要塞）可以
+        // 把移动者传给寻路器，让 OmniCrusher（战斗要塞）可以
         // 穿过它能碾压的载具寻路，与原版 YR 一致。
         mover: object,
       },
@@ -669,14 +669,14 @@ export class MoveTask extends Task {
               object.moveTrait.moveState = MoveState.ReachedNextWaypoint;
               return this.onTick(object);
             }
-            // OpenYRWeb: 用完整的原版碾压判定，让 OmniCrusher（战斗要塞）
+            // 用完整的原版碾压判定，让 OmniCrusher（战斗要塞）
             // 也能碾载具，而 OmniCrushResistant 目标仍然挡路。内层判断保留
             // 原版 Crusher=yes 才真正穿行的要求。
             if (object.canCrushObject(obstacle.obj) || obstacle.obj.rules.crushable) {
               if (
                 [SpeedType.Track, SpeedType.Hover].includes(object.rules.speedType) &&
                 object.crusher &&
-                // OpenYRWeb: 强攻友方可碾压目标（墙/单位）时直接碾过去，
+                // 强攻友方可碾压目标（墙/单位）时直接碾过去，
                 // 而不是请它让路。
                 (!obstacle.obj.isTechno() ||
                   !this.game.areFriendly(obstacle.obj, object) ||
@@ -970,7 +970,7 @@ export class MoveTask extends Task {
                 (obj: any) =>
                   obj.isUnit() &&
                   obj.onBridge === !!prevNode.onBridge &&
-                  // OpenYRWeb: 只吓跑本碾压单位真实可以碾掉的单位
+                  // 只吓跑本碾压单位真实可以碾掉的单位
                   // （SCATTER 老兵逃离真正的威胁，含 OmniCrusher）。
                   object.canCrushObject(obj) &&
                   obj.veteranTrait?.hasVeteranAbility(VeteranAbility.SCATTER) &&

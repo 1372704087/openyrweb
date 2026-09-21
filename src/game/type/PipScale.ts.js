@@ -15,7 +15,7 @@ System.register("game/type/PipScale", [], function (t, e) {
         (e[(e.Ammo = 2)] = "Ammo"),
         (e[(e.Power = 3)] = "Power"),
         (e[(e.Tiberium = 4)] = "Tiberium"),
-        // OpenYRWeb: MindControl pip scale — shows green/red pips for controlled targets.
+        // MindControl pip scale — shows green/red pips for controlled targets.
         (e[(e.MindControl = 5)] = "MindControl"));
     },
   };

@@ -155,7 +155,7 @@ System.register(
                   (this.pipOverlay = m),
                   (this.worldSound = f),
                   (this.rotorSpeeds = []),
-                  // OpenYRWeb: gravity-style tilt transition state. _curTilt drives an
+                  // gravity-style tilt transition state. _curTilt drives an
                   // accelerating (ease-in) progress from rest toward the ramp tilt, like a
                   // tank settling onto a slope. tiltGravityTicks = blend time in game ticks
                   // (a unit crosses one tile in ~10 ticks at Speed 6, so keep this well under
@@ -168,7 +168,7 @@ System.register(
                   (this.turretVxlBuilders = []),
                   (this.highlightAnimRunner = new T.HighlightAnimRunner(this.gameSpeed)),
                   (this.invulnAnimRunner = new v.InvulnerableAnimRunner(this.gameSpeed)),
-                  // OpenYRWeb: invulnerable visual state tracking (version counter, flash, FS).
+                  // invulnerable visual state tracking (version counter, flash, FS).
                   (this._invulnFlashTimer = 0),
                   (this._lastInvulnV = 0),
                   (this._lastFSActive = !1),
@@ -180,7 +180,7 @@ System.register(
                   (this.label = "vehicle_" + this.objectRules.name),
                   (this.paletteRemaps = [...this.rules.colors.values()].map((e) => this.palette.clone().remap(e))),
                   this.palette.remap(this.gameObject.owner.color),
-                  // OpenYRWeb: pre-add full red-tinted berserk palette (all 256 colors,
+                  // pre-add full red-tinted berserk palette (all 256 colors,
                   // not just player-color remap range) so VXL batched builders can find it.
                   (() => {
                     this.__berserkPalette = this.palette.clone();
@@ -281,7 +281,7 @@ System.register(
                   ((this.lastElevation = e), this.updateBaseLight(), this.updateClippingPlanes(this.gameObject.tile.z));
                 var s = this.gameObject.invulnerableTrait.isActive(),
                   a = s !== this.lastInvulnerable;
-                // OpenYRWeb: version counter for invulnerability re-application detection.
+                // version counter for invulnerability re-application detection.
                 void 0 === this._invulnFlashTimer && (this._invulnFlashTimer = (this._invulnFlashPlayed = 0, 0));
                 var _vNow = this.gameObject.invulnerableTrait._version;
                 void 0 === this._lastInvulnV && (this._lastInvulnV = _vNow);
@@ -290,14 +290,14 @@ System.register(
                   this._fsEndFlashEndTimer = 0;
                 }
                 this._lastInvulnV = _vNow;
-                // OpenYRWeb: FS end flash detection.
+                // FS end flash detection.
                 var _fsNow = this.gameObject.invulnerableTrait.isForceShieldActive();
                 void 0 === this._lastFSActive && (this._lastFSActive = _fsNow);
                 if (!_fsNow && this._lastFSActive) {
                   !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
                 }
                 this._lastFSActive = _fsNow;
-                // OpenYRWeb: generic end flash when invulnerability expires.
+                // generic end flash when invulnerability expires.
                 if (a && !s) {
                   !this._fsEndFlashEndTimer && (this._fsEndFlashEndTimer = 180);
                 }
@@ -329,7 +329,7 @@ System.register(
                       this.posObj.updateMatrix()));
                 }
                 if (
-                  // OpenYRWeb: fix invulnerable visual — reset base FIRST, then apply effects on top.
+                  // fix invulnerable visual — reset base FIRST, then apply effects on top.
                   // 1. Reset to base (or paralysis dark) as starting point (was overwriting invuln after apply).
                   this.gameObject.robotControlTrait?.isParalyzed()
                     ? (this.vxlExtraLight.set(-0.35, -0.35, -0.35),
@@ -374,7 +374,7 @@ System.register(
                       }
                     }
                   }).call(this),
-                  // OpenYRWeb: berserk palette switch — use full red-tinted palette.
+                  // berserk palette switch — use full red-tinted palette.
                   (() => {
                     var _bs = !!this.gameObject.berserkTrait?.isBerserk();
                     if (_bs !== this.__wasBerserk) {
@@ -505,7 +505,7 @@ System.register(
                         this.updateActiveTurret(this.currentTurretIdx),
                       this.updateSquidGrab(i, b, f, p, e, T, v))
                     : this.shpAnimRunner && (this.shpAnimRunner.tick(i), this.updateShapeFrame(e, y, d));
-                  // OpenYRWeb: Re-apply extraLight to VXL/SHP every frame — the values
+                  // Re-apply extraLight to VXL/SHP every frame — the values
                   // are updated by highlight, invulnerable, and paralysis darkening code
                   // in the comma expression above, but setExtraLight is only called once
                   // during create3DObject(). Without this, extraLight changes (darkening
@@ -515,7 +515,7 @@ System.register(
                   this.updateShadowProxy();
                 }
               }
-              // OpenYRWeb: 只有真正升空的单位才走影子副本 —— 在地面时保持主体的实时投影，
+              // 只有真正升空的单位才走影子副本 —— 在地面时保持主体的实时投影，
               // 避免起降瞬间出现"两个影子"。潜水（submerged）时主体本来就不投影。
               updateShadowProxy() {
                 if (!this.shadowProxy) return;
@@ -530,18 +530,18 @@ System.register(
                 var i,
                   r = this.gameObject.tilterTrait?.tilt ?? { yaw: 0, pitch: 0 };
                 var crashPitch = this.gameObject.crashPitch ?? 0,
-                  // OpenYRWeb: crush-tilt (vanilla YR TiltsWhenCrushes). Degrees; POSITIVE =
+                  // crush-tilt (vanilla YR TiltsWhenCrushes). Degrees; POSITIVE =
                   // nose up on mainObj's local X axis (in-engine verified; the VXL local
                   // axis is inverted vs. yrmd's -0.1 rad). Applied on mainObj's LOCAL axis
                   // so the nose pitches up no matter which way the unit is facing.
                   crushTilt = this.gameObject.crushTilt ?? 0,
-                  // OpenYRWeb: the blend tracks the RAMP tilt only. crashPitch is rewritten
+                  // the blend tracks the RAMP tilt only. crashPitch is rewritten
                   // every tick while crashing (JumpjetLocomotor.tickCrash), so including it
                   // in the target would restart the blend every frame and it would never
                   // complete. It is added back after the blend instead, like crushTilt.
                   targetPitch = r.pitch,
                   targetYaw = r.yaw;
-                // OpenYRWeb: gravity-style tilt transition. When the ramp tilt changes the
+                // gravity-style tilt transition. When the ramp tilt changes the
                 // tilt starts from rest and ACCELERATES toward the new target (ease-in),
                 // then stops firmly on arrival — the feel of a tank settling onto a slope
                 // instead of the old instant snap. Acceleration is derived so the blend
@@ -774,7 +774,7 @@ System.register(
                 ((s.matrixAutoUpdate = !1), (s.rotation.order = "YXZ"), s.add(r), i.add(s), e.add(i));
                 let a = (this.posObj = new THREE.Object3D());
                 ((a.matrixAutoUpdate = !1), a.add(e), t.add(a),
-                  // OpenYRWeb: 空中单位（jumpjet 类，如基洛夫/飞碟）的阴影偏移同样随高度线性放大，
+                  // 空中单位（jumpjet 类，如基洛夫/飞碟）的阴影偏移同样随高度线性放大，
                   // 改用限制在低位的不可见影子副本投影，偏移封顶在约 1 格。详见 VxlShadowProxy。
                   (this.shadowProxy = new Z.VxlShadowProxy(this.gameObject)),
                   this.shadowProxy.create3DObject(a, e));

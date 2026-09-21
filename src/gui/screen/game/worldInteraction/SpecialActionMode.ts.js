@@ -30,15 +30,15 @@ System.register(
           .set(s.SuperWeaponType.ChronoWarp, r.PointerType.Chrono)
           .set(s.SuperWeaponType.AmerParaDrop, r.PointerType.Para)
           .set(s.SuperWeaponType.ParaDrop, r.PointerType.Para)
-          // OpenYRWeb: YR superweapons. Both are single-click targeted (no tile2 two-click flow).
+          // YR superweapons. Both are single-click targeted (no tile2 two-click flow).
           .set(s.SuperWeaponType.PsychicDominator, r.PointerType.Dominate)
           .set(s.SuperWeaponType.GeneticMutator, r.PointerType.Mutate)
-          // OpenYRWeb (2026-07-25): Force Shield — uses the ForceField pointer (dedicated
+          // (2026-07-25): Force Shield — uses the ForceField pointer (dedicated
           // shield/force-field cursor, PointerType.ForceField=450). Single-click targeted.
           .set(s.SuperWeaponType.ForceShield, r.PointerType.ForceField)
-          // OpenYRWeb: Psychic Reveal — Yuri's map-reveal mini-superweapon, uses the PsychicReveal pointer (496).
+          // Psychic Reveal — Yuri's map-reveal mini-superweapon, uses the PsychicReveal pointer (496).
           .set(s.SuperWeaponType.PsychicReveal, r.PointerType.PsychicReveal)
-          // OpenYRWeb: Spy Plane — Soviet Radar Tower support power, uses the SpyPlane pointer (504).
+          // Spy Plane — Soviet Radar Tower support power, uses the SpyPlane pointer (504).
           .set(s.SuperWeaponType.SpyPlane, r.PointerType.SpyPlane)),
           e(
             "SpecialActionMode",
@@ -69,7 +69,7 @@ System.register(
               hover(e) {
                 var tile = e?.tile,
                   ptr = n.get(this.pointerSwType);
-                // OpenYRWeb: Force Shield only targets friendly buildings — show NoForceField on non-building or enemy tiles.
+                // Force Shield only targets friendly buildings — show NoForceField on non-building or enemy tiles.
                 if (tile && this.superWeaponRules.type === s.SuperWeaponType.ForceShield) {
                   var bld = this.superWeaponFxHandler.game.map
                     .getObjectsOnTile(tile)
@@ -83,7 +83,7 @@ System.register(
               execute(e) {
                 var t = e?.tile;
                 if (!t) return !1;
-                // OpenYRWeb: Force Shield only targets friendly buildings — prevent deployment on enemy or non-building tiles.
+                // Force Shield only targets friendly buildings — prevent deployment on enemy or non-building tiles.
                 if (this.superWeaponRules.type === s.SuperWeaponType.ForceShield) {
                   var bld = this.superWeaponFxHandler.game.map
                     .getObjectsOnTile(t)

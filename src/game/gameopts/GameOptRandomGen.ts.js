@@ -98,7 +98,7 @@ System.register(
               return (
                 t.forEach((e) => {
                   if (e.countryId !== g.OBS_COUNTRY_ID && e.startPos === g.RANDOM_START_POS) {
-                    // OpenYRWeb: 出生点不足时循环复用/回退固定位置，避免 RangeError 崩溃
+                    // 出生点不足时循环复用/回退固定位置，避免 RangeError 崩溃
                     //（上层 SkirmishScreen 已按地图实际出生点钳制槽位，GameScreen 也有玩家数校验兜底）
                     if (a.length === 0) {
                       h.set(e, r.length > 0 ? r[0] : 0);

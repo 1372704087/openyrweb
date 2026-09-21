@@ -59,7 +59,7 @@ System.register(
               let e = this.props.playerInfos;
               var t = this.props.countryName,
                 i = this.props.color;
-              // OpenYRWeb: 战役加载画面（参考临时源码 UKe）
+              // 战役加载画面（参考临时源码 UKe）
               if (this.props.campaignInfo) {
                 var ci = this.props.campaignInfo,
                   strings = this.props.strings,

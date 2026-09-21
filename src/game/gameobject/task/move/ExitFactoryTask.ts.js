@@ -69,7 +69,7 @@ System.register(
             return !this.game.map.tileOccupation.isTileOccupiedBy(t, this.factory) && super.canStopAtTile(e, t, i);
           }
           onTick(e) {
-            // OpenYRWeb: anti-stall. If a vehicle cannot clear the factory for a while (e.g.
+            // anti-stall. If a vehicle cannot clear the factory for a while (e.g.
             // surrounding buildings permanently block the direct path to the rally point and
             // forceWaitOnPathBlocked keeps it waiting inside forever), give up on the strict
             // wait and let MoveTask repath. The factory-building blocker is still ignored

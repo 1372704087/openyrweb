@@ -117,10 +117,10 @@ System.register(
                 (this.options = r),
                 (this.moveExecuted = !1),
                 (this.moveAttempts = 0),
-                // OpenYRWeb: set when the crush-on-attack approach fails (target unreachable)
+                // set when the crush-on-attack approach fails (target unreachable)
                 // so the unit falls back to firing instead of looping forever.
                 (this.crushApproachFailed = !1),
-                // OpenYRWeb: crush-approach progress guard — tracks whether the crush move
+                // crush-approach progress guard — tracks whether the crush move
                 // task is actually closing the gap on a crushable target (wall). If it
                 // stalls (unit parked adjacent and never driving onto the target), the
                 // approach is abandoned and the unit falls back to ranged fire.
@@ -249,7 +249,7 @@ System.register(
               return { reachable: u.getNextTile(), fallback: h };
             }
             onEnd(e) {
-              // OpenYRWeb: clear the force-attack crush state so the crusher no longer
+              // clear the force-attack crush state so the crusher no longer
               // runs over friendly targets after the force-attack ends.
               ((e.isForceAttacking = !1),
               (e.currentAttackTarget = void 0),
@@ -264,14 +264,14 @@ System.register(
                 this.weapon.rules.limboLaunch && e.attackTrait.expirePassiveScanCooldown(),
                 (e.isInfantry() || e.isVehicle()) && (e.isFiring = !1),
                 this.weapon.hasBurstsLeft() && this.weapon.resetBursts());
-              // OpenYRWeb: stop any looping weapon-fire sound when the attack ends. A looping
+              // stop any looping weapon-fire sound when the attack ends. A looping
               // Report sound (e.g. Gattling weapons whose [SoundList] has Control=Loop) keeps
               // playing after the unit stops firing otherwise — the only prior stop site was the
               // GattlingTrait stage-reset (gated behind a 200-tick spin-down). Stopping it here
               // matches vanilla YR (sound ends with the attack) and fixes the residual-loop bug.
               // For gattling units, multiple Report instances can be active simultaneously, so
               // stop every tracked handle rather than only the latest one.
-              // OpenYRWeb fix: this stop must ONLY apply to gattling units. __weaponFireSound is
+              // fix: this stop must ONLY apply to gattling units. __weaponFireSound is
               // set for every weapon with a Report (see SoundHandler WeaponFire), so stopping it
               // for all units truncated single-shot fire sounds (e.g. GIAttack) the moment the
               // victim died and the task ended — it sounded like the death sound cut the fire
@@ -320,7 +320,7 @@ System.register(
                   return (this.cancel(), this.onTick(r));
                 if (n) {
                   var o = this.target.obj || this.target.tile;
-                  // OpenYRWeb: DrainWeapon — the disc must be parked directly over the
+                  // DrainWeapon — the disc must be parked directly over the
                   // building's center tile before firing. If not, go back to CheckRange
                   // to re-position (MoveInWeaponRangeTask.onStart targets centerTile for
                   // drainWeapon + balloonHover units). This matches vanilla YR behavior.
@@ -334,7 +334,7 @@ System.register(
                     !this.game.isValidTarget(this.target.obj) ||
                     this.shouldDropTarget(this.target.obj, r) ||
                     (!magDragging &&
-                      // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
+                      // berserk units bypass weapon targeting (canTarget) so they
                       // can attack all units including friendlies.
                       !r.berserkTrait?.isBerserk() &&
                       !this.weapon.targeting.canTarget(
@@ -378,7 +378,7 @@ System.register(
                 )
                   return !0;
                 if (0 === r.ammo) {
-                  // OpenYRWeb: fighter fired its last weapon while still on its strafing
+                  // fighter fired its last weapon while still on its strafing
                   // run — do NOT cancel the move task here (that stops the aircraft dead
                   // in the air: it hovers, then turns around). Instead finish the pass:
                   // completeRun redirects the run to fly past the target; the TaskRunner
@@ -407,11 +407,11 @@ System.register(
                   }
                   i = !0;
                 }
-                // OpenYRWeb: Garrisoned buildings — each soldier fires independently
+                // Garrisoned buildings — each soldier fires independently
                 // with their own weapon and own ROF, not divided by occupant count.
                 if (r.isBuilding() && r.garrisonTrait && r.garrisonTrait.isOccupied()) {
                   for (var occ of r.garrisonTrait.units) {
-                    // OpenYRWeb: each occupant fires its OccupyWeapon (vanilla YR: GI
+                    // each occupant fires its OccupyWeapon (vanilla YR: GI
                     // fires its UCPara weapon while occupying; defaults to Primary).
                     var wp = occ.armedTrait?.getGarrisonWeapon();
                     if (wp && 0 === wp.getCooldownTicks() &&
@@ -422,7 +422,7 @@ System.register(
                   s.attackState = T.AttackState.JustFired;
                   return !1;
                 }
-                // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) — each passenger
+                // OpenTopped transports (e.g. Battle Fortress) — each passenger
                 // fires their own weapon independently. Unlike garrisoned buildings, the
                 // vehicle's own weapon ALSO fires (we do NOT return false here — execution
                 // continues to the normal weapon-fire path below). Passengers can fire while
@@ -432,7 +432,7 @@ System.register(
                 if (r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
                   var openToppedTarget = this.target.obj || this.target.tile;
                   for (var passenger of r.transportTrait.units) {
-                    // OpenYRWeb: use OpenTransportWeapon (GGI fires its MissileLauncher
+                    // use OpenTransportWeapon (GGI fires its MissileLauncher
                     // from the BF, not the M60 MG).
                     var passengerWeapon = passenger.armedTrait?.getOpenToppedWeapon();
                     if (
@@ -462,15 +462,15 @@ System.register(
                     return !1;
                   }
                 }
-                // OpenYRWeb: FireWhileMoving=no — the unit must be fully stationary to fire
+                // FireWhileMoving=no — the unit must be fully stationary to fire
                 // this weapon (vanilla: DiskDrain on the Floating Disc, ROF=50 drain ticks).
                 // If the unit is still moving, keep waiting in Firing state without consuming
                 // the shot. Mirrors yrmd.exe's FireWhileMoving gate on the firing check.
                 if (!this.weapon.rules.fireWhileMoving && r.moveTrait && r.moveTrait.isMoving()) return !1;
-                // OpenYRWeb: powered buildings (base defenses) cannot fire while unpowered
+                // powered buildings (base defenses) cannot fire while unpowered
                 // (drained by Floating Disc or Low Power blackout).
                 if (r.isBuilding() && r.poweredTrait && !r.poweredTrait.isPoweredOn()) return !1;
-                // OpenYRWeb: AreaFire=yes weapons fire at the shooter's own tile so the gas
+                // AreaFire=yes weapons fire at the shooter's own tile so the gas
                 // effect spreads from the unit's position (e.g. Chaos Drone), matching the
                 // deployed area-fire behavior.
                 var areaFireTarget = this.weapon.rules.areaFire ? this.game.createTarget(void 0, r.position.tile) : this.target;
@@ -494,7 +494,7 @@ System.register(
                   (this.target = l),
                   (t = t.replacedBy),
                   this.onTargetChange(r)));
-              // OpenYRWeb: the target was destroyed mid-approach — stop chasing its
+              // the target was destroyed mid-approach — stop chasing its
               // old position (previously the plane flew all the way to the destroyed
               // building and only turned around after reaching it). Abort the attack
               // so the unit moves on (airstrike planes then head straight for their
@@ -502,7 +502,7 @@ System.register(
               if (t && t.isDestroyed) return (this.cancel(), this.onTick(r));
               let i = this.game.isValidTarget(t) && !this.shouldDropTarget(t, r);
               if (i && !magDragging) {
-                // OpenYRWeb: berserk units bypass weapon targeting (canTarget) so they
+                // berserk units bypass weapon targeting (canTarget) so they
                 // can attack all units including friendlies.
                 let e = r.berserkTrait?.isBerserk() ||
                   this.weapon.targeting.canTarget(
@@ -533,7 +533,7 @@ System.register(
                 s.attackState === T.AttackState.CheckRange)
               ) {
                 let e = this.target.obj ? (i ? this.target.obj : this.lastValidTargetPosition.tile) : this.target.tile;
-                // OpenYRWeb: OpenTopped transports — passengers fire independently every
+                // OpenTopped transports — passengers fire independently every
                 // tick while the task is in CheckRange (idle, approaching, or moving).
                 // This runs BEFORE the rangeCheckCooldown early-return: that cooldown is
                 // re-armed on every CheckRange while the vehicle is still outside its own
@@ -541,7 +541,7 @@ System.register(
                 // it would mean passengers never shoot while the vehicle is moving.
                 if (i && !magDragging && r.transportTrait && r.rules.openTopped && r.transportTrait.units.length) {
                   for (var approachPassenger of r.transportTrait.units) {
-                    // OpenYRWeb: use OpenTransportWeapon (GGI fires its MissileLauncher
+                    // use OpenTransportWeapon (GGI fires its MissileLauncher
                     // from the BF, not the M60 MG).
                     var approachPassengerWeapon = approachPassenger.armedTrait?.getOpenToppedWeapon();
                     if (
@@ -569,12 +569,12 @@ System.register(
                       : this.target.obj.tile
                     : this.lastValidTargetPosition.tile
                   : this.target.tile;
-                // OpenYRWeb: Magnetron dragging a vehicle skips minimum-range check
+                // Magnetron dragging a vehicle skips minimum-range check
                 // (vanilla YR: the Magnetron does not back away from min range while
                 // dragging; the victim is being pulled in, not kept at distance) but still
                 // enforces maximum range so that if the target is teleported away, the
                 // attack task will chase (and the drag will naturally follow) or end.
-                // OpenYRWeb: vanilla YR "attack-to-crush" (yrmd sub_7414E0): a Crusher
+                // vanilla YR "attack-to-crush" (yrmd sub_7414E0): a Crusher
                 // drives onto a crushable ground target instead of stopping at weapon
                 // range to fire (Battle Fortress walks over infantry/tanks/walls). Zone
                 // Air is excluded — aircraft can never be driven over. Walls (overlay)
@@ -600,7 +600,7 @@ System.register(
                 } else {
                   inRange = this.rangeHelper.isInWeaponRange(r, e, this.weapon, this.game.rules);
                 }
-                // OpenYRWeb: DrainWeapon on a building — the disc must be parked
+                // DrainWeapon on a building — the disc must be parked
                 // exactly over the centerTile to fire (enforced in Firing state).
                 // Even if the weapon's Range covers the current tile, force the disc
                 // to reposition so the Firing check doesn't send us back to CheckRange,
@@ -611,7 +611,7 @@ System.register(
                   inRange = r.tile.rx === ct.rx && r.tile.ry === ct.ry;
                 }
                 if (
-                  // OpenYRWeb: crush-on-attack — always keep closing in (create the move
+                  // crush-on-attack — always keep closing in (create the move
                   // task once), but once in weapon range with LOS the unit FIRES while the
                   // move task keeps driving it onto the target (vanilla YR attacks and
                   // crushes simultaneously). The `!a` guard ensures the first approach move
@@ -620,7 +620,7 @@ System.register(
                     ? !inRange || !this.losHelper.hasLineOfSight(r, e, this.weapon) || !a
                     : (!inRange ||
                         !this.losHelper.hasLineOfSight(r, e, this.weapon) ||
-                        // OpenYRWeb: Aircraft bombing-run approach (Kirov keeps flying
+                        // Aircraft bombing-run approach (Kirov keeps flying
                         // via vertical bomb path; fighters weave). BalloonHover Disc
                         // uses the standard tank path — no same-tile force.
                         (r.isAircraft() && !a && (this.weapon.projectileRules.iniRot <= 1 || r.rules.fighter)))
@@ -631,7 +631,7 @@ System.register(
                         if (
                           i &&
                           this.target.obj &&
-                          // OpenYRWeb: crush-on-attack retargets as soon as the crushable
+                          // crush-on-attack retargets as soon as the crushable
                           // target MOVES, so the crusher chases its current tile instead of
                           // driving to the stale coordinate first, then turning, then
                           // pursuing. Non-crush attacks keep the original range-based chase.
@@ -643,7 +643,7 @@ System.register(
                           (a.retarget(this.target.obj, !!this.target.getBridge()),
                             (this.lastSelfTileBeforeMove = r.tile),
                             (this.lastSelfMoveTargetTile = this.target.obj?.tile ?? this.target.tile));
-                          // OpenYRWeb: crush-on-attack — the existing move task was just
+                          // crush-on-attack — the existing move task was just
                           // retargeted onto the crushable victim; wait for it instead of
                           // spawning a duplicate move task this tick.
                           if (crushTarget) return !1;
@@ -660,13 +660,13 @@ System.register(
                                 ((r.moveTrait.baseSpeed + h) / w.Coords.LEPTONS_PER_TILE),
                             );
                           0 < u && (this.rangeCheckCooldown = Math.min(S.GameSpeed.BASE_TICKS_PER_SECOND, u));
-                          // OpenYRWeb: crush-on-attack already has a move task homing onto
+                          // crush-on-attack already has a move task homing onto
                           // the crushable target — wait for it instead of spawning a
                           // duplicate MoveInWeaponRangeTask every tick. Without this the
                           // BFRT (in weapon range, so the cooldown above stays 0) would
                           // rebuild the move task on every CheckRange and never reach
                           // PrepareToFire (it stands still, neither moving nor firing).
-                          // OpenYRWeb: crush-approach progress guard — if the crush move
+                          // crush-approach progress guard — if the crush move
                           // task never closes the gap on the crushable target (unit parked
                           // adjacent to a wall it cannot drive onto), give up on the crush
                           // and let the normal moveAttempts fallback switch to ranged fire.
@@ -712,7 +712,7 @@ System.register(
                     )
                       return !0;
                     if (this.moveAttempts > P) {
-                      // OpenYRWeb: crush-on-attack could not reach the target — fall back to
+                      // crush-on-attack could not reach the target — fall back to
                       // normal ranged fire on subsequent checks. Do NOT abort the attack
                       // (previously `return !0` ended the task, so a crusher parked next to
                       // a wall it could not drive onto neither fired nor crushed). Reset
@@ -733,7 +733,7 @@ System.register(
                       this.onTick(r)
                     );
                   }
-                  // OpenYRWeb: OpenTopped transport on holdGround — the vehicle's own
+                  // OpenTopped transport on holdGround — the vehicle's own
                   // weapon is out of range and holdGround prevents approaching, but
                   // passengers may still be in range. Don't complete the task (which
                   // would end passive fire after one shot); stay in CheckRange so
@@ -755,7 +755,7 @@ System.register(
                 if (
                   ((this.moveExecuted = !1),
                   (this.moveAttempts = 0),
-                  // OpenYRWeb: Once in weapon range, cancel the approach move and fire
+                  // Once in weapon range, cancel the approach move and fire
                   // (same as a tank/prism). Disc DiskLaser must not keep the move task
                   // alive — that caused loiter at the range edge. balloonHover only
                   // means "never land" (Jumpjet idle), not special attack logic.
@@ -791,7 +791,7 @@ System.register(
               if (!i || s.isDisabled()) return (a?.cancel(), !0);
               ((u = this.target.getWorldCoords()), (h = r.position.worldPosition));
               if (
-                // OpenYRWeb: crush-on-attack fires ON THE MOVE (the move task is closing
+                // crush-on-attack fires ON THE MOVE (the move task is closing
                 // in to crush), so the "must be stationary" re-check is skipped — vanilla
                 // YR fires and crushes simultaneously.
                 !crushTarget &&
@@ -812,7 +812,7 @@ System.register(
                 !(
                   this.weapon.rules.omniFire ||
                   (r.rules.omniFire && r.rules.fighter) ||
-                  // OpenYRWeb: crush-on-attack fires ON THE MOVE while driving onto the
+                  // crush-on-attack fires ON THE MOVE while driving onto the
                   // crushable target — skip the hull-facing requirement, otherwise a
                   // crusher approaching at an angle (path not on a straight line to the
                   // target) stays mis-aligned, the `if (a) return !1` below waits for the
@@ -867,7 +867,7 @@ System.register(
                       e.invulnerableTrait.isActive())) ||
                     (e.warpedOutTrait.isInvulnerable() &&
                       !this.weapon.warhead.rules.temporal &&
-                      // OpenYRWeb: a Crusher (e.g. Battle Fortress) attacking a crushable
+                      // a Crusher (e.g. Battle Fortress) attacking a crushable
                       // target must NOT drop it just because the victim was chrono-frozen —
                       // the crush is an absolute kill that destroys frozen units (vanilla
                       // YR: drive over a Chrono Legionnaire-frozen target). Non-crushers

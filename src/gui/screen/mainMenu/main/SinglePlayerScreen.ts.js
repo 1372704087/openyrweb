@@ -2,7 +2,7 @@
 // deps: ["gui/screen/mainMenu/ScreenType","engine/sound/Music","gui/screen/mainMenu/MainMenuScreen"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb: SinglePlayer hub — shows Campaign and Skirmish buttons.
+// SinglePlayer hub — shows Campaign and Skirmish buttons.
 
 System.register(
   "gui/screen/mainMenu/main/SinglePlayerScreen",
@@ -38,7 +38,7 @@ System.register(
           onEnter() {
             let e = this.strings;
             (this.controller.setSidebarButtons([
-              // OpenYRWeb: 战役入口暂屏蔽（战役功能尚未完善）
+              // 战役入口暂屏蔽（战役功能尚未完善）
               // {
               //   label: e.get("GUI:Campaign"),
               //   tooltip: e.get("STT:Campaign"),

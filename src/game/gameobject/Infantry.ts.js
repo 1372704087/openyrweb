@@ -82,7 +82,7 @@ System.register(
                 ((s.castProgressTrait = new g.CastProgressTrait()), s.traits.add(s.castProgressTrait)),
               (s.idleActionTrait = new c.IdleActionTrait()),
               s.traits.add(s.idleActionTrait),
-              // OpenYRWeb: attach a lightweight cargo trait (SlaveCargoTrait) to infantry that
+              // attach a lightweight cargo trait (SlaveCargoTrait) to infantry that
               // carry ore (Storage>0, e.g. SLAV slaves). Exposed as `harvesterTrait` so PipOverlay
               // renders ore pips. The full HarvesterTrait is NOT used because its auto-gather loop
               // would conflict with SlaveGatherTask; this trait is a passive cargo counter only.

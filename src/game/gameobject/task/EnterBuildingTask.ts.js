@@ -64,7 +64,7 @@ System.register(
                     (this.lastOutsideTile = t.tile),
                   !1
                 );
-              // OpenYRWeb: Grinder (Grinding=yes) — walk to the door (front edge) first,
+              // Grinder (Grinding=yes) — walk to the door (front edge) first,
               // then enter, matching vanilla. Delay-based entries keep their cast pause.
               var e = this.state !== l.MovingIn && (0 < this.enterDelaySeconds || this.target.rules?.grinding),
                 i = this.game.map.tileOccupation.isTileOccupiedBy(t.tile, this.target),
@@ -130,7 +130,7 @@ System.register(
             onEnd(e) {
               e.castProgressTrait?.reset();
             }
-            // OpenYRWeb: Grinder (Grinding=yes) — pick the middle cell of the nearest of
+            // Grinder (Grinding=yes) — pick the middle cell of the nearest of
             // the four edges (the "cross" door positions) as the approach destination,
             // so units walk to the door instead of entering from any direction.
             findGrinderDoor(u) {

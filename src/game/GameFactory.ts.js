@@ -250,7 +250,7 @@ System.register(
                 L.traits.add(L.mapShroudTrait),
                 (L.mapRadiationTrait = new ue.MapRadiationTrait(A)),
                 L.traits.add(L.mapRadiationTrait),
-                // OpenYRWeb: Virus sniper toxic cloud. Ticks [VirusGas] damage over a 3x3
+                // Virus sniper toxic cloud. Ticks [VirusGas] damage over a 3x3
                 // area per gas particle; Infantry deaths with InfDeath=8 feed new clouds
                 // back in (see Warhead.inflictDamage) for the vanilla chain reaction.
                 (L.virusCloudTrait = new Ve.VirusCloudTrait(A)),
@@ -269,7 +269,7 @@ System.register(
                 H = _.generateCountries(c, E),
                 G = _.generateStartLocations(c, A.startingLocations),
                 V = [...c.humanPlayers, ...c.aiPlayers].filter(J.isNotNullOrUndefined);
-              // OpenYRWeb: 战役模式（campaignId）按地图 [Houses] 创建玩家。遭遇战不受影响。
+              // 战役模式（campaignId）按地图 [Houses] 创建玩家。遭遇战不受影响。
               let campaignHouses = c.campaignId ? e.getHouses() : void 0;
               console.info(
                 `[OpenYRWeb] Campaign check: campaignId=${c.campaignId}, singlePlayer=${u}, ` +
@@ -437,7 +437,7 @@ System.register(
                   } else L.addPlayer(F.createObserver(t, b));
                 }),
                   L.addPlayer(F.createNeutral(b, "@@NEUTRAL@@")));
-              // OpenYRWeb: attach source extensions (Ares/Phobos) to the live game.
+              // attach source extensions (Ares/Phobos) to the live game.
               // Dispatches onMatchStart and wires runtime hooks (onTick/onObjectSpawn/…).
               try {
                 xt.ExtensionHost.attachToGame(L);

@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/bot/iraq/Util ===
-// OpenYRWeb IraqBot — shared utilities: config, blackboard, snapshot, placement, threat, diag.
+// IraqBot — shared utilities: config, blackboard, snapshot, placement, threat, diag.
 //
 // 视野/反作弊约定（用户钦定）：
 //   - 地图静态信息（矿点分布、地形、起点）对 AI 全开 —— YR 地图固定，假设人人背图。

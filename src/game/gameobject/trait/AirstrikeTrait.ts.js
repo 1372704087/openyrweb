@@ -80,16 +80,16 @@ System.register(
             // Vanilla AirstrikeClass::TeamList — the planes currently in the
             // air for this strike.
             this.teamMiGs = [];
-            // OpenYRWeb: target reference — set by execute/changeTarget, read by
+            // target reference — set by execute/changeTarget, read by
             // AirstrikeLaserPlugin on the render side to draw the designator beam.
             this.targetObject = null;
             this.targetTile = null;
-            // OpenYRWeb: "Target acquired!" voice played once when a MiG opens fire.
+            // "Target acquired!" voice played once when a MiG opens fire.
             this._targetAcquiredVoicePlayed = false;
-            // OpenYRWeb: MiGs that already dropped their bomb (Ammo=1 — they are
+            // MiGs that already dropped their bomb (Ammo=1 — they are
             // spent and must not be re-targeted; they just keep flying off).
             this._migFired = new Set();
-            // OpenYRWeb: MiGs that already played their death voice (MIGVoiceDie).
+            // MiGs that already played their death voice (MIGVoiceDie).
             this._migDeathVoiced = new Set();
             // Whether the airstrike is currently forcing Boris's attack animation
             // (so it is only cleared by this trait, not by normal attacks).
@@ -299,7 +299,7 @@ System.register(
             for (var i = 0; i < team.count; i++) {
               var mig = game.createUnitForPlayer(migRules, gameObject.owner);
               game.spawnObject(mig, spawnPos.tile);
-              // OpenYRWeb: the plane destroys itself the moment it is off the map —
+              // the plane destroys itself the moment it is off the map —
               // independent of Boris's lifetime (see OutOfBoundsCleanupTrait above).
               game.addObjectTrait(mig, new OutOfBoundsCleanupTrait());
               mig.position.tileElevation = d.Coords.worldToTileHeight(
@@ -737,7 +737,7 @@ System.register(
           }
         };
 
-        // OpenYRWeb: per-MiG off-map cleanup. The out-of-bounds destruction used
+        // per-MiG off-map cleanup. The out-of-bounds destruction used
         // to live only in Boris's AirstrikeTrait.onTick — that tick stops running
         // the moment Boris dies, so a plane already on its exit run could fly past
         // the map edge and never be destroyed (and the strike state would never

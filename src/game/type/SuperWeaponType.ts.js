@@ -17,7 +17,7 @@ System.register("game/type/SuperWeaponType", [], function (t, e) {
         (e[(e.ChronoWarp = 4)] = "ChronoWarp"),
         (e[(e.ParaDrop = 5)] = "ParaDrop"),
         (e[(e.AmerParaDrop = 6)] = "AmerParaDrop"),
-        // OpenYRWeb: YR superweapons. Verified against the vanilla YR [SuperWeaponTypes]
+        // YR superweapons. Verified against the vanilla YR [SuperWeaponTypes]
         // list (rulesmd.ini) — there are 12 entries. Values 7–11 are the YR additions:
         //   7 PsychicDominator — Yuri's mind-control + area damage superweapon
         //   8 SpyPlane         — Yuri/America recon plane (reveals map area)

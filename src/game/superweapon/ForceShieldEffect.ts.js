@@ -2,7 +2,7 @@
 // deps: ["game/map/tileFinder/RadialTileFinder","game/superweapon/SuperWeaponEffect","game/event/TriggerSoundFxEvent"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
-// OpenYRWeb (2026-07-25, FIXED): Force Shield super-weapon effect.
+// (2026-07-25, FIXED): Force Shield super-weapon effect.
 // Vanilla YR behaviour:
 //   - Every building within ForceShieldRadius (cells) of the activation tile gains
 //     temporary invulnerability (invulnerableTrait.setActiveFor) for ForceShieldDuration frames.
@@ -80,10 +80,10 @@ System.register(
                     o.isDestroyed ||
                     o.isUnit() || // Force Shield protects buildings (and grounded units), not aircraft.
                     o.rules.missileSpawn ||
-                    // OpenYRWeb: only shield friendly buildings (self or ally).
+                    // only shield friendly buildings (self or ally).
                     (o.owner !== this.owner && !e.alliances.areAllied(o.owner, this.owner)) ||
                     (o.invulnerableTrait.setActiveFor(duration, e.currentTick),
-                    // OpenYRWeb: mark as Force Shield invulnerability so the renderer
+                    // mark as Force Shield invulnerability so the renderer
                     // can apply a different visual tint (blue/cyan) vs Iron Curtain (dark).
                     // Use setForceShieldActiveFor so it's not overwritten by Iron Curtain calls.
                     o.invulnerableTrait.setForceShieldActiveFor(duration, e.currentTick),

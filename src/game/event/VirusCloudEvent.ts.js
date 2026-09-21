@@ -16,7 +16,7 @@ System.register("game/event/VirusCloudEvent", ["game/event/EventType"], function
       e(
         "VirusCloudEvent",
         (r = class {
-          // OpenYRWeb: Virus sniper toxic cloud visual event. Dispatched by VirusCloudTrait
+          // Virus sniper toxic cloud visual event. Dispatched by VirusCloudTrait
           // when an independent gas particle is created (action="spawn", main cloud or its
           // NextParticle dissipation cloud) and when it expires (action="remove"). The engine
           // side (VirusCloudFxHandler) consumes these to keep visuals in sync with the

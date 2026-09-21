@@ -88,11 +88,11 @@ System.register(
                     ? this.game.areFriendly(this.sourceObject, this.target.obj) && this.sourceObject.isInfantry()
                     : this.target.obj.garrisonTrait
                       ? this.target.obj.garrisonTrait.canBeOccupied() &&
-                        // OpenYRWeb: InfantryAbsorb buildings (Bio Reactor) absorb ANY infantry
+                        // InfantryAbsorb buildings (Bio Reactor) absorb ANY infantry
                         // (vanilla YR Absorb has no Occupier requirement) — only regular garrison
                         // buildings still require the Occupier=yes flag.
                         (this.target.obj.rules.infantryAbsorb || this.sourceObject.rules.occupier) &&
-                        // OpenYRWeb: InfantryAbsorb buildings (Bio Reactor): the entering unit
+                        // InfantryAbsorb buildings (Bio Reactor): the entering unit
                         // must be friendly to the building owner, and mind-controlled infantry
                         // ARE allowed (vanilla YR — absorbed, controller freed, reverted owners
                         // inside must not block further entries). Regular garrison buildings keep
@@ -103,16 +103,16 @@ System.register(
                               this.target.obj.garrisonTrait.units.length &&
                               this.target.obj.garrisonTrait.units[0].owner !== this.sourceObject.owner
                             ) && !this.sourceObject.mindControllableTrait?.isActive()) &&
-                        // OpenYRWeb: military buildings (isBaseDefense=yes) owned by civilian cannot be garrisoned.
+                        // military buildings (isBaseDefense=yes) owned by civilian cannot be garrisoned.
                         (this.target.obj.rules.isBaseDefense && this.target.obj.owner === this.game.getCivilianPlayer()
                           ? !1
                           : !0) &&
-                        // OpenYRWeb: neutral InfantryAbsorb buildings (Bio Reactor) cannot be garrisoned;
+                        // neutral InfantryAbsorb buildings (Bio Reactor) cannot be garrisoned;
                         // they must first be captured by an engineer.
                         (this.target.obj.rules.infantryAbsorb && this.target.obj.owner === this.game.getCivilianPlayer()
                           ? !1
                           : !0) &&
-                        // OpenYRWeb: empty player-owned garrison buildings cannot be entered by enemies.
+                        // empty player-owned garrison buildings cannot be entered by enemies.
                         (!this.target.obj.garrisonTrait.units.length &&
                         !this.game.areFriendly(this.sourceObject, this.target.obj) &&
                         this.target.obj.owner !== this.game.getCivilianPlayer()
@@ -150,7 +150,7 @@ System.register(
               : e.hospitalTrait
                 ? [new d.EnterHospitalTask(this.game, e)]
                 : e.garrisonTrait
-                  // OpenYRWeb: bio-reactors (InfantryAbsorb=yes) reuse the Battle Fortress
+                  // bio-reactors (InfantryAbsorb=yes) reuse the Battle Fortress
                   // transport entry mechanism (EnterTransportTask: queueing tile → wait for
                   // turn → walk inside), so entry position/pathfinding match the transport
                   // system instead of bespoke rally-point code.

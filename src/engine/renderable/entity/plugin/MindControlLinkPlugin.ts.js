@@ -1,4 +1,4 @@
-// OpenYRWeb: renders the mind-control link beam from a controller (e.g. Yuri / Mastermind)
+// renders the mind-control link beam from a controller (e.g. Yuri / Mastermind)
 // to each of its controlled targets, AND from a controlled unit back to its controller
 // when the controlled unit is selected. Endpoints are refreshed every render frame so the
 // beam tracks moving units. The beam is visible when:
@@ -44,9 +44,9 @@ System.register(
                 this.disposeLinks();
                 return;
               }
-              // OpenYRWeb: CONTROLLER case — show lines from controller to each target.
+              // CONTROLLER case — show lines from controller to each target.
               if (this.source.mindControllerTrait) this._updateControllerLinks(t);
-              // OpenYRWeb: CONTROLLED case — show line from controlled unit back to controller.
+              // CONTROLLED case — show line from controlled unit back to controller.
               else if (this.source.mindControllableTrait?.isActive()) this._updateControlledLink(t);
               else this.disposeLinks();
             }
@@ -75,7 +75,7 @@ System.register(
                 }
                 // Use worldPosition directly — MindControlLinkFx adds an arc height internally.
                 var dstPos = target.position.worldPosition.clone();
-                // OpenYRWeb: controlled-unit endpoint at head height using art-defined height.
+                // controlled-unit endpoint at head height using art-defined height.
                 dstPos.y += C.Coords.tileHeightToWorld(target.art.height);
                 let fx = this.links.get(target);
                 fx
@@ -105,7 +105,7 @@ System.register(
               var color = new THREE.Color(controller.owner.color.asHex()),
                 srcPos = this.source.position.worldPosition.clone(),
                 dstPos = controller.position.worldPosition.clone();
-              // OpenYRWeb: controlled-unit endpoint at head height using art-defined height.
+              // controlled-unit endpoint at head height using art-defined height.
               srcPos.y += C.Coords.tileHeightToWorld(this.source.art.height);
               // Use a single entry keyed by the controller's unique ID.
               var key = controller;

@@ -1,4 +1,4 @@
-// === OpenYRWeb: 传送全部动作 (TeleportAllExecutor) ===
+// === 传送全部动作 (TeleportAllExecutor) ===
 // 动作 128: TeleportAll — 将触发阵营所有存活单位传送到指定路径点。
 // 参考临时源码 teleportAll 语义（Tt.TeleportAll / 触发器 128）。
 // deps: ["game/trigger/TriggerExecutor"]

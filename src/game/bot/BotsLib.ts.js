@@ -1,5 +1,5 @@
 // === Reconstructed SystemJS module: game/bot/BotsLib ===
-// OpenYRWeb: BotsLib exports our in-tree IraqBot and OriginalAiBot.
+// BotsLib exports our in-tree IraqBot and OriginalAiBot.
 // GameLoader.loadBotsLib imports this module directly,
 // so the AI ships in the main ra2web.js bundle — no external sp-bots dependency.
 // `version` must match the app version (GameLoader checks botsLib.version).

@@ -41,7 +41,7 @@ System.register(
         ((l = class {
           constructor(e, t) {
             ((this.gameObject = e), (this.rules = t), (this.specialWeaponIndex = 0));
-            // OpenYRWeb: per-(stage,elite) Weapon cache for special-weapon (Gattling/Gunner) units.
+            // per-(stage,elite) Weapon cache for special-weapon (Gattling/Gunner) units.
             // selectSpecialWeapon is invoked every time the Gattling stage advances; rebuilding the
             // Weapon each time reset its cooldown/burst state, dropping fire continuity. The cache
             // reuses the same Weapon instance across re-selects of an already-built stage.
@@ -61,7 +61,7 @@ System.register(
               ? ((s = e ? t.art.elitePrimaryFireFlh : t.art.primaryFireFlh),
                 (this.primaryWeapon = a.Weapon.factory(i, n.WeaponType.Primary, t, this.rules, s)))
               : (this.primaryWeapon = void 0);
-            // OpenYRWeb: OccupyWeapon/EliteOccupyWeapon (vanilla YR) — the weapon an
+            // OccupyWeapon/EliteOccupyWeapon (vanilla YR) — the weapon an
             // infantry uses while garrisoning a building (Occupier=yes). Defaults to
             // Primary if unset (ModEnc). Rebuilt on elite toggle like primary/secondary.
             var occupyName = (e && t.rules.eliteOccupyWeapon) || t.rules.occupyWeapon;
@@ -93,7 +93,7 @@ System.register(
             var r = i.rules.weaponCount;
             if (r < 1) throw new Error(`Object "${i.name}" doesn't support special weapons`);
             if (r - 1 < e) throw new RangeError(`Weapon index ${e} out of bounds (max ${r}) for object ` + i.name);
-            // OpenYRWeb: reuse a cached Weapon for this (index, elite) so re-selecting an
+            // reuse a cached Weapon for this (index, elite) so re-selecting an
             // already-built stage (e.g. Gattling stage oscillation) does NOT reset its cooldown
             // or burst state. First selection builds & caches; later ones restore.
             var s = e + "_" + (t ? 1 : 0),
@@ -158,7 +158,7 @@ System.register(
               [this.primaryWeapon, this.secondaryWeapon]
                 .filter((e) => e === t || e?.rules.neverUse)
                 .reduce((e, t) => Math.max(e, t.range), 0);
-            // OpenYRWeb: garrisoned buildings (no own weapon) derive the guard scan radius
+            // garrisoned buildings (no own weapon) derive the guard scan radius
             // from their occupants' weapons — vanilla YR guard-mode huts scan out to the
             // garrison's weapon range.
             if (!e && this.gameObject.isBuilding() && this.gameObject.garrisonTrait?.isOccupied()) {
@@ -170,7 +170,7 @@ System.register(
             (e = Math.max(e, this.gameObject.rules.guardRange));
             return Math.min(15, 2 * e - 1);
           }
-          // OpenYRWeb: OpenTransportWeapon (vanilla YR) — the weapon a passenger uses
+          // OpenTransportWeapon (vanilla YR) — the weapon a passenger uses
           // while riding inside an OpenTopped transport (e.g. Battle Fortress).
           // 0=Primary, 1=Secondary, -1=decide normally (Primary). Guardian GI (GGI)
           // has OpenTransportWeapon=1 so it fires its MissileLauncher (anti-armour/AA)
@@ -179,7 +179,7 @@ System.register(
             if (this.gameObject.rules.openTransportWeapon > 0 && this.secondaryWeapon) return this.secondaryWeapon;
             return this.primaryWeapon;
           }
-          // OpenYRWeb: OccupyWeapon (vanilla YR) — the weapon an infantry uses while
+          // OccupyWeapon (vanilla YR) — the weapon an infantry uses while
           // garrisoning a building (Occupier=yes). OccupyWeapon is set per-unit in
           // rulesmd.ini (e.g. GI uses UCPara when occupying); defaults to Primary if
           // unset. Elite units get EliteOccupyWeapon (rebuilt in selectStandardWeapons).
@@ -188,7 +188,7 @@ System.register(
           }
           getDeployFireWeapon() {
             if (this.gameObject.rules.deployFire)
-              // OpenYRWeb: if DeployFireWeapon points to the secondary but the secondary
+              // if DeployFireWeapon points to the secondary but the secondary
               // is a virtual scanner (NeverUse=yes), fall back to the primary weapon.
               // This fixes the Chaos Drone where Primary=ChaosAttack (gas weapon) but
               // Secondary=VirtualScanner and DeployFireWeapon defaults to 1 (Secondary).
@@ -198,14 +198,14 @@ System.register(
           }
           isEquippedWithWeapon(e) {
             if ([this.primaryWeapon, this.secondaryWeapon].includes(e)) return !0;
-            // OpenYRWeb: garrisoned buildings use occupant weapons
+            // garrisoned buildings use occupant weapons
             var g = this.gameObject;
             if (g && g.garrisonTrait && g.garrisonTrait.isOccupied()) {
               for (var u of g.garrisonTrait.units) {
                 if (u.armedTrait?.getGarrisonWeapon() === e) return !0;
               }
             }
-            // OpenYRWeb: OpenTopped transports (e.g. Battle Fortress) — passengers' weapons
+            // OpenTopped transports (e.g. Battle Fortress) — passengers' weapons
             // are also considered equipped so target-line / range checks include them.
             if (g && g.transportTrait && g.rules.openTopped && g.transportTrait.units.length) {
               for (var passenger of g.transportTrait.units) {
@@ -219,7 +219,7 @@ System.register(
           }
           [i.NotifyTick.onTick]() {
             (this.primaryWeapon && this.primaryWeapon.tick(), this.secondaryWeapon && this.secondaryWeapon.tick());
-            // OpenYRWeb: tick weapons of garrisoned units so their cooldowns expire.
+            // tick weapons of garrisoned units so their cooldowns expire.
             // Only the OccupyWeapon-selected weapon is ticked (e.g. GI's UCPara).
             var g = this.gameObject;
             if (g && g.garrisonTrait && g.garrisonTrait.isOccupied()) {
@@ -228,7 +228,7 @@ System.register(
                 garrisonWeapon && garrisonWeapon.tick();
               }
             }
-            // OpenYRWeb: tick weapons of passengers inside an OpenTopped transport
+            // tick weapons of passengers inside an OpenTopped transport
             // (e.g. Battle Fortress) so their cooldowns expire while riding. Only the
             // weapon selected by OpenTransportWeapon is ticked (GGI fires its missile).
             if (g && g.transportTrait && g.rules.openTopped && g.transportTrait.units.length) {
