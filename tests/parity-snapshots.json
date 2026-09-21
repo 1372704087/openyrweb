@@ -3681,5 +3681,649 @@
       },
       "reservedLen": 1
     }
+  },
+  "game/gameobject/task/harvester/GatherOreTask": {
+    "0": {
+      "ctorKeys": [
+        "blocking",
+        "cancellable",
+        "children",
+        "explicitOrder",
+        "forceMoveTried",
+        "game",
+        "initialTarget",
+        "isAttackMove",
+        "preventLanding",
+        "preventOpportunityFire",
+        "rangeHelper",
+        "scanFarRadius",
+        "scanNearRadius",
+        "status",
+        "useChildTargetLines",
+        "waitingForChildrenToFinish"
+      ],
+      "scanNear": 8,
+      "scanFar": 20,
+      "explicitOrder": true,
+      "preventOpp": false,
+      "afterStart": {
+        "status": 2,
+        "explicit": true
+      },
+      "afterEndFromMoving": 0,
+      "afterEndFromLooking": 1,
+      "startErr": "Unit GI is not a harvester."
+    },
+    "1": {
+      "done": true,
+      "statusAfter": 1,
+      "lastOreSite": "undef",
+      "linesEmpty": 0,
+      "linesWithInit": [
+        {
+          "tile": {
+            "rx": 4,
+            "ry": 5,
+            "landType": 1
+          }
+        }
+      ]
+    },
+    "2": {
+      "done": true,
+      "statusAfter": 3,
+      "bailsAdded": [
+        [
+          "Ore",
+          1
+        ]
+      ],
+      "collectCalls": 1,
+      "childrenAfter": 0
+    }
+  },
+  "game/gameobject/task/harvester/ReturnOreTask": {
+    "0": {
+      "forceTarget": true,
+      "resetFlag": true,
+      "explicit": true,
+      "afterStart": {
+        "status": 5
+      },
+      "afterEnd": {
+        "status": 0,
+        "undocked": [
+          [
+            "undock",
+            true
+          ],
+          [
+            "unreserve",
+            true
+          ]
+        ]
+      },
+      "startErr": "Unit X is not a harvester."
+    },
+    "1": {
+      "done": true,
+      "credits": 374,
+      "creditsGained": 374,
+      "emptied": true,
+      "orePile": 150,
+      "gatherQueued": [
+        "game/gameobject/task/harvester/GatherOreTask"
+      ]
+    },
+    "2": {
+      "liveOk": true,
+      "deadNo": true,
+      "warpedNo": true,
+      "dockRx": 12,
+      "dockRy": 11,
+      "canTele5": true,
+      "canTele1": false,
+      "canTeleFar": false,
+      "canTeleNoDock": false,
+      "canTeleReserved": true,
+      "canTeleForcedFar": true
+    }
+  },
+  "game/gameobject/task/harvester/TeleportMoveToRefineryTask": {
+    "0": {
+      "teleTileSame": true,
+      "condSame": true,
+      "superDestWithMove": true,
+      "superDestNoMove": true,
+      "opt1": {
+        "strictCloseEnough": false
+      },
+      "opt2": {
+        "closeEnoughTiles": 0,
+        "strictCloseEnough": true
+      }
+    },
+    "1": {
+      "okAir": true,
+      "airZone": 0,
+      "airElev": 0,
+      "okGround": true,
+      "groundZone": 0,
+      "okBlocked": false,
+      "okDeny": false,
+      "teleports": [
+        [
+          true,
+          null,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          null,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    "2": {
+      "err": "Vehicle HTK is not a chrono miner",
+      "chronoStarted": true
+    }
+  },
+  "game/gameobject/task/move/ExitFactoryTask": {
+    "0": {
+      "factorySame": true,
+      "rallySame": true,
+      "preventOpp": true,
+      "cancellable": false,
+      "rampPushed": false,
+      "superTarget1": true,
+      "superTarget2": true,
+      "opt1": {
+        "ignoredBlockers": [
+          {
+            "factoryTrait": {
+              "type": 3
+            },
+            "tile": {
+              "rx": 0,
+              "ry": 0
+            }
+          }
+        ],
+        "closeEnoughTiles": 0,
+        "strictCloseEnough": true,
+        "forceWaitOnPathBlocked": true
+      },
+      "opt2": {
+        "ignoredBlockers": [
+          {
+            "factoryTrait": {
+              "type": 2
+            },
+            "tile": {
+              "rx": 0,
+              "ry": 0
+            }
+          }
+        ],
+        "closeEnoughTiles": 0,
+        "strictCloseEnough": true,
+        "forceWaitOnPathBlocked": false
+      }
+    },
+    "1": {
+      "superStarted": true,
+      "warRampTiles": [
+        "A",
+        "C"
+      ],
+      "barrackRamp": true
+    },
+    "2": {
+      "afterFirst": {
+        "first": false,
+        "rampPushed": true,
+        "scattered": [
+          "game/gameobject/task/ScatterTask"
+        ],
+        "optionsStillHasFactory": true
+      },
+      "afterSecond": {
+        "second": false,
+        "checkRampCleared": false,
+        "ignoredCleared": false,
+        "preventOppAfter": true,
+        "cancellableAfter": false,
+        "updated": [],
+        "closeEnough": 0,
+        "strictAfter": true
+      },
+      "stallForceWait": false,
+      "logged": [
+        "exit_factory_repath_after_stall"
+      ]
+    }
+  },
+  "game/gameobject/task/move/AttackMoveTargetTask": {
+    "0": {
+      "ctorErr": "Target must be a techno object",
+      "isAttackMove": true,
+      "attackPerformed": false,
+      "passedFirstWaypoint": false,
+      "internalFlag": false,
+      "scanCooldown": 0,
+      "initialTargetSame": true,
+      "initialWeaponSame": true,
+      "requestedSame": true,
+      "dupInitialSame": true,
+      "dupWeaponSame": true
+    },
+    "1": {
+      "afterFirst": {
+        "requestedIsB": true,
+        "initialIsB": true,
+        "attackPerformed": false
+      },
+      "afterSecond": {
+        "requestedIsC": true,
+        "initialIsC": true,
+        "attackPerformed": false
+      },
+      "afterInternal": {
+        "requestedIsA": true,
+        "initialStillC": true,
+        "internalCleared": true,
+        "attackPerformed": false
+      },
+      "afterChange": {
+        "requestedIsB": true,
+        "initialIsB": true
+      },
+      "superCalls": [
+        [
+          "req",
+          true
+        ],
+        [
+          "req",
+          true
+        ],
+        [
+          "req",
+          false
+        ],
+        [
+          "chg"
+        ]
+      ]
+    },
+    "2": {
+      "afterScan": {
+        "tick1": false,
+        "passedFirstWaypoint": true,
+        "holdGround": true,
+        "passive": true,
+        "weaponIsScanned": "n/a",
+        "requestedIsScanned": false,
+        "internalFlag": true,
+        "scanCooldown": 3
+      },
+      "afterReset": {
+        "tick2": false,
+        "attackPerformed": true,
+        "passedFirstWaypoint": false,
+        "holdGround": false,
+        "passive": false,
+        "requestedBackToInitial": false,
+        "internalFlag": true
+      },
+      "afterFinish": {
+        "tick3": false,
+        "attackPerformedAfter": true
+      },
+      "setWeaponTracked": "undefined"
+    }
+  },
+  "game/gameobject/task/move/MoveToBlockTask": {
+    "0": {
+      "gameSame": true,
+      "targetSame": true,
+      "attackPerformed": false,
+      "preventOpp": false,
+      "useChildLines": true,
+      "childCount": 1,
+      "childIsMoveStub": true,
+      "childTargetTile": true,
+      "childToBridge": false,
+      "childOptions": {
+        "closeEnoughTiles": 1,
+        "pathFinderIgnoredBlockers": [
+          {
+            "centerTile": {
+              "rx": 4,
+              "ry": 6
+            },
+            "tile": {
+              "rx": 4,
+              "ry": 6
+            }
+          }
+        ],
+        "stopOnBlocker": {
+          "centerTile": {
+            "rx": 4,
+            "ry": 6
+          },
+          "tile": {
+            "rx": 4,
+            "ry": 6
+          }
+        }
+      }
+    },
+    "1": {
+      "afterAttack": true,
+      "cancelling": true,
+      "noAttackTrait": true,
+      "disabled": true,
+      "notClose": true,
+      "noWeapon": true,
+      "ok": false,
+      "attackPerformedAfter": true,
+      "selectCalls": [
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "childPushed": true,
+      "forceFlag": true,
+      "tileSame": true,
+      "weaponSame": true
+    }
+  },
+  "game/gameobject/task/morph/MorphIntoTask": {
+    "0": {
+      "noMorphErr": "morphInto not set",
+      "buildToVehicleChildren": [
+        "pack"
+      ],
+      "vehicleToBuildChildren": [
+        [
+          "game/gameobject/task/TurnTask",
+          [
+            180
+          ]
+        ]
+      ],
+      "buildingToBuildingChildren": 0
+    },
+    "1": {
+      "done": true,
+      "placed": [
+        [
+          "can",
+          "GAPILE",
+          true,
+          true
+        ],
+        [
+          "place",
+          "GAPILE",
+          true
+        ]
+      ],
+      "morphedHealth": 42,
+      "morphedPurchase": 900,
+      "replacedBy": true,
+      "dispatchedKinds": [
+        "stash",
+        "event",
+        "unspawn",
+        "dispose",
+        "select",
+        "group",
+        "event"
+      ]
+    },
+    "2": {
+      "done": true,
+      "direction": 180,
+      "health": 77,
+      "purchase": 800,
+      "replacedBy": true,
+      "slaveMorphFlag": true,
+      "log": [
+        [
+          "evt"
+        ],
+        [
+          "unspawn",
+          "GAPILE"
+        ],
+        [
+          "dispose"
+        ],
+        [
+          "create",
+          "HTK",
+          true
+        ],
+        [
+          "tile",
+          11,
+          12
+        ],
+        [
+          "spawn",
+          true,
+          true
+        ],
+        [
+          "evt"
+        ]
+      ],
+      "movesReattached": 0
+    }
+  },
+  "game/gameobject/task/CaptureBuildingTask": {
+    "0": {
+      "enterDelay": 2.5,
+      "base": true,
+      "noEng": false,
+      "friendly": true,
+      "destroyed": false,
+      "buildDown": false,
+      "forceShield": false,
+      "secured": false,
+      "delay0": 4,
+      "delayNeutral": 0,
+      "delayInstant": 0,
+      "preventOpp": false
+    },
+    "1": {
+      "forceShield": {
+        "unspawn": 0,
+        "changes": 0,
+        "credits": 0
+      },
+      "capture": {
+        "unspawn": [
+          "ENG"
+        ],
+        "changes": [
+          [
+            "GAPILE",
+            "Soviets"
+          ]
+        ],
+        "buildingsCaptured": 1,
+        "eventCount": 1
+      },
+      "delayed": {
+        "started": [
+          [
+            true,
+            true
+          ]
+        ],
+        "changes": 0,
+        "captured": 0
+      },
+      "multiEngineer": {
+        "detonateInfo": {
+          "damage": 25,
+          "hasTarget": true,
+          "attackerPlayer": true
+        },
+        "changes": 0,
+        "captured": 0,
+        "unspawn": [
+          "ENG"
+        ]
+      }
+    }
+  },
+  "game/gameobject/task/GarrisonBuildingTask": {
+    "0": {
+      "isSubclass": true,
+      "hasIsAllowed": "function",
+      "hasOnEnter": "function",
+      "baseOk": false,
+      "mcNo": true,
+      "cannotOccupy": true,
+      "fullNo": true,
+      "friendlyOccupantOk": true,
+      "enemyOccupantNo": true,
+      "baseDefenseNo": true,
+      "emptyEnemyNo": true,
+      "emptyCivOk": true,
+      "emptyFriendlyOk": true
+    },
+    "1": {
+      "firstEnter": {
+        "limboed": [
+          [
+            "GI",
+            false,
+            7
+          ],
+          [
+            "GI2",
+            false,
+            7
+          ]
+        ],
+        "mcRestore": [
+          true
+        ],
+        "ownerChanges": [
+          [
+            "GACIVH",
+            true
+          ]
+        ],
+        "buildingsCaptured": 1,
+        "wasCapturedFlag": true,
+        "unitsLen": 1,
+        "unit0": true,
+        "garrisonedAt": true,
+        "eventCount": 1
+      },
+      "secondEnter": {
+        "unitsLen": 2,
+        "eventCount": 1,
+        "ownerChanges": 1,
+        "garrisonedAt2": true
+      }
+    }
+  },
+  "game/gameobject/task/RepairBuildingTask": {
+    "0": {
+      "isSubclass": true,
+      "hasIsAllowed": "function",
+      "hasOnEnter": "function",
+      "bridgeOk": true,
+      "bridgeNo": true,
+      "engFriendlyOk": false,
+      "nonEngNo": true,
+      "notRepairableNo": true,
+      "destroyedNo": true,
+      "fullHpNo": true,
+      "neutralGarrisonOk": true,
+      "neutralNoGarrisonNo": true
+    },
+    "1": {
+      "bridgeResult": {
+        "log": [
+          [
+            "unspawn",
+            "ENG"
+          ],
+          [
+            "evt",
+            "evt"
+          ]
+        ],
+        "bridgeCalls": [
+          [
+            true,
+            true
+          ]
+        ]
+      },
+      "repairLog": [
+        [
+          "unspawn",
+          "ENG"
+        ],
+        [
+          "evt",
+          "evt"
+        ]
+      ],
+      "healCalls": [
+        [
+          true,
+          true
+        ]
+      ]
+    }
+  },
+  "game/gameobject/task/CheerTask": {
+    "0": {
+      "ctor": {
+        "executed": false,
+        "cancellable": false
+      },
+      "nonInfDone": true,
+      "noSeqDone": true,
+      "badStanceDone": true,
+      "afterEnter": {
+        "enterDone": false,
+        "stance": 5,
+        "executed": true,
+        "children": [
+          {
+            "stub": null,
+            "ticksOrSeconds": 15,
+            "cancellable": false
+          }
+        ]
+      },
+      "afterSecond": {
+        "second": true,
+        "stance": 0,
+        "executed": true
+      },
+      "guardDone": false,
+      "guardStance": 5
+    }
   }
 }

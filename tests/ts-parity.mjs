@@ -8401,6 +8401,1567 @@ const CONVERTED = [
       },
     ],
   },
+  // ===== 批次1：采掘 / 移动补全 / 建筑任务族 =====
+  {
+    name: "game/gameobject/task/harvester/GatherOreTask",
+    tsjs: "src/game/gameobject/task/harvester/GatherOreTask.ts.js",
+    probes: [
+      // 构造 + onStart/onEnd 状态机（HarvesterStatus 数值与生产枚举一致）
+      (ns) => {
+        const game = {
+          map: { tileOccupation: {} },
+          rules: { ai: { tiberiumNearScan: 8, tiberiumFarScan: 20 } },
+        };
+        const task = new ns.GatherOreTask(game, undefined, true);
+        const unit = {
+          name: "CMIN",
+          isVehicle: () => true,
+          harvesterTrait: { status: 0, lastGatherExplicit: false },
+        };
+        task.onStart(unit);
+        const afterStart = { status: unit.harvesterTrait.status, explicit: unit.harvesterTrait.lastGatherExplicit };
+        unit.harvesterTrait.status = 2; // MovingToOreSite → onEnd 置 Idle
+        task.onEnd(unit);
+        const afterEndFromMoving = unit.harvesterTrait.status;
+        unit.harvesterTrait.status = 1; // LookingForOreSite → onEnd 保持
+        task.onEnd(unit);
+        const afterEndFromLooking = unit.harvesterTrait.status;
+        let startErr = null;
+        try {
+          task.onStart({ name: "GI", isVehicle: () => false });
+        } catch (e) {
+          startErr = e.message;
+        }
+        return {
+          ctorKeys: Object.keys(task).sort(),
+          scanNear: task.scanNearRadius,
+          scanFar: task.scanFarRadius,
+          explicitOrder: task.explicitOrder,
+          preventOpp: task.preventOpportunityFire,
+          afterStart,
+          afterEndFromMoving,
+          afterEndFromLooking,
+          startErr,
+        };
+      },
+      // MovingToOreSite 无矿 → LookingForOreSite 并结束；getTargetLinesConfig
+      (ns) => {
+        const tile = { rx: 0, ry: 0, landType: 0, z: 0 };
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: { getByMapCoords: () => null },
+            mapBounds: { isWithinBounds: () => true },
+            terrain: {
+              getPassableSpeed: () => 1,
+              getIslandIdMap: () => ({ get: () => 0 }),
+              findObstacles: () => [],
+            },
+            getObjectsOnTile: () => [], // 无矿：避免 getRefineryOnTile 读到缺 isBuilding 的桩对象
+          },
+          rules: {
+            ai: { tiberiumNearScan: 2, tiberiumFarScan: 3 },
+            general: { closeEnough: 1 },
+          },
+        };
+        const task = new ns.GatherOreTask(game);
+        const harvester = { status: 2, lastOreSite: undefined, isEmpty: () => true, isFull: () => false };
+        const unit = {
+          tile,
+          rules: { movementZone: 0, speedType: 0 },
+          isInfantry: () => false,
+          isVehicle: () => true,
+          harvesterTrait: harvester,
+          unitOrderTrait: { getTasks: () => [task], addTask: () => {}, addTasks: () => {} },
+          moveTrait: { lastMoveResult: 0 },
+        };
+        const done = task.onTick(unit);
+        const lines = task.getTargetLinesConfig({});
+        const withInit = new ns.GatherOreTask(game, { rx: 4, ry: 5, landType: 1 });
+        return {
+          done,
+          statusAfter: harvester.status, // 1 = LookingForOreSite
+          lastOreSite: harvester.lastOreSite === undefined ? "undef" : "set",
+          linesEmpty: lines.pathNodes.length,
+          linesWithInit: withInit.getTargetLinesConfig({}).pathNodes,
+        };
+      },
+      // 已站上矿石格 → Harvesting → collectBail 入账 / 无精炼厂结束
+      (ns) => {
+        const tibCalls = { bails: 0, unspawned: 0 };
+        const ore = {
+          isOverlay: () => true,
+          isTiberium: () => true,
+          isBuilding: () => false,
+          value: 3,
+          traits: {
+            get: () => ({
+              rules: { value: 50 },
+              collectBail: () => {
+                tibCalls.bails++;
+                return "Ore";
+              },
+              getBailCount: () => 1,
+            }),
+          },
+        };
+        const tile = { rx: 2, ry: 2, landType: 9, z: 0 }; // LandType.Tiberium=9
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: { getByMapCoords: () => null },
+            mapBounds: { isWithinBounds: () => true },
+            terrain: {
+              getPassableSpeed: () => 1,
+              getIslandIdMap: () => ({ get: () => 0 }),
+              findObstacles: () => [],
+            },
+            getObjectsOnTile: (t) => (t === tile ? [ore] : []),
+          },
+          rules: { ai: { tiberiumNearScan: 2, tiberiumFarScan: 3 }, general: { closeEnough: 1 } },
+          unspawnObject: () => {
+            tibCalls.unspawned++;
+          },
+        };
+        const added = [];
+        const harvester = {
+          status: 2,
+          lastOreSite: undefined,
+          isEmpty: () => false,
+          isFull: () => false,
+          addBails: (type, n) => added.push([type, n]),
+        };
+        const unit = {
+          name: "CMIN",
+          tile,
+          isVehicle: () => true,
+          isInfantry: () => false,
+          rules: { movementZone: 0, speedType: 0 },
+          harvesterTrait: harvester,
+          owner: { buildings: [] }, // 无精炼厂
+          unitOrderTrait: { getTasks: () => [task], addTask: (t) => added.push(["task", t.$stub || t.constructor.name]), addTasks: () => {} },
+          moveTrait: { lastMoveResult: 0 },
+        };
+        const task = new ns.GatherOreTask(game, tile, false);
+        const done = task.onTick(unit);
+        return {
+          done,
+          statusAfter: harvester.status,
+          bailsAdded: added.filter((x) => x[0] === "Ore"),
+          collectCalls: tibCalls.bails,
+          childrenAfter: task.children.length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/harvester/ReturnOreTask",
+    tsjs: "src/game/gameobject/task/harvester/ReturnOreTask.ts.js",
+    probes: [
+      // 构造 + onStart/onEnd
+      (ns) => {
+        const game = { map: { tileOccupation: {} } };
+        const force = { name: "GAREFN" };
+        const task = new ns.ReturnOreTask(game, force, true, true);
+        const harvester = { status: 0, lastOreSite: { rx: 1, ry: 1 } };
+        const unit = { name: "CMIN", isVehicle: () => true, harvesterTrait: harvester };
+        task.onStart(unit);
+        const afterStart = { status: harvester.status, lastOreSite: harvester.lastOreSite };
+        const undocked = [];
+        task.target = {
+          isSpawned: true,
+          dockTrait: {
+            undockUnit: (u) => undocked.push(["undock", u === unit]),
+            unreserveDockForUnit: (u) => undocked.push(["unreserve", u === unit]),
+          },
+        };
+        task.onEnd(unit);
+        const afterEnd = { status: harvester.status, undocked };
+        let startErr = null;
+        try {
+          task.onStart({ name: "X", isVehicle: () => false });
+        } catch (e) {
+          startErr = e.message;
+        }
+        return {
+          forceTarget: task.forceTarget === force,
+          resetFlag: task.resetLastOreSite,
+          explicit: task.explicitOrder,
+          afterStart,
+          afterEnd,
+          startErr,
+        };
+      },
+      // Unloading 计价：bails×单价 + 精炼厂加成 + AI 难度 + orePile + 追加 Gather
+      (ns) => {
+        const added = [];
+        const owner = {
+          credits: 0,
+          creditsGained: 0,
+          buildings: [{ rules: { orePurifier: true }, poweredTrait: undefined }],
+          isAi: true,
+          aiDifficulty: 0,
+          powerTrait: { isLowPower: () => false },
+        };
+        const target = {
+          name: "GAREFN",
+          rules: { refinery: true },
+          owner,
+          isSpawned: true,
+          warpedOutTrait: { isActive: () => false },
+          tile: { rx: 0, ry: 0 },
+          getFoundation: () => ({ width: 3, height: 2 }),
+          dockTrait: {
+            getFirstAvailableDockNumber: () => undefined,
+            getFirstEmptyDockNumber: () => undefined,
+            hasReservedDockForUnit: () => false,
+            reserveDockAt: () => {},
+            getReservedDockForUnit: () => undefined,
+            getAvailableDockCount: () => 0,
+          },
+        };
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: () => true,
+          rules: {
+            getTiberium: (t) => ({ value: t === "Ore" ? 25 : 50 }),
+            general: { purifierBonus: 0.25, harvesterTooFarDistance: 50, chronoHarvTooFarDistance: 20 },
+          },
+        };
+        const harvester = {
+          status: 8, // Unloading
+          getBails: () => [["Ore", 4], ["Gems", 1]],
+          empty: () => {
+            harvester._emptied = true;
+          },
+        };
+        const unit = {
+          name: "CMIN",
+          isVehicle: () => true,
+          harvesterTrait: harvester,
+          unitOrderTrait: { getTasks: () => [null], addTask: (t) => added.push(t.$stub || "real") },
+        };
+        const task = new ns.ReturnOreTask(game);
+        task.target = target;
+        const done = task.onTick(unit);
+        // base = 4*25 + 1*50 = 150; purifier = 1*floor(150*0.25)=37; AI easy ×2
+        return {
+          done,
+          credits: owner.credits,
+          creditsGained: owner.creditsGained,
+          emptied: !!harvester._emptied,
+          orePile: target._refineryOrePile,
+          gatherQueued: added,
+        };
+      },
+      // isValidTargetRefinery / findRefineryDockingTile / chronoMinerCanTeleport 条件
+      (ns) => {
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => a.friendly !== false,
+          rules: { general: { chronoHarvTooFarDistance: 20, harvesterTooFarDistance: 50 } },
+        };
+        const task = new ns.ReturnOreTask(game);
+        const live = { isSpawned: true, friendly: true, warpedOutTrait: { isActive: () => false } };
+        const dead = { isSpawned: false, friendly: true, warpedOutTrait: { isActive: () => false } };
+        const warped = { isSpawned: true, friendly: true, warpedOutTrait: { isActive: () => true } };
+        const unit = { friendly: true, zone: 0, rules: { speedType: 0, teleporter: true }, isInfantry: () => false, tile: { rx: 1, ry: 1 } };
+        const refinery = {
+          tile: { rx: 10, ry: 10 },
+          getFoundation: () => ({ width: 3, height: 2 }),
+        };
+        const dockTile = { rx: 12, ry: 11 };
+        game.map.tiles = { getByMapCoords: (x, y) => (x === 12 && y === 11 ? dockTile : null) };
+        const foundDock = task.findRefineryDockingTile(refinery);
+        const teleportRef = {
+          isSpawned: true,
+          friendly: true,
+          warpedOutTrait: { isActive: () => false },
+          dockTrait: {
+            getAvailableDockCount: () => 2,
+            hasReservedDockForUnit: () => false,
+          },
+        };
+        const results = {};
+        task.rangeHelper = { tileDistance: () => results.dist };
+        results.dist = 5;
+        const canTele5 = task.chronoMinerCanTeleport(unit, dockTile, teleportRef);
+        results.dist = 1;
+        const canTele1 = task.chronoMinerCanTeleport(unit, dockTile, teleportRef);
+        results.dist = 99;
+        const canTeleFar = task.chronoMinerCanTeleport(unit, dockTile, teleportRef);
+        teleportRef.dockTrait.getAvailableDockCount = () => 0;
+        teleportRef.dockTrait.hasReservedDockForUnit = () => false;
+        results.dist = 5;
+        const canTeleNoDock = task.chronoMinerCanTeleport(unit, dockTile, teleportRef);
+        teleportRef.dockTrait.hasReservedDockForUnit = () => true;
+        const canTeleReserved = task.chronoMinerCanTeleport(unit, dockTile, teleportRef);
+        task.forceTarget = teleportRef;
+        results.dist = 99;
+        teleportRef.dockTrait.getAvailableDockCount = () => 2;
+        const canTeleForcedFar = task.chronoMinerCanTeleport(unit, dockTile, teleportRef);
+        return {
+          liveOk: task.isValidTargetRefinery(live, unit),
+          deadNo: !task.isValidTargetRefinery(dead, unit),
+          warpedNo: !task.isValidTargetRefinery(warped, unit),
+          dockRx: foundDock && foundDock.rx,
+          dockRy: foundDock && foundDock.ry,
+          canTele5,
+          canTele1,
+          canTeleFar,
+          canTeleNoDock,
+          canTeleReserved,
+          canTeleForcedFar,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/harvester/TeleportMoveToRefineryTask",
+    tsjs: "src/game/gameobject/task/harvester/TeleportMoveToRefineryTask.ts.js",
+    probes: [
+      // 构造：moveTile 缺省时用 teleportTile；options 走 $args（父类为桩）
+      (ns) => {
+        const game = { map: { tileOccupation: {} } };
+        const teleTile = { rx: 5, ry: 5 };
+        const moveTile = { rx: 3, ry: 3 };
+        const cond = () => true;
+        const t1 = new ns.TeleportMoveToRefineryTask(game, teleTile, moveTile, cond);
+        const t2 = new ns.TeleportMoveToRefineryTask(game, teleTile, undefined, cond);
+        // 父类 MoveTask 被桩化时 constructor 不会写 game —— 手工补齐
+        t1.game = game;
+        t2.game = game;
+        const superArgs1 = t1.$args;
+        const superArgs2 = t2.$args;
+        return {
+          teleTileSame: t1.teleportTile === teleTile,
+          condSame: t1.teleportCondition === cond,
+          superDestWithMove: superArgs1 && superArgs1[1] === moveTile,
+          superDestNoMove: superArgs2 && superArgs2[1] === teleTile,
+          opt1: superArgs1 && superArgs1[3],
+          opt2: superArgs2 && superArgs2[3],
+        };
+      },
+      // tryTeleportToRefinery：条件拒绝 / 障碍拒绝 / 成功传送 + 空中落地
+      (ns, THREE, mod) => {
+        const ZoneType = mod("game/gameobject/unit/ZoneType").ZoneType;
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const teleTile = { rx: 8, ry: 8 };
+        const teleports = [];
+        const game = {
+          map: {
+            tileOccupation: {},
+            terrain: { findObstacles: (node, obj) => (game._blocked ? [{ obj: {} }] : []) },
+          },
+        };
+        const makeUnit = (zone) => ({
+          name: "CMIN",
+          zone,
+          rules: { locomotor: LocomotorType.Chrono },
+          harvesterTrait: {},
+          position: { tileElevation: 7 },
+          moveTrait: {
+            teleportUnitToTile: (tile, bridge, a, b, w) => teleports.push([tile === teleTile, bridge, a, b, w === game]),
+          },
+        });
+        const task = new ns.TeleportMoveToRefineryTask(game, teleTile, undefined, undefined);
+        task.game = game;
+        game._blocked = false;
+        const air = makeUnit(ZoneType.Air);
+        const okAir = ns.TeleportMoveToRefineryTask.prototype.tryTeleportToRefinery.call(task, air);
+        const ground = makeUnit(ZoneType.Ground);
+        const okGround = ns.TeleportMoveToRefineryTask.prototype.tryTeleportToRefinery.call(task, ground);
+        game._blocked = true;
+        const blockedUnit = makeUnit(ZoneType.Ground);
+        const okBlocked = ns.TeleportMoveToRefineryTask.prototype.tryTeleportToRefinery.call(task, blockedUnit);
+        game._blocked = false;
+        const denyTask = new ns.TeleportMoveToRefineryTask(game, teleTile, undefined, () => false);
+        denyTask.game = game;
+        const denyUnit = makeUnit(ZoneType.Ground);
+        const okDeny = ns.TeleportMoveToRefineryTask.prototype.tryTeleportToRefinery.call(denyTask, denyUnit);
+        return {
+          okAir,
+          airZone: air.zone,
+          airElev: air.position.tileElevation,
+          okGround,
+          groundZone: ground.zone,
+          okBlocked,
+          okDeny,
+          teleports,
+        };
+      },
+      // onStart：非超时空矿车抛错
+      (ns, THREE, mod) => {
+        const LocomotorType = mod("game/type/LocomotorType").LocomotorType;
+        const game = { map: { tileOccupation: {} } };
+        const task = new ns.TeleportMoveToRefineryTask(game, { rx: 1, ry: 1 }, undefined, undefined);
+        task.game = game;
+        const parentProto = Object.getPrototypeOf(ns.TeleportMoveToRefineryTask.prototype);
+        const prev = parentProto.onStart;
+        parentProto.onStart = function () {
+          this._superStarted = true;
+        };
+        let err = null;
+        try {
+          ns.TeleportMoveToRefineryTask.prototype.onStart.call(task, {
+            name: "HTK",
+            harvesterTrait: {},
+            rules: { locomotor: LocomotorType.Vehicle },
+          });
+        } catch (e) {
+          err = e.message;
+        }
+        const chronoTask = new ns.TeleportMoveToRefineryTask(game, { rx: 1, ry: 1 }, undefined, undefined);
+        chronoTask.game = game;
+        ns.TeleportMoveToRefineryTask.prototype.onStart.call(chronoTask, {
+          name: "CMIN",
+          harvesterTrait: {},
+          rules: { locomotor: LocomotorType.Chrono },
+        });
+        const chronoStarted = !!chronoTask._superStarted;
+        parentProto.onStart = prev;
+        return { err, chronoStarted };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/ExitFactoryTask",
+    tsjs: "src/game/gameobject/task/move/ExitFactoryTask.ts.js",
+    probes: [
+      // 构造：targetTile 与 options 经父类 stub $args 传出；出厂旗标
+      (ns, THREE, mod) => {
+        const FactoryType = mod("game/rules/TechnoRules").FactoryType;
+        const game = { map: { tileOccupation: {} } };
+        const targetTile = { rx: 7, ry: 3 };
+        const rally = { tile: { rx: 20, ry: 4 }, onBridge: true };
+        const warFactory = { factoryTrait: { type: FactoryType.UnitType }, tile: { rx: 0, ry: 0 } };
+        const barracks = { factoryTrait: { type: FactoryType.InfantryType }, tile: { rx: 0, ry: 0 } };
+        const t1 = new ns.ExitFactoryTask(game, warFactory, targetTile, rally);
+        const t2 = new ns.ExitFactoryTask(game, barracks, targetTile, undefined);
+        t1.game = game;
+        t2.game = game;
+        // 桩父类 Proxy 对未赋值属性返回函数（恒真）—— 显式写入 undefined
+        t1.checkRampTiles = undefined;
+        t2.checkRampTiles = undefined;
+        return {
+          factorySame: t1.factory === warFactory,
+          rallySame: t1.rallyPoint === rally,
+          preventOpp: t1.preventOpportunityFire,
+          cancellable: t1.cancellable,
+          rampPushed: t1.rampBlockersPushed,
+          superTarget1: t1.$args && t1.$args[1] === targetTile,
+          superTarget2: t2.$args && t2.$args[1] === targetTile,
+          opt1: t1.$args && t1.$args[3],
+          opt2: t2.$args && t2.$args[3],
+        };
+      },
+      // onStart 载具厂：计算坡道可通行格；步兵营不计算
+      (ns, THREE, mod) => {
+        const FactoryType = mod("game/rules/TechnoRules").FactoryType;
+        const rampA = { rx: 1, ry: 2, id: "A" };
+        const rampB = { rx: 2, ry: 2, id: "B" };
+        const rampC = { rx: 3, ry: 2, id: "C" };
+        const factoryTile = { rx: 1, ry: 1 };
+        const game = {
+          map: {
+            tileOccupation: {
+              calculateTilesForGameObject: () => [rampA, rampB, rampC],
+              isTileOccupiedBy: () => false,
+            },
+            terrain: { getPassableSpeed: (tile) => (tile === rampB ? 0 : 1) },
+          },
+        };
+        const parentProto = Object.getPrototypeOf(ns.ExitFactoryTask.prototype);
+        const prevStart = parentProto.onStart;
+        parentProto.onStart = function () {
+          this._superStarted = true;
+        };
+        const unit = { rules: { speedType: 0 }, isInfantry: () => false };
+        const warFactory = { factoryTrait: { type: FactoryType.UnitType }, tile: factoryTile };
+        const t1 = new ns.ExitFactoryTask(game, warFactory, { rx: 9, ry: 9 }, undefined);
+        t1.game = game;
+        t1.checkRampTiles = undefined;
+        ns.ExitFactoryTask.prototype.onStart.call(t1, unit);
+        const barracks = { factoryTrait: { type: FactoryType.InfantryType }, tile: factoryTile };
+        const t2 = new ns.ExitFactoryTask(game, barracks, { rx: 9, ry: 9 }, undefined);
+        t2.game = game;
+        t2.checkRampTiles = undefined;
+        ns.ExitFactoryTask.prototype.onStart.call(t2, unit);
+        parentProto.onStart = prevStart;
+        return {
+          superStarted: t1._superStarted,
+          warRampTiles: (t1.checkRampTiles || []).map((t) => t.id),
+          barrackRamp: t2.checkRampTiles === undefined,
+        };
+      },
+      // onTick 反卡死 + 坡道清障 + 离开厂房后改道集结点
+      (ns, THREE, mod) => {
+        const FactoryType = mod("game/rules/TechnoRules").FactoryType;
+        const FactoryTypeUnit = FactoryType.UnitType;
+        const scattered = [];
+        const updated = [];
+        const rampTile = { rx: 2, ry: 2, id: "R" };
+        const blocker = {
+          isUnit: () => true,
+          unitOrderTrait: {
+            getCurrentTask: () => null,
+            addTask: (t) => scattered.push(t.$stub || "task"),
+            addTaskNext: (t) => scattered.push(t.$stub || "task-next"),
+          },
+        };
+        const factory = {
+          factoryTrait: { type: FactoryTypeUnit },
+          tile: { rx: 1, ry: 1 },
+        };
+        const factoryTile = { rx: 2, ry: 2 };
+        const game = {
+          map: {
+            tileOccupation: {
+              getGroundObjectsOnTile: (tile) => (tile === rampTile ? [blocker] : []),
+              isTileOccupiedBy: () => false,
+            },
+            terrain: { isBlockerObject: () => false },
+          },
+          rules: { general: { closeEnough: 2 } },
+        };
+        const parentProto = Object.getPrototypeOf(ns.ExitFactoryTask.prototype);
+        const prevTick = parentProto.onTick;
+        const prevUpdate = parentProto.updateTarget;
+        const prevCanStop = parentProto.canStopAtTile;
+        parentProto.onTick = function () {
+          return this._superTickResult === undefined ? false : this._superTickResult;
+        };
+        parentProto.updateTarget = function (tile, onBridge) {
+          updated.push([tile, onBridge]);
+        };
+        parentProto.canStopAtTile = function () {
+          return this._superCanStop;
+        };
+        const task = new ns.ExitFactoryTask(game, factory, { rx: 9, ry: 9 }, { tile: { rx: 20, ry: 1 }, onBridge: true });
+        task.game = game;
+        task.options = task.$args[3];
+        task.checkRampTiles = [rampTile];
+        task.rampBlockersPushed = false;
+        const unit = {
+          rules: { speedType: 0 },
+          isInfantry: () => false,
+          tile: factoryTile,
+          moveTrait: { moveState: 1 }, // ReachedNextWaypoint
+        };
+        const first = ns.ExitFactoryTask.prototype.onTick.call(task, unit);
+        const afterFirst = {
+          first,
+          rampPushed: task.rampBlockersPushed,
+          scattered: scattered.slice(),
+          optionsStillHasFactory: task.options && !!task.options.ignoredBlockers,
+        };
+        const second = ns.ExitFactoryTask.prototype.onTick.call(task, unit);
+        const afterSecond = {
+          second,
+          checkRampCleared: task.checkRampTiles === undefined,
+          ignoredCleared: task.options && task.options.ignoredBlockers === undefined,
+          preventOppAfter: task.preventOpportunityFire,
+          cancellableAfter: task.cancellable,
+          updated,
+          closeEnough: task.options && task.options.closeEnoughTiles,
+          strictAfter: task.options && task.options.strictCloseEnough,
+        };
+        // 反卡死：stall > 90 且 forceWait → 关闭死等
+        const stallTask = new ns.ExitFactoryTask(game, factory, { rx: 9, ry: 9 }, undefined);
+        stallTask.game = game;
+        stallTask.checkRampTiles = undefined;
+        stallTask.options = { ...stallTask.$args[3], forceWaitOnPathBlocked: true };
+        stallTask.stallTicks = 90;
+        const logged = [];
+        stallTask.game = game;
+        stallTask.log = (obj, msg) => logged.push(msg);
+        ns.ExitFactoryTask.prototype.onTick.call(stallTask, unit);
+        parentProto.onTick = prevTick;
+        parentProto.updateTarget = prevUpdate;
+        parentProto.canStopAtTile = prevCanStop;
+        return {
+          afterFirst,
+          afterSecond,
+          stallForceWait: stallTask.options.forceWaitOnPathBlocked,
+          stallTicksAfter: stallTask.stallTicks,
+          logged,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/AttackMoveTargetTask",
+    tsjs: "src/game/gameobject/task/move/AttackMoveTargetTask.ts.js",
+    probes: [
+      // 构造校验 + 缓存字段 + duplicate（父类为桩，走原型 call）
+      (ns) => {
+        const game = { map: { tileOccupation: {} }, rules: { general: { normalTargetingDelay: 5 } } };
+        const obj = { isTechno: () => true, tile: { rx: 1, ry: 1 } };
+        const target = { obj, tile: obj.tile };
+        const weapon = { name: "120mm" };
+        let ctorErr = null;
+        try {
+          new ns.AttackMoveTargetTask(game, { obj: { isTechno: () => false } }, weapon);
+        } catch (e) {
+          ctorErr = e.message;
+        }
+        const task = new ns.AttackMoveTargetTask(game, target, weapon);
+        // 父类桩不写 game，补上供 duplicate / onTick 使用
+        task.game = game;
+        const dup = ns.AttackMoveTargetTask.prototype.duplicate.call(task);
+        return {
+          ctorErr,
+          isAttackMove: task.isAttackMove,
+          attackPerformed: task.attackPerformed,
+          passedFirstWaypoint: task.passedFirstWaypoint,
+          internalFlag: task.internalTargetUpdateRequested,
+          scanCooldown: task.scanCooldownTicks,
+          initialTargetSame: task.initialTarget === target,
+          initialWeaponSame: task.initialWeapon === weapon,
+          requestedSame: task.requestedTarget === target,
+          dupInitialSame: dup && dup.initialTarget === target,
+          dupWeaponSame: dup && dup.initialWeapon === weapon,
+        };
+      },
+      // requestTargetUpdate / onTargetChange 缓存语义（super 打桩后可观测字段）
+      (ns) => {
+        const game = { map: { tileOccupation: {} } };
+        const objA = { isTechno: () => true, tile: { rx: 0, ry: 0 } };
+        const objB = { isTechno: () => true, tile: { rx: 4, ry: 4 } };
+        const objC = { isTechno: () => true, tile: { rx: 8, ry: 8 } };
+        const tA = { obj: objA, tile: objA.tile };
+        const tB = { obj: objB, tile: objB.tile };
+        const tC = { obj: objC, tile: objC.tile };
+        const task = new ns.AttackMoveTargetTask(game, tA, { name: "W" });
+        task.game = game;
+        const parentProto = Object.getPrototypeOf(ns.AttackMoveTargetTask.prototype);
+        const prevReq = parentProto.requestTargetUpdate;
+        const prevChg = parentProto.onTargetChange;
+        const superCalls = [];
+        parentProto.requestTargetUpdate = function (t) {
+          superCalls.push(["req", t === tB || t === tC]);
+        };
+        parentProto.onTargetChange = function () {
+          superCalls.push(["chg"]);
+        };
+        const proto = ns.AttackMoveTargetTask.prototype;
+        // 外部第一次换目标：requested 仍等于 initial → 同步换掉
+        proto.requestTargetUpdate.call(task, tB);
+        const afterFirst = {
+          requestedIsB: task.requestedTarget === tB,
+          initialIsB: task.initialTarget === tB,
+          attackPerformed: task.attackPerformed,
+        };
+        // 第二次外部换目标：已偏离 → attackPerformed=true，再更新 initial
+        proto.requestTargetUpdate.call(task, tC);
+        const afterSecond = {
+          requestedIsC: task.requestedTarget === tC,
+          initialIsC: task.initialTarget === tC,
+          attackPerformed: task.attackPerformed,
+        };
+        // 内部标志路径：直接采纳 requested，不置 attackPerformed
+        task.internalTargetUpdateRequested = true;
+        task.attackPerformed = false;
+        proto.requestTargetUpdate.call(task, tA);
+        const afterInternal = {
+          requestedIsA: task.requestedTarget === tA,
+          initialStillC: task.initialTarget === tC,
+          internalCleared: task.internalTargetUpdateRequested === false,
+          attackPerformed: task.attackPerformed,
+        };
+        // onTargetChange：当前目标 obj 与 initial/requested 都不同
+        task.requestedTarget = tA;
+        task.initialTarget = tA;
+        const unit = { attackTrait: { currentTarget: tB } };
+        proto.onTargetChange.call(task, unit);
+        const afterChange = {
+          requestedIsB: task.requestedTarget === tB,
+          initialIsB: task.initialTarget === tB,
+        };
+        parentProto.requestTargetUpdate = prevReq;
+        parentProto.onTargetChange = prevChg;
+        return { afterFirst, afterSecond, afterInternal, afterChange, superCalls };
+      },
+      // onTick：过途经点 + 扫描接敌 holdGround/passive + attackPerformed 重置回 initial
+      (ns, THREE, mod) => {
+        const MoveState = mod("game/gameobject/trait/MoveTrait").MoveState;
+        const game = {
+          map: { tileOccupation: {} },
+          rules: { general: { normalTargetingDelay: 3 } },
+          createTarget: (obj, tile) => ({ obj, tile, scanned: true }),
+        };
+        const objA = { isTechno: () => true, tile: { rx: 0, ry: 0 }, name: "A" };
+        const scannedObj = { isTechno: () => true, tile: { rx: 5, ry: 5 }, name: "FOE" };
+        const tA = { obj: objA, tile: objA.tile };
+        const weaponReady = { name: "primary", getCooldownTicks: () => 0 };
+        const scannedWeapon = { name: "scanned", getCooldownTicks: () => 0 };
+        const scanTarget = { tile: scannedObj.tile };
+        const attackTrait = {
+          isDisabled: () => false,
+          currentTarget: null,
+          selectDefaultWeapon: () => weaponReady,
+          scanForTarget: () => ({ target: scanTarget, weapon: scannedWeapon }),
+        };
+        const parentProto = Object.getPrototypeOf(ns.AttackMoveTargetTask.prototype);
+        const prevTick = parentProto.onTick;
+        parentProto.onTick = function (object) {
+          return this._parentDone === undefined ? false : this._parentDone;
+        };
+        const task = new ns.AttackMoveTargetTask(game, tA, { name: "W0" });
+        task.game = game;
+        task.options = {};
+        const unit = {
+          isSpawned: true,
+          tile: { rx: 1, ry: 1 },
+          moveTrait: { moveState: MoveState.Moving, isIdle: () => false },
+          attackTrait,
+        };
+        const proto = ns.AttackMoveTargetTask.prototype;
+        const tick1 = proto.onTick.call(task, unit);
+        const afterScan = {
+          tick1,
+          passedFirstWaypoint: task.passedFirstWaypoint,
+          holdGround: task.options.holdGround,
+          passive: task.options.passive,
+          weaponIsScanned: task._weapon !== undefined ? "n/a" : "via-setWeapon",
+          requestedIsScanned: task.requestedTarget && task.requestedTarget.scanned === true,
+          internalFlag: task.internalTargetUpdateRequested,
+          scanCooldown: task.scanCooldownTicks,
+        };
+        // 攻击过一次后回到 initial：attackPerformed 路径
+        task.attackPerformed = true;
+        task.requestedTarget = { obj: scannedObj, tile: scannedObj.tile };
+        task.initialTarget = tA;
+        task.initialWeapon = { name: "W0" };
+        unit.moveTrait.isIdle = () => true; // 跳过扫描，走重置分支
+        const tick2 = proto.onTick.call(task, unit);
+        const afterReset = {
+          tick2,
+          attackPerformed: task.attackPerformed,
+          passedFirstWaypoint: task.passedFirstWaypoint,
+          holdGround: task.options.holdGround,
+          passive: task.options.passive,
+          requestedBackToInitial: task.requestedTarget === tA,
+          internalFlag: task.internalTargetUpdateRequested,
+        };
+        // 父类已完成但目标已偏离 initial → 收尾分支
+        task.attackPerformed = false;
+        task.requestedTarget = { obj: scannedObj, tile: scannedObj.tile };
+        task.initialTarget = tA;
+        task._parentDone = true;
+        unit.attackTrait.isDisabled = () => false;
+        const tick3 = proto.onTick.call(task, unit);
+        const afterFinish = {
+          tick3,
+          attackPerformedAfter: task.attackPerformed,
+        };
+        parentProto.onTick = prevTick;
+        return { afterScan, afterReset, afterFinish, setWeaponTracked: typeof proto.setWeapon };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/move/MoveToBlockTask",
+    tsjs: "src/game/gameobject/task/move/MoveToBlockTask.ts.js",
+    probes: [
+      // 构造 + onStart 挂 MoveTask（断言 targetTile/options，而非只断言 $stub）
+      (ns) => {
+        const centerTile = { rx: 4, ry: 6 };
+        const target = { centerTile, tile: { rx: 4, ry: 6 } };
+        const game = { map: { tileOccupation: {} } };
+        const task = new ns.MoveToBlockTask(game, target);
+        task.onStart({});
+        const child = task.children[0];
+        return {
+          gameSame: task.game === game,
+          targetSame: task.target === target,
+          attackPerformed: task.attackPerformed,
+          preventOpp: task.preventOpportunityFire,
+          useChildLines: task.useChildTargetLines,
+          childCount: task.children.length,
+          childIsMoveStub: child && child.$stub === "game/gameobject/task/move/MoveTask",
+          childTargetTile: child && child.$args && child.$args[1] === centerTile,
+          childToBridge: child && child.$args && child.$args[2],
+          childOptions: child && child.$args && child.$args[3],
+        };
+      },
+      // onTick：完成条件矩阵 + 成功挂 force 攻击子任务
+      (ns, THREE, mod) => {
+        const MoveResult = mod("game/gameobject/trait/MoveTrait").MoveResult;
+        const target = { centerTile: { rx: 1, ry: 1 }, tile: { rx: 1, ry: 1 } };
+        const game = { map: { tileOccupation: {} } };
+        const proto = ns.MoveToBlockTask.prototype;
+        const out = {};
+        // 已攻击过 → 完成
+        const t1 = new ns.MoveToBlockTask(game, target);
+        t1.attackPerformed = true;
+        out.afterAttack = proto.onTick.call(t1, {});
+        // 取消中 → 完成
+        const t2 = new ns.MoveToBlockTask(game, target);
+        t2.status = 3; // Cancelling
+        out.cancelling = proto.onTick.call(t2, {});
+        // 无 attackTrait → 完成
+        const t3 = new ns.MoveToBlockTask(game, target);
+        out.noAttackTrait = proto.onTick.call(t3, {});
+        // 攻击特性禁用 → 完成
+        const t4 = new ns.MoveToBlockTask(game, target);
+        out.disabled = proto.onTick.call(t4, { attackTrait: { isDisabled: () => true } });
+        // 移动未 CloseEnough → 完成
+        const t5 = new ns.MoveToBlockTask(game, target);
+        out.notClose = proto.onTick.call(t5, {
+          attackTrait: { isDisabled: () => false },
+          moveTrait: { lastMoveResult: MoveResult.Fail },
+        });
+        // 选不出武器 → 完成
+        const t6 = new ns.MoveToBlockTask(game, target);
+        out.noWeapon = proto.onTick.call(t6, {
+          attackTrait: { isDisabled: () => false, selectWeaponVersus: () => null },
+          moveTrait: { lastMoveResult: MoveResult.CloseEnough },
+        });
+        // 成功：挂 force 攻击任务
+        const created = [];
+        const weapon = { name: "MG" };
+        const t7 = new ns.MoveToBlockTask(game, target);
+        const attackChild = { kind: "attack", force: null };
+        const ok = proto.onTick.call(t7, {
+          attackTrait: {
+            isDisabled: () => false,
+            selectWeaponVersus: (self, tgt, g, force) => {
+              created.push([self !== undefined, tgt === target, g === game, force]);
+              return weapon;
+            },
+            createAttackTask: (g, tgt, tile, w, opts) => {
+              attackChild.force = opts && opts.force;
+              attackChild.tileSame = tile === target.tile;
+              attackChild.weaponSame = w === weapon;
+              return attackChild;
+            },
+          },
+          moveTrait: { lastMoveResult: MoveResult.CloseEnough },
+        });
+        out.ok = ok;
+        out.attackPerformedAfter = t7.attackPerformed;
+        out.selectCalls = created;
+        out.childPushed = t7.children[0] === attackChild;
+        out.forceFlag = attackChild.force;
+        out.tileSame = attackChild.tileSame;
+        out.weaponSame = attackChild.weaponSame;
+        return out;
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/morph/MorphIntoTask",
+    tsjs: "src/game/gameobject/task/morph/MorphIntoTask.ts.js",
+    probes: [
+      // onStart：建筑→非建筑挂 PackBuildingTask；载具→建筑挂 TurnTask(180)；缺 morphInto 抛错
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const BuildStatus = mod("game/gameobject/Building").BuildStatus;
+        const game = { map: { tileOccupation: {} } };
+        const task = new ns.MorphIntoTask(game);
+        let noMorphErr = null;
+        try {
+          task.onStart({});
+        } catch (e) {
+          noMorphErr = e.message;
+        }
+        const building = {
+          isBuilding: () => true,
+          isVehicle: () => false,
+          buildStatus: BuildStatus.Ready,
+        };
+        const vehicle = {
+          isBuilding: () => false,
+          isVehicle: () => true,
+        };
+        const tBuild = new ns.MorphIntoTask(game);
+        tBuild.morphInto = { type: ObjectType.Vehicle, name: "HTK" };
+        tBuild.onStart(building);
+        const tVehicle = new ns.MorphIntoTask(game);
+        tVehicle.morphInto = { type: ObjectType.Building, name: "GAAIRC" };
+        tVehicle.onStart(vehicle);
+        const tBuildingMorph = new ns.MorphIntoTask(game);
+        tBuildingMorph.morphInto = { type: ObjectType.Building, name: "X" };
+        tBuildingMorph.onStart(building);
+        return {
+          noMorphErr,
+          buildToVehicleChildren: tBuild.children.map((c) => c.$stub || "pack"),
+          vehicleToBuildChildren: tVehicle.children.map((c) => [c.$stub || "turn", c.$args]),
+          buildingToBuildingChildren: tBuildingMorph.children.length,
+        };
+      },
+      // onTick 载具→建筑：deploy 音效、unspawn/dispose、placeAt、继承血量与 purchaseValue
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const dispatched = [];
+        const placed = [];
+        const tile = { rx: 3, ry: 4 };
+        const morphedBuilding = {
+          healthTrait: { health: 0 },
+          purchaseValue: 0,
+          unitOrderTrait: { addTask: () => {} },
+        };
+        const worker = {
+          canPlaceAt: (name, t, opts) => placed.push(["can", name, t === tile, opts && opts.ignoreAdjacent]) || true,
+          placeAt: (name, t) => {
+            placed.push(["place", name, t === tile]);
+            return [morphedBuilding];
+          },
+        };
+        const selection = {
+          isSelected: () => true,
+          getOrCreateSelectionModel: () => ({ getControlGroupNumber: () => 4 }),
+          addToSelection: (o) => dispatched.push(["select", o === morphedBuilding]),
+          addUnitsToGroup: (g, units, flag) => dispatched.push(["group", g, units[0] === morphedBuilding, flag]),
+        };
+        const game = {
+          map: { tileOccupation: {} },
+          getUnitSelection: () => selection,
+          getConstructionWorker: () => worker,
+          unspawnObject: (o) => dispatched.push(["unspawn", o.name]),
+          events: { dispatch: (e) => dispatched.push(["event", e && e.constructor && e.$stub ? e.$stub : "evt", e]) },
+          createUnitForPlayer: () => {
+            throw new Error("should not create unit in building branch");
+          },
+        };
+        const object = {
+          name: "HTK",
+          tile,
+          isVehicle: () => true,
+          isBuilding: () => false,
+          healthTrait: { health: 42 },
+          purchaseValue: 900,
+          parasiteableTrait: undefined,
+          slaveMinerTrait: undefined,
+          slaveMinerVehicleTrait: { _stashSlavesForMorph: (g) => dispatched.push(["stash", g === game]) },
+          dispose: () => dispatched.push(["dispose"]),
+          unitOrderTrait: { getTasks: () => [] },
+        };
+        const task = new ns.MorphIntoTask(game);
+        task.morphInto = { type: ObjectType.Building, name: "GAPILE" };
+        const done = task.onTick(object);
+        return {
+          done,
+          placed,
+          morphedHealth: morphedBuilding.healthTrait.health,
+          morphedPurchase: morphedBuilding.purchaseValue,
+          replacedBy: object.replacedBy === morphedBuilding,
+          dispatchedKinds: dispatched.map((d) => d[0]),
+        };
+      },
+      // onTick 建筑→载具：undeploy + createUnitForPlayer + foundationCenter 偏移 spawn
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const MoveTaskStub = "game/gameobject/task/move/MoveTask";
+        const log = [];
+        const spawnTile = { rx: 11, ry: 12 };
+        const newUnit = {
+          direction: 0,
+          healthTrait: { health: 0 },
+          purchaseValue: 0,
+          unitOrderTrait: {
+            added: [],
+            addTask(t) {
+              this.added.push(t);
+            },
+          },
+        };
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: {
+              getByMapCoords: (x, y) => {
+                log.push(["tile", x, y]);
+                return spawnTile;
+              },
+            },
+          },
+          getUnitSelection: () => ({
+            isSelected: () => false,
+            getOrCreateSelectionModel: () => ({ getControlGroupNumber: () => undefined }),
+            addToSelection: () => {},
+            addUnitsToGroup: () => {},
+          }),
+          unspawnObject: (o) => log.push(["unspawn", o.name]),
+          events: { dispatch: (e) => log.push(["evt"]) },
+          createUnitForPlayer: (rules, owner) => {
+            log.push(["create", rules.name, owner === object.owner]);
+            return newUnit;
+          },
+          spawnObject: (u, tile) => log.push(["spawn", u === newUnit, tile === spawnTile]),
+        };
+        const pendingMove = { $stub: MoveTaskStub, kind: "move" };
+        const pendingOther = { kind: "attack" };
+        // instanceof MoveTask：桩类恒 false，非移动任务不会被回挂（两侧一致）
+        const object = {
+          name: "GAPILE",
+          tile: { rx: 10, ry: 10 },
+          isBuilding: () => true,
+          isVehicle: () => false,
+          healthTrait: { health: 77 },
+          purchaseValue: 800,
+          owner: { id: "p1" },
+          art: { foundationCenter: { x: 1, y: 2 } },
+          slaveMinerTrait: { _morphInFlight: false },
+          dispose: () => log.push(["dispose"]),
+          unitOrderTrait: { getTasks: () => [pendingMove, pendingOther] },
+        };
+        const task = new ns.MorphIntoTask(game);
+        task.morphInto = { type: ObjectType.Vehicle, name: "HTK" };
+        const done = task.onTick(object);
+        return {
+          done,
+          direction: newUnit.direction,
+          health: newUnit.healthTrait.health,
+          purchase: newUnit.purchaseValue,
+          replacedBy: object.replacedBy === newUnit,
+          slaveMorphFlag: object.slaveMinerTrait._morphInFlight,
+          log,
+          movesReattached: newUnit.unitOrderTrait.added.length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/CaptureBuildingTask",
+    tsjs: "src/game/gameobject/task/CaptureBuildingTask.ts.js",
+    probes: [
+      // 构造延迟 + isAllowed 矩阵
+      (ns, THREE, mod) => {
+        const BuildStatus = mod("game/gameobject/Building").BuildStatus;
+        const civilian = { name: "Neutral" };
+        const game = {
+          gameOpts: { multiEngineer: false, instantCapture: false, delayedOils: false },
+          rules: { general: { engineerCaptureDelay: 2.5 } },
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => a.friendly === true && b.friendly === true,
+          getCivilianPlayer: () => civilian,
+        };
+        const target = {
+          rules: { capturable: true, needsEngineer: false },
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+          owner: { isNeutral: false, name: "Enemy" },
+        };
+        const task = new ns.CaptureBuildingTask(game, target);
+        const proto = ns.CaptureBuildingTask.prototype;
+        const engineer = { rules: { engineer: true }, friendly: false, owner: { name: "Me" } };
+        const notEngineer = { rules: { engineer: false }, friendly: false, owner: { name: "Me" } };
+        const friendlyEng = { rules: { engineer: true }, friendly: true, owner: { name: "Me" } };
+        const base = proto.isAllowed.call(task, engineer);
+        const noEng = proto.isAllowed.call(task, notEngineer);
+        const friendly = proto.isAllowed.call(task, friendlyEng);
+        target.isDestroyed = true;
+        const destroyed = proto.isAllowed.call(task, engineer);
+        target.isDestroyed = false;
+        target.buildStatus = BuildStatus.BuildDown;
+        const buildDown = proto.isAllowed.call(task, engineer);
+        target.buildStatus = BuildStatus.Ready;
+        target.invulnerableTrait = { isForceShieldActive: () => true };
+        const forceShield = proto.isAllowed.call(task, engineer);
+        target.invulnerableTrait = undefined;
+        target.secureProgressTrait = { isActiveFrom: () => true };
+        const secured = proto.isAllowed.call(task, engineer);
+        target.secureProgressTrait = undefined;
+        // 延迟秒数分支
+        const delayGame = {
+          gameOpts: { multiEngineer: false, instantCapture: false },
+          rules: { general: { engineerCaptureDelay: 4 } },
+          map: { tileOccupation: {} },
+        };
+        const delay0 = ns.CaptureBuildingTask.getCaptureDelaySeconds(delayGame, {
+          owner: { isNeutral: false },
+          rules: { needsEngineer: false },
+        });
+        const delayNeutral = ns.CaptureBuildingTask.getCaptureDelaySeconds(delayGame, {
+          owner: { isNeutral: true },
+          rules: { needsEngineer: false },
+        });
+        const delayInstant = ns.CaptureBuildingTask.getCaptureDelaySeconds(
+          { gameOpts: { multiEngineer: false, instantCapture: true }, rules: delayGame.rules },
+          { owner: { isNeutral: false }, rules: { needsEngineer: false } },
+        );
+        return {
+          enterDelay: task.enterDelaySeconds,
+          base,
+          noEng,
+          friendly,
+          destroyed,
+          buildDown,
+          forceShield,
+          secured,
+          delay0,
+          delayNeutral,
+          delayInstant,
+          preventOpp: task.preventOpportunityFire,
+        };
+      },
+      // onEnter：力场中止 / 正式易主 / delayedOils / multiEngineer 伤害分支
+      (ns, THREE, mod) => {
+        const BuildStatus = mod("game/gameobject/Building").BuildStatus;
+        const events = [];
+        const unspawned = [];
+        const ownerChanges = [];
+        const makeGame = (opts) => ({
+          gameOpts: Object.assign({ multiEngineer: false, instantCapture: false, delayedOils: false }, opts),
+          rules: {
+            general: {
+              engineerCaptureDelay: 0,
+              engineerCaptureLevel: 0.5,
+              engineerDamage: 0.25,
+              engineerAlwaysCaptureTech: false,
+            },
+            combatDamage: { c4Warhead: "C4WH" },
+            getWarhead: () => ({ name: "C4WH" }),
+          },
+          map: { tileOccupation: {} },
+          areFriendly: () => false,
+          getCivilianPlayer: () => ({ name: "Neutral" }),
+          unspawnObject: (o) => unspawned.push(o.name),
+          changeObjectOwner: (t, o) => ownerChanges.push([t.name, o.name, (t.owner = o)]),
+          events: { dispatch: (e) => events.push(e.$stub || e) },
+          createTarget: (obj, tile) => ({ obj, tile }),
+        });
+        const engineer = { name: "ENG", owner: { name: "Soviets", buildingsCaptured: 0 }, rules: { engineer: true } };
+        const proto = ns.CaptureBuildingTask.prototype;
+        const out = {};
+        // 力场中止
+        const g1 = makeGame();
+        const t1Target = {
+          name: "GAAIRC",
+          rules: { capturable: true, needsEngineer: false },
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+          owner: { isNeutral: false, name: "Allied" },
+          invulnerableTrait: { isForceShieldActive: () => true },
+        };
+        const t1 = new ns.CaptureBuildingTask(g1, t1Target);
+        proto.onEnter.call(t1, engineer);
+        out.forceShield = { unspawn: unspawned.length, changes: ownerChanges.length, credits: engineer.owner.buildingsCaptured };
+        // 正式占领
+        unspawned.length = 0;
+        ownerChanges.length = 0;
+        engineer.owner.buildingsCaptured = 0;
+        const g2 = makeGame();
+        const t2Target = {
+          name: "GAPILE",
+          rules: { capturable: true, needsEngineer: false },
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+          owner: { isNeutral: false, name: "Allied" },
+          secureProgressTrait: undefined,
+        };
+        const t2 = new ns.CaptureBuildingTask(g2, t2Target);
+        proto.onEnter.call(t2, engineer);
+        out.capture = {
+          unspawn: unspawned.slice(),
+          changes: ownerChanges.map((c) => c.slice(0, 2)),
+          buildingsCaptured: engineer.owner.buildingsCaptured,
+          eventCount: events.length,
+        };
+        // delayedOils：中立 + secureProgress.start 返回真 → 不易主
+        unspawned.length = 0;
+        ownerChanges.length = 0;
+        events.length = 0;
+        engineer.owner.buildingsCaptured = 0;
+        const started = [];
+        const g3 = makeGame({ delayedOils: true });
+        const t3Target = {
+          name: "GAOILB",
+          rules: { capturable: true, needsEngineer: false },
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+          owner: { isNeutral: true, name: "Neutral" },
+          secureProgressTrait: {
+            start: (tgt, owner) => {
+              started.push([tgt === t3Target, owner === engineer.owner]);
+              return true;
+            },
+          },
+        };
+        const t3 = new ns.CaptureBuildingTask(g3, t3Target);
+        proto.onEnter.call(t3, engineer);
+        out.delayed = { started, changes: ownerChanges.length, captured: engineer.owner.buildingsCaptured };
+        // multiEngineer：血量高于阈值 → Warhead.detonate，不立即易主
+        unspawned.length = 0;
+        ownerChanges.length = 0;
+        events.length = 0;
+        engineer.owner.buildingsCaptured = 0;
+        const g4 = makeGame({ multiEngineer: true });
+        const t4Target = {
+          name: "GACNST",
+          rules: { capturable: true, needsEngineer: false },
+          isDestroyed: false,
+          buildStatus: BuildStatus.Ready,
+          owner: { isNeutral: false, name: "Allied" },
+          healthTrait: { health: 90, maxHitPoints: 100, getHitPoints: () => 90 },
+          tile: { rx: 2, ry: 2 },
+          position: { worldPosition: { x: 0, y: 0, z: 0 } },
+        };
+        const t4 = new ns.CaptureBuildingTask(g4, t4Target);
+        // Warhead 来自孪生/编译产物；detonate 行为两侧一致
+        let detonateInfo = null;
+        const WarheadCls = mod("game/Warhead").Warhead;
+        const origDetonate = WarheadCls.prototype.detonate;
+        WarheadCls.prototype.detonate = function (...args) {
+          detonateInfo = {
+            damage: args[1],
+            hasTarget: !!args[7],
+            attackerPlayer: args[8] && args[8].player === engineer.owner,
+          };
+          return "detonated";
+        };
+        proto.onEnter.call(t4, engineer);
+        WarheadCls.prototype.detonate = origDetonate;
+        out.multiEngineer = {
+          detonateInfo,
+          changes: ownerChanges.length,
+          captured: engineer.owner.buildingsCaptured,
+          unspawn: unspawned.slice(),
+        };
+        return out;
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/GarrisonBuildingTask",
+    tsjs: "src/game/gameobject/task/GarrisonBuildingTask.ts.js",
+    probes: [
+      // isAllowed 矩阵 + 基类契约（onEnter 存在；实例是 EnterBuildingTask 子类）
+      (ns, THREE, mod) => {
+        const Parent = mod("game/gameobject/task/EnterBuildingTask").EnterBuildingTask;
+        const civilian = { name: "Civilian" };
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => a.friendly === true,
+          getCivilianPlayer: () => civilian,
+        };
+        const proto = ns.GarrisonBuildingTask.prototype;
+        const occupantOwner = { name: "Allied" };
+        const makeTarget = (over) =>
+          Object.assign(
+            {
+              isDestroyed: false,
+              rules: { isBaseDefense: false },
+              owner: { name: "House" },
+              garrisonTrait: {
+                canBeOccupied: () => true,
+                units: [],
+                maxOccupants: 5,
+              },
+            },
+            over,
+          );
+        const task = new ns.GarrisonBuildingTask(game, makeTarget());
+        const soldier = { owner: { name: "Soviets" }, mindControllableTrait: undefined, friendly: false };
+        const mcUnit = {
+          owner: { name: "Soviets" },
+          friendly: false,
+          mindControllableTrait: { isActive: () => true },
+        };
+        const out = {
+          isSubclass: task instanceof Parent,
+          hasIsAllowed: typeof proto.isAllowed,
+          hasOnEnter: typeof proto.onEnter,
+          baseOk: proto.isAllowed.call(task, soldier),
+          mcNo: !proto.isAllowed.call(task, Object.assign({}, soldier, mcUnit)),
+        };
+        // 不可驻军
+        const tCant = new ns.GarrisonBuildingTask(game, makeTarget({ garrisonTrait: { canBeOccupied: () => false, units: [], maxOccupants: 5 } }));
+        out.cannotOccupy = !proto.isAllowed.call(tCant, soldier);
+        // 满员
+        const unitsFull = [1, 2, 3, 4, 5];
+        const tFull = new ns.GarrisonBuildingTask(
+          game,
+          makeTarget({ garrisonTrait: { canBeOccupied: () => true, units: unitsFull, maxOccupants: 5, } }),
+        );
+        out.fullNo = !proto.isAllowed.call(tFull, soldier);
+        // 已驻军须同阵营
+        const tMixed = new ns.GarrisonBuildingTask(
+          game,
+          makeTarget({
+            garrisonTrait: {
+              canBeOccupied: () => true,
+              units: [{ owner: occupantOwner }],
+              maxOccupants: 5,
+            },
+          }),
+        );
+        out.friendlyOccupantOk = proto.isAllowed.call(tMixed, { owner: occupantOwner, mindControllableTrait: undefined });
+        out.enemyOccupantNo = !proto.isAllowed.call(tMixed, soldier);
+        // 民兵基地防御
+        const tBaseDef = new ns.GarrisonBuildingTask(
+          game,
+          makeTarget({ rules: { isBaseDefense: true }, owner: civilian }),
+        );
+        out.baseDefenseNo = !proto.isAllowed.call(tBaseDef, soldier);
+        // 空建筑须友好或民用
+        const tEnemyEmpty = new ns.GarrisonBuildingTask(game, makeTarget({ owner: { name: "Enemy" } }));
+        out.emptyEnemyNo = !proto.isAllowed.call(tEnemyEmpty, soldier);
+        out.emptyCivOk = proto.isAllowed.call(tEnemyEmpty, Object.assign({}, soldier, { friendly: false }) && {
+          owner: { name: "Soviets" },
+          mindControllableTrait: undefined,
+        }) || proto.isAllowed.call(
+          new ns.GarrisonBuildingTask(game, makeTarget({ owner: civilian })),
+          soldier,
+        );
+        out.emptyFriendlyOk = proto.isAllowed.call(
+          new ns.GarrisonBuildingTask(game, makeTarget({ owner: { name: "Enemy" } })),
+          Object.assign({}, soldier, { friendly: true }),
+        );
+        return out;
+      },
+      // onEnter：limbo + 首占民用 + BuildingGarrisonEvent + units 回填 + garrisonedAt
+      (ns) => {
+        const events = [];
+        const limboed = [];
+        const ownerChanges = [];
+        const civilian = { name: "Civilian" };
+        const newOwner = { name: "Soviets", buildingsCaptured: 0 };
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: () => false,
+          getCivilianPlayer: () => civilian,
+          limboObject: (o, opts) => limboed.push([o.name, opts.selected, opts.controlGroup]),
+          getUnitSelection: () => ({
+            getOrCreateSelectionModel: () => ({ getControlGroupNumber: () => 7 }),
+          }),
+          changeObjectOwner: (t, o) => ownerChanges.push([t.name, o === newOwner]),
+          events: { dispatch: (e) => events.push(e.$stub || e) },
+        };
+        const target = {
+          name: "GACIVH",
+          rules: { isBaseDefense: false },
+          owner: civilian,
+          garrisonTrait: { canBeOccupied: () => true, units: [], maxOccupants: 5 },
+        };
+        const task = new ns.GarrisonBuildingTask(game, target);
+        const mcRestore = [];
+        const soldier = {
+          name: "GI",
+          owner: newOwner,
+          mindControllableTrait: {
+            isActive: () => true,
+            restore: (g) => mcRestore.push(g === game),
+          },
+        };
+        const result = ns.GarrisonBuildingTask.prototype.onEnter.call(task, soldier);
+        const firstEnter = {
+          onEnterResult: result,
+          limboed,
+          mcRestore,
+          ownerChanges,
+          buildingsCaptured: newOwner.buildingsCaptured,
+          wasCapturedFlag: target.wasCapturedFromCivilian,
+          unitsLen: target.garrisonTrait.units.length,
+          unit0: target.garrisonTrait.units[0] === soldier,
+          garrisonedAt: soldier.garrisonedAt === target,
+          eventCount: events.length,
+        };
+        // 第二人进驻：不再派发 BuildingGarrisonEvent、不再易主
+        const soldier2 = { name: "GI2", owner: newOwner, mindControllableTrait: undefined };
+        ns.GarrisonBuildingTask.prototype.onEnter.call(task, soldier2);
+        const secondEnter = {
+          unitsLen: target.garrisonTrait.units.length,
+          eventCount: events.length,
+          ownerChanges: ownerChanges.length,
+          garrisonedAt2: soldier2.garrisonedAt === target,
+        };
+        return { firstEnter, secondEnter };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/RepairBuildingTask",
+    tsjs: "src/game/gameobject/task/RepairBuildingTask.ts.js",
+    probes: [
+      // isAllowed：桥舱分支 / 工程师修理条件矩阵
+      (ns, THREE, mod) => {
+        const Parent = mod("game/gameobject/task/EnterBuildingTask").EnterBuildingTask;
+        const game = {
+          map: { tileOccupation: {} },
+          areFriendly: (a, b) => a.friendly === true && b.friendly === true,
+        };
+        const proto = ns.RepairBuildingTask.prototype;
+        const task = new ns.RepairBuildingTask(game, { rules: {} });
+        const engineer = { rules: { engineer: true }, friendly: true, owner: { name: "Me" } };
+        const civilian = { rules: { engineer: false }, friendly: true };
+        const mkTarget = (over) =>
+          Object.assign(
+            {
+              isDestroyed: false,
+              rules: { repairable: true },
+              healthTrait: { health: 50 },
+              owner: { isCombatant: () => true, name: "Ally" },
+              garrisonTrait: undefined,
+            },
+            over,
+          );
+        const out = {
+          isSubclass: task instanceof Parent,
+          hasIsAllowed: typeof proto.isAllowed,
+          hasOnEnter: typeof proto.onEnter,
+        };
+        // 桥舱
+        const bridgeTask = new ns.RepairBuildingTask(game, {
+          cabHutTrait: { canRepairBridge: () => true },
+          rules: {},
+        });
+        out.bridgeOk = proto.isAllowed.call(bridgeTask, civilian);
+        const bridgeNo = new ns.RepairBuildingTask(game, {
+          cabHutTrait: { canRepairBridge: () => false },
+          rules: {},
+        });
+        out.bridgeNo = !proto.isAllowed.call(bridgeNo, civilian);
+        // 普通修理
+        const t1 = new ns.RepairBuildingTask(game, mkTarget());
+        out.engFriendlyOk = proto.isAllowed.call(t1, engineer);
+        out.nonEngNo = !proto.isAllowed.call(t1, civilian);
+        const t2 = new ns.RepairBuildingTask(game, mkTarget({ rules: { repairable: false } }));
+        out.notRepairableNo = !proto.isAllowed.call(t2, engineer);
+        const t3 = new ns.RepairBuildingTask(game, mkTarget({ isDestroyed: true }));
+        out.destroyedNo = !proto.isAllowed.call(t3, engineer);
+        const t4 = new ns.RepairBuildingTask(game, mkTarget({ healthTrait: { health: 100 } }));
+        out.fullHpNo = !proto.isAllowed.call(t4, engineer);
+        // 非战斗方驻军建筑（中立）
+        const t5 = new ns.RepairBuildingTask(
+          game,
+          mkTarget({
+            owner: { isCombatant: () => false, name: "Civ" },
+            garrisonTrait: { units: [] },
+          }),
+        );
+        out.neutralGarrisonOk = proto.isAllowed.call(t5, { rules: { engineer: true }, friendly: false });
+        out.neutralNoGarrisonNo = !proto.isAllowed.call(
+          new ns.RepairBuildingTask(
+            game,
+            mkTarget({ owner: { isCombatant: () => false }, garrisonTrait: undefined }),
+          ),
+          { rules: { engineer: true }, friendly: false },
+        );
+        return out;
+      },
+      // onEnter：修桥 / 回满血 + unspawn + 事件
+      (ns) => {
+        const gameLog = [];
+        const game = {
+          map: { tileOccupation: {} },
+          unspawnObject: (o) => gameLog.push(["unspawn", o.name]),
+          events: { dispatch: (e) => gameLog.push(["evt", e.$stub || "evt"]) },
+        };
+        const proto = ns.RepairBuildingTask.prototype;
+        const engineer = { name: "ENG", owner: { name: "Soviets" }, rules: { engineer: true } };
+        // 修桥
+        const bridgeCalls = [];
+        const centerTile = { rx: 9, ry: 9 };
+        const bridgeTarget = {
+          cabHutTrait: {
+            canRepairBridge: () => true,
+            repairBridge: (g, owner) => bridgeCalls.push([g === game, owner === engineer.owner]),
+          },
+          centerTile,
+        };
+        const tBridge = new ns.RepairBuildingTask(game, bridgeTarget);
+        proto.onEnter.call(tBridge, engineer);
+        const bridgeResult = { log: gameLog.slice(), bridgeCalls };
+        // 修理建筑
+        gameLog.length = 0;
+        const healCalls = [];
+        const buildingTarget = {
+          cabHutTrait: undefined,
+          rules: { repairable: true },
+          healthTrait: {
+            health: 40,
+            healToFull: (o, g) => healCalls.push([o === engineer, g === game]),
+          },
+          owner: { isCombatant: () => true, name: "Ally" },
+        };
+        const tRepair = new ns.RepairBuildingTask(game, buildingTarget);
+        proto.onEnter.call(tRepair, engineer);
+        return {
+          bridgeResult,
+          repairLog: gameLog.slice(),
+          healCalls,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/task/CheerTask",
+    tsjs: "src/game/gameobject/task/CheerTask.ts.js",
+    probes: [
+      // 构造旗标 + onTick 条件矩阵 / Cheer 进入与复位（StanceType 经 mod 取真值）
+      (ns, THREE, mod) => {
+        const StanceType = mod("game/gameobject/infantry/StanceType").StanceType;
+        const SequenceType = mod("game/art/SequenceType").SequenceType;
+        const task = new ns.CheerTask();
+        const ctor = {
+          executed: task.executed,
+          cancellable: task.cancellable,
+        };
+        const proto = ns.CheerTask.prototype;
+        const cheerSeq = new Set([SequenceType.Cheer]);
+        // 非步兵 → 结束
+        const nonInf = { isInfantry: () => false, art: { sequences: cheerSeq }, stance: StanceType.None };
+        const nonInfDone = proto.onTick.call(task, nonInf);
+        // 无 Cheer 序列 → 结束
+        const t2 = new ns.CheerTask();
+        const noSeq = { isInfantry: () => true, art: { sequences: new Set() }, stance: StanceType.None };
+        const noSeqDone = proto.onTick.call(t2, noSeq);
+        // 姿态不对 → 结束
+        const t3 = new ns.CheerTask();
+        const badStance = {
+          isInfantry: () => true,
+          art: { sequences: cheerSeq },
+          stance: StanceType.Deployed,
+        };
+        const badStanceDone = proto.onTick.call(t3, badStance);
+        // 条件满足 → stance=Cheer、挂 WaitMinutesTask、executed=true、返回 false
+        const t4 = new ns.CheerTask();
+        const good = {
+          isInfantry: () => true,
+          art: { sequences: cheerSeq },
+          stance: StanceType.None,
+        };
+        const enterDone = proto.onTick.call(t4, good);
+        const afterEnter = {
+          enterDone,
+          stance: good.stance,
+          executed: t4.executed,
+          children: t4.children.map((c) => {
+            const wait = c.$args || [];
+            return {
+              stub: c.$stub || null,
+              ticksOrSeconds: c.ticks !== undefined ? c.ticks : wait,
+              cancellable: c.cancellable,
+            };
+          }),
+        };
+        // executed 后 → stance 复位 None 并结束
+        const second = proto.onTick.call(t4, good);
+        const afterSecond = { second, stance: good.stance, executed: t4.executed };
+        // Guard 姿态也可进入 Cheer
+        const t5 = new ns.CheerTask();
+        const guard = {
+          isInfantry: () => true,
+          art: { sequences: cheerSeq },
+          stance: StanceType.Guard,
+        };
+        const guardDone = proto.onTick.call(t5, guard);
+        return {
+          ctor,
+          nonInfDone,
+          noSeqDone,
+          badStanceDone,
+          afterEnter,
+          afterSecond,
+          guardDone,
+          guardStance: guard.stance,
+        };
+      },
+    ],
+  },
 ];
 
 /** Modules registered from the reconstructed sources to satisfy imports. */
@@ -8671,6 +10232,21 @@ function makeStubFactory(name) {
       exports("MoveState", { Idle: 0, ReachedNextWaypoint: 1, PlanMove: 2, Moving: 3 });
       exports("MoveResult", { Success: 0, Cancel: 1, CloseEnough: 2, Fail: 3 });
       exports("CollisionState", { Waiting: 0, Resolved: 1 });
+    }
+    if (exportName === "HarvesterTrait") {
+      // HarvesterStatus 同理注入（HarvesterTrait 被桩化时采集/返程任务
+      // 的状态机探针需要与生产一致的枚举值；孪生/转换版取值相同）。
+      exports("HarvesterStatus", {
+        Idle: 0,
+        LookingForOreSite: 1,
+        MovingToOreSite: 2,
+        Harvesting: 3,
+        LookingForRefinery: 4,
+        MovingToRefinery: 5,
+        Docking: 6,
+        PreparingToUnload: 7,
+        Unloading: 8,
+      });
     }
     return { setters: [], execute() {} };
   };
