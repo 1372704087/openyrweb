@@ -1,4 +1,4 @@
-﻿﻿// === Reconstructed SystemJS module: game/gameobject/task/SlaveGatherTask ===
+// === Reconstructed SystemJS module: game/gameobject/task/SlaveGatherTask ===
 // deps: ["game/gameobject/task/system/Task","game/gameobject/task/move/MoveTask","game/map/tileFinder/RadialTileFinder","game/type/LandType","game/gameobject/task/system/WaitMinutesTask","game/gameobject/trait/TiberiumTrait"]
 // Note: variable/type names are minified approximations of the original TypeScript.
 //
@@ -71,6 +71,11 @@ System.register(
               DUMPING = 4,
               EXITING_MINER = 5,
               IDLE_BEFORE_HARVEST = 6;
+        // Lockstep-safe integer RNG: prefer game.prng; fallback to lower bound.
+        function randInt(game, a, _b) {
+          if (game && game.prng && game.prng.generateRandomInt) return game.prng.generateRandomInt(a, _b);
+          return a;
+        }
         // Mining delay per bail. Read from GeneralRules.HarvestRate (rulescd.ini [General]),
         // default 2/60 (2 seconds) — HarvestRate is slave-specific (vehicle harvesters use a
         // hardcoded 1s interval). Slaves also pause for a random brief moment before starting
@@ -139,7 +144,7 @@ System.register(
               var pool = candidates
                 .filter((c) => (c.tibTrait.rules.value || 0) === topValue)
                 .slice(0, 5);
-              return pool[Math.floor(Math.random() * pool.length)].tile;
+              return pool[randInt(t, 0, pool.length)].tile;
             }
             // Search for higher-value ore within a small radius around the slave.
             // Used after the IDLE_BEFORE_HARVEST thinking pause — the slave looks around
@@ -271,17 +276,35 @@ System.register(
                     (t._oreLocked = !1),
                     (t.isHarvesting = !0),
                     (this.state = IDLE_BEFORE_HARVEST),
-                    this.children.push(new w.WaitMinutesTask(Math.random() * (5 / 60))),
+                    this.children.push(new w.WaitMinutesTask(randInt(this.game, 0, 5) / 60)),
                     !1
                   );
                 case IDLE_BEFORE_HARVEST:
                   if (this.children.length) {
-                    // Random turning while "thinking" / looking around (vanilla behavior)
-                    Math.random() < 0.05 && (t.direction = 360 * Math.random());
+                    // Cosmetic turn only when prng exists (lockstep-safe).
+                    if (this.game.prng && this.game.prng.generateRandomInt && this.game.prng.generateRandomInt(1, 100) <= 5)
+                      t.direction = randInt(this.game, 0, 360);
                     return !1;
                   }
-                  // face the slave toward the ore tile before digging
-                  this.oreTile && (this.oreTile.x !== t.tile.x || this.oreTile.y !== t.tile.y) && (t.direction = (-Math.atan2(this.oreTile.y - t.tile.y, this.oreTile.x - t.tile.x) * 180 / Math.PI - 90 + 720) % 360);
+                  // Face ore via rx/ry (legacy x/y fallback).
+                  if (this.oreTile && t.tile) {
+                    var oreRx = this.oreTile.rx ?? this.oreTile.x;
+                    var oreRy = this.oreTile.ry ?? this.oreTile.y;
+                    var selfRx = t.tile.rx ?? t.tile.x;
+                    var selfRy = t.tile.ry ?? t.tile.y;
+                    if (oreRx !== selfRx || oreRy !== selfRy)
+                      t.direction = (-Math.atan2(oreRy - selfRy, oreRx - selfRx) * 180 / Math.PI - 90 + 720) % 360;
+                  }
+                  var scanRange = this.game.rules.general.slaveMinerSlaveScan || 4;
+                  var betterOre = this._findBetterOreNearby(t, scanRange);
+                  if (betterOre) {
+                    this.oreTile = betterOre;
+                    this._moveTargetTile = betterOre;
+                    t._oreLocked = !0;
+                    this.state = MOVING_TO_ORE;
+                    this.children.push(new m.MoveTask(this.game, betterOre, !1));
+                    return !1;
+                  }
                   t.isHarvesting = !0;
                   return ((this.state = HARVESTING), this.children.push(new w.WaitMinutesTask(8 * this.game.rules.general.harvestRate)), !1);
                 case HARVESTING: {

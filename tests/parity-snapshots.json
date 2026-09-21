@@ -3371,59 +3371,6 @@
       "cancelThrew": false
     }
   },
-  "game/gameobject/task/SlaveGatherTask": {
-    "0": "function",
-    "1": {
-      "ctorKeys": [
-        "status",
-        "children",
-        "cancellable",
-        "useChildTargetLines",
-        "blocking",
-        "waitingForChildrenToFinish",
-        "preventOpportunityFire",
-        "preventLanding",
-        "isAttackMove",
-        "game",
-        "miner",
-        "state",
-        "cargo",
-        "cargoCount",
-        "_returnDoorTile"
-      ],
-      "initialState": 0,
-      "useChildTargetLines": true,
-      "cancelResult": true
-    },
-    "2": {
-      "r": false,
-      "state": 0,
-      "childStub": "game/gameobject/task/move/MoveTask",
-      "childTarget": true,
-      "childIgnoresMiner": true
-    },
-    "3": {
-      "r": false,
-      "state": 1,
-      "oreTileLocked": true,
-      "oreLockedFlag": true,
-      "childTarget": true
-    },
-    "4": {
-      "r": false,
-      "state": 3,
-      "cargo": "RIPARIUS",
-      "cargoCount": 1,
-      "unspawned": 1,
-      "isCarrying": true
-    },
-    "5": {
-      "credits": 250,
-      "creditsGained": 250,
-      "emptied": true,
-      "cargoReset": true
-    }
-  },
   "game/gameobject/task/MagnetronDragTask": {
     "0": "function",
     "1": {
@@ -3676,6 +3623,84 @@
       "grindTicks": 600,
       "eventCount": 3,
       "enterTick": true
+    }
+  },
+  "game/gameobject/task/SlaveGatherTask": {
+    "0": "function",
+    "1": {
+      "ctorKeys": [
+        "status",
+        "children",
+        "cancellable",
+        "useChildTargetLines",
+        "blocking",
+        "waitingForChildrenToFinish",
+        "preventOpportunityFire",
+        "preventLanding",
+        "isAttackMove",
+        "game",
+        "miner",
+        "state",
+        "cargo",
+        "cargoCount",
+        "_returnDoorTile"
+      ],
+      "initialState": 0,
+      "useChildTargetLines": true,
+      "cancelResult": true,
+      "endStatus": 0,
+      "endHarvesting": false,
+      "endCarrying": false,
+      "endOreLocked": false
+    },
+    "2": {
+      "r": false,
+      "state": 0,
+      "childHas": true,
+      "childTargetIsMiner": true,
+      "childIgnoresMiner": true
+    },
+    "3": {
+      "r": false,
+      "state": 1,
+      "oreTileLocked": true,
+      "oreLockedFlag": true,
+      "childTargetIsOre": true
+    },
+    "4": {
+      "r": false,
+      "state": 3,
+      "cargo": "RIPARIUS",
+      "cargoCount": 1,
+      "unspawned": 1,
+      "isCarrying": true
+    },
+    "5": {
+      "state": 2,
+      "cargoCount": 0,
+      "unspawned": 0,
+      "stillHarvestingWait": true
+    },
+    "6": {
+      "fullR": false,
+      "fullState": 3,
+      "fullCarrying": true,
+      "fullHarvestCleared": true,
+      "deadR": true,
+      "repathR": false,
+      "repathDroppedStale": true,
+      "repathTargetIsMiner": true
+    },
+    "7": {
+      "state": 1,
+      "oreSwitchedToRich": true,
+      "childTargetIsRich": true
+    },
+    "8": {
+      "credits": 250,
+      "creditsGained": 250,
+      "emptied": true,
+      "cargoReset": true
     }
   }
 }

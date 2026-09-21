@@ -22,6 +22,9 @@
  * 退出（取消/矿车被毁/被解放）时清掉收割动画标志，防止奴隶无限
  * 循环挖掘动作（onEnd）。
  *
+ * 锁步：选矿/停顿/转向优先用 game.prng；缺失时确定性回退（取候选
+ * 下界、停顿 0、不随机转向），避免联机/回放分叉。
+ *
  * 由 game/gameobject/task/SlaveGatherTask.ts.js 重写为 TS（行为完全
  * 一致）。两个文件并存期间，本文件才是修改目标。
  */
@@ -31,6 +34,12 @@ import { RadialTileFinder } from "game/map/tileFinder/RadialTileFinder"; // 已�
 import { LandType } from "game/type/LandType"; // 已转换
 import { WaitMinutesTask } from "game/gameobject/task/system/WaitMinutesTask"; // 已转换
 import * as TiberiumTraitModule from "game/gameobject/trait/TiberiumTrait"; // 未转换（any-shim）
+
+/** 锁步安全的整数随机：有 prng 用 prng，否则恒返回下界。 */
+function randInt(game: any, a: number, _b: number): number {
+  if (game && game.prng && game.prng.generateRandomInt) return game.prng.generateRandomInt(a, _b);
+  return a;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class SlaveGatherTask extends Task {
@@ -101,7 +110,7 @@ export class SlaveGatherTask extends Task {
     // 排序后最前面的就是最近的最高值格），5 个奴隶会自然分散。
     const topValue = candidates[0].tibTrait.rules.value || 0;
     const pool = candidates.filter((c: any) => (c.tibTrait.rules.value || 0) === topValue).slice(0, 5);
-    return pool[Math.floor(Math.random() * pool.length)].tile;
+    return pool[randInt(game, 0, pool.length)].tile;
   }
 
   /**
@@ -254,17 +263,37 @@ export class SlaveGatherTask extends Task {
         object._oreLocked = false;
         object.isHarvesting = true;
         this.state = 6 /* IDLE_BEFORE_HARVEST */;
-        this.children.push(new WaitMinutesTask(Math.random() * (5 / 60)));
+        this.children.push(new WaitMinutesTask(randInt(this.game, 0, 5) / 60));
         return false;
       case 6 /* IDLE_BEFORE_HARVEST */:
         if (this.children.length) {
-          // "思考"时小概率随机转向（原版：奴隶东张西望）。
-          if (Math.random() < 0.05) object.direction = 360 * Math.random();
+          // "思考"时小概率随机转向（仅在有 prng 时，保证锁步确定性）。
+          if (this.game.prng && this.game.prng.generateRandomInt && this.game.prng.generateRandomInt(1, 100) <= 5) {
+            object.direction = randInt(this.game, 0, 360);
+          }
           return false;
         }
-        // 挖矿前面向矿格。
-        if (this.oreTile && (this.oreTile.x !== object.tile.x || this.oreTile.y !== object.tile.y)) {
-          object.direction = ((-Math.atan2(this.oreTile.y - object.tile.y, this.oreTile.x - object.tile.x) * 180) / Math.PI - 90 + 720) % 360;
+        // 挖矿前面向矿格（tile 用 rx/ry；兼容历史 x/y 字段）。
+        if (this.oreTile && object.tile) {
+          const oreRx = this.oreTile.rx ?? this.oreTile.x;
+          const oreRy = this.oreTile.ry ?? this.oreTile.y;
+          const selfRx = object.tile.rx ?? object.tile.x;
+          const selfRy = object.tile.ry ?? object.tile.y;
+          if (oreRx !== selfRx || oreRy !== selfRy) {
+            object.direction =
+              ((-Math.atan2(oreRy - selfRy, oreRx - selfRx) * 180) / Math.PI - 90 + 720) % 360;
+          }
+        }
+        // 环顾：附近有更高价值矿 → 改道（实现文档承诺的 IDLE 行为）。
+        const scanRange = this.game.rules.general.slaveMinerSlaveScan || 4;
+        const betterOre = this._findBetterOreNearby(object, scanRange);
+        if (betterOre) {
+          this.oreTile = betterOre;
+          this._moveTargetTile = betterOre;
+          object._oreLocked = true;
+          this.state = 1 /* MOVING_TO_ORE */;
+          this.children.push(new MoveTask(this.game, betterOre, false));
+          return false;
         }
         object.isHarvesting = true;
         this.state = 2 /* HARVESTING */;
