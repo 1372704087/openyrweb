@@ -275,7 +275,7 @@ System.register(
                 e.moveTrait.velocity && e.moveTrait.velocity.set(0, 0, 0);
                 e.moveTrait.locomotor = void 0;
               }
-              e.unitOrderTrait.addTaskToFront(new Md.MagnetronDragTask(t, e, i, this));
+              e.unitOrderTrait.addTaskToFront(new Md.MagnetronDragTask(t, e, i));
             }
             // OpenYRWeb: Genetic Mutator transform helper. Spawns a Brute under the attacker's
             // owner at the victim's tile, then silently destroys the victim (no death anim).

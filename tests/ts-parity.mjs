@@ -6560,20 +6560,47 @@ const CONVERTED = [
     tsjs: "src/game/gameobject/task/MagnetronDragTask.ts.js",
     probes: [
       (ns) => typeof ns.MagnetronDragTask,
-      // 构造期键集合 + onStart 三条中止路径（受害者无效/缺特性/已被拖拽）。
-      (ns, THREE) => {
-        const task = new ns.MagnetronDragTask({ map: {}, events: { dispatch: () => {} } }, { tile: {} }, {}, undefined);
+      // 构造键 + onStart 三条中止路径 + 中止 onEnd 不拆别人的拖拽链接。
+      (ns, THREE, mod) => {
+        const task = new ns.MagnetronDragTask({ map: {}, events: { dispatch: () => {} } }, { tile: {} }, {});
         const ctorKeys = Object.keys(task);
-        const task2 = new ns.MagnetronDragTask({ events: { dispatch: () => {} } }, undefined, {}, undefined);
+
+        const task2 = new ns.MagnetronDragTask({ events: { dispatch: () => {} } }, undefined, {});
         task2.onStart({});
         const abortedNoVictim = task2._aborted;
-        const task3 = new ns.MagnetronDragTask({ events: { dispatch: () => {} } }, { magnetronDraggedBy: { x: 1 } }, {}, undefined);
+
+        const taskMissing = new ns.MagnetronDragTask(
+          { events: { dispatch: () => {} } },
+          { isDisposed: false, isDestroyed: false },
+          {},
+        );
+        taskMissing.onStart({});
+        const abortedMissingTraits = taskMissing._aborted;
+
+        const otherMag = { id: "other" };
+        const task3Victim = {
+          isDisposed: false,
+          isDestroyed: false,
+          moveTrait: { moveState: 0 },
+          unitOrderTrait: {},
+          magnetronDraggedBy: otherMag,
+        };
+        const task3 = new ns.MagnetronDragTask({ events: { dispatch: () => {} } }, task3Victim, { id: "self" });
         task3.onStart({});
         const abortedAlreadyDragged = task3._aborted;
-        return { ctorKeys, abortedNoVictim, abortedAlreadyDragged };
+        task3.onEnd({});
+        return {
+          ctorKeys,
+          abortedNoVictim,
+          abortedMissingTraits,
+          abortedAlreadyDragged,
+          foreignLinkKept: task3Victim.magnetronDraggedBy === otherMag,
+          abortedCleared: task3._aborted === false,
+        };
       },
-      // onStart 成功：升空（zone=Air）+ 双向链接 + LiftOff 事件 + MoveTrait 休眠。
-      (ns, THREE) => {
+      // onStart 成功：zone=Air + LiftOff(type/gameObject) + 双向链接 + MoveTrait 休眠。
+      (ns, THREE, mod) => {
+        const EventType = mod("game/event/EventType").EventType;
         const dispatched = [];
         const victim = {
           tile: { z: 0, landType: 0 },
@@ -6582,46 +6609,52 @@ const CONVERTED = [
           zone: 0,
           onBridge: true,
           magnetronDraggedBy: undefined,
-          moveTrait: { moveState: 3, velocity: { set: (x, y, z2) => {} } },
+          moveTrait: { moveState: 3, locomotor: { id: "drive" }, velocity: { set: () => {} } },
           unitOrderTrait: {},
           position: { worldPosition: { y: 0 } },
         };
         const magnetron = {};
         const task = new ns.MagnetronDragTask(
-          { events: { dispatch: (e) => dispatched.push(e.constructor.name) } },
+          { events: { dispatch: (e) => dispatched.push(e) } },
           victim,
           magnetron,
-          undefined,
         );
         task.onStart({});
         return {
           zoneAir: victim.zone === 1,
           onBridgeOff: victim.onBridge === false,
-          liftedOff: dispatched.includes("ObjectLiftOffEvent"),
+          liftedOff: dispatched.some((e) => e.type === EventType.ObjectLiftOff && e.gameObject === victim),
+          liftEventCount: dispatched.length,
           draggedBy: victim.magnetronDraggedBy === magnetron,
           dragging: magnetron.magnetronDragging === victim,
           moveStateIdle: victim.moveTrait.moveState === 0,
           locomotorCleared: victim.moveTrait.locomotor === undefined,
         };
       },
-      // 光束断裂 → 重力坠落全流程：约 10 tick 触地，恢复 zone + Land 事件。
-      (ns, THREE) => {
+      // 光束断裂 → 重力坠落：Land 事件 + zone 恢复 + 非受控自身坠落伤害。
+      (ns, THREE, mod) => {
+        const EventType = mod("game/event/EventType").EventType;
         const dispatched = [];
+        const selfDmg = [];
         const victim = {
-          tile: { z: 0, landType: undefined },
+          tile: { z: 0, landType: 0 },
           isDisposed: false,
           isDestroyed: false,
           zone: 1,
           onBridge: false,
           magnetronDraggedBy: undefined,
-          healthTrait: { getHitPoints: () => 100, maxHitPoints: 100, inflictDamage: () => {} },
+          rules: { speedType: 0 },
+          healthTrait: {
+            getHitPoints: () => 100,
+            maxHitPoints: 100,
+            inflictDamage: (d) => selfDmg.push(d),
+          },
           moveTrait: { moveState: 0 },
           unitOrderTrait: {},
           position: {
             worldY: 200,
             get worldPosition() {
-              const self = this;
-              return { y: self.worldY };
+              return { y: this.worldY };
             },
             setAbsoluteElevationWorld: function (v) {
               this.worldY = v;
@@ -6632,16 +6665,23 @@ const CONVERTED = [
         const magnetron = { unitOrderTrait: { getTasks: () => [] } };
         const task = new ns.MagnetronDragTask(
           {
-            map: { tileOccupation: { getGroundObjectsOnTile: () => [] } },
-            events: { dispatch: (e) => dispatched.push(e.constructor.name) },
-            rules: { combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true } },
+            map: {
+              tileOccupation: {
+                getGroundObjectsOnTile: () => [],
+                unoccupyTileRange: () => {},
+                occupyTileRange: () => {},
+              },
+            },
+            events: { dispatch: (e) => dispatched.push(e) },
+            rules: {
+              combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+              getWarhead: () => null,
+            },
           },
           victim,
           magnetron,
-          undefined,
         );
         task.onStart({});
-        // 无活跃 AttackTask → 光束断裂 → 坠落；驱动到触地。
         let ticks = 0;
         let done = false;
         while (!done && ticks < 60) {
@@ -6653,8 +6693,192 @@ const CONVERTED = [
           ticks,
           finalY: victim.position.worldY,
           zoneGround: victim.zone === 0,
-          landed: dispatched.includes("ObjectLandEvent"),
+          landed: dispatched.some((e) => e.type === EventType.ObjectLand && e.gameObject === victim),
+          landEventCount: dispatched.length,
           droppedFlag: task._dropped,
+          controlledDrop: task._controlledDrop,
+          uncontrolledSelfDmg: selfDmg.slice(),
+        };
+      },
+      // 活跃 AttackTask → 光束不断：爬升到巡航高度后水平靠近磁电，不提前坠落。
+      (ns) => {
+        const LPT = 256;
+        const victim = {
+          tile: { z: 0, landType: 0, rx: 0, ry: 0 },
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          moveTrait: { moveState: 0, locomotor: undefined, velocity: { set: () => {} } },
+          unitOrderTrait: {},
+          position: {
+            x: 0,
+            worldY: 0,
+            get worldPosition() {
+              return { y: this.worldY };
+            },
+            setAbsoluteElevationWorld: function (v) {
+              this.worldY = v;
+            },
+            moveByLeptons3: function (vec) {
+              this.x += vec.x;
+              this.worldY += vec.y;
+            },
+            getMapPosition: function () {
+              return { x: this.x, y: 0 };
+            },
+          },
+        };
+        const attackTask = {
+          isCancelling: () => false,
+          target: { obj: victim },
+          getWeapon: () => ({}),
+          cancelled: false,
+          cancel() {
+            this.cancelled = true;
+          },
+        };
+        const magnetron = {
+          position: { getMapPosition: () => ({ x: 8 * LPT, y: 0 }) },
+          unitOrderTrait: { getTasks: () => [attackTask] },
+          isFiring: false,
+        };
+        const game = {
+          events: { dispatch: () => {} },
+          map: {
+            tileOccupation: {
+              getGroundObjectsOnTile: () => [],
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+            },
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, magnetron);
+        task.onStart({});
+        const samples = [];
+        for (let i = 0; i < 40; i++) {
+          const done = task.onTick({});
+          samples.push({
+            y: victim.position.worldY,
+            x: victim.position.x,
+            firing: magnetron.isFiring,
+            dropped: task._dropped,
+            done,
+          });
+          if (done) break;
+        }
+        const early = samples[Math.min(4, samples.length - 1)];
+        const last = samples[samples.length - 1];
+        return {
+          sampleCount: samples.length,
+          earlyY: early.y,
+          earlyX: early.x,
+          lastY: last.y,
+          lastX: last.x,
+          lastFiring: last.firing,
+          dropped: task._dropped,
+          done: last.done,
+          stillAir: victim.zone === 1,
+          attackNotCancelled: !attackTask.cancelled,
+        };
+      },
+      // _applyDrop 伤害契约：受控空地安全 / 非受控自伤 / 受控砸人不自伤 / 落水沉没。
+      (ns, THREE, mod) => {
+        const DeathType = mod("game/gameobject/common/DeathType").DeathType;
+        const LandType = mod("game/type/LandType").LandType;
+        const SpeedType = mod("game/type/SpeedType").SpeedType;
+
+        function makeVictim(landType, speedType) {
+          const dmg = [];
+          return {
+            dmg,
+            tile: { z: 0, landType, rx: 0, ry: 0 },
+            isDisposed: false,
+            isDestroyed: false,
+            owner: { id: "p1" },
+            rules: { speedType },
+            healthTrait: {
+              getHitPoints: () => 100,
+              maxHitPoints: 100,
+              inflictDamage: (d) => dmg.push(d),
+            },
+          };
+        }
+        const game = {
+          map: {
+            tileOccupation: {
+              getGroundObjectsOnTile: (tile) => tile._objs || [],
+              unoccupyTileRange: () => {},
+            },
+          },
+          rules: {
+            combatDamage: {
+              fallingDamageMultiplier: 1,
+              currentStrengthDamage: true,
+              crushWarhead: "Crush",
+            },
+            getWarhead: () => null,
+          },
+        };
+
+        const v1 = makeVictim(0, SpeedType.Wheel);
+        const t1 = new ns.MagnetronDragTask(game, v1, {});
+        t1._controlledDrop = true;
+        t1._applyDrop(v1, game);
+        const controlledEmptyDmg = v1.dmg.slice();
+        const controlledEmptyDestroyed = !!v1.isDestroyed;
+
+        const v2 = makeVictim(0, SpeedType.Wheel);
+        const t2 = new ns.MagnetronDragTask(game, v2, {});
+        t2._controlledDrop = false;
+        t2._applyDrop(v2, game);
+        const uncontrolledEmptyDmg = v2.dmg.slice();
+
+        const targetDmg = [];
+        const crushTarget = {
+          isDestroyed: false,
+          isTechno: () => true,
+          healthTrait: {
+            getHitPoints: () => 50,
+            maxHitPoints: 50,
+            inflictDamage: (d) => targetDmg.push(d),
+          },
+        };
+        const v3 = makeVictim(0, SpeedType.Wheel);
+        v3.tile._objs = [v3, crushTarget];
+        const t3 = new ns.MagnetronDragTask(game, v3, {});
+        t3._controlledDrop = true;
+        t3._applyDrop(v3, game);
+        const controlledCrushSelfDmg = v3.dmg.slice();
+        const crushTargetDmg = targetDmg.slice();
+        const crushDeathType = crushTarget.deathType;
+
+        const v4 = makeVictim(LandType.Water, SpeedType.Wheel);
+        const t4 = new ns.MagnetronDragTask(game, v4, {});
+        t4._controlledDrop = true;
+        t4._applyDrop(v4, game);
+        const waterDestroyed = !!v4.isDestroyed;
+        const waterDeathType = v4.deathType;
+
+        const v5 = makeVictim(LandType.Water, SpeedType.Amphibious);
+        const t5 = new ns.MagnetronDragTask(game, v5, {});
+        t5._controlledDrop = true;
+        t5._applyDrop(v5, game);
+        const amphWaterDestroyed = !!v5.isDestroyed;
+
+        return {
+          controlledEmptyDmg,
+          controlledEmptyDestroyed,
+          uncontrolledEmptyDmg,
+          controlledCrushSelfDmg,
+          crushTargetDmg,
+          crushDeathType,
+          crushDeathTypeIsCrush: crushDeathType === DeathType.Crush,
+          waterDestroyed,
+          waterDeathType,
+          waterDeathTypeIsSink: waterDeathType === DeathType.Sink,
+          amphWaterDestroyed,
         };
       },
     ],

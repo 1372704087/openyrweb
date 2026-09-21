@@ -239,7 +239,7 @@ export class Warhead {
       if (victim.moveTrait.velocity) victim.moveTrait.velocity.set(0, 0, 0);
       victim.moveTrait.locomotor = undefined;
     }
-    victim.unitOrderTrait.addTaskToFront(new MagnetronDragTaskModule.MagnetronDragTask(game, victim, attacker, this));
+    victim.unitOrderTrait.addTaskToFront(new MagnetronDragTaskModule.MagnetronDragTask(game, victim, attacker));
   }
 
   /**

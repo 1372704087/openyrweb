@@ -3465,22 +3465,26 @@
         "game",
         "victim",
         "magnetron",
-        "warhead",
         "_tickCount",
         "_dropped",
         "_dropping",
         "_fallSpeed",
         "_dropTile",
         "_movingToDrop",
-        "_maxTicks"
+        "_maxTicks",
+        "_controlledDrop"
       ],
       "abortedNoVictim": true,
-      "abortedAlreadyDragged": true
+      "abortedMissingTraits": true,
+      "abortedAlreadyDragged": true,
+      "foreignLinkKept": true,
+      "abortedCleared": true
     },
     "2": {
       "zoneAir": true,
       "onBridgeOff": true,
-      "liftedOff": false,
+      "liftedOff": true,
+      "liftEventCount": 1,
       "draggedBy": true,
       "dragging": true,
       "moveStateIdle": true,
@@ -3491,8 +3495,42 @@
       "ticks": 11,
       "finalY": 0,
       "zoneGround": true,
-      "landed": false,
-      "droppedFlag": true
+      "landed": true,
+      "landEventCount": 2,
+      "droppedFlag": true,
+      "controlledDrop": false,
+      "uncontrolledSelfDmg": [
+        100
+      ]
+    },
+    "4": {
+      "sampleCount": 40,
+      "earlyY": 100,
+      "earlyX": 0,
+      "lastY": 522.2911719846655,
+      "lastX": 300,
+      "lastFiring": true,
+      "dropped": false,
+      "done": false,
+      "stillAir": true,
+      "attackNotCancelled": true
+    },
+    "5": {
+      "controlledEmptyDmg": [],
+      "controlledEmptyDestroyed": false,
+      "uncontrolledEmptyDmg": [
+        100
+      ],
+      "controlledCrushSelfDmg": [],
+      "crushTargetDmg": [
+        100
+      ],
+      "crushDeathType": 3,
+      "crushDeathTypeIsCrush": true,
+      "waterDestroyed": true,
+      "waterDeathType": 5,
+      "waterDeathTypeIsSink": true,
+      "amphWaterDestroyed": false
     }
   }
 }

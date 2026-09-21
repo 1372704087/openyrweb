@@ -9,10 +9,13 @@
  *    停止开火（死亡、新命令、目标被毁、超射程）时 locomotor 失效，
  *    受害者坠落；
  *  - 受害者被拖到磁电附近后，扔在磁电附近一个随机的、尽量空闲的格子上；
- *  - 坠落伤害：坠落单位自身受到 base × FallingDamageMultiplier（默认
- *    1.0）伤害，base = 当前血量（CurrentStrengthDamage=true，默认）或
- *    最大血量；落点格子上的地面单位被碾压，伤害值 = 坠落单位的 base；
- *  - 非两栖单位落水 → 沉没摧毁；空旷地面 → 安全落地无伤害。
+ *  - 落点格子上的地面单位被碾压，伤害值 = 坠落单位的 base
+ *    （CurrentStrengthDamage ? 当前血量 : 最大血量），经 CrushWarhead；
+ *  - 非两栖单位落水 → 沉没摧毁；受控投放到空旷地面 → 安全落地；
+ *  - 非受控坠落（光束断裂/磁电死亡）时，坠落单位自身另受
+ *    base × FallingDamageMultiplier（默认 1.0）伤害。受控投放不结算
+ *    自身坠落伤害（否则默认系数会把空地投放打成自杀，与原版磁电
+ *    可安全投放的玩法矛盾）。
  *
  * 本引擎实现说明：
  *  - 直接编辑受害者位置（不使用真实 Jumpjet locomotor），但正确模拟
@@ -22,7 +25,10 @@
  *  - 拖拽持续判定：检查磁电是否有活跃 AttackTask 指向受害者——近似
  *    原版的"持续开火即拖拽"行为；
  *  - 自包含：每 tick 直接驱动受害者位置，不派生 MoveTask 子任务；保持
- *    moveTrait.moveState = Idle 使 MoveTrait.NotifyTick 休眠。
+ *    moveTrait.moveState = Idle 使 MoveTrait.NotifyTick 休眠；
+ *  - `_controlledDrop`：拖到磁电附近并投放（含就地投放）为受控；
+ *    光束断裂/磁电消失为非受控，触地时才结算自身坠落伤害；
+ *  - onEnd 在 `_aborted` 时只回滚本任务建立的状态，不动别人的拖拽链接。
  *
  * 拖拽物理参数：巡航高度 500 leptons、爬升 20/tick、水平漂移 20/tick、
  * 重力 4/tick²、拖近到 2 格内寻找落点（半径 2 格搜索）。
@@ -32,19 +38,16 @@
  */
 import { Task } from "game/gameobject/task/system/Task"; // 已转换
 import * as RandomTileFinderModule from "game/map/tileFinder/RandomTileFinder"; // 未转换（any-shim）
-import { LocomotorType } from "game/type/LocomotorType"; // 已转换
 import { Coords } from "game/Coords"; // 已转换
 import { Vector2 } from "game/math/Vector2"; // 已转换
 import { Vector3 } from "game/math/Vector3"; // 已转换
 import { ZoneType, getZoneType } from "game/gameobject/unit/ZoneType"; // 已转换
 import { MoveState } from "game/gameobject/trait/MoveTrait"; // 已转换
-import { MoveTask } from "game/gameobject/task/move/MoveTask"; // 已转换
 import * as ObjectLandEventModule from "game/event/ObjectLandEvent"; // 未转换（any-shim）
 import * as ObjectLiftOffEventModule from "game/event/ObjectLiftOffEvent"; // 未转换（any-shim）
 import { DeathType } from "game/gameobject/common/DeathType"; // 已转换
 import { LandType } from "game/type/LandType"; // 已转换
 import { SpeedType } from "game/type/SpeedType"; // 已转换
-import { JumpjetLocomotor } from "game/gameobject/locomotor/JumpjetLocomotor"; // 已转换（与孪生依赖面一致，当前未直接使用）
 import { Warhead } from "game/Warhead"; // 已转换
 import { AttackState } from "game/gameobject/trait/AttackTrait"; // 已转换
 
@@ -58,11 +61,9 @@ const DROP_SEARCH_RADIUS = 2; // 落点搜索半径（格）
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class MagnetronDragTask extends Task {
-  // game、victim（被拖拽载具）、magnetron（开火单位）、warhead（坠落碾压伤害用）。
   game: any;
   victim: any;
   magnetron: any;
-  warhead: any;
   _tickCount: number;
   _dropped: boolean;
   _dropping: boolean;
@@ -71,14 +72,15 @@ export class MagnetronDragTask extends Task {
   _movingToDrop: boolean;
   /** 安全上限（约 20 秒）。超时但仍在空中时，onEnd 强制落地。 */
   _maxTicks: number;
+  /** 受控投放（磁电拖到位后放下）：不结算自身坠落伤害。 */
+  _controlledDrop: boolean;
   _aborted: boolean;
 
-  constructor(game: any, victim: any, magnetron: any, warhead: any) {
+  constructor(game: any, victim: any, magnetron: any) {
     super();
     this.game = game;
     this.victim = victim;
     this.magnetron = magnetron;
-    this.warhead = warhead;
     this._tickCount = 0;
     this._dropped = false;
     this._dropping = false;
@@ -86,6 +88,7 @@ export class MagnetronDragTask extends Task {
     this._dropTile = null;
     this._movingToDrop = false;
     this._maxTicks = 300;
+    this._controlledDrop = false;
     this.cancellable = true;
     this.blocking = true;
     this.preventOpportunityFire = true;
@@ -143,7 +146,7 @@ export class MagnetronDragTask extends Task {
     const magnetron = this.magnetron;
     const magnetronGone = !magnetron || magnetron.isDisposed || magnetron.isDestroyed;
     if (magnetronGone) {
-      // 磁电没了 → 断束坠落。
+      // 磁电没了 → 断束坠落（非受控）。
       this._startDrop(magnetron, victim);
       return this._descend(victim);
     }
@@ -191,7 +194,7 @@ export class MagnetronDragTask extends Task {
       const hz = magnetronPos.y - victimPos.y;
       const hlen = Math.hypot(hx, hz);
       const minSep = DRAG_DIST_TILES * Coords.LEPTONS_PER_TILE;
-      // 已拖到磁电附近——寻找随机落点（原版行为）。
+      // 已拖到磁电附近——寻找随机落点（原版行为，受控投放）。
       if (hlen <= minSep + 0.01) {
         this._initiateDrop(victim, magnetron);
         return;
@@ -220,14 +223,15 @@ export class MagnetronDragTask extends Task {
     } catch (err) {}
   }
 
-  /** 受害者到达磁电附近：寻找随机空闲落点并开始移向该格。 */
+  /** 受害者到达磁电附近：寻找随机空闲落点并开始移向该格（受控投放）。 */
   _initiateDrop(victim: any, magnetron: any): void {
+    this._controlledDrop = true;
     const dropTile = this._findDropTile(magnetron);
     if (dropTile) {
       this._dropTile = dropTile;
       this._movingToDrop = true;
     } else {
-      // 未找到空闲格子——就地坠落。
+      // 未找到空闲格子——就地受控坠落。
       this._dropping = true;
       this._fallSpeed = 0;
       this._startDrop(magnetron, victim);
@@ -285,18 +289,20 @@ export class MagnetronDragTask extends Task {
     } catch (err) {}
   }
 
-  /** 在磁电附近找一个随机的空闲地面格子作为落点。 */
+  /**
+   * 在磁电附近找一个随机的空闲地面格子作为落点。
+   * 缺 prng 时用确定性回退（始终取候选下界），避免联机/回放分叉。
+   */
   _findDropTile(magnetron: any): any {
     try {
       const game = this.game;
       const victim = this.victim;
-      // 优先用锁步随机源，缺失时退回 Math.random。
       const rng =
         game.prng && game.prng.generateRandomInt
           ? game.prng
           : {
-              generateRandomInt: function (a: number, b: number) {
-                return Math.floor(Math.random() * (b - a)) + a;
+              generateRandomInt: function (a: number, _b: number) {
+                return a;
               },
             };
       const finder = new RandomTileFinderModule.RandomTileFinder(
@@ -434,10 +440,12 @@ export class MagnetronDragTask extends Task {
   }
 
   /**
-   * 原版 YR 坠落伤害（ModEnc 考证）：base = CurrentStrengthDamage ?
-   * 当前血量 : 最大血量；自身坠落伤害 = base × FallingDamageMultiplier；
-   * 落点格子地面单位被碾压，伤害 = base（经 CrushWarhead）；非两栖
-   * 载具落水 → 沉没摧毁；空旷地面 → 安全落地。
+   * 落地结算（ModEnc 考证 + 玩法一致性）：
+   *  - base = CurrentStrengthDamage ? 当前血量 : 最大血量；
+   *  - 落点地面 techno：CrushWarhead 碾压，伤害 = base；
+   *  - 非两栖落水 → DeathType.Sink 摧毁；
+   *  - 自身坠落伤害 = base × FallingDamageMultiplier：仅非受控坠落
+   *    （光束断裂等）结算；受控投放空地/砸人时自身安全。
    */
   _applyDrop(victim: any, game: any): void {
     try {
@@ -446,8 +454,8 @@ export class MagnetronDragTask extends Task {
       const multiplier = combatDamage ? combatDamage.fallingDamageMultiplier : 1;
       const useCurrent = combatDamage ? combatDamage.currentStrengthDamage : true;
       const baseStrength = useCurrent ? victim.healthTrait.getHitPoints() : victim.healthTrait.maxHitPoints;
-      const fallDmg = Math.max(1, Math.round(baseStrength * multiplier));
-      // 机制 B：碾压所有站在落点格子上的地面 techno。
+      const fallDmg = Math.max(1, Math.round(baseStrength * (multiplier == null ? 1 : multiplier)));
+      // 碾压所有站在落点格子上的地面 techno。
       const targets = [];
       try {
         const onTile = game.map.tileOccupation.getGroundObjectsOnTile(victim.tile) || [];
@@ -463,7 +471,7 @@ export class MagnetronDragTask extends Task {
         const crushWarheadName = (combatDamage && combatDamage.crushWarhead) || "Crush";
         let crushWarhead: any = undefined;
         try {
-          const warheadRules = game.rules.getWarhead(crushWarheadName);
+          const warheadRules = game.rules.getWarhead && game.rules.getWarhead(crushWarheadName);
           if (warheadRules) crushWarhead = new Warhead(warheadRules);
         } catch (err) {}
         const attackerInfo = { obj: victim, player: victim.owner, weapon: undefined };
@@ -483,27 +491,25 @@ export class MagnetronDragTask extends Task {
             }
           } catch (err) {}
         }
-        // 机制 A：坠落载具自身受到坠落伤害。
-        if (!victim.isDestroyed && victim.healthTrait) {
-          try {
-            victim.deathType = DeathType.Crush;
-            victim.healthTrait.inflictDamage(fallDmg, { obj: undefined }, game);
-            if ((victim.healthTrait && victim.healthTrait.getHitPoints() <= 0) || victim.isDestroyed) {
-              this._forceDestroyObject(victim, game);
-            }
-          } catch (err) {}
-        }
-        return;
       }
-      // 下方无 techno。非两栖载具在水格上 → 直接摧毁（沉没）。
-      if (victim.tile.landType === LandType.Water && victim.rules.speedType !== SpeedType.Amphibious) {
+      // 非两栖载具在水格上 → 直接摧毁（沉没）。有碾压对象时落点仍是该格，同样适用。
+      if (victim.tile && victim.tile.landType === LandType.Water && victim.rules && victim.rules.speedType !== SpeedType.Amphibious) {
         try {
           victim.deathType = DeathType.Sink;
           this._forceDestroyObject(victim, game);
         } catch (err) {}
         return;
       }
-      // 空旷地面 → 正常安全落地，无伤害。
+      // 自身坠落伤害：仅非受控坠落。受控投放（含砸中地面单位）自身安全。
+      if (!this._controlledDrop && !victim.isDestroyed && victim.healthTrait) {
+        try {
+          victim.deathType = DeathType.Crush;
+          victim.healthTrait.inflictDamage(fallDmg, { obj: undefined }, game);
+          if ((victim.healthTrait && victim.healthTrait.getHitPoints() <= 0) || victim.isDestroyed) {
+            this._forceDestroyObject(victim, game);
+          }
+        } catch (err) {}
+      }
     } catch (err) {}
   }
 
@@ -536,14 +542,22 @@ export class MagnetronDragTask extends Task {
   }
 
   /**
-   * 收尾：受害者仍在空中时强制贴回地面并恢复 zone；未结算坠落伤害时
-   * 走完 _applyDrop（落水沉没/碾压落点单位/自身坠落伤害）；恢复受害者
-   * 移动状态；清除双向链接并取消以该受害者为目标的残留 AttackTask。
+   * 收尾：`_aborted` 时只回滚本任务可能写入的状态（且不碰别人建立的
+   * 拖拽链接）；正常结束时强制落地、结算未完成的坠落、恢复 MoveTrait、
+   * 清除双向链接并取消残留 AttackTask。
    */
   onEnd(unit: any): void {
     const victim = this.victim;
+    if (this._aborted) {
+      // onStart 校验失败：本任务未建立拖拽。绝不 clear 别人的 magnetronDraggedBy。
+      if (victim && this.magnetron && this.magnetron.magnetronDragging === victim && victim.magnetronDraggedBy === this.magnetron) {
+        this.magnetron.magnetronDragging = undefined;
+        victim.magnetronDraggedBy = undefined;
+      }
+      this._aborted = false;
+      return;
+    }
     if (!victim || victim.isDisposed || victim.isDestroyed) {
-      if (this._aborted) this._aborted = false;
       return;
     }
     try {
@@ -553,7 +567,7 @@ export class MagnetronDragTask extends Task {
       }
       if (victim.zone === ZoneType.Air) this._restoreZone(victim);
     } catch (err) {}
-    // OpenYRWeb：取消拖拽时走完坠落伤害流程，否则直接落地会跳过所有伤害。
+    // 取消/超时：走完落地结算（受控标志保持，决定是否算自身坠落伤害）。
     if (!this._dropped) {
       try {
         this._applyDrop(victim, this.game);
@@ -565,7 +579,10 @@ export class MagnetronDragTask extends Task {
       victim.moveTrait.moveState = MoveState.Idle;
       if (victim.moveTrait.velocity) victim.moveTrait.velocity.set(0, 0, 0);
     }
-    victim.magnetronDraggedBy = undefined;
+    // 只清本任务建立的正向链接。
+    if (victim.magnetronDraggedBy === this.magnetron) {
+      victim.magnetronDraggedBy = undefined;
+    }
     // 清除反向链接并取消残留 AttackTask。
     if (this.magnetron && this.magnetron.magnetronDragging === victim) {
       this.magnetron.magnetronDragging = undefined;
@@ -590,6 +607,5 @@ export class MagnetronDragTask extends Task {
         }
       } catch (err) {}
     }
-    this._aborted = false;
   }
 }
