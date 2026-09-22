@@ -56,9 +56,9 @@ export class GarrisonBuildingTask extends EnterBuildingTask {
       this.game.events.dispatch(new BuildingGarrisonEventModule.BuildingGarrisonEvent(this.target));
     }
     garrisonTrait.units.push(object);
-    // back-reference so the occupant's weapon can apply garrison bonuses
-    // (OccupyWeaponRange / OccupyDamageMultiplier / OccupyROFMultiplier) while inside
-    // (see Weapon.get range / get rof / fire). Cleared on evacuation/destruction.
+    // 回指建筑，使驻军单位的武器在建筑内应用驻军加成
+    // （OccupyWeaponRange / OccupyDamageMultiplier / OccupyROFMultiplier，
+    // 见 Weapon 的 range / rof / fire）。撤离或摧毁时清除。
     object.garrisonedAt = this.target;
   }
 }

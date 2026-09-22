@@ -59,8 +59,8 @@ export class AttackOrder extends Order {
   getPointerType(isMini: any, units: any): any {
     if (!this.isAllowed()) return isMini ? PointerTypeModule.PointerType.NoActionMini : PointerTypeModule.PointerType.NoAction;
     if (this.isC4) return PointerTypeModule.PointerType.C4;
-    // Boris airstrike cursor — when the selected weapon has MigAttackCursor=yes
-    // and the target is a building (valid airstrike target), show the AirStrike pointer.
+    // 鲍里斯空袭光标 — 当所选武器 MigAttackCursor=yes
+    // 且目标为建筑（合法空袭目标）时，显示 AirStrike 指针。
     let weapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
     if (!weapon)
       weapon = this.sourceObject.attackTrait?.selectWeaponVersus(
@@ -124,18 +124,17 @@ export class AttackOrder extends Order {
     )
       return false;
     if (targetObj === this.sourceObject) return false;
-    // Boris airstrike — check if the unit has AirstrikeTrait and the target
-    // is a building. If so, check if the airstrike is ready (cooldown, etc.).
+    // 鲍里斯空袭 — 检查单位是否有 AirstrikeTrait 且目标为建筑。
+    // 若是，再检查空袭是否就绪（冷却等）。
     const airstrikeWeapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
     if (airstrikeWeapon && targetObj?.isBuilding() && this.sourceObject.airstrikeTrait) {
-      // the airstrike is for enemy buildings — friendly buildings can
-      // only be targeted with a force-attack (Ctrl), while bridge repair huts
-      // (cab huts) are never targetable, matching the normal weapon behaviour.
+      // 空袭针对敌方建筑 — 友军建筑只能用强攻（Ctrl）点选，
+      // 而修桥舱（cab hut）永远不可选，与常规武器行为一致。
       if (targetObj.cabHutTrait || (!this.forceAttack && this.game.areFriendly(targetObj, this.sourceObject)))
         return false;
       if (!this.sourceObject.airstrikeTrait.isReady(this.sourceObject)) return false;
-      // No voice at order time — the airstrike voice plays when the MiGs
-      // spawn (see AirstrikeTrait.spawnMiGs), matching vanilla YR.
+      // 下令时不播语音 — 空袭语音在 MiG 生成时播放
+      // （见 AirstrikeTrait.spawnMiGs），与原版 YR 一致。
       this.feedbackType = OrderFeedbackType.None;
       return true;
     }
@@ -145,9 +144,8 @@ export class AttackOrder extends Order {
       this.game,
       this.forceAttack,
     );
-    // if the selected weapon is the secondary weapon and the unit
-    // has VoiceSecondaryWeaponAttack configured, use the dedicated feedback
-    // type so the sound handler plays the correct voice line.
+    // 若所选武器是副武器且单位配置了 VoiceSecondaryWeaponAttack，
+    // 改用专用反馈类型，使声音处理器播放正确的语音行。
     weapon &&
       weapon === this.sourceObject.secondaryWeapon &&
       this.sourceObject.rules.voiceSecondaryWeaponAttack &&
@@ -193,16 +191,16 @@ export class AttackOrder extends Order {
   /** 生成攻击任务：C4 / 鲍里斯空袭 / 常规 AttackTask。 */
   process(): any {
     if (this.isC4) return [new PlantC4Task(this.game, this.target.obj)];
-    // Boris airstrike — if the unit has AirstrikeTrait and the target is a
-    // building, create an AirstrikeAttackTask instead of a normal AttackTask. This
-    // makes Boris point his laser designator at the building and spawn MiG planes.
+    // 鲍里斯空袭 — 若单位有 AirstrikeTrait 且目标为建筑，
+    // 创建 AirstrikeAttackTask 而非普通 AttackTask。这会使鲍里斯
+    // 用激光指示器指向建筑并生成 MiG 飞机。
     const airstrikeWeapon = this.selectAirstrikeWeapon(this.sourceObject, this.target);
     if (airstrikeWeapon && this.target.obj?.isBuilding() && this.sourceObject.airstrikeTrait) {
-      // Note: vanilla YR has no "Airstrike confirmed" sound — the airstrike
-      // voice ("MiG's on the way") plays later when the MiGs spawn.
+      // 注意：原版 YR 没有「空袭已确认」音效 — 空袭
+      // 语音（"MiG's on the way"）稍后在 MiG 生成时播放。
       return [new AirstrikeAttackTask(this.game, this.target, airstrikeWeapon, { force: this.forceAttack })];
     }
-    // deploy-fire units undeploy before attacking
+    // 部署开火单位先解除部署再攻击
     const src = this.sourceObject;
     src.isUnit() && src.deployerTrait?.isDeployed() && src.deployerTrait.setDeployed(false);
     const weapon = src.attackTrait.selectWeaponVersus(
@@ -215,9 +213,9 @@ export class AttackOrder extends Order {
   }
 
   /**
-   * selectAirstrikeWeapon — returns the unit's secondary weapon if it has
-   * MigAttackCursor=yes and the unit has AirstrikeTrait (Boris). Returns null if not
-   * applicable. This is used to intercept building attacks and redirect to AirstrikeAttackTask.
+   * selectAirstrikeWeapon — 若单位副武器带 MigAttackCursor=yes 且单位有
+   * AirstrikeTrait（鲍里斯），返回其副武器；否则返回 null。用于拦截对
+   * 建筑的攻击并改道到 AirstrikeAttackTask。
    */
   selectAirstrikeWeapon(unit: any, target: any): any {
     if (!unit.airstrikeTrait) return null;

@@ -49,8 +49,7 @@ export class AirstrikeAttackTask extends Task {
     this.options = options || {};
     this.phase = Phase.Approaching;
     this.fired = false;
-    // set once the walk-into-range task has been created; after it
-    // completes (Boris is stationary at the range edge) the flare is fired.
+    // 走位进入射程子任务创建后置位；走完后（Boris 在射程边缘静止）再打信号弹。
     this._walkDone = false;
     this.rangeHelper = new RangeHelperModule.RangeHelper(game.map.tileOccupation);
     this.targetLinesConfig = { pathNodes: [] };
@@ -74,18 +73,17 @@ export class AirstrikeAttackTask extends Task {
   }
 
   _fire(gameObject: any): boolean {
-    // Firing the Flare triggers the AirstrikeTrait dispatcher (vanilla
-    // InfantryClass::SpecialAttack → AirstrikeClass::Update): it either
-    // spawns the MiG team (Execute) or redirects the in-flight planes
-    // to this new target (ChangeTarget). Both happen instantly.
+    // 发射信号弹会触发 AirstrikeTrait 分发器（原版
+    // InfantryClass::SpecialAttack → AirstrikeClass::Update）：要么立刻
+    // 生成 MiG 编队（Execute），要么把已在空中的编队改指向新目标
+    // （ChangeTarget）。两者都是立刻生效。
     const targetObj = this.target.obj;
     const targetTile = targetObj ? targetObj.tile : this.target.tile;
     if (targetObj && (targetObj.isDestroyed || !this.game.isValidTarget(targetObj))) {
       return false;
     }
-    // The VoiceSecondaryWeaponAttack line already played in onStart when the
-    // order was issued; firing the Flare only triggers the airstrike state
-    // machine (spawn/redirect planes).
+    // VoiceSecondaryWeaponAttack 语音已在 onStart 下令时播过；发射信号弹
+    // 只触发空袭状态机（生成/改向飞机）。
     gameObject.airstrikeTrait.update(this.game, gameObject, targetObj, targetTile);
     this.fired = true;
     return true;
@@ -102,18 +100,15 @@ export class AirstrikeAttackTask extends Task {
     }
     const targetObj = this.target.obj;
     const targetTile = targetObj ? targetObj.tile : this.target.tile;
-    // Vanilla YR: Boris speaks his VoiceSecondaryWeaponAttack line (e.g.
-    // BorisAirstrikeVoice) when the airstrike is ordered — immediately,
-    // whether he is already in the Flare's range or must walk there first.
-    // (Previously the voice only played at the flare throw, so an
-    // out-of-range order gave no immediate feedback.)
+    // 原版 YR：下令空袭时 Boris 立刻播 VoiceSecondaryWeaponAttack 语音
+    // （如 BorisAirstrikeVoice），无论是否已在信号弹射程内、是否还要先走过去。
+    // （此前只在扔信号弹时播，超射程下令时没有即时反馈。）
     const voice = gameObject.rules.voiceSecondaryWeaponAttack;
     if (voice) {
       this.game.events.dispatch(new TriggerSoundFxEventModule.TriggerSoundFxEvent(voice, gameObject.tile));
     }
-    // use the standard weapon-range check (footprint-aware,
-    // the same one the primary weapon and the MoveInWeaponRangeTask use)
-    // so Boris walks fully into the Flare's range before firing.
+    // 使用标准武器射程判定（感知占地，与主武器和 MoveInWeaponRangeTask
+    // 同一套），确保 Boris 完全走入信号弹射程后再开火。
     if (
       this.rangeHelper.isInWeaponRange(gameObject, targetObj || targetTile, this.weapon, this.game.rules)
     ) {
@@ -138,22 +133,19 @@ export class AirstrikeAttackTask extends Task {
     if (gameObject.isDestroyed || gameObject.isCrashing) {
       return true;
     }
-    // Phase: Firing — the strike has been launched (planes spawned or
-    // redirected); the trait manages the planes from here on.
+    // 阶段 Firing — 空袭已发射（飞机已生成或改向），之后由 trait 管理飞机。
     if (this.phase === Phase.Firing) {
       return true;
     }
-    // Phase: Approaching — move Boris into weapon range, then fire.
+    // 阶段 Approaching — 把 Boris 移入武器射程后再开火。
     const targetObj = this.target.obj;
     const targetTile = targetObj ? targetObj.tile : this.target.tile;
     if (targetObj && (targetObj.isDestroyed || !this.game.isValidTarget(targetObj))) {
       return true;
     }
-    // Wait for the walk to finish: the MoveInWeaponRangeTask stops Boris at
-    // the first waypoint inside the Flare's range, so firing after it has
-    // completed means Boris is already stationary when the flare goes off —
-    // cancelling a mid-path walk instead would carry him a few more steps
-    // and interrupt the laser guidance.
+    // 等走位结束：MoveInWeaponRangeTask 会把 Boris 停在信号弹射程内第一个
+    // 途经点，等它完成后再开火意味着信号弹发射时 Boris 已静止——若中途
+    // 取消走位，会多走出几步并打断激光指示。
     const moveChild = this.children.find((e: any) => e instanceof MoveInWeaponRangeTask);
     if (moveChild) {
       return false;
@@ -166,11 +158,10 @@ export class AirstrikeAttackTask extends Task {
       this._fire(gameObject);
       return true;
     }
-    // Out of range — walk into range. The move task receives the target
-    // object/tile, exactly like a normal AttackTask. Passing a Target
-    // object here broke MoveTask pathfinding (MoveTask reads
-    // targetTile.rx/ry directly, which a Target does not expose), so Boris
-    // never walked into range and just fired the Flare from afar.
+    // 超射程 — 走进射程。移动任务接收目标对象/地块，与普通 AttackTask
+    // 完全一致。此处传入 Target 对象曾破坏 MoveTask 寻路（MoveTask 直接读
+    // targetTile.rx/ry，Target 并不暴露），导致 Boris 从不走进射程、只在
+    // 远处扔信号弹。
     const moveTask = new MoveInWeaponRangeTask(this.game, targetObj || targetTile, false, this.weapon);
     moveTask.blocking = false;
     this._walkDone = true;

@@ -68,7 +68,7 @@ export class MoveToDockTask extends Task {
   }
 
   onEnd(object: any): void {
-    // twin: (status !== Docked && target.isSpawned && (undock, unreserve), status = Idle)
+    // 孪生：(status !== Docked && target.isSpawned && (undock, unreserve), status = Idle)
     if (this.dockingStatus !== DockingStatus.Docked && this.target.isSpawned) {
       this.target.dockTrait.undockUnit(object);
       this.target.dockTrait.unreserveDockForUnit(object);
@@ -87,7 +87,7 @@ export class MoveToDockTask extends Task {
         this.children.push(
           new MoveTask(this.game, queueTile, false, { closeEnoughTiles: 5 }),
           new CallbackTask(() => {
-            // twin: Fail ? cancel : CloseEnough && (occupied || status = WaitForTurn)
+            // 孪生：Fail ? cancel : CloseEnough && (occupied || status = WaitForTurn)
             if (object.moveTrait.lastMoveResult === MoveResult.Fail) {
               this.cancel();
             } else if (object.moveTrait.lastMoveResult === MoveResult.CloseEnough) {

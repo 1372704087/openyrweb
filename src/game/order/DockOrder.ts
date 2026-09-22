@@ -67,13 +67,13 @@ export class DockOrder extends OrderModule.Order {
       (!isPlainDock ||
         0 < (this.target.obj.dockTrait.getAvailableDockCount() ?? 0) ||
         this.target.obj.dockTrait.hasReservedDockForUnit(this.sourceObject) ||
-        // Tank Bunker: use TankBunkerTrait capacity check (DockTrait doesn't track bunkered state)
+        // 坦克碉堡：用 TankBunkerTrait 容量校验（DockTrait 不跟踪驻碉状态）
         !!(this.target.obj.tankBunkerTrait && this.target.obj.tankBunkerTrait.canVehicleEnter(this.sourceObject)))
     );
   }
 
   isAllowed(): boolean {
-    // Tank Bunker: check TankBunkerTrait capacity directly (DockTrait is bypassed)
+    // 坦克碉堡：直接检查 TankBunkerTrait 容量（绕过 DockTrait）
     if (this.target?.obj?.tankBunkerTrait) {
       return !this.target.obj.tankBunkerTrait.bunkeredVehicle;
     }

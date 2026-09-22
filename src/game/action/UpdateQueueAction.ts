@@ -145,10 +145,9 @@ export class UpdateQueueAction extends ActionModule.Action {
       );
       const toQueue = Math.min(this.quantity, capacity);
       if (toQueue <= 0) return;
-      // apply Industrial Plant (NAINDP) cost bonus to the per-item
-      // cost when queueing. getCostBonusMultiplier scans the player's buildings
-      // for UnitsCostBonus/InfantryCostBonus/etc. and returns the cheapest factor
-      // (1 = no discount). Rounded to an integer cost like the vanilla engine.
+      // 入队时对单项成本应用工业工厂（NAINDP）成本加成。
+      // getCostBonusMultiplier 扫描玩家建筑中的 UnitsCostBonus/InfantryCostBonus 等，
+      // 返回最便宜的折扣系数（1 = 无折扣）。与原版引擎一样四舍五入为整数成本。
       const creditsEach = Math.round(
         item.cost * player.production.getCostBonusMultiplier(item.type),
       );

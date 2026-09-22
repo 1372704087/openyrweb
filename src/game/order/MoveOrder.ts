@@ -54,7 +54,7 @@ export class MoveOrder extends Order {
   /** 光标：不可走/禁移动 → NoMove；可走 → Move（迷你版另取）。 */
   getPointerType(isMini: any): any {
     let allowed = this.isAllowed();
-    // bunkered vehicles show default arrow cursor instead of NoMove/NoAction
+    // 碉堡内载具显示默认箭头光标，而不是 NoMove/NoAction
     if (!allowed && this.sourceObject.bunkeredAt) {
       return PointerTypeModule.PointerType.Default;
     }
@@ -134,7 +134,7 @@ export class MoveOrder extends Order {
   /** 生成移动任务（见类注释分支）；建筑带集结点时返回 undefined（onAdd 改集结点）。 */
   process(): any {
     const src = this.sourceObject;
-    // deploy-fire units undeploy before moving
+    // 部署开火单位先解除部署再移动
     src.isUnit() && src.deployerTrait?.isDeployed() && src.deployerTrait.setDeployed(false);
     if (!src.isBuilding() || !src.rallyTrait?.getRallyPoint()) {
       const closeEnoughTiles = this.game.rules.general.closeEnough;

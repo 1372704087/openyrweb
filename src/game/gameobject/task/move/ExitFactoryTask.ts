@@ -88,13 +88,11 @@ export class ExitFactoryTask extends MoveTask {
    * 最后交父类驱动移动。
    */
   onTick(object: any): boolean {
-    // anti-stall. If a vehicle cannot clear the factory for a while (e.g.
-    // surrounding buildings permanently block the direct path to the rally point and
-    // forceWaitOnPathBlocked keeps it waiting inside forever), give up on the strict
-    // wait and let MoveTask repath. The factory-building blocker is still ignored
-    // (ignoredBlockers), so the unit can drive over the factory foundation to exit,
-    // then path normally to the rally point. Without this, a tightly-packed base leaves
-    // produced vehicles stuck inside the war factory indefinitely.
+    // 反卡死：若载具长时间无法驶出厂房（例如周围建筑永久堵住通往集结点的
+    // 直达路径，且 forceWaitOnPathBlocked 让它一直在厂内死等），放弃严格
+    // 等待，交给 MoveTask 重寻路。厂房建筑 blocker 仍被忽略
+    // （ignoredBlockers），单位可压过地基驶出，再正常寻路到集结点。
+    // 没有这段时，密集基地会让生产出的载具无限卡在战车工厂里。
     this.stallTicks = (this.stallTicks ?? 0) + 1;
     if (this.stallTicks > EXIT_FACTORY_STALL_TICKS && this.options?.forceWaitOnPathBlocked) {
       this.options.forceWaitOnPathBlocked = false;

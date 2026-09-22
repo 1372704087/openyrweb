@@ -47,14 +47,14 @@ export class CaptureBuildingTask extends EnterBuildingTask {
       this.target.buildStatus !== BuildStatus.BuildDown &&
       !this.target.secureProgressTrait?.isActiveFrom(object.owner) &&
       !this.game.areFriendly(object, this.target) &&
-      // cannot capture Force Shield invulnerable buildings.
+      // 力场无敌中的建筑不可占领。
       !this.target.invulnerableTrait?.isForceShieldActive()
     );
   }
 
   /** 进建筑：处理 multiEngineer 伤害/延迟油井/正式易主；返回 undefined → 父类结束任务。 */
   onEnter(object: any): void {
-    // abort capture if building is under Force Shield during approach.
+    // 接近过程中若建筑仍处于力场，中止占领。
     if (this.target.invulnerableTrait?.isForceShieldActive()) return;
     if ((this.game.unspawnObject(object), this.game.gameOpts.multiEngineer)) {
       const general = this.game.rules.general;

@@ -74,15 +74,15 @@ export class MorphIntoTask extends Task {
       const constructionWorker = this.game.getConstructionWorker(object.owner);
       if (!constructionWorker.canPlaceAt(this.morphInto.name, tile, { ignoreAdjacent: true, ignoreObjects: [object] }))
         return true;
-      // mark slave-miner morph so its SlaveMinerTrait.NotifyUnspawn silently
-      // recalls slaves instead of liberating them to the civilian player on a mere
-      // deploy/undeploy (the building is being re-spawned as another form, not sold).
-      // VEHICLE→BUILDING (deploy): the vehicle holds slaves inside (SlaveMinerVehicleTrait);
-      // set its _morphInFlight so it stashes the slave pool on game._pendingMinerSlaves
-      // for the new building's SlaveMinerTrait.NotifySpawn to re-enter onto the map.
+      // 标记矿场奴隶 morph，使 SlaveMinerTrait.NotifyUnspawn 在单纯
+      // deploy/undeploy 时静默召回奴隶，而不是把他们解放给平民玩家
+      // （建筑只是以另一形态重新生成，并非被卖出）。
+      // VEHICLE→BUILDING（deploy）：奴隶在载具内（SlaveMinerVehicleTrait）；
+      // 置 _morphInFlight，把奴隶池暂存到 game._pendingMinerSlaves，
+      // 供新建筑的 SlaveMinerTrait.NotifySpawn 重新入场。
       if (object.slaveMinerTrait) object.slaveMinerTrait._morphInFlight = true;
       if (object.slaveMinerVehicleTrait) object.slaveMinerVehicleTrait._stashSlavesForMorph(this.game);
-      // Dispatch deploy/undeploy sound BEFORE unspawn (vehicle still alive, can play sound).
+      // 在 unspawn 之前派发 deploy/undeploy 音效（载具尚存活，还能播音）。
       this.game.events.dispatch(new UnitDeployUndeployEventModule.UnitDeployUndeployEvent(object, "deploy"));
       this.game.unspawnObject(object);
       object.dispose();
@@ -91,7 +91,7 @@ export class MorphIntoTask extends Task {
     } else {
       const pendingMoveTasks = object.unitOrderTrait.getTasks().filter((task: any) => task instanceof MoveTask);
       if (object.slaveMinerTrait) object.slaveMinerTrait._morphInFlight = true;
-      // Dispatch deploy/undeploy sound BEFORE unspawn (unit still alive, can play sound).
+      // 在 unspawn 之前派发 deploy/undeploy 音效（单位尚存活，还能播音）。
       this.game.events.dispatch(new UnitDeployUndeployEventModule.UnitDeployUndeployEvent(object, "undeploy"));
       this.game.unspawnObject(object);
       object.dispose();

@@ -49,10 +49,9 @@ export class GuardAreaOrder extends OrderModule.Order {
 
   isValid(): boolean {
     const sourceObject = this.sourceObject;
-    // garrisoned buildings (bunkers/huts) can receive Guard too — they
-    // have no unit moveTrait, but a selected garrisoned building should be able to
-    // cancel its current attack and hold ground (vanilla YR behaviour). Plain
-    // buildings without a garrison still reject Guard.
+    // 驻军建筑（碉堡/民房）也可下达 Guard — 它们没有单位 moveTrait，
+    // 但选中的驻军建筑应能取消当前攻击并原地固守（原版 YR 行为）。
+    // 无驻军的普通建筑仍拒绝 Guard。
     return (
       (sourceObject.isUnit() || (sourceObject.isBuilding() && !!sourceObject.garrisonTrait)) &&
       (!!this.targetOptional || !sourceObject.moveTrait?.isDisabled()) &&
@@ -74,8 +73,7 @@ export class GuardAreaOrder extends OrderModule.Order {
     let guardTile = this.targeted ? this.target.tile : undefined;
     const sourceObject = this.sourceObject;
     let tasks: any[] = [];
-    // only units move to the guard-area tile — buildings (incl.
-    // garrisoned ones) cannot move, they just hold ground where they are.
+    // 只有单位会走向警戒格 — 建筑（含驻军建筑）不能移动，只能原地固守。
     guardTile &&
       sourceObject.isUnit() &&
       tasks.push(

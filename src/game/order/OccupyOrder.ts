@@ -59,31 +59,30 @@ export class OccupyOrder extends OrderModule.Order {
             ? this.game.areFriendly(this.sourceObject, this.target.obj) && this.sourceObject.isInfantry()
             : this.target.obj.garrisonTrait
               ? this.target.obj.garrisonTrait.canBeOccupied() &&
-                // InfantryAbsorb buildings (Bio Reactor) absorb ANY infantry
-                // (vanilla YR Absorb has no Occupier requirement) — only regular garrison
-                // buildings still require the Occupier=yes flag.
+                // InfantryAbsorb 建筑（生化反应堆）吸收任意步兵
+                // （原版 YR Absorb 无 Occupier 要求）— 仅普通驻军建筑
+                // 仍要求 Occupier=yes 标志。
                 (this.target.obj.rules.infantryAbsorb || this.sourceObject.rules.occupier) &&
-                // InfantryAbsorb buildings (Bio Reactor): the entering unit
-                // must be friendly to the building owner, and mind-controlled infantry
-                // ARE allowed (vanilla YR — absorbed, controller freed, reverted owners
-                // inside must not block further entries). Regular garrison buildings keep
-                // the same-owner-occupants rule and block mind-controlled units.
+                // InfantryAbsorb 建筑（生化反应堆）：进入单位须与建筑
+                // 所有者友好，且被心灵控制的步兵允许进入（原版 YR — 被吸收后
+                // 控制者获释，内部已易主者不得阻止后续进入）。普通驻军建筑
+                // 仍要求驻军同属，并阻止被心灵控制的单位。
                 (this.target.obj.rules.infantryAbsorb
                   ? this.game.areFriendly(this.sourceObject, this.target.obj)
                   : !(
                       this.target.obj.garrisonTrait.units.length &&
                       this.target.obj.garrisonTrait.units[0].owner !== this.sourceObject.owner
                     ) && !this.sourceObject.mindControllableTrait?.isActive()) &&
-                // military buildings (isBaseDefense=yes) owned by civilian cannot be garrisoned.
+                // 平民所有的军事建筑（isBaseDefense=yes）不可驻军。
                 (this.target.obj.rules.isBaseDefense && this.target.obj.owner === this.game.getCivilianPlayer()
                   ? false
                   : true) &&
-                // neutral InfantryAbsorb buildings (Bio Reactor) cannot be garrisoned;
-                // they must first be captured by an engineer.
+                // 中立的 InfantryAbsorb 建筑（生化反应堆）不可驻军；
+                // 须先由工程师占领。
                 (this.target.obj.rules.infantryAbsorb && this.target.obj.owner === this.game.getCivilianPlayer()
                   ? false
                   : true) &&
-                // empty player-owned garrison buildings cannot be entered by enemies.
+                // 空的、玩家所有的驻军建筑不可被敌人进入。
                 (!this.target.obj.garrisonTrait.units.length &&
                 !this.game.areFriendly(this.sourceObject, this.target.obj) &&
                 this.target.obj.owner !== this.game.getCivilianPlayer()
@@ -126,10 +125,9 @@ export class OccupyOrder extends OrderModule.Order {
       : target.hospitalTrait
         ? [new EnterHospitalTask(this.game, target)]
         : target.garrisonTrait
-          // bio-reactors (InfantryAbsorb=yes) reuse the Battle Fortress
-          // transport entry mechanism (EnterTransportTask: queueing tile → wait for
-          // turn → walk inside), so entry position/pathfinding match the transport
-          // system instead of bespoke rally-point code.
+          // 生化反应堆（InfantryAbsorb=yes）复用战斗要塞的
+          // 运输进入机制（EnterTransportTask：排队格 → 等转向 → 走进去），
+          // 使进入位置/寻路与运输系统一致，而非自定义集结点逻辑。
           ? target.rules.infantryAbsorb
             ? [new EnterTransportTask(this.game, target)]
             : [new GarrisonBuildingTask(this.game, target)]

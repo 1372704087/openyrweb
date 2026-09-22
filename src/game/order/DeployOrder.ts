@@ -52,7 +52,7 @@ export class DeployOrder extends OrderModule.Order {
       (unit.isVehicle() && unit.transportTrait) ||
       (unit.isBuilding() && unit.rules.factory && !unit.owner.production?.isPrimaryFactory(unit)) ||
       (unit.isBuilding() && unit.garrisonTrait?.units.length) ||
-      // bunkered vehicle can deploy to exit (select tank + press D).
+      // 碉堡内载具可部署驶出（选坦克后按 D）。
       (unit.isUnit() && unit.bunkeredAt?.tankBunkerTrait?.bunkeredVehicle === unit)
     );
   }
@@ -77,7 +77,7 @@ export class DeployOrder extends OrderModule.Order {
     }
     if (unit.isBuilding() && unit.rules.factory) return true;
     if (unit.isBuilding() && unit.garrisonTrait?.units.length) return true;
-    // bunkered vehicle can deploy to exit (select tank + press D).
+    // 碉堡内载具可部署驶出（选坦克后按 D）。
     if (unit.isUnit() && unit.bunkeredAt?.tankBunkerTrait?.bunkeredVehicle === unit) return true;
     throw new Error("Shouldn't reach this point. Missed a case.");
   }
@@ -111,20 +111,20 @@ export class DeployOrder extends OrderModule.Order {
               : unit.isUnit() && unit.bunkeredAt
                 ? [
                     new CallbackTask(() => {
-                      // Tank Bunker evacuation — eject the bunkered vehicle.
-                      // source can be the bunker building or the bunkered tank itself.
+                      // 坦克碉堡撤离 — 弹出碉堡内载具。
+                      // source 可以是碉堡建筑，也可以是被驻的坦克本身。
                       const bunker = unit.isBuilding() ? unit : unit.bunkeredAt;
                       const v = bunker?.tankBunkerTrait?.bunkeredVehicle;
                       if (v && bunker) {
                         v.bunkeredAt = void 0;
                         bunker.tankBunkerTrait.bunkeredVehicle = void 0;
                         if (v.moveTrait) v.moveTrait.setDisabled(false);
-                        // Cancel any active tasks (AttackTask, etc.) so exit MoveTasks run immediately
+                        // 取消全部活动任务（AttackTask 等），使驶出 MoveTask 立刻执行
                         if (v.unitOrderTrait) {
                           v.unitOrderTrait.clearOrders();
                           v.unitOrderTrait.cancelAllTasks();
                         }
-                        // Step 1: drive forward (South / +ry) out of the building
+                        // 第一步：向前驶出（南 / +ry）建筑
                         const s1Rx = bunker.tile.rx;
                         const s1Ry = bunker.tile.ry + (bunker.getFoundation() ? bunker.getFoundation().height : 1);
                         const s1Tile = this.game.map.tiles.getByMapCoords(s1Rx, s1Ry);
@@ -137,7 +137,7 @@ export class DeployOrder extends OrderModule.Order {
                             }),
                           );
                         }
-                        // Step 2: drive West (-rx, 180° - 90°) away from the bunker
+                        // 第二步：向西驶离碉堡（-rx，180° - 90°）
                         const s2Rx = s1Rx - 2;
                         const s2Tile = this.game.map.tiles.getByMapCoords(s2Rx, s1Ry);
                         if (s2Tile) {

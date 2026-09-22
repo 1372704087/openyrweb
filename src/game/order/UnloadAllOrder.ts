@@ -50,20 +50,18 @@ export class UnloadAllOrder extends OrderModule.Order {
     return this.isValid();
   }
 
-  // Hand off the LIFO drain to EvacuateTransportTask — the same task the Battle
-  // Fortress uses to unload passengers. It runs on the building's update loop
-  // (sourceObject = the building), spawning one infantry at a time on an exit tile
-  // outside the footprint. Soft mode: if the building is fully boxed in, units stay
-  // inside instead of being destroyed.
+  // 把 LIFO 排出交给 EvacuateTransportTask — 与战斗要塞卸乘客
+  // 使用同一任务。它在建筑更新循环上运行（sourceObject = 建筑），
+  // 一次在占地外的出口格刷出一个步兵。软模式：若建筑被完全围死，
+  // 单位留在建筑内而不是被摧毁。
   process(): any[] {
     return [new EvacuateTransportTask(this.game, true)];
   }
 
   onAdd(): boolean {
-    // Always allow re-triggering. If the building is empty, the task self-completes on
-    // onStart; if the user spam-clicks mid-drain, the existing task is cancelled and a
-    // new one starts with whatever is still in garrisonTrait.units — matches vanilla
-    // YR "restart the drain with whatever is still in".
+    // 恒允许重新触发。若建筑为空，任务在 onStart 自完成；若用户在排出
+    // 中途连点，现有任务被取消，并以 garrisonTrait.units 中仍存的单位
+    // 开新任务 — 对齐原版 YR「以仍存的单位重启排出」。
     return true;
   }
 }
