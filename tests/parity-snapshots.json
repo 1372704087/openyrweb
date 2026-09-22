@@ -7250,5 +7250,1932 @@
         "cooldownTicks"
       ]
     }
+  },
+  "data/map/tag/CellTag": {
+    "0": [],
+    "1": 0
+  },
+  "data/map/tag/CellTagsReader": {
+    "0": {
+      "c1": {
+        "x": 2,
+        "y": 1
+      },
+      "c2": {
+        "x": 234,
+        "y": 1
+      },
+      "list": [
+        {
+          "tagId": 7,
+          "coords": {
+            "x": 2,
+            "y": 0
+          }
+        },
+        {
+          "tagId": 9,
+          "coords": {
+            "x": 2,
+            "y": 1
+          }
+        }
+      ]
+    }
+  },
+  "data/map/tag/TagRepeatType": {
+    "0": {
+      "OnceAny": 0,
+      "OnceAll": 1,
+      "Repeat": 2,
+      "rev0": "OnceAny",
+      "rev1": "OnceAll",
+      "rev2": "Repeat",
+      "keys": [
+        "0",
+        "1",
+        "2",
+        "OnceAny",
+        "OnceAll",
+        "Repeat"
+      ]
+    }
+  },
+  "data/map/tag/TagsReader": {
+    "0": {
+      "out": [
+        {
+          "id": "A",
+          "repeatType": 0,
+          "name": "Alpha",
+          "triggerId": "10"
+        },
+        {
+          "id": "B",
+          "repeatType": 2,
+          "name": "Beta",
+          "triggerId": "20"
+        }
+      ],
+      "single": [
+        {
+          "id": "Z",
+          "repeatType": 1,
+          "name": "Zed",
+          "triggerId": "99"
+        }
+      ],
+      "empty": []
+    }
+  },
+  "data/map/trigger/Trigger": {
+    "0": [],
+    "1": 0
+  },
+  "data/map/trigger/TriggerAction": {
+    "0": [],
+    "1": 0
+  },
+  "data/map/trigger/TriggerActionType": {
+    "0": {
+      "NoAction": 0,
+      "Win": 1,
+      "CreateBuilding": 125,
+      "BlackoutRadar": 139,
+      "DisarmTrigger": 90,
+      "UnloadAll": 86,
+      "JumpCameraHome": 145,
+      "rev0": "NoAction",
+      "rev139": "BlackoutRadar",
+      "rev145": "JumpCameraHome",
+      "CreateTeam": 76,
+      "rev4": "CreateTeam",
+      "DestroyTeam": 77,
+      "PlayMovie": 82,
+      "rev10": "PlayMovie",
+      "EnableTrigger": 53,
+      "IronCurtainAt": 109,
+      "GeneticMutatorAt": 118,
+      "keys": 273
+    }
+  },
+  "data/map/trigger/TriggerEvent": {
+    "0": [],
+    "1": 0
+  },
+  "data/map/trigger/TriggerEventType": {
+    "0": {
+      "NoEvent": 0,
+      "EnteredBy": 1,
+      "AnyEvent": 8,
+      "AttackedByHouse": 44,
+      "BuildingNotExists": 57,
+      "rev0": "NoEvent",
+      "rev57": "BuildingNotExists",
+      "LocalIsSet": 36,
+      "QuarterHealthAny": 43,
+      "SpyEnteringAsInfantry": 54,
+      "keys": 116
+    }
+  },
+  "data/map/trigger/TriggerReader": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading '0')"
+    },
+    "1": {
+      "eventKeys": [
+        "E1"
+      ],
+      "actionKeys": [
+        "A1"
+      ]
+    }
+  },
+  "data/map/trigger/TriggerSupport": {
+    "0": {
+      "isSet": true,
+      "events": [
+        3,
+        4,
+        5,
+        18,
+        23,
+        33
+      ],
+      "has3": true,
+      "has33": true,
+      "actionsSize": 0,
+      "actionsIsSet": true,
+      "keys": [
+        "placeholderActionTypes",
+        "placeholderEventTypes"
+      ]
+    }
+  },
+  "game/trigger/TriggerCondition": {
+    "0": {
+      "eventSame": true,
+      "triggerSame": true,
+      "blocking": false,
+      "targets": [
+        1,
+        2
+      ],
+      "debug": "3[1] (T).",
+      "resetSameTargets": true,
+      "playerMatched": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "player",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/TriggerConditionFactory": {
+    "0": {
+      "anyOk": true,
+      "thr": 500,
+      "localMeta": {
+        "blocking": true,
+        "idx": 4,
+        "value": true
+      },
+      "localClearedValue": false,
+      "healthThr": 25,
+      "buildMeta": {
+        "objectIndex": 12,
+        "hasObjectType": true
+      },
+      "houseIdAttacked": 7,
+      "globalMeta": {
+        "blocking": true,
+        "value": true,
+        "idx": 9
+      },
+      "noEvDebug": "1[0] (F).",
+      "noEvCheck": false,
+      "threw": "Unhandled trigger event type \"undefined\"",
+      "namesLen": 8,
+      "anyDebug": "1[0] (F)."
+    }
+  },
+  "game/trigger/TriggerExecutor": {
+    "0": {
+      "actionSame": true,
+      "triggerSame": true,
+      "debug": "3[7] (Alpha).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/TriggerExecutorFactory": {
+    "0": {
+      "noName": "r",
+      "winName": "r",
+      "winFlag": true,
+      "gsName": "r",
+      "gsValue": true,
+      "gsIdx": 5,
+      "adName": "r",
+      "adDamage": 100,
+      "meteorName": "r",
+      "meteorMode": "meteor",
+      "uiName": "r",
+      "uiLock": true,
+      "teName": "r",
+      "feName": "r",
+      "noDebug": "1[0] (T).",
+      "threw": "Unhandled action type \"undefined\"",
+      "ownKeys": []
+    }
+  },
+  "game/trigger/TriggerInstance": {
+    "0": [],
+    "1": 0
+  },
+  "game/trigger/TriggerManager": {
+    "0": {
+      "empty": {
+        "instances": 0,
+        "tags": 0,
+        "pending": 0,
+        "globals": 0,
+        "locals": 0
+      },
+      "hasDisposables": true,
+      "hasCondFactory": true,
+      "hasExecFactory": true,
+      "gOn": true,
+      "gOff": false,
+      "lOn": true,
+      "localVarValue": true,
+      "attached": true,
+      "detached": true,
+      "hasNoTrigger": true,
+      "ownKeys": [
+        "conditionFactory",
+        "disposables",
+        "executorFactory",
+        "globalVariables",
+        "localVariables",
+        "pendingGameEvents",
+        "targetsByTag",
+        "triggerInstances"
+      ]
+    }
+  },
+  "game/trigger/TriggerTarget": {
+    "0": [],
+    "1": 0
+  },
+  "game/trigger/condition/AmbientLightCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "threshold",
+        "trigger",
+        "type"
+      ]
+    }
+  },
+  "game/trigger/condition/AnyEventCondition": {
+    "0": {
+      "check": true,
+      "blocking": false,
+      "debug": "1[0] (A).",
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/AttackedByAnyCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/AttackedByHouseCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/BuildObjectTypeCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "objectType": 1,
+      "objectIndex": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "objectIndex",
+        "objectType",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/BuildingExistsCondition": {
+    "0": {
+      "negate": false,
+      "objectIndex": 42,
+      "noPlayer": false,
+      "negate2": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "negate",
+        "objectIndex",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/ComesNearWaypointCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/CreditsBelowCondition": {
+    "0": {
+      "thr": 100,
+      "noPlayer": false,
+      "low": true,
+      "high": false,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "player",
+        "targets",
+        "threshold",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/CreditsExceedCondition": {
+    "0": {
+      "thr": 100,
+      "noPlayer": false,
+      "low": false,
+      "high": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "player",
+        "targets",
+        "threshold",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/CrossHorizLineCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/CrossVertLineCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedAllBuildingsCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "allDestroyed": false,
+      "hasCheck": true,
+      "ownKeys": [
+        "allDestroyed",
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedAllCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "allDestroyed": false,
+      "hasCheck": true,
+      "ownKeys": [
+        "allDestroyed",
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedAllUnitsCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "allDestroyed": false,
+      "hasCheck": true,
+      "ownKeys": [
+        "allDestroyed",
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedAllUnitsLandCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "allDestroyed": false,
+      "hasCheck": true,
+      "ownKeys": [
+        "allDestroyed",
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedAllUnitsNavalCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "allDestroyed": false,
+      "hasCheck": true,
+      "ownKeys": [
+        "allDestroyed",
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedBridgeCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedBuildingsCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "threshold": 3,
+      "count": 0,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "count",
+        "event",
+        "targets",
+        "threshold",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedByAnyCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedOrCapturedCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "eventsFilter",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/DestroyedUnitsCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "threshold": 3,
+      "count": 0,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "count",
+        "event",
+        "targets",
+        "threshold",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/ElapsedScenarioTimeCondition": {
+    "0": {
+      "__error__": "TypeError: Cannot read properties of undefined (reading 'currentTick')"
+    }
+  },
+  "game/trigger/condition/ElapsedTimeCondition": {
+    "0": {
+      "timerTicks": 30,
+      "expected": 30,
+      "t0": false,
+      "e0": 1,
+      "tLate": true,
+      "afterReset": 0,
+      "ownKeys": [
+        "blocking",
+        "elapsedTicks",
+        "event",
+        "targets",
+        "timerTicks",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/EnemyInZoneCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "zoneIndex": 3,
+      "houseId": 0,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger",
+        "zoneIndex"
+      ]
+    }
+  },
+  "game/trigger/condition/EnteredByCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/GlobalVariableCondition": {
+    "0": {
+      "value": true,
+      "blocking": true,
+      "variableIdx": 4,
+      "hit": true,
+      "miss": false,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger",
+        "value",
+        "variableIdx"
+      ]
+    }
+  },
+  "game/trigger/condition/HealthBelowAnyCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "threshold": 25,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "threshold",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/HealthBelowCombatCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "threshold": 50,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "threshold",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/LocalVariableCondition": {
+    "0": {
+      "blocking": true,
+      "idx": 7,
+      "value": false,
+      "hit": true,
+      "miss": false,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger",
+        "value",
+        "variableIdx"
+      ]
+    }
+  },
+  "game/trigger/condition/LowPowerCondition": {
+    "0": {
+      "houseId": 3,
+      "low": true,
+      "hasPlayer": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "player",
+        "targetPlayer",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/NoEventCondition": {
+    "0": {
+      "check": false,
+      "blocking": false,
+      "debug": "0[0] (t).",
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/NoFactoriesLeftCondition": {
+    "0": {
+      "noPlayer": false,
+      "empty": true,
+      "hasFactory": false,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "player",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/PickupCrateAnyCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/PickupCrateCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/RandomDelayCondition": {
+    "0": {
+      "e0": 0,
+      "r1": "boolean",
+      "afterReset": 0,
+      "ownKeys": [
+        "blocking",
+        "elapsedTicks",
+        "event",
+        "targets",
+        "timerTicks",
+        "trigger"
+      ],
+      "debug": "1[0] (rd)."
+    }
+  },
+  "game/trigger/condition/SpiedByCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/SpyEnteringAsHouseCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/SpyEnteringAsInfantryCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "infantryIdx": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "infantryIdx",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/TechBuildingCapturedCondition": {
+    "0": {
+      "eventOk": true,
+      "triggerOk": true,
+      "blocking": false,
+      "targetsIsArr": true,
+      "debug": "1[0] (T).",
+      "houseId": 3,
+      "hasCheck": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "houseId",
+        "targets",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/condition/TimerExpiredCondition": {
+    "0": {
+      "before": false,
+      "after": true,
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "trigger"
+      ],
+      "debug": "1[0] (te)."
+    }
+  },
+  "game/trigger/executor/AddSuperWeaponExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "oneTimeOnly": true,
+      "superWeaponIdx": 5,
+      "ownKeys": [
+        "action",
+        "oneTimeOnly",
+        "superWeaponIdx",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/AllToHuntExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/AllianceExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "houseId": 5,
+      "ownKeys": [
+        "action",
+        "houseId",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ApplyDamageExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "damage": 100,
+      "ownKeys": [
+        "action",
+        "damage",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/BlackoutRadarExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ChangeAllianceExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ChangeHouseAllExecutor": {
+    "0": {
+      "staticBegin": 4475,
+      "ownKeys": [
+        "action",
+        "trigger"
+      ],
+      "debug": "1[0] (T).",
+      "actionParams": [
+        0,
+        4475
+      ]
+    }
+  },
+  "game/trigger/executor/ChangeHouseExecutor": {
+    "0": {
+      "houseId": 4475,
+      "staticBegin": 4475,
+      "ownKeys": [
+        "action",
+        "houseId",
+        "trigger"
+      ],
+      "debug": "1[0] (T)."
+    }
+  },
+  "game/trigger/executor/ChangeLightingExecutor": {
+    "0": {
+      "intensity": 1,
+      "ownKeys": [
+        "action",
+        "trigger"
+      ],
+      "debug": "1[0] (T)."
+    }
+  },
+  "game/trigger/executor/CheerExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "houseId": 5,
+      "ownKeys": [
+        "action",
+        "houseId",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/CreateBuildingExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/CreateCrateExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/CreateRadarEventExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/CreateReinforcementExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/CreateTeamExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DestroyAllExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "scope": "all",
+      "ownKeys": [
+        "action",
+        "scope",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DestroyObjectExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DestroyTagExecutor": {
+    "0": {
+      "id": "TAG1",
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DestroyTeamExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DestroyTriggerExecutor": {
+    "0": {
+      "destroyed": [
+        "trg9"
+      ],
+      "debug": "0[1] (dt).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DetonateWarheadExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DisarmTriggerExecutor": {
+    "0": {
+      "pair": [
+        "42",
+        false
+      ],
+      "ownKeys": [
+        "action",
+        "trigger"
+      ],
+      "debug": "1[0] (T)."
+    }
+  },
+  "game/trigger/executor/DoShroudExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/DoUnshroudExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/EnemyExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "houseId": 5,
+      "ownKeys": [
+        "action",
+        "houseId",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/EvictOccupiersExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/FireSaleExecutor": {
+    "0": {
+      "houseId": 3,
+      "sold": [
+        "b1",
+        "b2"
+      ],
+      "ownKeys": [
+        "action",
+        "houseId",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/FlashBuildingsOfTypeExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/FlashUnitExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ForceEndExecutor": {
+    "0": {
+      "ended": 1,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ForceShieldAtExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ForceTriggerExecutor": {
+    "0": {
+      "ft": 12,
+      "wRef": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/GenericFacingExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/GlobalVariableExecutor": {
+    "0": {
+      "value": true,
+      "variableIdx": 6,
+      "calls": [
+        [
+          6,
+          true
+        ]
+      ],
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger",
+        "value",
+        "variableIdx"
+      ]
+    }
+  },
+  "game/trigger/executor/IronCurtainExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/LightningStrikeExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/LocalVariableExecutor": {
+    "0": {
+      "value": true,
+      "variableIdx": 6,
+      "calls": [
+        [
+          6,
+          true
+        ]
+      ],
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger",
+        "value",
+        "variableIdx"
+      ]
+    }
+  },
+  "game/trigger/executor/MiscActionExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "label": "Label",
+      "ownKeys": [
+        "action",
+        "label",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/MoveCameraExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/NoActionExecutor": {
+    "0": {
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ],
+      "actionType": 0
+    }
+  },
+  "game/trigger/executor/NukeStrikeExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/PlayAnimAtExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/PlaySoundEffectExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/PlaySoundFxAtExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/PlaySoundFxExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/PlaySoundFxRandomExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/PlaySpeechExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ReshroudMapExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ResizePlayerViewExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/RevealAroundWaypointExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/RevealMapExecutor": {
+    "0": {
+      "revealed": [
+        "A",
+        "B"
+      ],
+      "debug": "1[0] (rv).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/SabotageUnitExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/SellBuildingExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/SetAmbientLightExecutor": {
+    "0": {
+      "lights": [
+        0.75
+      ],
+      "debug": "1[0] (sal).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/SetAmbientRateExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/SetAmbientStepExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ShroudFxExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "mode": "meteor",
+      "ownKeys": [
+        "action",
+        "mode",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/StopSoundFxAtExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/SuperWeaponFxExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "mode": "meteor",
+      "ownKeys": [
+        "action",
+        "mode",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TeleportAllExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TextNotificationExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TextTriggerExecutor": {
+    "0": {
+      "keys": [
+        "label",
+        "type"
+      ],
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerExtendExecutor": {
+    "0": {
+      "log": {
+        "secs": 30,
+        "started": 0,
+        "stopped": 0,
+        "set": null,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerPauseExecutor": {
+    "0": {
+      "log": {
+        "secs": null,
+        "started": 0,
+        "stopped": 1,
+        "set": null,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerResumeExecutor": {
+    "0": {
+      "log": {
+        "secs": null,
+        "started": 1,
+        "stopped": 0,
+        "set": null,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerSetExecutor": {
+    "0": {
+      "log": {
+        "secs": null,
+        "started": 0,
+        "stopped": 0,
+        "set": 30,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerShortenExecutor": {
+    "0": {
+      "log": {
+        "secs": -30,
+        "started": 0,
+        "stopped": 0,
+        "set": null,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerStartExecutor": {
+    "0": {
+      "log": {
+        "secs": null,
+        "started": 1,
+        "stopped": 0,
+        "set": null,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerStopExecutor": {
+    "0": {
+      "log": {
+        "secs": null,
+        "started": 0,
+        "stopped": 1,
+        "set": null,
+        "text": null
+      },
+      "textAfter": null,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/TimerTextExecutor": {
+    "0": {
+      "log": {
+        "secs": null,
+        "started": 0,
+        "stopped": 0,
+        "set": null,
+        "text": null
+      },
+      "textAfter": 30,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/ToggleTriggerExecutor": {
+    "0": {
+      "te": [
+        9,
+        false
+      ],
+      "triggerEnable": false,
+      "ownKeys": [
+        "action",
+        "trigger",
+        "triggerEnable"
+      ],
+      "debug": "1[0] (T)."
+    }
+  },
+  "game/trigger/executor/TurnOnOffBuildingExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "turnOn": true,
+      "ownKeys": [
+        "action",
+        "trigger",
+        "turnOn"
+      ]
+    }
+  },
+  "game/trigger/executor/UnloadAllExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/UnrevealAroundWaypointExecutor": {
+    "0": {
+      "actionOk": true,
+      "triggerOk": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "action",
+        "trigger"
+      ]
+    }
+  },
+  "game/trigger/executor/UserInputExecutor": {
+    "0": {
+      "lock": true,
+      "inputLocked": true,
+      "ownKeys": [
+        "action",
+        "lock",
+        "trigger"
+      ],
+      "debug": "1[0] (T)."
+    }
+  },
+  "game/trigger/executor/WinLoseExecutor": {
+    "0": {
+      "win": true,
+      "ended": 1,
+      "defeated": [
+        false,
+        true,
+        false
+      ],
+      "ownKeys": [
+        "action",
+        "trigger",
+        "win"
+      ]
+    }
+  },
+  "data/map/tag/Tag": {
+    "0": {
+      "keys": [],
+      "isFn": true,
+      "empty": true
+    }
   }
 }

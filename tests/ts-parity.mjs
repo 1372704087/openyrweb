@@ -15400,7 +15400,2364 @@ const CONVERTED = [
       },
     ],
   },
-
+  {
+    name: "data/map/tag/CellTag",
+    tsjs: "src/data/map/tag/CellTag.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "data/map/tag/CellTagsReader",
+    tsjs: "src/data/map/tag/CellTagsReader.ts.js",
+    probes: [
+      (ns) => {
+        const r = new ns.CellTagsReader();
+        const c1 = r.readCoords(130, 1);
+        const c2 = r.readCoords(1234, 4);
+        const list = r.read({ entries: [["2", 7], ["130", 9]] }, 1);
+        return { c1, c2, list };
+      },
+    ],
+  },
+  {
+    name: "data/map/tag/Tag",
+    tsjs: "src/data/map/tag/Tag.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.Tag();
+        return { keys: Object.keys(t), isFn: typeof ns.Tag === "function", empty: Object.keys(t).length === 0 };
+      },
+    ],
+  },
+  {
+    name: "data/map/tag/TagRepeatType",
+    tsjs: "src/data/map/tag/TagRepeatType.ts.js",
+    probes: [
+      (ns) => ({
+        OnceAny: ns.TagRepeatType.OnceAny,
+        OnceAll: ns.TagRepeatType.OnceAll,
+        Repeat: ns.TagRepeatType.Repeat,
+        rev0: ns.TagRepeatType[0],
+        rev1: ns.TagRepeatType[1],
+        rev2: ns.TagRepeatType[2],
+        keys: Object.keys(ns.TagRepeatType),
+      }),
+    ],
+  },
+  {
+    name: "data/map/tag/TagsReader",
+    tsjs: "src/data/map/tag/TagsReader.ts.js",
+    probes: [
+      (ns) => {
+        const r = new ns.TagsReader();
+        const out = r.read({
+          entries: [
+            ["A", "0,Alpha,10"],
+            ["B", "2,Beta,20"],
+            ["C", "bad"],
+            ["D", "9,Gamma,30"],
+          ],
+        });
+        const single = r.read({ entries: [["Z", "1,Zed,99"]] });
+        const empty = r.read({ entries: [] });
+        return { out, single, empty };
+      },
+    ],
+  },
+  {
+    name: "data/map/trigger/Trigger",
+    tsjs: "src/data/map/trigger/Trigger.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "data/map/trigger/TriggerAction",
+    tsjs: "src/data/map/trigger/TriggerAction.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "data/map/trigger/TriggerActionType",
+    tsjs: "src/data/map/trigger/TriggerActionType.ts.js",
+    probes: [
+      (ns) => {
+        const E = ns.TriggerActionType;
+        return {
+          NoAction: E.NoAction,
+          Win: E.Win,
+          CreateBuilding: E.CreateBuilding,
+          BlackoutRadar: E.BlackoutRadar,
+          DisarmTrigger: E.DisarmTrigger,
+          UnloadAll: E.UnloadAll,
+          JumpCameraHome: E.JumpCameraHome,
+          rev0: E[0],
+          rev139: E[139],
+          rev145: E[145],
+          CreateTeam: E.CreateTeam,
+          rev4: E[4],
+          DestroyTeam: E.DestroyTeam,
+          PlayMovie: E.PlayMovie,
+          rev10: E[10],
+          EnableTrigger: E.EnableTrigger,
+          IronCurtainAt: E.IronCurtainAt,
+          GeneticMutatorAt: E.GeneticMutatorAt,
+          keys: Object.keys(E).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "data/map/trigger/TriggerEvent",
+    tsjs: "src/data/map/trigger/TriggerEvent.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "data/map/trigger/TriggerEventType",
+    tsjs: "src/data/map/trigger/TriggerEventType.ts.js",
+    probes: [
+      (ns) => {
+        const E = ns.TriggerEventType;
+        return {
+          NoEvent: E.NoEvent,
+          EnteredBy: E.EnteredBy,
+          AnyEvent: E.AnyEvent,
+          AttackedByHouse: E.AttackedByHouse,
+          BuildingNotExists: E.BuildingNotExists,
+          rev0: E[0],
+          rev57: E[57],
+          LocalIsSet: E.LocalIsSet,
+          QuarterHealthAny: E.QuarterHealthAny,
+          SpyEnteringAsInfantry: E.SpyEnteringAsInfantry,
+          keys: Object.keys(E).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "data/map/trigger/TriggerReader",
+    tsjs: "src/data/map/trigger/TriggerReader.ts.js",
+    probes: [
+      (ns) => {
+        const r = new ns.TriggerReader();
+        const azC = r.readAZActionParam ? r.readAZActionParam("C") : undefined;
+        const azBA = r.readAZActionParam ? r.readAZActionParam("BA") : undefined;
+        const { triggers } = r.readTriggers({
+          entries: [["trg1", "Americans,<none>,Intro,0,1,1,0,x"]],
+        });
+        const t = triggers[0];
+        return {
+          azC,
+          azBA,
+          count: triggers.length,
+          id: t && t.id,
+          disabled: t && t.disabled,
+          easy: t && t.difficulties && t.difficulties.easy,
+          hard: t && t.difficulties && t.difficulties.hard,
+          eventsLen: t && t.events.length,
+          actionsLen: t && t.actions.length,
+          attached: t && t.attachedTriggerId,
+          ownKeys: t ? Object.keys(t).sort() : null,
+        };
+      },
+      (ns) => {
+        const r = new ns.TriggerReader();
+        const events = r.readEvents({
+          entries: [["E1", "0,1,1,8,0"]],
+        });
+        const actions = r.readActions({
+          entries: [["A1", "0,1,1,0,0,0,0,0,0,0,0"]],
+        });
+        return {
+          eventKeys: events && events.events ? [...events.events.keys()] : events && Object.keys(events),
+          actionKeys: actions && actions.actions ? [...actions.actions.keys()] : actions && Object.keys(actions),
+        };
+      },
+    ],
+  },
+  {
+    name: "data/map/trigger/TriggerSupport",
+    tsjs: "src/data/map/trigger/TriggerSupport.ts.js",
+    probes: [
+      (ns) => {
+        const S = ns.TriggerSupport;
+        return {
+          isSet: S.placeholderEventTypes instanceof Set,
+          events: [...S.placeholderEventTypes].sort((a, b) => a - b),
+          has3: S.placeholderEventTypes.has(3),
+          has33: S.placeholderEventTypes.has(33),
+          actionsSize: S.placeholderActionTypes.size,
+          actionsIsSet: S.placeholderActionTypes instanceof Set,
+          keys: Object.keys(S).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/TriggerCondition",
+    tsjs: "src/game/trigger/TriggerCondition.ts.js",
+    probes: [
+      (ns) => {
+        const ev = { triggerId: 3, eventIndex: 1, type: 0, params: ["1", "0"] };
+        const trg = { name: "T", houseName: "Alpha" };
+        const c = new ns.TriggerCondition(ev, trg);
+        const before = c.targets;
+        c.init({ getAllPlayers: () => [{ country: { name: "Alpha" } }, { country: { name: "Beta" } }] });
+        c.setTargets([1, 2]);
+        c.reset();
+        const c2 = new ns.TriggerCondition({ triggerId: 0, eventIndex: 0 }, { name: "X", houseName: "Alpha" });
+        c2.init({ getAllPlayers: () => [{ country: { name: "Alpha" } }] });
+        return {
+          eventSame: c.event === ev,
+          triggerSame: c.trigger === trg,
+          blocking: c.blocking,
+          targets: c.targets,
+          debug: c.getDebugName(),
+          resetSameTargets: c.targets === before || c.targets.length === 2,
+          playerMatched: c2.player != null,
+          ownKeys: Object.keys(c).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/TriggerConditionFactory",
+    tsjs: "src/game/trigger/TriggerConditionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const TriggerEventType = mod("data/map/trigger/TriggerEventType").TriggerEventType;
+        const f = new ns.TriggerConditionFactory();
+        const ev = (type, params = []) => ({ type, params, triggerId: 1, eventIndex: 0 });
+        const trig = { name: "F", houseName: "Alpha" };
+        const any = f.create(ev(TriggerEventType.AnyEvent), trig);
+        const anyOk = any.check() === true;
+        const credit = f.create(ev(TriggerEventType.CreditsBelow, ["0", "500"]), trig);
+        const local = f.create(ev(TriggerEventType.LocalIsSet, ["0", "4"]), trig);
+        const localCleared = f.create(ev(TriggerEventType.LocalIsCleared, ["0", "4"]), trig);
+        const health = f.create(ev(TriggerEventType.QuarterHealthAny, []), trig);
+        const build = f.create(ev(TriggerEventType.BuildBuilding, ["0", "12"]), trig);
+        const attacked = f.create(ev(TriggerEventType.AttackedByHouse, ["0", "7"]), trig);
+        const globalSet = f.create(ev(TriggerEventType.GlobalIsSet, ["0", "9"]), trig);
+        const noEv = f.create(ev(TriggerEventType.NoEvent), trig);
+        let threw = null;
+        try {
+          f.create(ev(9999), trig);
+        } catch (e) {
+          threw = String(e && e.message);
+        }
+        const names = [any, credit, local, health, build, attacked, globalSet, noEv].map((x) => x.getDebugName());
+        return {
+          anyOk,
+          thr: credit.threshold,
+          localMeta: { blocking: local.blocking, idx: local.variableIdx, value: local.value },
+          localClearedValue: localCleared.value,
+          healthThr: health.threshold,
+          buildMeta: { objectIndex: build.objectIndex, hasObjectType: build.objectType !== undefined },
+          houseIdAttacked: attacked.houseId !== undefined ? attacked.houseId : Object.keys(attacked).sort(),
+          globalMeta: { blocking: globalSet.blocking, value: globalSet.value, idx: globalSet.variableIdx },
+          noEvDebug: noEv.getDebugName(),
+          noEvCheck: noEv.check(),
+          threw,
+          namesLen: names.length,
+          anyDebug: any.getDebugName(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/TriggerExecutor",
+    tsjs: "src/game/trigger/TriggerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const action = { triggerId: 3, index: 7, params: [], type: 0 };
+        const trigger = { name: "Alpha", houseName: "Americans" };
+        const ex = new ns.TriggerExecutor(action, trigger);
+        return {
+          actionSame: ex.action === action,
+          triggerSame: ex.trigger === trigger,
+          debug: ex.getDebugName(),
+          ownKeys: Object.keys(ex).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/TriggerExecutorFactory",
+    tsjs: "src/game/trigger/TriggerExecutorFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const TA = mod("data/map/trigger/TriggerActionType").TriggerActionType;
+        const f = new ns.TriggerExecutorFactory();
+        const trig = { name: "T", houseName: "Americans" };
+        const mk = (type, params = [0, 0, 0, 0, 0, 0, 0]) => ({ type, params, triggerId: 1, index: 0 });
+        const no = f.create(mk(TA.NoAction), trig);
+        const win = f.create(mk(TA.Win, [0]), trig);
+        const gs = f.create(mk(TA.GlobalSet, [0, 5]), trig);
+        const ad = f.create(mk(TA.ApplyOneHundredDamage), trig);
+        const meteor = f.create(mk(TA.MeteorStrike), trig);
+        const ui = f.create(mk(TA.DisableUserInput), trig);
+        const te = f.create(mk(TA.TimerExtend, [0, 30]), trig);
+        const fe = f.create(mk(TA.ForceEnd), trig);
+        let threw = null;
+        try {
+          f.create(mk(99999), trig);
+        } catch (e) {
+          threw = String(e && e.message);
+        }
+        return {
+          noName: no.constructor.name,
+          winName: win.constructor.name,
+          winFlag: win.win,
+          gsName: gs.constructor.name,
+          gsValue: gs.value,
+          gsIdx: gs.variableIdx,
+          adName: ad.constructor.name,
+          adDamage: ad.damage,
+          meteorName: meteor.constructor.name,
+          meteorMode: meteor.mode,
+          uiName: ui.constructor.name,
+          uiLock: ui.lock,
+          teName: te.constructor.name,
+          feName: fe.constructor.name,
+          noDebug: no.getDebugName(),
+          threw,
+          ownKeys: Object.keys(f),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/TriggerInstance",
+    tsjs: "src/game/trigger/TriggerInstance.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "game/trigger/TriggerManager",
+    tsjs: "src/game/trigger/TriggerManager.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const m = new ns.TriggerManager();
+        const empty = {
+          instances: m.triggerInstances.size,
+          tags: m.targetsByTag.size,
+          pending: m.pendingGameEvents.length,
+          globals: m.globalVariables.size,
+          locals: m.localVariables.size,
+        };
+        m.toggleGlobalVariable(7, true);
+        const gOn = m.getGlobalVariable(7);
+        m.toggleGlobalVariable(7, false);
+        const gOff = m.getGlobalVariable(7);
+        m.toggleLocalVariable(1, true);
+        const lOn = m.getLocalVariable(1);
+        const obj = { id: "u1" };
+        m.attachTargetToTag("tagA", obj);
+        const attached = m.targetsByTag.get("tagA").includes(obj);
+        m.detachTargetFromTag("tagA", obj);
+        const detached = !m.targetsByTag.get("tagA").includes(obj);
+        m.destroyTrigger("nope");
+        return {
+          empty,
+          hasDisposables: m.disposables != null,
+          hasCondFactory: m.conditionFactory != null,
+          hasExecFactory: m.executorFactory != null,
+          gOn,
+          gOff,
+          lOn,
+          localVarValue: m.localVariables.get(1) && m.localVariables.get(1).value,
+          attached,
+          detached,
+          hasNoTrigger: !m.triggerInstances.has("nope"),
+          ownKeys: Object.keys(m).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/TriggerTarget",
+    tsjs: "src/game/trigger/TriggerTarget.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "game/trigger/condition/AmbientLightCondition",
+    tsjs: "src/game/trigger/condition/AmbientLightCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.AmbientLightCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" }, "above");
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/AnyEventCondition",
+    tsjs: "src/game/trigger/condition/AnyEventCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.AnyEventCondition({ type: 8, params: [], triggerId: 1, eventIndex: 0 }, { name: "A" });
+        return { check: c.check(null, []), blocking: c.blocking, debug: c.getDebugName(), ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/AttackedByAnyCondition",
+    tsjs: "src/game/trigger/condition/AttackedByAnyCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.AttackedByAnyCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/AttackedByHouseCondition",
+    tsjs: "src/game/trigger/condition/AttackedByHouseCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.AttackedByHouseCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/BuildObjectTypeCondition",
+    tsjs: "src/game/trigger/condition/BuildObjectTypeCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.BuildObjectTypeCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" }, 1);
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          objectType: c.objectType,
+          objectIndex: c.objectIndex,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/BuildingExistsCondition",
+    tsjs: "src/game/trigger/condition/BuildingExistsCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.BuildingExistsCondition({ params: ["1", "42"], triggerId: 0, eventIndex: 0 }, { name: "be" });
+        const noPlayer = c.check();
+        const c2 = new ns.BuildingExistsCondition({ params: ["1", "42"], triggerId: 0, eventIndex: 0 }, { name: "be" }, true);
+        return { negate: c.negate, objectIndex: c.objectIndex, noPlayer, negate2: c2.negate, ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/ComesNearWaypointCondition",
+    tsjs: "src/game/trigger/condition/ComesNearWaypointCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.ComesNearWaypointCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/CreditsBelowCondition",
+    tsjs: "src/game/trigger/condition/CreditsBelowCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.CreditsBelowCondition({ type: 0, params: ["0", "100"], triggerId: 1, eventIndex: 0 }, { name: "C" });
+        const noPlayer = c.check();
+        c.player = { credits: 50 };
+        const low = c.check();
+        c.player = { credits: 150 };
+        const high = c.check();
+        return { thr: c.threshold, noPlayer, low, high, ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/CreditsExceedCondition",
+    tsjs: "src/game/trigger/condition/CreditsExceedCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.CreditsExceedCondition({ type: 0, params: ["0", "100"], triggerId: 1, eventIndex: 0 }, { name: "C" });
+        const noPlayer = c.check();
+        c.player = { credits: 50 };
+        const low = c.check();
+        c.player = { credits: 150 };
+        const high = c.check();
+        return { thr: c.threshold, noPlayer, low, high, ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/CrossHorizLineCondition",
+    tsjs: "src/game/trigger/condition/CrossHorizLineCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.CrossHorizLineCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/CrossVertLineCondition",
+    tsjs: "src/game/trigger/condition/CrossVertLineCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.CrossVertLineCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedAllBuildingsCondition",
+    tsjs: "src/game/trigger/condition/DestroyedAllBuildingsCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedAllBuildingsCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          allDestroyed: c.allDestroyed,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedAllCondition",
+    tsjs: "src/game/trigger/condition/DestroyedAllCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedAllCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          allDestroyed: c.allDestroyed,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedAllUnitsCondition",
+    tsjs: "src/game/trigger/condition/DestroyedAllUnitsCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedAllUnitsCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          allDestroyed: c.allDestroyed,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedAllUnitsLandCondition",
+    tsjs: "src/game/trigger/condition/DestroyedAllUnitsLandCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedAllUnitsLandCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          allDestroyed: c.allDestroyed,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedAllUnitsNavalCondition",
+    tsjs: "src/game/trigger/condition/DestroyedAllUnitsNavalCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedAllUnitsNavalCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          allDestroyed: c.allDestroyed,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedBridgeCondition",
+    tsjs: "src/game/trigger/condition/DestroyedBridgeCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedBridgeCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedBuildingsCondition",
+    tsjs: "src/game/trigger/condition/DestroyedBuildingsCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedBuildingsCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          threshold: c.threshold,
+          count: c.count,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedByAnyCondition",
+    tsjs: "src/game/trigger/condition/DestroyedByAnyCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedByAnyCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedOrCapturedCondition",
+    tsjs: "src/game/trigger/condition/DestroyedOrCapturedCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedOrCapturedCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition",
+    tsjs: "src/game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedOrCapturedOrInfiltratedCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/DestroyedUnitsCondition",
+    tsjs: "src/game/trigger/condition/DestroyedUnitsCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.DestroyedUnitsCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          threshold: c.threshold,
+          count: c.count,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/ElapsedScenarioTimeCondition",
+    tsjs: "src/game/trigger/condition/ElapsedScenarioTimeCondition.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const GameSpeed = mod("game/GameSpeed").GameSpeed;
+        const c = new ns.ElapsedScenarioTimeCondition({ params: [0, 2], triggerId: 1, eventIndex: 0 }, { name: "T" });
+        const expected = 2 * GameSpeed.BASE_TICKS_PER_SECOND;
+        const t0 = c.check();
+        const e0 = c.elapsedTicks;
+        c.elapsedTicks = 999999;
+        const tLate = c.check();
+        c.reset();
+        const afterReset = c.elapsedTicks;
+        return {
+          timerTicks: c.timerTicks,
+          expected,
+          t0,
+          e0,
+          tLate,
+          afterReset,
+          ownKeys: Object.keys(c).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/ElapsedTimeCondition",
+    tsjs: "src/game/trigger/condition/ElapsedTimeCondition.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const GameSpeed = mod("game/GameSpeed").GameSpeed;
+        const c = new ns.ElapsedTimeCondition({ params: [0, 2], triggerId: 1, eventIndex: 0 }, { name: "T" });
+        const expected = 2 * GameSpeed.BASE_TICKS_PER_SECOND;
+        const t0 = c.check();
+        const e0 = c.elapsedTicks;
+        c.elapsedTicks = 999999;
+        const tLate = c.check();
+        c.reset();
+        const afterReset = c.elapsedTicks;
+        return {
+          timerTicks: c.timerTicks,
+          expected,
+          t0,
+          e0,
+          tLate,
+          afterReset,
+          ownKeys: Object.keys(c).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/EnemyInZoneCondition",
+    tsjs: "src/game/trigger/condition/EnemyInZoneCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.EnemyInZoneCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          zoneIndex: c.zoneIndex,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/EnteredByCondition",
+    tsjs: "src/game/trigger/condition/EnteredByCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.EnteredByCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/GlobalVariableCondition",
+    tsjs: "src/game/trigger/condition/GlobalVariableCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.GlobalVariableCondition({ params: [0, 4], triggerId: 1, eventIndex: 0 }, { name: "T" }, true);
+        const world = { triggers: { getGlobalVariable: (i) => i === 4 } };
+        const hit = c.check(world);
+        const miss = c.check({ triggers: { getGlobalVariable: () => false } });
+        return {
+          value: c.value,
+          blocking: c.blocking,
+          variableIdx: c.variableIdx,
+          hit,
+          miss,
+          ownKeys: Object.keys(c).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/HealthBelowAnyCondition",
+    tsjs: "src/game/trigger/condition/HealthBelowAnyCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.HealthBelowAnyCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" }, 25);
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          threshold: c.threshold,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/HealthBelowCombatCondition",
+    tsjs: "src/game/trigger/condition/HealthBelowCombatCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.HealthBelowCombatCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" }, 50);
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          threshold: c.threshold,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/LocalVariableCondition",
+    tsjs: "src/game/trigger/condition/LocalVariableCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.LocalVariableCondition({ params: [0, 7], triggerId: 1, eventIndex: 0 }, { name: "L" }, true);
+        const ctx = { triggers: { getLocalVariable: (i) => i === 7 } };
+        const hit = c.check(ctx);
+        c.value = false;
+        const miss = c.check(ctx);
+        return { blocking: c.blocking, idx: c.variableIdx, value: c.value, hit, miss, ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/LowPowerCondition",
+    tsjs: "src/game/trigger/condition/LowPowerCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.LowPowerCondition({ type: 30, params: ["0", "3"], triggerId: 1, eventIndex: 0 }, { name: "P" });
+        c.init({ getAllPlayers: () => [{ country: { id: 3 }, powerTrait: { isLowPower: () => true } }] });
+        const low = c.check();
+        return { houseId: c.houseId, low, hasPlayer: c.player != null, ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/NoEventCondition",
+    tsjs: "src/game/trigger/condition/NoEventCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.NoEventCondition({ type: 0, params: ["1", "0"], triggerId: 0, eventIndex: 0 }, { name: "t" });
+        return { check: c.check({}, []), blocking: c.blocking, debug: c.getDebugName(), ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/NoFactoriesLeftCondition",
+    tsjs: "src/game/trigger/condition/NoFactoriesLeftCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.NoFactoriesLeftCondition({ type: 17, params: [], triggerId: 1, eventIndex: 0 }, { name: "N" });
+        const noPlayer = c.check();
+        c.player = { buildings: [] };
+        const empty = c.check();
+        c.player = { buildings: [{ factoryTrait: {} }] };
+        const hasFactory = c.check();
+        return { noPlayer, empty, hasFactory, ownKeys: Object.keys(c).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/PickupCrateAnyCondition",
+    tsjs: "src/game/trigger/condition/PickupCrateAnyCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.PickupCrateAnyCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/PickupCrateCondition",
+    tsjs: "src/game/trigger/condition/PickupCrateCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.PickupCrateCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/RandomDelayCondition",
+    tsjs: "src/game/trigger/condition/RandomDelayCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.RandomDelayCondition({ params: [0, 10], triggerId: 1, eventIndex: 0 }, { name: "rd" });
+        const e0 = c.elapsedTicks;
+        const game = { generateRandomInt: () => 100 };
+        const r1 = c.check(game);
+        for (let i = 0; i < 600; i++) c.check(game);
+        c.reset();
+        const afterReset = c.elapsedTicks;
+        return { e0, r1: typeof r1, afterReset, ownKeys: Object.keys(c).sort(), debug: c.getDebugName() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/SpiedByCondition",
+    tsjs: "src/game/trigger/condition/SpiedByCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.SpiedByCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/SpyEnteringAsHouseCondition",
+    tsjs: "src/game/trigger/condition/SpyEnteringAsHouseCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.SpyEnteringAsHouseCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/SpyEnteringAsInfantryCondition",
+    tsjs: "src/game/trigger/condition/SpyEnteringAsInfantryCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.SpyEnteringAsInfantryCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          infantryIdx: c.infantryIdx,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/TechBuildingCapturedCondition",
+    tsjs: "src/game/trigger/condition/TechBuildingCapturedCondition.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.TechBuildingCapturedCondition({ type: 0, params: [0, 3], triggerId: 1, eventIndex: 0 }, { name: "T", houseName: "Americans" });
+        const debug = c.getDebugName();
+        const own = Object.keys(c).sort();
+        return {
+          eventOk: c.event != null,
+          triggerOk: c.trigger != null,
+          blocking: c.blocking,
+          targetsIsArr: Array.isArray(c.targets),
+          debug,
+          houseId: c.houseId,
+          hasCheck: typeof c.check === "function",
+          ownKeys: own,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/condition/TimerExpiredCondition",
+    tsjs: "src/game/trigger/condition/TimerExpiredCondition.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const EventType = mod("game/event/EventType").EventType;
+        const c = new ns.TimerExpiredCondition({ type: 0, params: ["1", "0"], triggerId: 1, eventIndex: 0 }, { name: "te" });
+        const before = c.check({}, []);
+        const after = c.check({}, [{ type: EventType.TimerExpire }]);
+        return { before, after, ownKeys: Object.keys(c).sort(), debug: c.getDebugName() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/AddSuperWeaponExecutor",
+    tsjs: "src/game/trigger/executor/AddSuperWeaponExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.AddSuperWeaponExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, true);
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          oneTimeOnly: e.oneTimeOnly,
+          superWeaponIdx: e.superWeaponIdx,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/AllToHuntExecutor",
+    tsjs: "src/game/trigger/executor/AllToHuntExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.AllToHuntExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/AllianceExecutor",
+    tsjs: "src/game/trigger/executor/AllianceExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.AllianceExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          houseId: e.houseId,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ApplyDamageExecutor",
+    tsjs: "src/game/trigger/executor/ApplyDamageExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ApplyDamageExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, 100);
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          damage: e.damage,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/BlackoutRadarExecutor",
+    tsjs: "src/game/trigger/executor/BlackoutRadarExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.BlackoutRadarExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ChangeAllianceExecutor",
+    tsjs: "src/game/trigger/executor/ChangeAllianceExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ChangeAllianceExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ChangeHouseAllExecutor",
+    tsjs: "src/game/trigger/executor/ChangeHouseAllExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ChangeHouseAllExecutor({ type: 0, params: [0, 4475], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          staticBegin: ns.ChangeHouseAllExecutor.locationHouseIdBegin,
+          ownKeys: Object.keys(e).sort(),
+          debug: e.getDebugName(),
+          actionParams: e.action.params,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ChangeHouseExecutor",
+    tsjs: "src/game/trigger/executor/ChangeHouseExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ChangeHouseExecutor({ type: 0, params: [0, 4475], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        return {
+          houseId: e.houseId,
+          staticBegin: ns.ChangeHouseExecutor.locationHouseIdBegin,
+          ownKeys: Object.keys(e).sort(),
+          debug: e.getDebugName(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ChangeLightingExecutor",
+    tsjs: "src/game/trigger/executor/ChangeLightingExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let intensity = null;
+        const e = new ns.ChangeLightingExecutor({ type: 0, params: [0, 1], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute({ mapLightingTrait: { setTargetAmbientIntensity: (v) => { intensity = v; } } });
+        return { intensity, ownKeys: Object.keys(e).sort(), debug: e.getDebugName() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/CheerExecutor",
+    tsjs: "src/game/trigger/executor/CheerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.CheerExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          houseId: e.houseId,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/CreateBuildingExecutor",
+    tsjs: "src/game/trigger/executor/CreateBuildingExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.CreateBuildingExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/CreateCrateExecutor",
+    tsjs: "src/game/trigger/executor/CreateCrateExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.CreateCrateExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/CreateRadarEventExecutor",
+    tsjs: "src/game/trigger/executor/CreateRadarEventExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.CreateRadarEventExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/CreateReinforcementExecutor",
+    tsjs: "src/game/trigger/executor/CreateReinforcementExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.CreateReinforcementExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/CreateTeamExecutor",
+    tsjs: "src/game/trigger/executor/CreateTeamExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.CreateTeamExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DestroyAllExecutor",
+    tsjs: "src/game/trigger/executor/DestroyAllExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DestroyAllExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, undefined /* default scope */);
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          scope: e.scope,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DestroyObjectExecutor",
+    tsjs: "src/game/trigger/executor/DestroyObjectExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DestroyObjectExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DestroyTagExecutor",
+    tsjs: "src/game/trigger/executor/DestroyTagExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let id = null;
+        const e = new ns.DestroyTagExecutor({ type: 0, params: [70, "TAG1"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute({ triggers: { destroyTag: (x) => { id = x; } } });
+        return { id, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DestroyTeamExecutor",
+    tsjs: "src/game/trigger/executor/DestroyTeamExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DestroyTeamExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DestroyTriggerExecutor",
+    tsjs: "src/game/trigger/executor/DestroyTriggerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const destroyed = [];
+        const e = new ns.DestroyTriggerExecutor({ type: 0, params: [0, "trg9"], triggerId: 0, index: 1 }, { name: "dt" });
+        e.execute({ triggers: { destroyTrigger: (id) => destroyed.push(id) } });
+        return { destroyed, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DetonateWarheadExecutor",
+    tsjs: "src/game/trigger/executor/DetonateWarheadExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DetonateWarheadExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DisarmTriggerExecutor",
+    tsjs: "src/game/trigger/executor/DisarmTriggerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let pair = null;
+        const e = new ns.DisarmTriggerExecutor({ type: 0, params: [90, "42"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute({ triggers: { setTriggerEnabled: (a, b) => { pair = [a, b]; } } });
+        return { pair, ownKeys: Object.keys(e).sort(), debug: e.getDebugName() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DoShroudExecutor",
+    tsjs: "src/game/trigger/executor/DoShroudExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DoShroudExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/DoUnshroudExecutor",
+    tsjs: "src/game/trigger/executor/DoUnshroudExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DoUnshroudExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/EnemyExecutor",
+    tsjs: "src/game/trigger/executor/EnemyExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.EnemyExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          houseId: e.houseId,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/EvictOccupiersExecutor",
+    tsjs: "src/game/trigger/executor/EvictOccupiersExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.EvictOccupiersExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/FireSaleExecutor",
+    tsjs: "src/game/trigger/executor/FireSaleExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const sold = [];
+        const e = new ns.FireSaleExecutor({ type: 0, params: [1, 3], triggerId: 1, index: 0 }, { name: "fs" });
+        e.execute({
+          getAllPlayers: () => [{ country: { id: 3 }, buildings: [{ id: "b1" }, { id: "b2" }] }],
+          sellTrait: { sell: (b) => sold.push(b.id) },
+        });
+        return { houseId: e.houseId, sold, ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/FlashBuildingsOfTypeExecutor",
+    tsjs: "src/game/trigger/executor/FlashBuildingsOfTypeExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.FlashBuildingsOfTypeExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/FlashUnitExecutor",
+    tsjs: "src/game/trigger/executor/FlashUnitExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.FlashUnitExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ForceEndExecutor",
+    tsjs: "src/game/trigger/executor/ForceEndExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let ended = 0;
+        const e = new ns.ForceEndExecutor({ type: 0, params: [0], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute({ end: () => { ended++; } });
+        return { ended, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ForceShieldAtExecutor",
+    tsjs: "src/game/trigger/executor/ForceShieldAtExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ForceShieldAtExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ForceTriggerExecutor",
+    tsjs: "src/game/trigger/executor/ForceTriggerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let ft = null;
+        let wRef = null;
+        const w = { triggers: { forceTrigger: (id, ww) => { ft = id; wRef = ww === w; } } };
+        const e = new ns.ForceTriggerExecutor({ type: 0, params: [0, 12], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(w);
+        return { ft, wRef, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/GenericFacingExecutor",
+    tsjs: "src/game/trigger/executor/GenericFacingExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.GenericFacingExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/GlobalVariableExecutor",
+    tsjs: "src/game/trigger/executor/GlobalVariableExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const calls = [];
+        const e = new ns.GlobalVariableExecutor({ type: 0, params: [0, 6], triggerId: 1, index: 0 }, { name: "T", houseName: "A" }, true);
+        e.execute({ triggers: { toggleGlobalVariable: (i, v) => calls.push([i, v]) } });
+        return { value: e.value, variableIdx: e.variableIdx, calls, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/IronCurtainExecutor",
+    tsjs: "src/game/trigger/executor/IronCurtainExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.IronCurtainExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/LightningStrikeExecutor",
+    tsjs: "src/game/trigger/executor/LightningStrikeExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.LightningStrikeExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/LocalVariableExecutor",
+    tsjs: "src/game/trigger/executor/LocalVariableExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const calls = [];
+        const e = new ns.LocalVariableExecutor({ type: 0, params: [0, 6], triggerId: 1, index: 0 }, { name: "T", houseName: "A" }, true);
+        e.execute({ triggers: { toggleLocalVariable: (i, v) => calls.push([i, v]) } });
+        return { value: e.value, variableIdx: e.variableIdx, calls, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/MiscActionExecutor",
+    tsjs: "src/game/trigger/executor/MiscActionExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.MiscActionExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, "Label");
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          label: e.label,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/MoveCameraExecutor",
+    tsjs: "src/game/trigger/executor/MoveCameraExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.MoveCameraExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/NoActionExecutor",
+    tsjs: "src/game/trigger/executor/NoActionExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.NoActionExecutor({ type: 0, params: [0], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute();
+        return { debug: e.getDebugName(), ownKeys: Object.keys(e).sort(), actionType: e.action.type };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/NukeStrikeExecutor",
+    tsjs: "src/game/trigger/executor/NukeStrikeExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.NukeStrikeExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/PlayAnimAtExecutor",
+    tsjs: "src/game/trigger/executor/PlayAnimAtExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.PlayAnimAtExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/PlaySoundEffectExecutor",
+    tsjs: "src/game/trigger/executor/PlaySoundEffectExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.PlaySoundEffectExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/PlaySoundFxAtExecutor",
+    tsjs: "src/game/trigger/executor/PlaySoundFxAtExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.PlaySoundFxAtExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/PlaySoundFxExecutor",
+    tsjs: "src/game/trigger/executor/PlaySoundFxExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.PlaySoundFxExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/PlaySoundFxRandomExecutor",
+    tsjs: "src/game/trigger/executor/PlaySoundFxRandomExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.PlaySoundFxRandomExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/PlaySpeechExecutor",
+    tsjs: "src/game/trigger/executor/PlaySpeechExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.PlaySpeechExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ReshroudMapExecutor",
+    tsjs: "src/game/trigger/executor/ReshroudMapExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ReshroudMapExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ResizePlayerViewExecutor",
+    tsjs: "src/game/trigger/executor/ResizePlayerViewExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ResizePlayerViewExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/RevealAroundWaypointExecutor",
+    tsjs: "src/game/trigger/executor/RevealAroundWaypointExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.RevealAroundWaypointExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/RevealMapExecutor",
+    tsjs: "src/game/trigger/executor/RevealMapExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const revealed = [];
+        const e = new ns.RevealMapExecutor({ type: 0, params: [], triggerId: 1, index: 0 }, { name: "rv" });
+        e.execute({
+          getCombatants: () => ["A", "B"],
+          mapShroudTrait: { revealMap: (p) => revealed.push(p) },
+        });
+        return { revealed, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/SabotageUnitExecutor",
+    tsjs: "src/game/trigger/executor/SabotageUnitExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.SabotageUnitExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/SellBuildingExecutor",
+    tsjs: "src/game/trigger/executor/SellBuildingExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.SellBuildingExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/SetAmbientLightExecutor",
+    tsjs: "src/game/trigger/executor/SetAmbientLightExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const lights = [];
+        const e = new ns.SetAmbientLightExecutor({ type: 0, params: [1, 75], triggerId: 1, index: 0 }, { name: "sal" });
+        e.execute({ mapLightingTrait: { setTargetAmbientIntensity: (v) => lights.push(v) } });
+        return { lights, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/SetAmbientRateExecutor",
+    tsjs: "src/game/trigger/executor/SetAmbientRateExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.SetAmbientRateExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/SetAmbientStepExecutor",
+    tsjs: "src/game/trigger/executor/SetAmbientStepExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.SetAmbientStepExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ShroudFxExecutor",
+    tsjs: "src/game/trigger/executor/ShroudFxExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ShroudFxExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, "meteor");
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          mode: e.mode,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/StopSoundFxAtExecutor",
+    tsjs: "src/game/trigger/executor/StopSoundFxAtExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.StopSoundFxAtExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/SuperWeaponFxExecutor",
+    tsjs: "src/game/trigger/executor/SuperWeaponFxExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.SuperWeaponFxExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, "meteor");
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          mode: e.mode,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TeleportAllExecutor",
+    tsjs: "src/game/trigger/executor/TeleportAllExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.TeleportAllExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TextNotificationExecutor",
+    tsjs: "src/game/trigger/executor/TextNotificationExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.TextNotificationExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TextTriggerExecutor",
+    tsjs: "src/game/trigger/executor/TextTriggerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let t = null;
+        const e = new ns.TextTriggerExecutor({ type: 0, params: [11, "msg"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute({ events: { dispatch: (ev) => { t = ev; } } });
+        return { text: t && t.text, keys: t ? Object.keys(t) : null, ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerExtendExecutor",
+    tsjs: "src/game/trigger/executor/TimerExtendExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerExtendExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerPauseExecutor",
+    tsjs: "src/game/trigger/executor/TimerPauseExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerPauseExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerResumeExecutor",
+    tsjs: "src/game/trigger/executor/TimerResumeExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerResumeExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerSetExecutor",
+    tsjs: "src/game/trigger/executor/TimerSetExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerSetExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerShortenExecutor",
+    tsjs: "src/game/trigger/executor/TimerShortenExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerShortenExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerStartExecutor",
+    tsjs: "src/game/trigger/executor/TimerStartExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerStartExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerStopExecutor",
+    tsjs: "src/game/trigger/executor/TimerStopExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerStopExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TimerTextExecutor",
+    tsjs: "src/game/trigger/executor/TimerTextExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { secs: null, started: 0, stopped: 0, set: null, text: null };
+        const world = {
+          countdownTimer: {
+            addSeconds: (s) => { log.secs = s; },
+            start: () => { log.started++; },
+            stop: () => { log.stopped++; },
+            setSeconds: (s) => { log.set = s; },
+            text: null,
+          },
+        };
+        const e = new ns.TimerTextExecutor({ type: 0, params: [0, 30, "Hold!"], triggerId: 1, index: 0 }, { name: "T", houseName: "A" });
+        e.execute(world);
+        return { log, textAfter: world.countdownTimer.text, debug: e.getDebugName(), ownKeys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/ToggleTriggerExecutor",
+    tsjs: "src/game/trigger/executor/ToggleTriggerExecutor.ts.js",
+    probes: [
+      (ns) => {
+        let te = null;
+        const e = new ns.ToggleTriggerExecutor({ type: 0, params: [0, 9], triggerId: 1, index: 0 }, { name: "T", houseName: "A" }, false);
+        e.execute({ triggers: { setTriggerEnabled: (id, en) => { te = [id, en]; } } });
+        return { te, enable: e.enable, triggerEnable: e.triggerEnable, ownKeys: Object.keys(e).sort(), debug: e.getDebugName() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/TurnOnOffBuildingExecutor",
+    tsjs: "src/game/trigger/executor/TurnOnOffBuildingExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.TurnOnOffBuildingExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" }, true);
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          turnOn: e.turnOn,
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/UnloadAllExecutor",
+    tsjs: "src/game/trigger/executor/UnloadAllExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.UnloadAllExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/UnrevealAroundWaypointExecutor",
+    tsjs: "src/game/trigger/executor/UnrevealAroundWaypointExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.UnrevealAroundWaypointExecutor({ type: 0, params: [0, 5], triggerId: 1, index: 0 }, { name: "T", houseName: "Americans" });
+        return {
+          actionOk: e.action != null,
+          triggerOk: e.trigger != null,
+          debug: e.getDebugName(),
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/UserInputExecutor",
+    tsjs: "src/game/trigger/executor/UserInputExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const w = {};
+        const e = new ns.UserInputExecutor({ type: 0, params: [0], triggerId: 1, index: 0 }, { name: "T", houseName: "A" }, true);
+        e.execute(w);
+        return { lock: e.lock, inputLocked: w.inputLocked, ownKeys: Object.keys(e).sort(), debug: e.getDebugName() };
+      },
+    ],
+  },
+  {
+    name: "game/trigger/executor/WinLoseExecutor",
+    tsjs: "src/game/trigger/executor/WinLoseExecutor.ts.js",
+    probes: [
+      (ns) => {
+        const log = { ended: 0 };
+        const players = [
+          { name: "W", isNeutral: false, isObserver: false, defeated: false },
+          { name: "L", isNeutral: false, isObserver: false, defeated: false },
+          { name: "N", isNeutral: true, isObserver: false, defeated: false },
+        ];
+        const e = new ns.WinLoseExecutor({ type: 0, params: [0], triggerId: 1, index: 0 }, { name: "T", houseName: "A" }, true);
+        e.execute({
+          campaignHouses: [{ name: "W" }],
+          housePlayers: new Map([["W", players[0]]]),
+          getAllPlayers: () => players,
+          end: () => { log.ended++; },
+        });
+        return {
+          win: e.win,
+          ended: log.ended,
+          defeated: [players[0].defeated, players[1].defeated, players[2].defeated],
+          ownKeys: Object.keys(e).sort(),
+        };
+      },
+    ],
+  },
 ];
 
 /** Modules registered from the reconstructed sources to satisfy imports. */
