@@ -72,6 +72,22 @@ System.register(
                   this.loadHotKeys(t);
                 }
                 this.addHotKey(a.KeyCommandType.Scoreboard, 9);
+                // 把本实例挂到 globalThis，供扩展宿主为扩展声明的键位命令补默认键
+                // （ExtensionHost.applyExtensionKeyCommands → ensureDefaultKeyBinds）。
+                // 必须挂在 load() 末尾：load() 开头会 hotKeys.clear()，挂早了会被清掉。
+                // 也不能只靠 KeyboardHandler —— 它要到开局才创建，而「键盘设置」页在主菜单，
+                // 那时句柄还不存在，默认键会因此丢失（实测过）。
+                globalThis.__openyrweb_keyBinds = this;
+                // 扩展声明的默认键位由扩展宿主以纯数据发布在
+                // globalThis.__openyrweb_extKeyDefaults（[[命令 id, 位编码], ...]）。
+                // 在 load() 末尾补入而不是只在宿主侧补一次：本函数在「键盘设置 → 恢复默认」
+                // 时会被再调一次（KeyboardScreen.resetAndReload），必须重新补，
+                // 否则扩展的默认键会跟着一起丢。已有绑定的不覆盖（用户改过的键优先）。
+                for (const [cmd, code] of globalThis.__openyrweb_extKeyDefaults || []) {
+                  if (void 0 === this.getHotKey(cmd)) this.addHotKey(cmd, code);
+                }
+                // 扩展声明的默认键位（如 AutoLoad 的 Ctrl+D）不再硬编码在这里，
+                // 改由扩展自带的 manifest 声明 —— 使扩展保持自包含，新增扩展无需改动本文件。
               }
               async saveIni(e) {
                 await this.configDir?.writeFile(
@@ -88,9 +104,13 @@ System.register(
                 let t = e.getSection(o.iniSection);
                 if (!t) throw new Error(`Missing [${o.iniSection}] ini section`);
                 let i = Object.keys(a.KeyCommandType);
+                // 白名单 = 内置枚举 ∪ 扩展运行期注册的命令集
+                // （extensions/ExtensionHost 挂到 globalThis.__openyrweb_knownKeyCommands）
+                // ⇒ 新增扩展的热键不必再往 KeyCommandType 枚举里加成员。
+                var known = globalThis.__openyrweb_knownKeyCommands;
                 for (var r of t.entries.keys()) {
                   var s;
-                  i.includes(r)
+                  i.includes(r) || (known && known.has(r))
                     ? ((s = t.getNumber(r)), this.changeHotKey(r, s))
                     : // keyboardmd.ini (shipped inside the user's langmd.mix) contains
                       // Westwood map-editor / debug leftovers (CopyBlock, PasteBlock, FileNew,

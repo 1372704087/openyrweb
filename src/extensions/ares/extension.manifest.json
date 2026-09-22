@@ -1,0 +1,24 @@
+{
+  "id": "ares",
+  "messages": {
+    "en-US": {
+      "ts:ext.ares": "Ares",
+      "stt:ext.ares": "Ares — the most widely used YR community engine extension framework, providing a large set of economy, weapon and techno INI extensions (built into this port's source).",
+      "ts:ext.ares.feature.aicloneproduction": "AI clone production",
+      "stt:ext.ares.feature.aicloneproduction": "AI multi-factory parallel clone production (vanilla style). When off, the AI produces from one factory at a time (maps to Ares AllowParallelAIQueues)."
+    },
+    "zh-CN": {
+      "ts:ext.ares": "Ares",
+      "stt:ext.ares": "Ares——尤里复仇社区最主流的引擎扩展框架，提供经济、武器、单位属性等大量 INI 扩展（本作源码内置）。",
+      "ts:ext.ares.feature.aicloneproduction": "AI克隆生产",
+      "stt:ext.ares.feature.aicloneproduction": "AI 多工厂并行克隆生产（原版风格）。关闭后 AI 同一时刻只从一座工厂生产（对应 Ares AllowParallelAIQueues）。"
+    },
+    "zh-TW": {
+      "ts:ext.ares": "Ares",
+      "stt:ext.ares": "Ares——尤里復仇社群最主流的引擎擴充框架，提供經濟、武器、單位屬性等大量 INI 擴充（本作原始碼內建）。",
+      "ts:ext.ares.feature.aicloneproduction": "AI克隆生產",
+      "stt:ext.ares.feature.aicloneproduction": "AI 多工廠並行克隆生產（原版風格）。關閉後 AI 同一時刻只從一座工廠生產（對應 Ares AllowParallelAIQueues）。"
+    }
+  },
+  "keyCommands": []
+}

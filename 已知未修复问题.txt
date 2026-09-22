@@ -404,3 +404,18 @@
 若动画 Art.ini 带 Shadow=yes，雪地阴影走的是另一套调色板，先确认"描边"是否实际是错配的阴影帧而非动画本体；
 若为 SHP 动画，确认边缘半透明/透明索引在雪地调色板上的定义是否与温带一致（透明索引若在雪地调色板里非透明，就会渲染出实色描边）。
 优先级：中（视觉异常，不影响玩法）
+
+42. 扩展因依赖未启用被连带跳过时，界面仍显示「已启用」
+影响模块：`src/gui/screen/mainMenu/extensions/component/ExtensionsOpts.ts.js`（扩展页列表与开关）、`src/extensions/ExtensionHost.ts`（`getActiveSorted()` 的依赖过滤）
+问题描述：
+`getActiveSorted()` 会剔除「总开关开着、但 `dependsOn` 目标未启用或缺失」的扩展（Phobos 依赖 Ares），并且只在控制台打一行警告。而扩展页的开关状态读的是 `ExtensionConfig.getMaster()`（用户原始勾选值），因此被连带跳过的扩展在界面上**仍显示为「开」**，用户会误以为它正在生效。
+预期行为：
+扩展页应能看出「该扩展当前未生效，原因是依赖 X 未启用」——置灰子功能、标注原因，或在总开关旁给提示。
+实际表现：
+界面无任何提示；只有 F12 控制台出现 `[ExtensionHost] Skip "phobos": missing or disabled dependency (ares)`。（2026-09-22 实测）
+排查线索：
+复现：关闭 Ares → 进扩展页，Phobos 仍显示「开」；
+在 `ExtensionsOpts` 渲染时对每项算一次「运行时是否生效」——用 `ExtensionHost.getActiveSorted().some(e => e.id === id)` 与 `snapshot().extensions[].master` 对比，两者不一致即为「被依赖阻断」；
+被阻断的原因可由 `dependsOn` 反查：列出其中 master 为 false 或压根未注册的项，作为提示文案；
+实现约束：**只让 ExtensionHost 暴露纯查询**（如 `getInactiveReason(id): string | null`），**不要**为这个提示给宿主新增 GUI 依赖（会破坏「宿主不反向依赖 GUI」的桥接约定，见扩展热键那套 globalThis 方案）。
+优先级：低（仅界面误导，不影响运行逻辑本身）

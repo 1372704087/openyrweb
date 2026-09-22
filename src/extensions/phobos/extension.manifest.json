@@ -1,0 +1,18 @@
+{
+  "id": "phobos",
+  "messages": {
+    "en-US": {
+      "ts:ext.phobos": "Phobos",
+      "stt:ext.phobos": "Phobos — a modern engine extension framework built on top of Ares, adding techno, weapon and drawing/effects enhancements (built into this port's source)."
+    },
+    "zh-CN": {
+      "ts:ext.phobos": "Phobos",
+      "stt:ext.phobos": "Phobos——构建于 Ares 之上的现代引擎扩展框架，提供单位、武器、绘制特效等增强（本作源码内置）。"
+    },
+    "zh-TW": {
+      "ts:ext.phobos": "Phobos",
+      "stt:ext.phobos": "Phobos——構建於 Ares 之上的現代引擎擴充框架，提供單位、武器、繪製特效等增強（本作原始碼內建）。"
+    }
+  },
+  "keyCommands": []
+}

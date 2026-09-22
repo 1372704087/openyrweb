@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1322,
+  "moduleCount": 1323,
   "modules": [
     {
       "name": "extensions/ExtensionDefinition",
@@ -13681,6 +13681,16 @@
       "name": "extensions/placeex/PlaceExExtension",
       "file": "extensions/placeex/PlaceExExtension.ts.js",
       "deps": [],
+      "bytes": 0
+    },
+    {
+      "name": "extensions/autoload/AutoLoadExtension",
+      "file": "extensions/autoload/AutoLoadExtension.ts.js",
+      "deps": [
+        "extensions/ExtensionContext",
+        "game/gameobject/unit/ZoneType",
+        "game/order/EnterTransportOrder"
+      ],
       "bytes": 0
     }
   ]

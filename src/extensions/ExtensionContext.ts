@@ -65,6 +65,14 @@ export interface ExtensionHookContext {
   ini: NamespacedIniWriter | null;
   /** 对局内 Game 引用；rules 钩子阶段为 null。 */
   game: any;
+  /**
+   * 注册一个游戏键位命令（必须是 KeyCommandType 成员）——注册后它会出现在
+   * 「键盘设置」界面、可被用户改键，并由游戏统一在 keydown 中分发（自带 preventDefault）。
+   *
+   * 由 ExtensionHost 注入；rules 阶段等 GUI 未就绪的场景下可能为 undefined，调用方需容忍。
+   * 走 ctx 而非让扩展直接 import ExtensionHost —— 后者会形成 ExtensionHost ⇄ 扩展 的循环依赖。
+   */
+  registerKeyCommand?(command: any, handler: () => void): void;
 }
 
 /** 构造一次钩子调用的上下文。 */
@@ -76,6 +84,8 @@ export function createHookContext(
   },
   ini: any,
   game: any | null,
+  /** 由 ExtensionHost 注入的键位命令注册器（对应 ExtensionHookContext.registerKeyCommand）。 */
+  keyCommandRegistrar?: (command: any, handler: () => void) => void,
 ): ExtensionHookContext {
   const section = ini?.getOrCreateSection?.("General");
   const prefix = `OpenYRWeb.${extensionId}.`;
@@ -86,5 +96,6 @@ export function createHookContext(
     getEnabledFeatures: () => config.getEnabledFeatureIds(extensionId),
     ini: writer,
     game,
+    registerKeyCommand: keyCommandRegistrar,
   };
 }

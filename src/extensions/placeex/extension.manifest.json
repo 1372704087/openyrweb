@@ -1,0 +1,24 @@
+{
+  "id": "placeex",
+  "messages": {
+    "en-US": {
+      "ts:ext.placeex": "PlaceEx",
+      "stt:ext.placeex": "Building placement preview rendering enhancements (placeholder name, built-in source). Offers the vanilla place.shp footprint overlay option.",
+      "ts:ext.placeex.feature.useplaceshp": "Vanilla SHP placement preview",
+      "stt:ext.placeex.feature.useplaceshp": "When on, the red/green placement footprint tiles use the vanilla diamond shape from the game resource place.shp (no borders; requires imported game data). When off, or if the resource is missing, falls back to the procedural grid (with borders). Applies to a new match."
+    },
+    "zh-CN": {
+      "ts:ext.placeex": "PlaceEx",
+      "stt:ext.placeex": "建筑放置预览渲染增强（占位名，源码内置）。提供原版 place.shp 占地指示的渲染选项。",
+      "ts:ext.placeex.feature.useplaceshp": "原版SHP放置预览",
+      "stt:ext.placeex.feature.useplaceshp": "开启后建造放置的红绿占地格子改用游戏资源 place.shp 的原版菱形色块（无描边，需已导入游戏数据）；关闭或资源缺失时使用自绘格子（带描边）。对新一局生效。"
+    },
+    "zh-TW": {
+      "ts:ext.placeex": "PlaceEx",
+      "stt:ext.placeex": "建築放置預覽渲染增強（佔位名，原始碼內建）。提供原版 place.shp 佔地指示的渲染選項。",
+      "ts:ext.placeex.feature.useplaceshp": "原版SHP放置預覽",
+      "stt:ext.placeex.feature.useplaceshp": "開啟後建造放置的紅綠佔地格子改用遊戲資源 place.shp 的原版菱形色塊（無描邊，需已匯入遊戲資料）；關閉或資源缺失時使用自繪格子（帶描邊）。對新一局生效。"
+    }
+  },
+  "keyCommands": []
+}

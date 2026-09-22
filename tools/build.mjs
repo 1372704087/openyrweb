@@ -211,9 +211,12 @@ function stepAssets() {
   logv("res/changelog.html");
 
   // Locales: localized en-US/zh-CN/zh-TW; copy the other stubs verbatim.
-  localizeStrings("en-US.json", EN_LOCALE);
-  localizeStrings("zh-CN.json", ZH_CN_LOCALE);
-  localizeStrings("zh-TW.json", ZH_TW_LOCALE);
+  // 插件自带文案：扫描各扩展目录的 extension.manifest.json，构建期合并（manifest 优先于 baseline）。
+  const extMessages = collectExtensionMessages();
+  validateExtensionKeyCommands(extMessages);
+  localizeStrings("en-US.json", EN_LOCALE, extMessages["en-US"]);
+  localizeStrings("zh-CN.json", ZH_CN_LOCALE, extMessages["zh-CN"]);
+  localizeStrings("zh-TW.json", ZH_TW_LOCALE, extMessages["zh-TW"]);
   for (const f of readdirSync(join(VENDOR, "res", "locale"))) {
     if (!["en-US.json", "zh-CN.json", "zh-TW.json"].includes(f)) {
       copyVendor("res/locale/" + f);
@@ -447,15 +450,147 @@ const ZH_TW_LOCALE = {
   "TS:GameDataCleared": "遊戲資料已清除，正在重新載入……",
   "TS:ClearGameDataFailed": "清除遊戲資料失敗，請重試。",
 };
-function localizeStrings(file, table) {
+function localizeStrings(file, table, extTable) {
   const obj = JSON.parse(readFileSync(join(VENDOR, "res", "locale", file), "utf8"));
   let n = 0;
   for (const k of Object.keys(table)) {
     obj[k] = table[k];
     n++;
   }
+  // 插件自带文案：写进同一份产物，优先级高于 vendor baseline 与核心表。
+  let en = 0;
+  for (const k of Object.keys(extTable || {})) {
+    obj[k] = extTable[k];
+    en++;
+  }
+  validateExtensionStrings(obj, file);
   writeOut("res/locale/" + file, JSON.stringify(obj, null, 4));
-  logv("res/locale/" + file + " (" + n + " keys set)");
+  logv("res/locale/" + file + " (" + n + " core + " + en + " extension keys set)");
+}
+
+/**
+ * 校验合并后的 locale 里，每个扩展是否都有它在扩展页要用的两个键。
+ * 扩展页（gui/screen/mainMenu/extensions/component/ExtensionsOpts.ts.js）固定按
+ * `TS:Ext.<id>` 取行标题、`STT:Ext.<id>` 取提示气泡 —— 缺任一都会渲染成空白，
+ * 并在控制台打印 `String with name "..." not found`。这里做成硬失败，避免静默漏键。
+ * 键名大小写不敏感（Strings 内部 toLowerCase 归一化）。
+ */
+function validateExtensionStrings(obj, file) {
+  const manifests = collectExtensionMessages.manifests || [];
+  if (manifests.length === 0) return;
+  const lower = new Set(Object.keys(obj).map((k) => k.toLowerCase()));
+  const missing = [];
+  for (const m of manifests) {
+    for (const prefix of ["ts", "stt"]) {
+      const key = `${prefix}:ext.${m.id}`;
+      if (!lower.has(key)) missing.push(`${key}（${m.id}）`);
+    }
+  }
+  if (missing.length) {
+    throw new Error(
+      `${file}: 扩展页文案键缺失 → ${missing.join(", ")}。` +
+        `请在 src/extensions/<id>/extension.manifest.json 的 messages 里补上，` +
+        `或确认 vendor/res/locale 的 baseline 里已有该键。`,
+    );
+  }
+}
+
+// ---- 插件通用头：extension.manifest.json ----------------------------------
+// 每个扩展目录下的 extension.manifest.json 自带它的 UI 文案（三语）与键位命令声明，
+// 由这里统一扫描合并 —— 新增扩展不必再改本文件的 EN_LOCALE / ZH_CN_LOCALE / ZH_TW_LOCALE。
+const EXTENSION_DIR = join(ROOT, "src", "extensions");
+const KEY_COMMAND_TYPE_SRC = join(
+  ROOT,
+  "src",
+  "gui",
+  "screen",
+  "game",
+  "worldInteraction",
+  "keyboard",
+  "KeyCommandType.ts.js",
+);
+
+/** 扫描全部扩展 manifest → { "zh-CN": {key: value}, ... }；命令声明挂在函数属性上供校验用。 */
+function collectExtensionMessages() {
+  const perLang = {};
+  const manifests = [];
+  collectExtensionMessages.manifests = manifests;
+  if (!existsSync(EXTENSION_DIR)) return perLang;
+  for (const id of readdirSync(EXTENSION_DIR)) {
+    const p = join(EXTENSION_DIR, id, "extension.manifest.json");
+    if (!existsSync(p)) continue;
+    let m;
+    try {
+      m = JSON.parse(readFileSync(p, "utf8"));
+    } catch (err) {
+      throw new Error(`extension.manifest.json 解析失败：${p}\n${err.message}`);
+    }
+    if (m.id !== id) throw new Error(`manifest 的 id 与目录名不符：${p}（id=${m.id}）`);
+    for (const [lang, msgs] of Object.entries(m.messages || {})) {
+      perLang[lang] = perLang[lang] || {};
+      for (const [k, v] of Object.entries(msgs)) {
+        if (typeof v !== "string") throw new Error(`${p}: ${lang}.${k} 的值不是字符串`);
+        perLang[lang][k] = v;
+      }
+    }
+    manifests.push({ id, path: p, messages: m.messages || {}, keyCommands: m.keyCommands || [] });
+  }
+  const langs = Object.keys(perLang);
+  if (langs.length > 1) {
+    const sigs = langs.map((l) => Object.keys(perLang[l]).sort().join("|"));
+    if (new Set(sigs).size > 1) {
+      throw new Error(
+        `扩展文案各语言键集合不一致：${langs.map((l) => l + "=" + Object.keys(perLang[l]).length).join(", ")}`,
+      );
+    }
+  }
+  if (manifests.length) {
+    logv(
+      "extension manifests: " +
+        manifests.map((m) => `${m.id}(${Object.keys(m.messages[langs[0]] || {}).length})`).join(", "),
+    );
+  }
+  return perLang;
+}
+
+/** 校验扩展声明的键位命令：id 必须在 KeyCommandType 枚举内；label/desc 必须能取到文案。 */
+function validateExtensionKeyCommands(perLang) {
+  const manifests = collectExtensionMessages.manifests || [];
+  const withCmds = manifests.filter((m) => m.keyCommands.length > 0);
+  if (withCmds.length === 0) return;
+
+  // 从 KeyCommandType 源码提取枚举成员名：(e.AutoLoad = "AutoLoad")
+  const src = readFileSync(KEY_COMMAND_TYPE_SRC, "utf8");
+  const members = new Set();
+  for (const m of src.matchAll(/\(\s*\w+\.(\w+)\s*=\s*"[^"]*"\s*\)/g)) members.add(m[1]);
+  if (members.size === 0) {
+    throw new Error(`未能从 ${KEY_COMMAND_TYPE_SRC} 提取到任何枚举成员（正则失配？）`);
+  }
+
+  const langs = Object.keys(perLang);
+  for (const m of withCmds) {
+    for (const c of m.keyCommands) {
+      if (!members.has(c.id)) {
+        // 不再硬失败：KeyBinds.loadHotKeys() 的白名单已改为「枚举 ∪ 运行期注册集」
+        // （ExtensionHost 挂 globalThis.__openyrweb_knownKeyCommands），扩展命令可以
+        // 不在枚举内。这里只留提示，便于排查「宿主未运行导致绑定被丢弃」的场景。
+        logv(
+          `  note: "${c.id}"（${m.id}）不在 KeyCommandType 枚举内 —— ` +
+            `依赖 ExtensionHost 运行期注册；宿主未运行则该 ini 绑定会被丢弃。`,
+        );
+      }
+      for (const role of ["label", "desc"]) {
+        const key = c[role];
+        if (!key) throw new Error(`[${m.id}] 命令 "${c.id}" 缺少 ${role}`);
+        for (const lang of langs) {
+          if (perLang[lang][key] === undefined) {
+            throw new Error(`[${m.id}] 命令 "${c.id}" 的 ${role}="${key}" 在 ${lang} 文案里找不到`);
+          }
+        }
+      }
+    }
+    logv(`  key command ok: ${m.id} → ${m.keyCommands.map((c) => c.id).join(", ")}`);
+  }
 }
 
 // RA2-themed overrides for the file-explorer widget (Storage screen).

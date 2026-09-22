@@ -1,0 +1,31 @@
+{
+  "id": "autoload",
+  "messages": {
+    "en-US": {
+      "ts:ext.autoload": "AutoLoad",
+      "stt:ext.autoload": "AutoLoad — distributes the selected infantry / vehicles into your selected transport units, balancing by type. Issues only the engine's standard EnterTransport order, so all clients stay in sync.",
+      "cmnd:autoload": "Auto Load",
+      "cmnd:autoloaddesc": "Evenly distribute the selected infantry / vehicles into the selected transport vehicles that are in range and have free slots."
+    },
+    "zh-CN": {
+      "ts:ext.autoload": "自动装车",
+      "stt:ext.autoload": "自动装车——把选中的步兵/载具按类型均衡装入选中的载员载具。只下发引擎标准的进入运输载具指令，联机各端行为一致。",
+      "cmnd:autoload": "自动装车",
+      "cmnd:autoloaddesc": "把选中的步兵/载具按类型均衡装入选中的、范围内有空位的载员载具。"
+    },
+    "zh-TW": {
+      "ts:ext.autoload": "自動裝車",
+      "stt:ext.autoload": "自動裝車——將選中的步兵/載具依類型均衡裝入選中的載員載具。僅下達引擎標準的進入運輸載具指令，連線各端行為一致。",
+      "cmnd:autoload": "自動裝車",
+      "cmnd:autoloaddesc": "將選中的步兵/載具依類型均衡裝入選中的、範圍內有空位的載員載具。"
+    }
+  },
+  "keyCommands": [
+    {
+      "id": "AutoLoad",
+      "label": "cmnd:autoload",
+      "desc": "cmnd:autoloaddesc",
+      "default": "Ctrl+D"
+    }
+  ]
+}

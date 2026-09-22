@@ -38,7 +38,10 @@ System.register(
             };
           }
           static setMaster(e, t) {
-            h.ExtensionHost.getConfig().setMaster(e, t);
+            (h.ExtensionHost.getConfig().setMaster(e, t),
+              // 开关变更后立即重算键位命令注册：被关掉的扩展必须从「键盘设置」界面移除，
+              // 重新打开的则重新出现（并由宿主按 manifest 声明补默认键）。
+              h.ExtensionHost.applyExtensionKeyCommands());
           }
           static setFeature(e, t, i) {
             h.ExtensionHost.getConfig().setFeature(e, t, i);

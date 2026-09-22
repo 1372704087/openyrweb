@@ -24,6 +24,7 @@ import { aresExtension } from "extensions/ares/AresExtension";
 import { phobosExtension } from "extensions/phobos/PhobosExtension";
 import { npextExtension } from "extensions/npext/NPextExtension";
 import { placeExExtension } from "extensions/placeex/PlaceExExtension";
+import { autoLoadExtension } from "extensions/autoload/AutoLoadExtension";
 import {
   createHookContext,
   ExtensionHookContext,
@@ -33,6 +34,11 @@ import {
   ExtensionRuntimeHooks,
   RuntimeHookName,
 } from "extensions/ExtensionHooks";
+// 扩展声明的键位命令要出现在「键盘设置」界面，就得写进这张表。
+// 该模块只依赖 KeyCommandType（叶子模块），因此不会形成循环依赖。
+// 该模块尚未转 TS（只有孪生 .ts.js），走 gui/* 通配 shim（export = any）：
+// 具名导入会被 tsc 拒绝（TS2305），故用命名空间导入后取成员属性。
+import * as configurableCmdsModule from "gui/screen/options/component/configurableCmds";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -53,6 +59,14 @@ export class ExtensionHost {
   private static currentGame: any = null;
   private static detachGameFn: (() => void) | null = null;
 
+  /**
+   * 扩展键位命令的处理函数表（命令 id → handler）。
+   * 以 globalThis.__openyrweb_keyCommandHandlers 暴露给 GUI：每局的 KeyboardHandler 在
+   * 构造时拉取一次并注册进自己（见 registerKeyCommand 的说明）。
+   * 局内有效：attachToGame 会先清空，由 onMatchStart 用**本局**的 game 闭包重新登记。
+   */
+  private static readonly keyCommandHandlers = new Map<string, () => void>();
+
   // ------------------------------------------------------------------
   // 注册
   // ------------------------------------------------------------------
@@ -63,6 +77,7 @@ export class ExtensionHost {
     ExtensionHost.register(phobosExtension);
     ExtensionHost.register(npextExtension);
     ExtensionHost.register(placeExExtension);
+    ExtensionHost.register(autoLoadExtension);
     ExtensionHost.registered = true;
   }
 
@@ -105,6 +120,8 @@ export class ExtensionHost {
     const config = ExtensionConfig.fromJson(json, ExtensionHost.getRegistered());
     ExtensionHost.config = config;
     ExtensionHost.sortedCache = null;
+    // 把扩展声明的键位命令注入游戏（「键盘设置」界面条目 + 默认键位）。
+    ExtensionHost.applyExtensionKeyCommands();
     return config;
   }
 
@@ -214,6 +231,7 @@ export class ExtensionHost {
       const hook = ext.hooks?.applyToRules;
       if (!hook) continue;
       try {
+        // rules 阶段 GUI 尚未就绪，键位命令注册器为 undefined。
         const ctx = createHookContext(ext.id, config, ini, null);
         hook(ctx);
       } catch (err) {
@@ -255,6 +273,9 @@ export class ExtensionHost {
     if (ExtensionHost.currentGame) ExtensionHost.detachFromGame();
 
     ExtensionHost.currentGame = game;
+    // 清空上一局的键位命令登记：onMatchStart 会用**本局**的 game 重新登记
+    // （否则上一局的 handler 闭包会跨局残留，且新旧 handler 会互相错位）。
+    ExtensionHost.keyCommandHandlers.clear();
     const active = ExtensionHost.getActiveSorted();
 
     // onMatchStart
@@ -370,6 +391,169 @@ export class ExtensionHost {
   }
 
   // ------------------------------------------------------------------
+  // 键盘命令注册（把扩展的自定义热键接入游戏的键位系统）
+  // ------------------------------------------------------------------
+
+  /**
+   * 注册一个游戏键位命令（命令处理函数）。
+   *
+   * 桥接方式：GUI 层的 KeyboardHandler 把自己的注册器挂到
+   * `globalThis.__openyrweb_keyCmdRegistrar`，同时把「命令处理函数表」以纯数据形式
+   * 从 `globalThis.__openyrweb_keyCommandHandlers` **主动拉取** ——
+   * **扩展宿主不反向依赖 GUI**，避免给这个已知存在循环依赖的代码库再加一条模块边。
+   *
+   * ⚠️ **每局必须重新登记**，且**以「拉」为准、不以「推」为准**：
+   * registrar 是全局句柄，某个 KeyboardHandler 被 dispose 后它**不会被清理**；若只靠
+   * 「推」并轮询，第二局开局时会把命令注册到上一局那个已废弃的 handler 上，
+   * 本局的新 handler 反而是空的 ⇒ 不刷新页面就用不了扩展热键（实测复现）。
+   * 所以这里只做两件事：登记进表 + 若 registrar 已就绪则顺手推一次（覆盖
+   * 「GUI 早于 onMatchStart」的顺序），权威路径是 KeyboardHandler 构造时拉表。
+   */
+  static registerKeyCommand(command: any, handler: () => void): void {
+    const cmd = String(command);
+    ExtensionHost.keyCommandHandlers.set(cmd, handler);
+    (globalThis as any).__openyrweb_keyCommandHandlers = ExtensionHost.keyCommandHandlers;
+
+    const reg = (globalThis as any).__openyrweb_keyCmdRegistrar;
+    if (typeof reg === "function") {
+      try {
+        reg(cmd, handler);
+      } catch (err) {
+        // 重复注册由 GUI 侧忽略；其余异常只记录，不影响本局其它命令。
+        console.warn(`[ExtensionHost] registerKeyCommand("${cmd}") failed`, err);
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 键位命令注入（扩展 keyCommands → 「键盘设置」界面 + 默认键位）
+  // ------------------------------------------------------------------
+
+  /**
+   * 把各扩展 `keyCommands` 声明的命令注入游戏：
+   *  1) 写入 `configurableCmds`，让「键盘设置」界面列出该命令（用户可改键）；
+   *  2) 若该命令尚无任何键位，按声明的 `default` 补一个默认键。
+   * 默认键位依赖 GUI 层挂到 globalThis 的 keyBinds —— GUI 未就绪时轮询等待。
+   *
+   * 调用时机有两处：Application 启动路径（早于主菜单设置页渲染），以及
+   * `ExtensionsModel.setMaster()`（用户在扩展页开关扩展后立即生效）。
+   * ⇒ 本方法必须**幂等**，且要处理「上一轮注册过、这一轮不再生效」的撤销。
+   */
+  static applyExtensionKeyCommands(): void {
+    // 配置可能刚被改动（扩展开关），先失效排序缓存再取 getActiveSorted()。
+    ExtensionHost.sortedCache = null;
+
+    const collect = (exts: ExtensionDefinition[]) => {
+      const out: Array<{ id: string; label: string; desc: string; def?: string }> = [];
+      for (const ext of exts) {
+        for (const c of ext.keyCommands || []) {
+          out.push({ id: c.id, label: c.label, desc: c.desc, def: c.default });
+        }
+      }
+      return out;
+    };
+    // 已启用（总开关 + 依赖均满足）→ 进「键盘设置」界面、补默认键；
+    // 已注册但被关掉 → 不进界面、不补默认键。
+    const activeCmds = collect(ExtensionHost.getActiveSorted());
+    const allCmds = collect(ExtensionHost.getRegistered());
+
+    // 让 KeyBinds.loadHotKeys() 的白名单认识这些命令 —— 它的白名单原本硬编码为
+    // KeyCommandType 枚举成员，导致每加一个热键都得往那个枚举塞一行。现在改成
+    // 「枚举 ∪ 本集合」，新扩展就不必再动核心枚举了。挂 globalThis 同样是为了
+    // 不引入 ExtensionHost -> GUI 的反向模块依赖。
+    // 注意这里用「全部已注册」而非「已启用」：被关掉的扩展，其**用户已改过的键位**
+    // 仍留在 ini 的 [Hotkey] 段里，白名单放行才能保住那条绑定（关掉期间不派发，
+    // 因为没有注册命令处理函数；重新打开即恢复用户原来的键）。
+    (globalThis as any).__openyrweb_knownKeyCommands = new Set(allCmds.map((c) => c.id));
+
+    // 撤销：上一轮注入过、这一轮不在「已启用」里的条目必须从界面移除。
+    // 只删本机制注入过的 id（记在 __openyrweb_extKeyCommands），绝不碰内置命令。
+    const activeIds = new Set(activeCmds.map((c) => c.id));
+    const injected: Set<string> = (globalThis as any).__openyrweb_extKeyCommands || new Set();
+    for (const id of injected) {
+      if (activeIds.has(id)) continue;
+      try {
+        (configurableCmdsModule as any).configurableCmds.delete(id);
+      } catch (err) {
+        console.warn(`[ExtensionHost] 移除键位命令条目失败 "${id}"`, err);
+      }
+    }
+    (globalThis as any).__openyrweb_extKeyCommands = activeIds;
+
+    for (const c of activeCmds) {
+      try {
+        (configurableCmdsModule as any).configurableCmds.set(c.id, { label: c.label, desc: c.desc });
+      } catch (err) {
+        console.warn(`[ExtensionHost] 注入键位命令条目失败 "${c.id}"`, err);
+      }
+    }
+
+    // 默认键位以**纯数据**形式发布：[[命令 id, 位编码], ...]。KeyBinds.load() 会在末尾
+    // 读取它并补入未绑定的命令 —— 之所以不只在本类里补一次，是因为「键盘设置」里的
+    // 「恢复默认」会重新 load()（KeyboardScreen.resetAndReload），那时必须重新补，
+    // 否则扩展的默认键会跟着一起丢。
+    const defaults: Array<[string, number]> = [];
+    for (const c of activeCmds) {
+      if (!c.def) continue;
+      const code = ExtensionHost.parseHotkeyCode(c.def);
+      if (code === undefined) {
+        console.warn(`[ExtensionHost] 无法解析默认键位 "${c.def}"（命令 ${c.id}）`);
+        continue;
+      }
+      defaults.push([c.id, code]);
+    }
+    (globalThis as any).__openyrweb_extKeyDefaults = defaults;
+
+    ExtensionHost.ensureDefaultKeyBinds(0);
+  }
+
+  /**
+   * 兜底：KeyBinds 实例出现后，把 __openyrweb_extKeyDefaults 里尚未绑定的补上。
+   * 正常时序下 KeyBinds.load() 已经自己补过了（那时本函数是幂等的空转）；
+   * 这里只覆盖「load() 早于 applyExtensionKeyCommands() 执行」这类非常规入口。
+   * GUI/KeyBinds 还没就绪时轮询等待（最多约 10 秒）。
+   */
+  private static ensureDefaultKeyBinds(attempt: number): void {
+    const keyBinds = (globalThis as any).__openyrweb_keyBinds;
+    if (typeof keyBinds?.addHotKey !== "function") {
+      if (attempt < 40) setTimeout(() => ExtensionHost.ensureDefaultKeyBinds(attempt + 1), 250);
+      return;
+    }
+    const defaults: Array<[string, number]> = (globalThis as any).__openyrweb_extKeyDefaults || [];
+    let added = 0;
+    for (const [id, code] of defaults) {
+      // 已有绑定（用户改过键，或之前已补过）则不覆盖
+      if (keyBinds.getHotKey?.(id)) continue;
+      keyBinds.addHotKey(id, code);
+      added++;
+    }
+    if (added) console.info(`[ExtensionHost] 已为 ${added} 个扩展命令补入默认键位`);
+  }
+
+  /**
+   * 把 "Ctrl+D" 这类描述转成 KeyBinds 的位编码（与 KeyBinds.getHotKeyCode 一致）：
+   * `(meta<<12) + (alt<<10) + (ctrl<<9) + (shift<<8) + keyCode`，字母/数字取 charCodeAt。
+   */
+  private static parseHotkeyCode(spec: string): number | undefined {
+    let meta = 0;
+    let alt = 0;
+    let ctrl = 0;
+    let shift = 0;
+    let keyCode: number | undefined;
+    for (const raw of String(spec).split(/[+\s]+/).filter(Boolean)) {
+      const t = raw.toLowerCase();
+      if (t === "ctrl" || t === "control") ctrl = 1;
+      else if (t === "alt" || t === "menu") alt = 1;
+      else if (t === "shift") shift = 1;
+      else if (t === "win" || t === "windows" || t === "meta") meta = 1;
+      else if (raw.length === 1) keyCode = raw.toUpperCase().charCodeAt(0);
+      else return undefined; // 暂不支持 F1 / 方向键等具名键
+    }
+    if (keyCode === undefined) return undefined;
+    return (meta << 12) + (alt << 10) + (ctrl << 9) + (shift << 8) + keyCode;
+  }
+
+  // ------------------------------------------------------------------
   // 事件总线快捷方式
   // ------------------------------------------------------------------
 
@@ -400,7 +584,14 @@ export class ExtensionHost {
       const fn = (ext.hooks as ExtensionRuntimeHooks | undefined)?.[name];
       if (typeof fn !== "function") continue;
       try {
-        const ctx = createHookContext(ext.id, config, ini, game);
+        const ctx = createHookContext(
+          ext.id,
+          config,
+          ini,
+          game,
+          // 让扩展能在对局期把自己的热键命令接进游戏键位系统（见 ExtensionHost.registerKeyCommand）。
+          (cmd: any, fn: () => void) => ExtensionHost.registerKeyCommand(cmd, fn),
+        );
         // payload 展开在前，ctx 字段覆盖同名键（ctx 的 isFeatureEnabled 等优先）
         const arg = { ...payload, ...ctx };
         (fn as (a: unknown) => void).call(ext.hooks, arg);

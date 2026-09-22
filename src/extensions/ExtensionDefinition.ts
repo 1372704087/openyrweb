@@ -32,6 +32,22 @@ export interface ExtensionFeatureDef {
   defaultEnabled?: boolean;
 }
 
+/** 扩展声明的键位命令（热键）定义。 */
+export interface ExtensionKeyCommandDef {
+  /**
+   * 命令 id —— **必须是 `gui/screen/game/worldInteraction/keyboard/KeyCommandType`
+   * 的成员名**。`KeyBinds.loadHotKeys()` 拿该枚举做白名单过滤，名字不在枚举里的
+   * ini 绑定会被当成「未知命令」丢弃（只打一条 console.debug），因此无法纯靠扩展自包含。
+   */
+  id: string;
+  /** 设置页中该命令显示名的文案 key（locale）。 */
+  label: string;
+  /** 设置页中该命令说明的文案 key（locale）。 */
+  desc: string;
+  /** 默认键位，形如 "Ctrl+D"；用户可在游戏「键盘设置」界面改成任意键。 */
+  default?: string;
+}
+
 /** 数据钩子：Rules.init 解析前改写 rules INI。 */
 export type ApplyToRulesHook = (ctx: ExtensionHookContext) => void;
 
@@ -56,6 +72,13 @@ export interface ExtensionDefinition {
    * 仅在依赖拓扑排序结果相同时作为次级排序键。
    */
   priority?: number;
+
+  /**
+   * 本扩展提供的键位命令 —— 会出现在游戏「键盘设置」界面、可被用户改键。
+   * 文案内容放在同目录的 `extension.manifest.json`（构建期合并进 locale）；
+   * 这里只声明命令结构（运行期注入 configurableCmds 用），两者由构建期校验一致。
+   */
+  keyCommands?: ExtensionKeyCommandDef[];
 
   /** 运行时钩子处理函数集合（含 applyToRules）。 */
   hooks?: ExtensionRuntimeHooks & {

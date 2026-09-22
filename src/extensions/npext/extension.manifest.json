@@ -1,0 +1,30 @@
+{
+  "id": "npext",
+  "messages": {
+    "en-US": {
+      "ts:ext.npext": "NPext",
+      "stt:ext.npext": "NPext (NPatch Extended) — enhancement extension for the NPatch platform, adding new countries/sides, techno & weapon extensions and vanilla logic fixes (built into this port's source).",
+      "ts:ext.npext.feature.aicloneproduction": "AI clone production",
+      "stt:ext.npext.feature.aicloneproduction": "AI multi-factory parallel clone production (vanilla style: all factories of a type produce simultaneously). When off, the AI produces from one factory at a time.",
+      "ts:ext.npext.feature.aioverlimitproduction": "AI over-limit production",
+      "stt:ext.npext.feature.aioverlimitproduction": "AI production ignores BuildLimit caps (vanilla style). When off, the AI respects BuildLimit and no longer over-produces."
+    },
+    "zh-CN": {
+      "ts:ext.npext": "NPext",
+      "stt:ext.npext": "NPext（NPatch Extended）——NPatch 平台的增强扩展，提供新阵营、单位与武器扩展及原版逻辑修复（本作源码内置）。",
+      "ts:ext.npext.feature.aicloneproduction": "AI克隆生产",
+      "stt:ext.npext.feature.aicloneproduction": "AI 多工厂并行克隆生产（原版风格：拥有多座同类工厂时同时出货）。关闭后 AI 同一时刻只从一座工厂生产。",
+      "ts:ext.npext.feature.aioverlimitproduction": "AI超越上限生产",
+      "stt:ext.npext.feature.aioverlimitproduction": "AI 生产忽略 BuildLimit 上限（原版风格）。关闭后 AI 受 BuildLimit 约束，不再超限生产。"
+    },
+    "zh-TW": {
+      "ts:ext.npext": "NPext",
+      "stt:ext.npext": "NPext（NPatch Extended）——NPatch 平台的增強擴充，提供新陣營、單位與武器擴充及原版邏輯修復（本作原始碼內建）。",
+      "ts:ext.npext.feature.aicloneproduction": "AI克隆生產",
+      "stt:ext.npext.feature.aicloneproduction": "AI 多工廠並行克隆生產（原版風格：擁有多座同類工廠時同時出貨）。關閉後 AI 同一時刻只從一座工廠生產。",
+      "ts:ext.npext.feature.aioverlimitproduction": "AI超越上限生產",
+      "stt:ext.npext.feature.aioverlimitproduction": "AI 生產忽略 BuildLimit 上限（原版風格）。關閉後 AI 受 BuildLimit 約束，不再超限生產。"
+    }
+  },
+  "keyCommands": []
+}
