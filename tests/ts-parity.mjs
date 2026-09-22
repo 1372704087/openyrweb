@@ -5035,6 +5035,838 @@ const CONVERTED = [
     ],
   },
   {
+    name: "game/action/ActionType",
+    tsjs: "src/game/action/ActionType.ts.js",
+    probes: [
+      (ns) => ns.ActionType.NoAction,
+      (ns) => ns.ActionType.DropPlayer,
+      (ns) => ns.ActionType.ObserveGame,
+      (ns) => ns.ActionType.ResignGame,
+      (ns) => ns.ActionType.DebugCommand,
+      (ns) => ns.ActionType.PlaceBuilding,
+      (ns) => ns.ActionType.SellObject,
+      (ns) => ns.ActionType.ToggleRepair,
+      (ns) => ns.ActionType.SelectUnits,
+      (ns) => ns.ActionType.OrderUnits,
+      (ns) => ns.ActionType.UpdateQueue,
+      (ns) => ns.ActionType.ToggleAlliance,
+      (ns) => ns.ActionType.ActivateSuperWeapon,
+      (ns) => ns.ActionType.PingLocation,
+      (ns) => Object.keys(ns.ActionType).length,
+      (ns) => ns.ActionType[0],
+      (ns) => ns.ActionType[13],
+    ],
+  },
+  {
+    name: "game/action/Action",
+    tsjs: "src/game/action/Action.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.Action(ActionType.PlaceBuilding);
+        return {
+          actionType: a.actionType,
+          serialize: [...a.serialize()],
+          print: a.print(),
+          keys: Object.keys(a),
+        };
+      },
+      (ns) => {
+        const a = new ns.Action(0);
+        a.unserialize(new Uint8Array([1, 2]));
+        return { print: a.print(), len: a.serialize().length };
+      },
+    ],
+  },
+  {
+    name: "game/action/ActionQueue",
+    tsjs: "src/game/action/ActionQueue.ts.js",
+    probes: [
+      (ns) => {
+        const q = new ns.ActionQueue();
+        const a = { id: 1 };
+        const b = { id: 2 };
+        q.push(a, b);
+        const last = q.getLast();
+        const all = q.dequeueAll();
+        return {
+          lastId: last.id,
+          allIds: all.map((x) => x.id),
+          afterLen: q.actions.length,
+        };
+      },
+      (ns) => {
+        const q = new ns.ActionQueue();
+        q.push({ id: 3 });
+        q.clear();
+        const x = q.dequeueLast();
+        return { cleared: q.actions.length, popped: x === undefined };
+      },
+    ],
+  },
+  {
+    name: "game/action/ActionFactory",
+    tsjs: "src/game/action/ActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const f = new ns.ActionFactory();
+        const created = [];
+        f.registerFactory(ActionType.NoAction, { create: () => ({ t: "no" }) });
+        f.registerFactory(ActionType.PlaceBuilding, {
+          create: () => ({ t: "place" }),
+        });
+        created.push(f.create(ActionType.NoAction), f.create(ActionType.PlaceBuilding));
+        let err;
+        try {
+          f.create(ActionType.DebugCommand);
+        } catch (e) {
+          err = e.message;
+        }
+        return { created, err, size: f.factories.size };
+      },
+    ],
+  },
+  {
+    name: "game/action/ActionFactoryReg",
+    tsjs: "src/game/action/ActionFactoryReg.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const game = { map: { name: "map" } };
+        const registered = [];
+        const af = {
+          registerFactory: (type, factory) => {
+            registered.push({ type, factoryName: factory.constructor.name });
+          },
+        };
+        new ns.ActionFactoryReg().register(af, game, "Local");
+        return {
+          count: registered.length,
+          types: registered.map((r) => r.type).sort((a, b) => a - b),
+          hasAll: [
+            ActionType.NoAction,
+            ActionType.PlaceBuilding,
+            ActionType.SellObject,
+            ActionType.ToggleRepair,
+            ActionType.SelectUnits,
+            ActionType.OrderUnits,
+            ActionType.UpdateQueue,
+            ActionType.ToggleAlliance,
+            ActionType.ActivateSuperWeapon,
+            ActionType.PingLocation,
+            ActionType.DropPlayer,
+            ActionType.ObserveGame,
+            ActionType.ResignGame,
+            ActionType.DebugCommand,
+          ].every((t) => registered.some((r) => r.type === t)),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/OrderActionContext",
+    tsjs: "src/game/action/OrderActionContext.ts.js",
+    probes: [
+      (ns) => {
+        const ctx = new ns.OrderActionContext();
+        const player = { name: "P1" };
+        const s1 = ctx.getOrCreateSelection(player);
+        const s2 = ctx.getOrCreateSelection(player);
+        const other = ctx.getOrCreateSelection({ name: "P2" });
+        return {
+          same: s1 === s2,
+          different: s1 !== other,
+          size: ctx.unitSelectionByPlayer.size,
+          hasPlayer: ctx.unitSelectionByPlayer.get(player) === s1,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/NoAction",
+    tsjs: "src/game/action/NoAction.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.NoAction();
+        a.process();
+        return {
+          actionType: a.actionType,
+          isNoAction: a.actionType === ActionType.NoAction,
+          print: a.print(),
+          serializeLen: a.serialize().length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/SelectUnitsAction",
+    tsjs: "src/game/action/SelectUnitsAction.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.SelectUnitsAction({ getWorld: () => ({}) }, {});
+        // setter 截断（两侧一致）
+        a.unitIds = Array.from({ length: 200 }, (_, i) => i);
+        const afterSetter = a.unitIds.length;
+        // unserialize：≤128 路径（与孪生一致）
+        const ids = [10, 20, 30];
+        const buf = new Uint8Array(12);
+        const dv = new DataView(buf.buffer);
+        ids.forEach((id, i) => dv.setUint32(i * 4, id, true));
+        const b = new ns.SelectUnitsAction({}, {});
+        b.unserialize(buf);
+        const bytes = b.serialize();
+        const roundtrip = [];
+        const rdv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        for (let i = 0; i < bytes.byteLength / 4; i++) roundtrip.push(rdv.getUint32(i * 4, true));
+        return {
+          actionType: a.actionType,
+          afterSetter,
+          roundtrip,
+          print: b.print(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/OrderUnitsAction",
+    tsjs: "src/game/action/OrderUnitsAction.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const game = {
+          getWorld: () => ({ hasObjectId: () => false }),
+          createTarget: (obj, tile) => ({ obj, tile, getBridge: () => undefined }),
+        };
+        const map = { tiles: { getByMapCoords: (x, y) => (x === 1 && y === 2 ? { rx: x, ry: y } : null) } };
+        const ctx = {};
+        const factory = { create: () => ({ set() {}, isValid: () => true, isAllowed: () => true }) };
+        const a = new ns.OrderUnitsAction(game, map, ctx, factory);
+        // orderType only (version 0)
+        const p0 = new Uint8Array([OrderType.Move, 0]);
+        a.unserialize(p0);
+        const ser0 = a.serialize();
+        // full target tile + queue flag (version 3)
+        const p3 = new Uint8Array([OrderType.Move, 3, 1, 0, 2, 0, 1]);
+        const b = new ns.OrderUnitsAction(game, map, ctx, factory);
+        b.unserialize(p3);
+        const ser3 = b.serialize();
+        return {
+          limit: ns.ORDER_UNIT_LIMIT,
+          actionType: a.actionType,
+          orderType0: a.orderType,
+          ser0: [...ser0],
+          targetRx: b.target?.tile?.rx,
+          targetRy: b.target?.tile?.ry,
+          queue: b.queue,
+          isInvalid: b.isInvalid,
+          print3: b.print(),
+          ser3: [...ser3],
+        };
+      },
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const game = {
+          getWorld: () => ({ hasObjectId: (id) => id === 99 }),
+          getObjectById: () => ({ name: "obj99" }),
+          createTarget: (obj, tile) => ({ obj, tile, getBridge: () => undefined }),
+        };
+        const map = { tiles: { getByMapCoords: () => ({ rx: 5, ry: 6 }) } };
+        const a = new ns.OrderUnitsAction(game, map, {}, { create: () => ({}) });
+        // version 4: queue + objectId present
+        const p = new Uint8Array([
+          OrderType.Attack,
+          4,
+          5,
+          0,
+          6,
+          0,
+          1, // queue
+          99,
+          0,
+          0,
+          0, // objectId
+        ]);
+        a.unserialize(p);
+        return {
+          orderType: a.orderType,
+          queue: a.queue,
+          isInvalid: a.isInvalid,
+          hasObj: !!a.target?.obj,
+        };
+      },
+      (ns, THREE, mod) => {
+        const OrderType = mod("game/order/OrderType").OrderType;
+        const game = {
+          getWorld: () => ({ hasObjectId: () => false }),
+          getObjectById: () => undefined,
+          createTarget: () => undefined,
+        };
+        const map = { tiles: { getByMapCoords: () => null } };
+        const a = new ns.OrderUnitsAction(game, map, {}, { create: () => ({}) });
+        const p = new Uint8Array([OrderType.Move, 4, 1, 0, 1, 0, 0, 1, 0, 0, 0]);
+        a.unserialize(p);
+        return { isInvalid: a.isInvalid, print: a.print() };
+      },
+    ],
+  },
+  {
+    name: "game/action/PlaceBuildingAction",
+    tsjs: "src/game/action/PlaceBuildingAction.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const rules = { index: 42, name: "GAAIRC" };
+        const game = {
+          rules: {
+            getTechnoByInternalId: (id, type) =>
+              id === 42 && type === ObjectType.Building ? rules : null,
+          },
+        };
+        const a = new ns.PlaceBuildingAction(game);
+        const buf = new Uint8Array(8);
+        const dv = new DataView(buf.buffer);
+        dv.setUint32(0, 42, true);
+        dv.setUint16(4, 7, true);
+        dv.setUint16(6, 9, true);
+        a.unserialize(buf);
+        const ser = a.serialize();
+        const out = [];
+        const rdv = new DataView(ser.buffer, ser.byteOffset, ser.byteLength);
+        out.push(rdv.getUint32(0, true), rdv.getUint16(4, true), rdv.getUint16(6, true));
+        return {
+          actionType: a.actionType,
+          name: a.buildingRules?.name,
+          tile: a.tile,
+          roundtrip: out,
+          print: a.print(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/SellObjectAction",
+    tsjs: "src/game/action/SellObjectAction.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.SellObjectAction({});
+        const buf = new Uint8Array(4);
+        new DataView(buf.buffer).setUint32(0, 1234, true);
+        a.unserialize(buf);
+        const ser = a.serialize();
+        return {
+          actionType: a.actionType,
+          objectId: a.objectId,
+          ser0: new DataView(ser.buffer, ser.byteOffset).getUint32(0, true),
+          print: a.print(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/ToggleRepairAction",
+    tsjs: "src/game/action/ToggleRepairAction.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.ToggleRepairAction({});
+        const buf = new Uint8Array(4);
+        new DataView(buf.buffer).setUint32(0, 77, true);
+        a.unserialize(buf);
+        return {
+          actionType: a.actionType,
+          buildingId: a.buildingId,
+          print: a.print(),
+          ser0: new DataView(a.serialize().buffer, 0).getUint32(0, true),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/UpdateQueueAction",
+    tsjs: "src/game/action/UpdateQueueAction.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const QueueType = mod("game/player/production/ProductionQueue").QueueType;
+        const item = { index: 5, type: 3, name: "Initiate" };
+        const game = {
+          rules: {
+            getTechnoByInternalId: (id, type) =>
+              id === 5 && type === 3 ? item : null,
+          },
+        };
+        // Add: queueType + updateType + item + qty
+        const buf = new Uint8Array(9);
+        const dv = new DataView(buf.buffer);
+        dv.setUint8(0, 0);
+        dv.setUint8(1, ns.UpdateType.Add);
+        dv.setUint32(2, 5, true);
+        dv.setUint8(6, 3);
+        dv.setUint16(7, 3, true);
+        const a = new ns.UpdateQueueAction(game);
+        a.unserialize(buf);
+        const ser = a.serialize();
+        return {
+          actionType: a.actionType,
+          updateType: a.updateType,
+          itemName: a.item?.name,
+          quantity: a.quantity,
+          print: a.print(),
+          ser: [...ser],
+          pausePrint: (() => {
+            const p = new ns.UpdateQueueAction(game);
+            p.unserialize(new Uint8Array([1, ns.UpdateType.Pause]));
+            return p.print();
+          })(),
+          resumePrint: (() => {
+            const p = new ns.UpdateQueueAction(game);
+            p.unserialize(new Uint8Array([0, ns.UpdateType.Resume]));
+            return p.print();
+          })(),
+          updateTypeEnum: [ns.UpdateType.Add, ns.UpdateType.Cancel, ns.UpdateType.Pause, ns.UpdateType.Resume, ns.UpdateType.AddNext],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/ToggleAllianceAction",
+    tsjs: "src/game/action/ToggleAllianceAction.ts.js",
+    probes: [
+      (ns) => {
+        const playerA = { name: "Alice" };
+        const playerB = { name: "Bob" };
+        const game = {
+          getPlayer: (n) => (n === 1 ? playerB : playerA),
+          getPlayerNumber: (p) => (p === playerB ? 1 : 0),
+        };
+        const a = new ns.ToggleAllianceAction(game);
+        a.unserialize(new Uint8Array([1, 1]));
+        const ser = a.serialize();
+        return {
+          actionType: a.actionType,
+          toName: a.toPlayer?.name,
+          toggle: a.toggle,
+          ser: [...ser],
+          print: a.print(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/ActivateSuperWeaponAction",
+    tsjs: "src/game/action/ActivateSuperWeaponAction.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const SuperWeaponType = mod("game/type/SuperWeaponType").SuperWeaponType;
+        const a = new ns.ActivateSuperWeaponAction({});
+        // 1 tile: type u8 + count u8 + x u16 + y u16
+        const buf = new Uint8Array(6);
+        const dv = new DataView(buf.buffer);
+        dv.setUint8(0, SuperWeaponType.LightningStorm ?? 0);
+        dv.setUint8(1, 2);
+        dv.setUint16(2, 10, true);
+        dv.setUint16(4, 20, true);
+        a.unserialize(buf);
+        const ser1 = a.serialize();
+        // 2 tiles
+        const b = new ns.ActivateSuperWeaponAction({});
+        const buf2 = new Uint8Array(10);
+        const dv2 = new DataView(buf2.buffer);
+        dv2.setUint8(0, 1);
+        dv2.setUint8(1, 4);
+        dv2.setUint16(2, 1, true);
+        dv2.setUint16(4, 2, true);
+        dv2.setUint16(6, 3, true);
+        dv2.setUint16(8, 4, true);
+        b.unserialize(buf2);
+        return {
+          actionType: a.actionType,
+          tile: a.tile,
+          tile2: a.tile2 === undefined ? null : a.tile2,
+          print: a.print(),
+          ser1: [...ser1],
+          bTile: b.tile,
+          bTile2: b.tile2,
+          bPrint: b.print(),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/PingLocationAction",
+    tsjs: "src/game/action/PingLocationAction.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.PingLocationAction({});
+        const buf = new Uint8Array(4);
+        const dv = new DataView(buf.buffer);
+        dv.setUint16(0, 33, true);
+        dv.setUint16(2, 44, true);
+        a.unserialize(buf);
+        return {
+          actionType: a.actionType,
+          tile: a.tile,
+          print: a.print(),
+          ser: [...a.serialize()],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/DropPlayerAction",
+    tsjs: "src/game/action/DropPlayerAction.ts.js",
+    probes: [
+      (ns) => {
+        const game = {
+          redistributeAllPlayerAssets: (p) => ({ ore: p.name }),
+          removeAllPlayerAssets: (p) => {
+            p.assetsGone = true;
+          },
+          events: {
+            dispatch: (e) => {
+              game._last = e;
+            },
+          },
+        };
+        const a = new ns.DropPlayerAction(game, "Local");
+        // local player → no-op
+        a.player = { name: "Local", defeated: false };
+        a.process();
+        const skipped = a.player.assetsGone !== true;
+        // remote player → drop
+        const b = new ns.DropPlayerAction(game, "Local");
+        const remote = { name: "Remote", defeated: false };
+        b.player = remote;
+        game._last = null;
+        b.process();
+        return {
+          actionType: a.actionType,
+          skipped,
+          dropped: remote.dropped === true,
+          assetsGone: remote.assetsGone === true,
+          hasEvent: !!game._last,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/ResignGameAction",
+    tsjs: "src/game/action/ResignGameAction.ts.js",
+    probes: [
+      (ns) => {
+        const game = {
+          redistributeAllPlayerAssets: (p) => ({ units: p.name }),
+          removeAllPlayerAssets: (p) => {
+            p.assetsGone = true;
+          },
+          events: {
+            dispatch: (e) => {
+              game._last = e;
+            },
+          },
+        };
+        const a = new ns.ResignGameAction(game, "Local");
+        a.player = { name: "Local", isCombatant: () => true };
+        a.process();
+        const skipped = a.player.resigned !== true && a.player.assetsGone !== true;
+
+        const b = new ns.ResignGameAction(game, "Local");
+        const remote = { name: "R", isCombatant: () => true };
+        b.player = remote;
+        game._last = null;
+        b.process();
+
+        const c = new ns.ResignGameAction(game, "Local");
+        const nonCombat = { name: "N", isCombatant: () => false };
+        c.player = nonCombat;
+        game._last = null;
+        c.process();
+
+        return {
+          actionType: a.actionType,
+          skipped,
+          resigned: remote.resigned === true,
+          hasEvent: !!game._last,
+          nonCombatResigned: nonCombat.resigned === true,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/ObserveGameAction",
+    tsjs: "src/game/action/ObserveGameAction.ts.js",
+    probes: [
+      (ns) => {
+        const game = {
+          removeAllPlayerAssets: (p) => {
+            p.assetsGone = true;
+          },
+          events: { dispatch: () => {} },
+          mapShroudTrait: { getPlayerShroud: () => ({ revealAll: () => {} }) },
+        };
+        const a = new ns.ObserveGameAction(game);
+        const already = { name: "Obs", defeated: true, isObserver: false, isCombatant: () => true };
+        a.player = already;
+        a.process();
+        const early = { resigned: already.resigned === true };
+
+        const b = new ns.ObserveGameAction(game);
+        const combatant = {
+          name: "C",
+          defeated: false,
+          isObserver: false,
+          isCombatant: () => true,
+          resigned: false,
+          radarTrait: {
+            _disabled: true,
+            isDisabled() {
+              return this._disabled;
+            },
+            setDisabled(v) {
+              this._disabled = v;
+            },
+          },
+        };
+        b.player = combatant;
+        b.process();
+        return {
+          actionType: a.actionType,
+          early,
+          resigned: combatant.resigned === true,
+          defeated: combatant.defeated === true,
+          isObserver: combatant.isObserver === true,
+          radarOn: combatant.radarTrait.isDisabled() === false,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/DebugAction",
+    tsjs: "src/game/action/DebugAction.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.DebugAction({ debugText: { value: "" } });
+        // SetGlobalDebugText + cstring "hi"
+        const buf = new Uint8Array([ns.DebugCommandType.SetGlobalDebugText, 104, 105, 0]);
+        a.unserialize(buf);
+        a.process();
+        const ser = a.serialize();
+        const b = new ns.DebugAction({ debugText: { value: "" } });
+        b.unserialize(ser);
+        b.process();
+        return {
+          actionType: a.actionType,
+          type: a.command.type,
+          text: a.command.params.text,
+          debugAfter: a.game.debugText.value,
+          roundtripText: b.command.params.text,
+          enum: [ns.DebugCommandType.SetGlobalDebugText, ns.DebugCommandType.SetUnitDebugText],
+        };
+      },
+      (ns) => {
+        const labels = {};
+        const game = {
+          debugText: { value: "" },
+          getWorld: () => ({ hasObjectId: (id) => id === 9 }),
+          getObjectById: () => ({
+            isTechno: () => true,
+            set debugLabel(v) {
+              labels[9] = v;
+            },
+            get debugLabel() {
+              return labels[9];
+            },
+          }),
+        };
+        const a = new ns.DebugAction(game);
+        // SetUnitDebugText + id 9 + "L" + NUL
+        const buf = new Uint8Array([ns.DebugCommandType.SetUnitDebugText, 9, 0, 0, 0, 76, 0]);
+        a.unserialize(buf);
+        a.process();
+        return { unitId: a.command.params.unitId, label: a.command.params.label, applied: labels[9] };
+      },
+    ],
+  },
+  // --- action factories ---
+  {
+    name: "game/action/factories/NoActionFactory",
+    tsjs: "src/game/action/factories/NoActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.NoActionFactory().create();
+        return { actionType: a.actionType, ctor: a.constructor.name, isNo: a.actionType === ActionType.NoAction };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/PlaceBuildingActionFactory",
+    tsjs: "src/game/action/factories/PlaceBuildingActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const game = { g: 1 };
+        const a = new ns.PlaceBuildingActionFactory(game).create();
+        return { actionType: a.actionType, game: a.game, match: a.actionType === ActionType.PlaceBuilding };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/SellObjectActionFactory",
+    tsjs: "src/game/action/factories/SellObjectActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.SellObjectActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.SellObject };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/ToggleRepairActionFactory",
+    tsjs: "src/game/action/factories/ToggleRepairActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.ToggleRepairActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.ToggleRepair };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/SelectUnitsActionFactory",
+    tsjs: "src/game/action/factories/SelectUnitsActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const ctx = { x: 1 };
+        const a = new ns.SelectUnitsActionFactory({ g: 1 }, ctx).create();
+        return {
+          actionType: a.actionType,
+          match: a.actionType === ActionType.SelectUnits,
+          ctx: a.orderActionContext === ctx,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/OrderUnitsActionFactory",
+    tsjs: "src/game/action/factories/OrderUnitsActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const game = { g: 1 };
+        const map = { m: 1 };
+        const ctx = { c: 1 };
+        const a = new ns.OrderUnitsActionFactory(game, map, ctx).create();
+        return {
+          actionType: a.actionType,
+          match: a.actionType === ActionType.OrderUnits,
+          map: a.map === map,
+          ctx: a.orderActionContext === ctx,
+          hasOrderFactory: !!a.orderFactory,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/UpdateQueueActionFactory",
+    tsjs: "src/game/action/factories/UpdateQueueActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.UpdateQueueActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.UpdateQueue };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/ToggleAllianceFactory",
+    tsjs: "src/game/action/factories/ToggleAllianceFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.ToggleAllianceActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.ToggleAlliance };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/ActivateSuperWeaponActionFactory",
+    tsjs: "src/game/action/factories/ActivateSuperWeaponActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.ActivateSuperWeaponActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.ActivateSuperWeapon };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/PingLocationActionFactory",
+    tsjs: "src/game/action/factories/PingLocationActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.PingLocationActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.PingLocation };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/DropPlayerActionFactory",
+    tsjs: "src/game/action/factories/DropPlayerActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.DropPlayerActionFactory({ name: "g" }, "Local").create();
+        return {
+          actionType: a.actionType,
+          match: a.actionType === ActionType.DropPlayer,
+          localPlayerName: a.localPlayerName,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/ObserveGameActionFactory",
+    tsjs: "src/game/action/factories/ObserveGameActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.ObserveGameActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.ObserveGame };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/ResignGameActionFactory",
+    tsjs: "src/game/action/factories/ResignGameActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.ResignGameActionFactory({}, "Local").create();
+        return {
+          actionType: a.actionType,
+          match: a.actionType === ActionType.ResignGame,
+          localPlayerName: a.localPlayerName,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/action/factories/DebugActionFactory",
+    tsjs: "src/game/action/factories/DebugActionFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ActionType = mod("game/action/ActionType").ActionType;
+        const a = new ns.DebugActionFactory({}).create();
+        return { actionType: a.actionType, match: a.actionType === ActionType.DebugCommand };
+      },
+    ],
+  },
+  {
     name: "game/order/Order",
     tsjs: "src/game/order/Order.ts.js",
     probes: [

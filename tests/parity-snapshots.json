@@ -5293,5 +5293,410 @@
       "busyLen": 0,
       "refineryStub": "game/gameobject/task/harvester/ReturnOreTask"
     }
+  },
+  "game/action/ActionType": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 28,
+    "15": "NoAction",
+    "16": "PingLocation"
+  },
+  "game/action/Action": {
+    "0": {
+      "actionType": 5,
+      "serialize": [],
+      "print": "",
+      "keys": [
+        "actionType"
+      ]
+    },
+    "1": {
+      "print": "",
+      "len": 0
+    }
+  },
+  "game/action/ActionQueue": {
+    "0": {
+      "lastId": 2,
+      "allIds": [
+        1,
+        2
+      ],
+      "afterLen": 0
+    },
+    "1": {
+      "cleared": 0,
+      "popped": true
+    }
+  },
+  "game/action/ActionFactory": {
+    "0": {
+      "created": [
+        {
+          "t": "no"
+        },
+        {
+          "t": "place"
+        }
+      ],
+      "err": "No factory registered for action type 4",
+      "size": 2
+    }
+  },
+  "game/action/ActionFactoryReg": {
+    "0": {
+      "count": 14,
+      "types": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "hasAll": true
+    }
+  },
+  "game/action/OrderActionContext": {
+    "0": {
+      "same": true,
+      "different": true,
+      "size": 2,
+      "hasPlayer": true
+    }
+  },
+  "game/action/NoAction": {
+    "0": {
+      "actionType": 0,
+      "isNoAction": true,
+      "print": "",
+      "serializeLen": 0
+    }
+  },
+  "game/action/SelectUnitsAction": {
+    "0": {
+      "actionType": 8,
+      "afterSetter": 128,
+      "roundtrip": [
+        10,
+        20,
+        30
+      ],
+      "print": "Select unit(s) [10,20,30]"
+    }
+  },
+  "game/action/OrderUnitsAction": {
+    "0": {
+      "limit": 128,
+      "actionType": 9,
+      "orderType0": 0,
+      "ser0": [
+        0,
+        0
+      ],
+      "targetRx": 1,
+      "targetRy": 2,
+      "queue": true,
+      "isInvalid": false,
+      "print3": "Move order [obj: <none>, tile: 1,2](queue)",
+      "ser3": [
+        0,
+        3,
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    "1": {
+      "orderType": 2,
+      "queue": true,
+      "isInvalid": false,
+      "hasObj": true
+    },
+    "2": {
+      "isInvalid": true,
+      "print": ""
+    }
+  },
+  "game/action/PlaceBuildingAction": {
+    "0": {
+      "actionType": 5,
+      "name": "GAAIRC",
+      "tile": {
+        "x": 7,
+        "y": 9
+      },
+      "roundtrip": [
+        42,
+        7,
+        9
+      ],
+      "print": "Place building GAAIRC at tile (7, 9)"
+    }
+  },
+  "game/action/SellObjectAction": {
+    "0": {
+      "actionType": 6,
+      "objectId": 1234,
+      "ser0": 1234,
+      "print": "Sell object 1234"
+    }
+  },
+  "game/action/ToggleRepairAction": {
+    "0": {
+      "actionType": 7,
+      "buildingId": 77,
+      "print": "Toggle repair 77",
+      "ser0": 77
+    }
+  },
+  "game/action/UpdateQueueAction": {
+    "0": {
+      "actionType": 10,
+      "updateType": 0,
+      "itemName": "Initiate",
+      "quantity": 3,
+      "print": "Add to queue Initiate x 3",
+      "ser": [
+        0,
+        0,
+        5,
+        0,
+        0,
+        0,
+        3,
+        3,
+        0
+      ],
+      "pausePrint": "Put queue Armory on hold.",
+      "resumePrint": "Resume queue Structures",
+      "updateTypeEnum": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "game/action/ToggleAllianceAction": {
+    "0": {
+      "actionType": 11,
+      "toName": "Bob",
+      "toggle": true,
+      "ser": [
+        1,
+        1
+      ],
+      "print": "Toggle alliance on with Bob"
+    }
+  },
+  "game/action/ActivateSuperWeaponAction": {
+    "0": {
+      "actionType": 12,
+      "tile": {
+        "x": 10,
+        "y": 20
+      },
+      "tile2": null,
+      "print": "Activate SuperW LightningStorm at tile (10, 20)",
+      "ser1": [
+        2,
+        2,
+        10,
+        0,
+        20,
+        0
+      ],
+      "bTile": {
+        "x": 1,
+        "y": 2
+      },
+      "bTile2": {
+        "x": 3,
+        "y": 4
+      },
+      "bPrint": "Activate SuperW IronCurtain at tile (1, 2), (3, 4)"
+    }
+  },
+  "game/action/PingLocationAction": {
+    "0": {
+      "actionType": 13,
+      "tile": {
+        "x": 33,
+        "y": 44
+      },
+      "print": "Ping location at tile (33, 44)",
+      "ser": [
+        33,
+        0,
+        44,
+        0
+      ]
+    }
+  },
+  "game/action/DropPlayerAction": {
+    "0": {
+      "actionType": 1,
+      "skipped": true,
+      "dropped": true,
+      "assetsGone": true,
+      "hasEvent": true
+    }
+  },
+  "game/action/ResignGameAction": {
+    "0": {
+      "actionType": 3,
+      "skipped": true,
+      "resigned": true,
+      "hasEvent": false,
+      "nonCombatResigned": false
+    }
+  },
+  "game/action/ObserveGameAction": {
+    "0": {
+      "actionType": 2,
+      "early": {
+        "resigned": false
+      },
+      "resigned": true,
+      "defeated": true,
+      "isObserver": true,
+      "radarOn": true
+    }
+  },
+  "game/action/DebugAction": {
+    "0": {
+      "actionType": 4,
+      "type": 0,
+      "text": "hi",
+      "debugAfter": "hi",
+      "roundtripText": "hi",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "1": {
+      "unitId": 9,
+      "label": "L",
+      "applied": "L"
+    }
+  },
+  "game/action/factories/NoActionFactory": {
+    "0": {
+      "actionType": 0,
+      "ctor": "s",
+      "isNo": true
+    }
+  },
+  "game/action/factories/PlaceBuildingActionFactory": {
+    "0": {
+      "actionType": 5,
+      "game": {
+        "g": 1
+      },
+      "match": true
+    }
+  },
+  "game/action/factories/SellObjectActionFactory": {
+    "0": {
+      "actionType": 6,
+      "match": true
+    }
+  },
+  "game/action/factories/ToggleRepairActionFactory": {
+    "0": {
+      "actionType": 7,
+      "match": true
+    }
+  },
+  "game/action/factories/SelectUnitsActionFactory": {
+    "0": {
+      "actionType": 8,
+      "match": true,
+      "ctx": true
+    }
+  },
+  "game/action/factories/OrderUnitsActionFactory": {
+    "0": {
+      "actionType": 9,
+      "match": true,
+      "map": true,
+      "ctx": true,
+      "hasOrderFactory": true
+    }
+  },
+  "game/action/factories/UpdateQueueActionFactory": {
+    "0": {
+      "actionType": 10,
+      "match": true
+    }
+  },
+  "game/action/factories/ToggleAllianceFactory": {
+    "0": {
+      "actionType": 11,
+      "match": true
+    }
+  },
+  "game/action/factories/ActivateSuperWeaponActionFactory": {
+    "0": {
+      "actionType": 12,
+      "match": true
+    }
+  },
+  "game/action/factories/PingLocationActionFactory": {
+    "0": {
+      "actionType": 13,
+      "match": true
+    }
+  },
+  "game/action/factories/DropPlayerActionFactory": {
+    "0": {
+      "actionType": 1,
+      "match": true,
+      "localPlayerName": "Local"
+    }
+  },
+  "game/action/factories/ObserveGameActionFactory": {
+    "0": {
+      "actionType": 2,
+      "match": true
+    }
+  },
+  "game/action/factories/ResignGameActionFactory": {
+    "0": {
+      "actionType": 3,
+      "match": true,
+      "localPlayerName": "Local"
+    }
+  },
+  "game/action/factories/DebugActionFactory": {
+    "0": {
+      "actionType": 4,
+      "match": true
+    }
   }
 }
