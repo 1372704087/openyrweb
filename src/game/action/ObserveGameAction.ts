@@ -33,7 +33,8 @@ export class ObserveGameAction extends ActionModule.Action {
     player.defeated = true;
     player.isObserver = true;
     this.game.events.dispatch(
-      new PlayerResignedEventModule.PlayerResignedEvent(player),
+      // 孪生只传 target；assetsRedistributed 缺省为 undefined（与 .ts.js 运行时一致）
+      new PlayerResignedEventModule.PlayerResignedEvent(player, undefined),
     );
     this.game.events.dispatch(
       new PlayerDefeatedEventModule.PlayerDefeatedEvent(player),

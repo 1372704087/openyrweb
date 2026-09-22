@@ -123,7 +123,8 @@ export class EvacuateTransportTask extends Task {
     unit.transport = undefined;
     if (isAbsorb) {
       unit.garrisonedAt = undefined;
-      this.game.events.dispatch(new BuildingEvacuateEventModule.BuildingEvacuateEvent(transport));
+      // 孪生只传 target；player 缺省为 undefined（与 .ts.js 运行时一致）
+      this.game.events.dispatch(new BuildingEvacuateEventModule.BuildingEvacuateEvent(transport, undefined));
     }
     this.game.unlimboObject(unit, spawnNode.tile);
     unit.unitOrderTrait.unmarkNextQueuedOrder();

@@ -5698,5 +5698,408 @@
       "actionType": 4,
       "match": true
     }
+  },
+  "game/event/AllianceChangeEvent": {
+    "0": {
+      "sameAlliance": true,
+      "changeType": 0,
+      "sameFrom": true,
+      "type": 46,
+      "enumFormed": 1,
+      "enumBroken": 2
+    }
+  },
+  "game/event/BridgeRepairEvent": {
+    "0": {
+      "sameSource": true,
+      "sameTile": true,
+      "type": 14
+    }
+  },
+  "game/event/BuildingCaptureEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 20
+    }
+  },
+  "game/event/BuildingEvacuateEvent": {
+    "0": {
+      "sameTarget": true,
+      "samePlayer": true,
+      "type": 23
+    }
+  },
+  "game/event/BuildingFailedPlaceEvent": {
+    "0": {
+      "name": "PROC",
+      "samePlayer": true,
+      "sameTile": true,
+      "type": 17
+    }
+  },
+  "game/event/BuildingGarrisonEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 22
+    }
+  },
+  "game/event/BuildingInfiltrationEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameSource": true,
+      "type": 21
+    }
+  },
+  "game/event/BuildingPlaceEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 16
+    }
+  },
+  "game/event/BuildingRepairFullEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameSource": true,
+      "type": 19
+    }
+  },
+  "game/event/BuildingRepairStartEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 24,
+      "keys": [
+        "target",
+        "type"
+      ]
+    }
+  },
+  "game/event/CheerEvent": {
+    "0": {
+      "samePlayer": true,
+      "type": 0
+    }
+  },
+  "game/event/CratePickupEvent": {
+    "0": {
+      "sameTarget": true,
+      "samePlayer": true,
+      "sameSource": true,
+      "sameTile": true,
+      "type": 56
+    }
+  },
+  "game/event/DeployNotAllowedEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 34
+    }
+  },
+  "game/event/EnterObjectEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameSource": true,
+      "type": 50
+    }
+  },
+  "game/event/EnterTileEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameSource": true,
+      "type": 51
+    }
+  },
+  "game/event/EnterTransportEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 48
+    }
+  },
+  "game/event/EventMap": {
+    "0": 0,
+    "1": []
+  },
+  "game/event/GameEvent": {
+    "0": 0,
+    "1": []
+  },
+  "game/event/HealthChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "currentHealth": 40,
+      "prevHealth": 100,
+      "type": 29
+    }
+  },
+  "game/event/InflictDamageEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameAttacker": true,
+      "damageHitPoints": 60,
+      "currentHealth": 40,
+      "prevHealth": 100,
+      "type": 28
+    }
+  },
+  "game/event/LightningStormCloudEvent": {
+    "0": {
+      "samePos": true,
+      "type": 55
+    }
+  },
+  "game/event/LightningStormManifestEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 54
+    }
+  },
+  "game/event/ObjectAttackedEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameAttacker": true,
+      "incidental": true,
+      "type": 12
+    }
+  },
+  "game/event/ObjectDestroyEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameAttackerInfo": true,
+      "incidental": false,
+      "type": 3
+    }
+  },
+  "game/event/ObjectDisguiseChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 10
+    }
+  },
+  "game/event/ObjectLandEvent": {
+    "0": {
+      "sameGo": true,
+      "type": 8
+    }
+  },
+  "game/event/ObjectLiftOffEvent": {
+    "0": {
+      "sameGo": true,
+      "type": 7
+    }
+  },
+  "game/event/ObjectMorphEvent": {
+    "0": {
+      "sameFrom": true,
+      "sameTo": true,
+      "type": 6
+    }
+  },
+  "game/event/ObjectOwnerChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "samePrevOwner": true,
+      "type": 39
+    }
+  },
+  "game/event/ObjectSellEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 18
+    }
+  },
+  "game/event/ObjectSpawnEvent": {
+    "0": {
+      "sameGo": true,
+      "type": 4
+    }
+  },
+  "game/event/ObjectTeleportEvent": {
+    "0": {
+      "sameTarget": true,
+      "isChronoshift": true,
+      "samePrevTile": true,
+      "type": 45
+    }
+  },
+  "game/event/ObjectUnspawnEvent": {
+    "0": {
+      "sameGo": true,
+      "type": 5
+    }
+  },
+  "game/event/PingLocationEvent": {
+    "0": {
+      "sameTile": true,
+      "samePlayer": true,
+      "type": 57
+    }
+  },
+  "game/event/PlayerDefeatedEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 31
+    }
+  },
+  "game/event/PlayerDroppedEvent": {
+    "0": {
+      "sameTarget": true,
+      "assetsRedistributed": true,
+      "type": 33
+    }
+  },
+  "game/event/PlayerResignedEvent": {
+    "0": {
+      "sameTarget": true,
+      "assetsRedistributed": true,
+      "type": 32
+    }
+  },
+  "game/event/PrimaryFactoryChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 43
+    }
+  },
+  "game/event/RadarEvent": {
+    "0": {
+      "sameTarget": true,
+      "radarEventType": 0,
+      "sameTile": true,
+      "type": 40
+    }
+  },
+  "game/event/RadarOnOffEvent": {
+    "0": {
+      "sameTarget": true,
+      "radarEnabled": false,
+      "type": 38
+    }
+  },
+  "game/event/RallyPointChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 42
+    }
+  },
+  "game/event/ShipSubmergeChangeEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 13
+    }
+  },
+  "game/event/StalemateDetectEvent": {
+    "0": {
+      "type": 58,
+      "keys": [
+        "type"
+      ]
+    }
+  },
+  "game/event/SuperWeaponActivateEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameOwner": true,
+      "sameAtTile": true,
+      "sameAtTile2": true,
+      "noSfxWarning": true,
+      "type": 53
+    }
+  },
+  "game/event/SuperWeaponReadyEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 52
+    }
+  },
+  "game/event/TriggerAnimEvent": {
+    "0": {
+      "name": "Anim_Explosion",
+      "sameTile": true,
+      "type": 62
+    }
+  },
+  "game/event/TriggerEvaEvent": {
+    "0": {
+      "soundId": "EVA_ReinforcementsReady",
+      "type": 61
+    }
+  },
+  "game/event/TriggerSoundFxEvent": {
+    "0": {
+      "soundId": "Alarm",
+      "sameTile": true,
+      "type": 59
+    }
+  },
+  "game/event/TriggerStopSoundFxEvent": {
+    "0": {
+      "sameTile": true,
+      "type": 60
+    }
+  },
+  "game/event/TriggerTextEvent": {
+    "0": {
+      "label": "Mission objectives updated",
+      "type": 63
+    }
+  },
+  "game/event/UnitDeployUndeployEvent": {
+    "0": {
+      "sameUnit": true,
+      "deployType": "deploy",
+      "type": 1
+    }
+  },
+  "game/event/UnitPromoteEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 47
+    }
+  },
+  "game/event/UnitRecycleEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 27
+    }
+  },
+  "game/event/UnitRepairFinishEvent": {
+    "0": {
+      "sameTarget": true,
+      "sameFrom": true,
+      "type": 26
+    }
+  },
+  "game/event/UnitRepairStartEvent": {
+    "0": {
+      "sameTarget": true,
+      "type": 25
+    }
+  },
+  "game/event/VirusCloudEvent": {
+    "0": {
+      "action": "spawn",
+      "cloudId": 42,
+      "sameTile": true,
+      "lifetimeTicks": 75,
+      "samePos": true,
+      "sameVisual": true,
+      "sameVel": true,
+      "type": 66
+    }
+  },
+  "game/event/WarheadDetonateEvent": {
+    "0": {
+      "sameTarget": true,
+      "samePos": true,
+      "explodeAnim": "EXPLOD",
+      "isLightningStrike": false,
+      "type": 30
+    }
+  },
+  "game/event/WeaponFireEvent": {
+    "0": {
+      "sameWeapon": true,
+      "sameGo": true,
+      "type": 2
+    }
   }
 }

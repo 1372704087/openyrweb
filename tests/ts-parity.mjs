@@ -7473,6 +7473,727 @@ const CONVERTED = [
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
   {
+    name: "game/event/AllianceChangeEvent",
+    tsjs: "src/game/event/AllianceChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const alliance = { id: 1 };
+        const from = { id: 2 };
+        const e = new ns.AllianceChangeEvent(alliance, ns.AllianceEventType.Requested, from);
+        return {
+          sameAlliance: e.alliance === alliance,
+          changeType: e.changeType,
+          sameFrom: e.from === from,
+          type: e.type,
+          enumFormed: ns.AllianceEventType.Formed,
+          enumBroken: ns.AllianceEventType.Broken,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/BridgeRepairEvent",
+    tsjs: "src/game/event/BridgeRepairEvent.ts.js",
+    probes: [
+      (ns) => {
+        const source = { id: 1 };
+        const tile = { x: 5, y: 7 };
+        const e = new ns.BridgeRepairEvent(source, tile);
+        return { sameSource: e.source === source, sameTile: e.tile === tile, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingCaptureEvent",
+    tsjs: "src/game/event/BuildingCaptureEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.BuildingCaptureEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingEvacuateEvent",
+    tsjs: "src/game/event/BuildingEvacuateEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const p = { id: 2 };
+        const e = new ns.BuildingEvacuateEvent(t, p);
+        return { sameTarget: e.target === t, samePlayer: e.player === p, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingFailedPlaceEvent",
+    tsjs: "src/game/event/BuildingFailedPlaceEvent.ts.js",
+    probes: [
+      (ns) => {
+        const player = { id: 1 };
+        const tile = { x: 3, y: 4 };
+        const e = new ns.BuildingFailedPlaceEvent("PROC", player, tile);
+        return { name: e.name, samePlayer: e.player === player, sameTile: e.tile === tile, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingGarrisonEvent",
+    tsjs: "src/game/event/BuildingGarrisonEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.BuildingGarrisonEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingInfiltrationEvent",
+    tsjs: "src/game/event/BuildingInfiltrationEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const s = { id: 9, kind: "infantry" };
+        const e = new ns.BuildingInfiltrationEvent(t, s);
+        return { sameTarget: e.target === t, sameSource: e.source === s, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingPlaceEvent",
+    tsjs: "src/game/event/BuildingPlaceEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.BuildingPlaceEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingRepairFullEvent",
+    tsjs: "src/game/event/BuildingRepairFullEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const s = { kind: "repairyard" };
+        const e = new ns.BuildingRepairFullEvent(t, s);
+        return { sameTarget: e.target === t, sameSource: e.source === s, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/BuildingRepairStartEvent",
+    tsjs: "src/game/event/BuildingRepairStartEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.BuildingRepairStartEvent(t);
+        return { sameTarget: e.target === t, type: e.type, keys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/event/CheerEvent",
+    tsjs: "src/game/event/CheerEvent.ts.js",
+    probes: [
+      (ns) => {
+        const p = { id: 1 };
+        const e = new ns.CheerEvent(p);
+        return { samePlayer: e.player === p, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/CratePickupEvent",
+    tsjs: "src/game/event/CratePickupEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { id: 1 };
+        const player = { id: 2 };
+        const source = { crate: true };
+        const tile = { x: 5, y: 7 };
+        const e = new ns.CratePickupEvent(target, player, source, tile);
+        return {
+          sameTarget: e.target === target,
+          samePlayer: e.player === player,
+          sameSource: e.source === source,
+          sameTile: e.tile === tile,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/DeployNotAllowedEvent",
+    tsjs: "src/game/event/DeployNotAllowedEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.DeployNotAllowedEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/EnterObjectEvent",
+    tsjs: "src/game/event/EnterObjectEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1, kind: "bunker" };
+        const s = { id: 2, kind: "infantry" };
+        const e = new ns.EnterObjectEvent(t, s);
+        return { sameTarget: e.target === t, sameSource: e.source === s, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/EnterTileEvent",
+    tsjs: "src/game/event/EnterTileEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { id: 1 };
+        const source = { id: 2 };
+        const e = new ns.EnterTileEvent(target, source);
+        return { sameTarget: e.target === target, sameSource: e.source === source, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/EnterTransportEvent",
+    tsjs: "src/game/event/EnterTransportEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.EnterTransportEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/EventMap",
+    tsjs: "src/game/event/EventMap.ts.js",
+    probes: [
+      // 类型-only 模块：孪生 execute 为空，编译后无运行时导出
+      (ns) => Object.keys(ns).length,
+      (ns) => Object.keys(ns),
+    ],
+  },
+  {
+    name: "game/event/GameEvent",
+    tsjs: "src/game/event/GameEvent.ts.js",
+    probes: [
+      // 类型-only 模块：孪生 execute 为空，编译后无运行时导出
+      (ns) => Object.keys(ns).length,
+      (ns) => Object.keys(ns),
+    ],
+  },
+  {
+    name: "game/event/HealthChangeEvent",
+    tsjs: "src/game/event/HealthChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.HealthChangeEvent(t, 40, 100);
+        return {
+          sameTarget: e.target === t,
+          currentHealth: e.currentHealth,
+          prevHealth: e.prevHealth,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/InflictDamageEvent",
+    tsjs: "src/game/event/InflictDamageEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const a = { id: 2 };
+        const e = new ns.InflictDamageEvent(t, a, 60, 40, 100);
+        return {
+          sameTarget: e.target === t,
+          sameAttacker: e.attacker === a,
+          damageHitPoints: e.damageHitPoints,
+          currentHealth: e.currentHealth,
+          prevHealth: e.prevHealth,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/LightningStormCloudEvent",
+    tsjs: "src/game/event/LightningStormCloudEvent.ts.js",
+    probes: [
+      (ns) => {
+        const pos = { x: 100, y: 200, z: 0 };
+        const e = new ns.LightningStormCloudEvent(pos);
+        return { samePos: e.position === pos, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/LightningStormManifestEvent",
+    tsjs: "src/game/event/LightningStormManifestEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.LightningStormManifestEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectAttackedEvent",
+    tsjs: "src/game/event/ObjectAttackedEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { id: 1 };
+        const attacker = { id: 2 };
+        const e = new ns.ObjectAttackedEvent(target, attacker, true);
+        return {
+          sameTarget: e.target === target,
+          sameAttacker: e.attacker === attacker,
+          incidental: e.incidental,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectDestroyEvent",
+    tsjs: "src/game/event/ObjectDestroyEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { id: 1 };
+        const info = { player: 3 };
+        const e = new ns.ObjectDestroyEvent(target, info, false);
+        return {
+          sameTarget: e.target === target,
+          sameAttackerInfo: e.attackerInfo === info,
+          incidental: e.incidental,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectDisguiseChangeEvent",
+    tsjs: "src/game/event/ObjectDisguiseChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.ObjectDisguiseChangeEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectLandEvent",
+    tsjs: "src/game/event/ObjectLandEvent.ts.js",
+    probes: [
+      (ns) => {
+        const go = { name: "orca" };
+        const e = new ns.ObjectLandEvent(go);
+        return { sameGo: e.gameObject === go, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectLiftOffEvent",
+    tsjs: "src/game/event/ObjectLiftOffEvent.ts.js",
+    probes: [
+      (ns) => {
+        const go = { name: "orca" };
+        const e = new ns.ObjectLiftOffEvent(go);
+        return { sameGo: e.gameObject === go, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectMorphEvent",
+    tsjs: "src/game/event/ObjectMorphEvent.ts.js",
+    probes: [
+      (ns) => {
+        const from = { id: 1, name: "tank" };
+        const to = { id: 2, name: "tank-upgraded" };
+        const e = new ns.ObjectMorphEvent(from, to);
+        return { sameFrom: e.from === from, sameTo: e.to === to, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectOwnerChangeEvent",
+    tsjs: "src/game/event/ObjectOwnerChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const prev = { id: 2 };
+        const e = new ns.ObjectOwnerChangeEvent(t, prev);
+        return { sameTarget: e.target === t, samePrevOwner: e.prevOwner === prev, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectSellEvent",
+    tsjs: "src/game/event/ObjectSellEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.ObjectSellEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectSpawnEvent",
+    tsjs: "src/game/event/ObjectSpawnEvent.ts.js",
+    probes: [
+      (ns) => {
+        const go = { name: "harvester" };
+        const e = new ns.ObjectSpawnEvent(go);
+        return { sameGo: e.gameObject === go, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectTeleportEvent",
+    tsjs: "src/game/event/ObjectTeleportEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const prev = { x: 4, y: 7 };
+        const e = new ns.ObjectTeleportEvent(t, true, prev);
+        return {
+          sameTarget: e.target === t,
+          isChronoshift: e.isChronoshift,
+          samePrevTile: e.prevTile === prev,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/ObjectUnspawnEvent",
+    tsjs: "src/game/event/ObjectUnspawnEvent.ts.js",
+    probes: [
+      (ns) => {
+        const go = { name: "harvester" };
+        const e = new ns.ObjectUnspawnEvent(go);
+        return { sameGo: e.gameObject === go, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PingLocationEvent",
+    tsjs: "src/game/event/PingLocationEvent.ts.js",
+    probes: [
+      (ns) => {
+        const tile = { x: 10, y: 20 };
+        const player = { id: 1 };
+        const e = new ns.PingLocationEvent(tile, player);
+        return { sameTile: e.tile === tile, samePlayer: e.player === player, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PlayerDefeatedEvent",
+    tsjs: "src/game/event/PlayerDefeatedEvent.ts.js",
+    probes: [
+      (ns) => {
+        const p = { name: "Soviet" };
+        const e = new ns.PlayerDefeatedEvent(p);
+        return { sameTarget: e.target === p, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PlayerDroppedEvent",
+    tsjs: "src/game/event/PlayerDroppedEvent.ts.js",
+    probes: [
+      (ns) => {
+        const p = { id: 1 };
+        const e = new ns.PlayerDroppedEvent(p, true);
+        return { sameTarget: e.target === p, assetsRedistributed: e.assetsRedistributed, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PlayerResignedEvent",
+    tsjs: "src/game/event/PlayerResignedEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.PlayerResignedEvent(t, true);
+        return { sameTarget: e.target === t, assetsRedistributed: e.assetsRedistributed, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/PrimaryFactoryChangeEvent",
+    tsjs: "src/game/event/PrimaryFactoryChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const f = { kind: "WarFactory" };
+        const e = new ns.PrimaryFactoryChangeEvent(f);
+        return { sameTarget: e.target === f, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/RadarEvent",
+    tsjs: "src/game/event/RadarEvent.ts.js",
+    probes: [
+      (ns) => {
+        const p = { id: 1 };
+        const tile = { x: 8, y: 9 };
+        const e = new ns.RadarEvent(p, 0, tile);
+        return { sameTarget: e.target === p, radarEventType: e.radarEventType, sameTile: e.tile === tile, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/RadarOnOffEvent",
+    tsjs: "src/game/event/RadarOnOffEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.RadarOnOffEvent(t, false);
+        return { sameTarget: e.target === t, radarEnabled: e.radarEnabled, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/RallyPointChangeEvent",
+    tsjs: "src/game/event/RallyPointChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const b = { kind: "Barracks" };
+        const e = new ns.RallyPointChangeEvent(b);
+        return { sameTarget: e.target === b, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/ShipSubmergeChangeEvent",
+    tsjs: "src/game/event/ShipSubmergeChangeEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.ShipSubmergeChangeEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/StalemateDetectEvent",
+    tsjs: "src/game/event/StalemateDetectEvent.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.StalemateDetectEvent();
+        return { type: e.type, keys: Object.keys(e).sort() };
+      },
+    ],
+  },
+  {
+    name: "game/event/SuperWeaponActivateEvent",
+    tsjs: "src/game/event/SuperWeaponActivateEvent.ts.js",
+    probes: [
+      (ns) => {
+        const target = { id: 1 };
+        const owner = { id: 2 };
+        const atTile = { x: 3, y: 4 };
+        const atTile2 = { x: 3, y: 5 };
+        const e = new ns.SuperWeaponActivateEvent(target, owner, atTile, atTile2, true);
+        return {
+          sameTarget: e.target === target,
+          sameOwner: e.owner === owner,
+          sameAtTile: e.atTile === atTile,
+          sameAtTile2: e.atTile2 === atTile2,
+          noSfxWarning: e.noSfxWarning,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/SuperWeaponReadyEvent",
+    tsjs: "src/game/event/SuperWeaponReadyEvent.ts.js",
+    probes: [
+      (ns) => {
+        const sw = { kind: "NuclearSilo" };
+        const e = new ns.SuperWeaponReadyEvent(sw);
+        return { sameTarget: e.target === sw, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/TriggerAnimEvent",
+    tsjs: "src/game/event/TriggerAnimEvent.ts.js",
+    probes: [
+      (ns) => {
+        const tile = { x: 2, y: 3 };
+        const e = new ns.TriggerAnimEvent("Anim_Explosion", tile);
+        return { name: e.name, sameTile: e.tile === tile, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/TriggerEvaEvent",
+    tsjs: "src/game/event/TriggerEvaEvent.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.TriggerEvaEvent("EVA_ReinforcementsReady");
+        return { soundId: e.soundId, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/TriggerSoundFxEvent",
+    tsjs: "src/game/event/TriggerSoundFxEvent.ts.js",
+    probes: [
+      (ns) => {
+        const tile = { x: 10, y: 20 };
+        const e = new ns.TriggerSoundFxEvent("Alarm", tile);
+        return { soundId: e.soundId, sameTile: e.tile === tile, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/TriggerStopSoundFxEvent",
+    tsjs: "src/game/event/TriggerStopSoundFxEvent.ts.js",
+    probes: [
+      (ns) => {
+        const tile = { x: 4, y: 5 };
+        const e = new ns.TriggerStopSoundFxEvent(tile);
+        return { sameTile: e.tile === tile, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/TriggerTextEvent",
+    tsjs: "src/game/event/TriggerTextEvent.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.TriggerTextEvent("Mission objectives updated");
+        return { label: e.label, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/UnitDeployUndeployEvent",
+    tsjs: "src/game/event/UnitDeployUndeployEvent.ts.js",
+    probes: [
+      (ns) => {
+        const u = { name: "MCV" };
+        const e = new ns.UnitDeployUndeployEvent(u, "deploy");
+        return { sameUnit: e.unit === u, deployType: e.deployType, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/UnitPromoteEvent",
+    tsjs: "src/game/event/UnitPromoteEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.UnitPromoteEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/UnitRecycleEvent",
+    tsjs: "src/game/event/UnitRecycleEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.UnitRecycleEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/UnitRepairFinishEvent",
+    tsjs: "src/game/event/UnitRepairFinishEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { name: "rhino" };
+        const from = { kind: "ServiceDepot" };
+        const e = new ns.UnitRepairFinishEvent(t, from);
+        return { sameTarget: e.target === t, sameFrom: e.from === from, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/UnitRepairStartEvent",
+    tsjs: "src/game/event/UnitRepairStartEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const e = new ns.UnitRepairStartEvent(t);
+        return { sameTarget: e.target === t, type: e.type };
+      },
+    ],
+  },
+  {
+    name: "game/event/VirusCloudEvent",
+    tsjs: "src/game/event/VirusCloudEvent.ts.js",
+    probes: [
+      (ns) => {
+        const tile = { x: 3, y: 4 };
+        const pos = { x: 32.5, y: 48.25, z: 0 };
+        const visual = { image: "VIRUSL", translucency: 0.6, stateAIAdvance: 1 };
+        const vel = { x: 0.1, y: -0.05, z: 0 };
+        const e = new ns.VirusCloudEvent("spawn", 42, tile, 75, pos, visual, vel);
+        return {
+          action: e.action,
+          cloudId: e.cloudId,
+          sameTile: e.tile === tile,
+          lifetimeTicks: e.lifetimeTicks,
+          samePos: e.position === pos,
+          sameVisual: e.visual === visual,
+          sameVel: e.vel === vel,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/WarheadDetonateEvent",
+    tsjs: "src/game/event/WarheadDetonateEvent.ts.js",
+    probes: [
+      (ns) => {
+        const t = { id: 1 };
+        const pos = { x: 64, y: 96, z: 0 };
+        const e = new ns.WarheadDetonateEvent(t, pos, "EXPLOD", false);
+        return {
+          sameTarget: e.target === t,
+          samePos: e.position === pos,
+          explodeAnim: e.explodeAnim,
+          isLightningStrike: e.isLightningStrike,
+          type: e.type,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/event/WeaponFireEvent",
+    tsjs: "src/game/event/WeaponFireEvent.ts.js",
+    probes: [
+      (ns) => {
+        const weapon = { name: "105mm" };
+        const go = { name: "grizzly" };
+        const e = new ns.WeaponFireEvent(weapon, go);
+        return { sameWeapon: e.weapon === weapon, sameGo: e.gameObject === go, type: e.type };
+      },
+    ],
+  },
+  {
     name: "game/gameobject/task/ScatterTask",
     tsjs: "src/game/gameobject/task/ScatterTask.ts.js",
     probes: [(ns) => typeof ns.ScatterTask],
