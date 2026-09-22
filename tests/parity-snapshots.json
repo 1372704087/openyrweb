@@ -6101,5 +6101,1154 @@
       "sameGo": true,
       "type": 2
     }
+  },
+  "game/gameobject/trait/interface/NotifyDamage": {
+    "0": {
+      "onDamage": "Symbol()",
+      "keys": [
+        "onDamage"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/gameobject/trait/interface/NotifyHeal": {
+    "0": {
+      "onHeal": "Symbol()",
+      "keys": [
+        "onHeal"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/gameobject/trait/interface/NotifyHealthChange": {
+    "0": {
+      "onChange": "Symbol()",
+      "keys": [
+        "onChange"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/gameobject/trait/interface/NotifyOrder": {
+    "0": {
+      "onPush": "Symbol()",
+      "keys": [
+        "onPush"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyAllianceChange": {
+    "0": {
+      "onChange": "Symbol()",
+      "keys": [
+        "onChange"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyAttack": {
+    "0": {
+      "onAttack": "Symbol()",
+      "keys": [
+        "onAttack"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyDestroy": {
+    "0": {
+      "onDestroy": "Symbol()",
+      "keys": [
+        "onDestroy"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyHealthChange": {
+    "0": {
+      "onChange": "Symbol()",
+      "keys": [
+        "onChange"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyObjectTraitAdd": {
+    "0": {
+      "onAdd": "Symbol()",
+      "keys": [
+        "onAdd"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyOwnerChange": {
+    "0": {
+      "onChange": "Symbol()",
+      "keys": [
+        "onChange"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyPlaceBuilding": {
+    "0": {
+      "onPlace": "Symbol()",
+      "keys": [
+        "onPlace"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifySpawn": {
+    "0": {
+      "onSpawn": "Symbol()",
+      "keys": [
+        "onSpawn"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifySuperWeaponActivate": {
+    "0": {
+      "onActivate": "Symbol()",
+      "keys": [
+        "onActivate"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifySuperWeaponDeactivate": {
+    "0": {
+      "onDeactivate": "Symbol()",
+      "keys": [
+        "onDeactivate"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyTargetDestroy": {
+    "0": {
+      "onDestroy": "Symbol()",
+      "keys": [
+        "onDestroy"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyTick": {
+    "0": {
+      "onTick": "Symbol()",
+      "keys": [
+        "onTick"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyUnspawn": {
+    "0": {
+      "onUnspawn": "Symbol()",
+      "keys": [
+        "onUnspawn"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/trait/interface/NotifyWarpChange": {
+    "0": {
+      "onChange": "Symbol()",
+      "keys": [
+        "onChange"
+      ],
+      "symbols": [],
+      "descriptions": [
+        null
+      ]
+    }
+  },
+  "game/gameobject/trait/DelayedKillTrait": {
+    "0": {
+      "isActive": false,
+      "timerActive": false,
+      "ownKeys": [
+        "timer"
+      ],
+      "hasTick": "function"
+    }
+  },
+  "game/gameobject/trait/GunnerTrait": {
+    "0": {
+      "ownKeys": [],
+      "hasTick": "function"
+    }
+  },
+  "game/gameobject/trait/HoverBobTrait": {
+    "0": {
+      "prevHoverBobLeptons": 0,
+      "spawnTick": 0,
+      "disabled": false,
+      "ownKeys": [
+        "prevHoverBobLeptons",
+        "spawnTick",
+        "disabled"
+      ]
+    }
+  },
+  "game/gameobject/trait/DrainTrait": {
+    "0": {
+      "drainTicksLeft": 0,
+      "draining": false,
+      "primaryScanCooldown": 0,
+      "ownKeys": [
+        "drainTarget",
+        "drainTicksLeft",
+        "draining",
+        "primaryScanCooldown"
+      ],
+      "hasTick": "function",
+      "hasUnspawn": "function",
+      "hasDestroy": "function"
+    }
+  },
+  "game/gameobject/trait/DisguiseTrait": {
+    "0": {
+      "isActive": false,
+      "cooldownTicks": 0,
+      "isDisguised": false,
+      "ownKeys": [
+        "isActive",
+        "cooldownTicks"
+      ]
+    }
+  },
+  "game/gameobject/trait/MindControllableTrait": {
+    "0": {
+      "sameHost": true,
+      "isActive": false,
+      "ownKeys": [
+        "gameObject"
+      ]
+    }
+  },
+  "game/gameobject/trait/OilDerrickTrait": {
+    "0": {
+      "isActive": false,
+      "produceCashCooldown": 0,
+      "ownKeys": [
+        "isActive",
+        "produceCashCooldown"
+      ]
+    }
+  },
+  "game/gameobject/trait/PsychicDetectorTrait": {
+    "0": {
+      "radiusTiles": 10,
+      "detectionLines": [],
+      "nextScan": 15,
+      "ownKeys": [
+        "radiusTiles",
+        "detectionLines",
+        "nextScan"
+      ]
+    }
+  },
+  "game/gameobject/trait/SpawnDebrisTrait": {
+    "0": {
+      "ownKeys": [],
+      "hasCrash": "function",
+      "hasDestroy": "function",
+      "protoSymbols": [
+        "Symbol()"
+      ]
+    }
+  },
+  "game/gameobject/trait/TechHospitalHealTrait": {
+    "0": {
+      "tickCounter": 0,
+      "ownKeys": [
+        "tickCounter"
+      ],
+      "hasOwnerChange": "function"
+    }
+  },
+  "game/gameobject/trait/TiberiumTreeTrait": {
+    "0": {
+      "sameRules": true,
+      "ticksSinceLastSpawn": 0,
+      "cooldownTicks": 10,
+      "status": 0,
+      "enumIdle": 0,
+      "enumSpawning": 1,
+      "enumKeys": [
+        "0",
+        "1",
+        "Idle",
+        "Spawning"
+      ],
+      "ownKeys": [
+        "rules",
+        "ticksSinceLastSpawn",
+        "cooldownTicks",
+        "status"
+      ]
+    }
+  },
+  "game/gameobject/trait/VeteranTrait": {
+    "0": {
+      "sameGo": true,
+      "sameVr": true,
+      "veteranLevel": 0,
+      "xp": 0,
+      "promotionThresh": 501,
+      "isMaxLevel": false,
+      "isElite": false,
+      "ownKeys": [
+        "gameObject",
+        "veteranRules",
+        "veteranLevel",
+        "xp",
+        "promotionThresh"
+      ]
+    }
+  },
+  "game/gameobject/trait/OccupiableGarrisonTrait": {
+    "0": {
+      "evacThreshold": 0.2,
+      "sameBuilding": false,
+      "ownKeys": [
+        "$stub",
+        "$args",
+        "evacThreshold"
+      ]
+    }
+  },
+  "game/trait/PowerTrait": {
+    "0": {
+      "ownedEmpty": false,
+      "ownedBio": true,
+      "hasTick": "function",
+      "hasSpawn": "function",
+      "isCapturablePower": "function",
+      "ownKeys": []
+    }
+  },
+  "game/trait/RadarTrait": {
+    "0": {
+      "lightningIsMap": true,
+      "lightningSize": 0,
+      "hasActivate": "function",
+      "ownKeys": [
+        "activeLightningStrikes"
+      ]
+    }
+  },
+  "game/trait/MapRadiationTrait": {
+    "0": {
+      "sameMap": true,
+      "radSitesIsMap": true,
+      "radLevelIsMap": true,
+      "radSitesSize": 0,
+      "radLevelSize": 0,
+      "onChangeType": "object",
+      "ownKeys": [
+        "map",
+        "radSites",
+        "radLevelByTile",
+        "_onChange"
+      ]
+    }
+  },
+  "game/trait/MapShroudTrait": {
+    "0": {
+      "sameMap": true,
+      "sameAlliances": true,
+      "shroudIsMap": true,
+      "revealedIsSet": true,
+      "gapIsSet": true,
+      "shroudSize": 0,
+      "hasAllianceChange": "function",
+      "ownKeys": [
+        "map",
+        "alliances",
+        "shroudByPlayer",
+        "revealedToAll",
+        "gapGenerators",
+        "handleTileOccupationUpdate"
+      ]
+    }
+  },
+  "game/trait/SharedDetectDisguiseTrait": {
+    "0": {
+      "detectorsIsSet": true,
+      "detectorsSize": 0,
+      "isGlobalDetector": false,
+      "isDisguisable": false,
+      "ownKeys": [
+        "detectors"
+      ]
+    }
+  },
+  "game/gameobject/trait/AirstrikeTrait": {
+    "0": {
+      "cooldownTicks": 0,
+      "fired": false,
+      "interrupted": false,
+      "_guideGraceTicks": 0,
+      "pendingLaunch": false,
+      "teamMiGs": [],
+      "targetObject": null,
+      "targetTile": null,
+      "_targetAcquiredVoicePlayed": false,
+      "migFiredIsSet": true,
+      "migDeathIsSet": true,
+      "_guidanceAnimating": false,
+      "ownKeys": [
+        "cooldownTicks",
+        "fired",
+        "interrupted",
+        "_guideGraceTicks",
+        "pendingLaunch",
+        "teamMiGs",
+        "targetObject",
+        "targetTile",
+        "_targetAcquiredVoicePlayed",
+        "_migFired",
+        "_migDeathVoiced",
+        "_guidanceAnimating"
+      ],
+      "readyNoRules": false,
+      "readyWithRules": true,
+      "team": {
+        "count": 3,
+        "planeType": "PLANE",
+        "rechargeTime": 80
+      }
+    }
+  },
+  "game/gameobject/trait/AmmoTrait": {
+    "0": {
+      "full": {
+        "maxAmmo": 10,
+        "ammo": 10,
+        "isFull": true
+      },
+      "clampedLow": 0,
+      "clampedHigh": 10,
+      "partial": {
+        "ammo": 3,
+        "isFull": false
+      },
+      "ownKeys": [
+        "maxAmmo",
+        "_ammo"
+      ]
+    }
+  },
+  "game/gameobject/trait/AutoRepairTrait": {
+    "0": {
+      "freeRepair": false,
+      "disabled": true,
+      "cooldownTicks": 0,
+      "healLeftover": 0,
+      "isDisabled": true,
+      "ownKeys": [
+        "freeRepair",
+        "disabled",
+        "cooldownTicks",
+        "healLeftover"
+      ],
+      "protoSymbolCount": 2
+    }
+  },
+  "game/gameobject/trait/BerserkTrait": {
+    "0": {
+      "init": {
+        "sameHost": true,
+        "berserkFrames": 0,
+        "isBerserk": false
+      },
+      "afterFirst": {
+        "frames": 10,
+        "isBerserk": true,
+        "calls": 1
+      },
+      "afterSecond": 10,
+      "afterClear": {
+        "frames": 0
+      }
+    }
+  },
+  "game/gameobject/trait/C4ChargeTrait": {
+    "0": {
+      "hasCharge": false,
+      "timerActive": false,
+      "ownKeys": [
+        "timer"
+      ],
+      "protoSymbolCount": 1
+    }
+  },
+  "game/gameobject/trait/DeployerTrait": {
+    "0": {
+      "deployed": false,
+      "deployFireState": 0,
+      "deployFireDelay": 0,
+      "fireUpDelay": 0,
+      "deployFireCount": 0,
+      "isDeployed": false,
+      "getHash": 0,
+      "debugGetState": {
+        "deployed": false
+      },
+      "hasDeployFireStateExport": false,
+      "ownKeys": [
+        "gameObject",
+        "deployed",
+        "deployFireDelay",
+        "deployFireState",
+        "fireUpDelay",
+        "deployFireCount"
+      ]
+    }
+  },
+  "game/gameobject/trait/GarrisonTrait": {
+    "0": {
+      "sameBuilding": true,
+      "maxOccupants": 8,
+      "units": [],
+      "isOccupied": false,
+      "canBeOccupied": true,
+      "evacuateType": "function",
+      "_afterEvacuateType": "function",
+      "ownKeys": [
+        "building",
+        "maxOccupants",
+        "units"
+      ],
+      "protoSymbolCount": 2
+    }
+  },
+  "game/gameobject/trait/GattlingTrait": {
+    "0": {
+      "stage": 0,
+      "timer": 0,
+      "rateUp": 2,
+      "rateDown": 3,
+      "stageThresholds": [
+        10,
+        20
+      ],
+      "eliteStageThresholds": [
+        15,
+        30
+      ],
+      "ownKeys": [
+        "gameObject",
+        "stage",
+        "timer",
+        "rateUp",
+        "rateDown",
+        "stageThresholds",
+        "eliteStageThresholds"
+      ],
+      "protoSymbolCount": 3
+    }
+  },
+  "game/gameobject/trait/InfantryAbsorbTrait": {
+    "0": {
+      "sameBuilding": false,
+      "loadQueue": [],
+      "ownKeys": [
+        "$stub",
+        "$args",
+        "loadQueue"
+      ]
+    }
+  },
+  "game/gameobject/trait/InvulnerableTrait": {
+    "0": {
+      "isActive": false,
+      "isForceShieldActive": false,
+      "isForceShield": false,
+      "_version": 0,
+      "_fsVersion": 0,
+      "timerActive": false,
+      "fsTimerActive": false,
+      "ownKeys": [
+        "timer",
+        "isForceShield",
+        "fsTimer",
+        "_version",
+        "_fsVersion"
+      ]
+    }
+  },
+  "game/gameobject/trait/MindControllerTrait": {
+    "0": {
+      "init": {
+        "maxCapacity": 1,
+        "overloadEnabled": false,
+        "targets": [],
+        "isActive": false,
+        "isAtCapacity": false
+      },
+      "atCap": true,
+      "overloadNoCap": false,
+      "_overloadTicks": 0,
+      "mTargets": 3,
+      "ownKeys": [
+        "gameObject",
+        "maxCapacity",
+        "overloadEnabled",
+        "targets",
+        "_overloadTicks"
+      ]
+    }
+  },
+  "game/gameobject/trait/ParasiteableTrait": {
+    "0": {
+      "sameHost": true,
+      "beingBoarded": false,
+      "isInfested": false,
+      "isParalyzed": false,
+      "ownKeys": [
+        "gameObject",
+        "beingBoarded"
+      ],
+      "protoSymbolCount": 4
+    }
+  },
+  "game/gameobject/trait/SecureProgressTrait": {
+    "0": {
+      "secureTicks": 0,
+      "isActive": false,
+      "getProgress": 0,
+      "timerType": "function",
+      "timerActive": false,
+      "t2SecureTicks": 1800,
+      "t2Start": false,
+      "ownKeys": [
+        "timer",
+        "secureTicks"
+      ]
+    }
+  },
+  "game/gameobject/trait/SlaveMinerTrait": {
+    "0": {
+      "slaves": [],
+      "regenTicksLeft": 0,
+      "_morphInFlight": false,
+      "_pendingSpawnCount": 0,
+      "_initialSpawnTicksLeft": 0,
+      "_respawnTicksLeft": 0,
+      "_noOreTicks": 150,
+      "ownKeys": [
+        "slaves",
+        "regenTicksLeft",
+        "_liberator",
+        "_morphInFlight",
+        "_pendingSpawnCount",
+        "_initialSpawnTicksLeft",
+        "_respawnTicksLeft",
+        "_noOreTicks"
+      ],
+      "hasSpawn": "function",
+      "hasTick": "function",
+      "hasUnspawn": "function",
+      "hasDestroy": "function",
+      "hasOwner": "function",
+      "protoSymbolCount": 5
+    }
+  },
+  "game/gameobject/trait/SlaveMinerVehicleTrait": {
+    "0": {
+      "scanCooldown": 0,
+      "_playerLockTicks": 0,
+      "_aiTaskingIsFactory": false,
+      "slaves": [],
+      "_stashSlavesForMorph": "function",
+      "ownKeys": [
+        "scanCooldown",
+        "_playerLockTicks",
+        "_aiTaskingIsFactory",
+        "slaves"
+      ],
+      "protoSymbolCount": 3
+    }
+  },
+  "game/gameobject/trait/SubmergibleTrait": {
+    "0": {
+      "isActive": false,
+      "surfaceProgress": 0,
+      "targetSurfaceProgress": 0,
+      "isSubmerged": false,
+      "getSurfaceProgress": 0,
+      "emergeType": "function",
+      "ownKeys": [
+        "isActive",
+        "surfaceProgress",
+        "targetSurfaceProgress"
+      ],
+      "protoSymbolCount": 1
+    }
+  },
+  "game/gameobject/trait/TemporalTrait": {
+    "0": {
+      "before": {
+        "sameHost": true,
+        "ticksWhenWarpedOut": true,
+        "attackersSize": 0
+      },
+      "afterDispose": {
+        "attackersSize": 0
+      },
+      "ownKeys": [
+        "gameObject",
+        "ticksWhenWarpedOut",
+        "attackers"
+      ]
+    }
+  },
+  "game/gameobject/trait/TilterTrait": {
+    "0": {
+      "tilt": {
+        "pitch": 0,
+        "yaw": 0
+      },
+      "compute0": {
+        "pitch": 0,
+        "yaw": 0
+      },
+      "compute17": {
+        "pitch": 0,
+        "yaw": 0
+      },
+      "compute4": {
+        "pitch": 25,
+        "yaw": -360
+      },
+      "compute5": {
+        "pitch": 25,
+        "yaw": 225
+      },
+      "ownKeys": [
+        "tilt"
+      ],
+      "hasSpawn": "function",
+      "protoSymbolCount": 1
+    }
+  },
+  "game/gameobject/trait/UnitOrderTrait": {
+    "0": {
+      "orders": [],
+      "queuedSize": 0,
+      "tasks": [],
+      "hasTasks": false,
+      "isIdle": true,
+      "sameHost": true,
+      "ownKeys": [
+        "gameObject",
+        "orders",
+        "queuedOrders",
+        "tasks",
+        "taskRunner"
+      ],
+      "hasTick": "function",
+      "protoSymbolCount": 3
+    }
+  },
+  "game/trait/MapLightingTrait": {
+    "0": {
+      "ambientChangeRate": 1,
+      "ambientChangeStep": 0.1,
+      "mapLighting": true,
+      "onChangeType": "object",
+      "ownKeys": [
+        "mapLighting",
+        "_onChange",
+        "ambientChangeRate",
+        "ambientChangeStep"
+      ],
+      "protoSymbolCount": 1
+    }
+  },
+  "game/trait/SellTrait": {
+    "0": {
+      "gameType": "object",
+      "refundPercent": 0.5,
+      "refundNoCost": 0,
+      "refundSoylent": 100,
+      "refundCost": 400,
+      "purchaseValue": 50,
+      "ownKeys": [
+        "game",
+        "generalRules"
+      ]
+    }
+  },
+  "game/trait/SharedDetectCloakTrait": {
+    "0": {
+      "detectorsIsSet": true,
+      "detectorsSize": 0,
+      "isGlobalDetector": false,
+      "isCloakable": false,
+      "isCloakableTechno": false,
+      "ownKeys": [
+        "detectors"
+      ],
+      "protoSymbolCount": 9
+    }
+  },
+  "game/trait/StalemateDetectTrait": {
+    "0": {
+      "graceMinutes": 10,
+      "stale": false,
+      "isStale": false,
+      "countdownTicks": 9000,
+      "expectedCountdown": 9000,
+      "allPlayersSize": 0,
+      "hasTick": "function",
+      "ownKeys": [
+        "stale",
+        "allPlayersCredits",
+        "countdownTicks"
+      ]
+    }
+  },
+  "game/trait/SuperWeaponsTrait": {
+    "0": {
+      "effects": [],
+      "hasTick": "function",
+      "hasWarp": "function",
+      "hasPowerLow": "function",
+      "hasPowerRestore": "function",
+      "activateEffect": "function",
+      "activateSuperWeapon": "function",
+      "ownKeys": [
+        "effects"
+      ]
+    }
+  },
+  "game/trait/VirusCloudTrait": {
+    "0": {
+      "maxClouds": 200,
+      "nextCloudId": 1,
+      "cloudsSize": 0,
+      "getConfig": "function",
+      "createCloud": "function",
+      "spawnParticle": "function",
+      "applyDamage": "function",
+      "hasTick": "function",
+      "ownKeys": [
+        "map",
+        "clouds",
+        "nextCloudId",
+        "_config",
+        "_warheadCache"
+      ]
+    }
+  },
+  "game/trait/CrateGeneratorTrait": {
+    "0": {
+      "unsupportedLen": 4,
+      "unsupportedHasIon": true,
+      "unsupportedHasGas": true,
+      "unsupportedHasPod": true,
+      "unsupportedHasSquad": true,
+      "randomCrateSpawn": true,
+      "crates": [],
+      "availEdgeTiles": [],
+      "allTiles": [],
+      "hasTick": "function",
+      "grantPowerup": "function",
+      "pickupCrate": "function",
+      "choosePowerup": "function",
+      "ownKeys": [
+        "randomCrateSpawn",
+        "crates",
+        "availEdgeTiles",
+        "allTiles"
+      ]
+    }
+  },
+  "game/gameobject/trait/FreeUnitTrait": {
+    "0": {
+      "hasStatusChange": "function",
+      "ownKeys": []
+    }
+  },
+  "game/gameobject/trait/HospitalTrait": {
+    "0": {
+      "healQueue0": [],
+      "added": 0,
+      "isFirst": true,
+      "healQueueAfter": [],
+      "hasTick": "function",
+      "hasDestroy": "function",
+      "ownKeys": [
+        "healQueue"
+      ]
+    }
+  },
+  "game/gameobject/trait/TankBunkerTrait": {
+    "0": {
+      "_prevDockedCount": 0,
+      "canVehicleEnterNull": false,
+      "canVehicleEnterNonVehicle": false,
+      "getDamageMultiplier": 1,
+      "getROFMultiplier": 1,
+      "getRangeBonus": 0,
+      "isVehicleBunkered": true,
+      "hasTick": "function",
+      "hasDamage": "function",
+      "ownKeys": [
+        "building",
+        "bunkeredVehicle",
+        "_prevDockedCount"
+      ]
+    }
+  },
+  "game/gameobject/trait/BridgeTrait": {
+    "0": {
+      "needsImageUpdate": false,
+      "dominoHandled": false,
+      "hasDamage": "function",
+      "hasTick": "function",
+      "hasDestroy": "function",
+      "ownKeys": [
+        "bridges",
+        "needsImageUpdate",
+        "dominoHandled"
+      ]
+    }
+  },
+  "game/gameobject/trait/WallTrait": {
+    "0": {
+      "linkedDamageHandled": false,
+      "wallType": 0,
+      "findWallType": "function",
+      "findWallTypeEmpty": 0,
+      "hasSpawn": "function",
+      "hasUnspawn": "function",
+      "hasDamage": "function",
+      "ownKeys": [
+        "linkedDamageHandled",
+        "wallType"
+      ]
+    }
+  },
+  "game/gameobject/trait/TntChargeTrait": {
+    "0": {
+      "hasCharge": false,
+      "timerActive": false,
+      "detonateIvanWarhead": "function",
+      "hasTick": "function",
+      "hasDestroy": "function",
+      "ownKeys": [
+        "timer"
+      ]
+    }
+  },
+  "game/gameobject/trait/GapGeneratorTrait": {
+    "0": {
+      "radiusTiles": 5,
+      "refreshTicks": 0,
+      "hasTick": "function",
+      "update": "function",
+      "hasSpawn": "function",
+      "hasOwner": "function",
+      "ownKeys": [
+        "radiusTiles",
+        "refreshTicks"
+      ]
+    }
+  },
+  "game/gameobject/trait/BioReactorPowerTrait": {
+    "0": {
+      "registered": 0,
+      "added": false,
+      "totalFull": 150,
+      "totalDamaged": 275,
+      "addedAfterRemove": false,
+      "hasSpawn": "function",
+      "hasTick": "function",
+      "hasDamage": "function",
+      "ownKeys": [
+        "registered",
+        "added"
+      ]
+    }
+  },
+  "game/gameobject/trait/AirSpawnTrait": {
+    "0": {
+      "spawns": [],
+      "storage": [],
+      "missileLaunches": [],
+      "nextRegenTicks": [],
+      "availableSpawns": 0,
+      "isLaunchingMissiles": false,
+      "prepareLaunch": "function",
+      "storeAircraft": "function",
+      "hasSpawn": "function",
+      "hasTick": "function",
+      "ownKeys": [
+        "spawns",
+        "storage",
+        "missileLaunches",
+        "nextRegenTicks"
+      ]
+    }
+  },
+  "game/gameobject/trait/PoweredTrait": {
+    "0": {
+      "before": {
+        "turnedOn": true,
+        "sameObj": true,
+        "setTurnedOn": "function"
+      },
+      "ownKeys": [
+        "obj",
+        "turnedOn"
+      ]
+    }
+  },
+  "game/gameobject/trait/OverpoweredTrait": {
+    "0": {
+      "before": {
+        "chargersSize": 0,
+        "hasChargersToPowerOn": false,
+        "isOverpowered": false,
+        "hasTick": "function"
+      },
+      "ownKeys": [
+        "obj",
+        "chargers"
+      ]
+    }
+  },
+  "game/gameobject/trait/WarpedOutTrait": {
+    "0": {
+      "remainingTicks": 0,
+      "invulnerable": false,
+      "isActive": false,
+      "isInvulnerable": false,
+      "ticksWhenWarpedOut": true,
+      "hasTick": "function",
+      "ownKeys": [
+        "gameObject",
+        "ticksWhenWarpedOut",
+        "remainingTicks",
+        "invulnerable"
+      ]
+    }
+  },
+  "game/gameobject/trait/SuperWeaponTrait": {
+    "0": {
+      "name": "Nuke Missile",
+      "getSuperWeapon": "function",
+      "addSuperWeaponToPlayerIfNeeded": "function",
+      "removeSuperWeaponFromPlayerIfNeeded": "function",
+      "hasSpawn": "function",
+      "hasUnspawn": "function",
+      "hasOwner": "function",
+      "ownKeys": [
+        "name"
+      ]
+    }
+  },
+  "game/gameobject/trait/TiberiumTrait": {
+    "0": {
+      "maxBails": 11,
+      "init": {
+        "bailCount": 6,
+        "tiberiumType": 2
+      },
+      "got": 2,
+      "afterCollect": 4,
+      "afterRemove": {
+        "value": -1,
+        "bailCount": 0
+      },
+      "throws": "Attempted to collect an ore bail, but there are none left",
+      "afterSpawn": 11,
+      "ownKeys": [
+        "gameObject",
+        "rules"
+      ]
+    }
+  },
+  "game/gameobject/trait/CabHutTrait": {
+    "0": {
+      "checkedClosestBridge": false,
+      "findClosestBridgeBounds": "function",
+      "repairBridge": "function",
+      "demolishBridge": "function",
+      "ownKeys": [
+        "gameObject",
+        "bridges",
+        "checkedClosestBridge"
+      ]
+    }
+  },
+  "game/gameobject/trait/SelfHealingTrait": {
+    "0": {
+      "cooldownTicks": 0,
+      "hasTick": "function",
+      "ownKeys": [
+        "cooldownTicks"
+      ]
+    }
   }
 }

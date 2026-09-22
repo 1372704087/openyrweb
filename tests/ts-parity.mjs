@@ -13928,6 +13928,1479 @@ const CONVERTED = [
       },
     ],
   },
+  {
+    name: "game/gameobject/trait/interface/NotifyDamage",
+    tsjs: "src/game/gameobject/trait/interface/NotifyDamage.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyDamage;
+        return {
+          onDamage: String(ns.NotifyDamage.onDamage),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onDamage.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyHeal",
+    tsjs: "src/game/gameobject/trait/interface/NotifyHeal.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyHeal;
+        return {
+          onHeal: String(ns.NotifyHeal.onHeal),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onHeal.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyHealthChange",
+    tsjs: "src/game/gameobject/trait/interface/NotifyHealthChange.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyHealthChange;
+        return {
+          onChange: String(ns.NotifyHealthChange.onChange),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onChange.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/interface/NotifyOrder",
+    tsjs: "src/game/gameobject/trait/interface/NotifyOrder.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyOrder;
+        return {
+          onPush: String(ns.NotifyOrder.onPush),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onPush.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyAllianceChange",
+    tsjs: "src/game/trait/interface/NotifyAllianceChange.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyAllianceChange;
+        return {
+          onChange: String(ns.NotifyAllianceChange.onChange),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onChange.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyAttack",
+    tsjs: "src/game/trait/interface/NotifyAttack.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyAttack;
+        return {
+          onAttack: String(ns.NotifyAttack.onAttack),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onAttack.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyDestroy",
+    tsjs: "src/game/trait/interface/NotifyDestroy.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyDestroy;
+        return {
+          onDestroy: String(ns.NotifyDestroy.onDestroy),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onDestroy.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyHealthChange",
+    tsjs: "src/game/trait/interface/NotifyHealthChange.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyHealthChange;
+        return {
+          onChange: String(ns.NotifyHealthChange.onChange),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onChange.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyObjectTraitAdd",
+    tsjs: "src/game/trait/interface/NotifyObjectTraitAdd.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyObjectTraitAdd;
+        return {
+          onAdd: String(ns.NotifyObjectTraitAdd.onAdd),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onAdd.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyOwnerChange",
+    tsjs: "src/game/trait/interface/NotifyOwnerChange.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyOwnerChange;
+        return {
+          onChange: String(ns.NotifyOwnerChange.onChange),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onChange.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyPlaceBuilding",
+    tsjs: "src/game/trait/interface/NotifyPlaceBuilding.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyPlaceBuilding;
+        return {
+          onPlace: String(ns.NotifyPlaceBuilding.onPlace),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onPlace.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifySpawn",
+    tsjs: "src/game/trait/interface/NotifySpawn.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifySpawn;
+        return {
+          onSpawn: String(ns.NotifySpawn.onSpawn),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onSpawn.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifySuperWeaponActivate",
+    tsjs: "src/game/trait/interface/NotifySuperWeaponActivate.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifySuperWeaponActivate;
+        return {
+          onActivate: String(ns.NotifySuperWeaponActivate.onActivate),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onActivate.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifySuperWeaponDeactivate",
+    tsjs: "src/game/trait/interface/NotifySuperWeaponDeactivate.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifySuperWeaponDeactivate;
+        return {
+          onDeactivate: String(ns.NotifySuperWeaponDeactivate.onDeactivate),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onDeactivate.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyTargetDestroy",
+    tsjs: "src/game/trait/interface/NotifyTargetDestroy.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyTargetDestroy;
+        return {
+          onDestroy: String(ns.NotifyTargetDestroy.onDestroy),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onDestroy.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyTick",
+    tsjs: "src/game/trait/interface/NotifyTick.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyTick;
+        return {
+          onTick: String(ns.NotifyTick.onTick),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onTick.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyUnspawn",
+    tsjs: "src/game/trait/interface/NotifyUnspawn.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyUnspawn;
+        return {
+          onUnspawn: String(ns.NotifyUnspawn.onUnspawn),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onUnspawn.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/interface/NotifyWarpChange",
+    tsjs: "src/game/trait/interface/NotifyWarpChange.ts.js",
+    probes: [
+      (ns) => {
+        const n = ns.NotifyWarpChange;
+        return {
+          onChange: String(ns.NotifyWarpChange.onChange),
+          keys: Object.keys(n),
+          symbols: Object.getOwnPropertySymbols(n).map(String),
+          descriptions: [n.onChange.description],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/DelayedKillTrait",
+    tsjs: "src/game/gameobject/trait/DelayedKillTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const t = new ns.DelayedKillTrait();
+        return {
+          isActive: t.isActive(),
+          timerActive: t.timer.isActive(),
+          attackerInfo: t.attackerInfo,
+          ownKeys: Object.keys(t),
+          hasTick: typeof t[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/GunnerTrait",
+    tsjs: "src/game/gameobject/trait/GunnerTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const g = new ns.GunnerTrait();
+        return {
+          lastHadGunner: g.lastHadGunner,
+          ownKeys: Object.keys(g),
+          hasTick: typeof g[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/HoverBobTrait",
+    tsjs: "src/game/gameobject/trait/HoverBobTrait.ts.js",
+    probes: [
+      (ns) => {
+        const h = new ns.HoverBobTrait();
+        return {
+          prevHoverBobLeptons: h.prevHoverBobLeptons,
+          spawnTick: h.spawnTick,
+          disabled: h.disabled,
+          ownKeys: Object.keys(h),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/DrainTrait",
+    tsjs: "src/game/gameobject/trait/DrainTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const d = new ns.DrainTrait();
+        return {
+          drainTarget: d.drainTarget,
+          drainTicksLeft: d.drainTicksLeft,
+          draining: d.draining,
+          primaryScanCooldown: d.primaryScanCooldown,
+          ownKeys: Object.keys(d),
+          hasTick: typeof d[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasUnspawn: typeof d[mod("game/gameobject/trait/interface/NotifyUnspawn").NotifyUnspawn.onUnspawn],
+          hasDestroy: typeof d[mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy.onDestroy],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/DisguiseTrait",
+    tsjs: "src/game/gameobject/trait/DisguiseTrait.ts.js",
+    probes: [
+      (ns) => {
+        const d = new ns.DisguiseTrait();
+        return {
+          isActive: d.isActive,
+          cooldownTicks: d.cooldownTicks,
+          disguisedAs: d.disguisedAs,
+          isDisguised: d.isDisguised(),
+          getDisguise: d.getDisguise(),
+          ownKeys: Object.keys(d),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/MindControllableTrait",
+    tsjs: "src/game/gameobject/trait/MindControllableTrait.ts.js",
+    probes: [
+      (ns) => {
+        const host = { owner: { id: "p1" } };
+        const m = new ns.MindControllableTrait(host);
+        return {
+          sameHost: m.gameObject === host,
+          controller: m.controller,
+          prevOwner: m.prevOwner,
+          isActive: m.isActive(),
+          getOriginalOwner: m.getOriginalOwner(),
+          getController: m.getController(),
+          ownKeys: Object.keys(m),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/OilDerrickTrait",
+    tsjs: "src/game/gameobject/trait/OilDerrickTrait.ts.js",
+    probes: [
+      (ns) => {
+        const o = new ns.OilDerrickTrait();
+        return { isActive: o.isActive, produceCashCooldown: o.produceCashCooldown, ownKeys: Object.keys(o) };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/PsychicDetectorTrait",
+    tsjs: "src/game/gameobject/trait/PsychicDetectorTrait.ts.js",
+    probes: [
+      (ns) => {
+        const p = new ns.PsychicDetectorTrait(10);
+        return {
+          radiusTiles: p.radiusTiles,
+          detectionLines: p.detectionLines,
+          nextScan: p.nextScan,
+          ownKeys: Object.keys(p),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SpawnDebrisTrait",
+    tsjs: "src/game/gameobject/trait/SpawnDebrisTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const s = new ns.SpawnDebrisTrait();
+        const proto = ns.SpawnDebrisTrait.prototype;
+        const NotifyCrash = mod("game/gameobject/trait/interface/NotifyCrash").NotifyCrash;
+        const NotifyDestroy = mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy;
+        return {
+          ownKeys: Object.keys(s),
+          hasCrash: typeof proto[NotifyCrash.onCrash],
+          hasDestroy: typeof proto[NotifyDestroy.onDestroy],
+          protoSymbols: Object.getOwnPropertySymbols(proto).map(String),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TechHospitalHealTrait",
+    tsjs: "src/game/gameobject/trait/TechHospitalHealTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const t = new ns.TechHospitalHealTrait();
+        return {
+          tickCounter: t.tickCounter,
+          ownKeys: Object.keys(t),
+          hasOwnerChange: typeof t[mod("game/gameobject/trait/interface/NotifyOwnerChange").NotifyOwnerChange.onChange],
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TiberiumTreeTrait",
+    tsjs: "src/game/gameobject/trait/TiberiumTreeTrait.ts.js",
+    probes: [
+      (ns) => {
+        const rules = { animationProbability: 0.1 };
+        const t = new ns.TiberiumTreeTrait(rules);
+        return {
+          sameRules: t.rules === rules,
+          ticksSinceLastSpawn: t.ticksSinceLastSpawn,
+          cooldownTicks: t.cooldownTicks,
+          status: t.status,
+          enumIdle: ns.SpawnStatus.Idle,
+          enumSpawning: ns.SpawnStatus.Spawning,
+          enumKeys: Object.keys(ns.SpawnStatus),
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/VeteranTrait",
+    tsjs: "src/game/gameobject/trait/VeteranTrait.ts.js",
+    probes: [
+      (ns) => {
+        const go = { rules: { cost: 1000 } };
+        const vr = { veteranRatio: 0.5, veteranCap: 2 };
+        const v = new ns.VeteranTrait(go, vr);
+        return {
+          sameGo: v.gameObject === go,
+          sameVr: v.veteranRules === vr,
+          veteranLevel: v.veteranLevel,
+          xp: v.xp,
+          promotionThresh: v.promotionThresh,
+          isMaxLevel: v.isMaxLevel(),
+          isElite: v.isElite(),
+          ownKeys: Object.keys(v),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/OccupiableGarrisonTrait",
+    tsjs: "src/game/gameobject/trait/OccupiableGarrisonTrait.ts.js",
+    probes: [
+      (ns) => {
+        const building = { healthTrait: { health: 200 }, rules: {} };
+        const g = new ns.OccupiableGarrisonTrait(building, 0.2, {});
+        return {
+          evacThreshold: g.evacThreshold,
+          sameBuilding: g.building === building,
+          canBeOccupied: g.canBeOccupied(),
+          ownKeys: Object.keys(g),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/PowerTrait",
+    tsjs: "src/game/trait/PowerTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const p = new ns.PowerTrait();
+        return {
+          ownedEmpty: p._ownedByBioReactor({}),
+          ownedBio: p._ownedByBioReactor({ bioReactorPowerTrait: {} }),
+          hasTick: typeof p[mod("game/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasSpawn: typeof p[mod("game/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          isCapturablePower: typeof p.isCapturablePower,
+          ownKeys: Object.keys(p),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/RadarTrait",
+    tsjs: "src/game/trait/RadarTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const r = new ns.RadarTrait();
+        const NP = mod("game/trait/interface/NotifyPower").NotifyPower;
+        return {
+          lightningIsMap: r.activeLightningStrikes instanceof Map,
+          lightningSize: r.activeLightningStrikes.size,
+          onPowerChange: r[NP.onPowerChange](),
+          hasActivate: typeof r[mod("game/trait/interface/NotifySuperWeaponActivate").NotifySuperWeaponActivate.onActivate],
+          ownKeys: Object.keys(r),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/MapRadiationTrait",
+    tsjs: "src/game/trait/MapRadiationTrait.ts.js",
+    probes: [
+      (ns) => {
+        const map = { tileOccupation: {}, tiles: {}, mapBounds: {} };
+        const m = new ns.MapRadiationTrait(map);
+        return {
+          sameMap: m.map === map,
+          radSitesIsMap: m.radSites instanceof Map,
+          radLevelIsMap: m.radLevelByTile instanceof Map,
+          radSitesSize: m.radSites.size,
+          radLevelSize: m.radLevelByTile.size,
+          nextDamage: m.nextDamage,
+          nextDecay: m.nextDecay,
+          onChangeType: typeof m.onChange,
+          getRadLevel: m.getRadLevel(null),
+          ownKeys: Object.keys(m),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/MapShroudTrait",
+    tsjs: "src/game/trait/MapShroudTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const map = { tileOccupation: { onChange: { subscribe() {}, unsubscribe() {} } }, tiles: {} };
+        const alliances = {};
+        const m = new ns.MapShroudTrait(map, alliances);
+        return {
+          sameMap: m.map === map,
+          sameAlliances: m.alliances === alliances,
+          shroudIsMap: m.shroudByPlayer instanceof Map,
+          revealedIsSet: m.revealedToAll instanceof Set,
+          gapIsSet: m.gapGenerators instanceof Set,
+          shroudSize: m.shroudByPlayer.size,
+          getPlayerShroud: m.getPlayerShroud({}),
+          hasAllianceChange: typeof m[mod("game/trait/interface/NotifyAllianceChange").NotifyAllianceChange.onChange],
+          ownKeys: Object.keys(m),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/SharedDetectDisguiseTrait",
+    tsjs: "src/game/trait/SharedDetectDisguiseTrait.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.SharedDetectDisguiseTrait();
+        return {
+          detectorsIsSet: s.detectors instanceof Set,
+          detectorsSize: s.detectors.size,
+          isGlobalDetector: s.isGlobalDetector({ isTechno: () => false }),
+          isDisguisable: s.isDisguisable({ isInfantry: () => false, isVehicle: () => false }),
+          ownKeys: Object.keys(s),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/AirstrikeTrait",
+    tsjs: "src/game/gameobject/trait/AirstrikeTrait.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.AirstrikeTrait();
+        const readyNoRules = a.isReady({ rules: {} });
+        const readyWithRules = a.isReady({ rules: { airstrikeTeamType: "PLANE" } });
+        const team = a.getAirstrikeTeam({
+          rules: { airstrikeTeamType: "PLANE", airstrikeTeam: 3, airstrikeRechargeTime: 80 },
+          veteranTrait: null,
+        });
+        return {
+          cooldownTicks: a.cooldownTicks,
+          fired: a.fired,
+          interrupted: a.interrupted,
+          _guideGraceTicks: a._guideGraceTicks,
+          pendingLaunch: a.pendingLaunch,
+          teamMiGs: a.teamMiGs,
+          targetObject: a.targetObject,
+          targetTile: a.targetTile,
+          _targetAcquiredVoicePlayed: a._targetAcquiredVoicePlayed,
+          migFiredIsSet: a._migFired instanceof Set,
+          migDeathIsSet: a._migDeathVoiced instanceof Set,
+          _guidanceAnimating: a._guidanceAnimating,
+          ownKeys: Object.keys(a),
+          readyNoRules,
+          readyWithRules,
+          team,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/AmmoTrait",
+    tsjs: "src/game/gameobject/trait/AmmoTrait.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.AmmoTrait(10);
+        const full = { maxAmmo: a.maxAmmo, ammo: a.ammo, isFull: a.isFull() };
+        a.ammo = -5;
+        const clampedLow = a.ammo;
+        a.ammo = 99;
+        const clampedHigh = a.ammo;
+        const b = new ns.AmmoTrait(8, 3);
+        return {
+          full,
+          clampedLow,
+          clampedHigh,
+          partial: { ammo: b.ammo, isFull: b.isFull() },
+          ownKeys: Object.keys(a),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/AutoRepairTrait",
+    tsjs: "src/game/gameobject/trait/AutoRepairTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.AutoRepairTrait();
+        return {
+          freeRepair: t.freeRepair,
+          disabled: t.disabled,
+          cooldownTicks: t.cooldownTicks,
+          healLeftover: t.healLeftover,
+          isDisabled: t.isDisabled(),
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.AutoRepairTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/BerserkTrait",
+    tsjs: "src/game/gameobject/trait/BerserkTrait.ts.js",
+    probes: [
+      (ns) => {
+        let calls = 0;
+        const host = { unitOrderTrait: { cancelAllTasks() { calls++; } } };
+        const t = new ns.BerserkTrait(host);
+        const init = { sameHost: t.gameObject === host, berserkFrames: t.berserkFrames, berserkSource: t.berserkSource, isBerserk: t.isBerserk() };
+        t.setBerserk(10, "skill");
+        const afterFirst = { frames: t.berserkFrames, isBerserk: t.isBerserk(), calls };
+        t.setBerserk(5, "skill");
+        const afterSecond = t.berserkFrames;
+        t.clearBerserk();
+        return { init, afterFirst, afterSecond, afterClear: { frames: t.berserkFrames, source: t.berserkSource } };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/C4ChargeTrait",
+    tsjs: "src/game/gameobject/trait/C4ChargeTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.C4ChargeTrait();
+        return {
+          hasCharge: t.hasCharge(),
+          timerActive: t.timer.isActive(),
+          attackerInfo: t.attackerInfo,
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.C4ChargeTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/DeployerTrait",
+    tsjs: "src/game/gameobject/trait/DeployerTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.DeployerTrait({ isInfantry: () => false });
+        return {
+          deployed: t.deployed,
+          deployFireState: t.deployFireState,
+          deployFireDelay: t.deployFireDelay,
+          fireUpDelay: t.fireUpDelay,
+          deployFireCount: t.deployFireCount,
+          deployWeapon: t.deployWeapon,
+          undeployDelay: t.undeployDelay,
+          isDeployed: t.isDeployed(),
+          getHash: t.getHash(),
+          debugGetState: t.debugGetState(),
+          hasDeployFireStateExport: "DeployFireState" in ns,
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/GarrisonTrait",
+    tsjs: "src/game/gameobject/trait/GarrisonTrait.ts.js",
+    probes: [
+      (ns) => {
+        const b = {};
+        const t = new ns.GarrisonTrait(b, 8);
+        return {
+          sameBuilding: t.building === b,
+          maxOccupants: t.maxOccupants,
+          units: t.units,
+          isOccupied: t.isOccupied(),
+          canBeOccupied: t.canBeOccupied(),
+          evacuateType: typeof t.evacuate,
+          _afterEvacuateType: typeof t._afterEvacuate,
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.GarrisonTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/GattlingTrait",
+    tsjs: "src/game/gameobject/trait/GattlingTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.GattlingTrait({
+          rules: {
+            rateUp: 2,
+            rateDown: 3,
+            stageThresholds: [10, 20],
+            eliteStageThresholds: [15, 30],
+          },
+          veteranLevel: 0,
+        });
+        return {
+          stage: t.stage,
+          timer: t.timer,
+          rateUp: t.rateUp,
+          rateDown: t.rateDown,
+          stageThresholds: t.stageThresholds,
+          eliteStageThresholds: t.eliteStageThresholds,
+          firedThisTick: t.firedThisTick,
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.GattlingTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/InfantryAbsorbTrait",
+    tsjs: "src/game/gameobject/trait/InfantryAbsorbTrait.ts.js",
+    probes: [
+      (ns) => {
+        const b = { rules: { passengers: 5 } };
+        const t = new ns.InfantryAbsorbTrait(b, 8);
+        return {
+          sameBuilding: t.building === b,
+          loadQueue: t.loadQueue,
+          getMaxCapacity: t.getMaxCapacity(),
+          getOccupiedCapacity: t.getOccupiedCapacity(),
+          getAvailableCapacity: t.getAvailableCapacity(),
+          unitFitsInside: t.unitFitsInside(null),
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/InvulnerableTrait",
+    tsjs: "src/game/gameobject/trait/InvulnerableTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.InvulnerableTrait();
+        return {
+          isActive: t.isActive(),
+          isForceShieldActive: t.isForceShieldActive(),
+          isForceShield: t.isForceShield,
+          _version: t._version,
+          _fsVersion: t._fsVersion,
+          timerActive: t.timer.isActive(),
+          fsTimerActive: t.fsTimer.isActive(),
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/MindControllerTrait",
+    tsjs: "src/game/gameobject/trait/MindControllerTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.MindControllerTrait({}, 1, false);
+        const init = {
+          maxCapacity: t.maxCapacity,
+          overloadEnabled: t.overloadEnabled,
+          targets: t.targets,
+          isActive: t.isActive(),
+          isAtCapacity: t.isAtCapacity(),
+        };
+        t.targets = [{}, {}];
+        const atCap = t.isAtCapacity();
+        const m = new ns.MindControllerTrait({}, 1, true);
+        m.targets = [{}, {}, {}];
+        return {
+          init,
+          atCap,
+          overloadNoCap: m.isAtCapacity(),
+          _overloadTicks: m._overloadTicks,
+          mTargets: m.targets.length,
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/ParasiteableTrait",
+    tsjs: "src/game/gameobject/trait/ParasiteableTrait.ts.js",
+    probes: [
+      (ns) => {
+        const host = { moveTrait: { setDisabled() {} } };
+        const t = new ns.ParasiteableTrait(host);
+        return {
+          sameHost: t.gameObject === host,
+          beingBoarded: t.beingBoarded,
+          parasite: t.parasite,
+          parasiteWeapon: t.parasiteWeapon,
+          damageTickCooldown: t.damageTickCooldown,
+          lastAttacker: t.lastAttacker,
+          lastExternalBaseDamage: t.lastExternalBaseDamage,
+          lastExternalDamageTick: t.lastExternalDamageTick,
+          isInfested: t.isInfested(),
+          isParalyzed: t.isParalyzed(),
+          getParasite: t.getParasite(),
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.ParasiteableTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SecureProgressTrait",
+    tsjs: "src/game/gameobject/trait/SecureProgressTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SecureProgressTrait(0);
+        const t2 = new ns.SecureProgressTrait(2);
+        return {
+          secureTicks: t.secureTicks,
+          securingPlayer: t.securingPlayer,
+          isActive: t.isActive(),
+          getProgress: t.getProgress(),
+          getSecuringPlayer: t.getSecuringPlayer(),
+          timerType: typeof t.timer.isActive,
+          timerActive: t.timer.isActive(),
+          t2SecureTicks: t2.secureTicks,
+          t2Start: t2.start({ owner: { isNeutral: false } }, {}),
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SlaveMinerTrait",
+    tsjs: "src/game/gameobject/trait/SlaveMinerTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const t = new ns.SlaveMinerTrait();
+        return {
+          slaves: t.slaves,
+          regenTicksLeft: t.regenTicksLeft,
+          _liberator: t._liberator,
+          _morphInFlight: t._morphInFlight,
+          _pendingSpawnCount: t._pendingSpawnCount,
+          _initialSpawnTicksLeft: t._initialSpawnTicksLeft,
+          _respawnTicksLeft: t._respawnTicksLeft,
+          _noOreTicks: t._noOreTicks,
+          ownKeys: Object.keys(t),
+          hasSpawn: typeof t[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          hasTick: typeof t[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasUnspawn: typeof t[mod("game/gameobject/trait/interface/NotifyUnspawn").NotifyUnspawn.onUnspawn],
+          hasDestroy: typeof t[mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy.onDestroy],
+          hasOwner: typeof t[mod("game/gameobject/trait/interface/NotifyOwnerChange").NotifyOwnerChange.onChange],
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.SlaveMinerTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SlaveMinerVehicleTrait",
+    tsjs: "src/game/gameobject/trait/SlaveMinerVehicleTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SlaveMinerVehicleTrait();
+        return {
+          scanCooldown: t.scanCooldown,
+          _playerLockTicks: t._playerLockTicks,
+          _aiTaskingIsFactory: t._aiTaskingIsFactory,
+          slaves: t.slaves,
+          _stashSlavesForMorph: typeof t._stashSlavesForMorph,
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.SlaveMinerVehicleTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SubmergibleTrait",
+    tsjs: "src/game/gameobject/trait/SubmergibleTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SubmergibleTrait();
+        return {
+          isActive: t.isActive,
+          surfaceProgress: t.surfaceProgress,
+          targetSurfaceProgress: t.targetSurfaceProgress,
+          cooldownTicks: t.cooldownTicks,
+          isSubmerged: t.isSubmerged(),
+          getSurfaceProgress: t.getSurfaceProgress(),
+          emergeType: typeof t.emerge,
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.SubmergibleTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TemporalTrait",
+    tsjs: "src/game/gameobject/trait/TemporalTrait.ts.js",
+    probes: [
+      (ns) => {
+        const host = {};
+        const t = new ns.TemporalTrait(host);
+        const before = {
+          sameHost: t.gameObject === host,
+          ticksWhenWarpedOut: t.ticksWhenWarpedOut,
+          attackersSize: t.attackers.size,
+          currentTarget: t.currentTarget,
+          currentWeapon: t.currentWeapon,
+          eraseTicks: t.eraseTicks,
+          getTarget: t.getTarget(),
+        };
+        t.dispose();
+        return {
+          before,
+          afterDispose: { gameObject: t.gameObject, attackersSize: t.attackers.size },
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TilterTrait",
+    tsjs: "src/game/gameobject/trait/TilterTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const t = new ns.TilterTrait();
+        return {
+          tilt: t.tilt,
+          compute0: t.computeTilt(0),
+          compute17: t.computeTilt(17),
+          compute4: t.computeTilt(4),
+          compute5: t.computeTilt(5),
+          ownKeys: Object.keys(t),
+          hasSpawn: typeof t[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.TilterTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/UnitOrderTrait",
+    tsjs: "src/game/gameobject/trait/UnitOrderTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const host = { resetGuardModeToIdle() {} };
+        const t = new ns.UnitOrderTrait(host);
+        return {
+          orders: t.orders,
+          queuedSize: t.queuedOrders.size,
+          tasks: t.tasks,
+          hasTasks: t.hasTasks(),
+          isIdle: t.isIdle(),
+          getCurrentTask: t.getCurrentTask(),
+          waypointPath: t.waypointPath,
+          currentWaypoint: t.currentWaypoint,
+          targetLinesTask: t.targetLinesTask,
+          sameHost: t.gameObject === host,
+          ownKeys: Object.keys(t),
+          hasTick: typeof t[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.UnitOrderTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/MapLightingTrait",
+    tsjs: "src/game/trait/MapLightingTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.MapLightingTrait({ ambientChangeRate: 1, ambientChangeStep: 0.1 });
+        return {
+          ambientChangeRate: t.ambientChangeRate,
+          ambientChangeStep: t.ambientChangeStep,
+          targetAmbient: t.targetAmbient,
+          ambientUpdateTicks: t.ambientUpdateTicks,
+          mapLighting: !!t.mapLighting,
+          onChangeType: typeof t.onChange,
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.MapLightingTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/SellTrait",
+    tsjs: "src/game/trait/SellTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SellTrait({ events: { dispatch() {} } }, { refundPercent: 0.5 });
+        return {
+          gameType: typeof t.game,
+          refundPercent: t.generalRules.refundPercent,
+          refundNoCost: t.computeRefundValue({ rules: {}, owner: {} }),
+          refundSoylent: t.computeRefundValue({ rules: { soylent: 100 }, owner: {} }),
+          refundCost: t.computeRefundValue({
+            rules: { cost: 1000 },
+            purchaseValue: 800,
+            owner: { isAi: false },
+          }),
+          purchaseValue: t.computePurchaseValue({ cost: 50 }),
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/SharedDetectCloakTrait",
+    tsjs: "src/game/trait/SharedDetectCloakTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SharedDetectCloakTrait();
+        return {
+          detectorsIsSet: t.detectors instanceof Set,
+          detectorsSize: t.detectors.size,
+          isGlobalDetector: t.isGlobalDetector({ isTechno: () => false }),
+          isCloakable: t.isCloakable({ isTechno: () => false }),
+          isCloakableTechno: t.isCloakable({ isTechno: () => true, cloakableTrait: null }),
+          ownKeys: Object.keys(t),
+          protoSymbolCount: Object.getOwnPropertySymbols(ns.SharedDetectCloakTrait.prototype).length,
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/StalemateDetectTrait",
+    tsjs: "src/game/trait/StalemateDetectTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const GameSpeed = mod("game/GameSpeed").GameSpeed;
+        const s = new ns.StalemateDetectTrait();
+        return {
+          graceMinutes: ns.StalemateDetectTrait.graceMinutes,
+          stale: s.stale,
+          isStale: s.isStale(),
+          countdownTicks: s.countdownTicks,
+          expectedCountdown: Math.floor(60 * 10 * GameSpeed.BASE_TICKS_PER_SECOND),
+          allPlayersSize: s.allPlayersCredits.size,
+          hasTick: typeof s[mod("game/trait/interface/NotifyTick").NotifyTick.onTick],
+          ownKeys: Object.keys(s),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/SuperWeaponsTrait",
+    tsjs: "src/game/trait/SuperWeaponsTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const NP = mod("game/trait/interface/NotifyPower").NotifyPower;
+        const NW = mod("game/trait/interface/NotifyWarpChange").NotifyWarpChange;
+        const swt = new ns.SuperWeaponsTrait();
+        return {
+          effects: swt.effects,
+          hasTick: typeof swt[mod("game/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasWarp: typeof swt[NW.onChange],
+          hasPowerLow: typeof swt[NP.onPowerLow],
+          hasPowerRestore: typeof swt[NP.onPowerRestore],
+          onPowerChange: swt[NP.onPowerChange]({}),
+          activateEffect: typeof swt.activateEffect,
+          activateSuperWeapon: typeof swt.activateSuperWeapon,
+          ownKeys: Object.keys(swt),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/VirusCloudTrait",
+    tsjs: "src/game/trait/VirusCloudTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const v = new ns.VirusCloudTrait({});
+        return {
+          maxClouds: v.maxClouds,
+          nextCloudId: v.nextCloudId,
+          cloudsSize: v.clouds.size,
+          _config: v._config,
+          getConfig: typeof v.getConfig,
+          createCloud: typeof v.createCloud,
+          spawnParticle: typeof v.spawnParticle,
+          applyDamage: typeof v.applyDamage,
+          hasTick: typeof v[mod("game/trait/interface/NotifyTick").NotifyTick.onTick],
+          ownKeys: Object.keys(v),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/trait/CrateGeneratorTrait",
+    tsjs: "src/game/trait/CrateGeneratorTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const PowerupType = mod("game/type/PowerupType").PowerupType;
+        const c = new ns.CrateGeneratorTrait(true);
+        return {
+          unsupportedLen: ns.UNSUPPORTED_POWERUP_TYPES.length,
+          unsupportedHasIon: ns.UNSUPPORTED_POWERUP_TYPES.includes(PowerupType.IonStorm),
+          unsupportedHasGas: ns.UNSUPPORTED_POWERUP_TYPES.includes(PowerupType.Gas),
+          unsupportedHasPod: ns.UNSUPPORTED_POWERUP_TYPES.includes(PowerupType.Pod),
+          unsupportedHasSquad: ns.UNSUPPORTED_POWERUP_TYPES.includes(PowerupType.Squad),
+          randomCrateSpawn: c.randomCrateSpawn,
+          crates: c.crates,
+          availEdgeTiles: c.availEdgeTiles,
+          allTiles: c.allTiles,
+          hasTick: typeof c[mod("game/trait/interface/NotifyTick").NotifyTick.onTick],
+          grantPowerup: typeof c.grantPowerup,
+          pickupCrate: typeof c.pickupCrate,
+          choosePowerup: typeof c.choosePowerup,
+          peekInsideCrate: c.peekInsideCrate({}),
+          ownKeys: Object.keys(c),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/FreeUnitTrait",
+    tsjs: "src/game/gameobject/trait/FreeUnitTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const NBS = mod("game/gameobject/trait/interface/NotifyBuildStatus").NotifyBuildStatus;
+        const f = new ns.FreeUnitTrait();
+        return {
+          hasStatusChange: typeof f[NBS.onStatusChange],
+          ownKeys: Object.keys(f),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/HospitalTrait",
+    tsjs: "src/game/gameobject/trait/HospitalTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const h = new ns.HospitalTrait();
+        const healQueue0 = h.healQueue;
+        const unit0 = h.unit;
+        const healTicks0 = h.healTicks;
+        const u = {};
+        const added = h.addToHealQueue(u);
+        const isFirst = h.unitIsFirstInHealQueue(u);
+        h.removeFromHealQueue(u);
+        return {
+          healQueue0,
+          unit0,
+          healTicks0,
+          added,
+          isFirst,
+          healQueueAfter: h.healQueue,
+          hasTick: typeof h[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasDestroy: typeof h[mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy.onDestroy],
+          ownKeys: Object.keys(h),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TankBunkerTrait",
+    tsjs: "src/game/gameobject/trait/TankBunkerTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const b = new ns.TankBunkerTrait({ game: undefined });
+        return {
+          bunkeredVehicle: b.bunkeredVehicle,
+          _prevDockedCount: b._prevDockedCount,
+          canVehicleEnterNull: b.canVehicleEnter(null),
+          canVehicleEnterNonVehicle: b.canVehicleEnter({ isVehicle: () => false }),
+          getDamageMultiplier: b.getDamageMultiplier(),
+          getROFMultiplier: b.getROFMultiplier(),
+          getRangeBonus: b.getRangeBonus(),
+          isVehicleBunkered: b.isVehicleBunkered(undefined),
+          hasTick: typeof b[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasDamage: typeof b[mod("game/gameobject/trait/interface/NotifyDamage").NotifyDamage.onDamage],
+          ownKeys: Object.keys(b),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/BridgeTrait",
+    tsjs: "src/game/gameobject/trait/BridgeTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const br = new ns.BridgeTrait({});
+        return {
+          needsImageUpdate: br.needsImageUpdate,
+          dominoHandled: br.dominoHandled,
+          hasDamage: typeof br[mod("game/gameobject/trait/interface/NotifyDamage").NotifyDamage.onDamage],
+          hasTick: typeof br[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasDestroy: typeof br[mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy.onDestroy],
+          ownKeys: Object.keys(br),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/WallTrait",
+    tsjs: "src/game/gameobject/trait/WallTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const w = new ns.WallTrait();
+        return {
+          linkedDamageHandled: w.linkedDamageHandled,
+          wallType: w.wallType,
+          findWallType: typeof w.findWallType,
+          findWallTypeEmpty: w.findWallType([0, 0, 0, 0]),
+          hasSpawn: typeof w[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          hasUnspawn: typeof w[mod("game/gameobject/trait/interface/NotifyUnspawn").NotifyUnspawn.onUnspawn],
+          hasDamage: typeof w[mod("game/gameobject/trait/interface/NotifyDamage").NotifyDamage.onDamage],
+          ownKeys: Object.keys(w),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TntChargeTrait",
+    tsjs: "src/game/gameobject/trait/TntChargeTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const t = new ns.TntChargeTrait();
+        return {
+          hasCharge: t.hasCharge(),
+          getChargeOwner: t.getChargeOwner(),
+          timerActive: t.timer.isActive(),
+          detonateIvanWarhead: typeof t.detonateIvanWarhead,
+          hasTick: typeof t[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasDestroy: typeof t[mod("game/gameobject/trait/interface/NotifyDestroy").NotifyDestroy.onDestroy],
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/GapGeneratorTrait",
+    tsjs: "src/game/gameobject/trait/GapGeneratorTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const g = new ns.GapGeneratorTrait(5);
+        return {
+          radiusTiles: g.radiusTiles,
+          refreshTicks: g.refreshTicks,
+          hasTick: typeof g[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          update: typeof g.update,
+          hasSpawn: typeof g[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          hasOwner: typeof g[mod("game/gameobject/trait/interface/NotifyOwnerChange").NotifyOwnerChange.onChange],
+          ownKeys: Object.keys(g),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/BioReactorPowerTrait",
+    tsjs: "src/game/gameobject/trait/BioReactorPowerTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const bio = new ns.BioReactorPowerTrait();
+        const totalFull = bio._currentTotal({
+          rules: { power: 150, extraPower: 100 },
+          healthTrait: { health: 100 },
+          garrisonTrait: { units: [] },
+        });
+        const totalDamaged = bio._currentTotal({
+          rules: { power: 150, extraPower: 100 },
+          healthTrait: { health: 50 },
+          garrisonTrait: { units: [1, 2] },
+        });
+        bio._remove({}, {});
+        return {
+          registered: bio.registered,
+          added: bio.added,
+          totalFull,
+          totalDamaged,
+          addedAfterRemove: bio.added,
+          hasSpawn: typeof bio[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          hasTick: typeof bio[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          hasDamage: typeof bio[mod("game/gameobject/trait/interface/NotifyDamage").NotifyDamage.onDamage],
+          ownKeys: Object.keys(bio),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/AirSpawnTrait",
+    tsjs: "src/game/gameobject/trait/AirSpawnTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const a = new ns.AirSpawnTrait();
+        return {
+          spawns: a.spawns,
+          storage: a.storage,
+          missileLaunches: a.missileLaunches,
+          nextRegenTicks: a.nextRegenTicks,
+          nextReloadTicks: a.nextReloadTicks,
+          availableSpawns: a.availableSpawns,
+          isLaunchingMissiles: a.isLaunchingMissiles(),
+          prepareLaunch: typeof a.prepareLaunch,
+          storeAircraft: typeof a.storeAircraft,
+          hasSpawn: typeof a[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          hasTick: typeof a[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          ownKeys: Object.keys(a),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/PoweredTrait",
+    tsjs: "src/game/gameobject/trait/PoweredTrait.ts.js",
+    probes: [
+      (ns) => {
+        const mock = { isBuilding: () => false };
+        const p = new ns.PoweredTrait(mock);
+        const before = { turnedOn: p.turnedOn, sameObj: p.obj === mock, setTurnedOn: typeof p.setTurnedOn };
+        p.dispose();
+        return { before, afterDispose: p.obj, ownKeys: Object.keys(p) };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/OverpoweredTrait",
+    tsjs: "src/game/gameobject/trait/OverpoweredTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const o = new ns.OverpoweredTrait({});
+        const before = {
+          chargersSize: o.chargers.size,
+          hasChargersToPowerOn: o.hasChargersToPowerOn(),
+          isOverpowered: o.isOverpowered(),
+          hasTick: typeof o[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+        };
+        o.dispose();
+        return { before, afterDispose: o.obj, ownKeys: Object.keys(o) };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/WarpedOutTrait",
+    tsjs: "src/game/gameobject/trait/WarpedOutTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const w = new ns.WarpedOutTrait({ traits: { filter: () => [] } });
+        return {
+          remainingTicks: w.remainingTicks,
+          invulnerable: w.invulnerable,
+          isActive: w.isActive(),
+          isInvulnerable: w.isInvulnerable(),
+          ticksWhenWarpedOut: w.ticksWhenWarpedOut,
+          hasTick: typeof w[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          ownKeys: Object.keys(w),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SuperWeaponTrait",
+    tsjs: "src/game/gameobject/trait/SuperWeaponTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const s = new ns.SuperWeaponTrait("Nuke Missile");
+        return {
+          name: s.name,
+          getSuperWeapon: typeof s.getSuperWeapon,
+          addSuperWeaponToPlayerIfNeeded: typeof s.addSuperWeaponToPlayerIfNeeded,
+          removeSuperWeaponFromPlayerIfNeeded: typeof s.removeSuperWeaponFromPlayerIfNeeded,
+          hasSpawn: typeof s[mod("game/gameobject/trait/interface/NotifySpawn").NotifySpawn.onSpawn],
+          hasUnspawn: typeof s[mod("game/gameobject/trait/interface/NotifyUnspawn").NotifyUnspawn.onUnspawn],
+          hasOwner: typeof s[mod("game/gameobject/trait/interface/NotifyOwnerChange").NotifyOwnerChange.onChange],
+          ownKeys: Object.keys(s),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/TiberiumTrait",
+    tsjs: "src/game/gameobject/trait/TiberiumTrait.ts.js",
+    probes: [
+      (ns) => {
+        const maxBails = ns.TiberiumTrait.maxBails;
+        const stub = { value: 5 };
+        const t = new ns.TiberiumTrait(stub, { type: 2 });
+        const init = { bailCount: t.getBailCount(), tiberiumType: t.getTiberiumType() };
+        const got = t.collectBail();
+        const afterCollect = stub.value;
+        t.removeBails(100);
+        const afterRemove = { value: stub.value, bailCount: t.getBailCount() };
+        let throws = "no-throw";
+        try {
+          t.collectBail();
+        } catch (e) {
+          throws = e.message;
+        }
+        t.spawnBails(99);
+        return {
+          maxBails,
+          init,
+          got,
+          afterCollect,
+          afterRemove,
+          throws,
+          afterSpawn: stub.value,
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/CabHutTrait",
+    tsjs: "src/game/gameobject/trait/CabHutTrait.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.CabHutTrait({ tile: { rx: 0, ry: 0 } }, {});
+        return {
+          checkedClosestBridge: c.checkedClosestBridge,
+          closestBridge: c.closestBridge,
+          findClosestBridgeBounds: typeof c.findClosestBridgeBounds,
+          repairBridge: typeof c.repairBridge,
+          demolishBridge: typeof c.demolishBridge,
+          ownKeys: Object.keys(c),
+        };
+      },
+    ],
+  },
+  {
+    name: "game/gameobject/trait/SelfHealingTrait",
+    tsjs: "src/game/gameobject/trait/SelfHealingTrait.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const t = new ns.SelfHealingTrait();
+        return {
+          cooldownTicks: t.cooldownTicks,
+          hasTick: typeof t[mod("game/gameobject/trait/interface/NotifyTick").NotifyTick.onTick],
+          ownKeys: Object.keys(t),
+        };
+      },
+    ],
+  },
+
 ];
 
 /** Modules registered from the reconstructed sources to satisfy imports. */
