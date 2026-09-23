@@ -639,8 +639,8 @@ export class Gui {
       .set(GameMenuScreenType.Options, new OptionsScreen(strings, jsxRenderer, options, this.localPrefs, this.fullScreen, true, false, mixer, music))
       .set(GameMenuScreenType.OptionsSound, new SoundOptsScreen(strings, jsxRenderer, mixer, music, this.localPrefs))
       .set(GameMenuScreenType.OptionsKeyboard, new KeyboardScreen(strings, jsxRenderer, keyBinds));
-    (rootController = new LoadingScreenApiFactory(rules, strings, uiScene, jsxRenderer, renderer, gservConnection)),
-      (renderer = new ClientApi());
+    const loadingScreenApiFactory = new LoadingScreenApiFactory(rules, strings, uiScene, jsxRenderer, renderer, gservConnection);
+    (renderer = new ClientApi());
     (window.dispatchEvent(new CustomEvent("CdApiReady", { detail: renderer })), ((window as any).CdApi = renderer));
     ((loadingKeys = new GameScreen(
       (workerHost as any).workerHostApi,
@@ -652,7 +652,7 @@ export class Gui {
       this.engineModHash,
       errorHandler,
       gameMenuScreens,
-      rootController as any,
+      loadingScreenApiFactory,
       pausedFlag as any,
       lockstepLogger as any,
       this.config,
@@ -691,7 +691,7 @@ export class Gui {
         this.engineModHash,
         errorHandler as any,
         gameMenuScreens as any,
-        rootController as any,
+        loadingScreenApiFactory,
         this.config,
         strings,
         mixer as any,
