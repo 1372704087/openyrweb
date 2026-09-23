@@ -720,7 +720,7 @@ export class Gui {
         },
         (renderer as any).battleControl,
       )));
-    (rootController.addScreen(RootScreenType.MainMenuRoot, loadingKeys as any),
+    (rootController.addScreen(RootScreenType.MainMenuRoot, wolConnection as any),
       rootController.addScreen(RootScreenType.Game, loadingKeys as any),
       rootController.addScreen(RootScreenType.Replay, renderer as any),
       renderer as any,
