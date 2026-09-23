@@ -44,3 +44,8 @@ declare module "extensions/*" {
   const module_: any;
   export = module_;
 }
+
+declare module "liang-barsky" {
+  const module_: any;
+  export = module_;
+}

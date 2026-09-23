@@ -112,7 +112,12 @@ for (const f of disk) {
       `src/${spec}.ts`,
       `src/${spec}.ts.js`,
       `build/ts-modules/${spec}.js`,
-      `node_modules/${spec}`,        // npm 裸包（如 mersenne-twister）
+      `node_modules/${spec}`,        // npm 裸包目录（如 mersenne-twister）
+      `node_modules/${spec}.js`,     // 深层文件路径（如 .../lib/adapters/cache）
+      `node_modules/${spec}.mjs`,
+      `node_modules/${spec}.cjs`,
+      `node_modules/${spec}/index.js`,
+      `node_modules/${spec}/index.mjs`,
     ];
     if (!candidates.some((c) => fs.existsSync(path.join(ROOT, c)))) {
       broken++;

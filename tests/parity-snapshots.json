@@ -10387,6 +10387,101 @@
       "clone": ""
     }
   },
+  "engine/util/EntityIntersectHelper": {
+    "0": {
+      "emptyBox": 0,
+      "keys": [
+        "map",
+        "mapTileIntersectHelper",
+        "raycastHelper",
+        "renderableManager",
+        "scene",
+        "worldViewportHelper"
+      ]
+    },
+    "1": {
+      "hidden": 0,
+      "visible": 0,
+      "leafId": 9,
+      "noIdMsg": "No attached renderable ID found for Object3D."
+    }
+  },
+  "engine/util/MapPanningHelper": {
+    "0": {
+      "x": 5,
+      "y": 4,
+      "keys": [
+        "getScreenPanOrigin",
+        "map"
+      ]
+    },
+    "1": {
+      "x": 61,
+      "y": 60,
+      "width": 299,
+      "height": 219
+    },
+    "2": {
+      "hasMap": true,
+      "keys": [
+        "map"
+      ]
+    }
+  },
+  "engine/util/MapTileIntersectHelper": {
+    "0": {
+      "mapRef": true,
+      "sceneRef": true,
+      "keys": [
+        "map",
+        "scene"
+      ]
+    },
+    "1": {
+      "out": "undef",
+      "called": 0
+    }
+  },
+  "engine/util/RaycastHelper": {
+    "0": {
+      "origin": [
+        -1,
+        1
+      ],
+      "corner": [
+        1,
+        -1
+      ],
+      "mid": [
+        0,
+        0
+      ],
+      "keys": [
+        "scene"
+      ]
+    },
+    "1": {
+      "sceneRef": true,
+      "hasIntersect": true
+    }
+  },
+  "engine/util/WorldViewportHelper": {
+    "0": {
+      "sceneRef": true,
+      "methods": [
+        "distanceToViewport",
+        "distanceToScreenBox",
+        "distanceToViewportCenter",
+        "intersectsScreenBox"
+      ],
+      "keys": [
+        "scene"
+      ]
+    },
+    "1": {
+      "err": "Error"
+    }
+  },
   "util/array": {
     "0": {
       "hit": 2,
@@ -10735,6 +10830,388 @@
     "2": "Unhandled queue type \"nope\"",
     "3": "Unhandled ladder type \"nope\""
   },
+  "engine/AnimProps": {
+    "0": "AnimProps",
+    "1": {
+      "AnimProps": "function"
+    },
+    "2": "getArt,init,setArt"
+  },
+  "engine/Animation": {
+    "0": {
+      "keys": [
+        "Animation",
+        "AnimationState"
+      ],
+      "expected": [
+        "Animation",
+        "AnimationState"
+      ],
+      "types": {
+        "Animation": "function",
+        "AnimationState": "object"
+      }
+    }
+  },
+  "engine/AsyncResourceCollection": {
+    "0": {
+      "keys": [],
+      "expected": [],
+      "types": {}
+    }
+  },
+  "engine/Engine": {
+    "0": {
+      "keys": [
+        "Engine"
+      ],
+      "expected": [
+        "Engine"
+      ],
+      "types": {
+        "Engine": "function"
+      }
+    }
+  },
+  "engine/EngineType": {
+    "0": {
+      "keys": [
+        "EngineType"
+      ],
+      "expected": [
+        "EngineType"
+      ],
+      "types": {
+        "EngineType": "object"
+      }
+    }
+  },
+  "engine/GameAnimationLoop": {
+    "0": {
+      "keys": [
+        "GameAnimationLoop"
+      ],
+      "expected": [
+        "GameAnimationLoop"
+      ],
+      "types": {
+        "GameAnimationLoop": "function"
+      }
+    }
+  },
+  "engine/ImageFinder": {
+    "0": {
+      "keys": [
+        "ImageFinder"
+      ],
+      "expected": [
+        "ImageFinder"
+      ],
+      "types": {
+        "ImageFinder": "function"
+      }
+    }
+  },
+  "engine/IsoCoords": {
+    "0": {
+      "keys": [
+        "IsoCoords"
+      ],
+      "expected": [
+        "IsoCoords"
+      ],
+      "types": {
+        "IsoCoords": "function"
+      }
+    }
+  },
+  "engine/LazyAsyncResourceCollection": {
+    "0": {
+      "keys": [
+        "LazyAsyncResourceCollection"
+      ],
+      "expected": [
+        "LazyAsyncResourceCollection"
+      ],
+      "types": {
+        "LazyAsyncResourceCollection": "function"
+      }
+    }
+  },
+  "engine/LazyResourceCollection": {
+    "0": {
+      "keys": [
+        "LazyResourceCollection"
+      ],
+      "expected": [
+        "LazyResourceCollection"
+      ],
+      "types": {
+        "LazyResourceCollection": "function"
+      }
+    }
+  },
+  "engine/Lighting": {
+    "0": {
+      "keys": [
+        "Lighting"
+      ],
+      "expected": [
+        "Lighting"
+      ],
+      "types": {
+        "Lighting": "function"
+      }
+    }
+  },
+  "engine/MapDigest": {
+    "0": {
+      "keys": [
+        "MapDigest"
+      ],
+      "expected": [
+        "MapDigest"
+      ],
+      "types": {
+        "MapDigest": "function"
+      }
+    }
+  },
+  "engine/MapList": {
+    "0": {
+      "keys": [
+        "MapList"
+      ],
+      "expected": [
+        "MapList"
+      ],
+      "types": {
+        "MapList": "function"
+      }
+    }
+  },
+  "engine/MapManifest": {
+    "0": {
+      "keys": [
+        "MapManifest"
+      ],
+      "expected": [
+        "MapManifest"
+      ],
+      "types": {
+        "MapManifest": "function"
+      }
+    }
+  },
+  "engine/MapSupport": {
+    "0": {
+      "keys": [
+        "MapSupport"
+      ],
+      "expected": [
+        "MapSupport"
+      ],
+      "types": {
+        "MapSupport": "function"
+      }
+    }
+  },
+  "engine/RenderableManager": {
+    "0": {
+      "keys": [
+        "RenderableManager"
+      ],
+      "expected": [
+        "RenderableManager"
+      ],
+      "types": {
+        "RenderableManager": "function"
+      }
+    }
+  },
+  "engine/ResourceCollection": {
+    "0": {
+      "keys": [],
+      "expected": [],
+      "types": {}
+    }
+  },
+  "engine/ResourceLoader": {
+    "0": {
+      "rl": "function",
+      "lr": "function"
+    }
+  },
+  "engine/Theater": {
+    "0": {
+      "keys": [
+        "Theater"
+      ],
+      "expected": [
+        "Theater"
+      ],
+      "types": {
+        "Theater": "function"
+      }
+    }
+  },
+  "engine/TheaterType": {
+    "0": {
+      "keys": [
+        "TheaterType"
+      ],
+      "expected": [
+        "TheaterType"
+      ],
+      "types": {
+        "TheaterType": "object"
+      }
+    }
+  },
+  "engine/UiAnimationLoop": {
+    "0": {
+      "keys": [
+        "UiAnimationLoop"
+      ],
+      "expected": [
+        "UiAnimationLoop"
+      ],
+      "types": {
+        "UiAnimationLoop": "function"
+      }
+    }
+  },
+  "engine/animation/Runner": {
+    "0": {
+      "keys": [],
+      "expected": [],
+      "types": {}
+    }
+  },
+  "engine/animation/SimpleRunner": {
+    "0": {
+      "keys": [
+        "SimpleRunner"
+      ],
+      "expected": [
+        "SimpleRunner"
+      ],
+      "types": {
+        "SimpleRunner": "function"
+      }
+    }
+  },
+  "engine/gameRes/CdnManifest": {
+    "0": {
+      "keys": [],
+      "expected": [],
+      "types": {}
+    }
+  },
+  "engine/gameRes/CdnResourceLoader": {
+    "0": {
+      "keys": [
+        "CdnResourceLoader"
+      ],
+      "expected": [
+        "CdnResourceLoader"
+      ],
+      "types": {
+        "CdnResourceLoader": "function"
+      }
+    }
+  },
+  "engine/gameRes/FileSystemUtil": {
+    "0": {
+      "keys": [
+        "FileSystemUtil"
+      ],
+      "expected": [
+        "FileSystemUtil"
+      ],
+      "types": {
+        "FileSystemUtil": "function"
+      }
+    }
+  },
+  "engine/gameRes/GameRes": {
+    "0": {
+      "keys": [
+        "GameRes"
+      ],
+      "expected": [
+        "GameRes"
+      ],
+      "types": {
+        "GameRes": "function"
+      }
+    }
+  },
+  "engine/gameRes/GameResConfig": {
+    "0": {
+      "keys": [
+        "GameResConfig"
+      ],
+      "expected": [
+        "GameResConfig"
+      ],
+      "types": {
+        "GameResConfig": "function"
+      }
+    }
+  },
+  "engine/gameRes/GameResImporter": {
+    "0": {
+      "keys": [
+        "GameResImporter"
+      ],
+      "expected": [
+        "GameResImporter"
+      ],
+      "types": {
+        "GameResImporter": "function"
+      }
+    }
+  },
+  "engine/gameRes/GameResSource": {
+    "0": {
+      "keys": [
+        "GameResSource"
+      ],
+      "expected": [
+        "GameResSource"
+      ],
+      "types": {
+        "GameResSource": "object"
+      }
+    }
+  },
+  "engine/gameRes/VideoConverter": {
+    "0": {
+      "keys": [
+        "VideoConverter"
+      ],
+      "expected": [
+        "VideoConverter"
+      ],
+      "types": {
+        "VideoConverter": "function"
+      }
+    }
+  },
+  "engine/gameRes/importError/ArchiveDownloadError": {
+    "0": {
+      "keys": [
+        "ArchiveDownloadError"
+      ],
+      "expected": [
+        "ArchiveDownloadError"
+      ],
+      "types": {
+        "ArchiveDownloadError": "function"
+      }
+    }
+  },
   "engine/gameRes/importError/ArchiveExtractionError": {
     "0": {
       "keys": [
@@ -10745,6 +11222,355 @@
       ],
       "types": {
         "ArchiveExtractionError": "function"
+      }
+    }
+  },
+  "engine/gameRes/importError/ChecksumError": {
+    "0": {
+      "keys": [
+        "ChecksumError"
+      ],
+      "expected": [
+        "ChecksumError"
+      ],
+      "types": {
+        "ChecksumError": "function"
+      }
+    }
+  },
+  "engine/gameRes/importError/FileNotFoundError": {
+    "0": {
+      "keys": [
+        "FileNotFoundError"
+      ],
+      "expected": [
+        "FileNotFoundError"
+      ],
+      "types": {
+        "FileNotFoundError": "function"
+      }
+    }
+  },
+  "engine/gameRes/importError/InvalidArchiveError": {
+    "0": {
+      "keys": [
+        "InvalidArchiveError"
+      ],
+      "expected": [
+        "InvalidArchiveError"
+      ],
+      "types": {
+        "InvalidArchiveError": "function"
+      }
+    }
+  },
+  "engine/gameRes/importError/NoStorageError": {
+    "0": {
+      "keys": [
+        "NoStorageError"
+      ],
+      "expected": [
+        "NoStorageError"
+      ],
+      "types": {
+        "NoStorageError": "function"
+      }
+    }
+  },
+  "engine/gameRes/importError/NoWebAssemblyError": {
+    "0": {
+      "keys": [
+        "NoWebAssemblyError"
+      ],
+      "expected": [
+        "NoWebAssemblyError"
+      ],
+      "types": {
+        "NoWebAssemblyError": "function"
+      }
+    }
+  },
+  "engine/mixDatabase": {
+    "0": {
+      "keys": [
+        "mixDatabase"
+      ],
+      "expected": [
+        "mixDatabase"
+      ],
+      "types": {
+        "mixDatabase": "object"
+      }
+    }
+  },
+  "engine/resourceConfigs": {
+    "0": {
+      "keys": [
+        "ResourceType",
+        "resourceConfigs",
+        "resourcesForPrefetch",
+        "theaterSpecificResources"
+      ],
+      "expected": [
+        "ResourceType",
+        "resourceConfigs",
+        "resourcesForPrefetch",
+        "theaterSpecificResources"
+      ],
+      "types": {
+        "ResourceType": "object",
+        "resourceConfigs": "object",
+        "resourcesForPrefetch": "object",
+        "theaterSpecificResources": "object"
+      }
+    }
+  },
+  "engine/sound/AudioLoop": {
+    "0": {
+      "keys": [
+        "AudioLoop"
+      ],
+      "expected": [
+        "AudioLoop"
+      ],
+      "types": {
+        "AudioLoop": "function"
+      }
+    }
+  },
+  "engine/sound/AudioSequence": {
+    "0": {
+      "keys": [
+        "AudioSequence"
+      ],
+      "expected": [
+        "AudioSequence"
+      ],
+      "types": {
+        "AudioSequence": "function"
+      }
+    }
+  },
+  "engine/sound/AudioSystem": {
+    "0": {
+      "keys": [
+        "AudioSystem"
+      ],
+      "expected": [
+        "AudioSystem"
+      ],
+      "types": {
+        "AudioSystem": "function"
+      }
+    }
+  },
+  "engine/sound/ChannelType": {
+    "0": {
+      "keys": [
+        "ChannelType"
+      ],
+      "expected": [
+        "ChannelType"
+      ],
+      "types": {
+        "ChannelType": "object"
+      }
+    }
+  },
+  "engine/sound/Eva": {
+    "0": {
+      "keys": [
+        "Eva"
+      ],
+      "expected": [
+        "Eva"
+      ],
+      "types": {
+        "Eva": "function"
+      }
+    }
+  },
+  "engine/sound/EvaSpecs": {
+    "0": {
+      "keys": [
+        "EvaPriority",
+        "EvaSpecs"
+      ],
+      "expected": [
+        "EvaPriority",
+        "EvaSpecs"
+      ],
+      "types": {
+        "EvaPriority": "object",
+        "EvaSpecs": "function"
+      }
+    }
+  },
+  "engine/sound/InternalPlaybackHandle": {
+    "0": {
+      "keys": [
+        "InternalPlaybackHandle"
+      ],
+      "expected": [
+        "InternalPlaybackHandle"
+      ],
+      "types": {
+        "InternalPlaybackHandle": "function"
+      }
+    }
+  },
+  "engine/sound/Mixer": {
+    "0": {
+      "keys": [
+        "Mixer"
+      ],
+      "expected": [
+        "Mixer"
+      ],
+      "types": {
+        "Mixer": "function"
+      }
+    }
+  },
+  "engine/sound/Music": {
+    "0": {
+      "keys": [
+        "Music",
+        "MusicType"
+      ],
+      "expected": [
+        "Music",
+        "MusicType"
+      ],
+      "types": {
+        "Music": "function",
+        "MusicType": "object"
+      }
+    }
+  },
+  "engine/sound/MusicSpecs": {
+    "0": {
+      "keys": [
+        "MusicSpecs"
+      ],
+      "expected": [
+        "MusicSpecs"
+      ],
+      "types": {
+        "MusicSpecs": "function"
+      }
+    }
+  },
+  "engine/sound/Sound": {
+    "0": {
+      "keys": [
+        "Sound"
+      ],
+      "expected": [
+        "Sound"
+      ],
+      "types": {
+        "Sound": "function"
+      }
+    }
+  },
+  "engine/sound/SoundKey": {
+    "0": {
+      "keys": [
+        "SoundKey"
+      ],
+      "expected": [
+        "SoundKey"
+      ],
+      "types": {
+        "SoundKey": "object"
+      }
+    }
+  },
+  "engine/sound/SoundSpec": {
+    "0": {
+      "keys": [
+        "SoundSpec"
+      ],
+      "expected": [
+        "SoundSpec"
+      ],
+      "types": {
+        "SoundSpec": "function"
+      }
+    }
+  },
+  "engine/sound/SoundSpecs": {
+    "0": {
+      "keys": [
+        "SoundControl",
+        "SoundPriority",
+        "SoundSpecs",
+        "SoundType"
+      ],
+      "expected": [
+        "SoundControl",
+        "SoundPriority",
+        "SoundSpecs",
+        "SoundType"
+      ],
+      "types": {
+        "SoundControl": "object",
+        "SoundPriority": "object",
+        "SoundSpecs": "function",
+        "SoundType": "object"
+      }
+    }
+  },
+  "engine/sound/WorldSound": {
+    "0": {
+      "keys": [
+        "WorldSound"
+      ],
+      "expected": [
+        "WorldSound"
+      ],
+      "types": {
+        "WorldSound": "function"
+      }
+    }
+  },
+  "engine/type/LightingType": {
+    "0": {
+      "keys": [
+        "LightingType"
+      ],
+      "expected": [
+        "LightingType"
+      ],
+      "types": {
+        "LightingType": "object"
+      }
+    }
+  },
+  "engine/type/PaletteType": {
+    "0": {
+      "keys": [
+        "PaletteType"
+      ],
+      "expected": [
+        "PaletteType"
+      ],
+      "types": {
+        "PaletteType": "object"
+      }
+    }
+  },
+  "engine/type/PointerType": {
+    "0": {
+      "keys": [
+        "PointerType"
+      ],
+      "expected": [
+        "PointerType"
+      ],
+      "types": {
+        "PointerType": "object"
       }
     }
   },
@@ -10846,6 +11672,1077 @@
       "maxLevels": 4,
       "level": 0
     }
+  },
+  "engine/gfx/batch/BatchedMesh": {
+    "0": "BatchMode,BatchedMesh",
+    "1": {
+      "BatchMode": "object",
+      "BatchedMesh": "function"
+    },
+    "2": "getClippingPlanes,getClippingPlanesHash,getExtraLight,getLightDir,getOpacity,getPaletteIndex,setClippingPlanes,setExtraLight,setLightDir,setOpacity,setPaletteIndex,updateClippingPlanesHash",
+    "3": {
+      "keys": 2,
+      "hasDefault": false
+    }
+  },
+  "engine/gfx/batch/InstancedMesh": {
+    "0": "InstancedMesh",
+    "1": {
+      "InstancedMesh": "function"
+    },
+    "2": "dispose,setMatrixAt,setRenderCount,updateFromMeshes"
+  },
+  "engine/gfx/batch/MergedSpriteMesh": {
+    "0": "MergedSpriteMesh",
+    "1": {
+      "MergedSpriteMesh": "function"
+    },
+    "2": "dispose,updateFromMeshes"
+  },
+  "engine/gfx/batch/MeshBatchManager": {
+    "0": "MeshBatchManager",
+    "1": {
+      "MeshBatchManager": "function"
+    },
+    "2": "create3DObject,dispose,markNeedsRebuild,refreshOnly,updateMeshes"
+  },
+  "engine/gfx/batch/MeshInstancingBatch": {
+    "0": "MeshInstancingBatch",
+    "1": {
+      "MeshInstancingBatch": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,setMeshes,update"
+  },
+  "engine/gfx/batch/MeshMergingBatch": {
+    "0": "MeshMergingBatch",
+    "1": {
+      "MeshMergingBatch": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,setMeshes,update"
+  },
+  "engine/gfx/BufferGeometryUtils": {
+    "0": "BufferGeometryUtils",
+    "1": {
+      "BufferGeometryUtils": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    }
+  },
+  "engine/gfx/CanvasUtils": {
+    "0": "CanvasUtils",
+    "1": {
+      "CanvasUtils": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/gfx/DebugUtils": {
+    "0": "DebugUtils",
+    "1": {
+      "DebugUtils": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/gfx/drawable/PalDrawable": {
+    "0": "PalDrawable",
+    "1": {
+      "PalDrawable": "function"
+    },
+    "2": "draw"
+  },
+  "engine/gfx/drawable/TmpDrawable": {
+    "0": "TmpDrawable",
+    "1": {
+      "TmpDrawable": "function"
+    },
+    "2": "draw,drawExtraData,drawTileBlock",
+    "3": ""
+  },
+  "engine/gfx/FrustumCuller": {
+    "0": "FrustumCuller",
+    "1": {
+      "FrustumCuller": "function"
+    },
+    "2": "cull",
+    "3": ""
+  },
+  "engine/gfx/geometry/BufferGeometrySerializer": {
+    "0": "BufferGeometrySerializer",
+    "1": {
+      "BufferGeometrySerializer": "function"
+    },
+    "2": "getTypedArrayByteSize,readTypedArray,serialize,unserialize,writeTypedArray",
+    "3": ""
+  },
+  "engine/gfx/geometry/VxlGeometryCache": {
+    "0": "VxlGeometryCache",
+    "1": {
+      "VxlGeometryCache": "function"
+    },
+    "2": "clear,clearOtherModStorage,clearStorage,clearStorageFiles,getCacheFileName,getModPrefix,loadFromStorage,persistToStorage"
+  },
+  "engine/gfx/ImageUtils": {
+    "0": "ImageUtils",
+    "1": {
+      "ImageUtils": "function"
+    },
+    "2": "",
+    "3": ""
+  },
+  "engine/gfx/lighting/DominatorLightingFx": {
+    "0": "DominatorLightingFx",
+    "1": {
+      "DominatorLightingFx": "function"
+    },
+    "2": "update",
+    "3": ""
+  },
+  "engine/gfx/lighting/LightingDirector": {
+    "0": "LightingDirector",
+    "1": {
+      "LightingDirector": "function"
+    },
+    "2": "addEffect,dispose,init"
+  },
+  "engine/gfx/lighting/LightingFx": {
+    "0": "LightingFx,LightingFxPriority",
+    "1": {
+      "LightingFx": "function",
+      "LightingFxPriority": "object"
+    },
+    "2": "update",
+    "3": {
+      "keys": 2,
+      "hasDefault": false
+    },
+    "4": ""
+  },
+  "engine/gfx/lighting/LightningStormFx": {
+    "0": "LightningStormFx",
+    "1": {
+      "LightningStormFx": "function"
+    },
+    "2": "update,waitForCloudAnim"
+  },
+  "engine/gfx/lighting/NukeLightingFx": {
+    "0": "NukeLightingFx",
+    "1": {
+      "NukeLightingFx": "function"
+    },
+    "2": "update",
+    "3": ""
+  },
+  "engine/gfx/material/PaletteBasicMaterial": {
+    "0": "PaletteBasicMaterial",
+    "1": {
+      "PaletteBasicMaterial": "function"
+    },
+    "2": "copy"
+  },
+  "engine/gfx/material/PaletteLambertMaterial": {
+    "0": "PaletteLambertMaterial",
+    "1": {
+      "PaletteLambertMaterial": "function"
+    },
+    "2": "copy"
+  },
+  "engine/gfx/material/PalettePhongMaterial": {
+    "0": "PalettePhongMaterial",
+    "1": {
+      "PalettePhongMaterial": "function"
+    },
+    "2": "copy"
+  },
+  "engine/gfx/MathUtils": {
+    "0": "MathUtils",
+    "1": {
+      "MathUtils": "function"
+    },
+    "2": "",
+    "3": ""
+  },
+  "engine/gfx/OctreeContainer": {
+    "0": "OctreeContainer",
+    "1": {
+      "OctreeContainer": "function"
+    },
+    "2": "computeProjectionMatrix,cullChildren,update,updateChild"
+  },
+  "engine/gfx/OverlayUtils": {
+    "0": "OverlayUtils",
+    "1": {
+      "OverlayUtils": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/gfx/Renderable": {
+    "0": "",
+    "1": ""
+  },
+  "engine/gfx/RenderableContainer": {
+    "0": "RenderableContainer",
+    "1": {
+      "RenderableContainer": "function"
+    },
+    "2": "add,create3DObject,get3DObject,getChildren,processRenderQueue,remove,removeAll,set3DObject,update",
+    "3": ""
+  },
+  "engine/gfx/Renderer": {
+    "0": "Renderer",
+    "1": {
+      "Renderer": "function"
+    },
+    "2": "addScene,createGlRenderer,destroyStats,getCanvas,getStats,init,initStats,removeScene,setViewportSize,supportsInstancing,update"
+  },
+  "engine/gfx/RendererError": {
+    "0": "RendererError",
+    "1": {
+      "RendererError": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/gfx/Scene": {
+    "0": "",
+    "1": ""
+  },
+  "engine/gfx/SpriteUtils": {
+    "0": "",
+    "1": {},
+    "2": {
+      "hasUtils": true
+    },
+    "3": "TRIANGLES_PER_SPRITE,USE_INDEXED_GEOMETRY,VERTICES_PER_SPRITE"
+  },
+  "engine/gfx/TextureAtlas": {
+    "0": "TextureAtlas",
+    "1": {
+      "TextureAtlas": "function"
+    },
+    "2": "dispose,getImageRect,getTexture,pack",
+    "3": ""
+  },
+  "engine/gfx/TextureUtils": {
+    "0": "TextureUtils",
+    "1": {
+      "TextureUtils": "function"
+    },
+    "2": "",
+    "3": "cache"
+  },
+  "engine/renderable/AlphaRenderable": {
+    "0": "AlphaRenderable",
+    "1": {
+      "AlphaRenderable": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,setSize,setVisible,update"
+  },
+  "engine/renderable/builder/BatchShpBuilder": {
+    "0": "BatchShpBuilder",
+    "1": {
+      "BatchShpBuilder": "function"
+    },
+    "2": "add,build,dispose,has,initTexture,isEmpty,isFull,remove,setPalette,update,updateLighting"
+  },
+  "engine/renderable/builder/CanvasSpriteBuilder": {
+    "0": "CanvasSpriteBuilder",
+    "1": {
+      "CanvasSpriteBuilder": "function"
+    },
+    "2": "build,dispose,getFrame,getSize,setAlign,setExtraLight,setForceTransparent,setFrame,setFrustumCulled,setOffset,setOpacity"
+  },
+  "engine/renderable/builder/CanvasTextureAtlas": {
+    "0": "CanvasTextureAtlas",
+    "1": {
+      "CanvasTextureAtlas": "function"
+    },
+    "2": "getImageRect,getTexture,pack",
+    "3": ""
+  },
+  "engine/renderable/builder/ObjectBuilder": {
+    "0": "",
+    "1": ""
+  },
+  "engine/renderable/builder/ShpAggregator": {
+    "0": "ShpAggregator",
+    "1": {
+      "ShpAggregator": "function"
+    },
+    "2": "aggregate",
+    "3": ""
+  },
+  "engine/renderable/builder/ShpBuilder": {
+    "0": "ShpBuilder",
+    "1": {
+      "ShpBuilder": "function"
+    },
+    "2": "freeMaterial,getBatchPaletteIndex,getFrame,getSize,setBatched,setFrame,setFrameOffset,setOffset,setPalette,setSize,useMaterial"
+  },
+  "engine/renderable/builder/ShpTextureAtlas": {
+    "0": "ShpTextureAtlas",
+    "1": {
+      "ShpTextureAtlas": "function"
+    },
+    "2": "dispose,fromShpFile,getTexture,getTextureArea",
+    "3": ""
+  },
+  "engine/renderable/builder/SpriteBuilder": {
+    "0": "",
+    "1": ""
+  },
+  "engine/renderable/builder/VxlBatchedBuilder": {
+    "0": "VxlBatchedBuilder",
+    "1": {
+      "VxlBatchedBuilder": "function"
+    },
+    "2": "dispose,freeMaterial,getPaletteIndex,setClippingPlanes,setExtraLight,setOpacity,setPalette,setShadow,setVxlLightDir,useMaterial"
+  },
+  "engine/renderable/builder/VxlBuilder": {
+    "0": "VxlBuilder",
+    "1": {
+      "VxlBuilder": "function"
+    },
+    "2": "build,getLocalBoundingBox,getSection"
+  },
+  "engine/renderable/builder/VxlBuilderFactory": {
+    "0": "VxlBuilderFactory",
+    "1": {
+      "VxlBuilderFactory": "function"
+    },
+    "2": "create"
+  },
+  "engine/renderable/builder/vxlGeometry/VxlGeometryCulledBuilder": {
+    "0": "VxlGeometryCulledBuilder",
+    "1": {
+      "VxlGeometryCulledBuilder": "function"
+    },
+    "2": "build",
+    "3": ""
+  },
+  "engine/renderable/builder/vxlGeometry/VxlGeometryMonotoneBuilder": {
+    "0": "VxlGeometryMonotoneBuilder",
+    "1": {
+      "VxlGeometryMonotoneBuilder": "function"
+    },
+    "2": "build",
+    "3": ""
+  },
+  "engine/renderable/builder/vxlGeometry/VxlGeometryNaiveBuilder": {
+    "0": "VxlGeometryNaiveBuilder",
+    "1": {
+      "VxlGeometryNaiveBuilder": "function"
+    },
+    "2": "build",
+    "3": ""
+  },
+  "engine/renderable/builder/vxlGeometry/VxlGeometryPool": {
+    "0": "VxlGeometryPool",
+    "1": {
+      "VxlGeometryPool": "function"
+    },
+    "2": "clear,clearOtherModStorage,clearStorage,get,getModelQuality,loadFromStorage,persistToStorage,setModelQuality"
+  },
+  "engine/renderable/builder/VxlNonBatchedBuilder": {
+    "0": "VxlNonBatchedBuilder",
+    "1": {
+      "VxlNonBatchedBuilder": "function"
+    },
+    "2": "dispose,setClippingPlanes,setExtraLight,setOpacity,setPalette,setShadow,setVxlLightDir"
+  },
+  "engine/renderable/CameraPan": {
+    "0": "CameraPan",
+    "1": {
+      "CameraPan": "function"
+    },
+    "2": "getPan,getPanLimits,setPan,setPanLimits"
+  },
+  "engine/renderable/CameraZoom": {
+    "0": "CameraZoom",
+    "1": {
+      "CameraZoom": "function"
+    },
+    "2": "applyStep,getZoom"
+  },
+  "engine/renderable/DebugRenderable": {
+    "0": "DebugRenderable",
+    "1": {
+      "DebugRenderable": "function"
+    },
+    "2": "create3DObject,freeMaterial,get3DObject,getBatchPaletteIndex,getGeometryCacheKey,setBatchPalettes,setBatched,setOpacity,setPalette,update,updateOpacity,useMaterial"
+  },
+  "engine/renderable/entity/Aircraft": {
+    "0": "Aircraft",
+    "1": {
+      "Aircraft": "function"
+    },
+    "2": "create3DObject,get3DObject,getIntersectTarget,getPosition,getUiName,highlight,init,registerPlugin,setPosition,update,updateBaseLight,updateLighting"
+  },
+  "engine/renderable/entity/Anim": {
+    "0": "Anim",
+    "1": {
+      "Anim": "function"
+    },
+    "2": "computeSpriteAnchorOffset,create3DObject,createMainObject,createObjects,get3DObject,getAnimProps,getPosition,getShpFile,setExtraLight,setPosition,setRenderOrder,update"
+  },
+  "engine/renderable/entity/BoxIntersectObject3D": {
+    "0": "BoxIntersectObject3D",
+    "1": {
+      "BoxIntersectObject3D": "function"
+    },
+    "2": "raycast"
+  },
+  "engine/renderable/entity/building/AnimationType": {
+    "0": "AnimationType",
+    "1": {
+      "AnimationType": "object"
+    },
+    "2": {
+      "keys": 1,
+      "hasDefault": false
+    }
+  },
+  "engine/renderable/entity/building/BuildingAnimArtProps": {
+    "0": "BuildingAnimArtProps",
+    "1": {
+      "BuildingAnimArtProps": "function"
+    },
+    "2": "getAll,getByType,read",
+    "3": ""
+  },
+  "engine/renderable/entity/building/BuildingAnimData": {
+    "0": "BuildingAnimData",
+    "1": {
+      "BuildingAnimData": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/renderable/entity/building/BuildingShpHelper": {
+    "0": "BuildingShpHelper",
+    "1": {
+      "BuildingShpHelper": "function"
+    },
+    "2": "collectAnimShpFiles,getShpFrameInfos"
+  },
+  "engine/renderable/entity/building/DamageType": {
+    "0": "DamageType",
+    "1": {
+      "DamageType": "object"
+    },
+    "2": {
+      "keys": 1,
+      "hasDefault": false
+    }
+  },
+  "engine/renderable/entity/building/PsychicDetectPlugin": {
+    "0": "PsychicDetectPlugin",
+    "1": {
+      "PsychicDetectPlugin": "function"
+    },
+    "2": "dispose,disposeLine,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/Debris": {
+    "0": "Debris",
+    "1": {
+      "Debris": "function"
+    },
+    "2": "computeSpriteAnchorOffset,create3DObject,createMainObject,createObjects,get3DObject,getPosition,getVxlFileName,init,registerPlugin,setPosition,update,updateLighting"
+  },
+  "engine/renderable/entity/HighlightAnimRunner": {
+    "0": "HighlightAnimRunner",
+    "1": {
+      "HighlightAnimRunner": "function"
+    },
+    "2": "animate,getValue"
+  },
+  "engine/renderable/entity/Infantry": {
+    "0": "Infantry",
+    "1": {
+      "Infantry": "function"
+    },
+    "2": "create3DObject,findIdleSequence,get3DObject,getIntersectTarget,getPosition,getUiName,highlight,registerPlugin,setPosition,update,updateBaseLight,updateLighting"
+  },
+  "engine/renderable/entity/InvulnerableAnimRunner": {
+    "0": "InvulnerableAnimRunner",
+    "1": {
+      "InvulnerableAnimRunner": "function"
+    },
+    "2": "animate,getValue"
+  },
+  "engine/renderable/entity/map/MapBounds": {
+    "0": "MapBounds",
+    "1": {
+      "MapBounds": "function"
+    },
+    "2": "build,create3DObject,createBoundRect,dispose,get3DObject,setVisible,update"
+  },
+  "engine/renderable/entity/map/MapGrid": {
+    "0": "MapGrid",
+    "1": {
+      "MapGrid": "function"
+    },
+    "2": "build,create3DObject,get3DObject,update"
+  },
+  "engine/renderable/entity/map/MapRenderable": {
+    "0": "MapRenderable",
+    "1": {
+      "MapRenderable": "function"
+    },
+    "2": "addObject,create3DObject,dispose,get3DObject,getGameObject,init,removeObject,setShroud,update,updateLighting"
+  },
+  "engine/renderable/entity/map/MapShroudLayer": {
+    "0": "MapShroudLayer",
+    "1": {
+      "MapShroudLayer": "function"
+    },
+    "2": "create3DObject,createTileGeometry,createTileObjects,extendToAdjacentTiles,get3DObject,getTileGeometryOptions,setShroud,toggleAllTiles,update,updateAllTiles,updateTilePiece,updateTiles"
+  },
+  "engine/renderable/entity/map/MapSpriteBatchLayer": {
+    "0": "MapSpriteBatchLayer",
+    "1": {
+      "MapSpriteBatchLayer": "function"
+    },
+    "2": "addObject,buildBatchShpSpec,buildShadowBatchShpSpec,create3DObject,createAggregatedShpFile,get3DObject,getBatchKey,hasObject,removeObject,shouldBeBatched,update,updateLighting"
+  },
+  "engine/renderable/entity/map/MapSurface": {
+    "0": "MAGIC_OFFSET,MapSurface",
+    "1": {
+      "MAGIC_OFFSET": "number",
+      "MapSurface": "function"
+    },
+    "2": "create3DObject,createObject,createRectGeometry,dispose,get3DObject,setVisible,update",
+    "3": {
+      "keys": 2,
+      "hasDefault": false
+    }
+  },
+  "engine/renderable/entity/map/MapTileLayer": {
+    "0": "MapTileLayer",
+    "1": {
+      "MapTileLayer": "function"
+    },
+    "2": "create3DObject,createTileObjects,dispose,get3DObject,update,updateColorMultBuffer,updateColorMultBufferAtIndex,updateLighting"
+  },
+  "engine/renderable/entity/map/MapTileLayerDebug": {
+    "0": "MapTileLayerDebug",
+    "1": {
+      "MapTileLayerDebug": "function"
+    },
+    "2": "create3DObject,createConnectivityLines,createTileOverlay,destroyLines,dispose,get3DObject,getTileTexture,onRemove,setVisible,setupLines,update"
+  },
+  "engine/renderable/entity/map/MinimapModel": {
+    "0": "MinimapModel",
+    "1": {
+      "MinimapModel": "function"
+    },
+    "2": "computeAllColors,getTileColor,updateColors"
+  },
+  "engine/renderable/entity/map/MinimapRenderer": {
+    "0": "MinimapRenderer",
+    "1": {
+      "MinimapRenderer": "function"
+    },
+    "2": "canvasToDxy,computeCanvasSize,dxyToCanvas,dxyToLocalRxy,renderFull,renderIncremental,renderTiles,tileToLocalRxyOrigin"
+  },
+  "engine/renderable/entity/Overlay": {
+    "0": "Overlay",
+    "1": {
+      "Overlay": "function"
+    },
+    "2": "buildVirtualBridgeFile,computeFrame,create3DObject,createObjects,get3DObject,getIntersectTarget,getPosition,getUiName,init,setPosition,update,updateLighting"
+  },
+  "engine/renderable/entity/plugin/AirstrikeLaserPlugin": {
+    "0": "AirstrikeLaserPlugin",
+    "1": {
+      "AirstrikeLaserPlugin": "function"
+    },
+    "2": "dispose,disposeLaser,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/ChronoSparkleFxPlugin": {
+    "0": "ChronoSparkleFxPlugin",
+    "1": {
+      "ChronoSparkleFxPlugin": "function"
+    },
+    "2": "dispose,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/DamageSmokePlugin": {
+    "0": "DamageSmokePlugin",
+    "1": {
+      "DamageSmokePlugin": "function"
+    },
+    "2": "dispose,disposeSmokeFx,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/ForcedDisguisePlugin": {
+    "0": "ForcedDisguisePlugin",
+    "1": {
+      "ForcedDisguisePlugin": "function"
+    },
+    "2": "dispose,getUiNameOverride,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/HarvesterPlugin": {
+    "0": "HarvesterPlugin",
+    "1": {
+      "HarvesterPlugin": "function"
+    },
+    "2": "dispose,disposeHarvAnim,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/InfantryDisguisePlugin": {
+    "0": "InfantryDisguisePlugin",
+    "1": {
+      "InfantryDisguisePlugin": "function"
+    },
+    "2": "dispose,getUiNameOverride,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/MagnetronBeamPlugin": {
+    "0": "MagnetronBeamPlugin",
+    "1": {
+      "MagnetronBeamPlugin": "function"
+    },
+    "2": "dispose,disposeBeam,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/MindControlLinkPlugin": {
+    "0": "MindControlLinkPlugin",
+    "1": {
+      "MindControlLinkPlugin": "function"
+    },
+    "2": "dispose,disposeLinks,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/MoveSoundFxPlugin": {
+    "0": "MoveSoundFxPlugin",
+    "1": {
+      "MoveSoundFxPlugin": "function"
+    },
+    "2": "dispose,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/ObjectCloakPlugin": {
+    "0": "ObjectCloakPlugin",
+    "1": {
+      "ObjectCloakPlugin": "function"
+    },
+    "2": "dispose,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/RobotControlPlugin": {
+    "0": "RobotControlPlugin",
+    "1": {
+      "RobotControlPlugin": "function"
+    },
+    "2": "dispose,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/ShipWakeTrailPlugin": {
+    "0": "ShipWakeTrailPlugin",
+    "1": {
+      "ShipWakeTrailPlugin": "function"
+    },
+    "2": "dispose,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/TntFxPlugin": {
+    "0": "TntFxPlugin",
+    "1": {
+      "TntFxPlugin": "function"
+    },
+    "2": "dispose,disposeBombAnim,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/TrailerSmokePlugin": {
+    "0": "TrailerSmokePlugin",
+    "1": {
+      "TrailerSmokePlugin": "function"
+    },
+    "2": "dispose,onCreate,onRemove,update"
+  },
+  "engine/renderable/entity/plugin/VehicleDisguisePlugin": {
+    "0": "VehicleDisguisePlugin",
+    "1": {
+      "VehicleDisguisePlugin": "function"
+    },
+    "2": "createDisguiseObj,dispose,getUiNameOverride,onCreate,onRemove,shouldDisableHighlight,update,updateLighting"
+  },
+  "engine/renderable/entity/Projectile": {
+    "0": "Projectile",
+    "1": {
+      "Projectile": "function"
+    },
+    "2": "create3DObject,createObjects,createSonicWaveGeometry,get3DObject,getIntersectTarget,getPosition,onCreate,registerPlugin,setPosition,update,updateLighting,updateShapeFrame"
+  },
+  "engine/renderable/entity/RenderableFactory": {
+    "0": "RenderableFactory",
+    "1": {
+      "RenderableFactory": "function"
+    },
+    "2": "create,createAnim,createTransientAnim"
+  },
+  "engine/renderable/entity/SecureProgressSprite": {
+    "0": "SecureProgressSprite",
+    "1": {
+      "SecureProgressSprite": "function"
+    },
+    "2": "computeKey,create3DObject,dispose,get3DObject,getFillWidth,redraw,update"
+  },
+  "engine/renderable/entity/Smudge": {
+    "0": "Smudge",
+    "1": {
+      "Smudge": "function"
+    },
+    "2": "create3DObject,createObjects,dispose,get3DObject,getPosition,init,onRemove,setPosition,update,updateLighting"
+  },
+  "engine/renderable/entity/TargetLines": {
+    "0": "TargetLines",
+    "1": {
+      "TargetLines": "function"
+    },
+    "2": "create3DObject,createLineHead,dispose,disposeLineObjects,disposeUnitLines,forceShow,get3DObject,hideAllLines,showLines,update,updateLines"
+  },
+  "engine/renderable/entity/Terrain": {
+    "0": "Terrain",
+    "1": {
+      "Terrain": "function"
+    },
+    "2": "create3DObject,createObjects,dispose,get3DObject,getPosition,init,onRemove,setPosition,update,updateLighting"
+  },
+  "engine/renderable/entity/TransientAnim": {
+    "0": "TransientAnim",
+    "1": {
+      "TransientAnim": "function"
+    },
+    "2": "remove,update"
+  },
+  "engine/renderable/entity/unit/BlobShadow": {
+    "0": "BlobShadow",
+    "1": {
+      "BlobShadow": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,update"
+  },
+  "engine/renderable/entity/unit/DebugLabel": {
+    "0": "DebugLabel",
+    "1": {
+      "DebugLabel": "function"
+    },
+    "2": "create3DObject,createMesh,createTexture,dispose,get3DObject,update"
+  },
+  "engine/renderable/entity/unit/ExtraLightHelper": {
+    "0": "ExtraLightHelper",
+    "1": {
+      "ExtraLightHelper": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/renderable/entity/unit/FlyerHelperMode": {
+    "0": "FlyerHelperMode",
+    "1": {
+      "FlyerHelperMode": "object"
+    },
+    "2": {
+      "keys": 1,
+      "hasDefault": false
+    }
+  },
+  "engine/renderable/entity/unit/ModelQuality": {
+    "0": "ModelQuality",
+    "1": {
+      "ModelQuality": "object"
+    },
+    "2": {
+      "keys": 1,
+      "hasDefault": false
+    }
+  },
+  "engine/renderable/entity/unit/RotorHelper": {
+    "0": "RotorHelper",
+    "1": {
+      "RotorHelper": "function"
+    },
+    "2": {
+      "ctor": true,
+      "arity": 0
+    },
+    "3": ""
+  },
+  "engine/renderable/entity/unit/ShadowQuality": {
+    "0": "ShadowQuality",
+    "1": {
+      "ShadowQuality": "object"
+    },
+    "2": {
+      "keys": 1,
+      "hasDefault": false
+    }
+  },
+  "engine/renderable/entity/unit/VxlShadowProxy": {
+    "0": "VxlShadowProxy",
+    "1": {
+      "VxlShadowProxy": "function"
+    },
+    "2": "computeSink,create3DObject,dispose,setEnabled,syncVector,update"
+  },
+  "engine/renderable/entity/UnitCastBarSprite": {
+    "0": "UnitCastBarSprite",
+    "1": {
+      "UnitCastBarSprite": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,getFillWidth,redraw,update"
+  },
+  "engine/renderable/entity/WaypointLine": {
+    "0": "WaypointLine",
+    "1": {
+      "WaypointLine": "function"
+    },
+    "2": "computeDashArray,computeLineLength,computeResolution,create3DObject,createBgLineMaterial,createFgLineMaterial,createLineHeads,dispose,get3DObject,update,updateLineHeads"
+  },
+  "engine/renderable/entity/WaypointLines": {
+    "0": {
+      "hasClass": true
+    },
+    "1": "update",
+    "2": 10,
+    "3": ""
+  },
+  "engine/renderable/Entity": {
+    "0": "",
+    "1": ""
+  },
+  "engine/renderable/fx/DamageSmokeFx": {
+    "0": "DamageSmokeFx",
+    "1": {
+      "DamageSmokeFx": "function"
+    },
+    "2": "computeEmitterPosition,create3DObject,dispose,finishAndRemove,get3DObject,setContainer,update"
+  },
+  "engine/renderable/fx/DesignatorLaserFx": {
+    "0": "DesignatorLaserFx",
+    "1": {
+      "DesignatorLaserFx": "function"
+    },
+    "2": "buildMaterial,create3DObject,dispose,get3DObject,remove,setContainer,update"
+  },
+  "engine/renderable/fx/DetectionLineFx": {
+    "0": "DetectionLineFx",
+    "1": {
+      "DetectionLineFx": "function"
+    },
+    "2": "computeDashArray,computeResolution,create3DObject,createLineGeometry,createLineHead,createLineMaterial,createLineMesh,dispose,get3DObject,remove,setContainer,update"
+  },
+  "engine/renderable/fx/DiskLaserFx": {
+    "0": "DiskLaserFx",
+    "1": {
+      "DiskLaserFx": "function"
+    },
+    "2": "_buildArcMesh,_disposeMesh,_getCirclePoint,_rebuildBeamPhase,_rebuildChargePhase,_recalcAngles,create3DObject,dispose,get3DObject,isFinished,setContainer,update"
+  },
+  "engine/renderable/fx/Effect": {
+    "0": "",
+    "1": ""
+  },
+  "engine/renderable/fx/handler/BeaconFxHandler": {
+    "0": "BeaconFxHandler",
+    "1": {
+      "BeaconFxHandler": "function"
+    },
+    "2": "canPingLocation,dispose,init"
+  },
+  "engine/renderable/fx/handler/ChronoFxHandler": {
+    "0": "ChronoFxHandler",
+    "1": {
+      "ChronoFxHandler": "function"
+    },
+    "2": "dispose,init"
+  },
+  "engine/renderable/fx/handler/CrateFxHandler": {
+    "0": "CrateFxHandler",
+    "1": {
+      "CrateFxHandler": "function"
+    },
+    "2": "dispose,init"
+  },
+  "engine/renderable/fx/handler/ParasiteSparkFxHandler": {
+    "0": "ParasiteSparkFxHandler",
+    "1": {
+      "ParasiteSparkFxHandler": "function"
+    },
+    "2": "dispose,init"
+  },
+  "engine/renderable/fx/handler/SuperWeaponFxHandler": {
+    "0": "SuperWeaponFxHandler",
+    "1": {
+      "SuperWeaponFxHandler": "function"
+    },
+    "2": "createChronoSphereAnim,dispose,disposeChronoSphereAnim,init"
+  },
+  "engine/renderable/fx/handler/TriggerActionFxHandler": {
+    "0": "TriggerActionFxHandler",
+    "1": {
+      "TriggerActionFxHandler": "function"
+    },
+    "2": "dispose,init"
+  },
+  "engine/renderable/fx/handler/VirusCloudFxHandler": {
+    "0": "VirusCloudFxHandler",
+    "1": {
+      "VirusCloudFxHandler": "function"
+    },
+    "2": "dispose,init,stepPuff"
+  },
+  "engine/renderable/fx/handler/WarheadDetonateFxHandler": {
+    "0": "WarheadDetonateFxHandler",
+    "1": {
+      "WarheadDetonateFxHandler": "function"
+    },
+    "2": "dispose,init"
+  },
+  "engine/renderable/fx/LaserFx": {
+    "0": "LaserFx",
+    "1": {
+      "LaserFx": "function"
+    },
+    "2": "create3DObject,createObject,dispose,get3DObject,isFinished,setContainer,update"
+  },
+  "engine/renderable/fx/LineTrailFx": {
+    "0": "LineTrailFx",
+    "1": {
+      "LineTrailFx": "function"
+    },
+    "2": "create3DObject,createTrail,dispose,get3DObject,isFinished,requestFinishAndDispose,setContainer,stopTracking,update"
+  },
+  "engine/renderable/fx/MagBeamFx": {
+    "0": "MagBeamFx",
+    "1": {
+      "MagBeamFx": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,isDying,isFinished,removeAndDispose,revive,setContainer,setWaveReverse,startDying,update,updateEndpoints"
+  },
+  "engine/renderable/fx/MindControlLinkFx": {
+    "0": "MindControlLinkFx",
+    "1": {
+      "MindControlLinkFx": "function"
+    },
+    "2": "create3DObject,createLineGeometry,dispose,get3DObject,removeAndDispose,setContainer,update,updateEndpoints"
+  },
+  "engine/renderable/fx/RadBeamFx": {
+    "0": "RadBeamFx",
+    "1": {
+      "RadBeamFx": "function"
+    },
+    "2": "create3DObject,createLineGeometry,createObject,dispose,get3DObject,isFinished,setContainer,update"
+  },
+  "engine/renderable/fx/RallyPointFx": {
+    "0": "RallyPointFx",
+    "1": {
+      "RallyPointFx": "function"
+    },
+    "2": "computeDashArray,computeResolution,create3DObject,createLineGeometry,createLineMaterial,createLineMesh,createLineShadowMesh,createShadowLineGeometry,get3DObject,remove,setContainer,update"
+  },
+  "engine/renderable/fx/SparkFx": {
+    "0": "SparkFx",
+    "1": {
+      "SparkFx": "function"
+    },
+    "2": "create3DObject,dispose,get3DObject,setContainer,update"
+  },
+  "engine/renderable/fx/TeslaFx": {
+    "0": "TeslaFx",
+    "1": {
+      "TeslaFx": "function"
+    },
+    "2": "create3DObject,createBolt,dispose,get3DObject,isFinished,setContainer,update"
+  },
+  "engine/renderable/fx/TrailerSmokeFx": {
+    "0": "TrailerSmokeFx",
+    "1": {
+      "TrailerSmokeFx": "function"
+    },
+    "2": "create3DObject,disable,dispose,enable,finishAndRemove,get3DObject,setContainer,update"
+  },
+  "engine/renderable/MapSpriteTranslation": {
+    "0": "MapSpriteTranslation",
+    "1": {
+      "MapSpriteTranslation": "function"
+    },
+    "2": "compute"
+  },
+  "engine/renderable/RenderablePlugin": {
+    "0": "",
+    "1": ""
+  },
+  "engine/renderable/ShadowRenderable": {
+    "0": "ShadowRenderable",
+    "1": {
+      "ShadowRenderable": "function"
+    },
+    "2": "computeShadowFrameNo,create3DObject,dispose,frameHasShadowData,get3DObject,setBaseFrame,setBatched,setFrameOffset,setSize,setVisible,update"
+  },
+  "engine/renderable/ShpRenderable": {
+    "0": "ShpRenderable",
+    "1": {
+      "ShpRenderable": "function"
+    },
+    "2": "get3DObject,getFlat,setBatchPalettes,setBatched,setExtraLight,setFlat,setForceTransparent,setFrame,setFrameOffset,setOpacity,setPalette,setSize"
+  },
+  "engine/renderable/WithPosition": {
+    "0": "WithPosition",
+    "1": {
+      "WithPosition": "function"
+    },
+    "2": "applyTo,getPosition,setPosition,updatePosition",
+    "3": ""
+  },
+  "engine/renderable/WithVisibility": {
+    "0": "WithVisibility",
+    "1": {
+      "WithVisibility": "function"
+    },
+    "2": "applyTo,isVisible,setVisible,updateVisibility",
+    "3": ""
+  },
+  "engine/renderable/WorldScene": {
+    "0": "WorldScene",
+    "1": {
+      "WorldScene": "function"
+    },
+    "2": "applyLighting,create3DObject,dispose,markBatchRebuild,setLightFocusPoint,update,updateCamera,updateShadowQuality,updateViewport"
+  },
+  "engine/renderable/entity/PipOverlay": {
+    "0": "PipOverlay",
+    "1": {
+      "PipOverlay": "function"
+    },
+    "2": "buildSpriteGeometry,create3DObject,createBuildingHealthBar,createBuildingOccupationInfo,createBuildingSelectionBox,createBuildingSelectionCornerMesh,createControlGroupTexture,createPipsSprite,createUnitHealthBar,createUnitHealthTexture,initTexture,onCreate"
+  },
+  "engine/renderable/entity/Vehicle": {
+    "0": {
+      "hasVehicle": true
+    },
+    "1": "update",
+    "2": true,
+    "3": ""
+  },
+  "engine/renderable/entity/Building": {
+    "0": "Building",
+    "1": {
+      "Building": "function"
+    },
+    "2": "create3DObject,createLamp,createLampTexture,get3DObject,getIntersectTarget,getPosition,getUiName,setPosition,updateBaseLight,updateIntersectTarget,updateLighting,updateTurretVxlLightDir"
   },
   "gui/CanvasMetrics": {
     "0": "constructor,dispose,init,notifyViewportChange"

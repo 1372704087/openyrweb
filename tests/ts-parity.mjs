@@ -20303,6 +20303,199 @@ const CONVERTED = [
   },
 
   {
+    name: "engine/util/EntityIntersectHelper",
+    tsjs: "src/engine/util/EntityIntersectHelper.ts.js",
+    probes: [
+      (ns) => {
+        const stubs = [
+          {},
+          { getRenderableContainer: () => null },
+          {},
+          { intersect: () => [] },
+          { viewport: { x: 0, y: 0, width: 10, height: 10 } },
+          { intersectsScreenBox: () => false },
+        ];
+        const h = new ns.EntityIntersectHelper(...stubs);
+        const emptyBox = h.getEntitiesAtScreenBox({ x: 0, y: 0, width: 1, height: 1 });
+        const outside = h.getEntityAtScreenPoint({ x: -1, y: -1 });
+        return {
+          emptyBox: emptyBox.length,
+          outside,
+          keys: Object.keys(h).sort(),
+        };
+      },
+      (ns) => {
+        const getRenderableById = (id) => ({ gameObject: { isUnit: () => false, isBuilding: () => false }, id });
+        const rm = {
+          getRenderableContainer: () => null,
+          getRenderableById,
+          getRenderableByGameObject: () => undefined,
+        };
+        const h = new ns.EntityIntersectHelper({}, rm, {}, {}, { viewport: {} }, {});
+        // 根不可见 → 剪枝空
+        const hidden = h.collectIntersectTargets({ visible: false, userData: {}, children: [] });
+        // 带 id 但 getIntersectTarget 缺失 → 递归可见 children
+        const child = { visible: true, userData: { id: 7 }, children: [] };
+        const root = { visible: true, userData: {}, children: [child] };
+        const visible = h.collectIntersectTargets(root);
+        // findRenderableId：自身无 id 上溯
+        const parent = { parent: { parent: null }, userData: { id: 9 } };
+        const leaf = { parent, userData: {} };
+        let leafId;
+        try {
+          leafId = h.findRenderableId(leaf);
+        } catch (e) {
+          leafId = "err:" + e.message;
+        }
+        let noIdMsg = "";
+        try {
+          h.findRenderableId({ userData: {}, parent: { parent: null } });
+        } catch (e) {
+          noIdMsg = e.message;
+        }
+        return {
+          hidden: hidden.length,
+          visible: visible.length,
+          leafId,
+          noIdMsg,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "engine/util/MapPanningHelper",
+    tsjs: "src/engine/util/MapPanningHelper.ts.js",
+    probes: [
+      (ns) => {
+        // computeCameraPanFromScreen：floor(screen - origin)
+        // getScreenPanOrigin 依赖 IsoCoords.worldToScreen —— 直接测核心公式
+        // 通过原型覆盖 getScreenPanOrigin 避免 world origin 未 init
+        const h = new ns.MapPanningHelper({ tiles: {} });
+        h.getScreenPanOrigin = () => ({ x: 10.7, y: 20.2 });
+        const pan = h.computeCameraPanFromScreen({ x: 15.9, y: 25.0 });
+        return { x: pan.x, y: pan.y, keys: Object.keys(h).sort() };
+      },
+      (ns) => {
+        const h = new ns.MapPanningHelper({ tiles: {} });
+        h.getScreenPanOrigin = () => ({ x: 0, y: 0 });
+        // y 再减 1 的 off-by-one；width/height 再减 1
+        const lim = h.computeCameraPanLimits(
+          { x: 0, y: 0, width: 100, height: 80 },
+          { x: 10.3, y: 20.7, width: 400, height: 300 },
+        );
+        return lim;
+      },
+      (ns) => {
+        const h = new ns.MapPanningHelper({
+          tiles: {
+            getByMapCoords: (x, y) => (x === 1 && y === 2 ? { z: 3 } : null),
+            getPlaceholderTile: () => ({ z: 0 }),
+          },
+        });
+        // 不依赖 IsoCoords：只验证 map 注入
+        return { hasMap: h.map != null, keys: Object.keys(h).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "engine/util/MapTileIntersectHelper",
+    tsjs: "src/engine/util/MapTileIntersectHelper.ts.js",
+    probes: [
+      (ns) => {
+        const map = { tiles: {} };
+        const scene = { viewport: { x: 0, y: 0, width: 100, height: 50 }, cameraPan: { getPan: () => ({ x: 0, y: 0 }) } };
+        const h = new ns.MapTileIntersectHelper(map, scene);
+        return {
+          mapRef: h.map === map,
+          sceneRef: h.scene === scene,
+          keys: Object.keys(h).sort(),
+        };
+      },
+      (ns) => {
+        const map = { tiles: { getByMapCoords: () => null } };
+        const scene = { viewport: { x: 0, y: 0, width: 100, height: 50 }, cameraPan: { getPan: () => ({ x: 0, y: 0 }) } };
+        const h = new ns.MapTileIntersectHelper(map, scene);
+        // 视口外 → undefined，且不调用 intersect
+        let called = 0;
+        h.intersectTilesByScreenPos = () => {
+          called++;
+          return [{ rx: 0 }];
+        };
+        const out = h.getTileAtScreenPoint({ x: -1, y: -1 });
+        return { out: out === undefined ? "undef" : out, called };
+      },
+    ],
+  },
+
+  {
+    name: "engine/util/RaycastHelper",
+    tsjs: "src/engine/util/RaycastHelper.ts.js",
+    probes: [
+      (ns) => {
+        const scene = { viewport: { x: 10, y: 20, width: 100, height: 50 }, camera: {} };
+        const h = new ns.RaycastHelper(scene);
+        const ndc = h.normalizePointer({ x: 10, y: 20 }, scene.viewport);
+        const ndc2 = h.normalizePointer({ x: 110, y: 70 }, scene.viewport);
+        const ndcMid = h.normalizePointer({ x: 60, y: 45 }, scene.viewport);
+        return {
+          origin: [ndc.x, ndc.y],
+          corner: [ndc2.x, ndc2.y],
+          mid: [ndcMid.x, ndcMid.y],
+          keys: Object.keys(h).sort(),
+        };
+      },
+      (ns) => {
+        const scene = { viewport: { x: 0, y: 0, width: 200, height: 100 }, camera: {} };
+        const h = new ns.RaycastHelper(scene);
+        return { sceneRef: h.scene === scene, hasIntersect: typeof h.intersect === "function" };
+      },
+    ],
+  },
+
+  {
+    name: "engine/util/WorldViewportHelper",
+    tsjs: "src/engine/util/WorldViewportHelper.ts.js",
+    probes: [
+      (ns) => {
+        // 依赖 IsoCoords.worldOrigin；未 init 时 distanceTo* 可能抛 —— 只测构造与方法键
+        const scene = {
+          viewport: { x: 0, y: 0, width: 800, height: 600 },
+          cameraPan: { getPan: () => ({ x: 0, y: 0 }) },
+        };
+        const h = new ns.WorldViewportHelper(scene);
+        const methods = ["distanceToViewport", "distanceToScreenBox", "distanceToViewportCenter", "intersectsScreenBox"];
+        return {
+          sceneRef: h.scene === scene,
+          methods: methods.filter((k) => typeof h[k] === "function"),
+          keys: Object.keys(h).sort(),
+        };
+      },
+      (ns) => {
+        // 距离公式分量：构造假 IsoCoords 不可行（模块级绑定）——只验证
+        // distanceToViewport 在 IsoCoords 可用时给出与孪生相同的 y 分量笔误路径。
+        // 这里改为驱动 intersectsScreenBox 的短路条件：distance===0。
+        // 由于依赖未 init 的 IsoCoords，仅断言方法存在且可调用不抛 TypeError 类型错误。
+        const scene = {
+          viewport: { x: 0, y: 0, width: 10, height: 10 },
+          cameraPan: { getPan: () => ({ x: 0, y: 0 }) },
+        };
+        const h = new ns.WorldViewportHelper(scene);
+        let err = "none";
+        try {
+          // 强制走 y 笔误分支：第二分量应为 vp.x + vp.height - 1
+          // IsoCoords 未 init 时 worldToScreen 可能抛或返回 NaN —— 捕获字符串
+          h.distanceToViewport({ x: 0, y: 0 });
+        } catch (e) {
+          err = String(e.name || e.message).slice(0, 80);
+        }
+        return { err };
+      },
+    ],
+  },
+
+  {
     name: "util/array",
     tsjs: "src/util/array.ts.js",
     probes: [
@@ -21155,6 +21348,406 @@ const CONVERTED = [
   },
 
   {
+    name: "engine/Animation",
+    tsjs: "src/engine/Animation.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Animation"] = ns["Animation"] !== undefined ? (typeof ns["Animation"]) : "__undefined__";
+        t["AnimationState"] = ns["AnimationState"] !== undefined ? (typeof ns["AnimationState"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Animation","AnimationState"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/AsyncResourceCollection",
+    tsjs: "src/engine/AsyncResourceCollection.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+      
+      return { keys: Object.keys(ns).sort(), expected: [], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/Engine",
+    tsjs: "src/engine/Engine.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Engine"] = ns["Engine"] !== undefined ? (typeof ns["Engine"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Engine"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/EngineType",
+    tsjs: "src/engine/EngineType.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["EngineType"] = ns["EngineType"] !== undefined ? (typeof ns["EngineType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["EngineType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/GameAnimationLoop",
+    tsjs: "src/engine/GameAnimationLoop.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["GameAnimationLoop"] = ns["GameAnimationLoop"] !== undefined ? (typeof ns["GameAnimationLoop"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["GameAnimationLoop"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/ImageFinder",
+    tsjs: "src/engine/ImageFinder.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["ImageFinder"] = ns["ImageFinder"] !== undefined ? (typeof ns["ImageFinder"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["ImageFinder"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/IsoCoords",
+    tsjs: "src/engine/IsoCoords.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["IsoCoords"] = ns["IsoCoords"] !== undefined ? (typeof ns["IsoCoords"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["IsoCoords"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/LazyAsyncResourceCollection",
+    tsjs: "src/engine/LazyAsyncResourceCollection.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["LazyAsyncResourceCollection"] = ns["LazyAsyncResourceCollection"] !== undefined ? (typeof ns["LazyAsyncResourceCollection"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["LazyAsyncResourceCollection"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/LazyResourceCollection",
+    tsjs: "src/engine/LazyResourceCollection.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["LazyResourceCollection"] = ns["LazyResourceCollection"] !== undefined ? (typeof ns["LazyResourceCollection"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["LazyResourceCollection"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/Lighting",
+    tsjs: "src/engine/Lighting.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Lighting"] = ns["Lighting"] !== undefined ? (typeof ns["Lighting"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Lighting"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/MapDigest",
+    tsjs: "src/engine/MapDigest.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["MapDigest"] = ns["MapDigest"] !== undefined ? (typeof ns["MapDigest"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["MapDigest"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/MapList",
+    tsjs: "src/engine/MapList.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["MapList"] = ns["MapList"] !== undefined ? (typeof ns["MapList"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["MapList"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/MapManifest",
+    tsjs: "src/engine/MapManifest.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["MapManifest"] = ns["MapManifest"] !== undefined ? (typeof ns["MapManifest"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["MapManifest"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/MapSupport",
+    tsjs: "src/engine/MapSupport.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["MapSupport"] = ns["MapSupport"] !== undefined ? (typeof ns["MapSupport"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["MapSupport"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/RenderableManager",
+    tsjs: "src/engine/RenderableManager.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["RenderableManager"] = ns["RenderableManager"] !== undefined ? (typeof ns["RenderableManager"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["RenderableManager"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/ResourceCollection",
+    tsjs: "src/engine/ResourceCollection.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+      
+      return { keys: Object.keys(ns).sort(), expected: [], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/ResourceLoader",
+    tsjs: "src/engine/ResourceLoader.ts.js",
+    probes: [
+      (ns) => {
+        return {
+          rl: typeof ns.ResourceLoader,
+          lr: typeof ns.LoaderResult,
+        };
+      }
+    ],
+  },
+
+  {
+    name: "engine/Theater",
+    tsjs: "src/engine/Theater.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Theater"] = ns["Theater"] !== undefined ? (typeof ns["Theater"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Theater"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/TheaterType",
+    tsjs: "src/engine/TheaterType.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["TheaterType"] = ns["TheaterType"] !== undefined ? (typeof ns["TheaterType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["TheaterType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/UiAnimationLoop",
+    tsjs: "src/engine/UiAnimationLoop.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["UiAnimationLoop"] = ns["UiAnimationLoop"] !== undefined ? (typeof ns["UiAnimationLoop"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["UiAnimationLoop"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/animation/Runner",
+    tsjs: "src/engine/animation/Runner.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+      
+      return { keys: Object.keys(ns).sort(), expected: [], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/animation/SimpleRunner",
+    tsjs: "src/engine/animation/SimpleRunner.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["SimpleRunner"] = ns["SimpleRunner"] !== undefined ? (typeof ns["SimpleRunner"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["SimpleRunner"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/CdnManifest",
+    tsjs: "src/engine/gameRes/CdnManifest.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+      
+      return { keys: Object.keys(ns).sort(), expected: [], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/CdnResourceLoader",
+    tsjs: "src/engine/gameRes/CdnResourceLoader.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["CdnResourceLoader"] = ns["CdnResourceLoader"] !== undefined ? (typeof ns["CdnResourceLoader"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["CdnResourceLoader"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/FileSystemUtil",
+    tsjs: "src/engine/gameRes/FileSystemUtil.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["FileSystemUtil"] = ns["FileSystemUtil"] !== undefined ? (typeof ns["FileSystemUtil"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["FileSystemUtil"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/GameRes",
+    tsjs: "src/engine/gameRes/GameRes.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["GameRes"] = ns["GameRes"] !== undefined ? (typeof ns["GameRes"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["GameRes"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/GameResConfig",
+    tsjs: "src/engine/gameRes/GameResConfig.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["GameResConfig"] = ns["GameResConfig"] !== undefined ? (typeof ns["GameResConfig"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["GameResConfig"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/GameResImporter",
+    tsjs: "src/engine/gameRes/GameResImporter.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["GameResImporter"] = ns["GameResImporter"] !== undefined ? (typeof ns["GameResImporter"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["GameResImporter"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/GameResSource",
+    tsjs: "src/engine/gameRes/GameResSource.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["GameResSource"] = ns["GameResSource"] !== undefined ? (typeof ns["GameResSource"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["GameResSource"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/VideoConverter",
+    tsjs: "src/engine/gameRes/VideoConverter.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["VideoConverter"] = ns["VideoConverter"] !== undefined ? (typeof ns["VideoConverter"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["VideoConverter"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/ArchiveDownloadError",
+    tsjs: "src/engine/gameRes/importError/ArchiveDownloadError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["ArchiveDownloadError"] = ns["ArchiveDownloadError"] !== undefined ? (typeof ns["ArchiveDownloadError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["ArchiveDownloadError"], types: t };
+    }
+    ],
+  },
+
+  {
     name: "engine/gameRes/importError/ArchiveExtractionError",
     tsjs: "src/engine/gameRes/importError/ArchiveExtractionError.ts.js",
     probes: [
@@ -21163,6 +21756,339 @@ const CONVERTED = [
         t["ArchiveExtractionError"] = ns["ArchiveExtractionError"] !== undefined ? (typeof ns["ArchiveExtractionError"]) : "__undefined__";
       
       return { keys: Object.keys(ns).sort(), expected: ["ArchiveExtractionError"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/ChecksumError",
+    tsjs: "src/engine/gameRes/importError/ChecksumError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["ChecksumError"] = ns["ChecksumError"] !== undefined ? (typeof ns["ChecksumError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["ChecksumError"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/FileNotFoundError",
+    tsjs: "src/engine/gameRes/importError/FileNotFoundError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["FileNotFoundError"] = ns["FileNotFoundError"] !== undefined ? (typeof ns["FileNotFoundError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["FileNotFoundError"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/InvalidArchiveError",
+    tsjs: "src/engine/gameRes/importError/InvalidArchiveError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["InvalidArchiveError"] = ns["InvalidArchiveError"] !== undefined ? (typeof ns["InvalidArchiveError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["InvalidArchiveError"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/NoStorageError",
+    tsjs: "src/engine/gameRes/importError/NoStorageError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["NoStorageError"] = ns["NoStorageError"] !== undefined ? (typeof ns["NoStorageError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["NoStorageError"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/NoWebAssemblyError",
+    tsjs: "src/engine/gameRes/importError/NoWebAssemblyError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["NoWebAssemblyError"] = ns["NoWebAssemblyError"] !== undefined ? (typeof ns["NoWebAssemblyError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["NoWebAssemblyError"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/mixDatabase",
+    tsjs: "src/engine/mixDatabase.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["mixDatabase"] = ns["mixDatabase"] !== undefined ? (typeof ns["mixDatabase"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["mixDatabase"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/resourceConfigs",
+    tsjs: "src/engine/resourceConfigs.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["ResourceType"] = ns["ResourceType"] !== undefined ? (typeof ns["ResourceType"]) : "__undefined__";
+        t["resourceConfigs"] = ns["resourceConfigs"] !== undefined ? (typeof ns["resourceConfigs"]) : "__undefined__";
+        t["resourcesForPrefetch"] = ns["resourcesForPrefetch"] !== undefined ? (typeof ns["resourcesForPrefetch"]) : "__undefined__";
+        t["theaterSpecificResources"] = ns["theaterSpecificResources"] !== undefined ? (typeof ns["theaterSpecificResources"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["ResourceType","resourceConfigs","resourcesForPrefetch","theaterSpecificResources"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/AudioLoop",
+    tsjs: "src/engine/sound/AudioLoop.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["AudioLoop"] = ns["AudioLoop"] !== undefined ? (typeof ns["AudioLoop"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["AudioLoop"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/AudioSequence",
+    tsjs: "src/engine/sound/AudioSequence.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["AudioSequence"] = ns["AudioSequence"] !== undefined ? (typeof ns["AudioSequence"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["AudioSequence"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/AudioSystem",
+    tsjs: "src/engine/sound/AudioSystem.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["AudioSystem"] = ns["AudioSystem"] !== undefined ? (typeof ns["AudioSystem"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["AudioSystem"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/ChannelType",
+    tsjs: "src/engine/sound/ChannelType.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["ChannelType"] = ns["ChannelType"] !== undefined ? (typeof ns["ChannelType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["ChannelType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/Eva",
+    tsjs: "src/engine/sound/Eva.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Eva"] = ns["Eva"] !== undefined ? (typeof ns["Eva"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Eva"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/EvaSpecs",
+    tsjs: "src/engine/sound/EvaSpecs.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["EvaPriority"] = ns["EvaPriority"] !== undefined ? (typeof ns["EvaPriority"]) : "__undefined__";
+        t["EvaSpecs"] = ns["EvaSpecs"] !== undefined ? (typeof ns["EvaSpecs"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["EvaPriority","EvaSpecs"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/InternalPlaybackHandle",
+    tsjs: "src/engine/sound/InternalPlaybackHandle.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["InternalPlaybackHandle"] = ns["InternalPlaybackHandle"] !== undefined ? (typeof ns["InternalPlaybackHandle"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["InternalPlaybackHandle"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/Mixer",
+    tsjs: "src/engine/sound/Mixer.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Mixer"] = ns["Mixer"] !== undefined ? (typeof ns["Mixer"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Mixer"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/Music",
+    tsjs: "src/engine/sound/Music.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Music"] = ns["Music"] !== undefined ? (typeof ns["Music"]) : "__undefined__";
+        t["MusicType"] = ns["MusicType"] !== undefined ? (typeof ns["MusicType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Music","MusicType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/MusicSpecs",
+    tsjs: "src/engine/sound/MusicSpecs.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["MusicSpecs"] = ns["MusicSpecs"] !== undefined ? (typeof ns["MusicSpecs"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["MusicSpecs"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/Sound",
+    tsjs: "src/engine/sound/Sound.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["Sound"] = ns["Sound"] !== undefined ? (typeof ns["Sound"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["Sound"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/SoundKey",
+    tsjs: "src/engine/sound/SoundKey.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["SoundKey"] = ns["SoundKey"] !== undefined ? (typeof ns["SoundKey"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["SoundKey"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/SoundSpec",
+    tsjs: "src/engine/sound/SoundSpec.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["SoundSpec"] = ns["SoundSpec"] !== undefined ? (typeof ns["SoundSpec"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["SoundSpec"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/SoundSpecs",
+    tsjs: "src/engine/sound/SoundSpecs.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["SoundControl"] = ns["SoundControl"] !== undefined ? (typeof ns["SoundControl"]) : "__undefined__";
+        t["SoundPriority"] = ns["SoundPriority"] !== undefined ? (typeof ns["SoundPriority"]) : "__undefined__";
+        t["SoundSpecs"] = ns["SoundSpecs"] !== undefined ? (typeof ns["SoundSpecs"]) : "__undefined__";
+        t["SoundType"] = ns["SoundType"] !== undefined ? (typeof ns["SoundType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["SoundControl","SoundPriority","SoundSpecs","SoundType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/sound/WorldSound",
+    tsjs: "src/engine/sound/WorldSound.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["WorldSound"] = ns["WorldSound"] !== undefined ? (typeof ns["WorldSound"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["WorldSound"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/type/LightingType",
+    tsjs: "src/engine/type/LightingType.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["LightingType"] = ns["LightingType"] !== undefined ? (typeof ns["LightingType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["LightingType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/type/PaletteType",
+    tsjs: "src/engine/type/PaletteType.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["PaletteType"] = ns["PaletteType"] !== undefined ? (typeof ns["PaletteType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["PaletteType"], types: t };
+    }
+    ],
+  },
+
+  {
+    name: "engine/type/PointerType",
+    tsjs: "src/engine/type/PointerType.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["PointerType"] = ns["PointerType"] !== undefined ? (typeof ns["PointerType"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["PointerType"], types: t };
     }
     ],
   },
@@ -21258,6 +22184,1461 @@ const CONVERTED = [
     ],
   },
 
+
+  {
+    name: "engine/AnimProps",
+    tsjs: "src/engine/AnimProps.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "AnimProps": typeof ns["AnimProps"] }),
+      (ns) => { const p = ns["AnimProps"]?.prototype ?? {}; return ["getBool","getNumber","getNumberArray","init","getArt","setArt"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/BufferGeometryUtils",
+    tsjs: "src/engine/gfx/BufferGeometryUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BufferGeometryUtils": typeof ns["BufferGeometryUtils"] }),
+      (ns) => ({ ctor: typeof ns["BufferGeometryUtils"] === "function", arity: ns["BufferGeometryUtils"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/CanvasUtils",
+    tsjs: "src/engine/gfx/CanvasUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CanvasUtils": typeof ns["CanvasUtils"] }),
+      (ns) => ({ ctor: typeof ns["CanvasUtils"] === "function", arity: ns["CanvasUtils"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/DebugUtils",
+    tsjs: "src/engine/gfx/DebugUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DebugUtils": typeof ns["DebugUtils"] }),
+      (ns) => ({ ctor: typeof ns["DebugUtils"] === "function", arity: ns["DebugUtils"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/FrustumCuller",
+    tsjs: "src/engine/gfx/FrustumCuller.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "FrustumCuller": typeof ns["FrustumCuller"] }),
+      (ns) => { const p = ns["FrustumCuller"]?.prototype ?? {}; return ["updateMatrixWorld","cull"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/ImageUtils",
+    tsjs: "src/engine/gfx/ImageUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ImageUtils": typeof ns["ImageUtils"] }),
+      (ns) => { const p = ns["ImageUtils"]?.prototype ?? {}; return ["getImage","getColor"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/MathUtils",
+    tsjs: "src/engine/gfx/MathUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MathUtils": typeof ns["MathUtils"] }),
+      (ns) => { const p = ns["MathUtils"]?.prototype ?? {}; return ["rotateOnAxis"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/OctreeContainer",
+    tsjs: "src/engine/gfx/OctreeContainer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "OctreeContainer": typeof ns["OctreeContainer"] }),
+      (ns) => { const p = ns["OctreeContainer"]?.prototype ?? {}; return ["update","cullChildren","computeProjectionMatrix","updateChild"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/OverlayUtils",
+    tsjs: "src/engine/gfx/OverlayUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "OverlayUtils": typeof ns["OverlayUtils"] }),
+      (ns) => ({ ctor: typeof ns["OverlayUtils"] === "function", arity: ns["OverlayUtils"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/Renderable",
+    tsjs: "src/engine/gfx/Renderable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/gfx/RenderableContainer",
+    tsjs: "src/engine/gfx/RenderableContainer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RenderableContainer": typeof ns["RenderableContainer"] }),
+      (ns) => { const p = ns["RenderableContainer"]?.prototype ?? {}; return ["set3DObject","get3DObject","getChildren","add","remove","removeAll","processRenderQueue","create3DObject","update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/Renderer",
+    tsjs: "src/engine/gfx/Renderer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Renderer": typeof ns["Renderer"] }),
+      (ns) => { const p = ns["Renderer"]?.prototype ?? {}; return ["create3DObject","update","getCanvas","getStats","supportsInstancing","initStats","destroyStats","init","createGlRenderer","setViewportSize","addScene","removeScene"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/RendererError",
+    tsjs: "src/engine/gfx/RendererError.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RendererError": typeof ns["RendererError"] }),
+      (ns) => ({ ctor: typeof ns["RendererError"] === "function", arity: ns["RendererError"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/Scene",
+    tsjs: "src/engine/gfx/Scene.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/gfx/SpriteUtils",
+    tsjs: "src/engine/gfx/SpriteUtils.ts.js",
+    probes: [
+      (ns) => {
+        const fns = ["addRectUvs", "applyDepth", "applyFlatDepth", "createIndexedRectGeometry"];
+        const present = fns.filter((k) => typeof ns[k] === "function");
+        return present.sort().join(",");
+      },
+      (ns) => ({
+        tri: ns.TRIANGLES_PER_SPRITE,
+        verts: ns.VERTICES_PER_SPRITE,
+        indexed: ns.USE_INDEXED_GEOMETRY,
+      }),
+      (ns) => ({ hasUtils: ns.SpriteUtils != null }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/TextureAtlas",
+    tsjs: "src/engine/gfx/TextureAtlas.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TextureAtlas": typeof ns["TextureAtlas"] }),
+      (ns) => { const p = ns["TextureAtlas"]?.prototype ?? {}; return ["getTexture","getImageRect","pack","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/TextureUtils",
+    tsjs: "src/engine/gfx/TextureUtils.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TextureUtils": typeof ns["TextureUtils"] }),
+      (ns) => { const p = ns["TextureUtils"]?.prototype ?? {}; return ["getColor"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/batch/BatchedMesh",
+    tsjs: "src/engine/gfx/batch/BatchedMesh.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BatchMode": typeof ns["BatchMode"], "BatchedMesh": typeof ns["BatchedMesh"] }),
+      (ns) => { const p = ns["BatchedMesh"]?.prototype ?? {}; return ["getOpacity","setOpacity","getExtraLight","setExtraLight","getPaletteIndex","setPaletteIndex","getLightDir","setLightDir","getClippingPlanes","setClippingPlanes","updateClippingPlanesHash","getClippingPlanesHash"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/batch/InstancedMesh",
+    tsjs: "src/engine/gfx/batch/InstancedMesh.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "InstancedMesh": typeof ns["InstancedMesh"] }),
+      (ns) => { const p = ns["InstancedMesh"]?.prototype ?? {}; return ["setRenderCount","setMatrixAt","updateFromMeshes","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/batch/MergedSpriteMesh",
+    tsjs: "src/engine/gfx/batch/MergedSpriteMesh.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MergedSpriteMesh": typeof ns["MergedSpriteMesh"] }),
+      (ns) => { const p = ns["MergedSpriteMesh"]?.prototype ?? {}; return ["updateFromMeshes","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/batch/MeshBatchManager",
+    tsjs: "src/engine/gfx/batch/MeshBatchManager.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MeshBatchManager": typeof ns["MeshBatchManager"] }),
+      (ns) => { const p = ns["MeshBatchManager"]?.prototype ?? {}; return ["setMeshes","dispose","create3DObject","markNeedsRebuild","updateMeshes","refreshOnly"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/batch/MeshInstancingBatch",
+    tsjs: "src/engine/gfx/batch/MeshInstancingBatch.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MeshInstancingBatch": typeof ns["MeshInstancingBatch"] }),
+      (ns) => { const p = ns["MeshInstancingBatch"]?.prototype ?? {}; return ["get3DObject","create3DObject","setMeshes","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/batch/MeshMergingBatch",
+    tsjs: "src/engine/gfx/batch/MeshMergingBatch.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MeshMergingBatch": typeof ns["MeshMergingBatch"] }),
+      (ns) => { const p = ns["MeshMergingBatch"]?.prototype ?? {}; return ["get3DObject","create3DObject","setMeshes","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/drawable/PalDrawable",
+    tsjs: "src/engine/gfx/drawable/PalDrawable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PalDrawable": typeof ns["PalDrawable"] }),
+      (ns) => { const p = ns["PalDrawable"]?.prototype ?? {}; return ["getColor","draw"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/drawable/TmpDrawable",
+    tsjs: "src/engine/gfx/drawable/TmpDrawable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TmpDrawable": typeof ns["TmpDrawable"] }),
+      (ns) => { const p = ns["TmpDrawable"]?.prototype ?? {}; return ["drawTileBlock","draw","drawExtraData"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/geometry/BufferGeometrySerializer",
+    tsjs: "src/engine/gfx/geometry/BufferGeometrySerializer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BufferGeometrySerializer": typeof ns["BufferGeometrySerializer"] }),
+      (ns) => { const p = ns["BufferGeometrySerializer"]?.prototype ?? {}; return ["getAttribute","addAttribute","setIndex","serialize","unserialize","writeTypedArray","readTypedArray","getTypedArrayByteSize"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/geometry/VxlGeometryCache",
+    tsjs: "src/engine/gfx/geometry/VxlGeometryCache.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlGeometryCache": typeof ns["VxlGeometryCache"] }),
+      (ns) => { const p = ns["VxlGeometryCache"]?.prototype ?? {}; return ["openFile","writeFile","deleteFile","getEntries","loadFromStorage","persistToStorage","clearStorage","clearOtherModStorage","clearStorageFiles","getCacheFileName","getModPrefix","clear"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/lighting/DominatorLightingFx",
+    tsjs: "src/engine/gfx/lighting/DominatorLightingFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DominatorLightingFx": typeof ns["DominatorLightingFx"] }),
+      (ns) => { const p = ns["DominatorLightingFx"]?.prototype ?? {}; return ["update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/lighting/LightingDirector",
+    tsjs: "src/engine/gfx/lighting/LightingDirector.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LightingDirector": typeof ns["LightingDirector"] }),
+      (ns) => { const p = ns["LightingDirector"]?.prototype ?? {}; return ["copy","getBaseAmbient","applyAmbientOverride","update","init","addEffect","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/lighting/LightingFx",
+    tsjs: "src/engine/gfx/lighting/LightingFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LightingFx": typeof ns["LightingFx"], "LightingFxPriority": typeof ns["LightingFxPriority"] }),
+      (ns) => { const p = ns["LightingFx"]?.prototype ?? {}; return ["update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/gfx/lighting/LightningStormFx",
+    tsjs: "src/engine/gfx/lighting/LightningStormFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LightningStormFx": typeof ns["LightningStormFx"] }),
+      (ns) => { const p = ns["LightningStormFx"]?.prototype ?? {}; return ["isAnimFinished","waitForCloudAnim","update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/lighting/NukeLightingFx",
+    tsjs: "src/engine/gfx/lighting/NukeLightingFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "NukeLightingFx": typeof ns["NukeLightingFx"] }),
+      (ns) => { const p = ns["NukeLightingFx"]?.prototype ?? {}; return ["update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/material/PaletteBasicMaterial",
+    tsjs: "src/engine/gfx/material/PaletteBasicMaterial.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PaletteBasicMaterial": typeof ns["PaletteBasicMaterial"] }),
+      (ns) => { const p = ns["PaletteBasicMaterial"]?.prototype ?? {}; return ["copy"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/material/PaletteLambertMaterial",
+    tsjs: "src/engine/gfx/material/PaletteLambertMaterial.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PaletteLambertMaterial": typeof ns["PaletteLambertMaterial"] }),
+      (ns) => { const p = ns["PaletteLambertMaterial"]?.prototype ?? {}; return ["copy"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/gfx/material/PalettePhongMaterial",
+    tsjs: "src/engine/gfx/material/PalettePhongMaterial.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PalettePhongMaterial": typeof ns["PalettePhongMaterial"] }),
+      (ns) => { const p = ns["PalettePhongMaterial"]?.prototype ?? {}; return ["copy"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/AlphaRenderable",
+    tsjs: "src/engine/renderable/AlphaRenderable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "AlphaRenderable": typeof ns["AlphaRenderable"] }),
+      (ns) => { const p = ns["AlphaRenderable"]?.prototype ?? {}; return ["setVisible","setSize","create3DObject","get3DObject","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/CameraPan",
+    tsjs: "src/engine/renderable/CameraPan.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CameraPan": typeof ns["CameraPan"] }),
+      (ns) => { const p = ns["CameraPan"]?.prototype ?? {}; return ["setPanLimits","getPanLimits","getPan","setPan"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/CameraZoom",
+    tsjs: "src/engine/renderable/CameraZoom.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CameraZoom": typeof ns["CameraZoom"] }),
+      (ns) => { const p = ns["CameraZoom"]?.prototype ?? {}; return ["getZoom","applyStep"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/DebugRenderable",
+    tsjs: "src/engine/renderable/DebugRenderable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DebugRenderable": typeof ns["DebugRenderable"] }),
+      (ns) => { const p = ns["DebugRenderable"]?.prototype ?? {}; return ["useMaterial","freeMaterial","getGeometryCacheKey","setBatched","getBatchPaletteIndex","setPalette","setBatchPalettes","setOpacity","updateOpacity","create3DObject","get3DObject","update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/Entity",
+    tsjs: "src/engine/renderable/Entity.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/renderable/MapSpriteTranslation",
+    tsjs: "src/engine/renderable/MapSpriteTranslation.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapSpriteTranslation": typeof ns["MapSpriteTranslation"] }),
+      (ns) => { const p = ns["MapSpriteTranslation"]?.prototype ?? {}; return ["compute"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/RenderablePlugin",
+    tsjs: "src/engine/renderable/RenderablePlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/renderable/ShadowRenderable",
+    tsjs: "src/engine/renderable/ShadowRenderable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShadowRenderable": typeof ns["ShadowRenderable"] }),
+      (ns) => { const p = ns["ShadowRenderable"]?.prototype ?? {}; return ["getImage","setVisible","setSize","setBatched","setBaseFrame","setFrameOffset","computeShadowFrameNo","create3DObject","frameHasShadowData","get3DObject","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/ShpRenderable",
+    tsjs: "src/engine/renderable/ShpRenderable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShpRenderable": typeof ns["ShpRenderable"] }),
+      (ns) => { const p = ns["ShpRenderable"]?.prototype ?? {}; return ["get3DObject","setBatched","setBatchPalettes","setSize","getFlat","setFlat","setFrame","setFrameOffset","setPalette","setExtraLight","setOpacity","setForceTransparent"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/WithPosition",
+    tsjs: "src/engine/renderable/WithPosition.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "WithPosition": typeof ns["WithPosition"] }),
+      (ns) => { const p = ns["WithPosition"]?.prototype ?? {}; return ["get3DObject","setPosition","getPosition","updatePosition","applyTo"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/WithVisibility",
+    tsjs: "src/engine/renderable/WithVisibility.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "WithVisibility": typeof ns["WithVisibility"] }),
+      (ns) => { const p = ns["WithVisibility"]?.prototype ?? {}; return ["get3DObject","setVisible","isVisible","updateVisibility","applyTo"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/WorldScene",
+    tsjs: "src/engine/renderable/WorldScene.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "WorldScene": typeof ns["WorldScene"] }),
+      (ns) => { const p = ns["WorldScene"]?.prototype ?? {}; return ["updateViewport","updateCamera","create3DObject","updateShadowQuality","setLightFocusPoint","markBatchRebuild","applyLighting","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/BatchShpBuilder",
+    tsjs: "src/engine/renderable/builder/BatchShpBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BatchShpBuilder": typeof ns["BatchShpBuilder"] }),
+      (ns) => { const p = ns["BatchShpBuilder"]?.prototype ?? {}; return ["getImage","initTexture","setPalette","build","add","has","remove","update","isFull","isEmpty","updateLighting","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/CanvasSpriteBuilder",
+    tsjs: "src/engine/renderable/builder/CanvasSpriteBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CanvasSpriteBuilder": typeof ns["CanvasSpriteBuilder"] }),
+      (ns) => { const p = ns["CanvasSpriteBuilder"]?.prototype ?? {}; return ["setOffset","setAlign","setFrame","getFrame","getSize","setOpacity","setForceTransparent","setExtraLight","setFrustumCulled","build","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/CanvasTextureAtlas",
+    tsjs: "src/engine/renderable/builder/CanvasTextureAtlas.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CanvasTextureAtlas": typeof ns["CanvasTextureAtlas"] }),
+      (ns) => { const p = ns["CanvasTextureAtlas"]?.prototype ?? {}; return ["getTexture","getImageRect","pack"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/ObjectBuilder",
+    tsjs: "src/engine/renderable/builder/ObjectBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/ShpAggregator",
+    tsjs: "src/engine/renderable/builder/ShpAggregator.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShpAggregator": typeof ns["ShpAggregator"] }),
+      (ns) => { const p = ns["ShpAggregator"]?.prototype ?? {}; return ["getImage","aggregate"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/ShpBuilder",
+    tsjs: "src/engine/renderable/builder/ShpBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShpBuilder": typeof ns["ShpBuilder"] }),
+      (ns) => { const p = ns["ShpBuilder"]?.prototype ?? {}; return ["getImage","useMaterial","freeMaterial","setBatched","setOffset","setFrameOffset","setFrame","getFrame","setSize","getSize","getBatchPaletteIndex","setPalette"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/ShpTextureAtlas",
+    tsjs: "src/engine/renderable/builder/ShpTextureAtlas.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShpTextureAtlas": typeof ns["ShpTextureAtlas"] }),
+      (ns) => { const p = ns["ShpTextureAtlas"]?.prototype ?? {}; return ["getImage","fromShpFile","getTextureArea","getTexture","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/SpriteBuilder",
+    tsjs: "src/engine/renderable/builder/SpriteBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/VxlBatchedBuilder",
+    tsjs: "src/engine/renderable/builder/VxlBatchedBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlBatchedBuilder": typeof ns["VxlBatchedBuilder"] }),
+      (ns) => { const p = ns["VxlBatchedBuilder"]?.prototype ?? {}; return ["useMaterial","freeMaterial","getPaletteIndex","setPalette","setExtraLight","setVxlLightDir","setShadow","setClippingPlanes","setOpacity","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/VxlBuilder",
+    tsjs: "src/engine/renderable/builder/VxlBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlBuilder": typeof ns["VxlBuilder"] }),
+      (ns) => { const p = ns["VxlBuilder"]?.prototype ?? {}; return ["build","getSection","getLocalBoundingBox"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/VxlBuilderFactory",
+    tsjs: "src/engine/renderable/builder/VxlBuilderFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlBuilderFactory": typeof ns["VxlBuilderFactory"] }),
+      (ns) => { const p = ns["VxlBuilderFactory"]?.prototype ?? {}; return ["create"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/VxlNonBatchedBuilder",
+    tsjs: "src/engine/renderable/builder/VxlNonBatchedBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlNonBatchedBuilder": typeof ns["VxlNonBatchedBuilder"] }),
+      (ns) => { const p = ns["VxlNonBatchedBuilder"]?.prototype ?? {}; return ["setPalette","setExtraLight","setVxlLightDir","setShadow","setClippingPlanes","setOpacity","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/vxlGeometry/VxlGeometryCulledBuilder",
+    tsjs: "src/engine/renderable/builder/vxlGeometry/VxlGeometryCulledBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlGeometryCulledBuilder": typeof ns["VxlGeometryCulledBuilder"] }),
+      (ns) => { const p = ns["VxlGeometryCulledBuilder"]?.prototype ?? {}; return ["getAllVoxels","getNormals","build"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/vxlGeometry/VxlGeometryMonotoneBuilder",
+    tsjs: "src/engine/renderable/builder/vxlGeometry/VxlGeometryMonotoneBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlGeometryMonotoneBuilder": typeof ns["VxlGeometryMonotoneBuilder"] }),
+      (ns) => { const p = ns["VxlGeometryMonotoneBuilder"]?.prototype ?? {}; return ["getAllVoxels","getNormals","close_off","merge_run","build"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/vxlGeometry/VxlGeometryNaiveBuilder",
+    tsjs: "src/engine/renderable/builder/vxlGeometry/VxlGeometryNaiveBuilder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlGeometryNaiveBuilder": typeof ns["VxlGeometryNaiveBuilder"] }),
+      (ns) => { const p = ns["VxlGeometryNaiveBuilder"]?.prototype ?? {}; return ["getAllVoxels","getNormals","build"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/builder/vxlGeometry/VxlGeometryPool",
+    tsjs: "src/engine/renderable/builder/vxlGeometry/VxlGeometryPool.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlGeometryPool": typeof ns["VxlGeometryPool"] }),
+      (ns) => { const p = ns["VxlGeometryPool"]?.prototype ?? {}; return ["setModelQuality","getModelQuality","loadFromStorage","persistToStorage","clear","clearStorage","clearOtherModStorage","get"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Aircraft",
+    tsjs: "src/engine/renderable/entity/Aircraft.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Aircraft": typeof ns["Aircraft"] }),
+      (ns) => { const p = ns["Aircraft"]?.prototype ?? {}; return ["init","updateBaseLight","updateLighting","get3DObject","getIntersectTarget","getUiName","create3DObject","setPosition","getPosition","registerPlugin","highlight","update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Anim",
+    tsjs: "src/engine/renderable/entity/Anim.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Anim": typeof ns["Anim"] }),
+      (ns) => { const p = ns["Anim"]?.prototype ?? {}; return ["get3DObject","create3DObject","setPosition","getPosition","update","createObjects","setExtraLight","setRenderOrder","computeSpriteAnchorOffset","createMainObject","getAnimProps","getShpFile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/BoxIntersectObject3D",
+    tsjs: "src/engine/renderable/entity/BoxIntersectObject3D.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BoxIntersectObject3D": typeof ns["BoxIntersectObject3D"] }),
+      (ns) => { const p = ns["BoxIntersectObject3D"]?.prototype ?? {}; return ["raycast"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Building",
+    tsjs: "src/engine/renderable/entity/Building.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Building": typeof ns["Building"] }),
+      (ns) => { const p = ns["Building"]?.prototype ?? {}; return ["updateBaseLight","updateLighting","updateTurretVxlLightDir","get3DObject","getIntersectTarget","updateIntersectTarget","getUiName","create3DObject","createLamp","createLampTexture","setPosition","getPosition"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Debris",
+    tsjs: "src/engine/renderable/entity/Debris.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Debris": typeof ns["Debris"] }),
+      (ns) => { const p = ns["Debris"]?.prototype ?? {}; return ["init","registerPlugin","updateLighting","get3DObject","create3DObject","setPosition","getPosition","update","createObjects","computeSpriteAnchorOffset","createMainObject","getVxlFileName"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/HighlightAnimRunner",
+    tsjs: "src/engine/renderable/entity/HighlightAnimRunner.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "HighlightAnimRunner": typeof ns["HighlightAnimRunner"] }),
+      (ns) => { const p = ns["HighlightAnimRunner"]?.prototype ?? {}; return ["animate","getValue"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Infantry",
+    tsjs: "src/engine/renderable/entity/Infantry.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Infantry": typeof ns["Infantry"] }),
+      (ns) => { const p = ns["Infantry"]?.prototype ?? {}; return ["updateBaseLight","registerPlugin","updateLighting","get3DObject","getIntersectTarget","getUiName","create3DObject","setPosition","getPosition","highlight","update","findIdleSequence"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/InvulnerableAnimRunner",
+    tsjs: "src/engine/renderable/entity/InvulnerableAnimRunner.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "InvulnerableAnimRunner": typeof ns["InvulnerableAnimRunner"] }),
+      (ns) => { const p = ns["InvulnerableAnimRunner"]?.prototype ?? {}; return ["animate","getValue"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Overlay",
+    tsjs: "src/engine/renderable/entity/Overlay.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Overlay": typeof ns["Overlay"] }),
+      (ns) => { const p = ns["Overlay"]?.prototype ?? {}; return ["init","updateLighting","get3DObject","create3DObject","update","computeFrame","setPosition","getPosition","getIntersectTarget","getUiName","createObjects","buildVirtualBridgeFile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/PipOverlay",
+    tsjs: "src/engine/renderable/entity/PipOverlay.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PipOverlay": typeof ns["PipOverlay"] }),
+      (ns) => { const p = ns["PipOverlay"]?.prototype ?? {}; return ["create3DObject","onCreate","initTexture","buildSpriteGeometry","createBuildingHealthBar","createUnitHealthBar","createUnitHealthTexture","createBuildingSelectionBox","createBuildingSelectionCornerMesh","createBuildingOccupationInfo","createPipsSprite","createControlGroupTexture"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Projectile",
+    tsjs: "src/engine/renderable/entity/Projectile.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Projectile": typeof ns["Projectile"] }),
+      (ns) => { const p = ns["Projectile"]?.prototype ?? {}; return ["registerPlugin","updateLighting","getIntersectTarget","get3DObject","create3DObject","setPosition","getPosition","update","updateShapeFrame","createObjects","createSonicWaveGeometry","onCreate"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/RenderableFactory",
+    tsjs: "src/engine/renderable/entity/RenderableFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RenderableFactory": typeof ns["RenderableFactory"] }),
+      (ns) => { const p = ns["RenderableFactory"]?.prototype ?? {}; return ["createTransientAnim","createAnim","create"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/SecureProgressSprite",
+    tsjs: "src/engine/renderable/entity/SecureProgressSprite.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "SecureProgressSprite": typeof ns["SecureProgressSprite"] }),
+      (ns) => { const p = ns["SecureProgressSprite"]?.prototype ?? {}; return ["get3DObject","create3DObject","update","computeKey","redraw","getFillWidth","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Smudge",
+    tsjs: "src/engine/renderable/entity/Smudge.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Smudge": typeof ns["Smudge"] }),
+      (ns) => { const p = ns["Smudge"]?.prototype ?? {}; return ["init","updateLighting","get3DObject","create3DObject","update","setPosition","getPosition","createObjects","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/TargetLines",
+    tsjs: "src/engine/renderable/entity/TargetLines.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TargetLines": typeof ns["TargetLines"] }),
+      (ns) => { const p = ns["TargetLines"]?.prototype ?? {}; return ["create3DObject","get3DObject","forceShow","update","showLines","hideAllLines","updateLines","createLineHead","disposeUnitLines","disposeLineObjects","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Terrain",
+    tsjs: "src/engine/renderable/entity/Terrain.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Terrain": typeof ns["Terrain"] }),
+      (ns) => { const p = ns["Terrain"]?.prototype ?? {}; return ["init","updateLighting","get3DObject","create3DObject","setPosition","getPosition","update","createObjects","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/TransientAnim",
+    tsjs: "src/engine/renderable/entity/TransientAnim.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TransientAnim": typeof ns["TransientAnim"] }),
+      (ns) => { const p = ns["TransientAnim"]?.prototype ?? {}; return ["update","remove"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/UnitCastBarSprite",
+    tsjs: "src/engine/renderable/entity/UnitCastBarSprite.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "UnitCastBarSprite": typeof ns["UnitCastBarSprite"] }),
+      (ns) => { const p = ns["UnitCastBarSprite"]?.prototype ?? {}; return ["get3DObject","create3DObject","update","redraw","getFillWidth","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/Vehicle",
+    tsjs: "src/engine/renderable/entity/Vehicle.ts.js",
+    probes: [
+      (ns) => ({ hasVehicle: typeof ns.Vehicle === "function" }),
+      (ns) => {
+        const p = ns.Vehicle?.prototype ?? {};
+        const methods = ["tick", "getCollisionShape", "setFacing", "setVelocity", "update"].filter((k) => typeof p[k] === "function");
+        return methods.sort().join(",");
+      },
+      (ns) => Object.getOwnPropertyNames(ns.Vehicle?.prototype ?? {}).length > 0,
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/WaypointLine",
+    tsjs: "src/engine/renderable/entity/WaypointLine.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "WaypointLine": typeof ns["WaypointLine"] }),
+      (ns) => { const p = ns["WaypointLine"]?.prototype ?? {}; return ["get3DObject","create3DObject","update","computeLineLength","createFgLineMaterial","createBgLineMaterial","computeDashArray","computeResolution","createLineHeads","updateLineHeads","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/WaypointLines",
+    tsjs: "src/engine/renderable/entity/WaypointLines.ts.js",
+    probes: [
+      (ns) => ({ hasClass: typeof ns.WaypointLines === "function" }),
+      (ns) => {
+        const p = ns.WaypointLines?.prototype ?? {};
+        const methods = ["addWaypoint", "clear", "update", "removeWaypoint"].filter((k) => typeof p[k] === "function");
+        return methods.sort().join(",");
+      },
+      (ns) => Object.getOwnPropertyNames(ns.WaypointLines?.prototype ?? {}).length,
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/building/AnimationType",
+    tsjs: "src/engine/renderable/entity/building/AnimationType.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "AnimationType": typeof ns["AnimationType"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/building/BuildingAnimArtProps",
+    tsjs: "src/engine/renderable/entity/building/BuildingAnimArtProps.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BuildingAnimArtProps": typeof ns["BuildingAnimArtProps"] }),
+      (ns) => { const p = ns["BuildingAnimArtProps"]?.prototype ?? {}; return ["read","getByType","getAll"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/building/BuildingAnimData",
+    tsjs: "src/engine/renderable/entity/building/BuildingAnimData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BuildingAnimData": typeof ns["BuildingAnimData"] }),
+      (ns) => ({ ctor: typeof ns["BuildingAnimData"] === "function", arity: ns["BuildingAnimData"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/building/BuildingShpHelper",
+    tsjs: "src/engine/renderable/entity/building/BuildingShpHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BuildingShpHelper": typeof ns["BuildingShpHelper"] }),
+      (ns) => { const p = ns["BuildingShpHelper"]?.prototype ?? {}; return ["getShpFrameInfos","collectAnimShpFiles"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/building/DamageType",
+    tsjs: "src/engine/renderable/entity/building/DamageType.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DamageType": typeof ns["DamageType"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/building/PsychicDetectPlugin",
+    tsjs: "src/engine/renderable/entity/building/PsychicDetectPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PsychicDetectPlugin": typeof ns["PsychicDetectPlugin"] }),
+      (ns) => { const p = ns["PsychicDetectPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose","disposeLine"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapBounds",
+    tsjs: "src/engine/renderable/entity/map/MapBounds.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapBounds": typeof ns["MapBounds"] }),
+      (ns) => { const p = ns["MapBounds"]?.prototype ?? {}; return ["build","createBoundRect","get3DObject","create3DObject","update","setVisible","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapGrid",
+    tsjs: "src/engine/renderable/entity/map/MapGrid.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapGrid": typeof ns["MapGrid"] }),
+      (ns) => { const p = ns["MapGrid"]?.prototype ?? {}; return ["build","get3DObject","create3DObject","update"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapRenderable",
+    tsjs: "src/engine/renderable/entity/map/MapRenderable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapRenderable": typeof ns["MapRenderable"] }),
+      (ns) => { const p = ns["MapRenderable"]?.prototype ?? {}; return ["get3DObject","getGameObject","init","setShroud","addObject","removeObject","create3DObject","update","updateLighting","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapShroudLayer",
+    tsjs: "src/engine/renderable/entity/map/MapShroudLayer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapShroudLayer": typeof ns["MapShroudLayer"] }),
+      (ns) => { const p = ns["MapShroudLayer"]?.prototype ?? {}; return ["get3DObject","create3DObject","setShroud","createTileObjects","createTileGeometry","getTileGeometryOptions","update","extendToAdjacentTiles","updateTiles","updateAllTiles","toggleAllTiles","updateTilePiece"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapSpriteBatchLayer",
+    tsjs: "src/engine/renderable/entity/map/MapSpriteBatchLayer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapSpriteBatchLayer": typeof ns["MapSpriteBatchLayer"] }),
+      (ns) => { const p = ns["MapSpriteBatchLayer"]?.prototype ?? {}; return ["get3DObject","create3DObject","createAggregatedShpFile","update","updateLighting","shouldBeBatched","getBatchKey","addObject","buildBatchShpSpec","buildShadowBatchShpSpec","removeObject","hasObject"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapSurface",
+    tsjs: "src/engine/renderable/entity/map/MapSurface.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MAGIC_OFFSET": typeof ns["MAGIC_OFFSET"], "MapSurface": typeof ns["MapSurface"] }),
+      (ns) => { const p = ns["MapSurface"]?.prototype ?? {}; return ["get3DObject","create3DObject","update","setVisible","createObject","createRectGeometry","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapTileLayer",
+    tsjs: "src/engine/renderable/entity/map/MapTileLayer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapTileLayer": typeof ns["MapTileLayer"] }),
+      (ns) => { const p = ns["MapTileLayer"]?.prototype ?? {}; return ["get3DObject","create3DObject","createTileObjects","update","updateLighting","updateColorMultBuffer","updateColorMultBufferAtIndex","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MapTileLayerDebug",
+    tsjs: "src/engine/renderable/entity/map/MapTileLayerDebug.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapTileLayerDebug": typeof ns["MapTileLayerDebug"] }),
+      (ns) => { const p = ns["MapTileLayerDebug"]?.prototype ?? {}; return ["get3DObject","create3DObject","update","setVisible","setupLines","destroyLines","createTileOverlay","getTileTexture","createConnectivityLines","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MinimapModel",
+    tsjs: "src/engine/renderable/entity/map/MinimapModel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MinimapModel": typeof ns["MinimapModel"] }),
+      (ns) => { const p = ns["MinimapModel"]?.prototype ?? {}; return ["computeAllColors","updateColors","getTileColor"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/map/MinimapRenderer",
+    tsjs: "src/engine/renderable/entity/map/MinimapRenderer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MinimapRenderer": typeof ns["MinimapRenderer"] }),
+      (ns) => { const p = ns["MinimapRenderer"]?.prototype ?? {}; return ["computeCanvasSize","renderFull","renderIncremental","renderTiles","tileToLocalRxyOrigin","dxyToLocalRxy","dxyToCanvas","canvasToDxy"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/AirstrikeLaserPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/AirstrikeLaserPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "AirstrikeLaserPlugin": typeof ns["AirstrikeLaserPlugin"] }),
+      (ns) => { const p = ns["AirstrikeLaserPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose","disposeLaser"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/ChronoSparkleFxPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/ChronoSparkleFxPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ChronoSparkleFxPlugin": typeof ns["ChronoSparkleFxPlugin"] }),
+      (ns) => { const p = ns["ChronoSparkleFxPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/DamageSmokePlugin",
+    tsjs: "src/engine/renderable/entity/plugin/DamageSmokePlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DamageSmokePlugin": typeof ns["DamageSmokePlugin"] }),
+      (ns) => { const p = ns["DamageSmokePlugin"]?.prototype ?? {}; return ["onCreate","update","disposeSmokeFx","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/ForcedDisguisePlugin",
+    tsjs: "src/engine/renderable/entity/plugin/ForcedDisguisePlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ForcedDisguisePlugin": typeof ns["ForcedDisguisePlugin"] }),
+      (ns) => { const p = ns["ForcedDisguisePlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","getUiNameOverride","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/HarvesterPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/HarvesterPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "HarvesterPlugin": typeof ns["HarvesterPlugin"] }),
+      (ns) => { const p = ns["HarvesterPlugin"]?.prototype ?? {}; return ["onCreate","update","disposeHarvAnim","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/InfantryDisguisePlugin",
+    tsjs: "src/engine/renderable/entity/plugin/InfantryDisguisePlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "InfantryDisguisePlugin": typeof ns["InfantryDisguisePlugin"] }),
+      (ns) => { const p = ns["InfantryDisguisePlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","getUiNameOverride","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/MagnetronBeamPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/MagnetronBeamPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MagnetronBeamPlugin": typeof ns["MagnetronBeamPlugin"] }),
+      (ns) => { const p = ns["MagnetronBeamPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose","disposeBeam"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/MindControlLinkPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/MindControlLinkPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MindControlLinkPlugin": typeof ns["MindControlLinkPlugin"] }),
+      (ns) => { const p = ns["MindControlLinkPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose","disposeLinks"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/MoveSoundFxPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/MoveSoundFxPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MoveSoundFxPlugin": typeof ns["MoveSoundFxPlugin"] }),
+      (ns) => { const p = ns["MoveSoundFxPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/ObjectCloakPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/ObjectCloakPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ObjectCloakPlugin": typeof ns["ObjectCloakPlugin"] }),
+      (ns) => { const p = ns["ObjectCloakPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/RobotControlPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/RobotControlPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RobotControlPlugin": typeof ns["RobotControlPlugin"] }),
+      (ns) => { const p = ns["RobotControlPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/ShipWakeTrailPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/ShipWakeTrailPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShipWakeTrailPlugin": typeof ns["ShipWakeTrailPlugin"] }),
+      (ns) => { const p = ns["ShipWakeTrailPlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/TntFxPlugin",
+    tsjs: "src/engine/renderable/entity/plugin/TntFxPlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TntFxPlugin": typeof ns["TntFxPlugin"] }),
+      (ns) => { const p = ns["TntFxPlugin"]?.prototype ?? {}; return ["onCreate","update","disposeBombAnim","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/TrailerSmokePlugin",
+    tsjs: "src/engine/renderable/entity/plugin/TrailerSmokePlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TrailerSmokePlugin": typeof ns["TrailerSmokePlugin"] }),
+      (ns) => { const p = ns["TrailerSmokePlugin"]?.prototype ?? {}; return ["onCreate","update","onRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/plugin/VehicleDisguisePlugin",
+    tsjs: "src/engine/renderable/entity/plugin/VehicleDisguisePlugin.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VehicleDisguisePlugin": typeof ns["VehicleDisguisePlugin"] }),
+      (ns) => { const p = ns["VehicleDisguisePlugin"]?.prototype ?? {}; return ["onCreate","update","createDisguiseObj","updateLighting","onRemove","getUiNameOverride","shouldDisableHighlight","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/BlobShadow",
+    tsjs: "src/engine/renderable/entity/unit/BlobShadow.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BlobShadow": typeof ns["BlobShadow"] }),
+      (ns) => { const p = ns["BlobShadow"]?.prototype ?? {}; return ["get3DObject","create3DObject","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/DebugLabel",
+    tsjs: "src/engine/renderable/entity/unit/DebugLabel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DebugLabel": typeof ns["DebugLabel"] }),
+      (ns) => { const p = ns["DebugLabel"]?.prototype ?? {}; return ["get3DObject","create3DObject","createMesh","createTexture","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/ExtraLightHelper",
+    tsjs: "src/engine/renderable/entity/unit/ExtraLightHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ExtraLightHelper": typeof ns["ExtraLightHelper"] }),
+      (ns) => ({ ctor: typeof ns["ExtraLightHelper"] === "function", arity: ns["ExtraLightHelper"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/FlyerHelperMode",
+    tsjs: "src/engine/renderable/entity/unit/FlyerHelperMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "FlyerHelperMode": typeof ns["FlyerHelperMode"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/ModelQuality",
+    tsjs: "src/engine/renderable/entity/unit/ModelQuality.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ModelQuality": typeof ns["ModelQuality"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/RotorHelper",
+    tsjs: "src/engine/renderable/entity/unit/RotorHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RotorHelper": typeof ns["RotorHelper"] }),
+      (ns) => ({ ctor: typeof ns["RotorHelper"] === "function", arity: ns["RotorHelper"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/ShadowQuality",
+    tsjs: "src/engine/renderable/entity/unit/ShadowQuality.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ShadowQuality": typeof ns["ShadowQuality"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "engine/renderable/entity/unit/VxlShadowProxy",
+    tsjs: "src/engine/renderable/entity/unit/VxlShadowProxy.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VxlShadowProxy": typeof ns["VxlShadowProxy"] }),
+      (ns) => { const p = ns["VxlShadowProxy"]?.prototype ?? {}; return ["create3DObject","setEnabled","computeSink","syncVector","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/DamageSmokeFx",
+    tsjs: "src/engine/renderable/fx/DamageSmokeFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DamageSmokeFx": typeof ns["DamageSmokeFx"] }),
+      (ns) => { const p = ns["DamageSmokeFx"]?.prototype ?? {}; return ["setContainer","create3DObject","computeEmitterPosition","get3DObject","update","finishAndRemove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/DesignatorLaserFx",
+    tsjs: "src/engine/renderable/fx/DesignatorLaserFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DesignatorLaserFx": typeof ns["DesignatorLaserFx"] }),
+      (ns) => { const p = ns["DesignatorLaserFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","buildMaterial","remove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/DetectionLineFx",
+    tsjs: "src/engine/renderable/fx/DetectionLineFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DetectionLineFx": typeof ns["DetectionLineFx"] }),
+      (ns) => { const p = ns["DetectionLineFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","createLineMesh","createLineGeometry","createLineMaterial","createLineHead","computeDashArray","computeResolution","remove","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/DiskLaserFx",
+    tsjs: "src/engine/renderable/fx/DiskLaserFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DiskLaserFx": typeof ns["DiskLaserFx"] }),
+      (ns) => { const p = ns["DiskLaserFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","_rebuildChargePhase","_rebuildBeamPhase","_recalcAngles","_getCirclePoint","_buildArcMesh","_disposeMesh","isFinished","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/Effect",
+    tsjs: "src/engine/renderable/fx/Effect.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/LaserFx",
+    tsjs: "src/engine/renderable/fx/LaserFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LaserFx": typeof ns["LaserFx"] }),
+      (ns) => { const p = ns["LaserFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","createObject","isFinished","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/LineTrailFx",
+    tsjs: "src/engine/renderable/fx/LineTrailFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LineTrailFx": typeof ns["LineTrailFx"] }),
+      (ns) => { const p = ns["LineTrailFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","createTrail","isFinished","requestFinishAndDispose","stopTracking","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/MagBeamFx",
+    tsjs: "src/engine/renderable/fx/MagBeamFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MagBeamFx": typeof ns["MagBeamFx"] }),
+      (ns) => { const p = ns["MagBeamFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","updateEndpoints","setWaveReverse","startDying","revive","isDying","removeAndDispose","isFinished","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/MindControlLinkFx",
+    tsjs: "src/engine/renderable/fx/MindControlLinkFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MindControlLinkFx": typeof ns["MindControlLinkFx"] }),
+      (ns) => { const p = ns["MindControlLinkFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","updateEndpoints","update","createLineGeometry","removeAndDispose","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/RadBeamFx",
+    tsjs: "src/engine/renderable/fx/RadBeamFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RadBeamFx": typeof ns["RadBeamFx"] }),
+      (ns) => { const p = ns["RadBeamFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","createObject","createLineGeometry","isFinished","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/RallyPointFx",
+    tsjs: "src/engine/renderable/fx/RallyPointFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RallyPointFx": typeof ns["RallyPointFx"] }),
+      (ns) => { const p = ns["RallyPointFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","createLineMesh","createLineShadowMesh","createShadowLineGeometry","createLineGeometry","createLineMaterial","computeDashArray","computeResolution","remove"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/SparkFx",
+    tsjs: "src/engine/renderable/fx/SparkFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "SparkFx": typeof ns["SparkFx"] }),
+      (ns) => { const p = ns["SparkFx"]?.prototype ?? {}; return ["setContainer","create3DObject","get3DObject","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/TeslaFx",
+    tsjs: "src/engine/renderable/fx/TeslaFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TeslaFx": typeof ns["TeslaFx"] }),
+      (ns) => { const p = ns["TeslaFx"]?.prototype ?? {}; return ["setContainer","get3DObject","create3DObject","update","createBolt","isFinished","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/TrailerSmokeFx",
+    tsjs: "src/engine/renderable/fx/TrailerSmokeFx.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TrailerSmokeFx": typeof ns["TrailerSmokeFx"] }),
+      (ns) => { const p = ns["TrailerSmokeFx"]?.prototype ?? {}; return ["setContainer","create3DObject","get3DObject","update","finishAndRemove","disable","enable","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/BeaconFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/BeaconFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BeaconFxHandler": typeof ns["BeaconFxHandler"] }),
+      (ns) => { const p = ns["BeaconFxHandler"]?.prototype ?? {}; return ["init","canPingLocation","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/ChronoFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/ChronoFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ChronoFxHandler": typeof ns["ChronoFxHandler"] }),
+      (ns) => { const p = ns["ChronoFxHandler"]?.prototype ?? {}; return ["init","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/CrateFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/CrateFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CrateFxHandler": typeof ns["CrateFxHandler"] }),
+      (ns) => { const p = ns["CrateFxHandler"]?.prototype ?? {}; return ["init","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/ParasiteSparkFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/ParasiteSparkFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ParasiteSparkFxHandler": typeof ns["ParasiteSparkFxHandler"] }),
+      (ns) => { const p = ns["ParasiteSparkFxHandler"]?.prototype ?? {}; return ["init","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/SuperWeaponFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/SuperWeaponFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "SuperWeaponFxHandler": typeof ns["SuperWeaponFxHandler"] }),
+      (ns) => { const p = ns["SuperWeaponFxHandler"]?.prototype ?? {}; return ["init","createChronoSphereAnim","disposeChronoSphereAnim","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/TriggerActionFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/TriggerActionFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TriggerActionFxHandler": typeof ns["TriggerActionFxHandler"] }),
+      (ns) => { const p = ns["TriggerActionFxHandler"]?.prototype ?? {}; return ["init","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/VirusCloudFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/VirusCloudFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "VirusCloudFxHandler": typeof ns["VirusCloudFxHandler"] }),
+      (ns) => { const p = ns["VirusCloudFxHandler"]?.prototype ?? {}; return ["stepPuff","init","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "engine/renderable/fx/handler/WarheadDetonateFxHandler",
+    tsjs: "src/engine/renderable/fx/handler/WarheadDetonateFxHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "WarheadDetonateFxHandler": typeof ns["WarheadDetonateFxHandler"] }),
+      (ns) => { const p = ns["WarheadDetonateFxHandler"]?.prototype ?? {}; return ["init","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
 
   {
     name: "gui/CanvasMetrics",
