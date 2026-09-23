@@ -24160,6 +24160,197 @@ const CONVERTED = [
   },
 
   {
+    name: "tools/AircraftTester",
+    tsjs: "src/tools/AircraftTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.AircraftTester;
+        return {
+          keyCount: Object.keys(T).length,
+          hasDisposables: !!T.disposables,
+          methods: ["main", "selectAircraft", "buildBrowser", "buildControls", "destroy", "addGrid", "createFloor"].every((k) => typeof T[k] === "function"),
+          fixedDirection: T.fixedDirection === undefined ? "undef" : T.fixedDirection,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "tools/BuildingTester",
+    tsjs: "src/tools/BuildingTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.BuildingTester;
+        return {
+          hasDisposables: !!T.disposables,
+          methods: ["main", "selectBuilding", "selectAnimation", "stopCurrentAnimation", "setDamageType", "setActiveState", "createAnimButtons", "createOccupiedButtons", "buildBuildingControls", "buildBrowser", "destroy"].every((k) => typeof T[k] === "function"),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "tools/CameraZoomControls",
+    tsjs: "src/tools/CameraZoomControls.ts.js",
+    probes: [
+      (ns) => {
+        const steps = [];
+        const zoom = { applyStep: (s) => steps.push(s) };
+        let added = 0, removed = 0;
+        const pe = {
+          addEventListener: () => added++,
+          removeEventListener: () => removed++,
+        };
+        const c = new ns.CameraZoomControls(pe, zoom);
+        c.handleWheel({ wheelDeltaY: 100 });
+        c.handleWheel({ wheelDeltaY: -100 });
+        c.handleWheel({ wheelDeltaY: 0 });
+        c.handleWheel({});
+        c.init();
+        c.destroy();
+        return { steps, added, removed, sameHandler: true };
+      },
+    ],
+  },
+
+  {
+    name: "tools/DevToolsApi",
+    tsjs: "src/tools/DevToolsApi.ts.js",
+    probes: [
+      (ns) => {
+        // DevToolsApi 挂载到 window.r；桩环境无 window，补最小桩并在 finally 精确还原
+        const hadWindow = Object.prototype.hasOwnProperty.call(globalThis, "window");
+        const prevWindow = globalThis.window;
+        globalThis.window = {};
+        try {
+          [...ns.DevToolsApi.listCommands()].forEach((k) => ns.DevToolsApi.unregisterCommand(k));
+          [...ns.DevToolsApi.listVars()].forEach((k) => ns.DevToolsApi.unregisterVar(k));
+          ns.DevToolsApi.registerCommand("probe_cmd", () => "ran");
+          const box = { value: 1 };
+          ns.DevToolsApi.registerVar("probe_var", box);
+          const nsR = ns.DevToolsApi.getPublicNamespace();
+          const readCmd = nsR.probe_cmd;
+          const readVar = nsR.probe_var;
+          nsR.probe_var = 7;
+          ns.DevToolsApi.unregisterCommand("probe_cmd");
+          ns.DevToolsApi.unregisterVar("probe_var");
+          ns.DevToolsApi.registerCommand("probe_cmd", () => 1);
+          ns.DevToolsApi.registerCommand("probe_cmd", () => 2);
+          ns.DevToolsApi.unregisterCommand("probe_cmd");
+          ns.DevToolsApi.unregisterCommand("missing_cmd");
+          ns.DevToolsApi.unregisterVar("missing_var");
+          return {
+            readCmd,
+            readVar,
+            boxAfterSet: box.value,
+            cmdsAfter: [...ns.DevToolsApi.listCommands()].length,
+            varsAfter: [...ns.DevToolsApi.listVars()].length,
+            hasPublic: !!nsR,
+          };
+        } finally {
+          if (hadWindow) globalThis.window = prevWindow;
+          else delete globalThis.window;
+        }
+      },
+    ],
+  },
+
+  {
+    name: "tools/InfantryTester",
+    tsjs: "src/tools/InfantryTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.InfantryTester;
+        return {
+          hasDisposables: !!T.disposables,
+          methods: ["main", "selectInfantry", "buildControls", "createZoneSelect", "createStanceSelect", "createDeathSelect", "buildBrowser", "animateInfantry", "destroy", "addGrid"].every((k) => typeof T[k] === "function"),
+          timeoutId: T.timeoutId === undefined ? "undef" : T.timeoutId,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "tools/LobbyFormTester",
+    tsjs: "src/tools/LobbyFormTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.LobbyFormTester;
+        const before = !!T.disposables;
+        T.destroy();
+        return { before, hasMain: typeof T.main === "function", hasDisposables: !!T.disposables };
+      },
+    ],
+  },
+
+  {
+    name: "tools/ShpTester",
+    tsjs: "src/tools/ShpTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.ShpTester;
+        return {
+          hasDisposables: !!T.disposables,
+          methods: ["main", "destroy"].every((k) => typeof T[k] === "function"),
+          afterEmptyDestroy: (() => { T.destroy(); return !!T.disposables; })(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "tools/SoundTester",
+    tsjs: "src/tools/SoundTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.SoundTester;
+        return {
+          hasDisposables: !!T.disposables,
+          methods: ["main", "selectSound", "buildBrowser", "destroy"].every((k) => typeof T[k] === "function"),
+          destroyOk: (() => { try { T.destroy(); return false; } catch { return true; } })(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "tools/VehicleTester",
+    tsjs: "src/tools/VehicleTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.VehicleTester;
+        const tile = { ...T.tile };
+        T.tile.rampType = 3;
+        const after = { ...T.tile };
+        T.tile.rampType = 0;
+        return {
+          hasDisposables: !!T.disposables,
+          tile,
+          after,
+          fixedDirection: T.fixedDirection === undefined ? "undef" : T.fixedDirection,
+          methods: ["main", "selectVehicle", "buildControls", "buildBrowser", "animateVehicle", "destroy", "addGrid", "createFloor"].every((k) => typeof T[k] === "function"),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "tools/VxlTester",
+    tsjs: "src/tools/VxlTester.ts.js",
+    probes: [
+      (ns) => {
+        const T = ns.VxlTester;
+        return {
+          hasDisposables: !!T.disposables,
+          methods: ["main", "createFloor", "selectVxl", "buildBrowser", "destroy"].every((k) => typeof T[k] === "function"),
+          listEl: T.listEl === undefined ? "undef" : "set",
+          currentVxl: T.currentVxl === undefined ? "undef" : "set",
+        };
+      },
+    ],
+  },
+
+  {
     name: "game/Hashable",
     tsjs: "src/game/Hashable.ts.js",
     probes: [(ns) => Object.keys(ns).length],

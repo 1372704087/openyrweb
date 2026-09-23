@@ -13182,6 +13182,98 @@
       "level": 0
     }
   },
+  "tools/AircraftTester": {
+    "0": {
+      "keyCount": 1,
+      "hasDisposables": true,
+      "methods": true,
+      "fixedDirection": "undef"
+    }
+  },
+  "tools/BuildingTester": {
+    "0": {
+      "hasDisposables": true,
+      "methods": true
+    }
+  },
+  "tools/CameraZoomControls": {
+    "0": {
+      "steps": [
+        -0.1,
+        0.1,
+        0.1,
+        0.1
+      ],
+      "added": 1,
+      "removed": 1,
+      "sameHandler": true
+    }
+  },
+  "tools/DevToolsApi": {
+    "0": {
+      "readCmd": "ran",
+      "readVar": 1,
+      "boxAfterSet": 7,
+      "cmdsAfter": 0,
+      "varsAfter": 0,
+      "hasPublic": true
+    }
+  },
+  "tools/InfantryTester": {
+    "0": {
+      "hasDisposables": true,
+      "methods": true,
+      "timeoutId": "undef"
+    }
+  },
+  "tools/LobbyFormTester": {
+    "0": {
+      "before": true,
+      "hasMain": true,
+      "hasDisposables": true
+    }
+  },
+  "tools/ShpTester": {
+    "0": {
+      "hasDisposables": true,
+      "methods": true,
+      "afterEmptyDestroy": true
+    }
+  },
+  "tools/SoundTester": {
+    "0": {
+      "hasDisposables": true,
+      "methods": true,
+      "destroyOk": true
+    }
+  },
+  "tools/VehicleTester": {
+    "0": {
+      "hasDisposables": true,
+      "tile": {
+        "rx": 1,
+        "ry": 1,
+        "rampType": 0,
+        "z": 0
+      },
+      "after": {
+        "rx": 1,
+        "ry": 1,
+        "rampType": 3,
+        "z": 0
+      },
+      "fixedDirection": "undef",
+      "methods": true
+    }
+  },
+  "tools/VxlTester": {
+    "0": {
+      "hasDisposables": true,
+      "methods": true,
+      "listEl": "undef",
+      "currentVxl": "undef"
+    }
+  },
   "game/AttackerInfo": {
     "0": ""
   },
