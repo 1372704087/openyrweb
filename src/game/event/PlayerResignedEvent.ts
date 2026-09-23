@@ -10,11 +10,11 @@ import { EventType } from "game/event/EventType";
 export class PlayerResignedEvent {
   /** 投降的玩家目标。 */
   readonly target: any;
-  /** 资产是否已重新分配给盟友。 */
-  readonly assetsRedistributed: boolean;
+  /** 资产是否已重新分配给盟友（孪生单参调用时为 undefined）。 */
+  readonly assetsRedistributed: boolean | undefined;
   readonly type: number;
 
-  constructor(target: any, assetsRedistributed: boolean) {
+  constructor(target: any, assetsRedistributed?: boolean) {
     this.target = target;
     this.assetsRedistributed = assetsRedistributed;
     this.type = EventType.PlayerResigned;

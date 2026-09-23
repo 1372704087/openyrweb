@@ -10,7 +10,8 @@
  *  - InfantryAbsorb（生物反应堆）同步清理 garrisonedAt 并广播 BuildingEvacuateEvent。
  *
  * 由 game/gameobject/task/EvacuateTransportTask.ts.js 重写为 TS（行为完全
- * 一致）。两个文件并存期间，本文件才是修改目标。
+ * 一致）。两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时
+ * 优先采用 .ts 模块的编译产物。
  */
 import * as LeaveTransportEventModule from "game/event/LeaveTransportEvent"; // 未转换（any-shim）
 import * as FacingUtilModule from "game/gameobject/unit/FacingUtil"; // 未转换（any-shim）

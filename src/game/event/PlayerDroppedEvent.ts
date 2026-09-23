@@ -13,11 +13,11 @@ import { EventType } from "game/event/EventType";
 export class PlayerDroppedEvent {
   /** 掉线/被移出的玩家。 */
   readonly target: any;
-  /** 资产是否已重新分配（例如划归队友控制）。 */
-  readonly assetsRedistributed: boolean;
+  /** 资产是否已重新分配（例如划归队友控制；可缺省为 undefined）。 */
+  readonly assetsRedistributed: boolean | undefined;
   readonly type: number;
 
-  constructor(target: any, assetsRedistributed: boolean) {
+  constructor(target: any, assetsRedistributed?: boolean) {
     this.target = target;
     this.assetsRedistributed = assetsRedistributed;
     this.type = EventType.PlayerDropped;

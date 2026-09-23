@@ -12,11 +12,11 @@ import { EventType } from "game/event/EventType"; // 孪生
 export class BuildingEvacuateEvent {
   /** 被撤离驻军的建筑目标。 */
   readonly target: any;
-  /** 拥有该驻军的玩家。 */
+  /** 拥有该驻军的玩家（孪生单参调用时为 undefined）。 */
   readonly player: any;
   readonly type: number;
 
-  constructor(target: any, player: any) {
+  constructor(target: any, player?: any) {
     this.target = target;
     this.player = player;
     this.type = EventType.BuildingEvacuate;
