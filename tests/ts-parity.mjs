@@ -20303,6 +20303,155 @@ const CONVERTED = [
   },
 
   {
+    name: "_runtime/prelude",
+    tsjs: "src/_runtime/prelude.ts.js",
+    probes: [
+      (ns) => {
+        // __decorate 无 Reflect.decorate：手动逆序应用
+        const applied = [];
+        const dec = (target, key, desc) => {
+          applied.push(key);
+          return desc;
+        };
+        const target = {};
+        Object.defineProperty(target, "k", { value: 1, configurable: true, writable: true });
+        const out = ns.__decorate([dec], target, "k", Object.getOwnPropertyDescriptor(target, "k"));
+        return { applied, hasValue: out && out.value === 1, isFn: typeof ns.__decorate === "function" };
+      },
+      (ns) => {
+        // TS 发射约定：构造器先 _map.set(this, void 0) 种子化；未种子化的 receiver
+        // 会被守卫拒绝。这里手动种子化模拟"类已声明该私有字段"，让 kind="m" 的抛错分支真正落到 errMsg。
+        const map = new WeakMap();
+        const obj = {};
+        map.set(obj, {});
+        const v = ns.__classPrivateFieldSet(obj, map, 1, "v");
+        const g = ns.__classPrivateFieldGet(obj, map, "v");
+        let errMsg = "";
+        try {
+          ns.__classPrivateFieldSet(obj, map, 1, "m");
+        } catch (e) {
+          errMsg = String(e.message);
+        }
+        return { v, g, errMsg, same: v === g };
+      },
+      (ns) => {
+        // 幂等：globalThis 上已挂再取应同引用
+        return {
+          decorateSame: ns.__decorate === globalThis.__decorate,
+          setSame: ns.__classPrivateFieldSet === globalThis.__classPrivateFieldSet,
+          getSame: ns.__classPrivateFieldGet === globalThis.__classPrivateFieldGet,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "Config",
+    tsjs: "src/Config.ts.js",
+    probes: [
+      (ns) => {
+        try {
+          new ns.Config().load({ getSection: () => undefined });
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns) => {
+        const section = (name, kv = {}) => ({
+          name,
+          getNumber: (k) => Number(kv[k] ?? 0),
+          getString: (k, d) => (kv[k] !== undefined ? String(kv[k]) : d !== undefined ? d : ""),
+          getBool: (k, d) => {
+            if (kv[k] === undefined) return d !== undefined ? d : false;
+            const v = kv[k];
+            if (typeof v === "boolean") return v;
+            const s = String(v).toLowerCase();
+            return s === "true" || s === "1" || s === "yes" || s === "on";
+          },
+          getArray: (k) => String(kv[k] ?? "").split(",").filter(Boolean),
+          entries: Object.entries(kv),
+        });
+        const cfg = new ns.Config();
+        cfg.load({
+          getSection: (n) => {
+            if (n === "General") return section("General", { "viewport.width": 800, "viewport.height": 600, unrankedQueueEnabled: undefined });
+            if (n === "Sentry") return section("Sentry", { dsn: "d", tunnel: "", env: "e", defaultIntegrations: false, autoSessionTracking: true });
+            if (n === "CorsProxy") return section("CorsProxy", { ".example.com": "https://p1", "exact": "https://p2", "*": "https://wild" });
+            return undefined;
+          },
+        });
+        return {
+          vw: cfg.viewport.width,
+          vh: cfg.viewport.height,
+          tunnel: cfg.sentry.tunnel === undefined ? "undef" : cfg.sentry.tunnel,
+          unranked: cfg.unrankedQueueEnabled,
+          corsLen: cfg.corsProxies.length,
+          suffix: cfg.getCorsProxy("https://a.example.com"),
+          exact: cfg.getCorsProxy("exact"),
+          wild: cfg.getCorsProxy("nope"),
+          keys: Object.keys(cfg).sort(),
+        };
+      },
+      (ns) => {
+        const section = (kv) => ({
+          getNumber: () => 0,
+          getString: (k, d) => (kv[k] !== undefined ? String(kv[k]) : d !== undefined ? d : ""),
+          getBool: (k, d) => {
+            if (kv[k] === undefined) return d !== undefined ? d : false;
+            const s = String(kv[k]).toLowerCase();
+            return s === "true" || s === "1";
+          },
+          getArray: () => [],
+          entries: Object.entries(kv),
+        });
+        const cfg = new ns.Config();
+        const loadOnce = () =>
+          cfg.load({
+            getSection: (n) => {
+              if (n === "General") return section({ debugLogging: "verbose" });
+              if (n === "CorsProxy") return section({ a: "1" });
+              return undefined;
+            },
+          });
+        loadOnce();
+        const after1 = cfg.corsProxies.length;
+        loadOnce();
+        const after2 = cfg.corsProxies.length;
+        return { debugLogging: cfg.debugLogging, after1, after2, grows: after2 >= after1 };
+      },
+    ],
+  },
+
+  {
+    name: "ConsoleVars",
+    tsjs: "src/ConsoleVars.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.ConsoleVars();
+        return {
+          wire: c.debugWireframes.value,
+          bot: c.debugBotIndex.value,
+          force: c.forceResolution.value === undefined ? "undef" : c.forceResolution.value,
+          cheats: c.cheatsEnabled.value,
+          fps: c.fps.value,
+          keys: Object.keys(c).sort(),
+        };
+      },
+      (ns) => {
+        const c = new ns.ConsoleVars();
+        let hits = 0;
+        c.fps.onChange.subscribe(() => {
+          hits++;
+        });
+        c.fps.value = true;
+        c.fps.value = true; // 同值不应再触发
+        return { hits, value: c.fps.value };
+      },
+    ],
+  },
+
+  {
     name: "engine/util/EntityIntersectHelper",
     tsjs: "src/engine/util/EntityIntersectHelper.ts.js",
     probes: [
@@ -20491,6 +20640,85 @@ const CONVERTED = [
           err = String(e.name || e.message).slice(0, 80);
         }
         return { err };
+      },
+    ],
+  },
+
+  {
+    name: "ErrorHandler",
+    tsjs: "src/ErrorHandler.ts.js",
+    probes: [
+      (ns) => {
+        const calls = [];
+        const box = { show: (...a) => { calls.push(a); } };
+        const strings = { get: (k) => "T:" + k };
+        const h = new ns.ErrorHandler(box, strings);
+        h.handle(new Error("e1"), "msg1");
+        return { boxes: calls.length, firstMsg: calls[0] && calls[0][0], keys: Object.keys(h).sort() };
+      },
+      (ns) => {
+        const calls = [];
+        const box = { show: (...a) => { calls.push(a); } };
+        const detailsCalls = [];
+        const details = { show: (...a) => { detailsCalls.push(a); } };
+        const strings = { get: (k) => k };
+        const h = new ns.ErrorHandler(box, strings, details);
+        let cb = 0;
+        h.handleWithDetails(new Error("e"), "m", { type: "T", errorMessage: "E" }, () => {
+          cb++;
+        });
+        h.handleWithDetails(new Error("e2"), "m2"); // isErrorState 应挡住
+        detailsCalls[0][2](); // onClose 复位
+        return {
+          detailsShow: detailsCalls.length,
+          fallbackShows: calls.length,
+          cb,
+          errType: detailsCalls[0] && detailsCalls[0][1] && detailsCalls[0][1].type,
+        };
+      },
+      (ns) => {
+        // 无 details box → 回退拼接
+        const calls = [];
+        const box = { show: (...a) => { calls.push(a); } };
+        const strings = { get: (k) => "OK" };
+        const h = new ns.ErrorHandler(box, strings, null);
+        h.handleWithDetails(new Error("e"), "base", { type: "X", errorMessage: "Y", file: "f.js" });
+        const msg = calls[0] && calls[0][0];
+        return { showLen: calls.length, hasType: /Type: X/.test(msg), hasErr: /Error: Y/.test(msg), hasFile: /File: f.js/.test(msg) };
+      },
+    ],
+  },
+
+  {
+    name: "RouteHelper",
+    tsjs: "src/RouteHelper.ts.js",
+    probes: [
+      (ns) => {
+        const route = ns.RouteHelper.getGameRoute({
+          gameId: 1,
+          gameTimestamp: 2,
+          gservUrl: "http://x",
+          playerName: "P",
+          gameOpts: { a: 1 },
+          tournament: false,
+        });
+        const back = ns.RouteHelper.extractGameParams(route.slice("#/game/".length));
+        return {
+          prefix: route.startsWith("#/game/"),
+          gameId: back.gameId,
+          player: back.playerName,
+          modQ: ns.RouteHelper.modQueryStringName,
+          keys: Object.keys(back).sort(),
+        };
+      },
+      (ns) => {
+        // 解析失败应抛 JSON 异常（与孪生一致）
+        try {
+          ns.RouteHelper.extractGameParams("!!!not-base64-json!!!");
+          return "no-throw";
+        } catch (e) {
+          return e.constructor.name;
+        }
       },
     ],
   },
@@ -21624,6 +21852,19 @@ const CONVERTED = [
     ],
   },
 
+  {
+    name: "version",
+    tsjs: "src/version.ts.js",
+    probes: [
+      (ns) => {
+        // twin only exports named version; TS also has default — assert shared surface only
+        return {
+          named: ns.version,
+          is010: ns.version === "0.1.0",
+        };
+      },
+    ],
+  },
   // ---- network 鏃忥紙64 妯″潡锛?---
   {
     name: "network/AccountRegFormData",
@@ -24068,6 +24309,187 @@ const CONVERTED = [
     ],
   },
 
+
+  {
+    name: "Application",
+    tsjs: "src/Application.ts.js",
+    probes: [
+      (ns) => [ns.Application.resPath, typeof ns.Application],
+      (ns) => {
+        try {
+          const app = new ns.Application();
+          return {
+            resPath: ns.Application.resPath,
+            hasViewport: !!(app.viewport && typeof app.viewport.value === "object"),
+            viewportInit: JSON.stringify(app.viewport && app.viewport.value),
+            hasMethods: ["main", "loadConfig", "checkGlobalLibs", "initRouting", "destroy"].every(
+              (k) => typeof app[k] === "function",
+            ),
+          };
+        } catch (e) {
+          return "ctor:" + String(e && e.message).slice(0, 60);
+        }
+      },
+      (ns) => {
+        try {
+          const app = new ns.Application();
+          let outcome;
+          try {
+            app.checkGlobalLibs();
+            outcome = "no-throw";
+          } catch (e) {
+            outcome = String(e.message).slice(0, 40);
+          }
+          return { outcome, resPath: ns.Application.resPath };
+        } catch (e) {
+          return "ctor:" + String(e && e.message).slice(0, 60);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "BattleControlApi",
+    tsjs: "src/BattleControlApi.ts.js",
+    probes: [
+      (ns) => {
+        const api = new ns.BattleControlApi();
+        const seen = [];
+        const off = api.onToggle((on) => seen.push(on));
+        api._notifyToggle(true);
+        api._notifyToggle(false);
+        off();
+        api._notifyToggle(true);
+        return {
+          seen,
+          methods: ["requestPan", "cancelPan", "executeKeyCommand", "applyKeyModifiers"].every(
+            (k) => typeof api[k] === "function",
+          ),
+        };
+      },
+      (ns) => {
+        const api = new ns.BattleControlApi();
+        let called = 0;
+        api.onToggle(() => {
+          throw new Error("boom");
+        });
+        api.onToggle(() => called++);
+        api._notifyToggle(true);
+        api.requestPan(1, 2);
+        api.cancelPan();
+        api.executeKeyCommand("move");
+        api.applyKeyModifiers({ shift: true });
+        return { called, survived: true };
+      },
+    ],
+  },
+
+  {
+    name: "ClientApi",
+    tsjs: "src/ClientApi.ts.js",
+    probes: [
+      (ns) => {
+        const client = new ns.ClientApi();
+        return {
+          hasBattle: !!client.battleControl,
+          onToggleFn: typeof client.battleControl.onToggle === "function",
+          independent: client.battleControl !== new ns.ClientApi().battleControl,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "Gui",
+    tsjs: "src/Gui.ts.js",
+    probes: [
+      (ns) => {
+        try {
+          const g = new ns.Gui("0.1.0", "en-US", "1.0.0", "hash", undefined, {}, {}, "res/", {}, {}, document.createElement("div"), { value: { x: 0, y: 0, width: 800, height: 600 }, onChange: { subscribe() {}, unsubscribe() {} } }, { onChange: { subscribe() {}, unsubscribe() {} }, isFullScreen: () => false }, { get: () => "" }, undefined, {}, {}, undefined);
+          return {
+            appVersion: g.appVersion,
+            appResPath: g.appResPath,
+            hasDisposables: !!g.disposables,
+            methods: ["getRootController", "init", "initRenderer", "initSound", "destroy", "confirmLowGfxSettings", "confirmHighGfxSettings"].every((k) => typeof g[k] === "function"),
+          };
+        } catch (e) {
+          return "ctor:" + String(e && e.message).slice(0, 60);
+        }
+      },
+      (ns) => {
+        try {
+          const g = new ns.Gui("1.2.3", "zh-CN", "e", "m", undefined, {}, {}, "res/", {}, {}, document.createElement("div"), { value: { x: 0, y: 0, width: 0, height: 0 }, onChange: { subscribe() {}, unsubscribe() {} } }, { onChange: { subscribe() {}, unsubscribe() {} }, isFullScreen: () => false }, { get: (k) => k }, undefined, {}, {}, undefined);
+          let msg;
+          try {
+            g.getRootController();
+            msg = "no-throw";
+          } catch (e) {
+            msg = e.message;
+          }
+          return msg;
+        } catch (e) {
+          return "ctor:" + String(e && e.message).slice(0, 60);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "LocalPrefs",
+    tsjs: "src/LocalPrefs.ts.js",
+    probes: [
+      (ns) => ({
+        keyCount: Object.keys(ns.StorageKey).length,
+        GameRes: ns.StorageKey.GameRes,
+        Options: ns.StorageKey.Options,
+        Mixer: ns.StorageKey.Mixer,
+        LastConnection: ns.StorageKey.LastConnection,
+        PartyNoInvites: ns.StorageKey.PartyNoInvites,
+      }),
+      (ns) => {
+        const store = {
+          _m: new Map([["k", "v"]]),
+          getItem(k) { return this._m.has(k) ? this._m.get(k) : null; },
+          setItem(k, v) { this._m.set(k, v); },
+          removeItem(k) { this._m.delete(k); },
+        };
+        const prefs = new ns.LocalPrefs(store);
+        const before = prefs.getItem("k");
+        prefs.setItem("k2", "v2");
+        prefs.removeItem("k");
+        return {
+          before,
+          afterRemove: prefs.getItem("k"),
+          afterSet: prefs.getItem("k2"),
+          setOk: prefs.setItem("k3", "v3") === true,
+          list: prefs.listItems().slice().sort(),
+        };
+      },
+      (ns) => {
+        const empty = new ns.LocalPrefs();
+        const boom = new ns.LocalPrefs({
+          getItem() { throw new Error("deny"); },
+          setItem() { throw new Error("deny"); },
+          removeItem() { throw new Error("deny"); },
+        });
+        return {
+          emptyGet: empty.getItem("x") === undefined ? "undef" : empty.getItem("x"),
+          emptySet: empty.setItem("x", "1"),
+          emptyList: empty.listItems(),
+          boomGet: boom.getItem("x") === undefined ? "undef" : "set",
+          boomSet: boom.setItem("x", "1"),
+          boomRemove: boom.removeItem("x"),
+          boomList: boom.listItems().length > 0,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "main",
+    tsjs: "src/main.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
 
   {
     name: "worker/WorkerApi",
@@ -29827,7 +30249,6 @@ const CONVERTED = [
 
 /** Modules registered from the reconstructed sources to satisfy imports. */
 const RECON_DEPS = [
-  "_runtime/prelude",
   "util/math",
   "util/string",
   "util/Base64",

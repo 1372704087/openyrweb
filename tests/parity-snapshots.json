@@ -10387,6 +10387,76 @@
       "clone": ""
     }
   },
+  "_runtime/prelude": {
+    "0": {
+      "applied": [
+        "k"
+      ],
+      "hasValue": false,
+      "isFn": true
+    },
+    "1": {
+      "v": 1,
+      "g": 1,
+      "errMsg": "Private method is not writable",
+      "same": true
+    },
+    "2": {
+      "decorateSame": true,
+      "setSame": true,
+      "getSame": true
+    }
+  },
+  "Config": {
+    "0": "Missing [General] section in application config",
+    "1": {
+      "vw": 800,
+      "vh": 600,
+      "tunnel": "undef",
+      "unranked": true,
+      "corsLen": 3,
+      "suffix": "https://p1",
+      "exact": "https://p2",
+      "wild": "https://wild",
+      "keys": [
+        "corsProxies",
+        "generalData",
+        "sentry",
+        "viewport"
+      ]
+    },
+    "2": {
+      "debugLogging": "verbose",
+      "after1": 1,
+      "after2": 2,
+      "grows": true
+    }
+  },
+  "ConsoleVars": {
+    "0": {
+      "wire": false,
+      "bot": 0,
+      "force": "undef",
+      "cheats": false,
+      "fps": false,
+      "keys": [
+        "cheatsEnabled",
+        "debugBotIndex",
+        "debugGameState",
+        "debugLogging",
+        "debugPaths",
+        "debugText",
+        "debugWireframes",
+        "forceResolution",
+        "fps",
+        "freeCamera"
+      ]
+    },
+    "1": {
+      "hits": 1,
+      "value": true
+    }
+  },
   "engine/util/EntityIntersectHelper": {
     "0": {
       "emptyBox": 0,
@@ -10481,6 +10551,47 @@
     "1": {
       "err": "Error"
     }
+  },
+  "ErrorHandler": {
+    "0": {
+      "boxes": 1,
+      "firstMsg": "msg1",
+      "keys": [
+        "errorDetailsBoxApi",
+        "isErrorState",
+        "messageBoxApi",
+        "strings"
+      ]
+    },
+    "1": {
+      "detailsShow": 1,
+      "fallbackShows": 0,
+      "cb": 1,
+      "errType": "T"
+    },
+    "2": {
+      "showLen": 1,
+      "hasType": true,
+      "hasErr": true,
+      "hasFile": true
+    }
+  },
+  "RouteHelper": {
+    "0": {
+      "prefix": true,
+      "gameId": 1,
+      "player": "P",
+      "modQ": "mod",
+      "keys": [
+        "gameId",
+        "gameOpts",
+        "gameTimestamp",
+        "gservUrl",
+        "playerName",
+        "tournament"
+      ]
+    },
+    "1": "DOMException"
   },
   "game/math/Box2": {
     "0": {
@@ -11073,6 +11184,12 @@
         "pointerlockerror",
         "touchstart"
       ]
+    }
+  },
+  "version": {
+    "0": {
+      "named": "0.1.0",
+      "is010": true
     }
   },
   "network/AccountRegFormData": {
@@ -13082,6 +13199,83 @@
         "PointerType": "object"
       }
     }
+  },
+  "Application": {
+    "0": [
+      "res/",
+      "function"
+    ],
+    "1": {
+      "resPath": "res/",
+      "hasViewport": true,
+      "viewportInit": "{\"x\":0,\"y\":0,\"width\":0,\"height\":0}",
+      "hasMethods": true
+    },
+    "2": {
+      "outcome": "Library \"THREE\" was not found on window ",
+      "resPath": "res/"
+    }
+  },
+  "BattleControlApi": {
+    "0": {
+      "seen": [
+        true,
+        false
+      ],
+      "methods": true
+    },
+    "1": {
+      "called": 1,
+      "survived": true
+    }
+  },
+  "ClientApi": {
+    "0": {
+      "hasBattle": true,
+      "onToggleFn": true,
+      "independent": true
+    }
+  },
+  "Gui": {
+    "0": {
+      "appVersion": "0.1.0",
+      "appResPath": "res/",
+      "hasDisposables": true,
+      "methods": true
+    },
+    "1": "Root controller is not initialized"
+  },
+  "LocalPrefs": {
+    "0": {
+      "keyCount": 24,
+      "GameRes": "_r_gameRes",
+      "Options": "_r_opts_v3",
+      "Mixer": "_r_mixer_v3",
+      "LastConnection": "_r_lastCon",
+      "PartyNoInvites": "_r_partyNoInvites"
+    },
+    "1": {
+      "before": "v",
+      "afterSet": "v2",
+      "setOk": true,
+      "list": [
+        "_m",
+        "getItem",
+        "removeItem",
+        "setItem"
+      ]
+    },
+    "2": {
+      "emptyGet": "undef",
+      "emptySet": true,
+      "emptyList": [],
+      "boomGet": "undef",
+      "boomSet": false,
+      "boomList": true
+    }
+  },
+  "main": {
+    "0": 0
   },
   "worker/WorkerApi": {
     "0": 0
