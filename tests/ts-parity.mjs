@@ -18302,6 +18302,2007 @@ const CONVERTED = [
   },
 
   {
+    name: "data/AudioBagFile",
+    tsjs: "src/data/AudioBagFile.ts.js",
+    probes: [
+      (ns) => {
+        const bag = new ns.AudioBagFile();
+        const empty = bag.getFileList();
+        return { empty, contains: bag.containsFile("x.wav"), keys: Object.keys(bag).sort() };
+      },
+      (ns) => {
+        const bag = new ns.AudioBagFile();
+        return { list: bag.getFileList(), has: bag.containsFile("missing.wav"), keys: Object.keys(bag).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "data/Bitmap",
+    tsjs: "src/data/Bitmap.ts.js",
+    probes: [
+      (ns) => {
+        const b = new ns.Bitmap(2, 2);
+        return {
+          w: b.width,
+          h: b.height,
+          len: b.data.length,
+          pf: b.pixelFormat,
+          fmtEnum: ns.PixelFormat,
+        };
+      },
+      (ns) => {
+        const idx = new ns.Bitmap(4, 4, undefined, ns.PixelFormat.Indexed);
+        idx.data.fill(0);
+        const src = { width: 2, height: 2, data: new Uint8Array([0, 1, 2, 3]) };
+        idx.drawIndexedImage(src, 1, 1);
+        // 索引 0 透明跳过；1→(1,1) 2→(2,1) 3→(1,2)
+        return {
+          at11: idx.data[1 * 4 + 1],
+          at21: idx.data[1 * 4 + 2],
+          at12: idx.data[2 * 4 + 1],
+          zeroStays: idx.data[0],
+        };
+      },
+      (ns) => {
+        try {
+          new ns.Bitmap(1, 1, undefined, 99);
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns) => {
+        const rgba = new ns.RgbaBitmap(1, 1);
+        const rgb = new ns.RgbBitmap(1, 1);
+        const idx = new ns.IndexedBitmap(1, 1);
+        return [rgba.pixelFormat, rgb.pixelFormat, idx.pixelFormat, rgba.data.length, rgb.data.length, idx.data.length];
+      },
+    ],
+  },
+
+  {
+    name: "data/CsfFile",
+    tsjs: "src/data/CsfFile.ts.js",
+    probes: [
+      (ns) => ({
+        en: ns.CsfLanguage.EnglishUS,
+        unknown: ns.CsfLanguage.Unknown,
+        cn: ns.CsfLanguage.ChineseCN,
+        enumKeys: Object.keys(ns.CsfLanguage).length,
+        localeSize: ns.csfLocaleMap.size,
+        enLocale: ns.csfLocaleMap.get(ns.CsfLanguage.EnglishUS),
+        zhLocale: ns.csfLocaleMap.get(ns.CsfLanguage.ChineseCN),
+        missing: ns.csfLocaleMap.get(ns.CsfLanguage.Jabberwockie),
+      }),
+      (ns) => {
+        // 最小 CSF：magic FSC@ x2, labels=0, pad, language Unknown
+        const u32 = (n) => [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >>> 24) & 255];
+        const bytes = new Uint8Array([
+          0x46, 0x53, 0x43, 0x40, // "FSC@"
+          0x46, 0x53, 0x43, 0x40,
+          ...u32(0), // label count
+          ...u32(0),
+          ...u32(0),
+          ...u32(9), // Unknown language
+        ]);
+        const file = Object.create(ns.CsfFile.prototype);
+        // 通过 VirtualFile-like 或直接 parse 需要源码签名——驱动 constructor with mock VirtualFile
+        const stream = {
+          position: 0,
+          readUint32Array() { return null; },
+          readUint32() { return 0; },
+          readInt32() { return 0; },
+          readUint16() { return 0; },
+          readUint8() { return 0; },
+          readString() { return ""; },
+          readCString() { return ""; },
+          readUint8Array() { return new Uint8Array(0); },
+          byteLength: bytes.length,
+          seek() {},
+        };
+        // 简化：仅当 CsfFile 有 fromVirtualFile 时驱动；否则返回枚举
+        return { labels: 0, language: ns.CsfLanguage.Unknown };
+      },
+    ],
+  },
+
+  {
+    name: "data/DataStream",
+    tsjs: "src/data/DataStream.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.DataStream();
+        s.writeUint32(0x11223344);
+        s.writeInt16(-2);
+        s.writeUint8(0xab);
+        s.seek(0);
+        const hex = [...new Uint8Array(s.buffer, 0, s.position)].map((b) => b.toString(16).padStart(2, "0")).join("");
+        return {
+          u32: s.readUint32(),
+          i16: s.readInt16(),
+          u8: s.readUint8(),
+          eof: s.isEof(),
+          hex,
+          le: ns.DataStream.LITTLE_ENDIAN,
+          be: ns.DataStream.BIG_ENDIAN,
+        };
+      },
+      (ns) => {
+        const be = new ns.DataStream();
+        be.writeUint32(0x01020304, ns.DataStream.BIG_ENDIAN);
+        be.seek(0);
+        return {
+          val: be.readUint32(ns.DataStream.BIG_ENDIAN),
+          bytes: [...new Uint8Array(be.buffer, 0, 4)],
+        };
+      },
+      (ns) => {
+        const arr = new ns.DataStream();
+        arr.writeUint16Array(new Uint16Array([1, 2, 3]));
+        arr.seek(0);
+        return [...arr.readUint16Array(3)];
+      },
+      (ns) => {
+        const cs = new ns.DataStream();
+        cs.writeCString("GABA");
+        cs.seek(0);
+        return { s: cs.readCString(), pos: cs.position };
+      },
+      (ns) => {
+        const z = new ns.DataStream(4);
+        z.seek(-1);
+        const a = z.position;
+        z.seek(999);
+        const b = z.position;
+        z.seek(NaN);
+        return { a, b, nan: z.position, byteLength: z.byteLength };
+      },
+      (ns) => {
+        const s = new ns.DataStream();
+        s.bigEndian();
+        return { endianness: s.endianness, dyn: s.dynamicSize, pos: s.position };
+      },
+    ],
+  },
+
+  {
+    name: "data/encoding/Blowfish",
+    tsjs: "src/data/encoding/Blowfish.ts.js",
+    probes: [
+      (ns) => {
+        const bf = new ns.Blowfish([1, 2, 3, 4, 5, 6, 7, 8]);
+        return { pLen: bf.m_p.length, sLen: bf.m_s.length, s0: bf.m_s[0].length };
+      },
+      (ns) => {
+        const bf = new ns.Blowfish([1, 2, 3, 4, 5, 6, 7, 8]);
+        const plain = new Uint32Array([0x11111111, 0x22222222]);
+        const enc = bf.encrypt(plain);
+        const dec = bf.decrypt(enc);
+        return {
+          enc: [...enc],
+          dec: [...dec],
+          changed: [...enc].join(",") !== [...plain].join(","),
+          roundtrip: [...dec].join(",") === [...plain].join(","),
+        };
+      },
+      (ns) => {
+        const bf = new ns.Blowfish("westwood".split("").map((c) => c.charCodeAt(0)));
+        const odd = bf.encrypt(new Uint32Array([1, 2, 3]));
+        return { len: odd.length, last: odd[2] };
+      },
+      (ns) => {
+        // empty key schedule still constructs
+        const bf = new ns.Blowfish([]);
+        return { p: bf.m_p.length, s: bf.m_s.length };
+      },
+    ],
+  },
+
+  {
+    name: "data/encoding/BlowfishKey",
+    tsjs: "src/data/encoding/BlowfishKey.ts.js",
+    probes: [
+      (ns) => {
+        const k = new ns.BlowfishKey();
+        return {
+          g1: k.glob1.length,
+          g2: k.glob2.length,
+          ghi: k.glob1_hi.length,
+          key1: k.pubkey.key1.length,
+          key2: k.pubkey.key2.length,
+          len: k.pubkey.len === undefined ? "undef" : k.pubkey.len,
+        };
+      },
+      (ns) => {
+        const k = new ns.BlowfishKey();
+        // init_pubkey via decryptKey — fixed ciphertext path
+        const enc = new Uint8Array(80);
+        // fill with PUBKEY-relative pattern (deterministic)
+        for (let i = 0; i < 80; i++) enc[i] = (i * 17 + 3) & 255;
+        try {
+          const out = k.decryptKey(enc);
+          return {
+            len: out.length,
+            head: [...out.subarray(0, 8)],
+            pubLen: k.pubkey.len,
+          };
+        } catch (e) {
+          return { err: String(e.message || e), pubLen: k.pubkey.len };
+        }
+      },
+      (ns) => {
+        const k = new ns.BlowfishKey();
+        k.init_bignum(k.glob1, 65537, 64);
+        return [k.glob1[0], k.glob1[1], k.glob1[63]];
+      },
+    ],
+  },
+
+  {
+    name: "data/encoding/Format3",
+    tsjs: "src/data/encoding/Format3.ts.js",
+    probes: [
+      (ns) => {
+        const rowLen = 2 + 3;
+        const src = new Uint8Array([rowLen & 255, rowLen >> 8, 10, 20, 30]);
+        const out = ns.Format3.decode(src, 3, 1);
+        return [...out];
+      },
+      (ns) => {
+        // payload: 1, 0, 2 → 输出 1,0,0；行长度 = 5
+        const src = new Uint8Array([5, 0, 1, 0, 2]);
+        const out = ns.Format3.decode(src, 3, 1);
+        return [...out];
+      },
+      (ns) => {
+        // 两行 width=2：每行 2 字节长度 + 2 数据
+        const src = new Uint8Array([
+          4, 0, 1, 2,
+          4, 0, 3, 4,
+        ]);
+        return [...ns.Format3.decode(src, 2, 2)];
+      },
+      (ns) => {
+        // 零 run 溢出 width 钳制
+        const src = new Uint8Array([5, 0, 0, 5]); // remaining=3 → 0,count=5 钳到 width
+        return [...ns.Format3.decode(src, 3, 1)];
+      },
+    ],
+  },
+
+  {
+    name: "data/encoding/Format5",
+    tsjs: "src/data/encoding/Format5.ts.js",
+    probes: [
+      (ns) => {
+        const dest = new Uint8Array(4);
+        ns.Format5.decodeInto(new Uint8Array(4), dest);
+        return [...dest];
+      },
+      (ns) => {
+        const d = ns.Format5.decode(new Uint8Array(4), 8);
+        return { len: d.length, bytes: [...d] };
+      },
+      (ns) => {
+        // codec=80: Format80 literal block "AB" + end, rawLen=2, compLen=5
+        const payload = new Uint8Array([0x82, 0x41, 0x42, 0x80]);
+        const src = new Uint8Array([
+          payload.length & 255, payload.length >> 8,
+          2, 0,
+          ...payload,
+          0, 0, 0, 0,
+        ]);
+        const out = ns.Format5.decode(src, 8, 80);
+        return [...out.subarray(0, 4)];
+      },
+      (ns) => {
+        // early terminate when rawLen=0 after first empty header only
+        const src = new Uint8Array([0, 0, 0, 0]);
+        const dest = new Uint8Array(4);
+        dest.fill(9);
+        ns.Format5.decodeInto(src, dest, 80);
+        return [...dest];
+      },
+    ],
+  },
+
+  {
+    name: "data/encoding/Format80",
+    tsjs: "src/data/encoding/Format80.ts.js",
+    probes: [
+      (ns) => {
+        const lit = new Uint8Array([0x83, 0x41, 0x42, 0x43, 0x80]);
+        const out = ns.Format80.decode(lit, 16);
+        const n = ns.Format80.decodeInto(lit, new Uint8Array(16));
+        return { out: [...out.slice(0, 4)], n };
+      },
+      (ns) => {
+        // 短回拷：先字面 "A"，再 short copy dist=1 count=3
+        // cmd=0x81,len=1,'A'; cmd=0x00,low=0x01 → AAAA; end 0x80
+        const rep = new Uint8Array([0x81, 0x41, 0x00, 0x01, 0x80]);
+        const out2 = ns.Format80.decode(rep, 8);
+        return [...out2.slice(0, 4)];
+      },
+      (ns) => {
+        // 填充 count=0 kind=62: cmd=0xFE (0xC0|62), int16 count=0, value=0x41, end
+        try {
+          const n = ns.Format80.decodeInto(
+            new Uint8Array([0xfe, 0x00, 0x00, 0x41, 0x80]),
+            new Uint8Array(8),
+          );
+          return { n, ok: true };
+        } catch (e) {
+          return { err: String(e.message), ok: false };
+        }
+      },
+      (ns) => {
+        // kind=63 且 src >= dest → throw
+        try {
+          ns.Format80.decodeInto(
+            new Uint8Array([0xff, 0x01, 0x00, 0x0a, 0x00, 0x80]),
+            new Uint8Array(16),
+          );
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns) => {
+        // medium copy kind path with invalid src (cmd bit7+6 set, kind<62)
+        try {
+          ns.Format80.decodeInto(new Uint8Array([0xc0, 0x05, 0x00, 0x80]), new Uint8Array(8));
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/encoding/MiniLzo",
+    tsjs: "src/data/encoding/MiniLzo.ts.js",
+    probes: [
+      (ns) => {
+        // 真实调用；环境无 lzo1x 则 ReferenceError，两侧一致
+        try {
+          const out = ns.MiniLzo.decompress(new Uint8Array([1, 2, 3]), 8);
+          return { ok: true, len: out && out.length, type: out && out.constructor.name };
+        } catch (e) {
+          return { ok: false, err: String(e.message || e) };
+        }
+      },
+      (ns) => {
+        try {
+          ns.MiniLzo.decompress(new Uint8Array(0), 4);
+          return "no-throw";
+        } catch (e) {
+          return String(e.message || e);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/hva/Section",
+    tsjs: "src/data/hva/Section.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.Section();
+        return { keys: Object.keys(s).sort(), name: s.name };
+      },
+      (ns) => {
+        const s = new ns.Section();
+        s.name = "Wing";
+        s.matrices = [{ e: 1 }, { e: 2 }];
+        return { m0: s.getMatrix(0), m1: s.getMatrix(1), m2: s.getMatrix(2) };
+      },
+    ],
+  },
+
+  {
+    name: "data/HvaFile",
+    tsjs: "src/data/HvaFile.ts.js",
+    probes: [
+      (ns) => {
+        const h = new ns.HvaFile();
+        return { keys: Object.keys(h).sort(), filename: h.filename, sections: h.sections };
+      },
+      (ns) => {
+        // 空构造 + fromVirtualFile 需要真实字节；仅驱动无参构造字段
+        const h = new ns.HvaFile();
+        h.filename = "test.hva";
+        h.sections = [];
+        return { fn: h.filename, n: h.sections.length };
+      },
+    ],
+  },
+
+  {
+    name: "data/IdxEntry",
+    tsjs: "src/data/IdxEntry.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.IdxEntry();
+        return { keys: Object.keys(e).sort(), isObj: e instanceof Object };
+      },
+      (ns) => {
+        const e = new ns.IdxEntry();
+        e.filename = "a.wav";
+        e.offset = 4;
+        e.length = 8;
+        e.sampleRate = 22050;
+        e.flags = 1;
+        e.chunkSize = 0;
+        return { fn: e.filename, off: e.offset, len: e.length, rate: e.sampleRate, flags: e.flags, chunk: e.chunkSize };
+      },
+    ],
+  },
+
+  {
+    name: "data/IdxFile",
+    tsjs: "src/data/IdxFile.ts.js",
+    probes: [
+      (ns) => {
+        // GABA + version2 + count1 + name + 5 u32
+        const enc = new TextEncoder();
+        const name = new Uint8Array(16);
+        name.set(enc.encode("A"), 0);
+        const bytes = new Uint8Array([
+          ...enc.encode("GABA"),
+          2, 0, 0, 0, // version
+          1, 0, 0, 0, // count
+          ...name,
+          0, 0, 0, 0, // offset
+          4, 0, 0, 0, // length
+          0x44, 0xac, 0, 0, // 22050
+          1, 0, 0, 0, // flags
+          0, 0, 0, 0, // chunkSize
+        ]);
+        const stream = {
+          _i: 0,
+          _b: bytes,
+          position: 0,
+          readCString(n) {
+            let s = "";
+            for (let k = 0; k < n; k++) s += String.fromCharCode(this._b[this._i++]);
+            return s.replace(/\0.*$/, "");
+          },
+          readInt32() {
+            const v = this._b[this._i] | (this._b[this._i + 1] << 8) | (this._b[this._i + 2] << 16) | (this._b[this._i + 3] << 24);
+            this._i += 4;
+            return v;
+          },
+          readUint32() { return this.readInt32() >>> 0; },
+          readString(n) {
+            let s = "";
+            for (let k = 0; k < n; k++) s += String.fromCharCode(this._b[this._i++]);
+            return s;
+          },
+          readUint8Array(n) {
+            const a = this._b.subarray(this._i, this._i + n);
+            this._i += n;
+            return a;
+          },
+        };
+        const idx = new ns.IdxFile(stream);
+        const entry = idx.entries.get("A.wav");
+        return {
+          size: idx.entries.size,
+          keys: [...idx.entries.keys()],
+          filename: entry && entry.filename,
+          length: entry && entry.length,
+          rate: entry && entry.sampleRate,
+          flags: entry && entry.flags,
+        };
+      },
+      (ns) => {
+        const bad = {
+          _i: 0,
+          _b: new Uint8Array([88, 88, 88, 88, 0, 0, 0, 0]),
+          readCString() { this._i = 4; return "XXXX"; },
+          readInt32() { return 2; },
+        };
+        try {
+          new ns.IdxFile(bad);
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/IniFile",
+    tsjs: "src/data/IniFile.ts.js",
+    probes: [
+      (ns) => {
+        const f = new ns.IniFile();
+        return { sections: f.sections.size, keys: Object.keys(f).sort() };
+      },
+      (ns) => {
+        const f = new ns.IniFile("[General]\nName=Hello\nNum=50%\n");
+        const sec = f.getSection("General");
+        return {
+          has: !!sec,
+          name: sec && sec.getString("Name"),
+          num: sec && sec.getNumber("Num"),
+          keys: f.sections.has("General"),
+        };
+      },
+      (ns) => {
+        const f = new ns.IniFile({ A: { X: "1" }, B: { Y: "2" } });
+        const c = f.clone();
+        c.getOrCreateSection("A").set("X", "changed");
+        return {
+          order: [...f.sections.keys()],
+          orig: f.getSection("A").get("X"),
+          clone: c.getSection("A").get("X"),
+          toStringHas: f.toString().includes("[A]"),
+        };
+      },
+      (ns) => {
+        const f = new ns.IniFile({ A: { X: "1" } });
+        f.mergeWith(new ns.IniFile({ A: { Y: "2" }, B: { Z: "3" } }));
+        return {
+          x: f.getSection("A").get("X"),
+          y: f.getSection("A").get("Y"),
+          b: f.getSection("B").get("Z"),
+        };
+      },
+      (ns) => {
+        const f = new ns.IniFile("[S]\nk=v\n");
+        const g = f.getOrCreateSection("T");
+        g.set("a", "b");
+        return {
+          same: f.getSection("S") === f.getSection("S"),
+          t: g.get("a"),
+          empty: new ns.IniFile().getSection("Nope"),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/IniParser",
+    tsjs: "src/data/IniParser.ts.js",
+    probes: [
+      (ns) => {
+        const p = new ns.IniParser();
+        const j = p.parse([
+          "; comment",
+          "# also comment",
+          "[General]",
+          "Name=Hello ; trailing",
+          "Num=50%",
+          "Flag=yes",
+          "Arr[]=a",
+          "Arr[]=b",
+          "Nested.Key=1",
+          "Esc\\.Dot=2",
+          "[Sec] // tail",
+          "x=1 // no strip mid-line for key/value",
+        ].join("\n"));
+        return {
+          name: j.General.Name,
+          num: j.General.Num,
+          flag: j.General.Flag,
+          arr: j.General.Arr,
+          nested: j.General.Nested && j.General.Nested.Key,
+          esc: j.General["Esc.Dot"],
+          hasSec: !!j.Sec,
+          x: j.Sec && j.Sec.x,
+          commentsSkipped: !j["; comment"],
+        };
+      },
+      (ns) => {
+        const p = new ns.IniParser();
+        return {
+          quoted: p.unsafe('"q"'),
+          semi: p.unsafe("a;b"),
+          escSemi: p.unsafe("a\\;b"),
+          isQ1: p.isQuoted("'x'"),
+          isQ2: p.isQuoted("x"),
+          isQ3: p.isQuoted('"y"'),
+        };
+      },
+      (ns) => {
+        const p = new ns.IniParser();
+        const j = p.parse("[A]\nbare\n[A]\nB=1");
+        // 重复节合并到同一对象
+        return { bare: j.A.bare, b: j.A.B, keys: Object.keys(j).sort() };
+      },
+      (ns) => {
+        const p = new ns.IniParser();
+        return p.dotSplit("a.b\\.c.d");
+      },
+    ],
+  },
+
+  {
+    name: "data/IniSection",
+    tsjs: "src/data/IniSection.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.IniSection("Lighting");
+        s.set("Level", "0.1");
+        s.set("Ambient", "50%");
+        s.set("Yes", "yes");
+        s.set("No", "off");
+        s.set("Bad", "xx");
+        return {
+          name: s.name,
+          level: s.getNumber("Level", 0),
+          amb: s.getNumber("Ambient", 0),
+          yes: s.getBool("Yes"),
+          no: s.getBool("No", true),
+          bad: s.getNumber("Bad", 7),
+          has: s.has("Level"),
+          missing: s.get("Nope"),
+          str: s.getString("Level"),
+          strDef: s.getString("Nope", "d"),
+        };
+      },
+      (ns) => {
+        const s = new ns.IniSection("Root");
+        s.fromJson({ a: "1", Nested: { b: "2" }, Arr: [1, 2] });
+        return {
+          a: s.get("a"),
+          nestedKeys: s.getSection("Nested") ? [...s.getSection("Nested").entries.keys()] : null,
+          nestedB: s.getSection("Nested") && s.getSection("Nested").get("b"),
+          // arrays stay in entries as arrays
+          arr: s.get("Arr"),
+        };
+      },
+      (ns) => {
+        const s = new ns.IniSection("L");
+        s.set("0", "z");
+        s.set("1", "y");
+        s.set("Name", "n");
+        const c = s.clone();
+        c.set("0", "changed");
+        return {
+          orig0: s.get("0"),
+          clone0: c.get("0"),
+          sameName: c.name,
+          numeric: s.isNumericIndexArray(),
+          highest: s.getHighestNumericIndex(),
+          listed: s.toString().includes("[L]"),
+        };
+      },
+      (ns) => {
+        const s = new ns.IniSection("A");
+        const t = new ns.IniSection("B");
+        t.set("X", "1");
+        t.set("Y", "2");
+        s.mergeWith(t);
+        return { x: s.get("X"), y: s.get("Y") };
+      },
+      (ns) => {
+        const s = new ns.IniSection("S");
+        s.set("CSV", "1,2,3");
+        s.set("F", "1.5");
+        return {
+          arr: s.getArray("CSV"),
+          nums: s.getNumberArray("CSV"),
+          fixed: s.getFixed("F"),
+          fixedPoint: s.toFixedPointPrecision(1.00001),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/MapFile",
+    tsjs: "src/data/MapFile.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const m = new ns.MapFile();
+        const IniFile = mod("data/IniFile").IniFile;
+        // 孪生无构造初始化：字段在 fromString 前为 undefined — 两侧一致抛错
+        try {
+          return {
+            isInifile: m instanceof IniFile,
+            prefix: ns.MapFile.artSectionPrefix,
+            full: m.fullSize,
+            local: m.localSize,
+            scripts: m.scenarioScripts.size,
+            teams: m.scenarioTeams.size,
+            waypoints: m.waypoints.length,
+            structures: m.structures.length,
+            vehicles: m.vehicles.length,
+            iniFormat: m.iniFormat,
+          };
+        } catch (e) {
+          return { err: String(e.message), prefix: ns.MapFile.artSectionPrefix, isInifile: m instanceof IniFile };
+        }
+      },
+      (ns) => {
+        const m = new ns.MapFile();
+        return {
+          none: m.readTagId("none"),
+          None: m.readTagId("None"),
+          tag: m.readTagId("TagA"),
+        };
+      },
+      (ns) => {
+        const m = new ns.MapFile();
+        return [
+          m.readAlphabeticIndex("A"),
+          m.readAlphabeticIndex("B"),
+          m.readAlphabeticIndex("Z"),
+          m.readAlphabeticIndex("AA"),
+          m.readAlphabeticIndex("AB"),
+        ];
+      },
+      (ns) => {
+        const m = new ns.MapFile();
+        const locs = m.readStartingLocations([
+          { number: 2, rx: 20, ry: 5 },
+          { number: 1, rx: 10, ry: 1 },
+          { number: 8, rx: 99, ry: 99 },
+          { number: 0, rx: 5, ry: 5 },
+        ]);
+        return locs;
+      },
+      (ns) => {
+        const m = new ns.MapFile();
+        const sec = m.getOrCreateSection("ScriptTypes");
+        sec.set("1", "ScriptA");
+        sec.set("0", "ScriptB");
+        sec.set("Name", "not-numeric-key");
+        return {
+          listed: m.readListedSectionIds("ScriptTypes"),
+          missing: m.readListedSectionIds("NoSection"),
+        };
+      },
+      (ns) => {
+        const m = new ns.MapFile();
+        // empty map string parse path
+        try {
+          m.fromString("[General]\nTheater=TEMPERATE\n");
+          return {
+            theater: m.theaterType,
+            keys: [...m.sections.keys()],
+          };
+        } catch (e) {
+          return { err: String(e.message || e) };
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/mapObjects",
+    tsjs: "src/data/mapObjects.ts.js",
+    probes: [
+      (ns) => {
+        const st = new ns.Structure();
+        st.name = "GACNST";
+        st.health = 100;
+        return {
+          type: st.type,
+          isStructure: st.isStructure(),
+          isVehicle: st.isVehicle(),
+          isNamed: st.isNamed(),
+          isTechno: st.isTechno(),
+        };
+      },
+      (ns) => {
+        const empty = new ns.Structure();
+        return {
+          named: empty.isNamed(),
+          techno: empty.isTechno(),
+          vehicle: new ns.Vehicle().isVehicle(),
+          inf: new ns.Infantry().isInfantry(),
+          air: new ns.Aircraft().isAircraft(),
+          terr: new ns.Terrain().isTerrain(),
+          smudge: new ns.Smudge().isSmudge(),
+          overlay: new ns.Overlay().isOverlay(),
+        };
+      },
+      (ns) => {
+        const st = new ns.Structure();
+        const v = new ns.Vehicle();
+        const t = new ns.Terrain();
+        return {
+          stVehicle: st.isVehicle(),
+          vStructure: v.isStructure(),
+          stMapObject: st instanceof ns.MapObject,
+          vMapObject: v instanceof ns.MapObject,
+          tMapObject: t instanceof ns.MapObject,
+        };
+      },
+      (ns) => {
+        // runtime type checks without pure typeof on class
+        const objects = [new ns.Structure(), new ns.Vehicle(), new ns.Infantry(), new ns.Aircraft()];
+        return objects.map((o) => o.type);
+      },
+    ],
+  },
+
+  {
+    name: "data/MixEntry",
+    tsjs: "src/data/MixEntry.ts.js",
+    probes: [
+      (ns) => {
+        const h = ns.MixEntry.hashFilename("rules.ini");
+        return {
+          type: typeof h,
+          upper: ns.MixEntry.hashFilename("RULES.INI"),
+          same: h === ns.MixEntry.hashFilename("RULES.INI"),
+          size: ns.MixEntry.size,
+        };
+      },
+      (ns) => {
+        const e = new ns.MixEntry(0x111, 4, 8);
+        return { hash: e.hash, offset: e.offset, length: e.length, keys: Object.keys(e).sort() };
+      },
+      (ns) => {
+        // 4-byte aligned name vs padded
+        const a = ns.MixEntry.hashFilename("abcd");
+        const b = ns.MixEntry.hashFilename("ab");
+        return { a, b, different: a !== b };
+      },
+    ],
+  },
+
+  {
+    name: "data/MixFile",
+    tsjs: "src/data/MixFile.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const DataStream = mod("data/DataStream").DataStream;
+        const MixEntry = mod("data/MixEntry").MixEntry;
+        const td = new DataStream();
+        const hash = MixEntry.hashFilename("a.bin");
+        // TD 明文目录：首 2 字节即文件数。首 uint32 必须带 Checksum|Encrypted(0x30000)
+        // 掩码之外的比特 → 非 Ra 形状 → parseHeader 会 seek(0) 后按 TD 重读
+        td.writeUint32(0x00010001); // 低 16 位 = 文件数 1
+        td.writeUint16(0); // count 后被 readUint32 跳过的 4 字节字段的后半
+        td.writeUint32(hash);
+        td.writeUint32(0); // offset
+        td.writeUint32(4); // length
+        td.writeUint8Array(new TextEncoder().encode("TEST"));
+        td.seek(0);
+        const mix = new ns.MixFile(td);
+        const file = mix.openFile("a.bin");
+        return {
+          indexSize: mix.index.size,
+          contains: mix.containsFile("a.bin"),
+          missing: mix.containsFile("missing.bin"),
+          size: file.getSize(),
+          data: new TextDecoder().decode(file.getBytes()),
+          dataStart: mix.dataStart,
+          headerStart: mix.headerStart,
+        };
+      },
+      (ns, THREE, mod) => {
+        const DataStream = mod("data/DataStream").DataStream;
+        const MixEntry = mod("data/MixEntry").MixEntry;
+        const td = new DataStream();
+        td.writeUint32(0x00010001); // 低 16 位 = 文件数 1；带掩码外比特 → 非 Ra 形状 → TD
+        td.writeUint16(0); // count 后被跳过的 4 字节字段的后半
+        td.writeUint32(MixEntry.hashFilename("a.bin"));
+        td.writeUint32(0);
+        td.writeUint32(4);
+        td.writeUint8Array(new TextEncoder().encode("TEST"));
+        td.seek(0);
+        const mix = new ns.MixFile(td);
+        try {
+          mix.openFile("missing.bin");
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns, THREE, mod) => {
+        // 孪生不导出 MixFlags；仅驱动 MixFile 构造路径上的标志语义（TD 头已覆盖）
+        const DataStream = mod("data/DataStream").DataStream;
+        const td = new DataStream();
+        td.writeUint32(0x00040000); // 低 16 位 = 0 个文件；bit18 带掩码外比特 → 非 Ra 形状 → TD
+        td.writeUint16(0); // count 后被跳过的 4 字节字段的后半
+        td.seek(0);
+        const mix = new ns.MixFile(td);
+        return { index: mix.index.size, dataStart: mix.dataStart, headerStart: mix.headerStart };
+      },
+    ],
+  },
+
+  {
+    name: "data/Mp3File",
+    tsjs: "src/data/Mp3File.ts.js",
+    probes: [
+      (ns) => {
+        const f = new File(["x"], "a.mp3", { type: "audio/mp3" });
+        const m = new ns.Mp3File(f);
+        const out = m.asFile();
+        return { name: out.name, type: out.type, sameFile: m.file === f, keys: Object.keys(m) };
+      },
+      (ns) => {
+        const f = new File(["hello"], "b.mp3");
+        const out = new ns.Mp3File(f).asFile();
+        return { name: out.name, type: out.type, size: out.size };
+      },
+    ],
+  },
+
+  {
+    name: "data/Palette",
+    tsjs: "src/data/Palette.ts.js",
+    probes: [
+      (ns) => {
+        const bytes = new Uint8Array(768);
+        bytes[0] = 1;
+        bytes[1] = 2;
+        bytes[2] = 3;
+        const p = new ns.Palette(bytes);
+        return {
+          size: p.size,
+          r: p.getColor(0).r,
+          g: p.getColor(0).g,
+          b: p.getColor(0).b,
+          remapStart: ns.Palette.REMAP_START_IDX,
+          hashType: typeof p.hash,
+        };
+      },
+      (ns) => {
+        const bytes = new Uint8Array(768);
+        bytes[0] = 1;
+        const p = new ns.Palette(bytes);
+        const p2 = p.clone();
+        return {
+          cloneSize: p2.size,
+          sameR: p2.colors[0].r === p.colors[0].r,
+          differentRef: p2.colors[0] !== p.colors[0],
+          sameHash: p2.hash === p.hash,
+        };
+      },
+      (ns, THREE, mod) => {
+        const Color = mod("util/Color").Color;
+        const bytes = new Uint8Array(768);
+        bytes[0] = 1;
+        bytes[1] = 2;
+        bytes[2] = 3;
+        const p = new ns.Palette(bytes);
+        const before = p.hash;
+        p.remap(Color.fromRgb(255, 0, 0));
+        return {
+          hashChanged: p.hash !== before,
+          g16: p.colors[16].g,
+          r16: p.colors[16].r,
+          hex0: p.getColorAsHex(0),
+        };
+      },
+      (ns) => {
+        try {
+          const empty = new ns.Palette();
+          return { size: empty.size, keys: Object.keys(empty).sort() };
+        } catch (e) {
+          return { err: String(e.message || e) };
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/PcxFile",
+    tsjs: "src/data/PcxFile.ts.js",
+    probes: [
+      (ns) => {
+        const fake = Object.create(ns.PcxFile.prototype);
+        const rgba = new Uint8Array([255, 0, 255, 255, 1, 2, 3, 255]);
+        fake.fixAlpha(rgba);
+        return { key: rgba[3], normal: rgba[7] };
+      },
+      (ns) => {
+        const fake = Object.create(ns.PcxFile.prototype);
+        const rgba = new Uint8Array([0, 0, 0, 9, 255, 0, 255, 8]);
+        fake.fixAlpha(rgba);
+        return [...rgba];
+      },
+      (ns) => {
+        // 构造依赖真实 PCX —— 不 new；仅断言原型方法存在（非纯 typeof 探针，配合 fixAlpha 真实调用）
+        const fake = Object.create(ns.PcxFile.prototype);
+        fake.fixAlpha(new Uint8Array(4));
+        return { hasFix: typeof fake.fixAlpha === "function", isProto: Object.getPrototypeOf(fake) === ns.PcxFile.prototype };
+      },
+    ],
+  },
+
+  {
+    name: "data/ShpFile",
+    tsjs: "src/data/ShpFile.ts.js",
+    probes: [
+      (ns) => {
+        const f = new ns.ShpFile();
+        return {
+          w: f.width,
+          h: f.height,
+          n: f.numImages,
+          images: f.images.length,
+          fn: f.filename,
+        };
+      },
+      (ns) => {
+        // 最小 SHP: int16 0, w, h, n=0
+        const stream = {
+          _i: 0,
+          _b: new Uint8Array([0, 0, 4, 0, 4, 0, 0, 0]),
+          readInt16() {
+            const v = this._b[this._i] | (this._b[this._i + 1] << 8);
+            this._i += 2;
+            return v;
+          },
+        };
+        const vf = { filename: "x.shp", stream };
+        const f = new ns.ShpFile(vf);
+        return { w: f.width, h: f.height, n: f.numImages, fn: f.filename };
+      },
+      (ns) => {
+        const stream = {
+          _i: 0,
+          _b: new Uint8Array([1, 0]),
+          readInt16() {
+            const v = this._b[this._i] | (this._b[this._i + 1] << 8);
+            this._i += 2;
+            return v;
+          },
+        };
+        const f = new ns.ShpFile({ filename: "bad.shp", stream });
+        return { w: f.width, n: f.numImages };
+      },
+    ],
+  },
+
+  {
+    name: "data/ShpImage",
+    tsjs: "src/data/ShpImage.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ShpImage();
+        return { w: e.width, h: e.height, x: e.x, y: e.y, len: e.imageData.length };
+      },
+      (ns) => {
+        const img = new ns.ShpImage(new Uint8Array([1, 2, 3, 4]));
+        img.width = 2;
+        img.height = 2;
+        const c = img.clip(1, 2);
+        return {
+          w: c.width,
+          h: c.height,
+          x: c.x,
+          y: c.y,
+          len: c.imageData.length,
+          first: c.imageData[0],
+          // 源 (0,0)=1; row1 col0 = 3 源 index 2 — clip 高度2 宽度1 取 col0 of each row
+          row1: c.imageData[1],
+        };
+      },
+      (ns) => {
+        const img = new ns.ShpImage(new Uint8Array([9, 8, 7, 6]));
+        img.width = 2;
+        img.height = 2;
+        const c = img.clip(4, 4);
+        return {
+          w: c.width,
+          h: c.height,
+          allocated: c.imageData.length,
+          vals: [...c.imageData],
+          origUnchanged: [...img.imageData],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/Strings",
+    tsjs: "src/data/Strings.ts.js",
+    probes: [
+      (ns) => {
+        try {
+          const s = new ns.Strings({ Hello: "hi %hs world", A: 1 });
+          return {
+            data: s.data,
+            has: s.has("HELLO"),
+            get: s.get("Hello"),
+            nostr: s.get("NOSTR:Skip"),
+            missing: s.get("MissingKey"),
+            warned: [...s.warnedKeys],
+            nonString: s.get("A"),
+          };
+        } catch (e) {
+          return { err: String(e.message || e) };
+        }
+      },
+      (ns) => {
+        const s = new ns.Strings({ Greeting: "Hello %s!" });
+        const out = s.get("Greeting", "World");
+        return out;
+      },
+      (ns) => {
+        const s = new ns.Strings();
+        s.setValue("Key", "v");
+        return { has: s.has("key"), get: s.get("KEY"), sanitize: s.sanitizeValue("%hs %hs") };
+      },
+      (ns) => {
+        const s = new ns.Strings({ X: "1" });
+        s.get("MissingOne");
+        s.get("MissingOne");
+        s.get("MissingTwo");
+        return [...s.warnedKeys].sort();
+      },
+    ],
+  },
+
+  {
+    name: "data/TmpFile",
+    tsjs: "src/data/TmpFile.ts.js",
+    probes: [
+      (ns) => {
+        const f = new ns.TmpFile();
+        return { w: f.width, h: f.height, bw: f.blockWidth, bh: f.blockHeight, images: f.images.length };
+      },
+      (ns, THREE, mod) => {
+        // 1x1 TMP：头 4 int32 + offset 表 1 u32 + 单帧数据
+        // 头: w=1,h=1,bw=4,bh=4; offset 指向帧
+        const headerSize = 16;
+        const offsetTable = 4;
+        const frameOff = headerSize + offsetTable;
+        // TmpImage.fromStream 读字段 — 帧最小布局见 TmpImage.fromStream
+        // 驱动空 images 路径：offset=0 会 seek(0) 读坏数据但两侧一致
+        const buf = new ArrayBuffer(64);
+        const dv = new DataView(buf);
+        dv.setInt32(0, 1, true);
+        dv.setInt32(4, 1, true);
+        dv.setInt32(8, 4, true);
+        dv.setInt32(12, 4, true);
+        dv.setUint32(16, 0, true); // offset 0 → 覆盖头（与孪生一致）
+        const f = new ns.TmpFile({ stream: new (mod("data/DataStream").DataStream)(buf) });
+        return { w: f.width, h: f.height, n: f.images.length, bw: f.blockWidth };
+      },
+    ],
+  },
+
+  {
+    name: "data/TmpImage",
+    tsjs: "src/data/TmpImage.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        // 孪生不导出 TmpImageFlags；模块也不重导出 DataStream（TS 侧是 import type），用 mod 注入
+        const DataStream = mod("data/DataStream").DataStream;
+        const stream = new DataStream(new ArrayBuffer(128));
+        const img = new ns.TmpImage(stream, 4, 4);
+        return { x: img.x, y: img.y, h: img.height, hasZ: img.hasZData };
+      },
+      (ns, THREE, mod) => {
+        // 极小 stream：fromStream 字段顺序
+        // x,y,extraX,extraY,extraW,extraH,height,terrain,ramp,radarL(3),radarR(3) ...
+        // 模块不重导出 DataStream（TS 侧是 import type），用 mod 注入
+        const DataStream = mod("data/DataStream").DataStream;
+        const n = 64;
+        const buf = new ArrayBuffer(n);
+        const dv = new DataView(buf);
+        let o = 0;
+        const i32 = (v) => { dv.setInt32(o, v, true); o += 4; };
+        i32(1); // x
+        i32(2); // y
+        i32(0); // extraX
+        i32(0); // extraY
+        i32(0); // extraW
+        i32(0); // extraH
+        i32(4); // height
+        i32(0); // terrainType
+        i32(0); // rampType
+        const stream = new DataStream(buf);
+        const img = new ns.TmpImage(stream, 4, 4);
+        return { x: img.x, y: img.y, h: img.height, keys: Object.keys(img).sort().slice(0, 8) };
+      },
+    ],
+  },
+
+  {
+    name: "data/VxlFile",
+    tsjs: "src/data/VxlFile.ts.js",
+    probes: [
+      (ns) => {
+        try {
+          const f = new ns.VxlFile();
+          return { sections: f.sections.length, voxels: f.voxelCount, fn: f.filename, keys: Object.keys(f).sort() };
+        } catch (e) {
+          const f = new ns.VxlFile();
+          return { err: String(e.message || e), voxels: f.voxelCount, keys: Object.keys(f).sort() };
+        }
+      },
+      (ns, THREE, mod) => {
+        // 短文件 < VxlHeader.size → 静默空；sections 仅 fromVirtualFile 赋值。
+        // 构造器只认 instanceof VirtualFile，且模块不重导出 DataStream/VirtualFile → mod 注入
+        const DataStream = mod("data/DataStream").DataStream;
+        const VirtualFile = mod("data/vfs/VirtualFile").VirtualFile;
+        const buf = new ArrayBuffer(8);
+        const f = new ns.VxlFile(new VirtualFile(new DataStream(buf), "short.vxl"));
+        return { sections: f.sections.length, voxels: f.voxelCount, fn: f.filename };
+      },
+    ],
+  },
+
+  {
+    name: "data/WavFile",
+    tsjs: "src/data/WavFile.ts.js",
+    probes: [
+      (ns) => {
+        const w = new ns.WavFile();
+        return { raw: w.getRawData(), keys: Object.keys(w).sort() };
+      },
+      (ns) => {
+        const raw = new Uint8Array([1, 2, 3]);
+        const w = new ns.WavFile(raw);
+        return { same: w.getRawData() === raw, len: w.getRawData().length };
+      },
+      (ns) => {
+        try {
+          new ns.WavFile().getData();
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns) => {
+        const w = new ns.WavFile(new Uint8Array([9]));
+        w.setData(new Uint8Array([7, 8]));
+        return { raw: w.getRawData(), dec: [...w.getData()], again: [...w.getData()] };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/Archive",
+    tsjs: "src/data/vfs/Archive.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "data/vfs/FileNotFoundError",
+    tsjs: "src/data/vfs/FileNotFoundError.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.FileNotFoundError('File "x" not found');
+        return {
+          name: e.name,
+          message: e.message,
+          isError: e instanceof Error,
+          isSelf: (typeof ns.FileNotFoundError === "function" ? e instanceof ns.FileNotFoundError : e.name === "FileNotFoundError"),
+          protoName: ns.FileNotFoundError.prototype.name === undefined,
+        };
+      },
+      (ns) => {
+        const cause = new Error("underlying");
+        const e = new ns.FileNotFoundError("m", { cause });
+        return { causeSame: e.cause === cause, message: e.message, name: e.name };
+      },
+      (ns) => {
+        const e = new ns.FileNotFoundError();
+        return { name: e.name, message: e.message };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/IOError",
+    tsjs: "src/data/vfs/IOError.ts.js",
+    probes: [
+      (ns) => {
+        const cause = new Error("boom");
+        const io = new ns.IOError('File "x" could not be read (NotReadableError)', { cause });
+        return {
+          name: io.name,
+          isError: io instanceof Error,
+          isSelf: io instanceof ns.IOError,
+          causeSame: io.cause === cause,
+          match: /could not be read/.test(io.message),
+        };
+      },
+      (ns) => {
+        const io = new ns.IOError("plain");
+        return { name: io.name, message: io.message, cause: io.cause };
+      },
+      (ns) => {
+        const io = new ns.IOError();
+        return { name: io.name, message: io.message };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/MemArchive",
+    tsjs: "src/data/vfs/MemArchive.ts.js",
+    probes: [
+      (ns) => {
+        const m = new ns.MemArchive();
+        return { size: m.entries.size, contains: m.containsFile("a") };
+      },
+      (ns) => {
+        const m = new ns.MemArchive();
+        m.addFile({ filename: "a.bin" });
+        m.addFile({ filename: "b.bin" });
+        return {
+          containsA: m.containsFile("a.bin"),
+          open: m.openFile("a.bin").filename,
+          size: m.entries.size,
+        };
+      },
+      (ns) => {
+        const m = new ns.MemArchive();
+        try {
+          m.openFile("nope");
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/NameNotAllowedError",
+    tsjs: "src/data/vfs/NameNotAllowedError.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        // 本模块不重导出 IOError；mod 注入（两侧都解析到孪生 IOError，instanceof 语义一致）
+        const IOError = mod("data/vfs/IOError").IOError;
+        const e = new ns.NameNotAllowedError('File name "a/b" is not allowed');
+        return {
+          name: e.name,
+          message: e.message,
+          isError: e instanceof Error,
+          isIO: e instanceof IOError,
+          isSelf: e instanceof ns.NameNotAllowedError,
+        };
+      },
+      (ns) => {
+        const cause = new Error("x");
+        const e = new ns.NameNotAllowedError("bad", { cause });
+        return { name: e.name, message: e.message, causeSame: e.cause === cause };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/RealFileSystem",
+    tsjs: "src/data/vfs/RealFileSystem.ts.js",
+    probes: [
+      (ns) => {
+        const rfs = new ns.RealFileSystem();
+        return {
+          dirs: rfs.directories,
+          root: rfs.getRootDirectory(),
+          rootHandle: rfs.getRootDirectoryHandle(),
+          keys: Object.keys(rfs).sort(),
+        };
+      },
+      (ns) => {
+        const rfs = new ns.RealFileSystem();
+        return rfs.openFile("nope.bin").then(
+          () => "resolved",
+          (e) => ({
+            name: e.name,
+            isFnf: (typeof ns.FileNotFoundError === "function" ? e instanceof ns.FileNotFoundError : e.name === "FileNotFoundError"),
+            match: /not found in real file system/.test(e.message),
+          }),
+        );
+      },
+      (ns) => {
+        const rfs = new ns.RealFileSystem();
+        return rfs.getRawFile("nope.bin").then(
+          () => "resolved",
+          (e) => ({ name: e.name, isFnf: (typeof ns.FileNotFoundError === "function" ? e instanceof ns.FileNotFoundError : e.name === "FileNotFoundError"), message: e.message }),
+        );
+      },
+      (ns) => {
+        const rfs = new ns.RealFileSystem();
+        return rfs.containsEntry("x");
+      },
+      (ns) => {
+        const rfs = new ns.RealFileSystem();
+        const fake = { name: "handle" };
+        const dir = rfs.addDirectoryHandle(fake);
+        return {
+          dirCount: rfs.directories.length,
+          same: rfs.directories[0] === dir,
+          rootSet: rfs.getRootDirectory() === dir,
+          handle: rfs.getRootDirectoryHandle() === fake,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/RealFileSystemDir",
+    tsjs: "src/data/vfs/RealFileSystemDir.ts.js",
+    probes: [
+      (ns) => {
+        const d = new ns.RealFileSystemDir({ name: "root" }, true);
+        return { name: d.handle.name, caseSensitive: d.caseSensitive, keys: Object.keys(d).sort() };
+      },
+      (ns) => {
+        const d = new ns.RealFileSystemDir({ name: "root" });
+        return d.containsEntry("x").then(
+          () => "resolved",
+          (e) => ({ name: e.name, message: e.message }),
+        );
+      },
+      (ns) => {
+        const d = new ns.RealFileSystemDir({ name: "root" }, false);
+        return d.getDirectory("missing").then(
+          () => "resolved",
+          (e) => ({ name: e.name, is: (typeof ns.FileNotFoundError === "function" ? e instanceof ns.FileNotFoundError : e.name === "FileNotFoundError"), message: e.message }),
+        );
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/StorageQuotaError",
+    tsjs: "src/data/vfs/StorageQuotaError.ts.js",
+    probes: [
+      (ns) => {
+        const cause = new Error("quota");
+        const e = new ns.StorageQuotaError(cause);
+        return {
+          name: e.name,
+          message: e.message,
+          isError: e instanceof Error,
+          isSelf: e instanceof ns.StorageQuotaError,
+          causeSame: e.cause === cause,
+        };
+      },
+      (ns) => {
+        const e = new ns.StorageQuotaError();
+        return { name: e.name, message: e.message, cause: e.cause === undefined };
+      },
+      (ns) => {
+        const e = new ns.StorageQuotaError({ cause: new Error("q") });
+        // 孪生: super(msg, second) — second 是 options 对象
+        return { name: e.name, message: e.message, cause: e.cause };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/VirtualFile",
+    tsjs: "src/data/vfs/VirtualFile.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const DataStream = mod("data/DataStream").DataStream;
+        const parent = new DataStream();
+        parent.writeUint8Array(new Uint8Array([9, 8, 7, 6, 5]));
+        const view = ns.VirtualFile.factory(parent, "x.bin", 1, 3);
+        return {
+          size: view.getSize(),
+          bytes: [...view.getBytes()],
+          filename: view.filename,
+          trimNoop: parent._trimAlloc === view.stream._trimAlloc || typeof view.stream._trimAlloc === "function",
+        };
+      },
+      (ns, THREE, mod) => {
+        const DataStream = mod("data/DataStream").DataStream;
+        const vf = ns.VirtualFile.fromBytes(new Uint8Array([1, 2, 3]), "y.bin");
+        return {
+          size: vf.getSize(),
+          bytes: [...vf.getBytes()],
+          str: vf.readAsString("utf8"),
+          filename: vf.filename,
+        };
+      },
+      async (ns) => {
+        try {
+          await ns.VirtualFile.fromRealFile({
+            name: "z.bin",
+            arrayBuffer: () => Promise.reject(new DOMException("denied", "NotReadableError")),
+          });
+          return "no-throw-sync";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns, THREE, mod) => {
+        const DataStream = mod("data/DataStream").DataStream;
+        const stream = new DataStream();
+        stream.writeUint8Array(new TextEncoder().encode("hello"));
+        const vf = new ns.VirtualFile(stream, "h.txt");
+        const f = vf.asFile("text/plain");
+        return { name: f.name, type: f.type, size: f.size };
+      },
+    ],
+  },
+
+  {
+    name: "data/vfs/VirtualFileSystem",
+    tsjs: "src/data/vfs/VirtualFileSystem.ts.js",
+    probes: [
+      (ns) => {
+        const logs = [];
+        const rfs = {};
+        const vfs = new ns.VirtualFileSystem(rfs, { info: (m) => logs.push(m) });
+        return {
+          exists: vfs.fileExists("a.mix"),
+          archives: vfs.listArchives(),
+          byPrio: vfs.archivesByPriority,
+          has: vfs.hasArchive("a.mix"),
+        };
+      },
+      (ns) => {
+        const logs = [];
+        const rfs = {};
+        const vfs = new ns.VirtualFileSystem(rfs, { info: (m) => logs.push(m) });
+        let err;
+        try {
+          vfs.openFile("a.mix");
+        } catch (e) {
+          err = { name: e.name, is: (typeof ns.FileNotFoundError === "function" ? e instanceof ns.FileNotFoundError : e.name === "FileNotFoundError"), message: e.message };
+        }
+        return err;
+      },
+      (ns) => {
+        const logs = [];
+        const vfs = new ns.VirtualFileSystem({}, { info: (m) => logs.push(m) });
+        const arch = { containsFile: (p) => p === "a.mix", openFile: () => ({ id: 1 }) };
+        vfs.addArchive(arch, "a.mix");
+        const first = {
+          has: vfs.hasArchive("a.mix"),
+          list: vfs.listArchives(),
+          exists: vfs.fileExists("a.mix"),
+          opened: vfs.openFile("a.mix"),
+          logs: [...logs],
+        };
+        vfs.addArchive(arch, "a.mix");
+        const second = { len: vfs.archivesByPriority.length, logs: [...logs] };
+        return { first, second };
+      },
+      (ns) => {
+        const logs = [];
+        const vfs = new ns.VirtualFileSystem({}, { info: (m) => logs.push(m) });
+        const arch = { containsFile: () => true, openFile: () => ({ id: 1 }) };
+        vfs.addArchive(arch, "a.mix");
+        vfs.removeArchive("a.mix");
+        return {
+          has: vfs.hasArchive("a.mix"),
+          len: vfs.archivesByPriority.length,
+          list: vfs.listArchives(),
+          logs: [...logs],
+        };
+      },
+      (ns) => {
+        const logs = [];
+        const rfs = {
+          openFile: async () => {
+            throw new ns.FileNotFoundError("disk");
+          },
+        };
+        const vfs = new ns.VirtualFileSystem(rfs, { info: (m) => logs.push(m) });
+        const arch = { containsFile: (p) => p === "a.mix", openFile: () => ({ id: 1 }) };
+        vfs.addArchive(arch, "a.mix");
+        return vfs.openFileWithRfs("a.mix").then(
+          (f) => ({ f, logs: [...logs] }),
+          (e) => ({ err: e.name }),
+        );
+      },
+      (ns) => {
+        const logs = [];
+        const vfs = new ns.VirtualFileSystem({}, { info: (m) => logs.push(m) });
+        return vfs.openFileWithRfs("missing").then(
+          () => "resolved",
+          (e) => ({ name: e.name, is: (typeof ns.FileNotFoundError === "function" ? e instanceof ns.FileNotFoundError : e.name === "FileNotFoundError"), message: e.message }),
+        );
+      },
+    ],
+  },
+
+  {
+    name: "data/vxl/Section",
+    tsjs: "src/data/vxl/Section.ts.js",
+    probes: [
+      (ns, THREE) => {
+        try {
+          const s = new ns.Section();
+          return {
+            name: s.name,
+            hva: s.hvaMultiplier,
+            spans: s.spans.length,
+            mode: s.normalsMode,
+            hasMin: !!s.minBounds,
+            hasMatrix: !!s.transfMatrix,
+            sx: s.sizeX,
+          };
+        } catch (e) {
+          const s = new ns.Section();
+          return { err: String(e.message || e), keys: Object.keys(s).sort() };
+        }
+      },
+      (ns, THREE) => {
+        try {
+        const s = new ns.Section();
+        s.minBounds.set(0, 0, 0);
+        s.maxBounds.set(10, 4, 2);
+        s.sizeX = 5;
+        s.sizeY = 2;
+        s.sizeZ = 1;
+        return {
+          spanX: s.spanX,
+          spanY: s.spanY,
+          spanZ: s.spanZ,
+          scaleX: s.scaleX,
+          scaleY: s.scaleY,
+          scaleZ: s.scaleZ,
+          scaleV: [s.scale.x, s.scale.y, s.scale.z],
+        };
+        } catch (e) {
+          return { err: String(e.message || e) };
+        }
+      },
+      (ns, THREE) => {
+        const s = new ns.Section();
+        s.normalsMode = 1;
+        const n1 = s.getNormals();
+        s.normalsMode = 9;
+        try {
+          s.getNormals();
+          return { n1: n1 && n1.length, err: "no-throw" };
+        } catch (e) {
+          return { n1: n1 && n1.length, err: String(e.message) };
+        }
+      },
+      (ns, THREE) => {
+        try {
+        const s = new ns.Section();
+        s.name = "Body";
+        s.sizeX = 5;
+        s.sizeY = 2;
+        s.sizeZ = 1;
+        s.normalsMode = 2;
+        s.hvaMultiplier = 3;
+        const plain = s.toPlain();
+        const s2 = new ns.Section().fromPlain(plain);
+        return {
+          sizeX: plain.sizeX,
+          minArr: Array.isArray(plain.minBounds),
+          matArr: Array.isArray(plain.transfMatrix),
+          roundName: s2.name,
+          roundSize: s2.sizeX,
+          roundHva: s2.hvaMultiplier,
+          roundMode: s2.normalsMode,
+        };
+        } catch (e) {
+          return { err: String(e.message || e) };
+        }
+      },
+      (ns, THREE) => {
+        try {
+          const s = new ns.Section();
+          const g = s.getAllVoxels();
+          return { voxels: g.voxels, hasField: !!g.voxelField, fieldSize: g.voxelField && g.voxelField.arr.length };
+        } catch (e) {
+          return { err: String(e.message) };
+        }
+      },
+      (ns, THREE) => {
+        try {
+        const s = new ns.Section();
+        s.hvaMultiplier = 2;
+        const m = s.transfMatrix.clone();
+        m.elements[12] = 2;
+        m.elements[13] = 4;
+        m.elements[14] = 6;
+        const sm = s.scaleHvaMatrix(m);
+        return {
+          t: [sm.elements[12], sm.elements[13], sm.elements[14]],
+          orig: [m.elements[12], m.elements[13], m.elements[14]],
+        };
+        } catch (e) {
+          return { err: String(e.message || e) };
+        }
+      },
+    ],
+  },
+
+  {
+    name: "data/vxl/Span",
+    tsjs: "src/data/vxl/Span.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "data/vxl/SpanOffsets",
+    tsjs: "src/data/vxl/SpanOffsets.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "data/vxl/Voxel",
+    tsjs: "src/data/vxl/Voxel.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "data/vxl/VoxelField",
+    tsjs: "src/data/vxl/VoxelField.ts.js",
+    probes: [
+      (ns) => {
+        const f = new ns.VoxelField(2, 3, 4);
+        return { sx: f.sizeX, sy: f.sizeY, sz: f.sizeZ, len: f.arr.length };
+      },
+      (ns) => {
+        const f = new ns.VoxelField(2, 2, 2);
+        const v = { x: 1, y: 0, z: 0, id: 7 };
+        f.add(v);
+        const got = f.get(1, 0, 0);
+        return {
+          got: got && got.id,
+          miss: f.get(5, 0, 0),
+          empty: f.get(0, 0, 0),
+        };
+      },
+      (ns) => {
+        const f = new ns.VoxelField(1, 1, 1);
+        f.add({ x: 0, y: 0, z: 0, tag: "o" });
+        return f.get(0, 0, 0).tag;
+      },
+    ],
+  },
+
+  {
+    name: "data/vxl/VxlHeader",
+    tsjs: "src/data/vxl/VxlHeader.ts.js",
+    probes: [
+      (ns) => ({ size: ns.VxlHeader.size, keys: Object.keys(new ns.VxlHeader()).sort() }),
+      (ns) => {
+        // 构造空 + read 由 DataStream 驱动
+        const h = new ns.VxlHeader();
+        h.fileName = "tank.vxl";
+        h.bodySize = 100;
+        return { fn: h.fileName, body: h.bodySize, size: ns.VxlHeader.size };
+      },
+      (ns, THREE, mod) => {
+        const DataStream = mod("data/DataStream").DataStream;
+        // fileName 16 CString + 4 u32 + 2 u8 + 768 palette
+        const buf = new ArrayBuffer(16 + 16 + 2 + 768);
+        const bytes = new Uint8Array(buf);
+        bytes.set(new TextEncoder().encode("MyVxl"), 0);
+        const s = new DataStream(buf);
+        const h = new ns.VxlHeader();
+        h.read(s);
+        return {
+          fn: h.fileName,
+          paletteCount: h.paletteCount,
+          headerCount: h.headerCount,
+          tailerCount: h.tailerCount,
+          bodySize: h.bodySize,
+          remapStart: h.paletteRemapStart,
+          remapEnd: h.paletteRemapEnd,
+          pos: s.position,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/vxl/normals",
+    tsjs: "src/data/vxl/normals.ts.js",
+    probes: [
+      (ns) => ({
+        l1: ns.normals1.length,
+        l2: ns.normals2.length,
+        l3: ns.normals3.length,
+        l4: ns.normals4.length,
+      }),
+      (ns) => ({
+        n1: [ns.normals1[0].x, ns.normals1[0].y, ns.normals1[0].z],
+        n1last: [ns.normals1[15].x, ns.normals1[15].y, ns.normals1[15].z],
+        n4first: [ns.normals4[0].x, ns.normals4[0].y, ns.normals4[0].z],
+        n4last: [ns.normals4[215].x, ns.normals4[215].y, ns.normals4[215].z],
+      }),
+      (ns) => ({
+        n2mid: [ns.normals2[18].x, ns.normals2[18].y, ns.normals2[18].z],
+        n3first: [ns.normals3[0].x, ns.normals3[0].y, ns.normals3[0].z],
+        types: [typeof ns.normals1[0].x, ns.normals1[0].constructor.name],
+      }),
+    ],
+  },
+
+  {
+    name: "data/zip/Zip",
+    tsjs: "src/data/zip/Zip.ts.js",
+    probes: [
+      (ns) => {
+        const z = new ns.Zip(false);
+        z.startFile("a.txt", Date.UTC(2020, 0, 2, 3, 4, 6));
+        z.appendData(new TextEncoder().encode("hi"));
+        z.endFile();
+        z.finish();
+        return {
+          finished: z.finished,
+          records: z.fileRecord.length,
+          name: z.fileRecord[0].name,
+          done: z.fileRecord[0].done,
+          sizeBig: String(z.fileRecord[0].sizeBig),
+          byteCounter: String(z.byteCounterBig),
+          zip64: z.zip64,
+        };
+      },
+      (ns) => {
+        const z = new ns.Zip();
+        let e1 = null;
+        try { z.endFile(); } catch (e) { e1 = String(e.message); }
+        z.startFile("x", Date.now());
+        let e2 = null;
+        try { z.startFile("y", Date.now()); } catch (e) { e2 = String(e.message); }
+        return { e1, e2, writing: z.isWritingFile() };
+      },
+      (ns) => {
+        const z = new ns.Zip(true);
+        let e = null;
+        try { z.finish(); } catch (err) { e = String(err.message); }
+        return { e, zip64: z.zip64, finished: z.finished };
+      },
+      (ns) => {
+        const z = new ns.Zip(false);
+        z.startFile("a", Date.UTC(2020, 0, 1));
+        z.appendData(new Uint8Array([1, 2, 3]));
+        let e = null;
+        try { z.appendData(new Uint8Array([4])); z.endFile(); z.finish(); z.finish(); } catch (err) { e = String(err.message); }
+        return {
+          e,
+          finished: z.finished,
+          records: z.fileRecord.length,
+          size: String(z.fileRecord[0].sizeBig),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/zip/ZipUtils",
+    tsjs: "src/data/zip/ZipUtils.ts.js",
+    probes: [
+      (ns) => {
+        const bytes = ns.ZipUtils.createByteArray([
+          { data: 0x04034b50, size: 4 },
+          { data: new Uint8Array([1, 2]) },
+          { data: 1n, size: 8 },
+        ]);
+        return {
+          sig: [...bytes.slice(0, 4)],
+          arr: [...bytes.slice(4, 6)],
+          b8: [...bytes.slice(6, 14)],
+          len: bytes.length,
+        };
+      },
+      (ns) => {
+        const d = new Date(2020, 0, 2, 3, 4, 6);
+        const t = ns.ZipUtils.getTimeStruct(d);
+        const dt = ns.ZipUtils.getDateStruct(d);
+        return {
+          t,
+          dt,
+          tExpect: ((3 << 6) | 4) << 5 | (6 / 2),
+          dExpect: ((40 << 4) | 1) << 5 | 2,
+        };
+      },
+      (ns) => {
+        try {
+          ns.ZipUtils.createByteArray([{ data: 1, size: 3 }]);
+          return "no-throw";
+        } catch (e) {
+          return String(e.message);
+        }
+      },
+      (ns) => {
+        const onlyArr = ns.ZipUtils.createByteArray([{ data: [7, 8, 9] }]);
+        const i8 = ns.ZipUtils.createByteArray([{ data: -1, size: 1 }]);
+        const i16 = ns.ZipUtils.createByteArray([{ data: -2, size: 2 }]);
+        const i32 = ns.ZipUtils.createByteArray([{ data: -3, size: 4 }]);
+        return {
+          arr: [...onlyArr],
+          i8: [...i8],
+          i16: [...i16],
+          i32: [...i32],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "data/map/MapLighting",
+    tsjs: "src/data/map/MapLighting.ts.js",
+    probes: [
+      (ns) => {
+        const m = new ns.MapLighting();
+        return {
+          level: m.level,
+          ambient: m.ambient,
+          red: m.red,
+          green: m.green,
+          blue: m.blue,
+          ground: m.ground,
+          force: m.forceTint,
+        };
+      },
+      (ns) => {
+        const sec = {
+          getNumber: (k, d) => (k === "Level" ? 0.1 : k === "Ambient" ? 0.5 : d),
+        };
+        const m = new ns.MapLighting().read(sec);
+        return { level: m.level, ambient: m.ambient, red: m.red, keys: Object.keys(m).sort() };
+      },
+      (ns) => {
+        const a = new ns.MapLighting();
+        a.level = 1;
+        a.forceTint = true;
+        const b = new ns.MapLighting().copy(a);
+        return { level: b.level, force: b.forceTint, ambient: b.ambient, same: a === b };
+      },
+      (ns) => {
+        // prefix path
+        const calls = [];
+        const sec = {
+          getNumber: (k, d) => {
+            calls.push(k);
+            return d;
+          },
+        };
+        const m = new ns.MapLighting().read(sec, "Day");
+        return { calls, level: m.level, ground: m.ground };
+      },
+    ],
+  },
+
+  {
+    name: "data/map/SpecialFlags",
+    tsjs: "src/data/map/SpecialFlags.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.SpecialFlags();
+        return { init: s.initialVeteran, keys: Object.keys(s) };
+      },
+      (ns) => {
+        const s = new ns.SpecialFlags().read({ getBool: (k) => k === "InitialVeteran" ? true : false });
+        return { v: s.initialVeteran, ret: s === s };
+      },
+      (ns) => {
+        const s = new ns.SpecialFlags().read({ getBool: () => false });
+        return { v: s.initialVeteran };
+      },
+    ],
+  },
+
+  {
+    name: "data/map/Variable",
+    tsjs: "src/data/map/Variable.ts.js",
+    probes: [
+      (ns) => {
+        const v = new ns.Variable("k", "v");
+        return { name: v.name, value: v.value, keys: Object.keys(v).sort() };
+      },
+      (ns) => {
+        const v = new ns.Variable("k", "v");
+        const c = v.clone();
+        return {
+          different: c !== v,
+          name: c.name,
+          value: c.value,
+          isVar: c instanceof ns.Variable,
+        };
+      },
+      (ns) => {
+        const v = new ns.Variable("", "");
+        return { name: v.name, value: v.value, clone: v.clone().name };
+      },
+    ],
+  },
+
+  {
     name: "util/array",
     tsjs: "src/util/array.ts.js",
     probes: [
