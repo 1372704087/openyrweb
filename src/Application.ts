@@ -117,6 +117,7 @@ const CsfFile: any = (CsfFileNs as any).CsfFile;
 const Sentry: any = (SentryNs as any).Sentry;
 const NoWebAssemblyError: any = (NoWebAssemblyErrorNs as any).NoWebAssemblyError;
 const WolConfig: any = (WolConfigNs as any).WolConfig;
+const ClientType: any = (WolConfigNs as any).ClientType; // 模块级枚举，不是 WolConfig 类静态
 const ExtensionHost: any = (ExtensionHostNs as any).ExtensionHost;
 
 declare const window: any;
@@ -545,7 +546,7 @@ export class Application {
           if (((current = this), await time.sleep(1e3), 1 < params.length))
             throw new Error("Unsupported number of URL parameters");
           const connection = WolConnection.factory(AppLogger.get("net"));
-          const cfg = WolConfig.factory(WolConfig.ClientType.Cdral2);
+          const cfg = WolConfig.factory(ClientType.Cdral2);
           const wolService = new WolService(cfg, connection, this.getVersion(), this.locale);
           regions.load(await wolService.loadServerList(this.config.serversUrl));
           const preferred = this.localPrefs.getItem(StorageKey.PreferredServerRegion);

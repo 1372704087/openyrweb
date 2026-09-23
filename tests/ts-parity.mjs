@@ -24384,6 +24384,28 @@ const CONVERTED = [
           return "ctor:" + String(e && e.message).slice(0, 60);
         }
       },
+      (ns, THREE, mod) => {
+        // #/game 路径依赖的 WolConfig 形状（Application 曾写成 WolConfig.ClientType）：
+        // ClientType 必须在模块导出上；类上无此静态；factory(模块枚举) 可用。
+        // 源码级误用由 quality-audit 4d 扫描；此处锁住依赖模块形状。
+        const W = mod("network/WolConfig");
+        let factory = "no-factory";
+        try {
+          const cfg = W.WolConfig.factory(W.ClientType.Cdral2);
+          factory = {
+            clientType: cfg.clientType,
+            sku: cfg.getClientSku(),
+            channel: cfg.getClientChannelType(),
+          };
+        } catch (e) {
+          factory = { err: String(e && e.message).slice(0, 80) };
+        }
+        return {
+          hasModuleClientType: W.ClientType != null && W.ClientType.Cdral2 === 0,
+          classHasClientType: W.WolConfig.ClientType != null,
+          factory,
+        };
+      },
     ],
   },
 

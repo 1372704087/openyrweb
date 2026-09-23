@@ -16,6 +16,8 @@ const ShpBuilder = (ShpBuilderModule as any).ShpBuilder as any;
 const Coords = (CoordsModule as any).Coords as any;
 const IsoCoords = (IsoCoordsModule as any).IsoCoords as any;
 const MapSurface = (MapSurfaceModule as any).MapSurface as any;
+// MAGIC_OFFSET 是模块级导出（孪生 setter 收整模块 o.MAGIC_OFFSET），不是类静态
+const MAGIC_OFFSET: number = (MapSurfaceModule as any).MAGIC_OFFSET;
 
 /** SHP 文件最小形状。 */
 export interface ShpFileLike {
@@ -181,7 +183,7 @@ export class ShadowRenderable {
           t.updateMatrix());
       }
       (t.visible = this.visible && r >= 0 && this.frameHasShadowData(r),
-        (t.position.y += MapSurface.MAGIC_OFFSET / 5),
+        (t.position.y += MAGIC_OFFSET / 5),
         (t.material.polygonOffset = true),
         (t.material.polygonOffsetFactor = -1),
         (t.material.polygonOffsetUnits = -1),

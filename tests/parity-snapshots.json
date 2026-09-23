@@ -13339,6 +13339,15 @@
     "2": {
       "outcome": "Library \"THREE\" was not found on window ",
       "resPath": "res/"
+    },
+    "3": {
+      "hasModuleClientType": true,
+      "classHasClientType": false,
+      "factory": {
+        "clientType": 0,
+        "sku": 16640,
+        "channel": 45
+      }
     }
   },
   "BattleControlApi": {

@@ -231,6 +231,55 @@ if (orderBad.length) {
   console.log("  ✓ 两参及以上 factory 的 new this(...) 形参顺序与孪生一致");
 }
 
+// ---------------------------------------------------------------- 4d. 模块级 sibling 导出 ⇄ 类静态误用
+// 真实事故：WolConfig.ClientType / MapSurface.MAGIC_OFFSET / Vehicle.ROCKING_TICKS —
+// 宿主是「从命名空间解包或具名 import 的类」，sibling 却是模块级 export。
+// 跳过：export namespace 合并（GservError.Code）、整命名空间绑定（import * as / const X = XNs）。
+console.log("\n=== 4d. 模块级 sibling 导出 ⇄ 类静态误用 ===");
+const siblingMisuse = [];
+{
+  const classInfo = new Map();
+  for (const f of disk) {
+    const text = fs.readFileSync(path.join(ROOT, f), "utf8");
+    const classes = [...text.matchAll(/export\s+class\s+([A-Za-z0-9_]+)/g)].map((m) => m[1]);
+    const sibs = [...text.matchAll(/export\s+(?:enum|const|let|var)\s+([A-Za-z0-9_]+)/g)].map((m) => m[1]);
+    const nsNames = new Set([...text.matchAll(/export\s+namespace\s+([A-Za-z0-9_]+)/g)].map((m) => m[1]));
+    for (const cls of classes) {
+      if (nsNames.has(cls)) continue;
+      const idx = text.indexOf("export class " + cls);
+      if (idx < 0) continue;
+      const rest = text.slice(idx);
+      const nl = rest.slice(10).search(/\nexport\s/);
+      const body = nl >= 0 ? rest.slice(0, 10 + nl) : rest;
+      const nonStatic = sibs.filter(
+        (sib) => sib !== cls && !new RegExp(`static\\s+(?:readonly\\s+)?${sib}\\b`).test(body),
+      );
+      if (nonStatic.length) classInfo.set(cls, new Set(nonStatic));
+    }
+  }
+  for (const f of disk) {
+    const text = fs.readFileSync(path.join(ROOT, f), "utf8");
+    for (const [cls, nonStatic] of classInfo) {
+      const bindsClass =
+        new RegExp(`const\\s+${cls}\\b[^=;]*=\\s*\\(\\s*\\w+\\s+as\\s+any\\s*\\)\\.\\s*${cls}\\b`).test(text) ||
+        new RegExp(`import\\s*\\{[^}]*\\b${cls}\\b[^}]*\\}\\s*from`).test(text);
+      if (!bindsClass) continue;
+      for (const sib of nonStatic) {
+        if (new RegExp(`\\b${cls}\\.${sib}\\b`).test(text)) {
+          siblingMisuse.push(`${f}: ${cls}.${sib}（${sib} 是模块级导出，不是 ${cls} 静态）`);
+        }
+      }
+    }
+  }
+  const seen = new Set();
+  for (const m of siblingMisuse) {
+    if (seen.has(m)) continue;
+    seen.add(m);
+    fail(m);
+  }
+  if (!seen.size) console.log("  ✓ 未发现模块级导出被误挂到类（具名 import / 命名空间解包类）");
+}
+
 // ---------------------------------------------------------------- 5. 快照孤儿键
 console.log("\n=== 5. parity 快照孤儿键 ===");
 try {

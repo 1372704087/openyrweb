@@ -12,7 +12,7 @@
  */
 import { DeathType } from "game/gameobject/common/DeathType"; // 未转换（any-shim）
 import { ZoneType } from "game/gameobject/unit/ZoneType"; // 未转换（any-shim）
-import { Vehicle } from "game/gameobject/Vehicle"; // 未转换（any-shim）
+import { ROCKING_TICKS } from "game/gameobject/Vehicle"; // 模块级 export，非 Vehicle 类静态
 import * as NotifyAttackModule from "game/gameobject/trait/interface/NotifyAttack"; // 已转换
 import * as NotifyDestroyModule from "game/gameobject/trait/interface/NotifyDestroy"; // 已转换
 import * as NotifyHealModule from "game/gameobject/trait/interface/NotifyHeal"; // 已转换
@@ -24,12 +24,8 @@ import { GameSpeed } from "game/GameSpeed"; // 已转换
 import { RadialTileFinder } from "game/map/tileFinder/RadialTileFinder"; // 未转换（any-shim）
 import { AttackTask } from "game/gameobject/task/AttackTask"; // 未转换（any-shim）
 
-/** 寄生震荡后额外锁定帧。 */
-const ROCKING_TICKS_BASE = 10; // Vehicle.ROCKING_TICKS 近似；与孪生 m() 对齐用常量兜底
-// 实际孪生依赖 Vehicle.ROCKING_TICKS；此处从 Vehicle 取以保持行为。
-const ROCKING_TICKS = (Vehicle as any)?.ROCKING_TICKS ?? ROCKING_TICKS_BASE;
-
 function boardDelayTicks(): number {
+  // ROCKING_TICKS 来自 Vehicle 模块级 export（孪生 i.ROCKING_TICKS），不是类静态
   return ROCKING_TICKS + 2;
 }
 
