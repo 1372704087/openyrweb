@@ -21626,6 +21626,1536 @@ const CONVERTED = [
 
   // ---- network 鏃忥紙64 妯″潡锛?---
   {
+    name: "network/AccountRegFormData",
+    tsjs: "src/network/AccountRegFormData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/Logger",
+    tsjs: "src/network/Logger.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/WolAccount",
+    tsjs: "src/network/WolAccount.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/WolConnectOptions",
+    tsjs: "src/network/WolConnectOptions.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/chat/Message",
+    tsjs: "src/network/chat/Message.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/chat/SystemMessage",
+    tsjs: "src/network/chat/SystemMessage.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gameopt/PingInfo",
+    tsjs: "src/network/gameopt/PingInfo.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gameopt/WolGameTopic",
+    tsjs: "src/network/gameopt/WolGameTopic.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gameres/GameResClientInfo",
+    tsjs: "src/network/gameres/GameResClientInfo.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gameres/GameResGameInfo",
+    tsjs: "src/network/gameres/GameResGameInfo.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gamestate/PlayerActionPayload",
+    tsjs: "src/network/gamestate/PlayerActionPayload.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gamestate/PlayerConnectionInfo",
+    tsjs: "src/network/gamestate/PlayerConnectionInfo.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gserv/CreateGameInstanceParams",
+    tsjs: "src/network/gserv/CreateGameInstanceParams.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/ladder/LadderHead",
+    tsjs: "src/network/ladder/LadderHead.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/ladder/PagedResponse",
+    tsjs: "src/network/ladder/PagedResponse.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/ladder/PlayerLadderRung",
+    tsjs: "src/network/ladder/PlayerLadderRung.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/ladder/PlayerMatchHistoryEntry",
+    tsjs: "src/network/ladder/PlayerMatchHistoryEntry.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/ladder/PlayerProfile",
+    tsjs: "src/network/ladder/PlayerProfile.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort(),
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+
+  {
+    name: "network/gservCodes",
+    tsjs: "src/network/gservCodes.ts.js",
+    probes: [
+      (ns) => ({
+        RPL_CVERS_OK: ns.RPL_CVERS_OK,
+        RPL_LOGGED_IN: ns.RPL_LOGGED_IN,
+        RPL_INSTANCE_NONEXISTENT: ns.RPL_INSTANCE_NONEXISTENT,
+        RPL_GAME_OPTS: ns.RPL_GAME_OPTS,
+        RPL_LOAD_INFO: ns.RPL_LOAD_INFO,
+        RPL_GAME_START: ns.RPL_GAME_START,
+        RPL_GAME_DESYNC: ns.RPL_GAME_DESYNC,
+        RPL_TAUNT: ns.RPL_TAUNT,
+        RPL_PRIVMSG_NOT_ALLOWED: ns.RPL_PRIVMSG_NOT_ALLOWED,
+        RPL_BIN_PREFIX: ns.RPL_BIN_PREFIX,
+        RPL_BIN_GAME_ACTIONS: ns.RPL_BIN_GAME_ACTIONS,
+        RPL_BIN_MAP_DATA: ns.RPL_BIN_MAP_DATA,
+        REQ_BIN_PREFIX: ns.REQ_BIN_PREFIX,
+        REQ_BIN_GAME_ACTIONS: ns.REQ_BIN_GAME_ACTIONS,
+        REQ_BIN_GAME_STATE_HASH: ns.REQ_BIN_GAME_STATE_HASH,
+        REQ_BIN_PUT_MAP: ns.REQ_BIN_PUT_MAP,
+        REQ_BIN_GET_MAP: ns.REQ_BIN_GET_MAP,
+        keys: Object.keys(ns).sort(),
+        keyCount: Object.keys(ns).length,
+      }),
+    ],
+  },
+
+  {
+    name: "network/gservConfig",
+    tsjs: "src/network/gservConfig.ts.js",
+    probes: [
+      (ns) => ({
+        API_VERSION: ns.API_VERSION,
+        RECIPIENT_ALL: ns.RECIPIENT_ALL,
+        RECIPIENT_TEAM: ns.RECIPIENT_TEAM,
+        TURN_TIMEOUT_MILLIS: ns.TURN_TIMEOUT_MILLIS,
+        LAG_STATE_THRESH_MILLIS: ns.LAG_STATE_THRESH_MILLIS,
+        CON_INFO_THRESH_MILLIS: ns.CON_INFO_THRESH_MILLIS,
+        LAG_CHECK_INTERVAL_MILLIS: ns.LAG_CHECK_INTERVAL_MILLIS,
+        MAX_MAP_TRANSFER_BYTES: ns.MAX_MAP_TRANSFER_BYTES,
+        keys: Object.keys(ns).sort(),
+      }),
+    ],
+  },
+
+  {
+    name: "network/partyCodes",
+    tsjs: "src/network/partyCodes.ts.js",
+    probes: [
+      (ns) => ({
+        ERR_TARGET_IN_PARTY: ns.ERR_TARGET_IN_PARTY,
+        ERR_NO_INVITE: ns.ERR_NO_INVITE,
+        ERR_TARGET_SELF: ns.ERR_TARGET_SELF,
+        RPL_PARTY_INVITE: ns.RPL_PARTY_INVITE,
+        RPL_PARTY_FORMED: ns.RPL_PARTY_FORMED,
+        RPL_PARTY_LEFT: ns.RPL_PARTY_LEFT,
+        keys: Object.keys(ns).sort(),
+        keyCount: Object.keys(ns).length,
+      }),
+    ],
+  },
+
+  {
+    name: "network/qmCodes",
+    tsjs: "src/network/qmCodes.ts.js",
+    probes: [
+      (ns) => ({
+        REQ_MATCH: ns.REQ_MATCH,
+        REQ_STATS: ns.REQ_STATS,
+        REQ_LIST_QUEUES: ns.REQ_LIST_QUEUES,
+        RPL_WORKING: ns.RPL_WORKING,
+        RPL_MATCHED: ns.RPL_MATCHED,
+        RPL_REMOVED_FROM_QUEUE: ns.RPL_REMOVED_FROM_QUEUE,
+        TAG_COUNTRY: ns.TAG_COUNTRY,
+        TAG_MODHASH: ns.TAG_MODHASH,
+        keys: Object.keys(ns).sort(),
+        keyCount: Object.keys(ns).length,
+      }),
+    ],
+  },
+
+  {
+    name: "network/wolCodes",
+    tsjs: "src/network/wolCodes.ts.js",
+    probes: [
+      (ns) => ({
+        RPL_GET_LOCALE: ns.RPL_GET_LOCALE,
+        RPL_NAMREPLY: ns.RPL_NAMREPLY,
+        RPL_LOGIN_QUEUE: ns.RPL_LOGIN_QUEUE,
+        RPL_GAME_REPORT: ns.RPL_GAME_REPORT,
+        RPL_PARTY_UPDATE: ns.RPL_PARTY_UPDATE,
+        ERR_YOUREBANNEDCREEP: ns.ERR_YOUREBANNEDCREEP,
+        ERR_GAMEHASCLOSED: ns.ERR_GAMEHASCLOSED,
+        RPL_CVERS_OK: ns.RPL_CVERS_OK,
+        keys: Object.keys(ns).sort(),
+        keyCount: Object.keys(ns).length,
+      }),
+    ],
+  },
+
+  {
+    name: "network/GservError",
+    tsjs: "src/network/GservError.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.GservError("boom", ns.GservError.Code.InstanceNonExistent);
+        return {
+          name: e.name,
+          message: e.message,
+          code: e.code,
+          instanceofError: e instanceof Error,
+          instanceofSelf: e instanceof ns.GservError,
+        };
+      },
+      (ns) => ({
+        Unknown: ns.GservError.Code.Unknown,
+        OutdatedClient: ns.GservError.Code.OutdatedClient,
+        BadLogin: ns.GservError.Code.BadLogin,
+        InstanceNonExistent: ns.GservError.Code.InstanceNonExistent,
+        CreatedTooManyInstances: ns.GservError.Code.CreatedTooManyInstances,
+        reverse0: ns.GservError.Code[0],
+        reverse5: ns.GservError.Code[5],
+        reverse10: ns.GservError.Code[10],
+        keys: Object.keys(ns.GservError.Code).sort(),
+      }),
+      (ns) => ({
+        exportedCode: ns.Code === undefined ? "absent" : ns.Code[0],
+        hasClass: typeof ns.GservError === "function",
+        keys: Object.keys(ns).sort(),
+      }),
+    ],
+  },
+
+  {
+    name: "network/WolError",
+    tsjs: "src/network/WolError.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.WolError("bad pass", ns.WolError.Code.BadChannelPass, "server says no");
+        return {
+          name: e.name,
+          message: e.message,
+          code: e.code,
+          reason: e.reason,
+          isError: e instanceof Error,
+          isSelf: e instanceof ns.WolError,
+        };
+      },
+      (ns) => {
+        const e = new ns.WolError("no reason", ns.WolError.Code.ServerFull);
+        return { message: e.message, code: e.code, reason: e.reason };
+      },
+      (ns) => ({
+        OutdatedClient: ns.WolError.Code.OutdatedClient,
+        BadLogin: ns.WolError.Code.BadLogin,
+        GameHasClosed: ns.WolError.Code.GameHasClosed,
+        ServerFull: ns.WolError.Code.ServerFull,
+        reverse0: ns.WolError.Code[0],
+        reverse3: ns.WolError.Code[3],
+        reverse8: ns.WolError.Code[8],
+        keys: Object.keys(ns.WolError.Code).sort(),
+        modKeys: Object.keys(ns).sort(),
+      }),
+    ],
+  },
+
+  {
+    name: "network/IrcProtocol",
+    tsjs: "src/network/IrcProtocol.ts.js",
+    probes: [
+      (ns) => [
+        ns.IrcProtocol.escapeChannelName("my room"),
+        ns.IrcProtocol.escapeChannelName("a%b_c"),
+        ns.IrcProtocol.escapeChannelName("x\ny\rz\bz"),
+        ns.IrcProtocol.escapeChannelName(":,"),
+        ns.IrcProtocol.escapeChannelName("plain"),
+      ],
+      (ns) => [
+        ns.IrcProtocol.unescapeChannelName("my_room"),
+        ns.IrcProtocol.unescapeChannelName("a%%b%_c"),
+        ns.IrcProtocol.unescapeChannelName("%b%n%r%=%-"),
+        ns.IrcProtocol.unescapeChannelName(ns.IrcProtocol.escapeChannelName("#Hi There_100%")),
+        ns.IrcProtocol.unescapeChannelName(ns.IrcProtocol.escapeChannelName("Alice's game")),
+      ],
+      (ns) => ns.IrcProtocol.MAX_CHANNELNAME_LEN,
+    ],
+  },
+
+  {
+    name: "network/MapTransferService",
+    tsjs: "src/network/MapTransferService.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.MapTransferService({ getCredentials: () => ({ user: "u", pass: "p" }) });
+        const before = s.getUrl();
+        s.setUrl("https://example.test/map");
+        const after = s.getUrl();
+        const s2 = new ns.MapTransferService({ getCredentials: () => undefined });
+        s2.setUrl("https://example.test/map");
+        return Promise.all([
+          s.putMap(new ArrayBuffer(1), "m.map").then(() => "resolved", (e) => e.message),
+          s.getMap("m.map").then(() => "resolved", (e) => e.message),
+          s2.putMap(new ArrayBuffer(1), "m.map").then(() => "resolved", (e) => e.message),
+        ]).then(([putErr, getErr, credErr]) => ({ before, after, putErr, getErr, credErr }));
+      },
+      (ns) => {
+        const s = new ns.MapTransferService({ getCredentials: () => ({ user: "u", pass: "p" }) });
+        return s.putMap(new ArrayBuffer(1), "m.map").then(
+          () => "resolved",
+          (e) => e.message,
+        );
+      },
+    ],
+  },
+
+  {
+    name: "network/WGameResService",
+    tsjs: "src/network/WGameResService.ts.js",
+    probes: [
+      (ns) => {
+        const cfg = { getClientSku: () => 16640 };
+        const s = new ns.WGameResService({ getCredentials: () => undefined }, cfg);
+        s.setUrl("https://example.test/gs");
+        return Promise.all([
+          (() => {
+            const s0 = new ns.WGameResService({ getCredentials: () => undefined }, cfg);
+            return s0.sendGameResPacket(new Uint8Array([1, 2])).then(() => "resolved", (e) => e.message);
+          })(),
+          s.sendGameResPacket(new Uint8Array([1, 2])).then(() => "resolved", (e) => e.message),
+        ]).then(([urlErr, credErr]) => ({ url: s.getUrl(), urlErr, credErr }));
+      },
+    ],
+  },
+
+  {
+    name: "network/WolConfig",
+    tsjs: "src/network/WolConfig.ts.js",
+    probes: [
+      (ns) => [
+        ns.MATCH_BOT_NAME,
+        ns.MIN_USERNAME_LEN,
+        ns.MAX_USERNAME_LEN,
+        ns.MIN_PASS_LEN,
+        ns.MAX_PASS_LEN,
+        ns.MAX_MAP_TRANSFER_BYTES,
+      ],
+      (ns, THREE, mod) => {
+        // WolConfig 只导入不重导出 LadderQueueType → mod 注入
+        const LadderQueueType = mod("network/ladder/wladderConfig").LadderQueueType;
+        const c = ns.WolConfig.factory(ns.ClientType.Cdral2);
+        return {
+          clientType: c.clientType,
+          sku: c.getClientSku(),
+          channelType: c.getClientChannelType(),
+          globalPass: c.getGlobalChannelPass(),
+          bot: c.getQuickMatchBotName(),
+          chanIds: c.getAllQuickMatchChannelIds(),
+          solo: c.getQuickMatchChannelId(LadderQueueType.Solo1v1),
+          team: c.getQuickMatchChannelId(LadderQueueType.Team2v2),
+          reverse: ns.ClientType[0],
+        };
+      },
+      (ns) => ns.WolConfig.skuToClientType(16640),
+      (ns) => ns.WolConfig.skuToClientType(99999),
+      (ns) => {
+        try {
+          ns.WolConfig.factory(99);
+        } catch (e) {
+          return e.message;
+        }
+      },
+      (ns) => {
+        const c = ns.WolConfig.factory(ns.ClientType.Cdral2);
+        try {
+          c.getQuickMatchChannelId("nope");
+        } catch (e) {
+          return e.message;
+        }
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/WolConnection",
+    tsjs: "src/network/WolConnection.ts.js",
+    probes: [
+      (ns) => [ns.WolConnection.MAX_ROOM_DESC_LEN, ns.WolConnection.CHAN_OP_PREFIX],
+      (ns) => [ns.WolHasMapStatus.NoMap, ns.WolHasMapStatus.HasMap, ns.WolHasMapStatus.MapTransfer, ns.WolHasMapStatus[0], ns.WolHasMapStatus[1], ns.WolHasMapStatus[2]],
+      (ns) => {
+        const log = { info() {}, warn() {}, error() {} };
+        const conStub = {
+          onMessage: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, subscribeOnce() {}, unsubscribe() {} },
+          sendMessage() {},
+          sendCommand: async () => [],
+          isOpen: () => false,
+          onError: { subscribe() {}, unsubscribe() {} },
+        };
+        const w = new ns.WolConnection(conStub, log);
+        w.currentUser = "Alice";
+        return {
+          channels: w.getCurrentChannels().length,
+          gameName: w.makeGameChannelName(),
+          user: w.getCurrentUser(),
+          server: w.getServerName(),
+        };
+      },
+      (ns) => {
+        const log = { info() {}, warn() {}, error() {} };
+        const conStub = {
+          onMessage: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, subscribeOnce() {}, unsubscribe() {} },
+          sendMessage() {},
+          sendCommand: async () => [],
+          isOpen: () => false,
+          onError: { subscribe() {}, unsubscribe() {} },
+        };
+        const w = new ns.WolConnection(conStub, log);
+        return w.parseNamReply({
+          raw: ":server 353 u = #chan :@Bob,Carol,42,1",
+          code: 353,
+          params: ["u", "=", "#chan", "@Bob,Carol,42,1"],
+          time: 0,
+        });
+      },
+    ],
+  },
+
+  {
+    name: "network/WolGameReport",
+    tsjs: "src/network/WolGameReport.ts.js",
+    probes: [
+      (ns) => [ns.WolGameReportResult.Win, ns.WolGameReportResult.Loss, ns.WolGameReportResult.Draw, ns.WolGameReportResult[0], ns.WolGameReportResult[1], ns.WolGameReportResult[2]],
+      (ns) => {
+        const json = JSON.stringify({ gameId: "G1", duration: 42, players: [{ name: "A", resultType: 0 }] });
+        const b64 =
+          typeof btoa !== "undefined"
+            ? btoa(json.split("").map((c) => String.fromCharCode(c.charCodeAt(0))).join(""))
+            : Buffer.from(json, "binary").toString("base64");
+        const r = new ns.WolGameReport(b64);
+        return { gameId: r.gameId, duration: r.duration, players: r.players };
+      },
+    ],
+  },
+
+  {
+    name: "network/WolLocale",
+    tsjs: "src/network/WolLocale.ts.js",
+    probes: [
+      (ns) => ({
+        Unknown: ns.WolLocale.Unknown,
+        Usa: ns.WolLocale.Usa,
+        China: ns.WolLocale.China,
+        Turkey: ns.WolLocale.Turkey,
+        reverse0: ns.WolLocale[0],
+        reverse21: ns.WolLocale[21],
+        reverse37: ns.WolLocale[37],
+        keyCount: Object.keys(ns.WolLocale).length / 2,
+        mapSize: ns.localeCodeMap.size,
+        zhCN: ns.localeCodeMap.get("zh-CN"),
+        zhCNName: ns.WolLocale[ns.localeCodeMap.get("zh-CN")],
+        enUS: ns.localeCodeMap.get("en-US"),
+        keys: Object.keys(ns).sort(),
+      }),
+    ],
+  },
+
+  {
+    name: "network/WolService",
+    tsjs: "src/network/WolService.ts.js",
+    probes: [
+      (ns) => {
+        const stubCon = {
+          isOpen: () => false,
+          onGameReport: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, unsubscribe() {} },
+          close() {},
+          leaveAllChannels() {},
+        };
+        const stubCfg = { getClientSku: () => 16640 };
+        const s = new ns.WolService(stubCfg, stubCon, "1.0.6", "en-US");
+        return {
+          min: ns.WolService.MIN_RECONNECT_MILLIS,
+          max: ns.WolService.MAX_RECONNECT_MILLIS,
+          connected: s.isConnected(),
+          creds: s.getCredentials(),
+          m1: s.matchVersions("1.0.6", "1.0.6"),
+          m2: s.matchVersions("1.0.6", "1.0.10"),
+          m3: s.matchVersions("1.0.6-rc1", "1.0.5"),
+          m4: s.matchVersions("1.1.0", "1.0.9"),
+          auto: s.autoReconnect,
+          pending: s.pendingReconnect,
+          ignore: s.ignoreLastWolClose,
+        };
+      },
+      (ns) => {
+        const stubCon = {
+          isOpen: () => false,
+          onGameReport: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, unsubscribe() {} },
+          close() {},
+          leaveAllChannels() {},
+        };
+        const s = new ns.WolService({ getClientSku: () => 1 }, stubCon, "1.0.6", undefined);
+        return s.validateGameVersion({ gameVersion: "9.9.9" }).then(
+          () => "ok",
+          (e) => ({ message: e.message, code: e.code }),
+        );
+      },
+      (ns) => {
+        const stubCon = {
+          isOpen: () => false,
+          onGameReport: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, unsubscribe() {} },
+          close() {},
+          leaveAllChannels() {},
+        };
+        const s = new ns.WolService({ getClientSku: () => 1 }, stubCon, "1.0.6", undefined);
+        return s.validateGameVersion({ gameVersion: "1.0.6" }).then(
+          () => "ok",
+          (e) => e.message,
+        );
+      },
+    ],
+  },
+
+  {
+    name: "network/chat/ChatMessage",
+    tsjs: "src/network/chat/ChatMessage.ts.js",
+    probes: [
+      (ns) => [
+        ns.ChatRecipientType.Channel,
+        ns.ChatRecipientType.Page,
+        ns.ChatRecipientType.Whisper,
+        ns.ChatRecipientType[0],
+        ns.ChatRecipientType[1],
+        ns.ChatRecipientType[2],
+      ],
+      (ns) => Object.keys(ns.ChatRecipientType).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameres/GameResPlayerInfo",
+    tsjs: "src/network/gameres/GameResPlayerInfo.ts.js",
+    probes: [
+      (ns) => {
+        const p = new ns.GameResPlayerInfo();
+        p.name = "Bob";
+        p.unitsBuilt = 3;
+        return {
+          ctor: p instanceof ns.GameResPlayerInfo,
+          name: p.name,
+          units: p.unitsBuilt,
+          lost: p.lostConnection,
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/ActionSerializer",
+    tsjs: "src/network/gamestate/ActionSerializer.ts.js",
+    probes: [
+      (ns) => {
+        const ser = new ns.ActionSerializer();
+        const action = { actionType: 7, serialize: () => new Uint8Array([1, 2, 3]) };
+        const p = ser.getActionPayload(action);
+        return { id: p.id, params: Array.from(p.params) };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/replay/ReplayEventFactory",
+    tsjs: "src/network/gamestate/replay/ReplayEventFactory.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        // 工厂只导入不重导出 ReplayEventType → mod 注入
+        const ReplayEventType = mod("network/gamestate/replay/ReplayEventType").ReplayEventType;
+        const parser = { parseAllPlayerActions: () => new Map([[0, []]]) };
+        const serializer = { serializeAllPlayerActions: () => {} };
+        const f = new ns.ReplayEventFactory(parser, serializer);
+        const ta = f.create(ReplayEventType.TurnActions, 10);
+        const cm = f.create(ReplayEventType.ChatMessage, 11);
+        const taunt = f.create(ReplayEventType.Taunt, 12);
+        let err;
+        try {
+          f.create(99, 13);
+        } catch (e) {
+          err = e.message;
+        }
+        return {
+          taType: ta.type,
+          taTick: ta.tickNo,
+          cmType: cm.type,
+          cmTick: cm.tickNo,
+          tauntType: taunt.type,
+          tauntTick: taunt.tickNo,
+          err,
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/replay/TurnActionsReplayEvent",
+    tsjs: "src/network/gamestate/replay/TurnActionsReplayEvent.ts.js",
+    probes: [
+      (ns) => {
+        const parser = {
+          parseAllPlayerActions() {
+            return new Map([[0, []]]);
+          },
+        };
+        const serializer = {
+          serializeAllPlayerActions(stream, map) {
+            stream.writeUint8(map.size);
+            for (const [pid, actions] of map) {
+              stream.writeUint8(pid);
+              stream.writeUint16(0);
+              void actions;
+            }
+          },
+        };
+        const ev = new ns.TurnActionsReplayEvent(parser, serializer, 5);
+        ev.payload = [[0, []]];
+        const b64 = ev.serialize();
+        const ev2 = new ns.TurnActionsReplayEvent(parser, serializer, 5);
+        ev2.unserialize(b64);
+        return { type: ev.type, tick: ev.tickNo, b64, payload: ev2.payload };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/replay/TauntReplayEvent",
+    tsjs: "src/network/gamestate/replay/TauntReplayEvent.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        const ReplayEventType = mod("network/gamestate/replay/ReplayEventType").ReplayEventType;
+        const ev = new ns.TauntReplayEvent(7);
+        ev.payload = { playerId: 3, tauntNo: 4 };
+        const s = ev.serialize();
+        const ev2 = new ns.TauntReplayEvent(7);
+        ev2.unserialize(s);
+        return {
+          type: ev.type,
+          tick: ev.tickNo,
+          s,
+          typeIsTaunt: ev.type === ReplayEventType.Taunt,
+          payload: ev2.payload,
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/replay/ChatMessageReplayEvent",
+    tsjs: "src/network/gamestate/replay/ChatMessageReplayEvent.ts.js",
+    probes: [
+      (ns) => {
+        const ev = new ns.ChatMessageReplayEvent(3);
+        ev.payload = { playerId: 1, message: "hello 涓栫晫" };
+        const s = ev.serialize();
+        const ev2 = new ns.ChatMessageReplayEvent(3);
+        ev2.unserialize(s);
+        return { type: ev.type, tick: ev.tickNo, hasColon: s.includes(":"), payload: ev2.payload };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/replay/ReplayEvent",
+    tsjs: "src/network/gamestate/replay/ReplayEvent.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        // 基类模块不导入 ReplayEventType → mod 注入
+        const ReplayEventType = mod("network/gamestate/replay/ReplayEventType").ReplayEventType;
+        const ev = new ns.ReplayEvent(ReplayEventType.TurnActions, 9);
+        // payload 恒为 undefined（JSON 会丢键），显式断言
+        return { type: ev.type, tick: ev.tickNo, hasPayload: ev.payload === undefined, keys: Object.keys(ev).sort() };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/replay/ReplayEventType",
+    tsjs: "src/network/gamestate/replay/ReplayEventType.ts.js",
+    probes: [
+      (ns) => [
+        ns.ReplayEventType.TurnActions,
+        ns.ReplayEventType.ChatMessage,
+        ns.ReplayEventType.Taunt,
+        ns.ReplayEventType[0],
+        ns.ReplayEventType[1],
+        ns.ReplayEventType[2],
+      ],
+      (ns) => Object.keys(ns.ReplayEventType).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/PlayerConnectionStatus",
+    tsjs: "src/network/gamestate/PlayerConnectionStatus.ts.js",
+    probes: [
+      (ns) => [
+        ns.PlayerConnectionStatus.NotConnected,
+        ns.PlayerConnectionStatus.Connected,
+        ns.PlayerConnectionStatus[0],
+        ns.PlayerConnectionStatus[1],
+      ],
+      (ns) => Object.keys(ns.PlayerConnectionStatus).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/lockstepUtil",
+    tsjs: "src/network/gamestate/lockstepUtil.ts.js",
+    probes: [
+      (ns) => [
+        ns.computeNetworkTurnMillis(100, 50),
+        ns.computeNetworkTurnMillis(90, 50),
+        ns.computeNetworkTurnMillis(0, 50),
+        ns.computeNetworkTurnMillis(50, 50),
+        ns.computeNetworkTurnMillis(200, 50),
+        ns.computeNetworkTurnMillis(50, 100),
+      ],
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/LockstepManager",
+    tsjs: "src/network/gamestate/LockstepManager.ts.js",
+    probes: [
+      (ns) => ns.LockstepManager.PREFERRED_HASH_CHECK_MILLIS,
+      (ns) => {
+        const unsubs = { a: 0, d: 0 };
+        const gserv = {
+          onGameActions: {
+            subscribe() {},
+            unsubscribe() {
+              unsubs.a++;
+            },
+          },
+          onGameDesync: {
+            subscribe() {},
+            unsubscribe() {
+              unsubs.d++;
+            },
+          },
+          sendPlayerActive() {},
+          sendPlayerActions() {},
+          sendGameStateHash() {},
+        };
+        const game = {
+          desiredSpeed: { value: 1 },
+          currentTick: 0,
+          status: 1,
+          update() {},
+          getHash: () => 0,
+          getPlayer: () => undefined,
+        };
+        const parser = { parseAllPlayerActions: () => new Map() };
+        const serializer = { serializePlayerActions: () => new Uint8Array([0]) };
+        const actSer = { getActionPayload: (a) => ({ id: a.actionType, params: a.serialize() }) };
+        const factory = { create: () => ({ unserialize() {}, process() {}, print: () => "" }) };
+        const queue = { dequeueAll: () => [] };
+        const recorder = { recordActions() {} };
+        const m = new ns.LockstepManager(
+          game,
+          gserv,
+          parser,
+          serializer,
+          actSer,
+          factory,
+          queue,
+          () => {},
+          undefined,
+          undefined,
+          undefined,
+          recorder,
+          false,
+        );
+        const t0 = m.canAdvanceNetworkTurn();
+        let rateErr;
+        try {
+          m.setRate({ rate: 100, turnNo: -10 });
+        } catch (e) {
+          rateErr = e.message;
+        }
+        let turnErr;
+        try {
+          m.doGameTurn(0);
+        } catch (e) {
+          turnErr = e.message;
+        }
+        m.updateRate(100);
+        m.init();
+        const t1 = m.canAdvanceNetworkTurn();
+        m.setErrorState();
+        const err = m.getErrorState();
+        m.dispose();
+        return {
+          t0,
+          rateErr,
+          turnErr,
+          t1,
+          err,
+          unsubs,
+          turnMillis: m.getTurnMillis(),
+        };
+      },
+      (ns) => {
+        const gserv = {
+          onGameActions: { subscribe() {}, unsubscribe() {} },
+          onGameDesync: { subscribe() {}, unsubscribe() {} },
+          sendPlayerActive() {},
+          sendPlayerActions() {},
+          sendGameStateHash() {},
+        };
+        const game = {
+          desiredSpeed: { value: 1 },
+          currentTick: 0,
+          status: 1,
+          update() {},
+          getHash: () => 0,
+          getPlayer: () => undefined,
+        };
+        const m = new ns.LockstepManager(
+          game,
+          gserv,
+          { parseAllPlayerActions: () => new Map() },
+          { serializePlayerActions: () => new Uint8Array([0]) },
+          { getActionPayload: () => ({ id: 0, params: new Uint8Array() }) },
+          { create: () => ({ unserialize() {}, process() {}, print: () => "" }) },
+          { dequeueAll: () => [] },
+          () => {},
+          undefined,
+          undefined,
+          undefined,
+          { recordActions() {} },
+          false,
+        );
+        m.init();
+        // turn-2 window: need received for current-2
+        const advance = (turn, has) => {
+          const anyM = m;
+          anyM.currentNetworkTurn = turn;
+          anyM.receivedActions = new Map();
+          if (has) anyM.receivedActions.set(turn - 2, new Map());
+          return m.canAdvanceNetworkTurn();
+        };
+        return {
+          turn0: advance(0, false),
+          turn2Missing: advance(2, false),
+          turn2Has: advance(2, true),
+          turn5Missing: advance(5, false),
+          turn5Has: advance(5, true),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "network/gamestate/SoloPlayTurnManager",
+    tsjs: "src/network/gamestate/SoloPlayTurnManager.ts.js",
+    probes: [
+      (ns) => {
+        let subbed = 0;
+        let unsubbed = 0;
+        const game = {
+          desiredSpeed: {
+            onChange: {
+              subscribe() {
+                subbed++;
+              },
+              unsubscribe() {
+                unsubbed++;
+              },
+            },
+          },
+          speed: { value: 6 },
+          currentTick: 0,
+          status: 1,
+          update() {},
+        };
+        const processed = [];
+        const queue = { dequeueAll: () => [] };
+        const m = new ns.SoloPlayTurnManager(
+          game,
+          { name: "P" },
+          queue,
+          undefined,
+          { recordActions() {} },
+        );
+        m.init();
+        m.computeGameTurn(6);
+        const millis6 = m.getTurnMillis();
+        m.computeGameTurn(3);
+        const millis3 = m.getTurnMillis();
+        m.doGameTurn(0);
+        m.setErrorState();
+        const err = m.getErrorState();
+        m.doGameTurn(0);
+        m.dispose();
+        return {
+          subbed,
+          unsubbed,
+          millis6,
+          millis3,
+          ratio: millis6 === millis3 * 2,
+          err,
+          processed,
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameres/GameResType",
+    tsjs: "src/network/gameres/GameResType.ts.js",
+    probes: [
+      (ns) => [
+        ns.GameResType.ConnectionLost,
+        ns.GameResType.Playing,
+        ns.GameResType.Draw,
+        ns.GameResType.Win,
+        ns.GameResType.Loss,
+        ns.GameResType.Resign,
+        ns.GameResType.Disconnect,
+        ns.GameResType[2],
+        ns.GameResType[528],
+        ns.GameResType[768],
+      ],
+      (ns) => Object.keys(ns.GameResType).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameres/GameRes",
+    tsjs: "src/network/gameres/GameRes.ts.js",
+    probes: [
+      (ns) => {
+        const fullFlat = (id) => ({
+          PLRS: [6, 1], AIPL: [6, 0], CRAT: [2, false], DURA: [6, 42], CRED: [6, 10000],
+          GMID: [7, id], SCEN: [7, "m.map"], SHRT: [2, true], SPED: [6, 4], SUPR: [2, false],
+          TIME: [6, 1000], TRNY: [2, false], UNIT: [6, 10], MODE: [6, 1], MAPC: [7, "deadbeef"],
+          BAMR: [6, 3], DSTB: [2, true], MENG: [2, false], DOGK: [2, false], ICAP: [2, true],
+          DOIL: [2, false], SNAM: [7, "Alice"], AFPS: [6, 60], APNG: [6, 30], FINI: [2, true],
+          GSKU: [6, 16640], OOSY: [2, false], PNGR: [6, 1], PNGS: [6, 1], VERS: [7, "1.0.6"],
+          NAM0: [7, "Alice"], CMP0: [6, 528], BLB0: [5, 3], BLC0: [6, 1], BLK0: [5, 2],
+          BLL0: [5, 4], COL0: [6, 1], CRA0: [6, 0], CRD0: [5, 5000], HRV0: [6, 100],
+          INB0: [5, 5], INK0: [5, 1], INL0: [5, 6], LCN0: [2, false],
+          PLB0: [5, 0], PLK0: [5, 0], PLL0: [5, 0], UNB0: [5, 7], UNK0: [5, 3],
+          UNL0: [5, 8], CTY0: [6, 5], SID0: [6, 1], TID0: [6, 0], STP0: [6, 0],
+        });
+        const g = new ns.GameRes();
+        g.fromFlat(fullFlat("G9"));
+        const bin = g.toBinary();
+        const g2 = new ns.GameRes().fromBinary(bin);
+        const flat = g.toFlat();
+        return {
+          hasFieldTypeExport: "GameResFieldType" in ns,
+          keys: Object.keys(ns).sort(),
+          id: g2.game.id,
+          players: g2.players.length,
+          headerLen: (bin[0] << 8) | bin[1],
+          second: (bin[2] << 8) | bin[3],
+          binLen: bin.byteLength,
+          mcv: g.game.mcvRepacks,
+          buildOff: g.game.buildOffAlly,
+          dstb: g.game.destroyableBridges,
+          meng: g.game.multiEngineer,
+          icap: g.game.instantCapture,
+          hrv: g.players[0].creditsGained,
+          stp: g.players[0].startPos,
+          cmp: g.players[0].completionStatus,
+          bamrFlat: flat.BAMR,
+          duration: g.game.duration,
+        };
+      },
+      (ns) => {
+        const g = new ns.GameRes();
+        g.fromFlat({
+          PLRS: [6, 1], AIPL: [6, 0], CRAT: [2, false], DURA: [6, 1], CRED: [6, 0],
+          GMID: [7, "G1"], SCEN: [7, "m.map"], SHRT: [2, true], SPED: [6, 4], SUPR: [2, false],
+          TIME: [6, 1], TRNY: [2, false], UNIT: [6, 1], MODE: [6, 1], MAPC: [7, "ab"],
+          BAMR: [6, 0], SNAM: [7, "Alice"], AFPS: [6, 0], APNG: [6, 0], FINI: [2, false],
+          GSKU: [6, 0], OOSY: [2, false], PNGR: [6, 0], PNGS: [6, 0], VERS: [7, "1.0.6"],
+          NAM0: [7, "Alice"], CMP0: [6, 768], BLB0: [5, 0], BLC0: [6, 0], BLK0: [5, 0],
+          BLL0: [5, 0], COL0: [6, 1], CRA0: [6, 0], CRD0: [5, 0],
+          INB0: [5, 0], INK0: [5, 0], INL0: [5, 0], LCN0: [2, false],
+          PLB0: [5, 0], PLK0: [5, 0], PLL0: [5, 0], UNB0: [5, 0], UNK0: [5, 0],
+          UNL0: [5, 0], CTY0: [6, 0], SID0: [6, 0], TID0: [6, 0],
+        });
+        return {
+          dstb: g.game.destroyableBridges,
+          meng: g.game.multiEngineer,
+          dogk: g.game.noDogEngiKills,
+          icap: g.game.instantCapture,
+          doil: g.game.delayedOils,
+          hrv: g.players[0].creditsGained,
+          stp: g.players[0].startPos,
+          quit: g.client.quit,
+        };
+      },
+      (ns) => {
+        const g = new ns.GameRes();
+        g.fromFlat({
+          PLRS: [6, 0], AIPL: [6, 0], CRAT: [2, false], DURA: [6, 0], CRED: [6, 0],
+          GMID: [7, "G2"], SCEN: [7, "x.map"], SHRT: [2, false], SPED: [6, 4], SUPR: [2, false],
+          TIME: [6, 0], TRNY: [2, false], UNIT: [6, 0], MODE: [6, 0], MAPC: [7, "cd"],
+          BAMR: [6, 0], SNAM: [7, ""], AFPS: [6, 0], APNG: [6, 0], FINI: [2, false],
+          GSKU: [6, 0], OOSY: [2, false], PNGR: [6, 0], PNGS: [6, 0], VERS: [7, "1.0.6"],
+        });
+        const bin = g.toBinary();
+        const headerLen = (bin[0] << 8) | bin[1];
+        const second = (bin[2] << 8) | bin[3];
+        const g2 = new ns.GameRes().fromBinary(bin);
+        return {
+          headerLen,
+          match: headerLen === bin.byteLength,
+          second,
+          id: g2.game.id,
+          players: g2.players.length,
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameopt/FileNameEncoder",
+    tsjs: "src/network/gameopt/FileNameEncoder.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.FileNameEncoder();
+        return [
+          e.encode("map name.yrm"),
+          e.encode("mymap.yrm"),
+          e.encode("cool_map_v2.map"),
+          e.decode("plain.map"),
+          e.decode(e.encode("My Map Title.yrm")),
+          e.decode(e.encode("ok.map")),
+        ];
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameopt/MapNameLegacyEncoder",
+    tsjs: "src/network/gameopt/MapNameLegacyEncoder.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.MapNameLegacyEncoder();
+        const enc = (t) => {
+          const s = e.encode(t);
+          return Array.from(s, (c) => c.charCodeAt(0));
+        };
+        return {
+          short: enc("A"),
+          mid: enc("Hi"),
+          long: enc("Hello World Title"),
+          allHigh: enc("Hello World Title").every((b) => b >= 128),
+          tail: enc("Hello World Title").slice(-3),
+          roundTrip: e.decode(e.encode("Hello World Title")),
+          roundTrip2: e.decode(e.encode("AB")),
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameopt/Parser",
+    tsjs: "src/network/gameopt/Parser.ts.js",
+    probes: [
+      (ns) => {
+        const p = new ns.Parser();
+        // head fields: [x,x,speedRaw,credits,unitCount,shortGame,sw,buildOff,mcv,crates,mode,hostTeams,title,slots,official,size,mapName,digest]
+        const opts =
+          "0,0,6,10000,10,1,1,0,1,1,0,1,TITLE,8,1,64,mapname.bin,deadbeef";
+        const parsed = p.parseOptions(opts + ":Alice,1,0,0,0,0,0,0:@:");
+        return {
+          gameSpeed: parsed.gameSpeed,
+          credits: parsed.credits,
+          unitCount: parsed.unitCount,
+          shortGame: parsed.shortGame,
+          superWeapons: parsed.superWeapons,
+          destroyableBridges: parsed.destroyableBridges,
+          multiEngineer: parsed.multiEngineer,
+          noDogEngiKills: parsed.noDogEngiKills,
+          instantCapture: parsed.instantCapture,
+          delayedOils: parsed.delayedOils,
+          mapName: parsed.mapName,
+          mapDigest: parsed.mapDigest,
+          humanCount: parsed.humanPlayers.length,
+          human0: parsed.humanPlayers[0],
+          aiCount: parsed.aiPlayers.length,
+        };
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        // without optional trailing fields 鈫?defaults
+        const opts = "0,0,3,5000,5,0,0,0,0,0,1,0,TITLE,8,0,64,plain.map,abcd";
+        const parsed = p.parseOptions(opts + ":Bob,2,1,1,1,0,0,0:@:");
+        return {
+          gameSpeed: parsed.gameSpeed,
+          destroyableBridges: parsed.destroyableBridges,
+          multiEngineer: parsed.multiEngineer,
+          noDogEngiKills: parsed.noDogEngiKills,
+          instantCapture: parsed.instantCapture,
+          delayedOils: parsed.delayedOils,
+        };
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        try {
+          p.parsePlayerOpts("a,b,c");
+        } catch (e) {
+          return e.message;
+        }
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        try {
+          p.parseAiOpts("1,2,3");
+        } catch (e) {
+          return e.message;
+        }
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        try {
+          p.parsePingData("x,1,2");
+        } catch (e) {
+          return e.message;
+        }
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        return {
+          short: p.parseTopic("a,b,c"),
+          // 6+ parts: first[2] is maxPlayers char
+          full: p.parseTopic("xy8,0,2,1,0,plain.map," + (typeof btoa !== "undefined" ? btoa("desc") : Buffer.from("desc").toString("base64"))),
+        };
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        const ai = p.parseAiOpts("1,-1,0,0,0,2,5,1,1,1");
+        return { len: ai.length, slot0: ai[0], slot1: ai[1] };
+      },
+      (ns) => {
+        const p = new ns.Parser();
+        const slots = p.parseSlotData("@@Closed@,@Open@,@EasyAI@,Alice@@");
+        return slots.map((s) => ({ type: s.type, name: s.name, difficulty: s.difficulty }));
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameopt/Serializer",
+    tsjs: "src/network/gameopt/Serializer.ts.js",
+    probes: [
+      (ns) => ns.Serializer.MAX_ACTION_PAYLOAD_SIZE,
+      (ns) => {
+        const s = new ns.Serializer();
+        const slots = s.serializeSlotData([
+          { type: 0 },
+          { type: 1 },
+          { type: 2 },
+          { type: 4, difficulty: 0 },
+          { type: 3, name: "Alice" },
+        ]);
+        let err;
+        try {
+          s.serializeSlotData([{ type: 3 }]);
+        } catch (e) {
+          err = e.message;
+        }
+        const load = s.serializeLoadInfo([
+          { name: "A", status: 1, loadPercent: 50, ping: 20, lagAllowanceMillis: 1000 },
+          { name: "B", status: 2, loadPercent: 100, ping: 30, lagAllowanceMillis: 2000 },
+        ]);
+        return { slots, err, load };
+      },
+      (ns) => {
+        const s = new ns.Serializer();
+        const out = s.serializePlayerActions([{ id: 1, params: new Uint8Array([9, 8]) }]);
+        return Array.from(out);
+      },
+      (ns) => {
+        const s = new ns.Serializer();
+        try {
+          s.serializePlayerActions([{ id: 1, params: new Uint8Array(ns.Serializer.MAX_ACTION_PAYLOAD_SIZE) }]);
+        } catch (e) {
+          return { name: e.name, message: e.message };
+        }
+      },
+      (ns) => {
+        const s = new ns.Serializer();
+        return s.serializeAiOpts([
+          { difficulty: 1, countryId: 5, colorId: 2, startPos: 3, teamId: 4 },
+          undefined,
+        ]);
+      },
+      (ns) => {
+        const s = new ns.Serializer();
+        return s.serializePingData([
+          { playerName: "A", ping: 12 },
+          { playerName: "B", ping: 34 },
+        ]);
+      },
+      (ns) => {
+        const s = new ns.Serializer();
+        const opts = {
+          gameSpeed: 4,
+          credits: 10000,
+          unitCount: 10,
+          shortGame: true,
+          superWeapons: false,
+          buildOffAlly: true,
+          mcvRepacks: false,
+          cratesAppear: true,
+          gameMode: 1,
+          hostTeams: true,
+          mapTitle: "T",
+          maxSlots: 8,
+          mapOfficial: false,
+          mapSizeBytes: 64,
+          mapName: "m.map",
+          mapDigest: "abc",
+          destroyableBridges: true,
+          multiEngineer: false,
+          noDogEngiKills: false,
+          instantCapture: true,
+          delayedOils: false,
+          humanPlayers: [{ name: "A", countryId: 1, colorId: 0, startPos: 0, teamId: 0 }],
+          aiPlayers: [undefined],
+        };
+        const out = s.serializeOptions(opts, false);
+        return {
+          endsWithAiComma: out.endsWith(","),
+          hasAtAt: out.includes(":@:"),
+          speedRaw: out.split(":")[0].split(",")[2],
+          head: out.split(":")[0],
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameopt/SlotInfo",
+    tsjs: "src/network/gameopt/SlotInfo.ts.js",
+    probes: [
+      (ns) => [
+        ns.SlotType.Closed,
+        ns.SlotType.Open,
+        ns.SlotType.OpenObserver,
+        ns.SlotType.Player,
+        ns.SlotType.Ai,
+        ns.SlotType[0],
+        ns.SlotType[1],
+        ns.SlotType[2],
+        ns.SlotType[3],
+        ns.SlotType[4],
+      ],
+      (ns) => Object.keys(ns.SlotType).sort(),
+    ],
+  },
+
+  {
+    name: "network/gameopt/LoadInfoParser",
+    tsjs: "src/network/gameopt/LoadInfoParser.ts.js",
+    probes: [
+      (ns) => {
+        const p = new ns.LoadInfoParser();
+        return p.parse("Alice,1,50,20,1000,Bob,2,100,30,2000");
+      },
+      (ns) => {
+        const p = new ns.LoadInfoParser();
+        return p.parse("Only,0,0,0,0");
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/HttpRequest",
+    tsjs: "src/network/HttpRequest.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DownloadError("Fetch failed with status 404: Not Found", undefined, 404);
+        return {
+          message: e.message,
+          statusCode: e.statusCode,
+          isError: e instanceof Error,
+          isSelf: e instanceof ns.DownloadError,
+        };
+      },
+      (ns) => {
+        const e = new ns.DownloadError("network fail");
+        return { message: e.message, statusCode: e.statusCode };
+      },
+      (ns) => {
+        const h = new ns.HttpRequest();
+        return {
+          hasFetchText: typeof h.fetchText === "function",
+          hasFetchJson: typeof h.fetchJson === "function",
+          hasFetchBinary: typeof h.fetchBinary === "function",
+          hasFetchRaw: typeof h.fetchRaw === "function",
+          hasFetchHtml: typeof h.fetchHtml === "function",
+          keys: Object.keys(ns).sort(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "network/IrcConnection",
+    tsjs: "src/network/IrcConnection.ts.js",
+    probes: [
+      (ns) => {
+        const log = { info() {}, error() {}, debug() {}, enabledFor: () => false };
+        const c = new ns.IrcConnection({ mode: "text" }, log);
+        return {
+          timeout: c.timeout,
+          mode: c.options.mode,
+          keys: Object.keys(ns).sort(),
+          hasStaticErrors:
+            typeof ns.IrcConnection.NoReplyError === "function" &&
+            typeof ns.IrcConnection.SocketError === "function" &&
+            typeof ns.IrcConnection.ConnectError === "function",
+        };
+      },
+      (ns) => {
+        const n = new ns.IrcConnection.NoReplyError("no reply");
+        const s = new ns.IrcConnection.SocketError("socket broke");
+        const c = new ns.IrcConnection.ConnectError("connect failed");
+        return [
+          [n.name, n.message, n instanceof Error, n instanceof ns.IrcConnection.NoReplyError],
+          [s.name, s.message, s instanceof Error],
+          [c.name, c.message, c instanceof Error],
+        ];
+      },
+    ],
+  },
+
+  {
+    name: "network/GservConnection",
+    tsjs: "src/network/GservConnection.ts.js",
+    probes: [
+      (ns) => {
+        const conStub = {
+          onMessage: { subscribe() {}, unsubscribe() {} },
+          onError: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, unsubscribe() {} },
+          isOpen: () => false,
+          sendMessage() {},
+        };
+        const g = new ns.GservConnection(conStub);
+        return {
+          user: g.currentUser,
+          server: g.serverName,
+          hasEvents:
+            typeof g.onGameActions.subscribe === "function" &&
+            typeof g.onLoadInfo.subscribe === "function" &&
+            typeof g.onRateChange.subscribe === "function",
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const conStub = {
+          onMessage: { subscribe() {}, unsubscribe() {} },
+          onError: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, unsubscribe() {} },
+          sendMessage() {},
+        };
+        const g = new ns.GservConnection(conStub);
+        let err;
+        try {
+          g.sendPlayerActive(true);
+        } catch (e) {
+          err = e.message;
+        }
+        return err;
+      },
+    ],
+  },
+
+  {
+    name: "network/ServerRegions",
+    tsjs: "src/network/ServerRegions.ts.js",
+    probes: [
+      (ns) => {
+        const r = new ns.ServerRegions();
+        const mk = (name, entries) => ({
+          name,
+          getString: (k) => (k in entries ? String(entries[k]) : ""),
+          getBool: (k, d) => (k in entries ? entries[k] : d),
+        });
+        const ini = {
+          getOrderedSections: () => [
+            mk("us", {
+              label: "US",
+              available: true,
+              gameVersion: "1.06",
+              wolUrl: "wss://us",
+              apiRegUrl: "https://us/reg",
+              wladderUrl: "https://us/lad",
+            }),
+            mk("eu", {
+              label: "EU",
+              available: false,
+              gameVersion: "1.0.6",
+              wolUrl: "wss://eu",
+              apiRegUrl: "https://eu/reg",
+            }),
+          ],
+        };
+        r.load(ini);
+        let getErr;
+        try {
+          r.get("xx");
+        } catch (e) {
+          getErr = e.message;
+        }
+        let selErr;
+        try {
+          r.getSelectedRegion();
+        } catch (e) {
+          selErr = e.message;
+        }
+        r.setSelectedRegion("us");
+        return {
+          size: r.getSize(),
+          hasUs: r.has("us"),
+          hasNo: r.has("no"),
+          usVersion: r.get("us").gameVersion,
+          euVersion: r.get("eu").gameVersion,
+          usAvailable: r.isAvailable("us"),
+          euAvailable: r.isAvailable("eu"),
+          first: r.getFirstAvailable().id,
+          selected: r.getSelectedRegion().id,
+          getErr,
+          selErr,
+          all: r.getAll().map((x) => x.id),
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
     name: "network/ladder/wladderConfig",
     tsjs: "src/network/ladder/wladderConfig.ts.js",
     probes: [
@@ -21661,6 +23191,133 @@ const CONVERTED = [
         } catch (e) {
           return e.message;
         }
+      },
+    ],
+  },
+
+  {
+    name: "network/ladder/WLadderService",
+    tsjs: "src/network/ladder/WLadderService.ts.js",
+    probes: [
+      (ns) => [ns.WLadderService.CURRENT_SEASON, ns.WLadderService.PREV_SEASON],
+      (ns) => {
+        const cfg = { getClientSku: () => 16640 };
+        const s = new ns.WLadderService(cfg);
+        return Promise.all([
+          s.getSeasons().then(() => "resolved", (e) => e.message),
+          s.getSeason("current", "en-US").then(() => "resolved", (e) => e.message),
+          s.listSearch(["A"]).then(() => "resolved", (e) => e.message),
+          s.rungSearch(0, 10, "1v1", "current", "L").then(() => "resolved", (e) => e.message),
+        ]).then((errs) => ({ url: s.getUrl(), errs }));
+      },
+      (ns) => {
+        const cfg = { getClientSku: () => 16640 };
+        const s = new ns.WLadderService(cfg);
+        s.setUrl("https://ladder.test/api");
+        return { url: s.getUrl() };
+      },
+    ],
+  },
+
+  {
+    name: "network/ladder/PlayerRankType",
+    tsjs: "src/network/ladder/PlayerRankType.ts.js",
+    probes: [
+      (ns) => [
+        ns.PlayerRankType.None,
+        ns.PlayerRankType.Private,
+        ns.PlayerRankType.General,
+        ns.PlayerRankType.CommanderInChief,
+        ns.PlayerRankType[0],
+        ns.PlayerRankType[8],
+        ns.PlayerRankType[10],
+      ],
+      (ns) => Object.keys(ns.PlayerRankType).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/Replay",
+    tsjs: "src/network/gamestate/Replay.ts.js",
+    probes: [
+      (ns) => ({
+        extension: ns.Replay.extension,
+        maxNameLength: ns.Replay.maxNameLength,
+        engineLine: ns.Replay.engineLineRegex.test("ENGINE 1.06 123"),
+        engineLineBad: ns.Replay.engineLineRegex.test("ENGINE nope"),
+        sanitize: ns.Replay.sanitizeFileName('a/b\\c:*?"<>|d'),
+        sanitizeCtrl: ns.Replay.sanitizeFileName("x\u0000y\u001fz"),
+        sanitizeLong: ns.Replay.sanitizeFileName("z".repeat(300)).length,
+        keys: Object.keys(ns).sort(),
+      }),
+    ],
+  },
+
+  {
+    name: "network/gamestate/ReplayRecorder",
+    tsjs: "src/network/gamestate/ReplayRecorder.ts.js",
+    probes: [
+      (ns) => {
+        const events = [];
+        const replay = {
+          writeEvent(...e) {
+            events.push(...e);
+          },
+        };
+        const r = new ns.ReplayRecorder(
+          replay,
+          0,
+          [{ name: "Alice" }, { name: "Bob" }],
+          { getActionPayload: (a) => ({ id: a.id, params: a.params }) },
+        );
+        r.recordActions(5, [{ id: 1, params: [9] }, { id: 0, params: [] }]);
+        r.recordActions(6, new Map([[0, [{ id: 1, params: [1] }]]]));
+        r.recordActions(7, new Map([[0, [{ id: 0, params: [] }]]]));
+        r.recordChatMessage(8, "Bob", "hi");
+        r.recordTaunt(9, "Alice", 2);
+        return {
+          count: events.length,
+          types: events.map((e) => e.type),
+          ticks: events.map((e) => e.tickNo),
+        };
+      },
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "network/gamestate/ReplayTurnManager",
+    tsjs: "src/network/gamestate/ReplayTurnManager.ts.js",
+    probes: [
+      (ns) => {
+        let subbed = 0;
+        let unsubbed = 0;
+        const game = {
+          desiredSpeed: {
+            onChange: {
+              subscribe() {
+                subbed++;
+              },
+              unsubscribe() {
+                unsubbed++;
+              },
+            },
+          },
+          speed: { value: 6 },
+          currentTick: 0,
+          status: 1,
+          update() {},
+        };
+        const replay = { getEvents: () => [], endTick: undefined };
+        const m = new ns.ReplayTurnManager(game, replay, {
+          create: () => ({ unserialize() {}, process() {}, print() {} }),
+        });
+        return {
+          hasEvent: typeof m.onReplayEvent.subscribe === "function",
+          subbed,
+          unsubbed,
+          keys: Object.keys(ns).sort(),
+        };
       },
     ],
   },

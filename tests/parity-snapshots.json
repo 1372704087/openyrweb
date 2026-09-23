@@ -11075,6 +11075,1039 @@
       ]
     }
   },
+  "network/AccountRegFormData": {
+    "0": [],
+    "1": 0
+  },
+  "network/Logger": {
+    "0": [],
+    "1": 0
+  },
+  "network/WolAccount": {
+    "0": [],
+    "1": 0
+  },
+  "network/WolConnectOptions": {
+    "0": [],
+    "1": 0
+  },
+  "network/chat/Message": {
+    "0": [],
+    "1": 0
+  },
+  "network/chat/SystemMessage": {
+    "0": [],
+    "1": 0
+  },
+  "network/gameopt/PingInfo": {
+    "0": [],
+    "1": 0
+  },
+  "network/gameopt/WolGameTopic": {
+    "0": [],
+    "1": 0
+  },
+  "network/gameres/GameResClientInfo": {
+    "0": [],
+    "1": 0
+  },
+  "network/gameres/GameResGameInfo": {
+    "0": [],
+    "1": 0
+  },
+  "network/gamestate/PlayerActionPayload": {
+    "0": [],
+    "1": 0
+  },
+  "network/gamestate/PlayerConnectionInfo": {
+    "0": [],
+    "1": 0
+  },
+  "network/gserv/CreateGameInstanceParams": {
+    "0": [],
+    "1": 0
+  },
+  "network/ladder/LadderHead": {
+    "0": [],
+    "1": 0
+  },
+  "network/ladder/PagedResponse": {
+    "0": [],
+    "1": 0
+  },
+  "network/ladder/PlayerLadderRung": {
+    "0": [],
+    "1": 0
+  },
+  "network/ladder/PlayerMatchHistoryEntry": {
+    "0": [],
+    "1": 0
+  },
+  "network/ladder/PlayerProfile": {
+    "0": [],
+    "1": 0
+  },
+  "network/gservCodes": {
+    "0": {
+      "RPL_CVERS_OK": 10,
+      "RPL_LOGGED_IN": 100,
+      "RPL_INSTANCE_NONEXISTENT": 401,
+      "RPL_GAME_OPTS": 500,
+      "RPL_LOAD_INFO": 600,
+      "RPL_GAME_START": 700,
+      "RPL_GAME_DESYNC": 801,
+      "RPL_TAUNT": 803,
+      "RPL_PRIVMSG_NOT_ALLOWED": 805,
+      "RPL_BIN_PREFIX": 2,
+      "RPL_BIN_GAME_ACTIONS": 1,
+      "RPL_BIN_MAP_DATA": 2,
+      "REQ_BIN_PREFIX": 2,
+      "REQ_BIN_GAME_ACTIONS": 1,
+      "REQ_BIN_GAME_STATE_HASH": 2,
+      "REQ_BIN_PUT_MAP": 3,
+      "REQ_BIN_GET_MAP": 4,
+      "keys": [
+        "REQ_BIN_GAME_ACTIONS",
+        "REQ_BIN_GAME_STATE_HASH",
+        "REQ_BIN_GET_MAP",
+        "REQ_BIN_PREFIX",
+        "REQ_BIN_PUT_MAP",
+        "RPL_ALREADY_LOGGED_IN",
+        "RPL_BAD_LOGIN",
+        "RPL_BIN_GAME_ACTIONS",
+        "RPL_BIN_MAP_DATA",
+        "RPL_BIN_PREFIX",
+        "RPL_CVERS_MISSING",
+        "RPL_CVERS_OK",
+        "RPL_CVERS_OUTDATED",
+        "RPL_GAME_DESYNC",
+        "RPL_GAME_OPTS",
+        "RPL_GAME_START",
+        "RPL_INSTANCE_ALREADY_STARTED",
+        "RPL_INSTANCE_CONNECTED",
+        "RPL_INSTANCE_CREATED",
+        "RPL_INSTANCE_EXISTS",
+        "RPL_INSTANCE_NONEXISTENT",
+        "RPL_INSTANCE_NOT_ALLOWED",
+        "RPL_INSTANCE_NOT_RUNNING",
+        "RPL_INSTANCE_TOO_MANY",
+        "RPL_INSTANCE_VERS_MISMATCH",
+        "RPL_INVALID_PARAMS",
+        "RPL_LOAD_INFO",
+        "RPL_LOGGED_IN",
+        "RPL_MAP_ALREADY_SENT",
+        "RPL_MAP_TOO_BIG",
+        "RPL_NET_RATE",
+        "RPL_NOT_ENOUGH_PARAMS",
+        "RPL_NOT_LOGGED_IN",
+        "RPL_NO_INSTANCE",
+        "RPL_PLAYER_DISCONNECT",
+        "RPL_PRIVMSG_NOT_ALLOWED",
+        "RPL_RATE_LIMIT_EXCEEDED",
+        "RPL_TAUNT",
+        "RPL_TOO_MANY_LOGIN_ATTEMPTS"
+      ],
+      "keyCount": 39
+    }
+  },
+  "network/gservConfig": {
+    "0": {
+      "API_VERSION": 2,
+      "RECIPIENT_ALL": "#all",
+      "RECIPIENT_TEAM": "#team",
+      "TURN_TIMEOUT_MILLIS": 30000,
+      "LAG_STATE_THRESH_MILLIS": 1000,
+      "CON_INFO_THRESH_MILLIS": 2000,
+      "LAG_CHECK_INTERVAL_MILLIS": 1000,
+      "MAX_MAP_TRANSFER_BYTES": 2097152,
+      "keys": [
+        "API_VERSION",
+        "CON_INFO_THRESH_MILLIS",
+        "LAG_CHECK_INTERVAL_MILLIS",
+        "LAG_STATE_THRESH_MILLIS",
+        "MAX_MAP_TRANSFER_BYTES",
+        "RECIPIENT_ALL",
+        "RECIPIENT_TEAM",
+        "TURN_TIMEOUT_MILLIS"
+      ]
+    }
+  },
+  "network/partyCodes": {
+    "0": {
+      "ERR_TARGET_IN_PARTY": "TARGET_IN_PARTY",
+      "ERR_NO_INVITE": "NO_INVITE",
+      "ERR_TARGET_SELF": "TARGET_SELF",
+      "RPL_PARTY_INVITE": "PARTY_INVITE",
+      "RPL_PARTY_FORMED": "PARTY_FORMED",
+      "RPL_PARTY_LEFT": "PARTY_LEFT",
+      "keys": [
+        "ERR_ACCEPTER_IN_PARTY",
+        "ERR_INVITER_FRESH_ACCOUNT",
+        "ERR_INVITER_IN_PARTY",
+        "ERR_INVITE_ALREADY_PENDING",
+        "ERR_INVITE_PREVENTED",
+        "ERR_NO_INVITE",
+        "ERR_TARGET_IN_PARTY",
+        "ERR_TARGET_IN_QUEUE",
+        "ERR_TARGET_NOT_IN_QUICK_MATCH",
+        "ERR_TARGET_NO_INVITES",
+        "ERR_TARGET_SELF",
+        "RPL_PARTY_FORMED",
+        "RPL_PARTY_INVITE",
+        "RPL_PARTY_INVITE_DECLINED",
+        "RPL_PARTY_INVITE_DECLINED_SELF",
+        "RPL_PARTY_INVITE_ERROR",
+        "RPL_PARTY_INVITE_EXPIRED",
+        "RPL_PARTY_INVITE_PREVENTION",
+        "RPL_PARTY_INVITE_SENT",
+        "RPL_PARTY_LEFT",
+        "RPL_PARTY_UPDATE"
+      ],
+      "keyCount": 21
+    }
+  },
+  "network/qmCodes": {
+    "0": {
+      "REQ_MATCH": "Match",
+      "REQ_STATS": "Stats",
+      "REQ_LIST_QUEUES": "ListQueues",
+      "RPL_WORKING": "Working",
+      "RPL_MATCHED": "Matched",
+      "RPL_REMOVED_FROM_QUEUE": "Removed",
+      "TAG_COUNTRY": "COU",
+      "TAG_MODHASH": "MOD",
+      "keys": [
+        "REQ_LIST_QUEUES",
+        "REQ_MATCH",
+        "REQ_STATS",
+        "RPL_ALREADY_QUEUED",
+        "RPL_BAD_HASH",
+        "RPL_BAD_VERS",
+        "RPL_MATCHED",
+        "RPL_MODE_UNAVAIL",
+        "RPL_QUEUE_LIST",
+        "RPL_RATE_LIMITED",
+        "RPL_REMOVED_FROM_QUEUE",
+        "RPL_REQUEUE",
+        "RPL_STATS",
+        "RPL_WORKING",
+        "TAG_COLOR",
+        "TAG_COUNTRY",
+        "TAG_MODHASH",
+        "TAG_RANKED",
+        "TAG_VERSION"
+      ],
+      "keyCount": 19
+    }
+  },
+  "network/wolCodes": {
+    "0": {
+      "RPL_GET_LOCALE": 309,
+      "RPL_NAMREPLY": 353,
+      "RPL_LOGIN_QUEUE": 720,
+      "RPL_GAME_REPORT": 730,
+      "RPL_PARTY_UPDATE": 731,
+      "ERR_YOUREBANNEDCREEP": 465,
+      "ERR_GAMEHASCLOSED": 478,
+      "RPL_CVERS_OK": 700,
+      "keys": [
+        "ERR_ALREADYREGISTERED",
+        "ERR_BADCHANNELKEY",
+        "ERR_BAD_PARAMS",
+        "ERR_BANNEDFROMCHAN",
+        "ERR_CHANNELISFULL",
+        "ERR_CHANOPRIVSNEEDED",
+        "ERR_CVERS_UNKNOWN",
+        "ERR_GAMEHASCLOSED",
+        "ERR_NEEDMOREPARAMS",
+        "ERR_NOSUCHCHANNEL",
+        "ERR_NOSUCHNICK",
+        "ERR_NOTONCHANNEL",
+        "ERR_RATE_LIMIT_EXCEEDED",
+        "ERR_RESTRICTED",
+        "ERR_SERVER_FULL",
+        "ERR_UMODEUNKNOWNFLAG",
+        "ERR_UNKNOWNCOMMAND",
+        "ERR_UNKNOWNERROR",
+        "ERR_UNKNOWNMODE",
+        "ERR_USERNOTINCHANNEL",
+        "ERR_YOUREBANNEDCREEP",
+        "RPL_BAD_LOGIN",
+        "RPL_CHANNEL",
+        "RPL_CHANNELMODEIS",
+        "RPL_CVERS_OK",
+        "RPL_CVERS_OUTDATED",
+        "RPL_ENDOFMOTD",
+        "RPL_ENDOFNAMES",
+        "RPL_GAME_CHANNEL",
+        "RPL_GAME_REPORT",
+        "RPL_GET_LOCALE",
+        "RPL_LIST",
+        "RPL_LISTEND",
+        "RPL_LISTSTART",
+        "RPL_LOGIN_QUEUE",
+        "RPL_MOTD",
+        "RPL_MOTDSTART",
+        "RPL_NAMREPLY",
+        "RPL_PARTY_UPDATE",
+        "RPL_QUIT",
+        "RPL_SET_LOCALE",
+        "RPL_TOPIC"
+      ],
+      "keyCount": 42
+    }
+  },
+  "network/GservError": {
+    "0": {
+      "name": "Error",
+      "message": "boom",
+      "code": 5,
+      "instanceofError": true,
+      "instanceofSelf": true
+    },
+    "1": {
+      "Unknown": 0,
+      "OutdatedClient": 1,
+      "BadLogin": 2,
+      "InstanceNonExistent": 5,
+      "CreatedTooManyInstances": 10,
+      "reverse0": "Unknown",
+      "reverse5": "InstanceNonExistent",
+      "reverse10": "CreatedTooManyInstances",
+      "keys": [
+        "0",
+        "1",
+        "10",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "AlreadyLoggedIn",
+        "BadLogin",
+        "CreatedTooManyInstances",
+        "InstanceAlreadyExists",
+        "InstanceAlreadyStarted",
+        "InstanceNonExistent",
+        "InstanceNotAllowed",
+        "InstanceVersMismatch",
+        "OutdatedClient",
+        "TooManyLoginAttempts",
+        "Unknown"
+      ]
+    },
+    "2": {
+      "exportedCode": "absent",
+      "hasClass": true,
+      "keys": [
+        "GservError"
+      ]
+    }
+  },
+  "network/WolError": {
+    "0": {
+      "name": "Error",
+      "message": "bad pass",
+      "code": 2,
+      "reason": "server says no",
+      "isError": true,
+      "isSelf": true
+    },
+    "1": {
+      "message": "no reason",
+      "code": 8
+    },
+    "2": {
+      "OutdatedClient": 0,
+      "BadLogin": 1,
+      "GameHasClosed": 3,
+      "ServerFull": 8,
+      "reverse0": "OutdatedClient",
+      "reverse3": "GameHasClosed",
+      "reverse8": "ServerFull",
+      "keys": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "BadChannelPass",
+        "BadLogin",
+        "BannedFromChannel",
+        "BannedFromServer",
+        "ChannelFull",
+        "GameHasClosed",
+        "NoSuchChannel",
+        "OutdatedClient",
+        "ServerFull"
+      ],
+      "modKeys": [
+        "WolError"
+      ]
+    }
+  },
+  "network/IrcProtocol": {
+    "0": [
+      "my_room",
+      "a%%b%_c",
+      "x%ny%rz%bz",
+      "%=%-",
+      "plain"
+    ],
+    "1": [
+      "my room",
+      "a%b_c",
+      "\b\n\r:,",
+      "#Hi There_100%",
+      "Alice's game"
+    ],
+    "2": 30
+  },
+  "network/MapTransferService": {
+    "0": {},
+    "1": {}
+  },
+  "network/WGameResService": {
+    "0": {}
+  },
+  "network/WolConfig": {
+    "0": [
+      "matchbot",
+      2,
+      15,
+      8,
+      128,
+      2097152
+    ],
+    "1": {
+      "clientType": 0,
+      "sku": 16640,
+      "channelType": 45,
+      "globalPass": "zotclot9",
+      "bot": "matchbot",
+      "chanIds": [
+        50,
+        51
+      ],
+      "solo": 50,
+      "team": 51,
+      "reverse": "Cdral2"
+    },
+    "2": 0,
+    "3": {
+      "__undefined__": true
+    },
+    "4": "Unhandled client type \"undefined\"",
+    "5": "Client type 0 doesn't have a configured channel for ladder=nope",
+    "6": [
+      "ClientType",
+      "MATCH_BOT_NAME",
+      "MAX_MAP_TRANSFER_BYTES",
+      "MAX_PASS_LEN",
+      "MAX_USERNAME_LEN",
+      "MIN_PASS_LEN",
+      "MIN_USERNAME_LEN",
+      "WolConfig"
+    ]
+  },
+  "network/WolConnection": {
+    "0": [
+      64,
+      "@"
+    ],
+    "1": [
+      0,
+      1,
+      2,
+      "NoMap",
+      "HasMap",
+      "MapTransfer"
+    ],
+    "2": {
+      "channels": 0,
+      "gameName": "#Alice's game",
+      "user": "Alice"
+    },
+    "3": [
+      {
+        "name": "Bob",
+        "operator": true,
+        "fresh": true,
+        "ping": 42
+      }
+    ]
+  },
+  "network/WolGameReport": {
+    "0": [
+      0,
+      1,
+      2,
+      "Win",
+      "Loss",
+      "Draw"
+    ],
+    "1": {
+      "gameId": "G1",
+      "duration": 42,
+      "players": [
+        {
+          "name": "A",
+          "resultType": 0
+        }
+      ]
+    }
+  },
+  "network/WolLocale": {
+    "0": {
+      "Unknown": 0,
+      "Usa": 2,
+      "China": 21,
+      "Turkey": 37,
+      "reverse0": "Unknown",
+      "reverse21": "China",
+      "reverse37": "Turkey",
+      "keyCount": 38,
+      "mapSize": 15,
+      "zhCN": 21,
+      "zhCNName": "China",
+      "enUS": 2,
+      "keys": [
+        "WolLocale",
+        "localeCodeMap"
+      ]
+    }
+  },
+  "network/WolService": {
+    "0": {
+      "min": 5000,
+      "max": 60000,
+      "connected": false,
+      "m1": true,
+      "m2": false,
+      "m3": true,
+      "m4": false,
+      "auto": false,
+      "pending": false,
+      "ignore": false
+    },
+    "1": {},
+    "2": {}
+  },
+  "network/chat/ChatMessage": {
+    "0": [
+      0,
+      1,
+      2,
+      "Channel",
+      "Page",
+      "Whisper"
+    ],
+    "1": [
+      "0",
+      "1",
+      "2",
+      "Channel",
+      "Page",
+      "Whisper"
+    ]
+  },
+  "network/gameres/GameResPlayerInfo": {
+    "0": {
+      "ctor": true,
+      "name": "Bob",
+      "units": 3
+    },
+    "1": [
+      "GameResPlayerInfo"
+    ]
+  },
+  "network/gamestate/ActionSerializer": {
+    "0": {
+      "id": 7,
+      "params": [
+        1,
+        2,
+        3
+      ]
+    },
+    "1": [
+      "ActionSerializer"
+    ]
+  },
+  "network/gamestate/replay/ReplayEventFactory": {
+    "0": {
+      "taType": 0,
+      "taTick": 10,
+      "cmType": 1,
+      "cmTick": 11,
+      "tauntType": 2,
+      "tauntTick": 12,
+      "err": "Unsupported replay event type \"99\" at game tick \"13\""
+    },
+    "1": [
+      "ReplayEventFactory"
+    ]
+  },
+  "network/gamestate/replay/TurnActionsReplayEvent": {
+    "0": {
+      "type": 0,
+      "tick": 5,
+      "b64": "AQAAAA==",
+      "payload": [
+        [
+          0,
+          []
+        ]
+      ]
+    },
+    "1": [
+      "TurnActionsReplayEvent"
+    ]
+  },
+  "network/gamestate/replay/TauntReplayEvent": {
+    "0": {
+      "type": 2,
+      "tick": 7,
+      "s": "3:4",
+      "typeIsTaunt": true,
+      "payload": {
+        "playerId": 3,
+        "tauntNo": 4
+      }
+    },
+    "1": [
+      "TauntReplayEvent"
+    ]
+  },
+  "network/gamestate/replay/ChatMessageReplayEvent": {
+    "0": {
+      "type": 1,
+      "tick": 3,
+      "hasColon": true,
+      "payload": {
+        "playerId": 1,
+        "message": "hello 涓栫晫"
+      }
+    },
+    "1": [
+      "ChatMessageReplayEvent"
+    ]
+  },
+  "network/gamestate/replay/ReplayEvent": {
+    "0": {
+      "type": 0,
+      "tick": 9,
+      "hasPayload": true,
+      "keys": [
+        "tickNo",
+        "type"
+      ]
+    },
+    "1": [
+      "ReplayEvent"
+    ]
+  },
+  "network/gamestate/replay/ReplayEventType": {
+    "0": [
+      0,
+      1,
+      2,
+      "TurnActions",
+      "ChatMessage",
+      "Taunt"
+    ],
+    "1": [
+      "0",
+      "1",
+      "2",
+      "ChatMessage",
+      "Taunt",
+      "TurnActions"
+    ]
+  },
+  "network/gamestate/PlayerConnectionStatus": {
+    "0": [
+      0,
+      1,
+      "NotConnected",
+      "Connected"
+    ],
+    "1": [
+      "0",
+      "1",
+      "Connected",
+      "NotConnected"
+    ]
+  },
+  "network/gamestate/lockstepUtil": {
+    "0": [
+      100,
+      100,
+      50,
+      50,
+      200,
+      100
+    ],
+    "1": [
+      "computeNetworkTurnMillis"
+    ]
+  },
+  "network/gamestate/SoloPlayTurnManager": {
+    "0": {
+      "subbed": 1,
+      "unsubbed": 1,
+      "millis6": 11.11111111111111,
+      "millis3": 22.22222222222222,
+      "ratio": false,
+      "err": true,
+      "processed": []
+    },
+    "1": [
+      "SoloPlayTurnManager"
+    ]
+  },
+  "network/gameres/GameResType": {
+    "0": [
+      2,
+      8,
+      64,
+      256,
+      512,
+      528,
+      768,
+      "ConnectionLost",
+      "Resign",
+      "Disconnect"
+    ],
+    "1": [
+      "2",
+      "256",
+      "512",
+      "528",
+      "64",
+      "768",
+      "8",
+      "ConnectionLost",
+      "Disconnect",
+      "Draw",
+      "Loss",
+      "Playing",
+      "Resign",
+      "Win"
+    ]
+  },
+  "network/gameopt/FileNameEncoder": {
+    "0": [
+      "AG0AYQBwACAAbgBhAG0AZQAuAHkAcgBt",
+      "mymap.yrm",
+      "cool_map_v2.map",
+      "plain.map",
+      "My Map Title.yrm",
+      "ok.map"
+    ],
+    "1": [
+      "FileNameEncoder"
+    ]
+  },
+  "network/gameopt/MapNameLegacyEncoder": {
+    "0": {
+      "short": [
+        193,
+        128,
+        128,
+        128
+      ],
+      "mid": [
+        200,
+        128,
+        164,
+        131,
+        128,
+        128,
+        128
+      ],
+      "long": [
+        200,
+        128,
+        148,
+        131,
+        192,
+        141,
+        128,
+        182,
+        128,
+        222,
+        129,
+        128,
+        130,
+        224,
+        149,
+        128,
+        239,
+        128,
+        200,
+        131,
+        192,
+        141,
+        128,
+        178,
+        128,
+        192,
+        128,
+        160,
+        133,
+        160,
+        154,
+        128,
+        244,
+        128,
+        176,
+        131,
+        208,
+        140,
+        128,
+        128,
+        128
+      ],
+      "allHigh": true,
+      "tail": [
+        128,
+        128,
+        128
+      ],
+      "roundTrip": "Hello World Title",
+      "roundTrip2": "AB"
+    },
+    "1": [
+      "MapNameLegacyEncoder"
+    ]
+  },
+  "network/gameopt/Parser": {
+    "0": {
+      "gameSpeed": 0,
+      "credits": 10000,
+      "unitCount": 10,
+      "shortGame": true,
+      "superWeapons": true,
+      "destroyableBridges": true,
+      "multiEngineer": false,
+      "noDogEngiKills": false,
+      "instantCapture": true,
+      "delayedOils": false,
+      "mapName": "mapname.bin",
+      "mapDigest": "deadbeef",
+      "humanCount": 1,
+      "human0": {
+        "name": "Alice",
+        "countryId": 1,
+        "colorId": 0,
+        "startPos": 0,
+        "teamId": 0
+      },
+      "aiCount": 0
+    },
+    "1": {
+      "gameSpeed": 3,
+      "destroyableBridges": true,
+      "multiEngineer": false,
+      "noDogEngiKills": false,
+      "instantCapture": true,
+      "delayedOils": false
+    },
+    "2": "Couldn't parse gameopt: unexpected players data length 3",
+    "3": "Couldn't parse gameopt: unexpected ai data length 3",
+    "4": {
+      "__undefined__": true
+    },
+    "5": {
+      "full": {
+        "description": "摥獣",
+        "modHash": 0,
+        "aiPlayers": 2,
+        "maxPlayers": 8,
+        "observers": 1,
+        "observable": false,
+        "mapName": "plain.map"
+      }
+    },
+    "6": {
+      "len": 2,
+      "slot1": {
+        "difficulty": 2,
+        "countryId": 5,
+        "colorId": 1,
+        "startPos": 1,
+        "teamId": 1
+      }
+    },
+    "7": [
+      {
+        "type": 0
+      },
+      {
+        "type": 1
+      },
+      {
+        "type": 4,
+        "difficulty": 2
+      },
+      {
+        "type": 3,
+        "name": "Alice@"
+      }
+    ],
+    "8": [
+      "Parser"
+    ]
+  },
+  "network/gameopt/Serializer": {
+    "0": 65536,
+    "1": {
+      "slots": "@Closed@,@Open@,@OpenObserver@,@HardAI@,Alice,",
+      "load": "A,1,50,20,1000,B,2,100,30,2000"
+    },
+    "2": [
+      1,
+      1,
+      2,
+      0,
+      9,
+      8
+    ],
+    "3": {
+      "name": "RangeError",
+      "message": "Maximum payload data size exceeded"
+    },
+    "4": "1,5,2,3,4,0,-1,-1,-1,-1",
+    "5": "2,A,12,B,34",
+    "6": {
+      "endsWithAiComma": true,
+      "hasAtAt": true,
+      "speedRaw": "2",
+      "head": "0,0,2,10000,10,1,0,1,0,1,1,1,AFQ=,8,0,64,m.map,abc,1,0,0,1,0"
+    },
+    "7": [
+      "Serializer"
+    ]
+  },
+  "network/gameopt/SlotInfo": {
+    "0": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      "Closed",
+      "Open",
+      "OpenObserver",
+      "Player",
+      "Ai"
+    ],
+    "1": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "Ai",
+      "Closed",
+      "Open",
+      "OpenObserver",
+      "Player"
+    ]
+  },
+  "network/gameopt/LoadInfoParser": {
+    "0": [
+      {
+        "name": "Alice",
+        "status": 1,
+        "loadPercent": 50,
+        "ping": 20,
+        "lagAllowanceMillis": 1000
+      },
+      {
+        "name": "Bob",
+        "status": 2,
+        "loadPercent": 100,
+        "ping": 30,
+        "lagAllowanceMillis": 2000
+      }
+    ],
+    "1": [
+      {
+        "name": "Only",
+        "status": 0,
+        "loadPercent": 0,
+        "ping": 0,
+        "lagAllowanceMillis": 0
+      }
+    ],
+    "2": [
+      "LoadInfoParser"
+    ]
+  },
+  "network/HttpRequest": {
+    "0": {
+      "message": "Fetch failed with status 404: Not Found",
+      "statusCode": 404,
+      "isError": true,
+      "isSelf": true
+    },
+    "1": {
+      "message": "network fail"
+    },
+    "2": {
+      "hasFetchText": true,
+      "hasFetchJson": true,
+      "hasFetchBinary": true,
+      "hasFetchRaw": true,
+      "hasFetchHtml": true,
+      "keys": [
+        "DownloadError",
+        "HttpRequest"
+      ]
+    }
+  },
+  "network/GservConnection": {
+    "0": {
+      "hasEvents": true,
+      "keys": [
+        "GservConnection"
+      ]
+    },
+    "1": {
+      "__undefined__": true
+    }
+  },
+  "network/ServerRegions": {
+    "0": {
+      "size": 2,
+      "hasUs": true,
+      "hasNo": false,
+      "usVersion": "1.06.0",
+      "euVersion": "1.0.6",
+      "usAvailable": true,
+      "euAvailable": false,
+      "first": "us",
+      "selected": "us",
+      "getErr": "Unknown region id xx",
+      "selErr": "No server region selected",
+      "all": [
+        "us",
+        "eu"
+      ]
+    },
+    "1": [
+      "ServerRegions"
+    ]
+  },
   "network/ladder/wladderConfig": {
     "0": {
       "CURRENT_SEASON": "current",
@@ -11121,6 +12154,190 @@
     ],
     "2": "Unhandled queue type \"nope\"",
     "3": "Unhandled ladder type \"nope\""
+  },
+  "network/ladder/WLadderService": {
+    "0": [
+      "current",
+      "prev"
+    ],
+    "1": {},
+    "2": {
+      "url": "https://ladder.test/api"
+    }
+  },
+  "network/ladder/PlayerRankType": {
+    "0": [
+      0,
+      1,
+      8,
+      10,
+      "None",
+      "General",
+      "CommanderInChief"
+    ],
+    "1": [
+      "0",
+      "1",
+      "10",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "BrigGeneral",
+      "Colonel",
+      "CommanderInChief",
+      "Corporal",
+      "FiveStarGeneral",
+      "General",
+      "Lieutenant",
+      "Major",
+      "None",
+      "Private",
+      "Sergeant"
+    ]
+  },
+  "network/gamestate/Replay": {
+    "0": {
+      "extension": ".rpl",
+      "maxNameLength": 128,
+      "engineLine": true,
+      "engineLineBad": false,
+      "sanitize": "a_b_c_______d",
+      "sanitizeCtrl": "x_y_z",
+      "sanitizeLong": 128,
+      "keys": [
+        "Replay"
+      ]
+    }
+  },
+  "network/gamestate/ReplayRecorder": {
+    "0": {
+      "count": 4,
+      "types": [
+        0,
+        0,
+        1,
+        2
+      ],
+      "ticks": [
+        5,
+        6,
+        8,
+        9
+      ]
+    },
+    "1": [
+      "ReplayRecorder"
+    ]
+  },
+  "network/gamestate/ReplayTurnManager": {
+    "0": {
+      "hasEvent": true,
+      "subbed": 0,
+      "unsubbed": 0,
+      "keys": [
+        "ReplayTurnManager"
+      ]
+    }
+  },
+  "network/gamestate/LockstepManager": {
+    "0": 1000,
+    "1": {
+      "t0": false,
+      "turnErr": "Network turn rate should be set by now.",
+      "t1": true,
+      "err": true,
+      "unsubs": {
+        "a": 1,
+        "d": 1
+      },
+      "turnMillis": 66.66666666666667
+    },
+    "2": {
+      "turn0": true,
+      "turn2Missing": false,
+      "turn2Has": true,
+      "turn5Missing": false,
+      "turn5Has": true
+    }
+  },
+  "network/gameres/GameRes": {
+    "0": {
+      "hasFieldTypeExport": false,
+      "keys": [
+        "GameRes"
+      ],
+      "id": "G9",
+      "players": 1,
+      "headerLen": 676,
+      "second": 0,
+      "binLen": 676,
+      "mcv": true,
+      "buildOff": true,
+      "dstb": true,
+      "meng": false,
+      "icap": true,
+      "hrv": 100,
+      "stp": 0,
+      "cmp": 528,
+      "bamrFlat": [
+        6,
+        3
+      ],
+      "duration": 42
+    },
+    "1": {
+      "dstb": true,
+      "meng": false,
+      "dogk": false,
+      "icap": true,
+      "doil": false,
+      "hrv": -1,
+      "stp": -1,
+      "quit": false
+    },
+    "2": {
+      "headerLen": 372,
+      "match": true,
+      "second": 0,
+      "id": "G2",
+      "players": 0
+    },
+    "3": [
+      "GameRes"
+    ]
+  },
+  "network/IrcConnection": {
+    "0": {
+      "timeout": 5,
+      "mode": "text",
+      "keys": [
+        "IrcConnection"
+      ],
+      "hasStaticErrors": true
+    },
+    "1": [
+      [
+        "Error",
+        "no reply",
+        true,
+        true
+      ],
+      [
+        "Error",
+        "socket broke",
+        true
+      ],
+      [
+        "Error",
+        "connect failed",
+        true
+      ]
+    ]
   },
   "engine/AnimProps": {
     "0": "AnimProps",
