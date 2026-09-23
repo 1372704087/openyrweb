@@ -18314,6 +18314,39 @@ const CONVERTED = [
         const bag = new ns.AudioBagFile();
         return { list: bag.getFileList(), has: bag.containsFile("missing.wav"), keys: Object.keys(bag).sort() };
       },
+      (ns, THREE, mod) => {
+        // 回归（a9ac563 / f32cef9）：首参 VirtualFile，内部读 file.stream。
+        const DataStream = mod("data/DataStream").DataStream;
+        const VirtualFile = mod("data/vfs/VirtualFile").VirtualFile;
+        const src = new DataStream();
+        src.writeUint8Array(new Uint8Array([1, 2, 3, 4]));
+        const file = new VirtualFile(src, "bag.bin");
+        const bag = {
+          entries: [
+            ["a.wav", { sampleRate: 22050, length: 4, offset: 0, flags: 2, chunkSize: 0 }],
+          ],
+        };
+        try {
+          const bagFile = new ns.AudioBagFile();
+          const ret = bagFile.fromVirtualFile(file, bag);
+          const list = bagFile.getFileList();
+          const opened = bagFile.openFile("a.wav");
+          const bytes = [...opened.getBytes()];
+          const riff = bytes.slice(0, 4).map((b) => String.fromCharCode(b)).join("");
+          return {
+            chain: ret === bagFile,
+            list,
+            contains: bagFile.containsFile("a.wav"),
+            riff,
+            dataLen: bytes.length,
+            payload: bytes.slice(44, 48),
+            filename: opened.filename,
+          };
+        } catch (e) {
+          return { err: String(e && e.message ? e.message : e).slice(0, 100) };
+        }
+      },
+
     ],
   },
 

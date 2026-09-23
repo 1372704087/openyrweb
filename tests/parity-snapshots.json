@@ -9224,6 +9224,22 @@
       "keys": [
         "fileData"
       ]
+    },
+    "2": {
+      "chain": true,
+      "list": [
+        "a.wav"
+      ],
+      "contains": true,
+      "riff": "RIFF",
+      "dataLen": 48,
+      "payload": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "filename": "a.wav"
     }
   },
   "data/Bitmap": {

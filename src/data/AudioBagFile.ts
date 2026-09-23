@@ -12,8 +12,8 @@
  *
  * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
-import { DataStream } from './DataStream';
-import { VirtualFile } from './vfs/VirtualFile';
+import { DataStream } from "data/DataStream";
+import { VirtualFile } from "data/vfs/VirtualFile";
 
 /** BAG 索引中的单条音频条目（字段来自 IDX 记录，此处沿用运行时形态）。 */
 export interface AudioBagEntry {
