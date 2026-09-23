@@ -5,6 +5,8 @@
  * 简化实现：对路径点所在格邻近格（切比雪夫距离 ≤1）的敌方单位直接销毁。
  *
  * 由 game/trigger/executor/SabotageUnitExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { TriggerExecutor } from "game/trigger/TriggerExecutor"; // 本组已写
 

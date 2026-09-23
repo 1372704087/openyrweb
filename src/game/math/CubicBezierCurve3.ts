@@ -7,6 +7,8 @@
  *
  * 构造缺省控制点为零向量；getPoint 的 target 缺省时每次新建 Vector3
  * （与孪生 super.getPoint(t, target || new Vector3()) 一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { Vector3 } from "game/math/Vector3"; // 孪生
 

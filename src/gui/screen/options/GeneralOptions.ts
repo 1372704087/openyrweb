@@ -3,6 +3,8 @@
  *
  * 由 gui/screen/options/GeneralOptions.ts.js 重写为 TS。
  * serialize 末尾追加 enableAres / enablePhobos；旧存档缺字段时保持默认关闭。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as FlyerHelperModeModule from "engine/renderable/entity/unit/FlyerHelperMode";
 import { Base64 } from "util/Base64";

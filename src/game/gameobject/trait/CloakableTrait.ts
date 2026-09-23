@@ -3,6 +3,8 @@
  *
  * 由 game/gameobject/trait/CloakableTrait.ts.js 重写为 TS（行为完全一致）。
  * 本文件为修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as ObjectCloakChangeEventModule from "game/event/ObjectCloakChangeEvent"; // 未转换（any-shim）
 import { GameSpeed } from "game/GameSpeed"; // 已转换

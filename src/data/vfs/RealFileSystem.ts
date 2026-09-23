@@ -8,6 +8,8 @@
  * 由 data/vfs/RealFileSystem.ts.js 重写为 TS（行为完全一致）。两个文件
  * 并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块
  * 的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { FileNotFoundError } from "data/vfs/FileNotFoundError"; // 本组已写
 import * as RealFileSystemDirModule from "data/vfs/RealFileSystemDir"; // 未转换（any-shim）

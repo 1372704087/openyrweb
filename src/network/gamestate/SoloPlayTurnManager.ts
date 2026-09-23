@@ -9,6 +9,8 @@
  * - `gameTurnMillis = 1000 / (speed * BASE_TICKS_PER_SECOND)`。
  * - 无输入时入队 NoAction；有动作先记入 replayRecorder。
  * - 速度变更经 desiredSpeed.onChange 订阅，dispose 时退订。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { NoAction } from "game/action/NoAction"; // 孪生

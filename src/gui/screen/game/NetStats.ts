@@ -2,6 +2,8 @@
  * NetStats — 网络统计面板（RTT + 本地玩家 LAT）。
  *
  * 由 gui/screen/game/NetStats.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as StatsModule from "stats.js"; // 孪生
 import { CompositeDisposable } from "util/disposable/CompositeDisposable"; // 已转换

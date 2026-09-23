@@ -7,6 +7,8 @@
  *
  * 用途：读取 INI/条目集合中形如 `Id=RepeatType,Name,TriggerId` 的标签行；
  * 非法格式或非法 RepeatType 只 console.warn 并跳过（不抛错），与孪生一致。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { TagRepeatType } from "data/map/tag/TagRepeatType"; // 孪生
 

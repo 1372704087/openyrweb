@@ -7,6 +7,8 @@
  *
  * 关键语义（勿改）：字符串枚举值、season 常量、teamSizes 映射、以及
  * queue↔ladder 互转的 switch 分支与 throw 消息与孪生逐项一致。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 /** 当前赛季查询别名。 */

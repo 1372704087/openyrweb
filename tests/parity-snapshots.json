@@ -10007,9 +10007,17 @@
         "directories"
       ]
     },
-    "1": {},
-    "2": {},
-    "3": {},
+    "1": {
+      "name": "FileNotFoundError",
+      "isFnf": true,
+      "match": true
+    },
+    "2": {
+      "name": "Error",
+      "isFnf": false,
+      "message": "File \"nope.bin\" not found in real file system"
+    },
+    "3": false,
     "4": {
       "dirCount": 1,
       "same": true,
@@ -10026,8 +10034,15 @@
         "handle"
       ]
     },
-    "1": {},
-    "2": {}
+    "1": {
+      "name": "TypeError",
+      "message": "this.handle.keys(...) is not a function or its return value is not async iterable"
+    },
+    "2": {
+      "name": "TypeError",
+      "is": false,
+      "message": "this.handle.keys(...) is not a function or its return value is not async iterable"
+    }
   },
   "data/vfs/StorageQuotaError": {
     "0": {
@@ -10069,7 +10084,7 @@
       "str": "\u0001\u0002\u0003",
       "filename": "y.bin"
     },
-    "2": {},
+    "2": "File \"z.bin\" could not be read (NotReadableError)",
     "3": {
       "name": "h.txt",
       "type": "text/plain",
@@ -10119,8 +10134,14 @@
         "Removed archive \"a.mix\" from VFS"
       ]
     },
-    "4": {},
-    "5": {}
+    "4": {
+      "err": "TypeError"
+    },
+    "5": {
+      "name": "TypeError",
+      "is": false,
+      "message": "this.rfs.openFile is not a function"
+    }
   },
   "data/vxl/Section": {
     "0": {
@@ -10931,8 +10952,16 @@
         "document"
       ]
     },
-    "1": {},
-    "2": {}
+    "1": {
+      "type": "text/javascript",
+      "charset": "utf8",
+      "async": true,
+      "src": "/a.js"
+    },
+    "2": {
+      "rejectMsg": "Failed to load script \"/a.js\"",
+      "asyncFalse": "ok"
+    }
   },
   "util/Routing": {
     "0": {
@@ -10944,8 +10973,24 @@
     "1": {
       "has": true
     },
-    "2": {},
-    "3": {}
+    "2": {
+      "star": "star",
+      "starRest": [
+        "a",
+        "b"
+      ],
+      "foo": "foo",
+      "fooRest": [
+        "a",
+        "b"
+      ],
+      "nonSlashNoFoo": true,
+      "total": 4,
+      "rootFromEmpty": 1
+    },
+    "3": {
+      "msg": "TypeError"
+    }
   },
   "util/QuadTree": {
     "0": {
@@ -11023,7 +11068,16 @@
       ],
       "hasLoad": true
     },
-    "1": {}
+    "1": {
+      "phase": "error-rejected",
+      "msg": "Couldn't load CSS at \"/b.css\"",
+      "hrefB": "/b.css",
+      "loadRes": {
+        "phase": "load",
+        "href": "/a.css",
+        "rel": "stylesheet"
+      }
+    }
   },
   "util/number": {
     "0": {
@@ -11079,7 +11133,17 @@
         "setupFullScreenChangeListener"
       ]
     },
-    "1": {}
+    "1": {
+      "isFn": true,
+      "types": [
+        "fullscreenchange",
+        "keyup"
+      ],
+      "afterEnter": 1,
+      "afterExit": 2,
+      "f11": "ok",
+      "removed": true
+    }
   },
   "util/Graph": {
     "0": {
@@ -11116,16 +11180,31 @@
       "keys": []
     },
     "1": {
-      "initOk": false,
-      "errMsg": "helpers.WINDOW.document.addEventListener is not a function",
+      "initOk": true,
+      "errMsg": "",
       "keys": [
         "sdk"
       ]
     }
   },
   "util/stream": {
-    "0": {},
-    "1": {}
+    "0": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "keys": [
+        "makeTextFileLineIterator"
+      ]
+    },
+    "1": {
+      "lines": [
+        "hello",
+        "world"
+      ]
+    }
   },
   "util/time": {
     "0": {
@@ -11137,8 +11216,19 @@
         "throttle"
       ]
     },
-    "1": {},
-    "2": {}
+    "1": {
+      "slept": true,
+      "hasThrottleDecorator": true
+    },
+    "2": {
+      "calls": 2,
+      "bIsUndefined": true,
+      "keys": [
+        "Throttle",
+        "sleep",
+        "throttle"
+      ]
+    }
   },
   "util/userAgent": {
     "0": {
@@ -11588,11 +11678,20 @@
     "2": 30
   },
   "network/MapTransferService": {
-    "0": {},
-    "1": {}
+    "0": {
+      "after": "https://example.test/map",
+      "putErr": "Fetch failed with error: TypeError:fetch failed",
+      "getErr": "Fetch failed with error: TypeError:fetch failed",
+      "credErr": "Missing WOL credentials"
+    },
+    "1": "No MapTransfer URL is set"
   },
   "network/WGameResService": {
-    "0": {}
+    "0": {
+      "url": "https://example.test/gs",
+      "urlErr": "No WGameRes URL is set",
+      "credErr": "Missing WOL credentials"
+    }
   },
   "network/WolConfig": {
     "0": [
@@ -11659,7 +11758,11 @@
         "fresh": true,
         "ping": 42
       }
-    ]
+    ],
+    "4": {
+      "type": "function",
+      "arity": 1
+    }
   },
   "network/WolGameReport": {
     "0": [
@@ -11714,8 +11817,11 @@
       "pending": false,
       "ignore": false
     },
-    "1": {},
-    "2": {}
+    "1": {
+      "message": "Game version mismatch: client version is 1.0.6, but expected 9.9.9",
+      "code": 0
+    },
+    "2": "ok"
   },
   "network/chat/ChatMessage": {
     "0": [
@@ -12201,6 +12307,10 @@
     },
     "1": {
       "__undefined__": true
+    },
+    "2": {
+      "type": "function",
+      "arity": 1
     }
   },
   "network/ServerRegions": {
@@ -12277,7 +12387,14 @@
       "current",
       "prev"
     ],
-    "1": {},
+    "1": {
+      "errs": [
+        "No ladder URL is set",
+        "No ladder URL is set",
+        "No ladder URL is set",
+        "No ladder URL is set"
+      ]
+    },
     "2": {
       "url": "https://ladder.test/api"
     }
@@ -12679,6 +12796,10 @@
       "types": {
         "Theater": "function"
       }
+    },
+    "1": {
+      "type": "function",
+      "arity": 5
     }
   },
   "engine/TheaterType": {
@@ -13237,13 +13358,8 @@
     }
   },
   "Gui": {
-    "0": {
-      "appVersion": "0.1.0",
-      "appResPath": "res/",
-      "hasDisposables": true,
-      "methods": true
-    },
-    "1": "Root controller is not initialized"
+    "0": "ctor:Cannot read properties of undefined (reading 'createElement'",
+    "1": "ctor:Cannot read properties of undefined (reading 'createElement'"
   },
   "LocalPrefs": {
     "0": {
@@ -13873,7 +13989,11 @@
       false,
       true,
       1
-    ]
+    ],
+    "4": {
+      "type": "function",
+      "arity": 4
+    }
   },
   "game/gameopts/constants": {
     "0": [
@@ -14730,48 +14850,37 @@
     }
   },
   "game/api/interface/BuildingPlacementData": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/GameObjectData": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/PathFinderOptions": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/PathNode": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/PlaceCheckOptions": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/PlayerData": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/PlayerStats": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/ReachabilityMap": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/SuperWeaponData": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/TileResourceData": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/api/interface/UnitData": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "game/gameobject/common/AnimTerrainEffect": {
     "0": "AnimTerrainEffect",
@@ -14785,7 +14894,11 @@
     "1": {
       "Debris": "function"
     },
-    "2": "detonate,onSpawn,update"
+    "2": "detonate,onSpawn,update",
+    "3": {
+      "type": "function",
+      "arity": 4
+    }
   },
   "game/gameobject/infantry/sequenceMap": {
     "0": "findSequence,getCrashingSequences,getDeathAnim,getDeathSequence,getFireSequenceBy,getIdleSequenceBy,getMoveSequenceBy,getStanceTransitionSequenceBy,getStillSequenceBy",
@@ -14817,7 +14930,11 @@
     "1": {
       "Overlay": "function"
     },
-    "2": "getFoundation,getLandType,isBridge,isBridgePlaceholder,isHighBridge,isLowBridge,isTiberium,isXBridge"
+    "2": "getFoundation,getLandType,isBridge,isBridgePlaceholder,isHighBridge,isLowBridge,isTiberium,isXBridge",
+    "3": {
+      "type": "function",
+      "arity": 3
+    }
   },
   "game/gameobject/Projectile": {
     "0": "Projectile,ProjectileState",
@@ -14831,31 +14948,15 @@
       "hasDefault": false
     },
     "4": {
-      "plain": 10,
-      "first": 2,
-      "accel": 7
+      "type": "function",
+      "arity": 4
     },
     "5": {
       "straight": 100,
       "arc": 50.83333333333333,
       "arcFar": 177.91666666666666,
       "sonic": 49
-    },
-    "6": [
-      2,
-      0
-    ],
-    "7": {
-      "no": false,
-      "yes": true,
-      "arc": false
-    },
-    "8": {
-      "name": "F",
-      "occ": 1,
-      "arity": 4
-    },
-    "9": "adjustAimForBallisticScatter,calculateBallisticOvershootVsMoving,calculateInaccurateBallisticOvershoot,checkObstacles,computeAimPointVersusMovingTarget,computeBaseDamage,computeMaxSpeed,constructor,createShrapnel,detonate,fromObject,iniRot,isHoming,isInHomingRange,onSpawn,rot,update,updateSpeed"
+    }
   },
   "game/gameobject/selection/SelectionLevel": {
     "0": "SelectionLevel",
@@ -14981,8 +15082,7 @@
         "Chu",
         false
       ]
-    },
-    "4": "Unsupported AI difficulty \"99\""
+    }
   },
   "game/bot/BotsLib": {
     "0": "IraqBot,OriginalAiBot,version",
@@ -15038,29 +15138,7 @@
         "x": 9,
         "y": 3
       }
-    ],
-    "5": {
-      "u0": 0,
-      "u1": 76.5,
-      "u2": 13.472
-    },
-    "6": [
-      "LOW",
-      "HIGH",
-      "MED"
-    ],
-    "7": {
-      "n": 3,
-      "firstUnsorted": 10,
-      "firstSorted": 1,
-      "near": {
-        "x": 1,
-        "y": 1
-      }
-    },
-    "8": null,
-    "9": null,
-    "10": "A,Blackboard,Config,assessThreat,countName,dist,findPlacement,findRefineryPlacement,firepower,makeSnapshot,myCYTile,nearestOreAnchor,scanOre"
+    ]
   },
   "game/bot/iraq/Economy": {
     "0": "Economy",
@@ -15073,16 +15151,7 @@
       "NAHAND",
       "NAREFN",
       "NAWEAP"
-    ],
-    "4": {
-      "a1": {
-        "x": 5,
-        "y": 5
-      },
-      "reused": true,
-      "refreshed": true,
-      "calls": 2
-    }
+    ]
   },
   "game/bot/iraq/Military": {
     "0": "Military",
@@ -15129,8 +15198,7 @@
       "army": 1,
       "harvs": 1,
       "queuesEmpty": true
-    },
-    "4": "ok"
+    }
   },
   "engine/gfx/batch/BatchedMesh": {
     "0": "BatchMode,BatchedMesh",
@@ -15197,8 +15265,7 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/gfx/DebugUtils": {
     "0": "DebugUtils",
@@ -15208,8 +15275,7 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/gfx/drawable/PalDrawable": {
     "0": "PalDrawable",
@@ -15334,7 +15400,11 @@
     "1": {
       "OctreeContainer": "function"
     },
-    "2": "computeProjectionMatrix,cullChildren,update,updateChild"
+    "2": "computeProjectionMatrix,cullChildren,update,updateChild",
+    "3": {
+      "type": "function",
+      "arity": 1
+    }
   },
   "engine/gfx/OverlayUtils": {
     "0": "OverlayUtils",
@@ -15344,12 +15414,10 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/gfx/Renderable": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/gfx/RenderableContainer": {
     "0": "RenderableContainer",
@@ -15374,12 +15442,10 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/gfx/Scene": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/gfx/SpriteUtils": {
     "0": "",
@@ -15435,8 +15501,7 @@
     "3": ""
   },
   "engine/renderable/builder/ObjectBuilder": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/renderable/builder/ShpAggregator": {
     "0": "ShpAggregator",
@@ -15462,8 +15527,7 @@
     "3": ""
   },
   "engine/renderable/builder/SpriteBuilder": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/renderable/builder/VxlBatchedBuilder": {
     "0": "VxlBatchedBuilder",
@@ -15592,8 +15656,7 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/renderable/entity/building/BuildingShpHelper": {
     "0": "BuildingShpHelper",
@@ -15905,8 +15968,7 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/renderable/entity/unit/FlyerHelperMode": {
     "0": "FlyerHelperMode",
@@ -15936,8 +15998,7 @@
     "2": {
       "ctor": true,
       "arity": 0
-    },
-    "3": ""
+    }
   },
   "engine/renderable/entity/unit/ShadowQuality": {
     "0": "ShadowQuality",
@@ -15979,8 +16040,7 @@
     "3": ""
   },
   "engine/renderable/Entity": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/renderable/fx/DamageSmokeFx": {
     "0": "DamageSmokeFx",
@@ -16011,8 +16071,7 @@
     "2": "_buildArcMesh,_disposeMesh,_getCirclePoint,_rebuildBeamPhase,_rebuildChargePhase,_recalcAngles,create3DObject,dispose,get3DObject,isFinished,setContainer,update"
   },
   "engine/renderable/fx/Effect": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/renderable/fx/handler/BeaconFxHandler": {
     "0": "BeaconFxHandler",
@@ -16141,8 +16200,7 @@
     "2": "compute"
   },
   "engine/renderable/RenderablePlugin": {
-    "0": "",
-    "1": ""
+    "0": ""
   },
   "engine/renderable/ShadowRenderable": {
     "0": "ShadowRenderable",
@@ -16156,7 +16214,11 @@
     "1": {
       "ShpRenderable": "function"
     },
-    "2": "get3DObject,getFlat,setBatchPalettes,setBatched,setExtraLight,setFlat,setForceTransparent,setFrame,setFrameOffset,setOpacity,setPalette,setSize"
+    "2": "get3DObject,getFlat,setBatchPalettes,setBatched,setExtraLight,setFlat,setForceTransparent,setFrame,setFrameOffset,setOpacity,setPalette,setSize",
+    "3": {
+      "type": "function",
+      "arity": 4
+    }
   },
   "engine/renderable/WithPosition": {
     "0": "WithPosition",
@@ -16179,7 +16241,11 @@
     "1": {
       "WorldScene": "function"
     },
-    "2": "applyLighting,create3DObject,dispose,markBatchRebuild,setLightFocusPoint,update,updateCamera,updateShadowQuality,updateViewport"
+    "2": "applyLighting,create3DObject,dispose,markBatchRebuild,setLightFocusPoint,update,updateCamera,updateShadowQuality,updateViewport",
+    "3": {
+      "type": "function",
+      "arity": 3
+    }
   },
   "engine/renderable/entity/PipOverlay": {
     "0": "PipOverlay",
@@ -16204,40 +16270,134 @@
     "2": "create3DObject,createLamp,createLampTexture,get3DObject,getIntersectTarget,getPosition,getUiName,setPosition,updateBaseLight,updateIntersectTarget,updateLighting,updateTurretVxlLightDir"
   },
   "gui/CanvasMetrics": {
-    "0": "constructor,dispose,init,notifyViewportChange"
+    "0": "constructor,dispose,init,notifyViewportChange",
+    "1": [
+      0,
+      0,
+      0,
+      0,
+      "function"
+    ]
   },
   "gui/FullScreen": {
     "0": "FullScreen",
-    "1": "constructor,dispose,init,isAvailable,isFullScreen,onChange,toggle,toggleAsync"
+    "1": "constructor,dispose,init,isAvailable,isFullScreen,onChange,toggle,toggleAsync",
+    "2": {
+      "keyCode": 70,
+      "hit": true,
+      "miss": false,
+      "available": true,
+      "full": false
+    }
   },
   "gui/HtmlContainer": {
-    "0": "constructor,getSize,hide,render,setPosition,setRelativeMode,setSize,setTranslateMode,setVisible,show,updateMode,updatePosition,updateSize,updateVisibility"
+    "0": "constructor,getSize,hide,render,setPosition,setRelativeMode,setSize,setTranslateMode,setVisible,show,updateMode,updatePosition,updateSize,updateVisibility",
+    "1": {
+      "size": {
+        "width": 10,
+        "height": 20
+      },
+      "left": 1,
+      "top": 2,
+      "visible": false,
+      "relative": true,
+      "translate": true
+    }
   },
   "gui/HtmlReactElement": {
     "0": "HtmlReactElement",
-    "1": "applyOptions,constructor,refresh,render,renderReactElement,unrender"
+    "1": "applyOptions,constructor,refresh,render,renderReactElement,unrender",
+    "2": {
+      "componentIsFn": true,
+      "optionsIsProps": true,
+      "arity": 2
+    }
   },
   "gui/LazyHtmlElement": {
-    "0": "add,constructor,getChildren,getElement,isRendered,remove,removeAll,render,renderChild,setElement,unrender,unrenderChild"
+    "0": "add,constructor,getChildren,getElement,isRendered,remove,removeAll,render,renderChild,setElement,unrender,unrenderChild",
+    "1": {
+      "afterAdd": 1,
+      "afterRemove": 0,
+      "childRendered": false,
+      "isRendered": false
+    }
   },
   "gui/Pointer": {
-    "0": "constructor,dispose,getPointerLock,getPosition,getSprite,getUserLockMode,init,listenForFirstCanvasClick,lock,setPointerType,setVisible,unlock,updateSpritePosition"
+    "0": "constructor,dispose,getPointerLock,getPosition,getSprite,getUserLockMode,init,listenForFirstCanvasClick,lock,setPointerType,setVisible,unlock,updateSpritePosition",
+    "1": {
+      "frames": [
+        [
+          "runner",
+          false
+        ],
+        [
+          "frame",
+          3
+        ],
+        [
+          "pos",
+          34,
+          44
+        ]
+      ],
+      "type": 2,
+      "sub": 1
+    },
+    "2": {
+      "type": "function",
+      "arity": 6
+    }
   },
   "gui/PointerEvents": {
-    "0": "PointerEvents"
+    "0": "PointerEvents",
+    "1": {
+      "count": 1,
+      "gone": true,
+      "intersections": true
+    }
   },
   "gui/PointerSprite": {
-    "0": {
-      "__undefined__": true
-    },
-    "1": "constructor,create3DObject,destroy,drawFrame,getAnimationRunner,getFrame,getFrameCount,getSize,setAnimationRunner,setFrame,update"
+    "0": 100,
+    "1": "constructor,create3DObject,destroy,drawFrame,getAnimationRunner,getFrame,getFrameCount,getSize,setAnimationRunner,setFrame,update",
+    "2": {
+      "mid": [
+        1,
+        3,
+        {
+          "width": 8,
+          "height": 8
+        }
+      ],
+      "rangeErr": "RangeError"
+    }
   },
   "gui/ReactFormat": {
-    "0": 2,
-    "1": "ReactFormat"
+    "0": {
+      "n": 3,
+      "first": "a",
+      "secondKind": "object",
+      "secondText": "B"
+    },
+    "1": "ReactFormat",
+    "2": {
+      "hrefs": [
+        "https://a.example/x",
+        "https://b.example/y"
+      ],
+      "texts": [
+        "go ",
+        " and ",
+        " end"
+      ],
+      "targets": 2
+    }
   },
   "gui/ReplayManager": {
-    "0": "constructor,deleteReplay,importReplay,keepReplay,loadList,loadReplay,loadSerializedReplay,saveReplay"
+    "0": "constructor,deleteReplay,importReplay,keepReplay,loadList,loadReplay,loadSerializedReplay,saveReplay",
+    "1": {
+      "bound": true,
+      "err": "Replay is not initialized"
+    }
   },
   "gui/ShpSpriteBatch": {
     "0": "constructor,create3DObject,createAggregatedShpFile,createObjects,destroy"
@@ -16250,7 +16410,11 @@
     "0": "constructor,create3DObject,destroy,getAnimationRunner,getFrame,getFrameCount,getSize,setAnimationRunner,setFrame,setLightMult,setOpacity,setTransparent,update"
   },
   "gui/UiScene": {
-    "0": "constructor,create3DObject,destroy,menuViewport,setCamera,setViewport,update"
+    "0": "constructor,create3DObject,destroy,menuViewport,setCamera,setViewport,update",
+    "1": {
+      "type": "function",
+      "arity": 1
+    }
   },
   "gui/chat/ChatHistory": {
     "0": "addChatMessage,constructor,getAll,onNewMessage"
@@ -16701,7 +16865,11 @@
   },
   "gui/screen/game/worldInteraction/BeaconMode": {
     "0": "BeaconMode",
-    "1": "cancel,constructor,dispose,end,enter,execute,hover,onExecute"
+    "1": "cancel,constructor,dispose,end,enter,execute,hover,onExecute",
+    "2": {
+      "type": "function",
+      "arity": 2
+    }
   },
   "gui/screen/game/worldInteraction/CameraPanHandler": {
     "0": "CameraPanHandler",
@@ -16714,7 +16882,11 @@
     "0": [
       2,
       6
-    ]
+    ],
+    "1": {
+      "type": "function",
+      "arity": 7
+    }
   },
   "gui/screen/game/worldInteraction/InteractionMode": {
     "0": 0
@@ -16732,11 +16904,19 @@
   },
   "gui/screen/game/worldInteraction/PendingPlacementHandler": {
     "0": "PendingPlacementHandler",
-    "1": "addGrid,constructor,dispose,init,pushPlacementInfo,removeGrid,removePendingPlacement"
+    "1": "addGrid,constructor,dispose,init,pushPlacementInfo,removeGrid,removePendingPlacement",
+    "2": {
+      "type": "function",
+      "arity": 4
+    }
   },
   "gui/screen/game/worldInteraction/PlacementMode": {
     "0": "PlacementMode",
-    "1": "cancel,constructor,dispose,endConstrMode,enter,execute,getBuilding,getBuildingRangeCircle,hideBuildingRangeOverlays,hover,init,onBuildingPlaceRequest,prepareBuildingRanges,setBuilding,showBuildingRangeOverlays,updateGridModel"
+    "1": "cancel,constructor,dispose,endConstrMode,enter,execute,getBuilding,getBuildingRangeCircle,hideBuildingRangeOverlays,hover,init,onBuildingPlaceRequest,prepareBuildingRanges,setBuilding,showBuildingRangeOverlays,updateGridModel",
+    "2": {
+      "type": "function",
+      "arity": 5
+    }
   },
   "gui/screen/game/worldInteraction/PlanningMode": {
     "0": "PlanningMode",
@@ -16744,15 +16924,27 @@
   },
   "gui/screen/game/worldInteraction/RepairMode": {
     "0": "RepairMode",
-    "1": "cancel,constructor,dispose,end,enter,execute,findRepairableBuilding,hover,onExecute"
+    "1": "cancel,constructor,dispose,end,enter,execute,findRepairableBuilding,hover,onExecute",
+    "2": {
+      "type": "function",
+      "arity": 5
+    }
   },
   "gui/screen/game/worldInteraction/SellMode": {
     "0": "SellMode",
-    "1": "cancel,constructor,dispose,end,enter,execute,hover,isRefundableObject,onExecute"
+    "1": "cancel,constructor,dispose,end,enter,execute,hover,isRefundableObject,onExecute",
+    "2": {
+      "type": "function",
+      "arity": 5
+    }
   },
   "gui/screen/game/worldInteraction/SpecialActionMode": {
     "0": "SpecialActionMode",
-    "1": "cancel,constructor,dispose,end,enter,execute,hover,onExecute,superWeaponType"
+    "1": "cancel,constructor,dispose,end,enter,execute,hover,onExecute,superWeaponType",
+    "2": {
+      "type": "function",
+      "arity": 6
+    }
   },
   "gui/screen/game/worldInteraction/Tooltip": {
     "0": "Tooltip",

@@ -5,6 +5,8 @@
  * 由 engine/gfx/SpriteUtils.ts.js 重写为 TS（行为完全一致）。两个文件
  * 并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts
  * 模块的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { isBetween } from "util/math"; // 已转换
 import { BufferGeometryUtils } from "engine/gfx/BufferGeometryUtils"; // 孪生（本批内一并转换）
@@ -27,8 +29,9 @@ export interface SpriteGeometryParams {
   [key: string]: any;
 }
 
-/** SpriteUtils 实例（与孪生 export const SpriteUtils = new SpriteUtils() 对齐）。 */
-export class SpriteUtils {
+/** SpriteUtils 实现类。孪生导出的是单例实例（export const SpriteUtils = new SpriteUtils()），
+ *  对外（如 l.SpriteUtils.createSpriteGeometry）都是实例方法；MAGIC_DEPTH_SCALE 为类静态。 */
+class SpriteUtilsImpl {
   USE_INDEXED_GEOMETRY = true;
   VERTICES_PER_SPRITE = this.USE_INDEXED_GEOMETRY ? 8 : 12;
   TRIANGLES_PER_SPRITE = 4;
@@ -169,7 +172,7 @@ export class SpriteUtils {
   applyDepth(geometry: any, camera: any, depthOffset: number): void {
     const position = geometry.getAttribute("position");
     for (let i = 0, n = position.count; i < n; i++) {
-      const scaled = position.getX(i) * SpriteUtils.MAGIC_DEPTH_SCALE;
+      const scaled = position.getX(i) * SpriteUtilsImpl.MAGIC_DEPTH_SCALE;
       const z =
         scaled < 0
           ? depthOffset - (Math.abs(scaled) / Math.cos(camera.rotation.x)) * Math.tan(camera.rotation.y)
@@ -184,3 +187,5 @@ export class SpriteUtils {
     for (let i = 0, n = position.count; i < n; i++) position.setZ(i, depthOffset);
   }
 }
+
+export const SpriteUtils = new SpriteUtilsImpl();

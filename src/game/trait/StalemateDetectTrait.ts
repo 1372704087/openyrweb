@@ -9,6 +9,8 @@
  * game/trait/StalemateDetectTrait.ts.js 重写为 TS（行为完全一致）。两个文
  * 件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模
  * 块的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as StalemateDetectEventModule from "game/event/StalemateDetectEvent"; // 未转换（any-shim）
 import * as GameSpeedModule from "game/GameSpeed"; // 已转换

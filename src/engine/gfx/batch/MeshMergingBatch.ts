@@ -4,6 +4,8 @@
  * 由 engine/gfx/batch/MeshMergingBatch.ts.js 重写为 TS（行为完全一致）。两个
  * 文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用
  * .ts 模块的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { MergedSpriteMesh } from "engine/gfx/batch/MergedSpriteMesh"; // 孪生（本批内一并转换）
 

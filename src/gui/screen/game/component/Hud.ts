@@ -2,6 +2,8 @@
  * Hud — 对局 HUD 根（侧栏/雷达/命令栏/消息/菜单内容区）。
  *
  * 由 gui/screen/game/component/Hud.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as jsxModule from "gui/jsx/jsx"; // 孪生
 import * as ShpFileModule from "data/ShpFile"; // 孪生

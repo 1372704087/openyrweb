@@ -7,6 +7,8 @@
  * 目标已败北时：若开启资产再分配则改给源阵营第一个盟友，否则放弃转移。
  *
  * 由 game/trigger/executor/ChangeHouseAllExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { TriggerExecutor } from "game/trigger/TriggerExecutor"; // 本组已写
 

@@ -10,6 +10,8 @@
  * - doGameTurn 消费 tickNo === currentTick 的事件；tick 落后抛 desync。
  * - endTick+1 <= currentTick 时置 GameStatus.Ended；结束后 speed=0。
  * - processActions 经 actionFactory 创建动作并 process()，可选 debug 打印。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import * as GameModule from "game/Game"; // 孪生

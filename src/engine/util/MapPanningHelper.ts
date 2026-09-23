@@ -4,6 +4,8 @@
  * 由 engine/util/MapPanningHelper.ts.js 重写为 TS（行为完全一致）。两个文件
  * 并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块
  * 的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 // 孪生模块仅经 wildcard `export = any` 可达，命名导出需经模块对象取值。
 import * as IsoCoordsModule from "engine/IsoCoords"; // 孪生

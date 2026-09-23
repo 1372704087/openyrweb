@@ -5,6 +5,8 @@
  * 找到 IronCurtain 超武规则后经 SuperWeaponsTrait.activateEffect 施放。
  *
  * 由 game/trigger/executor/IronCurtainExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { SuperWeaponsTrait } from "game/trait/SuperWeaponsTrait"; // 孪生
 import { SuperWeaponType } from "game/type/SuperWeaponType"; // 孪生

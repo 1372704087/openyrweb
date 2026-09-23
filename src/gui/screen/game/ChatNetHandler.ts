@@ -2,6 +2,8 @@
  * ChatNetHandler — 订阅 gserv/wol 聊天消息，本地展示与发送路由。
  *
  * 由 gui/screen/game/ChatNetHandler.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { CompositeDisposable } from "util/disposable/CompositeDisposable"; // 已转换
 import * as ChatMessageModule from "network/chat/ChatMessage"; // 孪生

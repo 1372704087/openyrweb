@@ -8,6 +8,8 @@
  * 关键语义（勿改）：
  * - 未 setUrl 时各请求 throw "No ladder URL is set"。
  * - URL 路径拼接、CURRENT_SEASON/PREV_SEASON 静态属性、POST body 形状与孪生一致。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import * as wladderConfig from "network/ladder/wladderConfig"; // 孪生

@@ -3,6 +3,8 @@
  *
  * 由 gui/screen/game/worldInteraction/PlanningMode.ts.js
  * 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { OrderType } from "game/order/OrderType"; // 已转换
 import { SoundKey } from "engine/sound/SoundKey"; // 已转换

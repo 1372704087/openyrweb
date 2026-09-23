@@ -2,6 +2,8 @@
  * GameLoader — 对局资源装载（剧场/音效/纹理/VXL/bot 库/进度回调）。
  *
  * 由 gui/screen/game/GameLoader.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { DataStream } from "data/DataStream"; // 已转换
 import * as cancellationModule from "@puzzl/core/lib/async/cancellation"; // 孪生

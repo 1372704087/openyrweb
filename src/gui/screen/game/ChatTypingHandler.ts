@@ -5,6 +5,8 @@
  * Enter/Backspace 可在未输入时启动输入（Backspace 预设团队收件人）。
  *
  * 由 gui/screen/game/ChatTypingHandler.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as ChatMessageModule from "network/chat/ChatMessage"; // 孪生
 import * as gservConfigModule from "network/gservConfig"; // 孪生

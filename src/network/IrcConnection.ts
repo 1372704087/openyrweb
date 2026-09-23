@@ -11,6 +11,8 @@
  * - sendCommand 支持 replyCodes / start-end / replyMatch / replyRawText 四种匹配。
  * - 超时/关闭/取消分别映射 NoReplyError / SocketError / OperationCanceledError。
  * - 命名空间导出 NoReplyError / SocketError / ConnectError。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { OperationCanceledError } from "@puzzl/core/lib/async/cancellation"; // 孪生

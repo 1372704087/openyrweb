@@ -10,6 +10,8 @@
  * 由 game/action/ActionFactoryReg.ts.js 重写为 TS。两个
  * 文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用
  * .ts 模块的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import type { ActionFactory as ActionFactoryInstance } from "game/action/ActionFactory"; // 已转换
 import { OrderActionContext } from "game/action/OrderActionContext"; // 已转换

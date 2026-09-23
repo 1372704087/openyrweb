@@ -7,6 +7,8 @@
  *
  * 关键语义（勿改）：每 5 个逗号分隔字段为一名玩家条目，
  * 顺序为 name, status, loadPercent, ping, lagAllowanceMillis。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 /** 单名玩家的加载进度条目。 */

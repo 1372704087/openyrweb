@@ -6,6 +6,8 @@
  * 索引（campaignHouses）→ 13+索引。
  *
  * 由 game/trigger/executor/AllianceExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { AllianceStatus } from "game/Alliances"; // 孪生
 import { TriggerExecutor } from "game/trigger/TriggerExecutor"; // 本组已写

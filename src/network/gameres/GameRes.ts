@@ -12,6 +12,8 @@
  * - toFlat 键与 BAMR 位打包（mcvRepacks | buildOffAlly<<1）、
  *   fromFlat 对 DSTB/ICAP 缺省 true、MENG/DOGK/DOIL 缺省 false、HRV/STP 缺省 -1。
  * - toBinary 头：uint16BE(body+4) + uint16BE(0) + body。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { DataStream } from "data/DataStream"; // 孪生

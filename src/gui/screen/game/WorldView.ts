@@ -2,6 +2,8 @@
  * WorldView — 构建世界场景、光照、渲染件与 FX 处理器。
  *
  * 由 gui/screen/game/WorldView.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { CompositeDisposable } from "util/disposable/CompositeDisposable"; // 已转换
 import * as WorldSceneModule from "engine/renderable/WorldScene"; // 孪生

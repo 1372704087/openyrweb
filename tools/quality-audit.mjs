@@ -12,11 +12,14 @@
  *     坏文件，叠加 noEmitOnError 后 repack 静默回退孪生 ⇒ 整批转换白做；
  *   - 探针只写 `typeof ns.X`：快照里记的就是 "function"，把模块换成空壳也照样 PASS
  *     （行为零覆盖）—— 漏掉运行时缺陷的头号原因；
- *   - B 里出现重复登记 / 快照里残留旧探针的孤儿键（探针被换过、旧值还在做基线）。
+ *   - B 里出现重复登记 / 快照里残留旧探针的孤儿键（探针被换过、旧值还在做基线）；
+ *   - static factory 丢掉孪生参数交换（如 HtmlReactElement.factory(Component, options)
+ *     被写成 factory(options, Component)）—— 签名 arity 相同，tsc/parity 形状探针全绿，
+ *     运行时组件/props 颠倒才炸。
  *
  * 用法：
  *   node tools/quality-audit.mjs           # 有硬失败时退出码 1
- *   node tools/quality-audit.mjs --list    # 额外列出全部「弱探针」模块
+ *   node tools/quality-audit.mjs --list    # 额外列出全部「弱探针」/缺 factory 探针模块
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -55,16 +58,67 @@ const paritySrc = fs.readFileSync(PARITY, "utf8");
 const entries = [...paritySrc.matchAll(/\{\s*\n?\s*name:\s*"([^"]+)",\s*\n?\s*tsjs:\s*"([^"]+)"/g)].map((m) => ({
   name: m[1],
   tsjs: m[2],
+  index: m.index,
 }));
 
 function probesOf(name) {
-  const at = paritySrc.indexOf(`"${name}"`);
+  // 必须匹配 name 字段：裸 "path" 会命中别的探针里的 mod("path") 首次出现
+  const at = paritySrc.indexOf(`name: "${name}"`);
   if (at < 0) return null;
   const pi = paritySrc.indexOf("probes:", at);
-  if (pi < 0) return null;
+  if (pi < 0 || pi - at > 200) return null;
   return sliceBracket(paritySrc, paritySrc.indexOf("[", pi));
 }
 const probeCount = (pr) => (pr.match(/=>/g) || []).length;
+
+/** 去掉 TS 类型注解后的形参名列表。 */
+function paramNames(paramSrc) {
+  return paramSrc
+    .split(",")
+    .map((p) => p.trim().replace(/:.*/, "").trim())
+    .filter(Boolean);
+}
+
+/**
+ * 比对 static factory 的调用参数顺序（TS 源码 ⇄ 孪生）。
+ * 返回 mismatch 列表；解析失败（单侧无 factory）则跳过。
+ */
+function factoryOrderMismatches() {
+  const out = [];
+  for (const e of entries) {
+    const tsPath = path.join(ROOT, "src", e.name + ".ts");
+    const twPath = path.join(ROOT, "src", e.name + ".ts.js");
+    if (!fs.existsSync(tsPath) || !fs.existsSync(twPath)) continue;
+    const ts = fs.readFileSync(tsPath, "utf8");
+    const tw = fs.readFileSync(twPath, "utf8");
+    const tsM = ts.match(/static\s+factory\s*\(([^)]*)\)[^{]*\{([\s\S]{0,500}?)\n  \}/);
+    const twM = tw.match(/static\s+factory\s*\(([^)]*)\)\s*\{([\s\S]{0,500}?)\}/);
+    if (!tsM || !twM) continue;
+    const pT = paramNames(tsM[1]);
+    const pW = paramNames(twM[1]);
+    const cT =
+      (tsM[2].match(/new\s+\(this as any\)\(([^)]*)\)/) ||
+        tsM[2].match(/new this\(([^)]*)\)/) ||
+        [])[1];
+    const cW = (twM[2].match(/new this\(([^)]*)\)/) || [])[1];
+    if (cT == null || cW == null || pT.length < 2 || pT.length !== pW.length) continue;
+    const aT = cT.split(",").map((s) => s.trim()).filter(Boolean);
+    const aW = cW.split(",").map((s) => s.trim()).filter(Boolean);
+    if (aT.length !== aW.length || aT.length < 2) continue;
+    const oT = aT.map((a) => pT.indexOf(a));
+    const oW = aW.map((a) => pW.indexOf(a));
+    // 形参下标序列不一致 ⇒ 交换语义与孪生不同（HtmlReactElement 类 bug）
+    if (JSON.stringify(oT) !== JSON.stringify(oW)) {
+      // 仅当两侧都在用形参变量（不是字面量）时才算交换差异
+      if (oT.every((x) => x >= 0) && oW.every((x) => x >= 0)) {
+        out.push(
+          `${e.name}: factory(${pT}) → (${aT}) order=${oT} vs twin factory(${pW}) → (${aW}) order=${oW}`,
+        );
+      }
+    }
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------- 1. 登记 ⇄ 磁盘
 console.log("=== 1. parity 登记 ⇄ 磁盘 .ts ===");
@@ -147,6 +201,36 @@ if (weakMods.length) {
   if (!LIST && weakMods.length > 8) console.log(`     …（共 ${weakMods.length} 个，加 --list 看全部）`);
 }
 
+// ---------------------------------------------------------------- 4b. static factory 必须有调用/引用探针
+console.log("\n=== 4b. static factory ⇄ 探针覆盖 ===");
+const noFactoryProbe = [];
+for (const e of entries) {
+  const tsPath = path.join(ROOT, "src", e.name + ".ts");
+  if (!fs.existsSync(tsPath)) continue;
+  const src = fs.readFileSync(tsPath, "utf8");
+  if (!/static\s+factory\s*\(/.test(src)) continue;
+  const pr = probesOf(e.name);
+  if (pr === null) continue;
+  if (!/factory/.test(pr)) noFactoryProbe.push(e.name);
+}
+if (noFactoryProbe.length) {
+  fail(
+    `含 static factory 但探针未引用 factory（装配顺序/交换语义零覆盖）${noFactoryProbe.length} 个：` +
+      noFactoryProbe.join(", "),
+  );
+} else {
+  console.log("  ✓ 全部 static factory 模块的探针都触及 factory");
+}
+
+// ---------------------------------------------------------------- 4c. factory 参数顺序（源码 ⇄ 孪生）
+console.log("\n=== 4c. static factory 参数顺序（TS ⇄ 孪生）===");
+const orderBad = factoryOrderMismatches();
+if (orderBad.length) {
+  for (const m of orderBad) fail(m);
+} else {
+  console.log("  ✓ 两参及以上 factory 的 new this(...) 形参顺序与孪生一致");
+}
+
 // ---------------------------------------------------------------- 5. 快照孤儿键
 console.log("\n=== 5. parity 快照孤儿键 ===");
 try {
@@ -167,6 +251,29 @@ try {
   if (errorEntries) warn("两侧抛同一个错也算 PASS —— 新增探针捕获到错误时必须人工确认它是「有意的错误断言」而不是探针写坏了。");
 } catch (e) {
   fail("读取 tests/parity-snapshots.json 失败: " + String(e).slice(0, 120));
+}
+
+// ---------------------------------------------------------------- 6. 双文件注释（有孪生的 .ts）
+console.log("\n=== 6. 双文件并存注释 ===");
+let dualMissing = 0;
+let dualNoTwin = 0;
+for (const f of disk) {
+  const twin = f + ".js";
+  const full = path.join(ROOT, f);
+  const hasTwin = fs.existsSync(path.join(ROOT, twin));
+  const text = fs.readFileSync(full, "utf8");
+  const hasNote = text.includes("两个文件并存期间");
+  if (hasTwin && !hasNote) {
+    dualMissing++;
+    if (LIST || dualMissing <= 5) warn(`${f} 有孪生但缺少「两个文件并存期间」注释`);
+  } else if (!hasTwin && !f.startsWith("src/extensions/") && hasNote) {
+    dualNoTwin++;
+  }
+}
+console.log(`  有孪生缺注释 ${dualMissing} 个／注释声明有孪生但磁盘无孪生 ${dualNoTwin} 个`);
+if (dualMissing) {
+  // 历史批次欠账：列表过长时只 warn 数量，--list 看全量；新增文件应带上注释
+  warn("新转换文件必须带「两个文件并存期间…」注释（指明 .ts 是修改目标）；历史欠账用 --list 查看。");
 }
 
 // ---------------------------------------------------------------- 汇总

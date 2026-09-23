@@ -9,6 +9,8 @@
  * - recordActions 接受单玩家数组或 Map 玩家→动作列表；无实质动作时跳过。
  * - 聊天/挑衅通过 humanPlayers 按 name 反查 playerId 下标。
  * - 仅当存在 id !== ActionType.NoAction 的动作才算 hasActualActions。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { ActionType } from "game/action/ActionType"; // 孪生

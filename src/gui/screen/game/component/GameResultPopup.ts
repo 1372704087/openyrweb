@@ -2,6 +2,8 @@
  * GameResultPopup — 胜负结算弹层（grfxtxt.shp 按 type 取帧）。
  *
  * 由 gui/screen/game/component/GameResultPopup.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as jsxModule from "gui/jsx/jsx"; // 孪生
 import * as UiObjectModule from "gui/UiObject"; // 孪生

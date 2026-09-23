@@ -9,6 +9,8 @@
  * - serializeOptions 字段顺序、`6 - gameSpeed`、末尾 `:@:` 与 AI 尾逗号与孪生一致。
  * - serializeSlotData 对未识别 AI 难度 throw 消息与孪生一致。
  * - MAX_ACTION_PAYLOAD_SIZE = 65536 与越界 RangeError 消息与孪生一致。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { DataStream } from "data/DataStream"; // 孪生

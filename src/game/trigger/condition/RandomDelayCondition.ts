@@ -5,6 +5,8 @@
  * 之后每帧 elapsedTicks++，超过 timerTicks 才为 true。reset() 清空以便重掷。
  *
  * 由 game/trigger/condition/RandomDelayCondition.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { GameSpeed } from "game/GameSpeed"; // 孪生
 import { TriggerCondition } from "game/trigger/TriggerCondition"; // 本组已写

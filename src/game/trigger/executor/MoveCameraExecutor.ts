@@ -7,6 +7,8 @@
  * 路径点参数在 params[6]（AZ 编码，readActions 已转成编号），速度在 params[1]。
  *
  * 由 game/trigger/executor/MoveCameraExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { TriggerExecutor } from "game/trigger/TriggerExecutor"; // 本组已写
 

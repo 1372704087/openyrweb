@@ -5,6 +5,8 @@
  * 对其空闲步兵 addTask(CheerTask)。
  *
  * 由 game/trigger/executor/CheerExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { ObjectType } from "engine/type/ObjectType"; // 孪生
 import { CheerTask } from "game/gameobject/task/CheerTask"; // 孪生

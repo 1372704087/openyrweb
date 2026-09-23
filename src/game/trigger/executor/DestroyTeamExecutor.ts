@@ -6,6 +6,8 @@
  * 优先 scenarioTeamRuntime.destroyTeam；否则遍历 AI 引擎 destroyTeam。
  *
  * 由 game/trigger/executor/DestroyTeamExecutor.ts.js 重写为 TS。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { TriggerExecutor } from "game/trigger/TriggerExecutor"; // 本组已写
 

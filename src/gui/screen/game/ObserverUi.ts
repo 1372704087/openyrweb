@@ -2,6 +2,8 @@
  * ObserverUi — 观察者/回放侧栏与键位（切换观察玩家、快捷键绑定）。
  *
  * 由 gui/screen/game/ObserverUi.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as ReactModule from "react"; // 孪生
 import { CompositeDisposable } from "util/disposable/CompositeDisposable"; // 已转换

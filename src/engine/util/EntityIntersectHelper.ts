@@ -10,6 +10,8 @@
  *
  * THREE.Object3D 未列入 three-global.d.ts 最小声明，本文件以局部 any 别名
  * 对齐运行时行为（不扩展全局 ambient，避免影响其它组）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as GeometryUtil from "util/geometry"; // 孪生
 

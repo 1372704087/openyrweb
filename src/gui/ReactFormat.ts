@@ -14,7 +14,12 @@ const React: any = (ReactModule as any).default;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** 匹配 [text](url) 或裸 URL/mailto。 */
+/**
+ * 匹配 [text](url) 或裸 URL/mailto。
+ *
+ * 含 /g：split 后再 `.test` 会推进 lastIndex（已知继承自孪生的缺陷，
+ * 与 `src/gui/ReactFormat.ts.js` 保持同构；修 bug 必须两侧同改 + 重录快照）。
+ */
 const URL_SPLIT_RE = /(\[(?:[^\]]+)\]\((?:https?:\/\/[^\s]+|mailto:[^\s]+)\))|(https?:\/\/[^\s]+|mailto:[^\s]+)/g;
 /** 整段 Markdown 链接。 */
 const MARKDOWN_LINK_RE = /^\[([^\]]+)\]\((https?:\/\/[^\s]+|mailto:[^\s]+)\)$/;

@@ -8,6 +8,8 @@
  * 关键语义（勿改）：
  * - encode：匹配 `^[a-z0-9-_]+\.[a-z]{3}$` 则原样返回，否则 utf16→binary 再 Base64。
  * - decode：匹配 `\.[a-z]{3}$` 则原样返回，否则 Base64→binary 再转 utf16。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { Base64 } from "util/Base64"; // 孪生

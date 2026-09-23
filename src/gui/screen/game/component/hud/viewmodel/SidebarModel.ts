@@ -3,6 +3,8 @@
  *
  * 由 gui/screen/game/component/hud/viewmodel/SidebarModel.ts.js
  * 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as SidebarTabModule from "gui/screen/game/component/hud/viewmodel/SidebarTab"; // 孪生
 import { GameSpeed } from "game/GameSpeed"; // 已转换

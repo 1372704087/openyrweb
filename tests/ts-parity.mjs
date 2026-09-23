@@ -21738,7 +21738,7 @@ const CONVERTED = [
           const Throttle = ns.Throttle;
           return {
             slept: dt >= 4,
-            dt,
+            // 绝对 dt 受调度抖动影响，不写入快照
             hasThrottleDecorator: typeof Throttle === "function",
           };
         });
@@ -22354,6 +22354,12 @@ const CONVERTED = [
           params: ["u", "=", "#chan", "@Bob,Carol,42,1"],
           time: 0,
         });
+      },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["WolConnection"] && ns["WolConnection"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
       },
     ],
   },
@@ -23330,6 +23336,12 @@ const CONVERTED = [
         }
         return err;
       },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["GservConnection"] && ns["GservConnection"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -23793,6 +23805,12 @@ const CONVERTED = [
       
       return { keys: Object.keys(ns).sort(), expected: ["Theater"], types: t };
     }
+    ,
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["Theater"] && ns["Theater"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -25383,6 +25401,12 @@ const CONVERTED = [
           ns.ObjectArt.getDefaultHeight(ObjectType.Infantry),
         ];
       },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["ObjectArt"] && ns["ObjectArt"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -26184,6 +26208,12 @@ const CONVERTED = [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "OctreeContainer": typeof ns["OctreeContainer"] }),
       (ns) => { const p = ns["OctreeContainer"]?.prototype ?? {}; return ["update","cullChildren","computeProjectionMatrix","updateChild"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["OctreeContainer"] && ns["OctreeContainer"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -26546,6 +26576,12 @@ const CONVERTED = [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "ShpRenderable": typeof ns["ShpRenderable"] }),
       (ns) => { const p = ns["ShpRenderable"]?.prototype ?? {}; return ["get3DObject","setBatched","setBatchPalettes","setSize","getFlat","setFlat","setFrame","setFrameOffset","setPalette","setExtraLight","setOpacity","setForceTransparent"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["ShpRenderable"] && ns["ShpRenderable"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -26576,6 +26612,12 @@ const CONVERTED = [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "WorldScene": typeof ns["WorldScene"] }),
       (ns) => { const p = ns["WorldScene"]?.prototype ?? {}; return ["updateViewport","updateCamera","create3DObject","updateShadowQuality","setLightFocusPoint","markBatchRebuild","applyLighting","update","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["WorldScene"] && ns["WorldScene"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -27874,6 +27916,12 @@ const CONVERTED = [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "Debris": typeof ns["Debris"] }),
       (ns) => { const p = ns["Debris"]?.prototype ?? {}; return ["onSpawn","update","detonate"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["Debris"] && ns["Debris"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -27894,6 +27942,12 @@ const CONVERTED = [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "Overlay": typeof ns["Overlay"] }),
       (ns) => { const p = ns["Overlay"]?.prototype ?? {}; return ["isTiberium","isBridge","isXBridge","isHighBridge","isLowBridge","isBridgePlaceholder","getFoundation","getLandType"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["Overlay"] && ns["Overlay"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -27905,6 +27959,12 @@ const CONVERTED = [
       (ns) => ({ "Projectile": typeof ns["Projectile"], "ProjectileState": typeof ns["ProjectileState"] }),
       (ns) => { const p = ns["Projectile"]?.prototype ?? {}; return ["onSpawn","adjustAimForBallisticScatter","calculateBallisticOvershootVsMoving","calculateInaccurateBallisticOvershoot","update","isHoming","isInHomingRange","updateSpeed","computeMaxSpeed","checkObstacles","computeBaseDamage","detonate"].filter((k) => typeof p[k] === "function").sort().join(","); },
       (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["Projectile"] && ns["Projectile"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
 
@@ -28257,6 +28317,11 @@ const CONVERTED = [
     tsjs: "src/gui/CanvasMetrics.ts.js",
     probes: [
       (ns) => Object.getOwnPropertyNames(ns.CanvasMetrics.prototype).sort().join(","),
+      (ns) => {
+        // 不 init（需 window）：只驱动字段初值与 update 写回（getOffset 需 DOM，跳过）
+        const m = new ns.CanvasMetrics({ width: 3, height: 4 }, {});
+        return [m.x, m.y, m.width, m.height, typeof m.updateCanvasBoxMetrics];
+      },
     ],
   },
   {
@@ -28265,6 +28330,26 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.FullScreen.prototype).sort().join(","),
+      (ns) => {
+        // 驱动静态快捷键判定：与孪生 hotKey 默认 Alt+F 对齐
+        const hk = ns.FullScreen.hotKey;
+        const hit = {
+          keyCode: hk.keyCode,
+          altKey: hk.altKey,
+          shiftKey: hk.shiftKey,
+          ctrlKey: hk.ctrlKey,
+          metaKey: hk.metaKey,
+        };
+        const wrong = { ...hit, altKey: !hk.altKey };
+        const fs = new ns.FullScreen({ fullscreenEnabled: true, fullscreenElement: null });
+        return {
+          keyCode: hk.keyCode,
+          hit: ns.FullScreen.isFullScreenHotKey(hit),
+          miss: ns.FullScreen.isFullScreenHotKey(wrong),
+          available: fs.isAvailable(),
+          full: fs.isFullScreen(),
+        };
+      },
     ],
   },
   {
@@ -28272,6 +28357,23 @@ const CONVERTED = [
     tsjs: "src/gui/HtmlContainer.ts.js",
     probes: [
       (ns) => Object.getOwnPropertyNames(ns.HtmlContainer.prototype).sort().join(","),
+      (ns) => {
+        // 不 render（需 document）：驱动 position/size/visibility 状态机
+        const c = new ns.HtmlContainer();
+        c.setSize(10, 20);
+        c.setPosition(1, 2);
+        c.setVisible(false);
+        c.setRelativeMode(true);
+        c.setTranslateMode(true);
+        return {
+          size: c.getSize(),
+          left: c.left,
+          top: c.top,
+          visible: c.visible,
+          relative: c.relativeMode,
+          translate: c.translateMode,
+        };
+      },
     ],
   },
   {
@@ -28280,6 +28382,18 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.HtmlReactElement.prototype || {}).sort().join(","),
+      (ns) => {
+        // 回归：factory(Component, options) 必须交换成 ctor(options, Component)
+        // （d0e344e 曾丢掉孪生交换，组件/props 颠倒致 React #130）
+        const Comp = function HtmlReactElementProbeComponent() {};
+        const opts = { probe: 42 };
+        const inst = ns.HtmlReactElement.factory(Comp, opts);
+        return {
+          componentIsFn: typeof inst.Component === "function" && inst.Component === Comp,
+          optionsIsProps: inst.options === opts && inst.options.probe === 42,
+          arity: ns.HtmlReactElement.factory.length,
+        };
+      },
     ],
   },
   {
@@ -28287,6 +28401,34 @@ const CONVERTED = [
     tsjs: "src/gui/LazyHtmlElement.ts.js",
     probes: [
       (ns) => Object.getOwnPropertyNames(ns.LazyHtmlElement.prototype).sort().join(","),
+      (ns) => {
+        const root = {
+          appendChild() {},
+          removeChild() {},
+        };
+        const node = new ns.LazyHtmlElement(root);
+        const child = {
+          rendered: false,
+          render() {
+            this.rendered = true;
+          },
+          unrender() {
+            this.rendered = false;
+          },
+          getElement() {
+            return { parentElement: root };
+          },
+        };
+        node.add(child);
+        const afterAdd = node.getChildren().length;
+        node.remove(child);
+        return {
+          afterAdd,
+          afterRemove: node.getChildren().length,
+          childRendered: child.rendered,
+          isRendered: node.isRendered(),
+        };
+      },
     ],
   },
   {
@@ -28294,6 +28436,49 @@ const CONVERTED = [
     tsjs: "src/gui/Pointer.ts.js",
     probes: [
       (ns) => Object.getOwnPropertyNames(ns.Pointer.prototype).sort().join(","),
+      (ns) => {
+        // 驱动 setPointerType：滚动类直接 setFrame，其余走动画端点推算
+        const frames = [];
+        const sprite = {
+          setAnimationRunner(r) {
+            frames.push(["runner", !!r]);
+          },
+          setFrame(f) {
+            frames.push(["frame", f]);
+          },
+          getFrameCount() {
+            return 100;
+          },
+          getSize() {
+            return { width: 32, height: 32 };
+          },
+          setPosition(x, y) {
+            frames.push(["pos", x, y]);
+          },
+          setVisible() {},
+        };
+        const pointer = Object.create(ns.Pointer.prototype);
+        pointer.pointerType = 0;
+        pointer.pointerSubFrame = 0;
+        pointer.sprite = sprite;
+        pointer.position = { x: 50, y: 60 };
+        pointer.canvasMetrics = { x: 0, y: 0, width: 200, height: 100 };
+        pointer.userLockMode = false;
+        pointer.userPointerVisible = true;
+        pointer.userPermissionGranted = false;
+        pointer.document = {};
+        pointer.canvas = { addEventListener() {}, removeEventListener() {} };
+        pointer.pointerLock = { isActive: () => false, onChange: { subscribe() {} }, request: async () => {}, exit: async () => {} };
+        // Scroll = 2（与 engine/type/PointerType 对齐）
+        pointer.setPointerType(2, 1);
+        return { frames, type: pointer.pointerType, sub: pointer.pointerSubFrame };
+      },
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["Pointer"] && ns["Pointer"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -28301,22 +28486,89 @@ const CONVERTED = [
     tsjs: "src/gui/PointerEvents.ts.js",
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
+      (ns) => {
+        const canvas = {
+          addEventListener() {},
+          removeEventListener() {},
+        };
+        const renderer = {
+          getCanvas: () => canvas,
+          getScenes: () => [],
+        };
+        const pe = new ns.PointerEvents(renderer, { x: 0, y: 0 }, {}, { x: 0, y: 0, width: 10, height: 10 });
+        const fn = () => {};
+        const off = pe.addEventListener("canvas", "mousemove", fn);
+        const count = pe.canvasContext.handlers.get("mousemove").length;
+        off();
+        const gone = !pe.canvasContext.handlers.has("mousemove");
+        pe.dispose();
+        return { count, gone, intersections: pe.intersectionsEnabled };
+      },
     ],
   },
   {
     name: "gui/PointerSprite",
     tsjs: "src/gui/PointerSprite.ts.js",
     probes: [
-      (ns) => ns.HTML_ZINDEX,
+      (ns) => ns.PointerSprite.HTML_ZINDEX,
       (ns) => Object.getOwnPropertyNames(ns.PointerSprite.prototype).sort().join(","),
+      (ns) => {
+        const sp = Object.create(ns.PointerSprite.prototype);
+        sp.images = null;
+        sp.size = { width: 8, height: 8 };
+        sp.frameCount = 3;
+        sp.currentFrame = 0;
+        sp.animationRunner = undefined;
+        sp.targetContext = {
+          clearRect() {},
+          drawImage(...args) {
+            sp._lastBlit = args;
+          },
+        };
+        sp.setFrame(1);
+        const mid = [sp.getFrame(), sp.getFrameCount(), sp.getSize()];
+        let rangeErr = null;
+        try {
+          sp.setFrame(99);
+        } catch (e) {
+          rangeErr = e.name;
+        }
+        return { mid, rangeErr };
+      },
     ],
   },
   {
     name: "gui/ReactFormat",
     tsjs: "src/gui/ReactFormat.ts.js",
     probes: [
-      (ns) => ns.ReactFormat.formatMultiline("a\nb", (s) => s).length,
+      (ns) => {
+        // 多行：每行经 formatter；非首行前插 br
+        const rows = ns.ReactFormat.formatMultiline("a\nb\nc", (s) => s.toUpperCase());
+        return {
+          n: rows.length,
+          first: rows[0],
+          // 第 2 行是 Fragment(br, formatter(line))
+          secondKind: typeof rows[1],
+          secondText: rows[1] && rows[1].props && rows[1].props.children && rows[1].props.children[1],
+        };
+      },
       (ns) => Object.keys(ns).sort().join(","),
+      (ns) => {
+        // 驱动 formatUrls：裸 URL + Markdown 链接（含多段，覆盖全局正则 lastIndex 交互）
+        const el = ns.ReactFormat.formatUrls("go https://a.example/x and [t](https://b.example/y) end");
+        const kids = el.props && el.props.children;
+        const hrefs = [];
+        const texts = [];
+        for (const k of kids || []) {
+          if (k && k.props && k.props.href) hrefs.push(k.props.href);
+          else if (typeof k === "string") texts.push(k);
+        }
+        return {
+          hrefs,
+          texts,
+          targets: (kids || []).filter((k) => k && k.props && k.props.target === "_blank").length,
+        };
+      },
     ],
   },
   {
@@ -28324,6 +28576,33 @@ const CONVERTED = [
     tsjs: "src/gui/ReplayManager.ts.js",
     probes: [
       (ns) => Object.getOwnPropertyNames(ns.ReplayManager.prototype).sort().join(","),
+      (ns) => {
+        // 构造绑定 + 同步错误路径（未初始化名）
+        const storage = {
+          async getManifest() {
+            return [];
+          },
+          async hasReplayData() {
+            return false;
+          },
+          async getReplayData() {
+            return "";
+          },
+          async saveReplayData() {},
+          async deleteReplayData() {},
+          async saveManifest() {},
+        };
+        const mgr = new ns.ReplayManager(storage);
+        const bound = mgr.storage === storage;
+        let err = null;
+        // saveReplay 对空 name 同步抛错（async 函数 → rejected promise）
+        return Promise.resolve()
+          .then(() => mgr.saveReplay({ name: "", serialize: () => "", timestamp: 0 }))
+          .then(
+            () => ({ bound, err: "no-throw" }),
+            (e) => ({ bound, err: String(e && e.message ? e.message : e) }),
+          );
+      },
     ],
   },
   {
@@ -28353,6 +28632,12 @@ const CONVERTED = [
     tsjs: "src/gui/UiScene.ts.js",
     probes: [
       (ns) => Object.getOwnPropertyNames(ns.UiScene.prototype).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["UiScene"] && ns["UiScene"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29223,6 +29508,12 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.BeaconMode.prototype || {}).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["BeaconMode"] && ns["BeaconMode"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29245,6 +29536,12 @@ const CONVERTED = [
     tsjs: "src/gui/screen/game/worldInteraction/DefaultActionHandler.ts.js",
     probes: [
       (ns) => [ns.ActionFilter.NoSelect, Object.keys(ns.ActionFilter).length],
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["DefaultActionHandler"] && ns["DefaultActionHandler"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29283,6 +29580,12 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.PendingPlacementHandler.prototype || {}).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["PendingPlacementHandler"] && ns["PendingPlacementHandler"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29291,6 +29594,12 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.PlacementMode.prototype || {}).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["PlacementMode"] && ns["PlacementMode"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29307,6 +29616,12 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.RepairMode.prototype || {}).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["RepairMode"] && ns["RepairMode"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29315,6 +29630,12 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.SellMode.prototype || {}).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["SellMode"] && ns["SellMode"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -29323,6 +29644,12 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => Object.getOwnPropertyNames(ns.SpecialActionMode.prototype || {}).sort().join(","),
+    
+      (ns) => {
+        // factory 装配面：锁定存在性与 arity（调用顺序见 quality-audit 4c）
+        const F = ns["SpecialActionMode"] && ns["SpecialActionMode"].factory;
+        return { type: typeof F, arity: F ? F.length : -1 };
+      },
     ],
   },
   {
@@ -30871,28 +31198,36 @@ async function main() {
 
     if (!hasTwin) console.log(`  ${mod.name}: twin deleted — snapshot track only`);
 
-    mod.probes.forEach((probe, i) => {
-      let newV, newErr;
-      try {
-        newV = probe(newNs, globalThis.THREE, newMod);
-      } catch (e) {
-        newErr = String(e);
-      }
+    // 必须用 for + await：forEach 回调里的 await 不会阻塞外层循环。
+    for (let i = 0; i < mod.probes.length; i++) {
+      const probe = mod.probes[i];
+      // 探针可返回 Promise（async 行为驱动）：必须 await，否则两侧 Promise
+      // 经 JSON.stringify 都变成 {}，异步分支会假绿。
+      const runProbe = async (ns, modAccessor) => {
+        try {
+          let v = probe(ns, globalThis.THREE, modAccessor);
+          if (v && typeof v.then === "function") v = await v;
+          return { v, err: undefined };
+        } catch (e) {
+          return { v: undefined, err: String(e) };
+        }
+      };
+
       const fail = (msg) => {
         moduleFailures++;
         console.error(`FAIL ${mod.name} probe#${i}: ${msg}`);
       };
 
+      const next = await runProbe(newNs, newMod);
+      const newV = next.v;
+      const newErr = next.err;
+
       // Track 1: old twin vs new TS output.
       if (hasTwin) {
-        let oldV, oldErr;
-        try {
-          oldV = probe(oldNs, globalThis.THREE, oldMod);
-        } catch (e) {
-          oldErr = String(e);
-        }
-        const twinOk = oldErr === newErr && (oldErr !== undefined || deepEqual(oldV, newV));
-        if (!twinOk) fail(`old=${oldErr ?? JSON.stringify(oldV)} new=${newErr ?? JSON.stringify(newV)}`);
+        const old = await runProbe(oldNs, oldMod);
+        const twinOk = old.err === newErr && (old.err !== undefined || deepEqual(old.v, newV));
+        if (!twinOk)
+          fail(`old=${old.err ?? JSON.stringify(old.v)} new=${newErr ?? JSON.stringify(newV)}`);
       }
 
       // Track 2: committed snapshot vs new TS output.
@@ -30907,13 +31242,8 @@ async function main() {
       if (!hasEntry) {
         // First capture. Only legal while the twin still exists, as the oracle.
         if (hasTwin) {
-          let oldV, oldErr;
-          try {
-            oldV = probe(oldNs, globalThis.THREE, oldMod);
-          } catch (e) {
-            oldErr = String(e);
-          }
-          (snapshots[mod.name] ??= {})[i] = encodeOutcome(oldV, oldErr);
+          const old = await runProbe(oldNs, oldMod);
+          (snapshots[mod.name] ??= {})[i] = encodeOutcome(old.v, old.err);
           snapshotsChanged.add(mod.name);
         } else if (UPDATE_SNAPSHOTS) {
           (snapshots[mod.name] ??= {})[i] = encodeOutcome(newV, newErr);
@@ -30932,7 +31262,7 @@ async function main() {
       } else if (newErr !== undefined || !deepEqual(newV, expected.value)) {
         fail(`snapshot=${JSON.stringify(expected.value)} new=${newErr ?? JSON.stringify(newV)} (run: npm run test:parity -- --update-snapshots)`);
       }
-    });
+    }
     totalFailures += moduleFailures;
     console.log(
       `${moduleFailures === 0 ? "PASS" : "FAIL"} ${mod.name}: ${mod.probes.length} probes${hasTwin ? " (twin+snapshot)" : " (snapshot)"}`,

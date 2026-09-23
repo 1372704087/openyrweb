@@ -33,6 +33,8 @@
  * 由 game/gameobject/Building.ts.js 重写为 TS（行为完全一致）。两个文件
  * 并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts
  * 模块的编译产物。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { ObjectType } from "engine/type/ObjectType";
 import * as InfantryAbsorbTraitModule from "game/gameobject/trait/InfantryAbsorbTrait"; // 未转换（any-shim）：转成真实 .ts 后可改具名导入

@@ -2,6 +2,8 @@
  * PingMonitor — 周期向 gserv 发 ping，写入 MedianPing 并广播样本事件。
  *
  * 由 gui/screen/game/PingMonitor.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as IrcConnectionModule from "network/IrcConnection"; // 孪生
 import { EventDispatcher } from "util/event"; // 已转换

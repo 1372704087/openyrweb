@@ -11,6 +11,8 @@
  * - rate 变更队列、comms lag 阈值 LAG_STATE_THRESH_MILLIS、被动模式发送。
  * - 收到动作 → 入 Map 并广播 onActionsReceived；处理 turn-2 后 delete 并广播 onActionsProcessed。
  * - 网络回合慢于游戏回合时走子回合（currentSubTurn）路径。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { DataStream } from "data/DataStream"; // 孪生

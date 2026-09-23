@@ -4,6 +4,8 @@
  * 文件名格式：tau{国家两字母}{两位序号}.wav
  *
  * 由 gui/screen/game/TauntPlayback.ts.js 重写为 TS（行为完全一致）。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import * as ChannelTypeModule from "engine/sound/ChannelType"; // 孪生
 import { pad } from "util/string"; // 已转换

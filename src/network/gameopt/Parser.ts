@@ -9,6 +9,8 @@
  * - parseOptions 的字段顺序、`6 - speed`、缺省 `?? "1"`/`?? "0"` 与孪生一致。
  * - parseTopic 在段数 < 6 时返回 undefined（不 throw）。
  * - 玩家段长度 %8、AI 段 %5、ping 段 %2 校验消息与孪生一致。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 import { DataStream } from "data/DataStream"; // 孪生

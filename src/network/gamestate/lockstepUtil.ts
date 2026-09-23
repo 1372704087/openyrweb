@@ -6,6 +6,8 @@
  * 的编译产物。
  *
  * 关键语义（勿改）：`max(1, ceil(desired/gameTurn)) * gameTurn` 与孪生一致。
+ *
+ * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
 /**
