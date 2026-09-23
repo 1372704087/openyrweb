@@ -20,11 +20,12 @@ const ReactDOM: any = (ReactDOMModule as any).default;
 /** 挂 React 的 HTML 元素容器。 */
 export class HtmlReactElement extends HtmlContainer {
   /**
-   * 创建实例（new this(options, Component) 与孪生一致）。
-   * @param options - 组件 props
+   * 创建实例。孪生 factory(e, t) → new this(t, e)：调用约定为 (Component, options)，
+   * 构造器内再交换回 (options, Component)——此处必须保留孪生的参数交换。
    * @param Component - React 组件
+   * @param options - 组件 props
    */
-  static factory(options: any, Component: any): any {
+  static factory(Component: any, options: any): any {
     return new (this as any)(options, Component);
   }
 
