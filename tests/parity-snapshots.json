@@ -7380,7 +7380,27 @@
   },
   "data/map/trigger/TriggerReader": {
     "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading '0')"
+      "azC": 2,
+      "azBA": 52,
+      "count": 1,
+      "id": "trg1",
+      "disabled": false,
+      "easy": true,
+      "hard": false,
+      "eventsLen": 0,
+      "actionsLen": 0,
+      "ownKeys": [
+        "actions",
+        "attachedTrigger",
+        "attachedTriggerId",
+        "difficulties",
+        "disabled",
+        "events",
+        "houseName",
+        "id",
+        "name",
+        "tag"
+      ]
     },
     "1": {
       "eventKeys": [
@@ -7924,7 +7944,19 @@
   },
   "game/trigger/condition/ElapsedScenarioTimeCondition": {
     "0": {
-      "__error__": "TypeError: Cannot read properties of undefined (reading 'currentTick')"
+      "timerTicks": 30,
+      "expected": 30,
+      "before": false,
+      "at": false,
+      "after": true,
+      "debug": "1[0] (T).",
+      "ownKeys": [
+        "blocking",
+        "event",
+        "targets",
+        "timerTicks",
+        "trigger"
+      ]
     }
   },
   "game/trigger/condition/ElapsedTimeCondition": {
@@ -9177,5 +9209,1117 @@
       "isFn": true,
       "empty": true
     }
+  },
+  "network/ladder/wladderConfig": {
+    "0": {
+      "CURRENT_SEASON": "current",
+      "PREV_SEASON": "prev",
+      "MAX_LIST_SEARCH_COUNT": 50,
+      "Solo1v1": "1v1",
+      "Random2v2": "2v2-random",
+      "QSolo": "1v1",
+      "QTeam": "2v2",
+      "ladderKeys": [
+        "Random2v2",
+        "Solo1v1"
+      ],
+      "queueKeys": [
+        "Solo1v1",
+        "Team2v2"
+      ],
+      "teamSizes": [
+        [
+          "1v1",
+          1
+        ],
+        [
+          "2v2",
+          2
+        ]
+      ],
+      "mapKeys": [
+        "CURRENT_SEASON",
+        "LadderQueueType",
+        "LadderType",
+        "MAX_LIST_SEARCH_COUNT",
+        "PREV_SEASON",
+        "getLadderTypeForQueueType",
+        "getQueueTypeForLadderType",
+        "teamSizes"
+      ]
+    },
+    "1": [
+      "1v1",
+      "2v2-random",
+      "1v1",
+      "2v2"
+    ],
+    "2": "Unhandled queue type \"nope\"",
+    "3": "Unhandled ladder type \"nope\""
+  },
+  "engine/gameRes/importError/ArchiveExtractionError": {
+    "0": {
+      "keys": [
+        "ArchiveExtractionError"
+      ],
+      "expected": [
+        "ArchiveExtractionError"
+      ],
+      "types": {
+        "ArchiveExtractionError": "function"
+      }
+    }
+  },
+  "gui/CanvasMetrics": {
+    "0": "constructor,dispose,init,notifyViewportChange"
+  },
+  "gui/FullScreen": {
+    "0": "FullScreen",
+    "1": "constructor,dispose,init,isAvailable,isFullScreen,onChange,toggle,toggleAsync"
+  },
+  "gui/HtmlContainer": {
+    "0": "constructor,getSize,hide,render,setPosition,setRelativeMode,setSize,setTranslateMode,setVisible,show,updateMode,updatePosition,updateSize,updateVisibility"
+  },
+  "gui/HtmlReactElement": {
+    "0": "HtmlReactElement",
+    "1": "applyOptions,constructor,refresh,render,renderReactElement,unrender"
+  },
+  "gui/LazyHtmlElement": {
+    "0": "add,constructor,getChildren,getElement,isRendered,remove,removeAll,render,renderChild,setElement,unrender,unrenderChild"
+  },
+  "gui/Pointer": {
+    "0": "constructor,dispose,getPointerLock,getPosition,getSprite,getUserLockMode,init,listenForFirstCanvasClick,lock,setPointerType,setVisible,unlock,updateSpritePosition"
+  },
+  "gui/PointerEvents": {
+    "0": "PointerEvents"
+  },
+  "gui/PointerSprite": {
+    "0": {
+      "__undefined__": true
+    },
+    "1": "constructor,create3DObject,destroy,drawFrame,getAnimationRunner,getFrame,getFrameCount,getSize,setAnimationRunner,setFrame,update"
+  },
+  "gui/ReactFormat": {
+    "0": 2,
+    "1": "ReactFormat"
+  },
+  "gui/ReplayManager": {
+    "0": "constructor,deleteReplay,importReplay,keepReplay,loadList,loadReplay,loadSerializedReplay,saveReplay"
+  },
+  "gui/ShpSpriteBatch": {
+    "0": "constructor,create3DObject,createAggregatedShpFile,createObjects,destroy"
+  },
+  "gui/UiObject": {
+    "0": -1,
+    "1": "add,addEventListener,constructor,create3DObject,destroy,get3DObject,getHtmlContainer,getPosition,getRenderableContainer,isVisible,onDispose,onFrame,remove,removeAll,removeEventListener,set3DObject,setHtmlContainer,setPointerEvents,setPosition,setTooltip,setVisible,setZIndex,setupEventListener,update,updateTooltip"
+  },
+  "gui/UiObjectSprite": {
+    "0": "constructor,create3DObject,destroy,getAnimationRunner,getFrame,getFrameCount,getSize,setAnimationRunner,setFrame,setLightMult,setOpacity,setTransparent,update"
+  },
+  "gui/UiScene": {
+    "0": "constructor,create3DObject,destroy,menuViewport,setCamera,setViewport,update"
+  },
+  "gui/chat/ChatHistory": {
+    "0": "addChatMessage,constructor,getAll,onNewMessage"
+  },
+  "gui/chat/ChatMessageFormat": {
+    "0": "constructor,formatPrefixHtml,formatPrefixPlain,formatTextHtml"
+  },
+  "gui/component/BasicErrorBoxApi": {
+    "0": "constructor,destroy,show"
+  },
+  "gui/component/ButtonSelect": {
+    "0": true,
+    "1": ""
+  },
+  "gui/component/ChannelOpIndicator": {
+    "0": true
+  },
+  "gui/component/ChannelUser": {
+    "0": true
+  },
+  "gui/component/Chat": {
+    "0": "componentDidUpdate,constructor,render,renderMessage"
+  },
+  "gui/component/ChatInput": {
+    "0": "",
+    "1": true
+  },
+  "gui/component/ColorSelect": {
+    "0": true
+  },
+  "gui/component/CountryIcon": {
+    "0": "constructor,render"
+  },
+  "gui/component/CountrySelect": {
+    "0": true
+  },
+  "gui/component/Dialog": {
+    "0": "constructor,getWrapperStyle,render,renderButton"
+  },
+  "gui/component/ErrorDetailsBoxApi": {
+    "0": "constructor,destroy,show"
+  },
+  "gui/component/ErrorDetailsDialog": {
+    "0": true
+  },
+  "gui/component/GameResBoxApi": {
+    "0": "constructor,promptForGameRes"
+  },
+  "gui/component/GameResForm": {
+    "0": true
+  },
+  "gui/component/Image": {
+    "0": true
+  },
+  "gui/component/ImageContext": {
+    "0": true,
+    "1": 0
+  },
+  "gui/component/List": {
+    "0": "List,ListHeader,ListItem"
+  },
+  "gui/component/MenuButton": {
+    "0": "constructor,getClassName,getStyle,onClick,onMouseDown,onMouseUp,render"
+  },
+  "gui/component/MessageBoxApi": {
+    "0": "alert,confirm,constructor,destroy,prompt,show,splitNewLines,updateText,updateViewport"
+  },
+  "gui/component/Option": {
+    "0": true
+  },
+  "gui/component/PartyInviteDialog": {
+    "0": true
+  },
+  "gui/component/PingIndicator": {
+    "0": "PingIndicator",
+    "1": true,
+    "2": "function"
+  },
+  "gui/component/PlayerContextMenu": {
+    "0": true
+  },
+  "gui/component/PromptDialog": {
+    "0": true
+  },
+  "gui/component/Select": {
+    "0": true
+  },
+  "gui/component/Slider": {
+    "0": true
+  },
+  "gui/component/SplashScreen": {
+    "0": "constructor,destroy,render,setBackgroundImage,setCopyrightText,setDisclaimerText,setLoadingText,setSize,updateSize"
+  },
+  "gui/component/StartPosSelect": {
+    "0": true
+  },
+  "gui/component/TeamSelect": {
+    "0": "A",
+    "1": "Z",
+    "2": true
+  },
+  "gui/component/ToastApi": {
+    "0": "constructor,destroy,push,update"
+  },
+  "gui/component/Toasts": {
+    "0": true
+  },
+  "gui/component/UiText": {
+    "0": "constructor,createMesh,createTexture,createUiObject,defineChildren,onDispose,setTextAlign,setValue,updateTexture"
+  },
+  "gui/jsx/HtmlView": {
+    "0": "constructor,createUiObject,getElement"
+  },
+  "gui/jsx/JsxRenderer": {
+    "0": "constructor,getImage,getPalette,render,setCamera,setupListeners"
+  },
+  "gui/jsx/UiComponent": {
+    "0": true
+  },
+  "gui/jsx/jsx": {
+    "0": {},
+    "1": "createRef,jsx,renderJsx"
+  },
+  "gui/replay/ReplayExistsError": {
+    "0": [
+      "m",
+      true
+    ]
+  },
+  "gui/replay/ReplayMeta": {
+    "0": 0
+  },
+  "gui/replay/ReplayStorage": {
+    "0": 0
+  },
+  "gui/replay/ReplayStorageError": {
+    "0": [
+      "m",
+      "Error"
+    ]
+  },
+  "gui/replay/ReplayStorageFileSystem": {
+    "0": [
+      null,
+      null
+    ],
+    "1": "ReplayStorageFileSystem"
+  },
+  "gui/replay/ReplayStorageMemStorage": {
+    "0": "constructor,deleteReplayData,getManifest,getReplayData,hasReplayData,saveManifest,saveReplayData"
+  },
+  "gui/replay/ReplayStorageMigration": {
+    "0": {
+      "__undefined__": true
+    },
+    "1": "ReplayStorageMigration"
+  },
+  "gui/screen/Controller": {
+    "0": "addScreen,constructor,destroy,getCurrentScreen,goToScreen,goToScreenBlocking,hasScreen,leaveCurrentScreen,onScreenChange,popScreen,pushScreen,rerenderCurrentScreen"
+  },
+  "gui/screen/RootController": {
+    "0": "constructor,createGame,goToScreen,goToScreenBlocking,joinGame,pushScreen"
+  },
+  "gui/screen/RootRoute": {
+    "0": [
+      1,
+      2
+    ]
+  },
+  "gui/screen/RootScreen": {
+    "0": [
+      false,
+      [
+        "constructor",
+        "setController"
+      ]
+    ]
+  },
+  "gui/screen/Screen": {
+    "0": 0
+  },
+  "gui/screen/ScreenParamsMap": {
+    "0": 0
+  },
+  "gui/screen/ScreenType": {
+    "0": [
+      0,
+      1,
+      2,
+      "MainMenuRoot"
+    ]
+  },
+  "gui/screen/game/ChatNetHandler": {
+    "0": "ChatNetHandler",
+    "1": "constructor,dispose,init,submitMessage"
+  },
+  "gui/screen/game/ChatTypingHandler": {
+    "0": "constructor,dispose,endTyping,handleKeyDown,handleKeyUp,startTyping"
+  },
+  "gui/screen/game/CombatantUi": {
+    "0": "CombatantUi",
+    "1": "activateSpecialMode,constructor,dispose,handleBeacon,handleCommandBarTeam,handleDeploy,handleGuard,handleHudChange,handleInvalidCommand,handleSidebarSlotClick,handleStop,handleUnloadAll,init,initGameEventListeners,initGameMenuListeners,initHudEventListeners,initKeyboardCommands,pushAction,pushOrder,queueOrders,setSelectedVeteranLevel"
+  },
+  "gui/screen/game/GameLoader": {
+    "0": "GameLoader",
+    "1": "clearStaticCaches,collectCameoFileNames,constructor,createGame,doLoad,load,loadBotsLib,loadFestiveAssets,loadHudSideImages,loadTheater,prepareSounds,prepareTextures,prepareVxlGeometries,resolveLoadingPlayerInfos"
+  },
+  "gui/screen/game/GameMenu": {
+    "0": "GameMenu",
+    "1": "bindHudEvents,close,constructor,dispose,getCurrentScreen,handleHudChange,init,onCancel,onObserve,onOpen,onQuit,onSendMessage,onToggleAlliance,open,openConnectionInfo,openDiplo"
+  },
+  "gui/screen/game/GameMenuScreen": {
+    "0": "GameMenuScreen",
+    "1": "constructor,setController"
+  },
+  "gui/screen/game/GameScreen": {
+    "0": "GameScreen",
+    "1": "buildCampaignLoadingInfo,connectToServerInstance,constructor,createAttackMarkerMesh,disposeAttackTargetMarkers,flashUnits,getGameResClientInfo,handleError,handleGameError,handleGameLoadError,handleGservConError,handleMapLoadError,initGameMenuEvents,initHudChatTypingEvents,initLockstep,initNetStats,initUi,joinGame,loadUi,logGame,moveCameraToWaypoint,onEnter,onGameEnd,onGameStart,onLeave,onViewportChange,rerenderHud,saveReplay,sendDebugInfo,sendGameRes,transferAndLoadMapFile,updateAttackTargetMarkers"
+  },
+  "gui/screen/game/HudFactory": {
+    "0": "HudFactory",
+    "1": "constructor,create,setSidebarModel"
+  },
+  "gui/screen/game/MapFileLoader": {
+    "0": "constructor,load"
+  },
+  "gui/screen/game/MedianPing": {
+    "0": "calculate,constructor,pushSample"
+  },
+  "gui/screen/game/NetStats": {
+    "0": "NetStats",
+    "1": "constructor,dispose,init"
+  },
+  "gui/screen/game/ObserverUi": {
+    "0": "ObserverUi",
+    "1": "changePlayer,constructor,dispose,handleHudChange,init,initGameEventListeners,initHudEventListeners,initKeyboardCommands,onPlayerChange"
+  },
+  "gui/screen/game/PingMonitor": {
+    "0": "constructor,dispose,monitor,onNewSample,setPingInterval,updatePing"
+  },
+  "gui/screen/game/PlayerUi": {
+    "0": 0
+  },
+  "gui/screen/game/SoundHandler": {
+    "0": "SoundHandler",
+    "1": "_lookupNickname,constructor,dispose,handleAvailableObjectsUpdate,handleGameEvent,handleOrderPushed,handleProductionQueueUpdate,handleSelectionChangeEvent,init"
+  },
+  "gui/screen/game/TauntHandler": {
+    "0": "TauntHandler",
+    "1": "checkAndUpdateLastTauntTime,constructor,dispose,init,recordReplayEvent,sendTaunt"
+  },
+  "gui/screen/game/TauntPlayback": {
+    "0": "constructor,getTauntFileName,playTaunt",
+    "1": "TauntPlayback"
+  },
+  "gui/screen/game/WorldView": {
+    "0": "WorldView",
+    "1": "changeLocalPlayer,computeMapScreenBounds,computeWorldViewport,constructor,dispose,handleMapBoundsOrViewportChange,handleViewportChange,init,initRenderables,initWorldView,updatePanLimits"
+  },
+  "gui/screen/game/component/GameResultPopup": {
+    "0": [
+      2,
+      8
+    ]
+  },
+  "gui/screen/game/component/Hud": {
+    "0": "Hud",
+    "1": "buildCameoFile,constructor,createCameoNameToIdMap,createSidebarMenu,destroy,destroySidebarMenu,getImage,getTextColor,hideSidebarMenu,init,onCommandBarButtonClick,onCreditsTick,onDiploButtonClick,onMessageCancel,onMessageSubmit,onMessagesTick,onOptButtonClick,onRepairButtonClick,onScrollButtonClick,onSellButtonClick,onSidebarSlotClick,onSidebarTabClick,renderCommandBarButtons,setMenuContentComponent,setMinimap,showSidebarMenu,toggleMenuContentVisibility,update"
+  },
+  "gui/screen/game/component/Minimap": {
+    "0": "Minimap",
+    "1": "canvasCoordsToTile,changeLocalPlayer,computeIntersectionTile,computeMinimapPosition,constructor,create3DObject,createMesh,createTexture,createViewportOutline,destroy,destroyMesh,destroyViewportOutline,forceRerender,initWorld,map,onClick,onMouseMove,onMouseOut,onMouseOver,onRightClick,renderMinimap,setFitSize,setupListeners,update,updateOutlineSize"
+  },
+  "gui/screen/game/component/MinimapPing": {
+    "0": "MinimapPing",
+    "1": "constructor,createPingRectLine,destroy,get3DObject,update"
+  },
+  "gui/screen/game/component/hud/DebugText": {
+    "0": "DebugText",
+    "1": "constructor,createMesh,createTexture,createUiObject,defineChildren,drawLine,drawLines,onDispose,onFrame,wrapText"
+  },
+  "gui/screen/game/component/hud/GameMenuContentArea": {
+    "0": "GameMenuContentArea",
+    "1": "constructor,createMask,createUiObject,defineChildren"
+  },
+  "gui/screen/game/component/hud/HudChat": {
+    "0": "HudChat",
+    "1": "function"
+  },
+  "gui/screen/game/component/hud/Messages": {
+    "0": "Messages",
+    "1": "constructor,createMesh,createTexture,createUiObject,defineChildren,drawLine,drawMessages,onDispose,onFrame,wrapText"
+  },
+  "gui/screen/game/component/hud/PhobosVersionWarning": {
+    "0": "PhobosVersionWarning",
+    "1": "function"
+  },
+  "gui/screen/game/component/hud/SidebarCard": {
+    "0": "SidebarCard",
+    "1": "constructor,createLabelImages,createQuantityImages,createSlotClickEvent,createSlotOutline,createTextBox,createUiObject,defineChildren,getCameoSize,getItemIndexAtSlot,handleFrame,hide,pageDown,pageUp,scrollToOffset,show,updateCameo,updateProgressOverlay,updateQuantities,updateSlots,updateStatusText,updateTooltip"
+  },
+  "gui/screen/game/component/hud/SidebarCredits": {
+    "0": "SidebarCredits",
+    "1": "constructor,createUiObject,defineChildren,onFrame"
+  },
+  "gui/screen/game/component/hud/SidebarGameTime": {
+    "0": "SidebarGameTime",
+    "1": "constructor,createUiObject,defineChildren,onFrame"
+  },
+  "gui/screen/game/component/hud/SidebarIconButton": {
+    "0": "SidebarIconButton",
+    "1": "constructor,createUiObject,defineChildren,getBaseFrameNo,onDispose,setDisabled,setToggleState"
+  },
+  "gui/screen/game/component/hud/SidebarMenu": {
+    "0": "SidebarMenu",
+    "1": "constructor,createButton,createUiObject,defineChildren"
+  },
+  "gui/screen/game/component/hud/SidebarPower": {
+    "0": {
+      "cls": "function",
+      "proto": "computeHeightFromPowerLevel,constructor,createDataTexture,createMesh,createPips,createUiObject,defineChildren,hide,onDispose,onFrame,show,updateTexture"
+    },
+    "1": "SidebarPower"
+  },
+  "gui/screen/game/component/hud/SidebarRadar": {
+    "0": "SidebarRadar",
+    "1": "constructor,createUiObject,defineChildren,getMinimapAvailSpace,hide,onFrame,setMinimap,show,toggleCover"
+  },
+  "gui/screen/game/component/hud/SidebarRadarAnimRunner": {
+    "0": 2,
+    "1": "AnimationType,SidebarRadarAnimationRunner"
+  },
+  "gui/screen/game/component/hud/SidebarTabs": {
+    "0": "SidebarTabs",
+    "1": "constructor,createUiObject,defineChildren,handleFrame"
+  },
+  "gui/screen/game/component/hud/SuperWeaponTimers": {
+    "0": "SuperWeaponTimers",
+    "1": "constructor,createMesh,createTexture,createUiObject,defineChildren,drawLine,onDispose,onFrame"
+  },
+  "gui/screen/game/component/hud/commandBar/CommandBarButtonList": {
+    "0": "CommandBarButtonList",
+    "1": "constructor,fromIni"
+  },
+  "gui/screen/game/component/hud/commandBar/CommandBarButtonType": {
+    "0": 32,
+    "1": [
+      0,
+      15
+    ]
+  },
+  "gui/screen/game/component/hud/commandBar/CommandButtonConfig": {
+    "0": 0
+  },
+  "gui/screen/game/component/hud/commandBar/commandButtonConfigs": {
+    "0": [
+      15,
+      1,
+      "reportbug.shp"
+    ]
+  },
+  "gui/screen/game/component/hud/viewmodel/CombatantSidebarModel": {
+    "0": "CombatantSidebarModel",
+    "1": "computePurchaseCost,computeStatus,constructor,credits,getObjectTypeSortValue,getSidebarCategoryForQueueType,getTabForQueueType,radarEnabled,sortAvailableObjects,updateActiveTab,updateAvailableObjects,updateFromQueue,updateSidebarTechnoItem,updateSuperWeaponItems,updateSuperWeapons,updateTabFlashing"
+  },
+  "gui/screen/game/component/hud/viewmodel/MessageList": {
+    "0": "MessageList",
+    "1": "addChatMessage,addSystemMessage,addUiFeedbackMessage,constructor,getAll,onNewMessage,prune"
+  },
+  "gui/screen/game/component/hud/viewmodel/SidebarModel": {
+    "0": [
+      1,
+      3,
+      4
+    ]
+  },
+  "gui/screen/game/component/hud/viewmodel/SidebarTab": {
+    "0": 1
+  },
+  "gui/screen/game/gameMenu/ConInfoForm": {
+    "0": "ConInfoForm",
+    "1": "function"
+  },
+  "gui/screen/game/gameMenu/ConnectionInfoScreen": {
+    "0": "ConnectionInfoScreen",
+    "1": "constructor,initView,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/game/gameMenu/DiploForm": {
+    "0": "DiploForm",
+    "1": "function"
+  },
+  "gui/screen/game/gameMenu/DiploScreen": {
+    "0": "DiploScreen",
+    "1": "buildPlayerInfos,constructor,initView,onEnter,onLeave"
+  },
+  "gui/screen/game/gameMenu/GameMenuController": {
+    "0": "GameMenuController",
+    "1": "close,constructor,destroy,goToScreen,goToScreenBlocking,hideSidebarButtons,popScreen,pushScreen,rerenderCurrentScreen,setHud,setMainComponent,setSidebarButtons,showSidebarButtons,toggleContentAreaVisibility"
+  },
+  "gui/screen/game/gameMenu/GameMenuHomeScreen": {
+    "0": "GameMenuHomeScreen",
+    "1": "constructor,initView,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/game/gameMenu/QuitConfirmScreen": {
+    "0": "QuitConfirmScreen",
+    "1": "constructor,initView,onEnter,onLeave"
+  },
+  "gui/screen/game/gameMenu/ScreenParamsMap": {
+    "0": 0
+  },
+  "gui/screen/game/gameMenu/ScreenType": {
+    "0": 14,
+    "1": [
+      0,
+      6
+    ]
+  },
+  "gui/screen/game/loadingScreen/LoadingScreen": {
+    "0": "LoadingScreen",
+    "1": "constructor,getMapPreviewStyle,getStyle,render,renderStatus"
+  },
+  "gui/screen/game/loadingScreen/LoadingScreenApi": {
+    "0": 0
+  },
+  "gui/screen/game/loadingScreen/LoadingScreenApiFactory": {
+    "0": 2,
+    "1": "LoadingScreenApiFactory,LoadingScreenType"
+  },
+  "gui/screen/game/loadingScreen/LoadingScreenWrapper": {
+    "0": "LoadingScreenWrapper",
+    "1": "applyOptions,constructor,createUiObject,defineChildren,updateViewport"
+  },
+  "gui/screen/game/loadingScreen/MpLoadingScreenApi": {
+    "0": "MpLoadingScreenApi",
+    "1": "constructor,createExtendedLoadingInfos,createLoadingScreen,dispose,onLoadProgress,start,updateViewport"
+  },
+  "gui/screen/game/loadingScreen/ReplayLoadingScreenApi": {
+    "0": "ReplayLoadingScreenApi",
+    "1": "constructor,createExtendedLoadingInfos,createLoadingScreen,dispose,onLoadProgress,start,updateViewport"
+  },
+  "gui/screen/game/loadingScreen/SpLoadingScreenApi": {
+    "0": "SpLoadingScreenApi",
+    "1": "constructor,createExtendedLoadingInfos,createLoadingScreen,dispose,onLoadProgress,start,updateViewport"
+  },
+  "gui/screen/game/worldInteraction/ArrowScrollHandler": {
+    "0": "ArrowScrollHandler",
+    "1": "cancel,constructor,handleKeyDown,handleKeyUp,pause,unpause,updateScrollDir"
+  },
+  "gui/screen/game/worldInteraction/BeaconMode": {
+    "0": "BeaconMode",
+    "1": "cancel,constructor,dispose,end,enter,execute,hover,onExecute"
+  },
+  "gui/screen/game/worldInteraction/CameraPanHandler": {
+    "0": "CameraPanHandler",
+    "1": "constructor,dispose,finish,setPaused,start,update"
+  },
+  "gui/screen/game/worldInteraction/CustomScrollHandler": {
+    "0": "cancel,constructor,pause,requestScroll,unpause"
+  },
+  "gui/screen/game/worldInteraction/DefaultActionHandler": {
+    "0": [
+      2,
+      6
+    ]
+  },
+  "gui/screen/game/worldInteraction/InteractionMode": {
+    "0": 0
+  },
+  "gui/screen/game/worldInteraction/MapHoverHandler": {
+    "0": "MapHoverHandler",
+    "1": "constructor,dispose,doUpdate,finish,getCurrentHover,onHoverChange,setShroud,update"
+  },
+  "gui/screen/game/worldInteraction/MapScrollHandler": {
+    "0": "MapScrollHandler",
+    "1": "cancel,cancelForceScroll,constructor,dispose,isScrolling,requestForceScroll,setPaused,update"
+  },
+  "gui/screen/game/worldInteraction/MinimapHandler": {
+    "0": "constructor,getHover,panToTile,setShroud"
+  },
+  "gui/screen/game/worldInteraction/PendingPlacementHandler": {
+    "0": "PendingPlacementHandler",
+    "1": "addGrid,constructor,dispose,init,pushPlacementInfo,removeGrid,removePendingPlacement"
+  },
+  "gui/screen/game/worldInteraction/PlacementMode": {
+    "0": "PlacementMode",
+    "1": "cancel,constructor,dispose,endConstrMode,enter,execute,getBuilding,getBuildingRangeCircle,hideBuildingRangeOverlays,hover,init,onBuildingPlaceRequest,prepareBuildingRanges,setBuilding,showBuildingRangeOverlays,updateGridModel"
+  },
+  "gui/screen/game/worldInteraction/PlanningMode": {
+    "0": "PlanningMode",
+    "1": "constructor,dispose,enter,exit,handleInvalidCommand,isActive,pushOrder,updatePaths,updateSelection"
+  },
+  "gui/screen/game/worldInteraction/RepairMode": {
+    "0": "RepairMode",
+    "1": "cancel,constructor,dispose,end,enter,execute,findRepairableBuilding,hover,onExecute"
+  },
+  "gui/screen/game/worldInteraction/SellMode": {
+    "0": "SellMode",
+    "1": "cancel,constructor,dispose,end,enter,execute,hover,isRefundableObject,onExecute"
+  },
+  "gui/screen/game/worldInteraction/SpecialActionMode": {
+    "0": "SpecialActionMode",
+    "1": "cancel,constructor,dispose,end,enter,execute,hover,onExecute,superWeaponType"
+  },
+  "gui/screen/game/worldInteraction/Tooltip": {
+    "0": "Tooltip",
+    "1": "computePosition,constructor,create3DObject,createMesh,createTexture,destroy"
+  },
+  "gui/screen/game/worldInteraction/TooltipHandler": {
+    "0": "TooltipHandler",
+    "1": "constructor,destroyTooltip,dispose,getTooltipText,init,reset"
+  },
+  "gui/screen/game/worldInteraction/UnitSelectionHandler": {
+    "0": [
+      2,
+      10
+    ]
+  },
+  "gui/screen/game/worldInteraction/WorldInteraction": {
+    "0": "WorldInteraction",
+    "1": "applyKeyModifiers,cancelKeyUp,cancelMouseUp,constructor,dispose,executeMinimapClickCommand,getCurrentHover,getLastKeyModifiers,getMode,handleDefaultClickAction,init,isClickRange,isEnabled,isRightClickMove,isRightClickPanAllowed,pausePanning,processMouseMove,registerKeyCommand,setEnabled,setMode,setShroud,setupHandlers,teardownHandlers,unpausePanning,unregisterKeyCommand,updateDefaultAction"
+  },
+  "gui/screen/game/worldInteraction/WorldInteractionFactory": {
+    "0": "WorldInteractionFactory",
+    "1": "constructor,create"
+  },
+  "gui/screen/game/worldInteraction/keyboard/KeyBinds": {
+    "0": "addHotKey,changeHotKey,constructor,getCommandType,getHotKey,getHotKeyCode,load,loadHotKeys,resetAndReload,save,saveIni"
+  },
+  "gui/screen/game/worldInteraction/keyboard/KeyCommand": {
+    "0": [
+      0,
+      2,
+      1
+    ]
+  },
+  "gui/screen/game/worldInteraction/keyboard/KeyCommandType": {
+    "0": 118,
+    "1": [
+      "CenterView",
+      "TeamSelect_10"
+    ]
+  },
+  "gui/screen/game/worldInteraction/keyboard/KeyboardHandler": {
+    "0": "constructor,dispose,executeCommand,getNoModCmdType,handleKeyDown,handleKeyUp,pause,registerCommand,unpause,unregisterCommand"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/CenterBaseCmd": {
+    "0": "CenterBaseCmd",
+    "1": "constructor,execute"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/CenterGroupCmd": {
+    "0": "computePanTile,constructor,execute",
+    "1": "CenterGroupCmd"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/CenterViewCmd": {
+    "0": "CenterViewCmd",
+    "1": "computePanTile,constructor,execute"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/FollowUnitCmd": {
+    "0": "FollowUnitCmd",
+    "1": "constructor,dispose,execute,init,updatePan,updateUnit"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/GoToCameraLocationCmd": {
+    "0": "constructor,execute"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/LastRadarEventCmd": {
+    "0": "LastRadarEventCmd",
+    "1": "constructor,execute,handleGameEvent,recordEvent"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/SelectGroupCmd": {
+    "0": "SelectGroupCmd",
+    "1": "computePanTile,constructor,execute"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/SelectNextUnitCmd": {
+    "0": "SelectNextUnitCmd",
+    "1": "constructor,dispose,execute,generate,getNextUnit,setReverse"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/SelectPlayerCmd": {
+    "0": "SelectPlayerCmd",
+    "1": "constructor,execute"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/SelectTypeByCmd": {
+    "0": "SelectByTypeCmd",
+    "1": "constructor,dispose,execute,init"
+  },
+  "gui/screen/game/worldInteraction/keyboard/command/SetCameraLocationCmd": {
+    "0": "constructor,execute"
+  },
+  "gui/screen/game/worldInteraction/placementMode/PlacementGrid": {
+    "0": "PlacementGrid",
+    "1": "constructor,create3DObject,createTileOverlay,createTileOverlays,dispose,get3DObject,getTileOverlayTextures,getTilePosition,refreshRangeCircle,update"
+  },
+  "gui/screen/game/worldInteraction/placementMode/PlacementGridModel": {
+    "0": 0
+  },
+  "gui/screen/mainMenu/MainMenuController": {
+    "0": "MainMenuController",
+    "1": "constructor,destroy,getSidebarPreviewSize,goToScreen,goToScreenBlocking,hideSidebarButtons,hideVersion,popScreen,pushScreen,setMainComponent,setSidebarButtons,setSidebarMpContent,setSidebarPreview,showSidebarButtons,showVersion,toggleMainVideo,toggleSidebarPreview"
+  },
+  "gui/screen/mainMenu/MainMenuRootScreen": {
+    "0": "MainMenuRootScreen",
+    "1": "constructor,createView,createViewAndController,onEnter,onLeave,onViewportChange,updatePrefetchProgressViewport"
+  },
+  "gui/screen/mainMenu/MainMenuRoute": {
+    "0": [
+      0,
+      1
+    ]
+  },
+  "gui/screen/mainMenu/MainMenuScreen": {
+    "0": [
+      "mnscrnl.shp",
+      [
+        "constructor",
+        "setController",
+        "backgroundImageName"
+      ]
+    ]
+  },
+  "gui/screen/mainMenu/ScreenParamsMap": {
+    "0": 0
+  },
+  "gui/screen/mainMenu/ScreenType": {
+    "0": 46,
+    "1": "Home,Skirmish,QuickGame,CustomGame,Login,NewAccount,Lobby,MapSelection,Ladder,LadderRules,ReplaySelection,ModSelection,Score,InfoAndCredits,PatchNotes,Credits,Options,OptionsSound,OptionsKeyboard,OptionsStorage,SinglePlayer,Campaign,Extensions,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"
+  },
+  "gui/screen/mainMenu/campaign/CampaignResources": {
+    "0": "CampaignResources",
+    "1": "constructor,dispose,getCampaignMapNames,getMissingFiles,inspect,install,isReady,loadCampaignList"
+  },
+  "gui/screen/mainMenu/campaign/CampaignScreen": {
+    "0": "CampaignScreen",
+    "1": "cancelCampaignDownload,checkCampaignResources,constructor,getString,installCampaignResources,loadCampaignList,onEnter,onLeave,onStack,onUnstack,renderCurrentPage,renderMissionList,renderResourceGate,renderSideSelection,resolveDirectMission,resolveMissionName,showReadyCampaign,showResourceError,startMission,updateSidebarButtons"
+  },
+  "gui/screen/mainMenu/component/Iframe": {
+    "0": "Iframe",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/component/MainMenu": {
+    "0": "MainMenu",
+    "1": "computeSidebarButtonsViewport,computeSidebarViewport,constructor,create3DObject,createSidebarButtons,destroy,getImage,getSidebarPreviewSize,hideButtons,hideVersion,isSidebarCollapsed,onSidebarButtonClick,onSidebarToggle,setBackgroundImageName,setButtons,setContentComponent,setSidebarMpContent,setSidebarPreview,setSidebarTitle,setSlots,setViewport,showButtons,showVersion,toggleSidebarPreview,toggleVideo,update,updateButtons,updateSidebarButtons,updateSidebarMpContent"
+  },
+  "gui/screen/mainMenu/component/MenuMpSlotAnimRunner": {
+    "0": "MenuMpSlotAnimRunner",
+    "1": "constructor,getCurrentFrame"
+  },
+  "gui/screen/mainMenu/component/MenuMpSlotText": {
+    "0": "MenuMpSlotText",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/component/MenuSdTopAnimRunner": {
+    "0": "MenuSdTopAnimRunner",
+    "1": "constructor,getCurrentFrame"
+  },
+  "gui/screen/mainMenu/component/MenuSlotAnimationRunner": {
+    "0": "AnimationType,MenuButtonState,MenuSlotAnimationRunner",
+    "1": "constructor,getCurrentFrame,initAnimation,isStopped,shouldUpdate,slideIn,slideOut,tick"
+  },
+  "gui/screen/mainMenu/component/MenuTooltip": {
+    "0": "MenuTooltip",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/component/MenuVideo": {
+    "0": "MenuVideo",
+    "1": "applyMediaSourceFallback,componentDidMount,componentWillUnmount,constructor,processNextSegment,render"
+  },
+  "gui/screen/mainMenu/component/PrefetchProgress": {
+    "0": "PrefetchProgress",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/component/SidebarPreview": {
+    "0": "SidebarPreview",
+    "1": "constructor,createUiObject,defineChildren,getPreviewSize,handleFrame,setPreview,setTitle,toggleSidebarPreview,updateTitleSize"
+  },
+  "gui/screen/mainMenu/component/SidebarTitle": {
+    "0": "SidebarTitle",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/component/VersionString": {
+    "0": "VersionString",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/component/viewmodel/MenuButtonConfig": {
+    "0": 0
+  },
+  "gui/screen/mainMenu/credits/Credits": {
+    "0": "Credits",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/credits/CreditsScreen": {
+    "0": "CreditsScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/customGame/CustomGameScreen": {
+    "0": "CustomGameScreen",
+    "1": "addSystemMessage,constructor,createGame,gameIsFull,handleError,initView,joinGame,joinRoom,loadChannel,observeGame,onEnter,onGameSelectionChange,onLeave,refreshGames,refreshPlayerRanks,refreshSidebarButtons"
+  },
+  "gui/screen/mainMenu/customGame/component/GameBrowser": {
+    "0": "GameBrowser",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/customGame/component/viewmodel/gameBrowser": {
+    "0": 0
+  },
+  "gui/screen/mainMenu/extensions/ExtensionsScreen": {
+    "0": "ExtensionsScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/extensions/component/ExtensionsModel": {
+    "0": "ExtensionsModel",
+    "1": "constructor"
+  },
+  "gui/screen/mainMenu/extensions/component/ExtensionsOpts": {
+    "0": "ExtensionsOpts",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/infoAndCredits/InfoAndCreditsScreen": {
+    "0": "InfoAndCreditsScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/ladder/LadderScreen": {
+    "0": 20
+  },
+  "gui/screen/mainMenu/ladder/component/Ladder": {
+    "0": "Ladder",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/ladderRules/LadderRulesScreen": {
+    "0": "LadderRulesScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/lobby/LobbyScreen": {
+    "0": "LobbyScreen",
+    "1": "addSystemMessage,applyGameOption,changeSlotType,constructor,createGame,getAvailablePlayerColors,getAvailablePlayerCountries,getAvailablePlayerCountryRules,getAvailableStartPositions,getColorIdByName,getColorNameById,getCountryIdByName,getCountryNameById,getSelectablePlayerColors,getSelectableStartPositions,guestUpdateMapDeferred,handleError,handleGameOptHasMap,handleGameOptObserver,handleGameOptOptions,handleGameOptPing,handleGameOptReady,handleGameOptSlots,handlePlayerJoinLeave,handlePlayerOptsChange,initFormModel,initHostOptions,initLobbyForm,initView,joinGame,kickPlayer,loadAndCheckMap,meetsMinimumTeams,onEnter,onLeave,onStack,onUnstack,onViewportChange,pingGserv,refreshSidebarButtons,refreshSidebarMpText,removeHumanPlayer,sendGameOpts,sendGameSlotInfo,sendModeMaxSlots,sendObserverSlotInfo,sendPingData,sendPlayerInfo,showCreateGameBox,showPasswordBox,unrender,updateFormModel,updateGservPing,updateMapPreview,updatePlayerInfo,updatePlayerPing,waitForHostPlayer"
+  },
+  "gui/screen/mainMenu/lobby/MapPreviewRenderer": {
+    "0": "MapPreviewRenderer",
+    "1": "_loadStartBut,constructor,drawStartLocations,dxyToCanvas,render"
+  },
+  "gui/screen/mainMenu/lobby/PreferredHostOpts": {
+    "0": [
+      6,
+      10000,
+      "6;10000;10;1;0;1;1;0;;0;1;0;0;1;0"
+    ]
+  },
+  "gui/screen/mainMenu/lobby/SelectMapParams": {
+    "0": 0
+  },
+  "gui/screen/mainMenu/lobby/SkirmishScreen": {
+    "0": "SkirmishScreen",
+    "1": "applyGameOption,backgroundImageName,changeSlotType,constructor,createGame,getAvailablePlayerColors,getAvailablePlayerCountries,getAvailablePlayerCountryRules,getAvailableStartPositions,getColorIdByName,getColorNameById,getCountryIdByName,getCountryNameById,getSelectablePlayerColors,getSelectableStartPositions,handleError,initFormModel,initLobbyForm,initOptions,initView,meetsMinimumTeams,onEnter,onLeave,onStack,onUnstack,onViewportChange,refreshSidebarButtons,refreshSidebarMpText,sanitizeLastBotSettings,saveBotSettings,unrender,updateFormModel,updateMapPreview,updatePlayerInfo"
+  },
+  "gui/screen/mainMenu/lobby/component/CreateGameBox": {
+    "0": "CreateGameBox",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/lobby/component/LobbyForm": {
+    "0": "LobbyForm",
+    "1": "constructor,render,renderPlayerSelect,renderPlayerSlot,renderPlayerStatus"
+  },
+  "gui/screen/mainMenu/lobby/component/PasswordBox": {
+    "0": "PasswordBox",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/lobby/component/RankIndicator": {
+    "0": "RANK_LABELS,RankIndicator",
+    "1": "object",
+    "2": "function"
+  },
+  "gui/screen/mainMenu/lobby/component/viewmodel/lobby": {
+    "0": [
+      1,
+      2,
+      3
+    ],
+    "1": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "2": [
+      1,
+      2,
+      3
+    ],
+    "3": [
+      0,
+      1,
+      2
+    ]
+  },
+  "gui/screen/mainMenu/login/LoginBox": {
+    "0": "LoginBox",
+    "1": "object"
+  },
+  "gui/screen/mainMenu/login/LoginDebugUi": {
+    "0": [
+      "testpass",
+      8
+    ]
+  },
+  "gui/screen/mainMenu/login/LoginScreen": {
+    "0": "LoginScreen",
+    "1": "constructor,handleBadPass,handleLoginError,handleServerPingsUpdate,handleWolError,initView,loadServerList,login,onEnter,onLeave,submitLoginForm,updateServers,updateSidebarButtons"
+  },
+  "gui/screen/mainMenu/login/ServerList": {
+    "0": "ServerList",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/login/ServerPingIndicator": {
+    "0": "ServerPingIndicator",
+    "1": "undefined",
+    "2": "function"
+  },
+  "gui/screen/mainMenu/login/ServerPings": {
+    "0": "ServerPings",
+    "1": "constructor,update"
+  },
+  "gui/screen/mainMenu/main/HomeScreen": {
+    "0": "HomeScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/main/ReportBug": {
+    "0": "ReportBug",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/main/SinglePlayerScreen": {
+    "0": "SinglePlayerScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/mapSel/MapSelScreen": {
+    "0": "MapSelScreen",
+    "1": "backgroundImageName,computeAvailableMaps,constructor,handleMapImportError,handleSubmit,importMap,initForm,initSidebar,onEnter,onLeave,readInitialSort,refreshMapInfo,submitMap,updateMapDeferred,updateMapsAndModes"
+  },
+  "gui/screen/mainMenu/mapSel/component/MapSel": {
+    "0": "MapSel,SortType",
+    "1": "undefined",
+    "2": "function"
+  },
+  "gui/screen/mainMenu/modSel/BadModArchiveError": {
+    "0": true
+  },
+  "gui/screen/mainMenu/modSel/DuplicateModError": {
+    "0": true
+  },
+  "gui/screen/mainMenu/modSel/Mod": {
+    "0": "constructor,id,isInstalled,name,supported"
+  },
+  "gui/screen/mainMenu/modSel/ModDetailsPane": {
+    "0": "ModDetailsPane",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/modSel/ModDownloadPrompt": {
+    "0": "ModDownloadPrompt",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/modSel/ModImporter": {
+    "0": "length,modFileExtensions,name,prototype"
+  },
+  "gui/screen/mainMenu/modSel/ModManager": {
+    "0": "length,modIdRegex,modMetaFileName,name,prototype,remoteListFileName"
+  },
+  "gui/screen/mainMenu/modSel/ModMeta": {
+    "0": "ModMeta",
+    "1": "clone,constructor,fromIniFile,fromIniSection"
+  },
+  "gui/screen/mainMenu/modSel/ModSel": {
+    "0": "ModSel",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/modSel/ModSelScreen": {
+    "0": "ModSelScreen",
+    "1": "constructor,downloadMod,handleError,handleModImportError,importModFromFile,initForm,initSidebar,loadAvailableMods,loadOrUnloadMod,onEnter,onLeave,onStack,onUnstack,updateSidebarButtons"
+  },
+  "gui/screen/mainMenu/modSel/ModStatus": {
+    "0": 1,
+    "1": 6,
+    "2": "NotInstalled,Installed,UpdateAvailable,0,1,2"
+  },
+  "gui/screen/mainMenu/newAccount/NewAccountBox": {
+    "0": "NewAccountBox",
+    "1": "object"
+  },
+  "gui/screen/mainMenu/newAccount/NewAccountScreen": {
+    "0": "NewAccountScreen",
+    "1": "constructor,createAccount,handleValidationError,handleWolError,onEnter,onLeave,submitForm"
+  },
+  "gui/screen/mainMenu/patchNotes/PatchNotesScreen": {
+    "0": "PatchNotesScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack"
+  },
+  "gui/screen/mainMenu/quickGame/ChatUi": {
+    "0": "ChatUi",
+    "1": "addSystemMessage,constructor,dispose,getViewProps,loadChannel,refreshPlayerRanks"
+  },
+  "gui/screen/mainMenu/quickGame/PartyState": {
+    "0": [
+      "idle",
+      "queued"
+    ],
+    "1": "PartyStatus"
+  },
+  "gui/screen/mainMenu/quickGame/QuickGameScreen": {
+    "0": "QuickGameScreen",
+    "1": "constructor,destroyInviteDialog,getAvailablePlayerColors,getAvailablePlayerCountries,getAvailablePlayerCountryRules,getColorIdByName,getColorNameById,getCountryIdByName,getCountryNameById,getInitialPartyState,handleError,initView,isWaitingForTeammate,joinQueue,leaveQueue,onEnter,onLeave,onStack,onUnstack,refreshPlayerProfile,refreshSidebarButtons,requestPlayerProfileRefresh,requestStats,resetPartyState,restorePrePartyQueueType,savePrePartyQueueType,showInviteDialog,tickStartTimer,unrender,updatePartyUI,updateQueueState,updateSidebarText"
+  },
+  "gui/screen/mainMenu/quickGame/component/QuickGameChat": {
+    "0": "QuickGameChat",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/quickGame/component/QuickGameForm": {
+    "0": "QuickGameForm",
+    "1": "function"
+  },
+  "gui/screen/mainMenu/score/ScoreScreen": {
+    "0": "ScoreScreen",
+    "1": "constructor,initView,loadGameReport,onEnter,onLeave"
+  },
+  "gui/screen/mainMenu/score/ScoreTable": {
+    "0": "ScoreTable",
+    "1": "function"
+  },
+  "gui/screen/options/GraphicsOptions": {
+    "0": "applyHighPreset,applyLowPreset,constructor,serialize,unserialize"
+  },
+  "gui/screen/options/KeyboardScreen": {
+    "0": "KeyboardScreen",
+    "1": "constructor,onEnter,onLeave,setController"
+  },
+  "gui/screen/options/OptionsScreen": {
+    "0": "OptionsScreen",
+    "1": "constructor,onEnter,onLeave,onStack,onUnstack,setController"
+  },
+  "gui/screen/options/SoundOptsScreen": {
+    "0": "SoundOptsScreen",
+    "1": "constructor,onEnter,onLeave,setController"
+  },
+  "gui/screen/options/StorageScreen": {
+    "0": "StorageScreen",
+    "1": "constructor,onEnter,onLeave,setVxlGeometryPool"
+  },
+  "gui/screen/options/component/GeneralOpts": {
+    "0": "GeneralOpts",
+    "1": "function"
+  },
+  "gui/screen/options/component/KeyOpts": {
+    "0": "KeyOpts",
+    "1": "function"
+  },
+  "gui/screen/options/component/MusicJukebox": {
+    "0": "MusicJukebox",
+    "1": "function"
+  },
+  "gui/screen/options/component/PressKeyInput": {
+    "0": "PressKeyInput",
+    "1": "function"
+  },
+  "gui/screen/options/component/Resolution": {
+    "0": "ResolutionSelect",
+    "1": "function"
+  },
+  "gui/screen/options/component/SoundOpts": {
+    "0": "SoundOpts",
+    "1": "function"
+  },
+  "gui/screen/options/component/StorageExplorer": {
+    "0": "StorageExplorer",
+    "1": "function"
+  },
+  "gui/screen/options/component/configurableCmds": {
+    "0": [
+      true,
+      88
+    ]
+  },
+  "gui/screen/options/component/getHumanReadableKey": {
+    "0": "Ctrl+A",
+    "1": "getHumanReadableKey"
+  },
+  "gui/screen/replay/KeepReplayBox": {
+    "0": "KeepReplayBox",
+    "1": "function"
+  },
+  "gui/screen/replay/ReplayDetailsPane": {
+    "0": "ReplayDetailsPane",
+    "1": "function"
+  },
+  "gui/screen/replay/ReplayScreen": {
+    "0": "ReplayScreen",
+    "1": "constructor,handleError,initGameMenuEvents,initHudEvents,initUi,onEnter,onGameStart,onLeave,onViewportChange,rerenderHud"
+  },
+  "gui/screen/replay/ReplaySel": {
+    "0": "ReplaySel",
+    "1": "function"
+  },
+  "gui/screen/replay/ReplaySelScreen": {
+    "0": "ReplaySelScreen",
+    "1": "constructor,exportCurrentReplay,getAvailablePlayerColors,getSelectedReplayMeta,handleError,initFileInput,initForm,initSidebar,loadReplayDetails,loadSelectedReplay,onEnter,onLeave,showKeepReplayBox,updateSidebarButtons"
+  },
+  "gui/screen/replay/StorageWarning": {
+    "0": "StorageWarning",
+    "1": "function"
   }
 }

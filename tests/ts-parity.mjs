@@ -61,6 +61,7 @@ const CONVERTED = [
       (ns) => ns.fnv32a([]),
     ],
   },
+
   {
     name: "game/math/GameMath",
     tsjs: "src/game/math/GameMath.ts.js",
@@ -115,6 +116,7 @@ const CONVERTED = [
       (ns) => ns.GameMath.reverseSinTableLookup(0.5, 648, 972, true),
     ],
   },
+
   {
     name: "game/math/Quaternion",
     tsjs: "src/game/math/Quaternion.ts.js",
@@ -174,6 +176,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/math/Vector2",
     tsjs: "src/game/math/Vector2.ts.js",
@@ -192,6 +195,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/math/Vector3",
     tsjs: "src/game/math/Vector3.ts.js",
@@ -241,6 +245,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/GameSpeed",
     tsjs: "src/game/GameSpeed.ts.js",
@@ -254,6 +259,7 @@ const CONVERTED = [
       (ns) => ns.GameSpeed.computeGameSpeed(6),
     ],
   },
+
   {
     name: "game/event/EventType",
     tsjs: "src/game/event/EventType.ts.js",
@@ -267,6 +273,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.EventType).length,
     ],
   },
+
   {
     name: "game/event/TimerExpireEvent",
     tsjs: "src/game/event/TimerExpireEvent.ts.js",
@@ -278,6 +285,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/CountdownTimer",
     tsjs: "src/game/CountdownTimer.ts.js",
@@ -317,6 +325,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Prng",
     tsjs: "src/game/Prng.ts.js",
@@ -355,6 +364,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "util/Base64",
     tsjs: "src/util/Base64.ts.js",
@@ -368,6 +378,7 @@ const CONVERTED = [
       (ns) => ns.Base64.isBase64(""),
     ],
   },
+
   {
     name: "util/string",
     tsjs: "src/util/string.ts.js",
@@ -394,6 +405,7 @@ const CONVERTED = [
       (ns) => ns.bufferToHexString(new ArrayBuffer(0)),
     ],
   },
+
   {
     name: "data/Crc32",
     tsjs: "src/data/Crc32.ts.js",
@@ -432,6 +444,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "engine/type/ObjectType",
     tsjs: "src/engine/type/ObjectType.ts.js",
@@ -445,6 +458,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.ObjectType).length,
     ],
   },
+
   {
     name: "game/SideType",
     tsjs: "src/game/SideType.ts.js",
@@ -457,6 +471,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.SideType).length,
     ],
   },
+
   {
     name: "util/Color",
     tsjs: "src/util/Color.ts.js",
@@ -473,6 +488,7 @@ const CONVERTED = [
       (ns) => new ns.Color(300, -5, 0).asHex(), // 越界输入同样按位运算处理
     ],
   },
+
   {
     name: "game/Traits",
     tsjs: "src/game/Traits.ts.js",
@@ -538,6 +554,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Country",
     tsjs: "src/game/Country.ts.js",
@@ -587,6 +604,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/PlayerList",
     tsjs: "src/game/PlayerList.ts.js",
@@ -652,6 +670,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Alliances",
     tsjs: "src/game/Alliances.ts.js",
@@ -771,6 +790,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Player",
     tsjs: "src/game/Player.ts.js",
@@ -932,6 +952,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "util/event",
     tsjs: "src/util/event.ts.js",
@@ -963,6 +984,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/theater/rampHeights",
     tsjs: "src/game/theater/rampHeights.ts.js",
@@ -974,6 +996,7 @@ const CONVERTED = [
       (ns) => ns.rampHeights.map((row) => row.reduce((a, b) => a + b, 0)),
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyTick",
     tsjs: "src/game/gameobject/trait/interface/NotifyTick.ts.js",
@@ -983,31 +1006,37 @@ const CONVERTED = [
       (ns) => ns.NotifyTick.onTick === ns.NotifyTick.onTick,
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyDestroy",
     tsjs: "src/game/gameobject/trait/interface/NotifyDestroy.ts.js",
     probes: [(ns) => typeof ns.NotifyDestroy.onDestroy, (ns) => Object.keys(ns.NotifyDestroy).length],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyOwnerChange",
     tsjs: "src/game/gameobject/trait/interface/NotifyOwnerChange.ts.js",
     probes: [(ns) => typeof ns.NotifyOwnerChange.onChange, (ns) => Object.keys(ns.NotifyOwnerChange).length],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifySpawn",
     tsjs: "src/game/gameobject/trait/interface/NotifySpawn.ts.js",
     probes: [(ns) => typeof ns.NotifySpawn.onSpawn, (ns) => Object.keys(ns.NotifySpawn).length],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyUnspawn",
     tsjs: "src/game/gameobject/trait/interface/NotifyUnspawn.ts.js",
     probes: [(ns) => typeof ns.NotifyUnspawn.onUnspawn, (ns) => Object.keys(ns.NotifyUnspawn).length],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyAttack",
     tsjs: "src/game/gameobject/trait/interface/NotifyAttack.ts.js",
     probes: [(ns) => typeof ns.NotifyAttack.onAttack, (ns) => Object.keys(ns.NotifyAttack).length],
   },
+
   {
     name: "game/gameobject/common/DeathType",
     tsjs: "src/game/gameobject/common/DeathType.ts.js",
@@ -1020,11 +1049,13 @@ const CONVERTED = [
       (ns) => Object.keys(ns.DeathType).length,
     ],
   },
+
   {
     name: "game/gameobject/Unit",
     tsjs: "src/game/gameobject/Unit.ts.js",
     probes: [(ns) => Object.keys(ns).length, (ns) => typeof ns],
   },
+
   {
     name: "game/gameobject/Terrain",
     tsjs: "src/game/gameobject/Terrain.ts.js",
@@ -1041,6 +1072,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/Smudge",
     tsjs: "src/game/gameobject/Smudge.ts.js",
@@ -1055,6 +1087,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/GameObject",
     tsjs: "src/game/gameobject/GameObject.ts.js",
@@ -1146,6 +1179,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/ObjectPosition",
     tsjs: "src/game/gameobject/ObjectPosition.ts.js",
@@ -1239,11 +1273,13 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/unit/VeteranLevel",
     tsjs: "src/game/gameobject/unit/VeteranLevel.ts.js",
     probes: [(ns) => ns.VeteranLevel.None, (ns) => ns.VeteranLevel.Elite, (ns) => Object.keys(ns.VeteranLevel).length],
   },
+
   {
     name: "game/gameobject/infantry/StanceType",
     tsjs: "src/game/gameobject/infantry/StanceType.ts.js",
@@ -1254,6 +1290,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.StanceType).length,
     ],
   },
+
   {
     name: "game/gameobject/unit/ZoneType",
     tsjs: "src/game/gameobject/unit/ZoneType.ts.js",
@@ -1266,6 +1303,7 @@ const CONVERTED = [
       (ns) => ns.getZoneType(0), // LandType.Clear
     ],
   },
+
   {
     name: "game/gameobject/infantry/InfDeathType",
     tsjs: "src/game/gameobject/infantry/InfDeathType.ts.js",
@@ -1277,6 +1315,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.InfDeathType).length,
     ],
   },
+
   {
     name: "game/gameobject/unit/CrateBonuses",
     tsjs: "src/game/gameobject/unit/CrateBonuses.ts.js",
@@ -1287,6 +1326,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/Techno",
     tsjs: "src/game/gameobject/Techno.ts.js",
@@ -1367,6 +1407,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/Infantry",
     tsjs: "src/game/gameobject/Infantry.ts.js",
@@ -1421,6 +1462,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/Vehicle",
     tsjs: "src/game/gameobject/Vehicle.ts.js",
@@ -1600,6 +1642,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyBuildStatus",
     tsjs: "src/game/gameobject/trait/interface/NotifyBuildStatus.ts.js",
@@ -1608,6 +1651,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.NotifyBuildStatus).length,
     ],
   },
+
   {
     name: "game/event/BuildStatusChangeEvent",
     tsjs: "src/game/event/BuildStatusChangeEvent.ts.js",
@@ -1624,6 +1668,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/Aircraft",
     tsjs: "src/game/gameobject/Aircraft.ts.js",
@@ -1699,6 +1744,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/Building",
     tsjs: "src/game/gameobject/Building.ts.js",
@@ -1858,11 +1904,13 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/WeaponInfo",
     tsjs: "src/game/WeaponInfo.ts.js",
     probes: [(ns) => Object.keys(ns).length, (ns) => typeof ns],
   },
+
   {
     name: "game/WeaponTargeting",
     tsjs: "src/game/WeaponTargeting.ts.js",
@@ -1944,6 +1992,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Weapon",
     tsjs: "src/game/Weapon.ts.js",
@@ -2192,6 +2241,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Warhead",
     tsjs: "src/game/Warhead.ts.js",
@@ -2381,6 +2431,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/RepairRules",
     tsjs: "src/game/rules/general/RepairRules.ts.js",
@@ -2396,6 +2447,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/CrewRules",
     tsjs: "src/game/rules/general/CrewRules.ts.js",
@@ -2414,6 +2466,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/PrismRules",
     tsjs: "src/game/rules/general/PrismRules.ts.js",
@@ -2426,6 +2479,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/ThreatRules",
     tsjs: "src/game/rules/general/ThreatRules.ts.js",
@@ -2436,6 +2490,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/HoverRules",
     tsjs: "src/game/rules/general/HoverRules.ts.js",
@@ -2448,6 +2503,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/LightningStormRules",
     tsjs: "src/game/rules/general/LightningStormRules.ts.js",
@@ -2460,11 +2516,13 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/MissileRules",
     tsjs: "src/game/rules/general/MissileRules.ts.js",
     probes: [(ns) => Object.keys(new ns.MissileRules()).length],
   },
+
   {
     name: "game/rules/general/V3RocketRules",
     tsjs: "src/game/rules/general/V3RocketRules.ts.js",
@@ -2484,6 +2542,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/DMislRules",
     tsjs: "src/game/rules/general/DMislRules.ts.js",
@@ -2495,6 +2554,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/VeteranRules",
     tsjs: "src/game/rules/general/VeteranRules.ts.js",
@@ -2512,6 +2572,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/CMislRules",
     tsjs: "src/game/rules/general/CMislRules.ts.js",
@@ -2524,6 +2585,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/RadarRules",
     tsjs: "src/game/rules/general/RadarRules.ts.js",
@@ -2554,6 +2616,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/general/ParadropRules",
     tsjs: "src/game/rules/general/ParadropRules.ts.js",
@@ -2624,6 +2687,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/GeneralRules",
     tsjs: "src/game/rules/GeneralRules.ts.js",
@@ -2692,6 +2756,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/type/SuperWeaponType",
     tsjs: "src/game/type/SuperWeaponType.ts.js",
@@ -2703,6 +2768,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.SuperWeaponType).length,
     ],
   },
+
   {
     name: "game/rules/CountryRules",
     tsjs: "src/game/rules/CountryRules.ts.js",
@@ -2751,6 +2817,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/MpDialogSettings",
     tsjs: "src/game/rules/MpDialogSettings.ts.js",
@@ -2770,11 +2837,13 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/mpAllowedColors",
     tsjs: "src/game/rules/mpAllowedColors.ts.js",
     probes: [(ns) => ns.mpAllowedColors.length, (ns) => ns.mpAllowedColors[0], (ns) => ns.mpAllowedColors.includes("Purple")],
   },
+
   {
     name: "util/typeGuard",
     tsjs: "src/util/typeGuard.ts.js",
@@ -2785,6 +2854,7 @@ const CONVERTED = [
       (ns) => [1, null, 2].filter(ns.isNotNullOrUndefined),
     ],
   },
+
   {
     name: "game/rules/TiberiumRules",
     tsjs: "src/game/rules/TiberiumRules.ts.js",
@@ -2795,6 +2865,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/AiRules",
     tsjs: "src/game/rules/AiRules.ts.js",
@@ -2815,6 +2886,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/LandRules",
     tsjs: "src/game/rules/LandRules.ts.js",
@@ -2847,6 +2919,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/RadiationRules",
     tsjs: "src/game/rules/RadiationRules.ts.js",
@@ -2866,6 +2939,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/ElevationModelRules",
     tsjs: "src/game/rules/ElevationModelRules.ts.js",
@@ -2885,6 +2959,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/CrateRules",
     tsjs: "src/game/rules/CrateRules.ts.js",
@@ -2911,6 +2986,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/SuperWeaponRules",
     tsjs: "src/game/rules/SuperWeaponRules.ts.js",
@@ -2935,6 +3011,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/PowerupsRules",
     tsjs: "src/game/rules/PowerupsRules.ts.js",
@@ -2962,6 +3039,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/ProjectileRules",
     tsjs: "src/game/rules/ProjectileRules.ts.js",
@@ -2987,6 +3065,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/WarheadRules",
     tsjs: "src/game/rules/WarheadRules.ts.js",
@@ -3015,6 +3094,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/ObjectRulesFactory",
     tsjs: "src/game/rules/ObjectRulesFactory.ts.js",
@@ -3036,6 +3116,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/WeaponRules",
     tsjs: "src/game/rules/WeaponRules.ts.js",
@@ -3079,6 +3160,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/AudioVisualRules",
     tsjs: "src/game/rules/AudioVisualRules.ts.js",
@@ -3103,6 +3185,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/CombatDamageRules",
     tsjs: "src/game/rules/CombatDamageRules.ts.js",
@@ -3128,6 +3211,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/Rules",
     tsjs: "src/game/rules/Rules.ts.js",
@@ -3259,6 +3343,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyPower",
     tsjs: "src/game/trait/interface/NotifyPower.ts.js",
@@ -3269,6 +3354,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.NotifyPower).length,
     ],
   },
+
   {
     name: "game/event/InsufficientFundsEvent",
     tsjs: "src/game/event/InsufficientFundsEvent.ts.js",
@@ -3280,6 +3366,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PowerLowEvent",
     tsjs: "src/game/event/PowerLowEvent.ts.js",
@@ -3291,6 +3378,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PowerRestoreEvent",
     tsjs: "src/game/event/PowerRestoreEvent.ts.js",
@@ -3302,6 +3390,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PowerChangeEvent",
     tsjs: "src/game/event/PowerChangeEvent.ts.js",
@@ -3313,6 +3402,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/player/trait/PowerTrait",
     tsjs: "src/game/player/trait/PowerTrait.ts.js",
@@ -3364,6 +3454,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/player/production/ProductionQueue",
     tsjs: "src/game/player/production/ProductionQueue.ts.js",
@@ -3398,6 +3489,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/player/production/Production",
     tsjs: "src/game/player/production/Production.ts.js",
@@ -3452,6 +3544,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/ProductionTrait",
     tsjs: "src/game/trait/ProductionTrait.ts.js",
@@ -3483,6 +3576,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/TaskStatus",
     tsjs: "src/game/gameobject/task/system/TaskStatus.ts.js",
@@ -3491,6 +3585,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.TaskStatus).length,
     ],
   },
+
   {
     name: "game/gameobject/task/system/Task",
     tsjs: "src/game/gameobject/task/system/Task.ts.js",
@@ -3506,6 +3601,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/CallbackTask",
     tsjs: "src/game/gameobject/task/system/CallbackTask.ts.js",
@@ -3518,6 +3614,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/WaitTicksTask",
     tsjs: "src/game/gameobject/task/system/WaitTicksTask.ts.js",
@@ -3529,6 +3626,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/WaitMinutesTask",
     tsjs: "src/game/gameobject/task/system/WaitMinutesTask.ts.js",
@@ -3539,6 +3637,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "util/geometry",
     tsjs: "src/util/geometry.ts.js",
@@ -3555,6 +3654,7 @@ const CONVERTED = [
       ],
     ],
   },
+
   {
     name: "util/disposable/CompositeDisposable",
     tsjs: "src/util/disposable/CompositeDisposable.ts.js",
@@ -3570,6 +3670,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/morph/PackBuildingTask",
     tsjs: "src/game/gameobject/task/morph/PackBuildingTask.ts.js",
@@ -3607,6 +3708,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/ConstructionWorker",
     tsjs: "src/game/ConstructionWorker.ts.js",
@@ -3684,6 +3786,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/TaskGroup",
     tsjs: "src/game/gameobject/task/system/TaskGroup.ts.js",
@@ -3697,31 +3800,37 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "gui/screen/options/GeneralOptions",
     tsjs: "src/gui/screen/options/GeneralOptions.ts.js",
     probes: [(ns) => typeof ns.GeneralOptions],
   },
+
   {
     name: "util/BoxedVar",
     tsjs: "src/util/BoxedVar.ts.js",
     probes: [(ns) => typeof ns.BoxedVar],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifySell",
     tsjs: "src/game/gameobject/trait/interface/NotifySell.ts.js",
     probes: [(ns) => typeof ns.NotifySell.onSell, (ns) => Object.keys(ns.NotifySell).length],
   },
+
   {
     name: "game/trait/interface/NotifyProduceUnit",
     tsjs: "src/game/trait/interface/NotifyProduceUnit.ts.js",
     probes: [(ns) => typeof ns.NotifyProduceUnit.onProduce, (ns) => Object.keys(ns.NotifyProduceUnit).length],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyWarpChange",
     tsjs: "src/game/gameobject/trait/interface/NotifyWarpChange.ts.js",
     probes: [(ns) => typeof ns.NotifyWarpChange.onChange, (ns) => Object.keys(ns.NotifyWarpChange).length],
   },
+
   {
     name: "game/event/FactoryProduceUnitEvent",
     tsjs: "src/game/event/FactoryProduceUnitEvent.ts.js",
@@ -3733,6 +3842,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/DockTrait",
     tsjs: "src/game/gameobject/trait/DockTrait.ts.js",
@@ -3775,6 +3885,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/FactoryTrait",
     tsjs: "src/game/gameobject/trait/FactoryTrait.ts.js",
@@ -3879,21 +3990,25 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/HelipadTrait",
     tsjs: "src/game/gameobject/trait/HelipadTrait.ts.js",
     probes: [(ns) => typeof ns.HelipadTrait],
   },
+
   {
     name: "game/gameobject/trait/UnitReloadTrait",
     tsjs: "src/game/gameobject/trait/UnitReloadTrait.ts.js",
     probes: [(ns) => typeof ns.UnitReloadTrait],
   },
+
   {
     name: "game/gameobject/trait/TurretTrait",
     tsjs: "src/game/gameobject/trait/TurretTrait.ts.js",
     probes: [(ns) => typeof ns.TurretTrait],
   },
+
   {
     name: "game/gameobject/trait/RallyTrait",
     tsjs: "src/game/gameobject/trait/RallyTrait.ts.js",
@@ -3941,6 +4056,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/CrewedTrait",
     tsjs: "src/game/gameobject/trait/CrewedTrait.ts.js",
@@ -3976,6 +4092,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/UnitRepairTrait",
     tsjs: "src/game/gameobject/trait/UnitRepairTrait.ts.js",
@@ -4008,6 +4125,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/ArmedTrait",
     tsjs: "src/game/gameobject/trait/ArmedTrait.ts.js",
@@ -4169,6 +4287,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/LeaveTransportEvent",
     tsjs: "src/game/event/LeaveTransportEvent.ts.js",
@@ -4180,6 +4299,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TransportTrait",
     tsjs: "src/game/gameobject/trait/TransportTrait.ts.js",
@@ -4229,6 +4349,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/HarvesterTrait",
     tsjs: "src/game/gameobject/trait/HarvesterTrait.ts.js",
@@ -4265,6 +4386,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/MoveTrait",
     tsjs: "src/game/gameobject/trait/MoveTrait.ts.js",
@@ -4367,6 +4489,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/RobotControlTrait",
     tsjs: "src/game/gameobject/trait/RobotControlTrait.ts.js",
@@ -4494,6 +4617,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "engine/gfx/material/paletteShaderLib",
     tsjs: "src/engine/gfx/material/paletteShaderLib.ts.js",
@@ -4504,26 +4628,31 @@ const CONVERTED = [
       (ns) => typeof ns.paletteShaderLib.paletteVplFragment,
     ],
   },
+
   {
     name: "game/gameobject/trait/SensorsTrait",
     tsjs: "src/game/gameobject/trait/SensorsTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/AirportBoundTrait",
     tsjs: "src/game/gameobject/trait/AirportBoundTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/SuppressionTrait",
     tsjs: "src/game/gameobject/trait/SuppressionTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/AgentTrait",
     tsjs: "src/game/gameobject/trait/AgentTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/DockableTrait",
     tsjs: "src/game/gameobject/trait/DockableTrait.ts.js",
@@ -4538,21 +4667,25 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/MissileSpawnTrait",
     tsjs: "src/game/gameobject/trait/MissileSpawnTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/IdleActionTrait",
     tsjs: "src/game/gameobject/trait/IdleActionTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/CloakableTrait",
     tsjs: "src/game/gameobject/trait/CloakableTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/SlaveCargoTrait",
     tsjs: "src/game/gameobject/trait/SlaveCargoTrait.ts.js",
@@ -4565,21 +4698,25 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/UnlandableTrait",
     tsjs: "src/game/gameobject/trait/UnlandableTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/SpawnLinkTrait",
     tsjs: "src/game/gameobject/trait/SpawnLinkTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/CastProgressTrait",
     tsjs: "src/game/gameobject/trait/CastProgressTrait.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/trait/CrashableTrait",
     tsjs: "src/game/gameobject/trait/CrashableTrait.ts.js",
@@ -4592,6 +4729,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/HealthTrait",
     tsjs: "src/game/gameobject/trait/HealthTrait.ts.js",
@@ -4610,6 +4748,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/AttackTrait",
     tsjs: "src/game/gameobject/trait/AttackTrait.ts.js",
@@ -4793,6 +4932,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "util/bresenham",
     tsjs: "src/util/bresenham.ts.js",
@@ -4811,6 +4951,7 @@ const CONVERTED = [
       (ns) => ns.bresenham(3, 1, 0, 0), // 反向
     ],
   },
+
   {
     name: "game/gameobject/unit/CollisionType",
     tsjs: "src/game/gameobject/unit/CollisionType.ts.js",
@@ -4828,6 +4969,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.CollisionType).length,
     ],
   },
+
   {
     name: "game/gameobject/unit/FacingUtil",
     tsjs: "src/game/gameobject/unit/FacingUtil.ts.js",
@@ -4853,6 +4995,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/unit/TargetUtil",
     tsjs: "src/game/gameobject/unit/TargetUtil.ts.js",
@@ -4909,6 +5052,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/map/tileFinder/RadialTileFinder",
     tsjs: "src/game/map/tileFinder/RadialTileFinder.ts.js",
@@ -4955,6 +5099,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/map/tileFinder/CardinalTileFinder",
     tsjs: "src/game/map/tileFinder/CardinalTileFinder.ts.js",
@@ -4994,6 +5139,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "engine/type/TerrainType",
     tsjs: "src/engine/type/TerrainType.ts.js",
@@ -5016,6 +5162,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.TerrainType).length,
     ],
   },
+
   {
     name: "engine/type/TiberiumType",
     tsjs: "src/engine/type/TiberiumType.ts.js",
@@ -5034,6 +5181,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.TiberiumType).length,
     ],
   },
+
   {
     name: "game/action/ActionType",
     tsjs: "src/game/action/ActionType.ts.js",
@@ -5057,6 +5205,7 @@ const CONVERTED = [
       (ns) => ns.ActionType[13],
     ],
   },
+
   {
     name: "game/action/Action",
     tsjs: "src/game/action/Action.ts.js",
@@ -5078,6 +5227,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ActionQueue",
     tsjs: "src/game/action/ActionQueue.ts.js",
@@ -5104,6 +5254,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ActionFactory",
     tsjs: "src/game/action/ActionFactory.ts.js",
@@ -5127,6 +5278,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ActionFactoryReg",
     tsjs: "src/game/action/ActionFactoryReg.ts.js",
@@ -5164,6 +5316,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/OrderActionContext",
     tsjs: "src/game/action/OrderActionContext.ts.js",
@@ -5183,6 +5336,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/NoAction",
     tsjs: "src/game/action/NoAction.ts.js",
@@ -5200,6 +5354,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/SelectUnitsAction",
     tsjs: "src/game/action/SelectUnitsAction.ts.js",
@@ -5229,6 +5384,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/OrderUnitsAction",
     tsjs: "src/game/action/OrderUnitsAction.ts.js",
@@ -5312,6 +5468,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/PlaceBuildingAction",
     tsjs: "src/game/action/PlaceBuildingAction.ts.js",
@@ -5346,6 +5503,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/SellObjectAction",
     tsjs: "src/game/action/SellObjectAction.ts.js",
@@ -5365,6 +5523,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ToggleRepairAction",
     tsjs: "src/game/action/ToggleRepairAction.ts.js",
@@ -5383,6 +5542,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/UpdateQueueAction",
     tsjs: "src/game/action/UpdateQueueAction.ts.js",
@@ -5429,6 +5589,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ToggleAllianceAction",
     tsjs: "src/game/action/ToggleAllianceAction.ts.js",
@@ -5453,6 +5614,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ActivateSuperWeaponAction",
     tsjs: "src/game/action/ActivateSuperWeaponAction.ts.js",
@@ -5493,6 +5655,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/PingLocationAction",
     tsjs: "src/game/action/PingLocationAction.ts.js",
@@ -5513,6 +5676,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/DropPlayerAction",
     tsjs: "src/game/action/DropPlayerAction.ts.js",
@@ -5550,6 +5714,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ResignGameAction",
     tsjs: "src/game/action/ResignGameAction.ts.js",
@@ -5593,6 +5758,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/ObserveGameAction",
     tsjs: "src/game/action/ObserveGameAction.ts.js",
@@ -5641,6 +5807,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/DebugAction",
     tsjs: "src/game/action/DebugAction.ts.js",
@@ -5700,6 +5867,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/PlaceBuildingActionFactory",
     tsjs: "src/game/action/factories/PlaceBuildingActionFactory.ts.js",
@@ -5712,6 +5880,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/SellObjectActionFactory",
     tsjs: "src/game/action/factories/SellObjectActionFactory.ts.js",
@@ -5723,6 +5892,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/ToggleRepairActionFactory",
     tsjs: "src/game/action/factories/ToggleRepairActionFactory.ts.js",
@@ -5734,6 +5904,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/SelectUnitsActionFactory",
     tsjs: "src/game/action/factories/SelectUnitsActionFactory.ts.js",
@@ -5750,6 +5921,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/OrderUnitsActionFactory",
     tsjs: "src/game/action/factories/OrderUnitsActionFactory.ts.js",
@@ -5770,6 +5942,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/UpdateQueueActionFactory",
     tsjs: "src/game/action/factories/UpdateQueueActionFactory.ts.js",
@@ -5781,6 +5954,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/ToggleAllianceFactory",
     tsjs: "src/game/action/factories/ToggleAllianceFactory.ts.js",
@@ -5792,6 +5966,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/ActivateSuperWeaponActionFactory",
     tsjs: "src/game/action/factories/ActivateSuperWeaponActionFactory.ts.js",
@@ -5803,6 +5978,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/PingLocationActionFactory",
     tsjs: "src/game/action/factories/PingLocationActionFactory.ts.js",
@@ -5814,6 +5990,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/DropPlayerActionFactory",
     tsjs: "src/game/action/factories/DropPlayerActionFactory.ts.js",
@@ -5829,6 +6006,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/ObserveGameActionFactory",
     tsjs: "src/game/action/factories/ObserveGameActionFactory.ts.js",
@@ -5840,6 +6018,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/ResignGameActionFactory",
     tsjs: "src/game/action/factories/ResignGameActionFactory.ts.js",
@@ -5855,6 +6034,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/action/factories/DebugActionFactory",
     tsjs: "src/game/action/factories/DebugActionFactory.ts.js",
@@ -5866,6 +6046,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/Order",
     tsjs: "src/game/order/Order.ts.js",
@@ -5904,6 +6085,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/OrderFeedbackType",
     tsjs: "src/game/order/OrderFeedbackType.ts.js",
@@ -5936,6 +6118,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/orderPriorities",
     tsjs: "src/game/order/orderPriorities.ts.js",
@@ -5958,6 +6141,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/OrderFactory",
     tsjs: "src/game/order/OrderFactory.ts.js",
@@ -6023,6 +6207,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/MoveOrder",
     tsjs: "src/game/order/MoveOrder.ts.js",
@@ -6157,6 +6342,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/AttackOrder",
     tsjs: "src/game/order/AttackOrder.ts.js",
@@ -6271,6 +6457,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/AttackMoveOrder",
     tsjs: "src/game/order/AttackMoveOrder.ts.js",
@@ -6369,6 +6556,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/DeployOrder",
     tsjs: "src/game/order/DeployOrder.ts.js",
@@ -6463,6 +6651,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/CaptureOrder",
     tsjs: "src/game/order/CaptureOrder.ts.js",
@@ -6540,6 +6729,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/CheerOrder",
     tsjs: "src/game/order/CheerOrder.ts.js",
@@ -6585,6 +6775,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/DockOrder",
     tsjs: "src/game/order/DockOrder.ts.js",
@@ -6675,6 +6866,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/EnterTransportOrder",
     tsjs: "src/game/order/EnterTransportOrder.ts.js",
@@ -6758,6 +6950,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/GatherOrder",
     tsjs: "src/game/order/GatherOrder.ts.js",
@@ -6824,6 +7017,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/GuardAreaOrder",
     tsjs: "src/game/order/GuardAreaOrder.ts.js",
@@ -6917,6 +7111,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/OccupyOrder",
     tsjs: "src/game/order/OccupyOrder.ts.js",
@@ -7023,6 +7218,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/RepairOrder",
     tsjs: "src/game/order/RepairOrder.ts.js",
@@ -7123,6 +7319,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/ScatterOrder",
     tsjs: "src/game/order/ScatterOrder.ts.js",
@@ -7186,6 +7383,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/StopOrder",
     tsjs: "src/game/order/StopOrder.ts.js",
@@ -7269,6 +7467,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/UnloadAllOrder",
     tsjs: "src/game/order/UnloadAllOrder.ts.js",
@@ -7327,6 +7526,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/order/OrderType",
     tsjs: "src/game/order/OrderType.ts.js",
@@ -7357,6 +7557,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.OrderType).length,
     ],
   },
+
   {
     name: "game/trait/interface/NotifyElevationChange",
     tsjs: "src/game/trait/interface/NotifyElevationChange.ts.js",
@@ -7366,6 +7567,7 @@ const CONVERTED = [
       (ns) => typeof Object.values(ns)[0],
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyTeleport",
     tsjs: "src/game/gameobject/trait/interface/NotifyTeleport.ts.js",
@@ -7375,6 +7577,7 @@ const CONVERTED = [
       (ns) => typeof Object.values(ns)[0],
     ],
   },
+
   {
     name: "game/trait/interface/NotifyTileChange",
     tsjs: "src/game/trait/interface/NotifyTileChange.ts.js",
@@ -7384,6 +7587,7 @@ const CONVERTED = [
       (ns) => typeof Object.values(ns)[0],
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyTileChange",
     tsjs: "src/game/gameobject/trait/interface/NotifyTileChange.ts.js",
@@ -7393,6 +7597,7 @@ const CONVERTED = [
       (ns) => typeof Object.values(ns)[0],
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyCrash",
     tsjs: "src/game/gameobject/trait/interface/NotifyCrash.ts.js",
@@ -7402,6 +7607,7 @@ const CONVERTED = [
       (ns) => typeof Object.values(ns)[0],
     ],
   },
+
   {
     name: "game/type/LandType",
     tsjs: "src/game/type/LandType.ts.js",
@@ -7437,41 +7643,49 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/locomotor/Locomotor",
     tsjs: "src/game/gameobject/locomotor/Locomotor.ts.js",
     probes: [() => "exists"], // 空模块存在性检查（常量，新旧一致）
   },
+
   {
     name: "game/gameobject/locomotor/LocomotorFactory",
     tsjs: "src/game/gameobject/locomotor/LocomotorFactory.ts.js",
     probes: [(ns) => typeof ns.LocomotorFactory],
   },
+
   {
     name: "game/gameobject/locomotor/ChronoLocomotor",
     tsjs: "src/game/gameobject/locomotor/ChronoLocomotor.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/locomotor/FootLocomotor",
     tsjs: "src/game/gameobject/locomotor/FootLocomotor.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/gameobject/unit/Timer",
     tsjs: "src/game/gameobject/unit/Timer.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/event/ObjectCloakChangeEvent",
     tsjs: "src/game/event/ObjectCloakChangeEvent.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/event/ObjectCrashingEvent",
     tsjs: "src/game/event/ObjectCrashingEvent.ts.js",
     probes: [(ns) => typeof Object.values(ns)[0]],
   },
+
   {
     name: "game/event/AllianceChangeEvent",
     tsjs: "src/game/event/AllianceChangeEvent.ts.js",
@@ -7491,6 +7705,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BridgeRepairEvent",
     tsjs: "src/game/event/BridgeRepairEvent.ts.js",
@@ -7503,6 +7718,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingCaptureEvent",
     tsjs: "src/game/event/BuildingCaptureEvent.ts.js",
@@ -7514,6 +7730,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingEvacuateEvent",
     tsjs: "src/game/event/BuildingEvacuateEvent.ts.js",
@@ -7526,6 +7743,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingFailedPlaceEvent",
     tsjs: "src/game/event/BuildingFailedPlaceEvent.ts.js",
@@ -7538,6 +7756,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingGarrisonEvent",
     tsjs: "src/game/event/BuildingGarrisonEvent.ts.js",
@@ -7549,6 +7768,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingInfiltrationEvent",
     tsjs: "src/game/event/BuildingInfiltrationEvent.ts.js",
@@ -7561,6 +7781,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingPlaceEvent",
     tsjs: "src/game/event/BuildingPlaceEvent.ts.js",
@@ -7572,6 +7793,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingRepairFullEvent",
     tsjs: "src/game/event/BuildingRepairFullEvent.ts.js",
@@ -7584,6 +7806,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/BuildingRepairStartEvent",
     tsjs: "src/game/event/BuildingRepairStartEvent.ts.js",
@@ -7595,6 +7818,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/CheerEvent",
     tsjs: "src/game/event/CheerEvent.ts.js",
@@ -7606,6 +7830,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/CratePickupEvent",
     tsjs: "src/game/event/CratePickupEvent.ts.js",
@@ -7626,6 +7851,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/DeployNotAllowedEvent",
     tsjs: "src/game/event/DeployNotAllowedEvent.ts.js",
@@ -7637,6 +7863,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/EnterObjectEvent",
     tsjs: "src/game/event/EnterObjectEvent.ts.js",
@@ -7649,6 +7876,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/EnterTileEvent",
     tsjs: "src/game/event/EnterTileEvent.ts.js",
@@ -7661,6 +7889,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/EnterTransportEvent",
     tsjs: "src/game/event/EnterTransportEvent.ts.js",
@@ -7672,6 +7901,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/EventMap",
     tsjs: "src/game/event/EventMap.ts.js",
@@ -7681,6 +7911,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns),
     ],
   },
+
   {
     name: "game/event/GameEvent",
     tsjs: "src/game/event/GameEvent.ts.js",
@@ -7690,6 +7921,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns),
     ],
   },
+
   {
     name: "game/event/HealthChangeEvent",
     tsjs: "src/game/event/HealthChangeEvent.ts.js",
@@ -7706,6 +7938,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/InflictDamageEvent",
     tsjs: "src/game/event/InflictDamageEvent.ts.js",
@@ -7725,6 +7958,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/LightningStormCloudEvent",
     tsjs: "src/game/event/LightningStormCloudEvent.ts.js",
@@ -7736,6 +7970,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/LightningStormManifestEvent",
     tsjs: "src/game/event/LightningStormManifestEvent.ts.js",
@@ -7747,6 +7982,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectAttackedEvent",
     tsjs: "src/game/event/ObjectAttackedEvent.ts.js",
@@ -7764,6 +8000,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectDestroyEvent",
     tsjs: "src/game/event/ObjectDestroyEvent.ts.js",
@@ -7781,6 +8018,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectDisguiseChangeEvent",
     tsjs: "src/game/event/ObjectDisguiseChangeEvent.ts.js",
@@ -7792,6 +8030,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectLandEvent",
     tsjs: "src/game/event/ObjectLandEvent.ts.js",
@@ -7803,6 +8042,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectLiftOffEvent",
     tsjs: "src/game/event/ObjectLiftOffEvent.ts.js",
@@ -7814,6 +8054,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectMorphEvent",
     tsjs: "src/game/event/ObjectMorphEvent.ts.js",
@@ -7826,6 +8067,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectOwnerChangeEvent",
     tsjs: "src/game/event/ObjectOwnerChangeEvent.ts.js",
@@ -7838,6 +8080,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectSellEvent",
     tsjs: "src/game/event/ObjectSellEvent.ts.js",
@@ -7849,6 +8092,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectSpawnEvent",
     tsjs: "src/game/event/ObjectSpawnEvent.ts.js",
@@ -7860,6 +8104,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectTeleportEvent",
     tsjs: "src/game/event/ObjectTeleportEvent.ts.js",
@@ -7877,6 +8122,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ObjectUnspawnEvent",
     tsjs: "src/game/event/ObjectUnspawnEvent.ts.js",
@@ -7888,6 +8134,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PingLocationEvent",
     tsjs: "src/game/event/PingLocationEvent.ts.js",
@@ -7900,6 +8147,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PlayerDefeatedEvent",
     tsjs: "src/game/event/PlayerDefeatedEvent.ts.js",
@@ -7911,6 +8159,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PlayerDroppedEvent",
     tsjs: "src/game/event/PlayerDroppedEvent.ts.js",
@@ -7922,6 +8171,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PlayerResignedEvent",
     tsjs: "src/game/event/PlayerResignedEvent.ts.js",
@@ -7933,6 +8183,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/PrimaryFactoryChangeEvent",
     tsjs: "src/game/event/PrimaryFactoryChangeEvent.ts.js",
@@ -7944,6 +8195,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/RadarEvent",
     tsjs: "src/game/event/RadarEvent.ts.js",
@@ -7956,6 +8208,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/RadarOnOffEvent",
     tsjs: "src/game/event/RadarOnOffEvent.ts.js",
@@ -7967,6 +8220,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/RallyPointChangeEvent",
     tsjs: "src/game/event/RallyPointChangeEvent.ts.js",
@@ -7978,6 +8232,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/ShipSubmergeChangeEvent",
     tsjs: "src/game/event/ShipSubmergeChangeEvent.ts.js",
@@ -7989,6 +8244,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/StalemateDetectEvent",
     tsjs: "src/game/event/StalemateDetectEvent.ts.js",
@@ -7999,6 +8255,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/SuperWeaponActivateEvent",
     tsjs: "src/game/event/SuperWeaponActivateEvent.ts.js",
@@ -8020,6 +8277,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/SuperWeaponReadyEvent",
     tsjs: "src/game/event/SuperWeaponReadyEvent.ts.js",
@@ -8031,6 +8289,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/TriggerAnimEvent",
     tsjs: "src/game/event/TriggerAnimEvent.ts.js",
@@ -8042,6 +8301,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/TriggerEvaEvent",
     tsjs: "src/game/event/TriggerEvaEvent.ts.js",
@@ -8052,6 +8312,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/TriggerSoundFxEvent",
     tsjs: "src/game/event/TriggerSoundFxEvent.ts.js",
@@ -8063,6 +8324,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/TriggerStopSoundFxEvent",
     tsjs: "src/game/event/TriggerStopSoundFxEvent.ts.js",
@@ -8074,6 +8336,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/TriggerTextEvent",
     tsjs: "src/game/event/TriggerTextEvent.ts.js",
@@ -8084,6 +8347,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/UnitDeployUndeployEvent",
     tsjs: "src/game/event/UnitDeployUndeployEvent.ts.js",
@@ -8095,6 +8359,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/UnitPromoteEvent",
     tsjs: "src/game/event/UnitPromoteEvent.ts.js",
@@ -8106,6 +8371,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/UnitRecycleEvent",
     tsjs: "src/game/event/UnitRecycleEvent.ts.js",
@@ -8117,6 +8383,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/UnitRepairFinishEvent",
     tsjs: "src/game/event/UnitRepairFinishEvent.ts.js",
@@ -8129,6 +8396,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/UnitRepairStartEvent",
     tsjs: "src/game/event/UnitRepairStartEvent.ts.js",
@@ -8140,6 +8408,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/VirusCloudEvent",
     tsjs: "src/game/event/VirusCloudEvent.ts.js",
@@ -8163,6 +8432,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/WarheadDetonateEvent",
     tsjs: "src/game/event/WarheadDetonateEvent.ts.js",
@@ -8181,6 +8451,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/event/WeaponFireEvent",
     tsjs: "src/game/event/WeaponFireEvent.ts.js",
@@ -8193,11 +8464,13 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/ScatterTask",
     tsjs: "src/game/gameobject/task/ScatterTask.ts.js",
     probes: [(ns) => typeof ns.ScatterTask],
   },
+
   {
     name: "game/gameobject/locomotor/DriveLocomotor",
     tsjs: "src/game/gameobject/locomotor/DriveLocomotor.ts.js",
@@ -8242,6 +8515,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/locomotor/HoverLocomotor",
     tsjs: "src/game/gameobject/locomotor/HoverLocomotor.ts.js",
@@ -8307,6 +8581,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/locomotor/JumpjetLocomotor",
     tsjs: "src/game/gameobject/locomotor/JumpjetLocomotor.ts.js",
@@ -8418,6 +8693,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/locomotor/MissileLocomotor",
     tsjs: "src/game/gameobject/locomotor/MissileLocomotor.ts.js",
@@ -8543,6 +8819,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/locomotor/WingedLocomotor",
     tsjs: "src/game/gameobject/locomotor/WingedLocomotor.ts.js",
@@ -8685,6 +8962,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveTask",
     tsjs: "src/game/gameobject/task/move/MoveTask.ts.js",
@@ -8907,6 +9185,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/TurnTask",
     tsjs: "src/game/gameobject/task/TurnTask.ts.js",
@@ -8936,6 +9215,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveInsideTask",
     tsjs: "src/game/gameobject/task/move/MoveInsideTask.ts.js",
@@ -8984,6 +9264,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveTargetTask",
     tsjs: "src/game/gameobject/task/move/MoveTargetTask.ts.js",
@@ -9020,6 +9301,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/AttackMoveTask",
     tsjs: "src/game/gameobject/task/move/AttackMoveTask.ts.js",
@@ -9057,6 +9339,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveNextToTask",
     tsjs: "src/game/gameobject/task/move/MoveNextToTask.ts.js",
@@ -9117,6 +9400,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveAsideTask",
     tsjs: "src/game/gameobject/task/move/MoveAsideTask.ts.js",
@@ -9225,6 +9509,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveOutsideTask",
     tsjs: "src/game/gameobject/task/move/MoveOutsideTask.ts.js",
@@ -9256,6 +9541,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/morph/DeployIntoTask",
     tsjs: "src/game/gameobject/task/morph/DeployIntoTask.ts.js",
@@ -9306,6 +9592,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/morph/UndeployIntoTask",
     tsjs: "src/game/gameobject/task/morph/UndeployIntoTask.ts.js",
@@ -9340,6 +9627,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/InfiltrateBuildingTask",
     tsjs: "src/game/gameobject/task/InfiltrateBuildingTask.ts.js",
@@ -9377,6 +9665,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/WaitForBuildUpTask",
     tsjs: "src/game/gameobject/task/WaitForBuildUpTask.ts.js",
@@ -9400,6 +9689,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/PlantC4Task",
     tsjs: "src/game/gameobject/task/PlantC4Task.ts.js",
@@ -9440,6 +9730,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/AttackTask",
     tsjs: "src/game/gameobject/task/AttackTask.ts.js",
@@ -9689,6 +9980,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveInWeaponRangeTask",
     tsjs: "src/game/gameobject/task/move/MoveInWeaponRangeTask.ts.js",
@@ -9839,6 +10131,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/SlaveGatherTask",
     tsjs: "src/game/gameobject/task/SlaveGatherTask.ts.js",
@@ -10178,6 +10471,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/EnterBuildingTask",
     tsjs: "src/game/gameobject/task/EnterBuildingTask.ts.js",
@@ -10272,6 +10566,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/EnterHospitalTask",
     tsjs: "src/game/gameobject/task/EnterHospitalTask.ts.js",
@@ -10346,6 +10641,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/EnterRecyclerTask",
     tsjs: "src/game/gameobject/task/EnterRecyclerTask.ts.js",
@@ -10481,6 +10777,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/EnterTankBunkerTask",
     tsjs: "src/game/gameobject/task/EnterTankBunkerTask.ts.js",
@@ -10560,6 +10857,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/EnterTransportTask",
     tsjs: "src/game/gameobject/task/EnterTransportTask.ts.js",
@@ -10647,6 +10945,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/EvacuateTransportTask",
     tsjs: "src/game/gameobject/task/EvacuateTransportTask.ts.js",
@@ -10717,6 +11016,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/MagnetronDragTask",
     tsjs: "src/game/gameobject/task/MagnetronDragTask.ts.js",
@@ -11045,6 +11345,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/type/SpeedType",
     tsjs: "src/game/type/SpeedType.ts.js",
@@ -11055,11 +11356,13 @@ const CONVERTED = [
       (ns) => Object.keys(ns.SpeedType).length,
     ],
   },
+
   {
     name: "game/type/PipColor",
     tsjs: "src/game/type/PipColor.ts.js",
     probes: [(ns) => ns.PipColor.Green, (ns) => ns.PipColor.Blue, (ns) => Object.keys(ns.PipColor).length],
   },
+
   {
     name: "game/type/PipScale",
     tsjs: "src/game/type/PipScale.ts.js",
@@ -11070,6 +11373,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns.PipScale).length,
     ],
   },
+
   {
     name: "game/type/LocomotorType",
     tsjs: "src/game/type/LocomotorType.ts.js",
@@ -11084,21 +11388,25 @@ const CONVERTED = [
       (ns) => ns.defaultSpeedsByLocomotor.get(ns.LocomotorType.Chrono),
     ],
   },
+
   {
     name: "game/type/MovementZone",
     tsjs: "src/game/type/MovementZone.ts.js",
     probes: [(ns) => ns.MovementZone.Fly, (ns) => ns.MovementZone.Normal, (ns) => Object.keys(ns.MovementZone).length],
   },
+
   {
     name: "game/type/ArmorType",
     tsjs: "src/game/type/ArmorType.ts.js",
     probes: [(ns) => ns.ArmorType.None, (ns) => ns.ArmorType.Concrete, (ns) => ns.ArmorType.Special_2, (ns) => Object.keys(ns.ArmorType).length],
   },
+
   {
     name: "game/type/LandTargeting",
     tsjs: "src/game/type/LandTargeting.ts.js",
     probes: [(ns) => ns.LandTargeting.LandOk, (ns) => ns.LandTargeting.LandSecondary, (ns) => Object.keys(ns.LandTargeting).length],
   },
+
   {
     name: "game/type/NavalTargeting",
     tsjs: "src/game/type/NavalTargeting.ts.js",
@@ -11109,11 +11417,13 @@ const CONVERTED = [
       (ns) => Object.keys(ns.NavalTargeting).length,
     ],
   },
+
   {
     name: "game/type/VhpScan",
     tsjs: "src/game/type/VhpScan.ts.js",
     probes: [(ns) => ns.VhpScan.None, (ns) => ns.VhpScan.Strong, (ns) => Object.keys(ns.VhpScan).length],
   },
+
   {
     name: "game/gameobject/unit/VeteranAbility",
     tsjs: "src/game/gameobject/unit/VeteranAbility.ts.js",
@@ -11124,11 +11434,13 @@ const CONVERTED = [
       (ns) => Object.keys(ns.VeteranAbility).length,
     ],
   },
+
   {
     name: "game/WeaponType",
     tsjs: "src/game/WeaponType.ts.js",
     probes: [(ns) => ns.WeaponType.Primary, (ns) => ns.WeaponType.DeathWeapon, (ns) => Object.keys(ns.WeaponType).length],
   },
+
   {
     name: "game/rules/ObjectRules",
     tsjs: "src/game/rules/ObjectRules.ts.js",
@@ -11157,6 +11469,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/rules/TechnoRules",
     tsjs: "src/game/rules/TechnoRules.ts.js",
@@ -11385,6 +11698,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/Coords",
     tsjs: "src/game/Coords.ts.js",
@@ -11568,6 +11882,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/harvester/ReturnOreTask",
     tsjs: "src/game/gameobject/task/harvester/ReturnOreTask.ts.js",
@@ -11730,6 +12045,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/harvester/TeleportMoveToRefineryTask",
     tsjs: "src/game/gameobject/task/harvester/TeleportMoveToRefineryTask.ts.js",
@@ -11838,6 +12154,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/ExitFactoryTask",
     tsjs: "src/game/gameobject/task/move/ExitFactoryTask.ts.js",
@@ -12003,6 +12320,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/AttackMoveTargetTask",
     tsjs: "src/game/gameobject/task/move/AttackMoveTargetTask.ts.js",
@@ -12174,6 +12492,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/move/MoveToBlockTask",
     tsjs: "src/game/gameobject/task/move/MoveToBlockTask.ts.js",
@@ -12264,6 +12583,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/morph/MorphIntoTask",
     tsjs: "src/game/gameobject/task/morph/MorphIntoTask.ts.js",
@@ -12437,6 +12757,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/CaptureBuildingTask",
     tsjs: "src/game/gameobject/task/CaptureBuildingTask.ts.js",
@@ -12638,6 +12959,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/GarrisonBuildingTask",
     tsjs: "src/game/gameobject/task/GarrisonBuildingTask.ts.js",
@@ -12786,6 +13108,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/RepairBuildingTask",
     tsjs: "src/game/gameobject/task/RepairBuildingTask.ts.js",
@@ -12901,6 +13224,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/CheerTask",
     tsjs: "src/game/gameobject/task/CheerTask.ts.js",
@@ -12976,6 +13300,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/ParadropTask",
     tsjs: "src/game/gameobject/task/ParadropTask.ts.js",
@@ -13096,6 +13421,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/MoveToDockTask",
     tsjs: "src/game/gameobject/task/MoveToDockTask.ts.js",
@@ -13369,6 +13695,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/AirstrikeAttackTask",
     tsjs: "src/game/gameobject/task/AirstrikeAttackTask.ts.js",
@@ -13644,6 +13971,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/TargetLinesConfig",
     tsjs: "src/game/gameobject/task/system/TargetLinesConfig.ts.js",
@@ -13694,6 +14022,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/task/system/TaskRunner",
     tsjs: "src/game/gameobject/task/system/TaskRunner.ts.js",
@@ -13928,6 +14257,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyDamage",
     tsjs: "src/game/gameobject/trait/interface/NotifyDamage.ts.js",
@@ -13943,6 +14273,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyHeal",
     tsjs: "src/game/gameobject/trait/interface/NotifyHeal.ts.js",
@@ -13958,6 +14289,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyHealthChange",
     tsjs: "src/game/gameobject/trait/interface/NotifyHealthChange.ts.js",
@@ -13973,6 +14305,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/interface/NotifyOrder",
     tsjs: "src/game/gameobject/trait/interface/NotifyOrder.ts.js",
@@ -13988,6 +14321,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyAllianceChange",
     tsjs: "src/game/trait/interface/NotifyAllianceChange.ts.js",
@@ -14003,6 +14337,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyAttack",
     tsjs: "src/game/trait/interface/NotifyAttack.ts.js",
@@ -14018,6 +14353,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyDestroy",
     tsjs: "src/game/trait/interface/NotifyDestroy.ts.js",
@@ -14033,6 +14369,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyHealthChange",
     tsjs: "src/game/trait/interface/NotifyHealthChange.ts.js",
@@ -14048,6 +14385,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyObjectTraitAdd",
     tsjs: "src/game/trait/interface/NotifyObjectTraitAdd.ts.js",
@@ -14063,6 +14401,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyOwnerChange",
     tsjs: "src/game/trait/interface/NotifyOwnerChange.ts.js",
@@ -14078,6 +14417,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyPlaceBuilding",
     tsjs: "src/game/trait/interface/NotifyPlaceBuilding.ts.js",
@@ -14093,6 +14433,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifySpawn",
     tsjs: "src/game/trait/interface/NotifySpawn.ts.js",
@@ -14108,6 +14449,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifySuperWeaponActivate",
     tsjs: "src/game/trait/interface/NotifySuperWeaponActivate.ts.js",
@@ -14123,6 +14465,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifySuperWeaponDeactivate",
     tsjs: "src/game/trait/interface/NotifySuperWeaponDeactivate.ts.js",
@@ -14138,6 +14481,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyTargetDestroy",
     tsjs: "src/game/trait/interface/NotifyTargetDestroy.ts.js",
@@ -14153,6 +14497,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyTick",
     tsjs: "src/game/trait/interface/NotifyTick.ts.js",
@@ -14168,6 +14513,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyUnspawn",
     tsjs: "src/game/trait/interface/NotifyUnspawn.ts.js",
@@ -14183,6 +14529,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/interface/NotifyWarpChange",
     tsjs: "src/game/trait/interface/NotifyWarpChange.ts.js",
@@ -14198,6 +14545,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/DelayedKillTrait",
     tsjs: "src/game/gameobject/trait/DelayedKillTrait.ts.js",
@@ -14214,6 +14562,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/GunnerTrait",
     tsjs: "src/game/gameobject/trait/GunnerTrait.ts.js",
@@ -14228,6 +14577,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/HoverBobTrait",
     tsjs: "src/game/gameobject/trait/HoverBobTrait.ts.js",
@@ -14243,6 +14593,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/DrainTrait",
     tsjs: "src/game/gameobject/trait/DrainTrait.ts.js",
@@ -14262,6 +14613,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/DisguiseTrait",
     tsjs: "src/game/gameobject/trait/DisguiseTrait.ts.js",
@@ -14279,6 +14631,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/MindControllableTrait",
     tsjs: "src/game/gameobject/trait/MindControllableTrait.ts.js",
@@ -14298,6 +14651,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/OilDerrickTrait",
     tsjs: "src/game/gameobject/trait/OilDerrickTrait.ts.js",
@@ -14308,6 +14662,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/PsychicDetectorTrait",
     tsjs: "src/game/gameobject/trait/PsychicDetectorTrait.ts.js",
@@ -14323,6 +14678,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SpawnDebrisTrait",
     tsjs: "src/game/gameobject/trait/SpawnDebrisTrait.ts.js",
@@ -14341,6 +14697,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TechHospitalHealTrait",
     tsjs: "src/game/gameobject/trait/TechHospitalHealTrait.ts.js",
@@ -14355,6 +14712,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TiberiumTreeTrait",
     tsjs: "src/game/gameobject/trait/TiberiumTreeTrait.ts.js",
@@ -14375,6 +14733,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/VeteranTrait",
     tsjs: "src/game/gameobject/trait/VeteranTrait.ts.js",
@@ -14396,6 +14755,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/OccupiableGarrisonTrait",
     tsjs: "src/game/gameobject/trait/OccupiableGarrisonTrait.ts.js",
@@ -14412,6 +14772,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/PowerTrait",
     tsjs: "src/game/trait/PowerTrait.ts.js",
@@ -14429,6 +14790,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/RadarTrait",
     tsjs: "src/game/trait/RadarTrait.ts.js",
@@ -14446,6 +14808,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/MapRadiationTrait",
     tsjs: "src/game/trait/MapRadiationTrait.ts.js",
@@ -14468,6 +14831,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/MapShroudTrait",
     tsjs: "src/game/trait/MapShroudTrait.ts.js",
@@ -14490,6 +14854,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/SharedDetectDisguiseTrait",
     tsjs: "src/game/trait/SharedDetectDisguiseTrait.ts.js",
@@ -14506,6 +14871,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/AirstrikeTrait",
     tsjs: "src/game/gameobject/trait/AirstrikeTrait.ts.js",
@@ -14539,6 +14905,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/AmmoTrait",
     tsjs: "src/game/gameobject/trait/AmmoTrait.ts.js",
@@ -14561,6 +14928,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/AutoRepairTrait",
     tsjs: "src/game/gameobject/trait/AutoRepairTrait.ts.js",
@@ -14579,6 +14947,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/BerserkTrait",
     tsjs: "src/game/gameobject/trait/BerserkTrait.ts.js",
@@ -14597,6 +14966,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/C4ChargeTrait",
     tsjs: "src/game/gameobject/trait/C4ChargeTrait.ts.js",
@@ -14613,6 +14983,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/DeployerTrait",
     tsjs: "src/game/gameobject/trait/DeployerTrait.ts.js",
@@ -14636,6 +15007,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/GarrisonTrait",
     tsjs: "src/game/gameobject/trait/GarrisonTrait.ts.js",
@@ -14657,6 +15029,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/GattlingTrait",
     tsjs: "src/game/gameobject/trait/GattlingTrait.ts.js",
@@ -14685,6 +15058,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/InfantryAbsorbTrait",
     tsjs: "src/game/gameobject/trait/InfantryAbsorbTrait.ts.js",
@@ -14704,6 +15078,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/InvulnerableTrait",
     tsjs: "src/game/gameobject/trait/InvulnerableTrait.ts.js",
@@ -14723,6 +15098,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/MindControllerTrait",
     tsjs: "src/game/gameobject/trait/MindControllerTrait.ts.js",
@@ -14751,6 +15127,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/ParasiteableTrait",
     tsjs: "src/game/gameobject/trait/ParasiteableTrait.ts.js",
@@ -14776,6 +15153,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SecureProgressTrait",
     tsjs: "src/game/gameobject/trait/SecureProgressTrait.ts.js",
@@ -14798,6 +15176,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SlaveMinerTrait",
     tsjs: "src/game/gameobject/trait/SlaveMinerTrait.ts.js",
@@ -14824,6 +15203,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SlaveMinerVehicleTrait",
     tsjs: "src/game/gameobject/trait/SlaveMinerVehicleTrait.ts.js",
@@ -14842,6 +15222,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SubmergibleTrait",
     tsjs: "src/game/gameobject/trait/SubmergibleTrait.ts.js",
@@ -14862,6 +15243,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TemporalTrait",
     tsjs: "src/game/gameobject/trait/TemporalTrait.ts.js",
@@ -14887,6 +15269,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TilterTrait",
     tsjs: "src/game/gameobject/trait/TilterTrait.ts.js",
@@ -14906,6 +15289,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/UnitOrderTrait",
     tsjs: "src/game/gameobject/trait/UnitOrderTrait.ts.js",
@@ -14931,6 +15315,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/MapLightingTrait",
     tsjs: "src/game/trait/MapLightingTrait.ts.js",
@@ -14950,6 +15335,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/SellTrait",
     tsjs: "src/game/trait/SellTrait.ts.js",
@@ -14972,6 +15358,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/SharedDetectCloakTrait",
     tsjs: "src/game/trait/SharedDetectCloakTrait.ts.js",
@@ -14990,6 +15377,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/StalemateDetectTrait",
     tsjs: "src/game/trait/StalemateDetectTrait.ts.js",
@@ -15010,6 +15398,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/SuperWeaponsTrait",
     tsjs: "src/game/trait/SuperWeaponsTrait.ts.js",
@@ -15032,6 +15421,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/VirusCloudTrait",
     tsjs: "src/game/trait/VirusCloudTrait.ts.js",
@@ -15053,6 +15443,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trait/CrateGeneratorTrait",
     tsjs: "src/game/trait/CrateGeneratorTrait.ts.js",
@@ -15080,6 +15471,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/FreeUnitTrait",
     tsjs: "src/game/gameobject/trait/FreeUnitTrait.ts.js",
@@ -15094,6 +15486,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/HospitalTrait",
     tsjs: "src/game/gameobject/trait/HospitalTrait.ts.js",
@@ -15121,6 +15514,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TankBunkerTrait",
     tsjs: "src/game/gameobject/trait/TankBunkerTrait.ts.js",
@@ -15143,6 +15537,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/BridgeTrait",
     tsjs: "src/game/gameobject/trait/BridgeTrait.ts.js",
@@ -15160,6 +15555,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/WallTrait",
     tsjs: "src/game/gameobject/trait/WallTrait.ts.js",
@@ -15179,6 +15575,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TntChargeTrait",
     tsjs: "src/game/gameobject/trait/TntChargeTrait.ts.js",
@@ -15197,6 +15594,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/GapGeneratorTrait",
     tsjs: "src/game/gameobject/trait/GapGeneratorTrait.ts.js",
@@ -15215,6 +15613,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/BioReactorPowerTrait",
     tsjs: "src/game/gameobject/trait/BioReactorPowerTrait.ts.js",
@@ -15246,6 +15645,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/AirSpawnTrait",
     tsjs: "src/game/gameobject/trait/AirSpawnTrait.ts.js",
@@ -15269,6 +15669,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/PoweredTrait",
     tsjs: "src/game/gameobject/trait/PoweredTrait.ts.js",
@@ -15282,6 +15683,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/OverpoweredTrait",
     tsjs: "src/game/gameobject/trait/OverpoweredTrait.ts.js",
@@ -15299,6 +15701,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/WarpedOutTrait",
     tsjs: "src/game/gameobject/trait/WarpedOutTrait.ts.js",
@@ -15317,6 +15720,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SuperWeaponTrait",
     tsjs: "src/game/gameobject/trait/SuperWeaponTrait.ts.js",
@@ -15336,6 +15740,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/TiberiumTrait",
     tsjs: "src/game/gameobject/trait/TiberiumTrait.ts.js",
@@ -15369,6 +15774,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/CabHutTrait",
     tsjs: "src/game/gameobject/trait/CabHutTrait.ts.js",
@@ -15386,6 +15792,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/gameobject/trait/SelfHealingTrait",
     tsjs: "src/game/gameobject/trait/SelfHealingTrait.ts.js",
@@ -15400,6 +15807,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/tag/CellTag",
     tsjs: "src/data/map/tag/CellTag.ts.js",
@@ -15408,6 +15816,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns).length,
     ],
   },
+
   {
     name: "data/map/tag/CellTagsReader",
     tsjs: "src/data/map/tag/CellTagsReader.ts.js",
@@ -15421,6 +15830,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/tag/Tag",
     tsjs: "src/data/map/tag/Tag.ts.js",
@@ -15431,6 +15841,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/tag/TagRepeatType",
     tsjs: "src/data/map/tag/TagRepeatType.ts.js",
@@ -15446,6 +15857,7 @@ const CONVERTED = [
       }),
     ],
   },
+
   {
     name: "data/map/tag/TagsReader",
     tsjs: "src/data/map/tag/TagsReader.ts.js",
@@ -15466,6 +15878,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/trigger/Trigger",
     tsjs: "src/data/map/trigger/Trigger.ts.js",
@@ -15474,6 +15887,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns).length,
     ],
   },
+
   {
     name: "data/map/trigger/TriggerAction",
     tsjs: "src/data/map/trigger/TriggerAction.ts.js",
@@ -15482,6 +15896,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns).length,
     ],
   },
+
   {
     name: "data/map/trigger/TriggerActionType",
     tsjs: "src/data/map/trigger/TriggerActionType.ts.js",
@@ -15512,6 +15927,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/trigger/TriggerEvent",
     tsjs: "src/data/map/trigger/TriggerEvent.ts.js",
@@ -15520,6 +15936,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns).length,
     ],
   },
+
   {
     name: "data/map/trigger/TriggerEventType",
     tsjs: "src/data/map/trigger/TriggerEventType.ts.js",
@@ -15542,6 +15959,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/trigger/TriggerReader",
     tsjs: "src/data/map/trigger/TriggerReader.ts.js",
@@ -15550,7 +15968,8 @@ const CONVERTED = [
         const r = new ns.TriggerReader();
         const azC = r.readAZActionParam ? r.readAZActionParam("C") : undefined;
         const azBA = r.readAZActionParam ? r.readAZActionParam("BA") : undefined;
-        const { triggers } = r.readTriggers({
+        // readTriggers 直接返回 trigger 数组（{triggers:...} 包装是 4 参 read() 的返回）
+        const triggers = r.readTriggers({
           entries: [["trg1", "Americans,<none>,Intro,0,1,1,0,x"]],
         });
         const t = triggers[0];
@@ -15583,6 +16002,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "data/map/trigger/TriggerSupport",
     tsjs: "src/data/map/trigger/TriggerSupport.ts.js",
@@ -15601,6 +16021,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/TriggerCondition",
     tsjs: "src/game/trigger/TriggerCondition.ts.js",
@@ -15628,6 +16049,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/TriggerConditionFactory",
     tsjs: "src/game/trigger/TriggerConditionFactory.ts.js",
@@ -15672,6 +16094,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/TriggerExecutor",
     tsjs: "src/game/trigger/TriggerExecutor.ts.js",
@@ -15689,6 +16112,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/TriggerExecutorFactory",
     tsjs: "src/game/trigger/TriggerExecutorFactory.ts.js",
@@ -15734,6 +16158,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/TriggerInstance",
     tsjs: "src/game/trigger/TriggerInstance.ts.js",
@@ -15742,6 +16167,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns).length,
     ],
   },
+
   {
     name: "game/trigger/TriggerManager",
     tsjs: "src/game/trigger/TriggerManager.ts.js",
@@ -15784,6 +16210,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/TriggerTarget",
     tsjs: "src/game/trigger/TriggerTarget.ts.js",
@@ -15792,6 +16219,7 @@ const CONVERTED = [
       (ns) => Object.keys(ns).length,
     ],
   },
+
   {
     name: "game/trigger/condition/AmbientLightCondition",
     tsjs: "src/game/trigger/condition/AmbientLightCondition.ts.js",
@@ -15812,6 +16240,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/AnyEventCondition",
     tsjs: "src/game/trigger/condition/AnyEventCondition.ts.js",
@@ -15822,6 +16251,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/AttackedByAnyCondition",
     tsjs: "src/game/trigger/condition/AttackedByAnyCondition.ts.js",
@@ -15842,6 +16272,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/AttackedByHouseCondition",
     tsjs: "src/game/trigger/condition/AttackedByHouseCondition.ts.js",
@@ -15863,6 +16294,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/BuildObjectTypeCondition",
     tsjs: "src/game/trigger/condition/BuildObjectTypeCondition.ts.js",
@@ -15885,6 +16317,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/BuildingExistsCondition",
     tsjs: "src/game/trigger/condition/BuildingExistsCondition.ts.js",
@@ -15897,6 +16330,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/ComesNearWaypointCondition",
     tsjs: "src/game/trigger/condition/ComesNearWaypointCondition.ts.js",
@@ -15918,6 +16352,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/CreditsBelowCondition",
     tsjs: "src/game/trigger/condition/CreditsBelowCondition.ts.js",
@@ -15933,6 +16368,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/CreditsExceedCondition",
     tsjs: "src/game/trigger/condition/CreditsExceedCondition.ts.js",
@@ -15948,6 +16384,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/CrossHorizLineCondition",
     tsjs: "src/game/trigger/condition/CrossHorizLineCondition.ts.js",
@@ -15969,6 +16406,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/CrossVertLineCondition",
     tsjs: "src/game/trigger/condition/CrossVertLineCondition.ts.js",
@@ -15990,6 +16428,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedAllBuildingsCondition",
     tsjs: "src/game/trigger/condition/DestroyedAllBuildingsCondition.ts.js",
@@ -16012,6 +16451,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedAllCondition",
     tsjs: "src/game/trigger/condition/DestroyedAllCondition.ts.js",
@@ -16034,6 +16474,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedAllUnitsCondition",
     tsjs: "src/game/trigger/condition/DestroyedAllUnitsCondition.ts.js",
@@ -16056,6 +16497,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedAllUnitsLandCondition",
     tsjs: "src/game/trigger/condition/DestroyedAllUnitsLandCondition.ts.js",
@@ -16078,6 +16520,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedAllUnitsNavalCondition",
     tsjs: "src/game/trigger/condition/DestroyedAllUnitsNavalCondition.ts.js",
@@ -16100,6 +16543,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedBridgeCondition",
     tsjs: "src/game/trigger/condition/DestroyedBridgeCondition.ts.js",
@@ -16120,6 +16564,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedBuildingsCondition",
     tsjs: "src/game/trigger/condition/DestroyedBuildingsCondition.ts.js",
@@ -16142,6 +16587,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedByAnyCondition",
     tsjs: "src/game/trigger/condition/DestroyedByAnyCondition.ts.js",
@@ -16162,6 +16608,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedOrCapturedCondition",
     tsjs: "src/game/trigger/condition/DestroyedOrCapturedCondition.ts.js",
@@ -16182,6 +16629,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition",
     tsjs: "src/game/trigger/condition/DestroyedOrCapturedOrInfiltratedCondition.ts.js",
@@ -16202,6 +16650,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/DestroyedUnitsCondition",
     tsjs: "src/game/trigger/condition/DestroyedUnitsCondition.ts.js",
@@ -16224,32 +16673,32 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/ElapsedScenarioTimeCondition",
     tsjs: "src/game/trigger/condition/ElapsedScenarioTimeCondition.ts.js",
     probes: [
       (ns, THREE, mod) => {
         const GameSpeed = mod("game/GameSpeed").GameSpeed;
+        // 与 ElapsedTimeCondition 不同：check 需传入 world 上下文（内部读 world.currentTick）
         const c = new ns.ElapsedScenarioTimeCondition({ params: [0, 2], triggerId: 1, eventIndex: 0 }, { name: "T" });
         const expected = 2 * GameSpeed.BASE_TICKS_PER_SECOND;
-        const t0 = c.check();
-        const e0 = c.elapsedTicks;
-        c.elapsedTicks = 999999;
-        const tLate = c.check();
-        c.reset();
-        const afterReset = c.elapsedTicks;
+        const before = c.check({ currentTick: expected - 1 });
+        const at = c.check({ currentTick: expected });
+        const after = c.check({ currentTick: expected + 1 });
         return {
           timerTicks: c.timerTicks,
           expected,
-          t0,
-          e0,
-          tLate,
-          afterReset,
+          before,
+          at,
+          after,
+          debug: c.getDebugName(),
           ownKeys: Object.keys(c).sort(),
         };
       },
     ],
   },
+
   {
     name: "game/trigger/condition/ElapsedTimeCondition",
     tsjs: "src/game/trigger/condition/ElapsedTimeCondition.ts.js",
@@ -16276,6 +16725,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/EnemyInZoneCondition",
     tsjs: "src/game/trigger/condition/EnemyInZoneCondition.ts.js",
@@ -16298,6 +16748,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/EnteredByCondition",
     tsjs: "src/game/trigger/condition/EnteredByCondition.ts.js",
@@ -16319,6 +16770,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/GlobalVariableCondition",
     tsjs: "src/game/trigger/condition/GlobalVariableCondition.ts.js",
@@ -16339,6 +16791,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/HealthBelowAnyCondition",
     tsjs: "src/game/trigger/condition/HealthBelowAnyCondition.ts.js",
@@ -16360,6 +16813,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/HealthBelowCombatCondition",
     tsjs: "src/game/trigger/condition/HealthBelowCombatCondition.ts.js",
@@ -16381,6 +16835,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/LocalVariableCondition",
     tsjs: "src/game/trigger/condition/LocalVariableCondition.ts.js",
@@ -16395,6 +16850,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/LowPowerCondition",
     tsjs: "src/game/trigger/condition/LowPowerCondition.ts.js",
@@ -16407,6 +16863,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/NoEventCondition",
     tsjs: "src/game/trigger/condition/NoEventCondition.ts.js",
@@ -16417,6 +16874,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/NoFactoriesLeftCondition",
     tsjs: "src/game/trigger/condition/NoFactoriesLeftCondition.ts.js",
@@ -16432,6 +16890,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/PickupCrateAnyCondition",
     tsjs: "src/game/trigger/condition/PickupCrateAnyCondition.ts.js",
@@ -16452,6 +16911,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/PickupCrateCondition",
     tsjs: "src/game/trigger/condition/PickupCrateCondition.ts.js",
@@ -16472,6 +16932,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/RandomDelayCondition",
     tsjs: "src/game/trigger/condition/RandomDelayCondition.ts.js",
@@ -16488,6 +16949,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/SpiedByCondition",
     tsjs: "src/game/trigger/condition/SpiedByCondition.ts.js",
@@ -16509,6 +16971,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/SpyEnteringAsHouseCondition",
     tsjs: "src/game/trigger/condition/SpyEnteringAsHouseCondition.ts.js",
@@ -16530,6 +16993,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/SpyEnteringAsInfantryCondition",
     tsjs: "src/game/trigger/condition/SpyEnteringAsInfantryCondition.ts.js",
@@ -16551,6 +17015,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/TechBuildingCapturedCondition",
     tsjs: "src/game/trigger/condition/TechBuildingCapturedCondition.ts.js",
@@ -16572,6 +17037,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/condition/TimerExpiredCondition",
     tsjs: "src/game/trigger/condition/TimerExpiredCondition.ts.js",
@@ -16585,6 +17051,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/AddSuperWeaponExecutor",
     tsjs: "src/game/trigger/executor/AddSuperWeaponExecutor.ts.js",
@@ -16602,6 +17069,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/AllToHuntExecutor",
     tsjs: "src/game/trigger/executor/AllToHuntExecutor.ts.js",
@@ -16617,6 +17085,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/AllianceExecutor",
     tsjs: "src/game/trigger/executor/AllianceExecutor.ts.js",
@@ -16633,6 +17102,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ApplyDamageExecutor",
     tsjs: "src/game/trigger/executor/ApplyDamageExecutor.ts.js",
@@ -16649,6 +17119,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/BlackoutRadarExecutor",
     tsjs: "src/game/trigger/executor/BlackoutRadarExecutor.ts.js",
@@ -16664,6 +17135,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ChangeAllianceExecutor",
     tsjs: "src/game/trigger/executor/ChangeAllianceExecutor.ts.js",
@@ -16679,6 +17151,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ChangeHouseAllExecutor",
     tsjs: "src/game/trigger/executor/ChangeHouseAllExecutor.ts.js",
@@ -16694,6 +17167,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ChangeHouseExecutor",
     tsjs: "src/game/trigger/executor/ChangeHouseExecutor.ts.js",
@@ -16709,6 +17183,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ChangeLightingExecutor",
     tsjs: "src/game/trigger/executor/ChangeLightingExecutor.ts.js",
@@ -16721,6 +17196,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/CheerExecutor",
     tsjs: "src/game/trigger/executor/CheerExecutor.ts.js",
@@ -16737,6 +17213,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/CreateBuildingExecutor",
     tsjs: "src/game/trigger/executor/CreateBuildingExecutor.ts.js",
@@ -16752,6 +17229,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/CreateCrateExecutor",
     tsjs: "src/game/trigger/executor/CreateCrateExecutor.ts.js",
@@ -16767,6 +17245,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/CreateRadarEventExecutor",
     tsjs: "src/game/trigger/executor/CreateRadarEventExecutor.ts.js",
@@ -16782,6 +17261,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/CreateReinforcementExecutor",
     tsjs: "src/game/trigger/executor/CreateReinforcementExecutor.ts.js",
@@ -16797,6 +17277,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/CreateTeamExecutor",
     tsjs: "src/game/trigger/executor/CreateTeamExecutor.ts.js",
@@ -16812,6 +17293,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DestroyAllExecutor",
     tsjs: "src/game/trigger/executor/DestroyAllExecutor.ts.js",
@@ -16828,6 +17310,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DestroyObjectExecutor",
     tsjs: "src/game/trigger/executor/DestroyObjectExecutor.ts.js",
@@ -16843,6 +17326,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DestroyTagExecutor",
     tsjs: "src/game/trigger/executor/DestroyTagExecutor.ts.js",
@@ -16855,6 +17339,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DestroyTeamExecutor",
     tsjs: "src/game/trigger/executor/DestroyTeamExecutor.ts.js",
@@ -16870,6 +17355,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DestroyTriggerExecutor",
     tsjs: "src/game/trigger/executor/DestroyTriggerExecutor.ts.js",
@@ -16882,6 +17368,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DetonateWarheadExecutor",
     tsjs: "src/game/trigger/executor/DetonateWarheadExecutor.ts.js",
@@ -16897,6 +17384,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DisarmTriggerExecutor",
     tsjs: "src/game/trigger/executor/DisarmTriggerExecutor.ts.js",
@@ -16909,6 +17397,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DoShroudExecutor",
     tsjs: "src/game/trigger/executor/DoShroudExecutor.ts.js",
@@ -16924,6 +17413,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/DoUnshroudExecutor",
     tsjs: "src/game/trigger/executor/DoUnshroudExecutor.ts.js",
@@ -16939,6 +17429,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/EnemyExecutor",
     tsjs: "src/game/trigger/executor/EnemyExecutor.ts.js",
@@ -16955,6 +17446,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/EvictOccupiersExecutor",
     tsjs: "src/game/trigger/executor/EvictOccupiersExecutor.ts.js",
@@ -16970,6 +17462,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/FireSaleExecutor",
     tsjs: "src/game/trigger/executor/FireSaleExecutor.ts.js",
@@ -16985,6 +17478,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/FlashBuildingsOfTypeExecutor",
     tsjs: "src/game/trigger/executor/FlashBuildingsOfTypeExecutor.ts.js",
@@ -17000,6 +17494,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/FlashUnitExecutor",
     tsjs: "src/game/trigger/executor/FlashUnitExecutor.ts.js",
@@ -17015,6 +17510,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ForceEndExecutor",
     tsjs: "src/game/trigger/executor/ForceEndExecutor.ts.js",
@@ -17027,6 +17523,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ForceShieldAtExecutor",
     tsjs: "src/game/trigger/executor/ForceShieldAtExecutor.ts.js",
@@ -17042,6 +17539,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ForceTriggerExecutor",
     tsjs: "src/game/trigger/executor/ForceTriggerExecutor.ts.js",
@@ -17056,6 +17554,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/GenericFacingExecutor",
     tsjs: "src/game/trigger/executor/GenericFacingExecutor.ts.js",
@@ -17071,6 +17570,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/GlobalVariableExecutor",
     tsjs: "src/game/trigger/executor/GlobalVariableExecutor.ts.js",
@@ -17083,6 +17583,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/IronCurtainExecutor",
     tsjs: "src/game/trigger/executor/IronCurtainExecutor.ts.js",
@@ -17098,6 +17599,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/LightningStrikeExecutor",
     tsjs: "src/game/trigger/executor/LightningStrikeExecutor.ts.js",
@@ -17113,6 +17615,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/LocalVariableExecutor",
     tsjs: "src/game/trigger/executor/LocalVariableExecutor.ts.js",
@@ -17125,6 +17628,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/MiscActionExecutor",
     tsjs: "src/game/trigger/executor/MiscActionExecutor.ts.js",
@@ -17141,6 +17645,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/MoveCameraExecutor",
     tsjs: "src/game/trigger/executor/MoveCameraExecutor.ts.js",
@@ -17156,6 +17661,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/NoActionExecutor",
     tsjs: "src/game/trigger/executor/NoActionExecutor.ts.js",
@@ -17167,6 +17673,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/NukeStrikeExecutor",
     tsjs: "src/game/trigger/executor/NukeStrikeExecutor.ts.js",
@@ -17182,6 +17689,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/PlayAnimAtExecutor",
     tsjs: "src/game/trigger/executor/PlayAnimAtExecutor.ts.js",
@@ -17197,6 +17705,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/PlaySoundEffectExecutor",
     tsjs: "src/game/trigger/executor/PlaySoundEffectExecutor.ts.js",
@@ -17212,6 +17721,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/PlaySoundFxAtExecutor",
     tsjs: "src/game/trigger/executor/PlaySoundFxAtExecutor.ts.js",
@@ -17227,6 +17737,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/PlaySoundFxExecutor",
     tsjs: "src/game/trigger/executor/PlaySoundFxExecutor.ts.js",
@@ -17242,6 +17753,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/PlaySoundFxRandomExecutor",
     tsjs: "src/game/trigger/executor/PlaySoundFxRandomExecutor.ts.js",
@@ -17257,6 +17769,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/PlaySpeechExecutor",
     tsjs: "src/game/trigger/executor/PlaySpeechExecutor.ts.js",
@@ -17272,6 +17785,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ReshroudMapExecutor",
     tsjs: "src/game/trigger/executor/ReshroudMapExecutor.ts.js",
@@ -17287,6 +17801,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ResizePlayerViewExecutor",
     tsjs: "src/game/trigger/executor/ResizePlayerViewExecutor.ts.js",
@@ -17302,6 +17817,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/RevealAroundWaypointExecutor",
     tsjs: "src/game/trigger/executor/RevealAroundWaypointExecutor.ts.js",
@@ -17317,6 +17833,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/RevealMapExecutor",
     tsjs: "src/game/trigger/executor/RevealMapExecutor.ts.js",
@@ -17332,6 +17849,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/SabotageUnitExecutor",
     tsjs: "src/game/trigger/executor/SabotageUnitExecutor.ts.js",
@@ -17347,6 +17865,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/SellBuildingExecutor",
     tsjs: "src/game/trigger/executor/SellBuildingExecutor.ts.js",
@@ -17362,6 +17881,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/SetAmbientLightExecutor",
     tsjs: "src/game/trigger/executor/SetAmbientLightExecutor.ts.js",
@@ -17374,6 +17894,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/SetAmbientRateExecutor",
     tsjs: "src/game/trigger/executor/SetAmbientRateExecutor.ts.js",
@@ -17389,6 +17910,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/SetAmbientStepExecutor",
     tsjs: "src/game/trigger/executor/SetAmbientStepExecutor.ts.js",
@@ -17404,6 +17926,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ShroudFxExecutor",
     tsjs: "src/game/trigger/executor/ShroudFxExecutor.ts.js",
@@ -17420,6 +17943,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/StopSoundFxAtExecutor",
     tsjs: "src/game/trigger/executor/StopSoundFxAtExecutor.ts.js",
@@ -17435,6 +17959,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/SuperWeaponFxExecutor",
     tsjs: "src/game/trigger/executor/SuperWeaponFxExecutor.ts.js",
@@ -17451,6 +17976,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TeleportAllExecutor",
     tsjs: "src/game/trigger/executor/TeleportAllExecutor.ts.js",
@@ -17466,6 +17992,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TextNotificationExecutor",
     tsjs: "src/game/trigger/executor/TextNotificationExecutor.ts.js",
@@ -17481,6 +18008,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TextTriggerExecutor",
     tsjs: "src/game/trigger/executor/TextTriggerExecutor.ts.js",
@@ -17493,6 +18021,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerExtendExecutor",
     tsjs: "src/game/trigger/executor/TimerExtendExecutor.ts.js",
@@ -17514,6 +18043,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerPauseExecutor",
     tsjs: "src/game/trigger/executor/TimerPauseExecutor.ts.js",
@@ -17535,6 +18065,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerResumeExecutor",
     tsjs: "src/game/trigger/executor/TimerResumeExecutor.ts.js",
@@ -17556,6 +18087,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerSetExecutor",
     tsjs: "src/game/trigger/executor/TimerSetExecutor.ts.js",
@@ -17577,6 +18109,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerShortenExecutor",
     tsjs: "src/game/trigger/executor/TimerShortenExecutor.ts.js",
@@ -17598,6 +18131,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerStartExecutor",
     tsjs: "src/game/trigger/executor/TimerStartExecutor.ts.js",
@@ -17619,6 +18153,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerStopExecutor",
     tsjs: "src/game/trigger/executor/TimerStopExecutor.ts.js",
@@ -17640,6 +18175,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TimerTextExecutor",
     tsjs: "src/game/trigger/executor/TimerTextExecutor.ts.js",
@@ -17661,6 +18197,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/ToggleTriggerExecutor",
     tsjs: "src/game/trigger/executor/ToggleTriggerExecutor.ts.js",
@@ -17673,6 +18210,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/TurnOnOffBuildingExecutor",
     tsjs: "src/game/trigger/executor/TurnOnOffBuildingExecutor.ts.js",
@@ -17689,6 +18227,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/UnloadAllExecutor",
     tsjs: "src/game/trigger/executor/UnloadAllExecutor.ts.js",
@@ -17704,6 +18243,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/UnrevealAroundWaypointExecutor",
     tsjs: "src/game/trigger/executor/UnrevealAroundWaypointExecutor.ts.js",
@@ -17719,6 +18259,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/UserInputExecutor",
     tsjs: "src/game/trigger/executor/UserInputExecutor.ts.js",
@@ -17731,6 +18272,7 @@ const CONVERTED = [
       },
     ],
   },
+
   {
     name: "game/trigger/executor/WinLoseExecutor",
     tsjs: "src/game/trigger/executor/WinLoseExecutor.ts.js",
@@ -17758,10 +18300,2061 @@ const CONVERTED = [
       },
     ],
   },
+
+  // ---- network 鏃忥紙64 妯″潡锛?---
+  {
+    name: "network/ladder/wladderConfig",
+    tsjs: "src/network/ladder/wladderConfig.ts.js",
+    probes: [
+      (ns) => ({
+        CURRENT_SEASON: ns.CURRENT_SEASON,
+        PREV_SEASON: ns.PREV_SEASON,
+        MAX_LIST_SEARCH_COUNT: ns.MAX_LIST_SEARCH_COUNT,
+        Solo1v1: ns.LadderType.Solo1v1,
+        Random2v2: ns.LadderType.Random2v2,
+        QSolo: ns.LadderQueueType.Solo1v1,
+        QTeam: ns.LadderQueueType.Team2v2,
+        ladderKeys: Object.keys(ns.LadderType).sort(),
+        queueKeys: Object.keys(ns.LadderQueueType).sort(),
+        teamSizes: [...ns.teamSizes.entries()],
+        mapKeys: Object.keys(ns).sort(),
+      }),
+      (ns) => [
+        ns.getLadderTypeForQueueType(ns.LadderQueueType.Solo1v1),
+        ns.getLadderTypeForQueueType(ns.LadderQueueType.Team2v2),
+        ns.getQueueTypeForLadderType(ns.LadderType.Solo1v1),
+        ns.getQueueTypeForLadderType(ns.LadderType.Random2v2),
+      ],
+      (ns) => {
+        try {
+          ns.getLadderTypeForQueueType("nope");
+        } catch (e) {
+          return e.message;
+        }
+      },
+      (ns) => {
+        try {
+          ns.getQueueTypeForLadderType("nope");
+        } catch (e) {
+          return e.message;
+        }
+      },
+    ],
+  },
+
+  {
+    name: "engine/gameRes/importError/ArchiveExtractionError",
+    tsjs: "src/engine/gameRes/importError/ArchiveExtractionError.ts.js",
+    probes: [
+      (ns) => {
+      const t = {};
+        t["ArchiveExtractionError"] = ns["ArchiveExtractionError"] !== undefined ? (typeof ns["ArchiveExtractionError"]) : "__undefined__";
+      
+      return { keys: Object.keys(ns).sort(), expected: ["ArchiveExtractionError"], types: t };
+    }
+    ],
+  },
+
+
+
+  {
+    name: "gui/CanvasMetrics",
+    tsjs: "src/gui/CanvasMetrics.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.CanvasMetrics.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/FullScreen",
+    tsjs: "src/gui/FullScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.FullScreen.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/HtmlContainer",
+    tsjs: "src/gui/HtmlContainer.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.HtmlContainer.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/HtmlReactElement",
+    tsjs: "src/gui/HtmlReactElement.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.HtmlReactElement.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/LazyHtmlElement",
+    tsjs: "src/gui/LazyHtmlElement.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.LazyHtmlElement.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/Pointer",
+    tsjs: "src/gui/Pointer.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.Pointer.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/PointerEvents",
+    tsjs: "src/gui/PointerEvents.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/PointerSprite",
+    tsjs: "src/gui/PointerSprite.ts.js",
+    probes: [
+      (ns) => ns.HTML_ZINDEX,
+      (ns) => Object.getOwnPropertyNames(ns.PointerSprite.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/ReactFormat",
+    tsjs: "src/gui/ReactFormat.ts.js",
+    probes: [
+      (ns) => ns.ReactFormat.formatMultiline("a\nb", (s) => s).length,
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/ReplayManager",
+    tsjs: "src/gui/ReplayManager.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ReplayManager.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/ShpSpriteBatch",
+    tsjs: "src/gui/ShpSpriteBatch.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ShpSpriteBatch.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/UiObject",
+    tsjs: "src/gui/UiObject.ts.js",
+    probes: [
+      (ns) => ns.UiObject.zIndexToWorld(1), // zIndexToWorld 是 UiObject 的静态方法，非模块级导出
+      (ns) => Object.getOwnPropertyNames(ns.UiObject.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/UiObjectSprite",
+    tsjs: "src/gui/UiObjectSprite.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.UiObjectSprite.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/UiScene",
+    tsjs: "src/gui/UiScene.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.UiScene.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/chat/ChatHistory",
+    tsjs: "src/gui/chat/ChatHistory.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ChatHistory.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/chat/ChatMessageFormat",
+    tsjs: "src/gui/chat/ChatMessageFormat.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ChatMessageFormat.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/BasicErrorBoxApi",
+    tsjs: "src/gui/component/BasicErrorBoxApi.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.BasicErrorBoxApi.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/ButtonSelect",
+    tsjs: "src/gui/component/ButtonSelect.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("ButtonSelect"),
+      (ns) => Object.getOwnPropertyNames(ns.ButtonSelect.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/ChannelOpIndicator",
+    tsjs: "src/gui/component/ChannelOpIndicator.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("ChannelOpIndicator"),
+    ],
+  },
+  {
+    name: "gui/component/ChannelUser",
+    tsjs: "src/gui/component/ChannelUser.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("ChannelUser"),
+    ],
+  },
+  {
+    name: "gui/component/Chat",
+    tsjs: "src/gui/component/Chat.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.Chat.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/ChatInput",
+    tsjs: "src/gui/component/ChatInput.ts.js",
+    probes: [
+      (ns) => ns.IMPLICIT_CHANNEL_NAME,
+      (ns) => Object.keys(ns).includes("ChatInput"),
+    ],
+  },
+  {
+    name: "gui/component/ColorSelect",
+    tsjs: "src/gui/component/ColorSelect.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("ColorSelect"),
+    ],
+  },
+  {
+    name: "gui/component/CountryIcon",
+    tsjs: "src/gui/component/CountryIcon.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.CountryIcon.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/CountrySelect",
+    tsjs: "src/gui/component/CountrySelect.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("CountrySelect"),
+    ],
+  },
+  {
+    name: "gui/component/Dialog",
+    tsjs: "src/gui/component/Dialog.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.Dialog.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/ErrorDetailsBoxApi",
+    tsjs: "src/gui/component/ErrorDetailsBoxApi.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ErrorDetailsBoxApi.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/ErrorDetailsDialog",
+    tsjs: "src/gui/component/ErrorDetailsDialog.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("ErrorDetailsDialog"),
+    ],
+  },
+  {
+    name: "gui/component/GameResBoxApi",
+    tsjs: "src/gui/component/GameResBoxApi.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.GameResBoxApi.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/GameResForm",
+    tsjs: "src/gui/component/GameResForm.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("GameResForm"),
+    ],
+  },
+  {
+    name: "gui/component/Image",
+    tsjs: "src/gui/component/Image.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("Image"),
+    ],
+  },
+  {
+    name: "gui/component/ImageContext",
+    tsjs: "src/gui/component/ImageContext.ts.js",
+    probes: [
+      (ns) => ns.ImageContext.imageUrlCache instanceof Map,
+      (ns) => ns.ImageContext.imageUrlCache.size,
+    ],
+  },
+  {
+    name: "gui/component/List",
+    tsjs: "src/gui/component/List.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/MenuButton",
+    tsjs: "src/gui/component/MenuButton.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.MenuButton.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/MessageBoxApi",
+    tsjs: "src/gui/component/MessageBoxApi.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.MessageBoxApi.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/Option",
+    tsjs: "src/gui/component/Option.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("Option"),
+    ],
+  },
+  {
+    name: "gui/component/PartyInviteDialog",
+    tsjs: "src/gui/component/PartyInviteDialog.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("PartyInviteDialog"),
+    ],
+  },
+  {
+    name: "gui/component/PingIndicator",
+    tsjs: "src/gui/component/PingIndicator.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.keys(ns).includes("PingIndicator"),
+      (ns) => typeof ns.PingIndicator,
+    ],
+  },
+  {
+    name: "gui/component/PlayerContextMenu",
+    tsjs: "src/gui/component/PlayerContextMenu.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("PlayerContextMenu"),
+    ],
+  },
+  {
+    name: "gui/component/PromptDialog",
+    tsjs: "src/gui/component/PromptDialog.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("PromptDialog"),
+    ],
+  },
+  {
+    name: "gui/component/Select",
+    tsjs: "src/gui/component/Select.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("Select"),
+    ],
+  },
+  {
+    name: "gui/component/Slider",
+    tsjs: "src/gui/component/Slider.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("Slider"),
+    ],
+  },
+  {
+    name: "gui/component/SplashScreen",
+    tsjs: "src/gui/component/SplashScreen.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.SplashScreen.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/StartPosSelect",
+    tsjs: "src/gui/component/StartPosSelect.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("StartPosSelect"),
+    ],
+  },
+  {
+    name: "gui/component/TeamSelect",
+    tsjs: "src/gui/component/TeamSelect.ts.js",
+    probes: [
+      (ns) => ns.formatTeamId(0),
+      (ns) => ns.formatTeamId(25),
+      (ns) => Object.keys(ns).includes("TeamSelect"),
+    ],
+  },
+  {
+    name: "gui/component/ToastApi",
+    tsjs: "src/gui/component/ToastApi.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ToastApi.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/component/Toasts",
+    tsjs: "src/gui/component/Toasts.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("Toasts"),
+    ],
+  },
+  {
+    name: "gui/component/UiText",
+    tsjs: "src/gui/component/UiText.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.UiText.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/jsx/HtmlView",
+    tsjs: "src/gui/jsx/HtmlView.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.HtmlView.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/jsx/JsxRenderer",
+    tsjs: "src/gui/jsx/JsxRenderer.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.JsxRenderer.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/jsx/UiComponent",
+    tsjs: "src/gui/jsx/UiComponent.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).includes("UiComponent"),
+    ],
+  },
+  {
+    name: "gui/jsx/jsx",
+    tsjs: "src/gui/jsx/jsx.ts.js",
+    probes: [
+      (ns) => ns.createRef(),
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/replay/ReplayExistsError",
+    tsjs: "src/gui/replay/ReplayExistsError.ts.js",
+    probes: [
+      (ns) => { const e = new ns.ReplayExistsError("m"); return [e.message, e instanceof Error]; },
+    ],
+  },
+  {
+    name: "gui/replay/ReplayMeta",
+    tsjs: "src/gui/replay/ReplayMeta.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/replay/ReplayStorage",
+    tsjs: "src/gui/replay/ReplayStorage.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/replay/ReplayStorageError",
+    tsjs: "src/gui/replay/ReplayStorageError.ts.js",
+    probes: [
+      (ns) => { const e = new ns.ReplayStorageError("m"); return [e.message, e.name]; },
+    ],
+  },
+  {
+    name: "gui/replay/ReplayStorageFileSystem",
+    tsjs: "src/gui/replay/ReplayStorageFileSystem.ts.js",
+    probes: [
+      (ns) => [ns.manifestFileName, ns.unsavedReplayPrefix],
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/replay/ReplayStorageMemStorage",
+    tsjs: "src/gui/replay/ReplayStorageMemStorage.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ReplayStorageMemStorage.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/replay/ReplayStorageMigration",
+    tsjs: "src/gui/replay/ReplayStorageMigration.ts.js",
+    probes: [
+      (ns) => ns.migratedMarker,
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/Controller",
+    tsjs: "src/gui/screen/Controller.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.Controller.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/RootController",
+    tsjs: "src/gui/screen/RootController.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.RootController.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/RootRoute",
+    tsjs: "src/gui/screen/RootRoute.ts.js",
+    probes: [
+      (ns) => { const r = new ns.RootRoute(1, { a: 2 }); return [r.screenType, r.params && r.params.a]; },
+    ],
+  },
+  {
+    name: "gui/screen/RootScreen",
+    tsjs: "src/gui/screen/RootScreen.ts.js",
+    probes: [
+      (ns) => { const s = new ns.RootScreen(); return [s.preventUnload, Object.getOwnPropertyNames(Object.getPrototypeOf(s))]; },
+    ],
+  },
+  {
+    name: "gui/screen/Screen",
+    tsjs: "src/gui/screen/Screen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/ScreenParamsMap",
+    tsjs: "src/gui/screen/ScreenParamsMap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/ScreenType",
+    tsjs: "src/gui/screen/ScreenType.ts.js",
+    probes: [
+      (ns) => [ns.ScreenType.MainMenuRoot, ns.ScreenType.Game, ns.ScreenType.Replay, ns.ScreenType[0]],
+    ],
+  },
+  {
+    name: "gui/screen/game/ChatNetHandler",
+    tsjs: "src/gui/screen/game/ChatNetHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ChatNetHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/ChatTypingHandler",
+    tsjs: "src/gui/screen/game/ChatTypingHandler.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ChatTypingHandler.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/CombatantUi",
+    tsjs: "src/gui/screen/game/CombatantUi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CombatantUi.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/GameLoader",
+    tsjs: "src/gui/screen/game/GameLoader.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameLoader.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/GameMenu",
+    tsjs: "src/gui/screen/game/GameMenu.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameMenu.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/GameMenuScreen",
+    tsjs: "src/gui/screen/game/GameMenuScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameMenuScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/GameScreen",
+    tsjs: "src/gui/screen/game/GameScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/HudFactory",
+    tsjs: "src/gui/screen/game/HudFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.HudFactory.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/MapFileLoader",
+    tsjs: "src/gui/screen/game/MapFileLoader.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.MapFileLoader.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/MedianPing",
+    tsjs: "src/gui/screen/game/MedianPing.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.MedianPing.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/NetStats",
+    tsjs: "src/gui/screen/game/NetStats.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.NetStats.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/ObserverUi",
+    tsjs: "src/gui/screen/game/ObserverUi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ObserverUi.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/PingMonitor",
+    tsjs: "src/gui/screen/game/PingMonitor.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.PingMonitor.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/PlayerUi",
+    tsjs: "src/gui/screen/game/PlayerUi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/game/SoundHandler",
+    tsjs: "src/gui/screen/game/SoundHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SoundHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/TauntHandler",
+    tsjs: "src/gui/screen/game/TauntHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.TauntHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/TauntPlayback",
+    tsjs: "src/gui/screen/game/TauntPlayback.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.TauntPlayback.prototype || {}).sort().join(","),
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/WorldView",
+    tsjs: "src/gui/screen/game/WorldView.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.WorldView.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/GameResultPopup",
+    tsjs: "src/gui/screen/game/component/GameResultPopup.ts.js",
+    probes: [
+      (ns) => [ns.GameResultType.MpVictory, Object.keys(ns.GameResultType).length],
+    ],
+  },
+  {
+    name: "gui/screen/game/component/Hud",
+    tsjs: "src/gui/screen/game/component/Hud.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.Hud.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/Minimap",
+    tsjs: "src/gui/screen/game/component/Minimap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.Minimap.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/MinimapPing",
+    tsjs: "src/gui/screen/game/component/MinimapPing.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MinimapPing.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/DebugText",
+    tsjs: "src/gui/screen/game/component/hud/DebugText.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.DebugText.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/GameMenuContentArea",
+    tsjs: "src/gui/screen/game/component/hud/GameMenuContentArea.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameMenuContentArea.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/HudChat",
+    tsjs: "src/gui/screen/game/component/hud/HudChat.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["HudChat"],
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/Messages",
+    tsjs: "src/gui/screen/game/component/hud/Messages.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.Messages.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/PhobosVersionWarning",
+    tsjs: "src/gui/screen/game/component/hud/PhobosVersionWarning.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["PhobosVersionWarning"],
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarCard",
+    tsjs: "src/gui/screen/game/component/hud/SidebarCard.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarCard.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarCredits",
+    tsjs: "src/gui/screen/game/component/hud/SidebarCredits.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarCredits.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarGameTime",
+    tsjs: "src/gui/screen/game/component/hud/SidebarGameTime.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarGameTime.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarIconButton",
+    tsjs: "src/gui/screen/game/component/hud/SidebarIconButton.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarIconButton.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarMenu",
+    tsjs: "src/gui/screen/game/component/hud/SidebarMenu.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarMenu.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarPower",
+    tsjs: "src/gui/screen/game/component/hud/SidebarPower.ts.js",
+    probes: [
+      // PipKind 是模块内局部枚举（孪生与 TS 版都未导出，无从注入），改探真实导出面与原型方法
+      (ns) => ({
+        cls: typeof ns.SidebarPower,
+        proto: Object.getOwnPropertyNames(ns.SidebarPower?.prototype ?? {}).sort().join(","),
+      }),
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarRadar",
+    tsjs: "src/gui/screen/game/component/hud/SidebarRadar.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarRadar.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarRadarAnimRunner",
+    tsjs: "src/gui/screen/game/component/hud/SidebarRadarAnimRunner.ts.js",
+    probes: [
+      (ns) => ns.AnimationType.RadarOn,
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SidebarTabs",
+    tsjs: "src/gui/screen/game/component/hud/SidebarTabs.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarTabs.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/SuperWeaponTimers",
+    tsjs: "src/gui/screen/game/component/hud/SuperWeaponTimers.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SuperWeaponTimers.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/commandBar/CommandBarButtonList",
+    tsjs: "src/gui/screen/game/component/hud/commandBar/CommandBarButtonList.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CommandBarButtonList.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/commandBar/CommandBarButtonType",
+    tsjs: "src/gui/screen/game/component/hud/commandBar/CommandBarButtonType.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.CommandBarButtonType).length,
+      (ns) => [ns.CommandBarButtonType.Separator, ns.CommandBarButtonType.ReplaySpeed],
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/commandBar/CommandButtonConfig",
+    tsjs: "src/gui/screen/game/component/hud/commandBar/CommandButtonConfig.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/commandBar/commandButtonConfigs",
+    tsjs: "src/gui/screen/game/component/hud/commandBar/commandButtonConfigs.ts.js",
+    probes: [
+      (ns) => [ns.commandButtonConfigs.length, ns.commandButtonConfigs[0].type, ns.commandButtonConfigs[0].icon],
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/viewmodel/CombatantSidebarModel",
+    tsjs: "src/gui/screen/game/component/hud/viewmodel/CombatantSidebarModel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CombatantSidebarModel.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/viewmodel/MessageList",
+    tsjs: "src/gui/screen/game/component/hud/viewmodel/MessageList.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MessageList.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/viewmodel/SidebarModel",
+    tsjs: "src/gui/screen/game/component/hud/viewmodel/SidebarModel.ts.js",
+    probes: [
+      (ns) => [ns.SidebarItemTargetType.Special, ns.SidebarCategory.Vehicles, ns.SidebarItemStatus.Ready],
+    ],
+  },
+  {
+    name: "gui/screen/game/component/hud/viewmodel/SidebarTab",
+    tsjs: "src/gui/screen/game/component/hud/viewmodel/SidebarTab.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/ConInfoForm",
+    tsjs: "src/gui/screen/game/gameMenu/ConInfoForm.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ConInfoForm"],
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/ConnectionInfoScreen",
+    tsjs: "src/gui/screen/game/gameMenu/ConnectionInfoScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ConnectionInfoScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/DiploForm",
+    tsjs: "src/gui/screen/game/gameMenu/DiploForm.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["DiploForm"],
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/DiploScreen",
+    tsjs: "src/gui/screen/game/gameMenu/DiploScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.DiploScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/GameMenuController",
+    tsjs: "src/gui/screen/game/gameMenu/GameMenuController.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameMenuController.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/GameMenuHomeScreen",
+    tsjs: "src/gui/screen/game/gameMenu/GameMenuHomeScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.GameMenuHomeScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/QuitConfirmScreen",
+    tsjs: "src/gui/screen/game/gameMenu/QuitConfirmScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.QuitConfirmScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/ScreenParamsMap",
+    tsjs: "src/gui/screen/game/gameMenu/ScreenParamsMap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/game/gameMenu/ScreenType",
+    tsjs: "src/gui/screen/game/gameMenu/ScreenType.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.ScreenType).length,
+      (ns) => [ns.ScreenType.Home, ns.ScreenType.OptionsKeyboard],
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/LoadingScreen",
+    tsjs: "src/gui/screen/game/loadingScreen/LoadingScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LoadingScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/LoadingScreenApi",
+    tsjs: "src/gui/screen/game/loadingScreen/LoadingScreenApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/LoadingScreenApiFactory",
+    tsjs: "src/gui/screen/game/loadingScreen/LoadingScreenApiFactory.ts.js",
+    probes: [
+      (ns) => ns.LoadingScreenType.Replay,
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/LoadingScreenWrapper",
+    tsjs: "src/gui/screen/game/loadingScreen/LoadingScreenWrapper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LoadingScreenWrapper.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/MpLoadingScreenApi",
+    tsjs: "src/gui/screen/game/loadingScreen/MpLoadingScreenApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MpLoadingScreenApi.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/ReplayLoadingScreenApi",
+    tsjs: "src/gui/screen/game/loadingScreen/ReplayLoadingScreenApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ReplayLoadingScreenApi.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/loadingScreen/SpLoadingScreenApi",
+    tsjs: "src/gui/screen/game/loadingScreen/SpLoadingScreenApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SpLoadingScreenApi.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/ArrowScrollHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/ArrowScrollHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ArrowScrollHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/BeaconMode",
+    tsjs: "src/gui/screen/game/worldInteraction/BeaconMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.BeaconMode.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/CameraPanHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/CameraPanHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CameraPanHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/CustomScrollHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/CustomScrollHandler.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.CustomScrollHandler.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/DefaultActionHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/DefaultActionHandler.ts.js",
+    probes: [
+      (ns) => [ns.ActionFilter.NoSelect, Object.keys(ns.ActionFilter).length],
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/InteractionMode",
+    tsjs: "src/gui/screen/game/worldInteraction/InteractionMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/MapHoverHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/MapHoverHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MapHoverHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/MapScrollHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/MapScrollHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MapScrollHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/MinimapHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/MinimapHandler.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.MinimapHandler.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/PendingPlacementHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/PendingPlacementHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.PendingPlacementHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/PlacementMode",
+    tsjs: "src/gui/screen/game/worldInteraction/PlacementMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.PlacementMode.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/PlanningMode",
+    tsjs: "src/gui/screen/game/worldInteraction/PlanningMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.PlanningMode.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/RepairMode",
+    tsjs: "src/gui/screen/game/worldInteraction/RepairMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.RepairMode.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/SellMode",
+    tsjs: "src/gui/screen/game/worldInteraction/SellMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SellMode.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/SpecialActionMode",
+    tsjs: "src/gui/screen/game/worldInteraction/SpecialActionMode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SpecialActionMode.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/Tooltip",
+    tsjs: "src/gui/screen/game/worldInteraction/Tooltip.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.Tooltip.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/TooltipHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/TooltipHandler.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.TooltipHandler.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/UnitSelectionHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/UnitSelectionHandler.ts.js",
+    probes: [
+      (ns) => [ns.QueryType.OnMap, Object.keys(ns.QueryType).length],
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/WorldInteraction",
+    tsjs: "src/gui/screen/game/worldInteraction/WorldInteraction.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.WorldInteraction.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/WorldInteractionFactory",
+    tsjs: "src/gui/screen/game/worldInteraction/WorldInteractionFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.WorldInteractionFactory.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/KeyBinds",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/KeyBinds.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.KeyBinds.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/KeyCommand",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/KeyCommand.ts.js",
+    probes: [
+      (ns) => [ns.TriggerMode.KeyDown, ns.TriggerMode.KeyDownUp, Object.keys(ns).length],
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/KeyCommandType",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/KeyCommandType.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.KeyCommandType).length,
+      (ns) => [ns.KeyCommandType.CenterView, ns.KeyCommandType.TeamSelect_10],
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/KeyboardHandler",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/KeyboardHandler.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.KeyboardHandler.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/CenterBaseCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/CenterBaseCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CenterBaseCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/CenterGroupCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/CenterGroupCmd.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.CenterGroupCmd.prototype).sort().join(","),
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/CenterViewCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/CenterViewCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CenterViewCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/FollowUnitCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/FollowUnitCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.FollowUnitCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/GoToCameraLocationCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/GoToCameraLocationCmd.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.GoToCameraLocationCmd.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/LastRadarEventCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/LastRadarEventCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LastRadarEventCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/SelectGroupCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/SelectGroupCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SelectGroupCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/SelectNextUnitCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/SelectNextUnitCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SelectNextUnitCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/SelectPlayerCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/SelectPlayerCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SelectPlayerCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/SelectTypeByCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/SelectTypeByCmd.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SelectByTypeCmd.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/keyboard/command/SetCameraLocationCmd",
+    tsjs: "src/gui/screen/game/worldInteraction/keyboard/command/SetCameraLocationCmd.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.SetCameraLocationCmd.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/placementMode/PlacementGrid",
+    tsjs: "src/gui/screen/game/worldInteraction/placementMode/PlacementGrid.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.PlacementGrid.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/game/worldInteraction/placementMode/PlacementGridModel",
+    tsjs: "src/gui/screen/game/worldInteraction/placementMode/PlacementGridModel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/MainMenuController",
+    tsjs: "src/gui/screen/mainMenu/MainMenuController.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MainMenuController.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/MainMenuRootScreen",
+    tsjs: "src/gui/screen/mainMenu/MainMenuRootScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MainMenuRootScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/MainMenuRoute",
+    tsjs: "src/gui/screen/mainMenu/MainMenuRoute.ts.js",
+    probes: [
+      (ns) => { const r = new ns.MainMenuRoute(0, { x: 1 }); return [r.screenType, r.params && r.params.x]; },
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/MainMenuScreen",
+    tsjs: "src/gui/screen/mainMenu/MainMenuScreen.ts.js",
+    probes: [
+      (ns) => { const s = new ns.MainMenuScreen(); return [s.backgroundImageName, Object.getOwnPropertyNames(Object.getPrototypeOf(s))]; },
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/ScreenParamsMap",
+    tsjs: "src/gui/screen/mainMenu/ScreenParamsMap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/ScreenType",
+    tsjs: "src/gui/screen/mainMenu/ScreenType.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.ScreenType).length,
+      (ns) => Object.values(ns.ScreenType).join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/campaign/CampaignResources",
+    tsjs: "src/gui/screen/mainMenu/campaign/CampaignResources.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CampaignResources.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/campaign/CampaignScreen",
+    tsjs: "src/gui/screen/mainMenu/campaign/CampaignScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CampaignScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/Iframe",
+    tsjs: "src/gui/screen/mainMenu/component/Iframe.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["Iframe"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MainMenu",
+    tsjs: "src/gui/screen/mainMenu/component/MainMenu.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MainMenu.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MenuMpSlotAnimRunner",
+    tsjs: "src/gui/screen/mainMenu/component/MenuMpSlotAnimRunner.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MenuMpSlotAnimRunner.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MenuMpSlotText",
+    tsjs: "src/gui/screen/mainMenu/component/MenuMpSlotText.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["MenuMpSlotText"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MenuSdTopAnimRunner",
+    tsjs: "src/gui/screen/mainMenu/component/MenuSdTopAnimRunner.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MenuSdTopAnimRunner.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MenuSlotAnimationRunner",
+    tsjs: "src/gui/screen/mainMenu/component/MenuSlotAnimationRunner.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MenuSlotAnimationRunner.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MenuTooltip",
+    tsjs: "src/gui/screen/mainMenu/component/MenuTooltip.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["MenuTooltip"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/MenuVideo",
+    tsjs: "src/gui/screen/mainMenu/component/MenuVideo.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MenuVideo.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/PrefetchProgress",
+    tsjs: "src/gui/screen/mainMenu/component/PrefetchProgress.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["PrefetchProgress"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/SidebarPreview",
+    tsjs: "src/gui/screen/mainMenu/component/SidebarPreview.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SidebarPreview.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/SidebarTitle",
+    tsjs: "src/gui/screen/mainMenu/component/SidebarTitle.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["SidebarTitle"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/VersionString",
+    tsjs: "src/gui/screen/mainMenu/component/VersionString.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["VersionString"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/component/viewmodel/MenuButtonConfig",
+    tsjs: "src/gui/screen/mainMenu/component/viewmodel/MenuButtonConfig.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/credits/Credits",
+    tsjs: "src/gui/screen/mainMenu/credits/Credits.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["Credits"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/credits/CreditsScreen",
+    tsjs: "src/gui/screen/mainMenu/credits/CreditsScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CreditsScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/customGame/CustomGameScreen",
+    tsjs: "src/gui/screen/mainMenu/customGame/CustomGameScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.CustomGameScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/customGame/component/GameBrowser",
+    tsjs: "src/gui/screen/mainMenu/customGame/component/GameBrowser.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["GameBrowser"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/customGame/component/viewmodel/gameBrowser",
+    tsjs: "src/gui/screen/mainMenu/customGame/component/viewmodel/gameBrowser.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/extensions/ExtensionsScreen",
+    tsjs: "src/gui/screen/mainMenu/extensions/ExtensionsScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ExtensionsScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/extensions/component/ExtensionsModel",
+    tsjs: "src/gui/screen/mainMenu/extensions/component/ExtensionsModel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ExtensionsModel.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/extensions/component/ExtensionsOpts",
+    tsjs: "src/gui/screen/mainMenu/extensions/component/ExtensionsOpts.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ExtensionsOpts"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/infoAndCredits/InfoAndCreditsScreen",
+    tsjs: "src/gui/screen/mainMenu/infoAndCredits/InfoAndCreditsScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.InfoAndCreditsScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/ladder/LadderScreen",
+    tsjs: "src/gui/screen/mainMenu/ladder/LadderScreen.ts.js",
+    probes: [
+      (ns) => ns.LadderScreen.PLAYERS_PER_PAGE,
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/ladder/component/Ladder",
+    tsjs: "src/gui/screen/mainMenu/ladder/component/Ladder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["Ladder"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/ladderRules/LadderRulesScreen",
+    tsjs: "src/gui/screen/mainMenu/ladderRules/LadderRulesScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LadderRulesScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/LobbyScreen",
+    tsjs: "src/gui/screen/mainMenu/lobby/LobbyScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LobbyScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/MapPreviewRenderer",
+    tsjs: "src/gui/screen/mainMenu/lobby/MapPreviewRenderer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MapPreviewRenderer.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/PreferredHostOpts",
+    tsjs: "src/gui/screen/mainMenu/lobby/PreferredHostOpts.ts.js",
+    probes: [
+      (ns) => { const o = new ns.PreferredHostOpts(); return [o.gameSpeed, o.credits, o.serialize()]; },
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/SelectMapParams",
+    tsjs: "src/gui/screen/mainMenu/lobby/SelectMapParams.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/SkirmishScreen",
+    tsjs: "src/gui/screen/mainMenu/lobby/SkirmishScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SkirmishScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/component/CreateGameBox",
+    tsjs: "src/gui/screen/mainMenu/lobby/component/CreateGameBox.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["CreateGameBox"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/component/LobbyForm",
+    tsjs: "src/gui/screen/mainMenu/lobby/component/LobbyForm.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LobbyForm.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/component/PasswordBox",
+    tsjs: "src/gui/screen/mainMenu/lobby/component/PasswordBox.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["PasswordBox"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/component/RankIndicator",
+    tsjs: "src/gui/screen/mainMenu/lobby/component/RankIndicator.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["RANK_LABELS"],
+      (ns) => typeof ns["RankIndicator"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/lobby/component/viewmodel/lobby",
+    tsjs: "src/gui/screen/mainMenu/lobby/component/viewmodel/lobby.ts.js",
+    probes: [
+      (ns) => [ns.SlotType.Player, ns.SlotType.Ai, ns.SlotType.Observer],
+      (ns) => [ns.SlotOccupation.Open, ns.SlotOccupation.Closed, ns.SlotOccupation.Occupied, ns.SlotOccupation.Observer],
+      (ns) => [ns.PlayerStatus.NotReady, ns.PlayerStatus.Ready, ns.PlayerStatus.Host],
+      (ns) => [ns.LobbyType.Singleplayer, ns.LobbyType.MultiplayerHost, ns.LobbyType.MultiplayerGuest],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/login/LoginBox",
+    tsjs: "src/gui/screen/mainMenu/login/LoginBox.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["LoginBox"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/login/LoginDebugUi",
+    tsjs: "src/gui/screen/mainMenu/login/LoginDebugUi.ts.js",
+    probes: [
+      (ns) => [ns.TEST_PASSWORD, ns.TEST_USERS.length],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/login/LoginScreen",
+    tsjs: "src/gui/screen/mainMenu/login/LoginScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.LoginScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/login/ServerList",
+    tsjs: "src/gui/screen/mainMenu/login/ServerList.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ServerList"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/login/ServerPingIndicator",
+    tsjs: "src/gui/screen/mainMenu/login/ServerPingIndicator.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["pingLevelOf"],
+      (ns) => typeof ns["ServerPingIndicator"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/login/ServerPings",
+    tsjs: "src/gui/screen/mainMenu/login/ServerPings.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ServerPings.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/main/HomeScreen",
+    tsjs: "src/gui/screen/mainMenu/main/HomeScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.HomeScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/main/ReportBug",
+    tsjs: "src/gui/screen/mainMenu/main/ReportBug.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ReportBug"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/main/SinglePlayerScreen",
+    tsjs: "src/gui/screen/mainMenu/main/SinglePlayerScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SinglePlayerScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/mapSel/MapSelScreen",
+    tsjs: "src/gui/screen/mainMenu/mapSel/MapSelScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MapSelScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/mapSel/component/MapSel",
+    tsjs: "src/gui/screen/mainMenu/mapSel/component/MapSel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["sortMaps"],
+      (ns) => typeof ns["MapSel"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/BadModArchiveError",
+    tsjs: "src/gui/screen/mainMenu/modSel/BadModArchiveError.ts.js",
+    probes: [
+      (ns) => { const e = new ns.BadModArchiveError("x"); return e instanceof Error; },
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/DuplicateModError",
+    tsjs: "src/gui/screen/mainMenu/modSel/DuplicateModError.ts.js",
+    probes: [
+      (ns) => { const e = new ns.DuplicateModError("x"); return e instanceof Error; },
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/Mod",
+    tsjs: "src/gui/screen/mainMenu/modSel/Mod.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.Mod.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModDetailsPane",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModDetailsPane.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ModDetailsPane"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModDownloadPrompt",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModDownloadPrompt.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ModDownloadPrompt"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModImporter",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModImporter.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ModImporter).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModManager",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModManager.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.ModManager).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModMeta",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModMeta.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ModMeta.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModSel",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModSel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ModSel"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModSelScreen",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModSelScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ModSelScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/modSel/ModStatus",
+    tsjs: "src/gui/screen/mainMenu/modSel/ModStatus.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).length,
+      (ns) => Object.keys(ns.ModStatus).length,
+      (ns) => Object.values(ns.ModStatus).join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/newAccount/NewAccountBox",
+    tsjs: "src/gui/screen/mainMenu/newAccount/NewAccountBox.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["NewAccountBox"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/newAccount/NewAccountScreen",
+    tsjs: "src/gui/screen/mainMenu/newAccount/NewAccountScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.NewAccountScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/patchNotes/PatchNotesScreen",
+    tsjs: "src/gui/screen/mainMenu/patchNotes/PatchNotesScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.PatchNotesScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/quickGame/ChatUi",
+    tsjs: "src/gui/screen/mainMenu/quickGame/ChatUi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ChatUi.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/quickGame/PartyState",
+    tsjs: "src/gui/screen/mainMenu/quickGame/PartyState.ts.js",
+    probes: [
+      (ns) => [ns.PartyStatus.Idle, ns.PartyStatus.Queued],
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/quickGame/QuickGameScreen",
+    tsjs: "src/gui/screen/mainMenu/quickGame/QuickGameScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.QuickGameScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/quickGame/component/QuickGameChat",
+    tsjs: "src/gui/screen/mainMenu/quickGame/component/QuickGameChat.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["QuickGameChat"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/quickGame/component/QuickGameForm",
+    tsjs: "src/gui/screen/mainMenu/quickGame/component/QuickGameForm.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["QuickGameForm"],
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/score/ScoreScreen",
+    tsjs: "src/gui/screen/mainMenu/score/ScoreScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ScoreScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/mainMenu/score/ScoreTable",
+    tsjs: "src/gui/screen/mainMenu/score/ScoreTable.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ScoreTable"],
+    ],
+  },
+  {
+    name: "gui/screen/options/GraphicsOptions",
+    tsjs: "src/gui/screen/options/GraphicsOptions.ts.js",
+    probes: [
+      (ns) => Object.getOwnPropertyNames(ns.GraphicsOptions.prototype).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/options/KeyboardScreen",
+    tsjs: "src/gui/screen/options/KeyboardScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.KeyboardScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/options/OptionsScreen",
+    tsjs: "src/gui/screen/options/OptionsScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.OptionsScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/options/SoundOptsScreen",
+    tsjs: "src/gui/screen/options/SoundOptsScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.SoundOptsScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/options/StorageScreen",
+    tsjs: "src/gui/screen/options/StorageScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.StorageScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/options/component/GeneralOpts",
+    tsjs: "src/gui/screen/options/component/GeneralOpts.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["GeneralOpts"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/KeyOpts",
+    tsjs: "src/gui/screen/options/component/KeyOpts.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["KeyOpts"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/MusicJukebox",
+    tsjs: "src/gui/screen/options/component/MusicJukebox.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["MusicJukebox"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/PressKeyInput",
+    tsjs: "src/gui/screen/options/component/PressKeyInput.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["PressKeyInput"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/Resolution",
+    tsjs: "src/gui/screen/options/component/Resolution.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ResolutionSelect"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/SoundOpts",
+    tsjs: "src/gui/screen/options/component/SoundOpts.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["SoundOpts"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/StorageExplorer",
+    tsjs: "src/gui/screen/options/component/StorageExplorer.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["StorageExplorer"],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/configurableCmds",
+    tsjs: "src/gui/screen/options/component/configurableCmds.ts.js",
+    probes: [
+      (ns) => [ns.configurableCmds instanceof Map, ns.configurableCmds.size],
+    ],
+  },
+  {
+    name: "gui/screen/options/component/getHumanReadableKey",
+    tsjs: "src/gui/screen/options/component/getHumanReadableKey.ts.js",
+    probes: [
+      (ns) => ns.getHumanReadableKey({ ctrlKey: true, altKey: false, shiftKey: false, metaKey: false, keyCode: 65 }),
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/replay/KeepReplayBox",
+    tsjs: "src/gui/screen/replay/KeepReplayBox.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["KeepReplayBox"],
+    ],
+  },
+  {
+    name: "gui/screen/replay/ReplayDetailsPane",
+    tsjs: "src/gui/screen/replay/ReplayDetailsPane.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ReplayDetailsPane"],
+    ],
+  },
+  {
+    name: "gui/screen/replay/ReplayScreen",
+    tsjs: "src/gui/screen/replay/ReplayScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ReplayScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/replay/ReplaySel",
+    tsjs: "src/gui/screen/replay/ReplaySel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["ReplaySel"],
+    ],
+  },
+  {
+    name: "gui/screen/replay/ReplaySelScreen",
+    tsjs: "src/gui/screen/replay/ReplaySelScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.ReplaySelScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    name: "gui/screen/replay/StorageWarning",
+    tsjs: "src/gui/screen/replay/StorageWarning.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["StorageWarning"],
+    ],
+  },
+// END_MARKER
 ];
 
 /** Modules registered from the reconstructed sources to satisfy imports. */
 const RECON_DEPS = [
+  "_runtime/prelude",
   "util/math",
   "util/string",
   "util/Base64",
@@ -17835,10 +20428,133 @@ const RECON_DEPS = [
 vm.runInThisContext(readFileSync(join(ROOT, "vendor/lib/three.min.js"), "utf8"), {
   filename: "vendor/lib/three.min.js",
 });
+// System/npm deps named "three" and three.meshline's require("three") must see
+// the UMD just loaded — the npm package is not installed.
+import Module from "node:module";
+import { register as registerHooks } from "node:module";
+{
+  const resolvePath = join(ROOT, "vendor", "three-shim.cjs");
+  const origResolve = Module._resolveFilename;
+  Module._resolveFilename = function (request, ...rest) {
+    if (request === "three") return resolvePath;
+    return origResolve.call(this, request, ...rest);
+  };
+}
+// @puzzl/core ships ESM with extensionless relative imports (../event/EventDispatcher);
+// Node's ESM resolver requires explicit .js — bridge those for require()/import.
+registerHooks(
+  "data:text/javascript," +
+    encodeURIComponent(
+      `export async function resolve(specifier, context, nextResolve) {
+  const isRel = specifier.startsWith(".") || specifier.startsWith("/");
+  const noExt = isRel && !/\\.[a-z]+$/i.test(specifier);
+  if (!noExt) return nextResolve(specifier, context);
+  try {
+    return await nextResolve(specifier, context);
+  } catch {}
+  try {
+    return await nextResolve(specifier + ".js", context);
+  } catch {}
+  return nextResolve(specifier + "/index.js", context);
+}`,
+    ),
+);
+// main (and other side-effect entry modules) touch document at execute time.
+// Node has no DOM; only force a DOM shim for main (side-effect entry).
+// Other probes (e.g. util/Sentry) must keep bare-Node document absence.
+function ensureDomDocumentFor(name) {
+  if (name !== "main") return;
+  const base =
+    globalThis.document && typeof globalThis.document === "object" ? globalThis.document : {};
+  globalThis.document = Object.assign(base, {
+    body: null,
+    head: base.head || { appendChild() {} },
+    documentElement: base.documentElement || { style: {}, appendChild() {} },
+    addEventListener() {},
+    removeEventListener() {},
+    getElementById: base.getElementById || (() => null),
+    createElement:
+      base.createElement ||
+      (() => ({
+        style: {},
+        setAttribute() {},
+        appendChild() {},
+        remove() {},
+      })),
+  });
+}
+
+function __puzzlSynthetic(defs) {
+  const OCE = class OperationCanceledError extends Error {
+    constructor(cancellationToken) { super(); this.cancellationToken = cancellationToken; }
+  };
+  const CT = class CancellationToken {
+    constructor(source) { this.source = source; this.cancelled = false; }
+    throwIfCancelled() { if (this.isCancelled()) throw new OCE(this); }
+    isCancelled() { return this.cancelled === true; }
+    register(callback) {
+      if (this.source && typeof this.source.registerCallback === 'function') this.source.registerCallback(callback);
+      else if (this.isCancelled()) callback();
+    }
+  };
+  const CTS = class CancellationTokenSource {
+    constructor() { this.token = new CT(this); this._cbs = []; this._canceled = false; }
+    cancel() {
+      if (this._canceled) return;
+      this._canceled = true; this.token.cancelled = true;
+      for (const cb of this._cbs.splice(0)) cb();
+    }
+    registerCallback(callback) { if (this._canceled) callback(); else this._cbs.push(callback); }
+    dispose() { this._cbs.length = 0; }
+  };
+  const mk = (exports) => {
+    exports('OperationCanceledError', OCE);
+    exports('CancellationToken', CT);
+    exports('CancellationTokenSource', CTS);
+    return { setters: [], execute() {} };
+  };
+  defs.set('@puzzl/core/lib/async/cancellation', { deps: [], factory: mk });
+  defs.set('@puzzl/core/lib/async/cancellation/OperationCanceledError', { deps: [], factory: (e) => { e('OperationCanceledError', OCE); return { setters: [], execute() {} }; } });
+  defs.set('@puzzl/core/lib/async/cancellation/CancellationToken', { deps: [], factory: (e) => { e('CancellationToken', CT); return { setters: [], execute() {} }; } });
+  defs.set('@puzzl/core/lib/async/cancellation/CancellationTokenSource', { deps: [], factory: (e) => { e('CancellationTokenSource', CTS); return { setters: [], execute() {} }; } });
+  defs.set('@puzzl/core/lib/async/sleep', {
+    deps: ['@puzzl/core/lib/async/cancellation'],
+    factory: (exports) => {
+      let cancellation;
+      return {
+        setters: [(m) => { cancellation = m; }],
+        execute() {
+          function sleep(millis, cancellationToken) {
+            let timeoutId;
+            return new Promise((resolve, reject) => {
+              timeoutId = setTimeout(() => { resolve(); timeoutId = undefined; }, millis);
+              if (cancellationToken) {
+                cancellationToken.register(() => {
+                  clearTimeout(timeoutId); timeoutId = undefined;
+                  reject(new cancellation.OperationCanceledError(cancellationToken));
+                });
+              }
+            });
+          }
+          exports('sleep', sleep);
+        },
+      };
+    },
+  });
+  defs.set('@puzzl/core/lib/regexp', {
+    deps: [],
+    factory: (e) => {
+      const specials = '\\^$.*+?()[]{}|';
+      e('escape', (str) => Array.from(str).map((ch) => (specials.includes(ch) ? '\\' + ch : ch)).join(''));
+      return { setters: [], execute() {} };
+    },
+  });
+}
 
 function makeSystem() {
   const defs = new Map();
   const instances = new Map();
+  __puzzlSynthetic(defs);
   async function get(name) {
     if (instances.has(name)) return instances.get(name);
     const def = defs.get(name);
@@ -17857,7 +20573,21 @@ function makeSystem() {
       const lazyTwin = "src/" + name + ".ts.js";
       const lazyCompiled = "build/ts-modules/" + name + ".js";
       if (existsSync(join(ROOT, lazyTwin))) {
+        const hadBefore = defs.has(name);
         loadFile(system, lazyTwin);
+        if (!hadBefore && !defs.has(name) && name === "_runtime/prelude") {
+          // twin prelude is a plain script (System.register only in a comment);
+          // synthesize exports from globals to avoid get() infinite recursion.
+          defs.set(name, {
+            deps: [],
+            factory: (exports) => {
+              exports("__classPrivateFieldSet", globalThis.__classPrivateFieldSet);
+              exports("__classPrivateFieldGet", globalThis.__classPrivateFieldGet);
+              exports("__decorate", globalThis.__decorate);
+              return { setters: [], execute() {} };
+            },
+          });
+        }
         return get(name);
       }
       if (existsSync(join(ROOT, lazyCompiled))) {
@@ -17881,6 +20611,11 @@ function makeSystem() {
     // 返回半初始化命名空间——与真实 SystemJS 语义一致，否则无限递归。
     instances.set(name, ns);
     const exports = (key, value) => {
+      // Object form used by reconstructed re-export setters: exports({ Bot: e.Bot })
+      if (typeof key === "object" && key !== null && value === undefined) {
+        Object.assign(ns, key);
+        return;
+      }
       ns[key] = value;
       return value; // 真实 SystemJS 的 exports 会返回 value（EventType 模块依赖此行为）
     };
@@ -17929,6 +20664,10 @@ function syncInstantiate(system, name) {
   const ns = {};
   instances.set(name, ns);
   const exports = (key, value) => {
+    if (typeof key === "object" && key !== null && value === undefined) {
+      Object.assign(ns, key);
+      return;
+    }
     ns[key] = value;
     return value;
   };
@@ -18227,9 +20966,11 @@ async function main() {
     const twinPath = "src/" + mod.name + ".ts.js";
     const hasTwin = existsSync(join(ROOT, twinPath));
 
+    ensureDomDocumentFor(mod.name);
     const newSys = await instantiate("build/ts-modules/" + mod.name + ".js");
     const newMod = makeMod(newSys);
     const newNs = await newSys.get(mod.name);
+    ensureDomDocumentFor(mod.name);
     const oldSys = hasTwin ? await instantiate(twinPath) : null;
     const oldNs = oldSys ? await oldSys.get(mod.name) : null;
     const oldMod = oldSys ? makeMod(oldSys) : null;
