@@ -20,7 +20,8 @@ export class PowerupsRules {
               for (var [s, a] of ini.entries) {
                 let [ini, t, i, r] = a.split(",");
                 var n = Number(ini),
-                  a = M1_PowerupType.PowerupType[s];
+                  // PowerupType 已是正式枚举：as any 避免与前序 var a 的类型冲突
+                  a = M1_PowerupType.PowerupType[s as keyof typeof M1_PowerupType.PowerupType] as any;
                 void 0 !== a
                   ? M0_CrateGeneratorTrait.UNSUPPORTED_POWERUP_TYPES.includes(a) ||
                     this.powerups.push({

@@ -20496,6 +20496,324 @@ const CONVERTED = [
   },
 
   {
+    name: "game/math/Box2",
+    tsjs: "src/game/math/Box2.ts.js",
+    probes: [
+      (ns) => {
+        const b = new ns.Box2();
+        return {
+          hasMin: b.min != null,
+          hasMax: b.max != null,
+          min: b.min ? [b.min.x, b.min.y] : null,
+          max: b.max ? [b.max.x, b.max.y] : null,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const b = new ns.Box2(new THREE.Vector2(-1, -2), new THREE.Vector2(3, 4));
+        return {
+          min: [b.min.x, b.min.y],
+          max: [b.max.x, b.max.y],
+          contains: b.containsPoint(new THREE.Vector2(0, 0)),
+          outside: b.containsPoint(new THREE.Vector2(9, 0)),
+          isBox2: b instanceof THREE.Box2,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/CubicBezierCurve3",
+    tsjs: "src/game/math/CubicBezierCurve3.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.CubicBezierCurve3();
+        return {
+          v0: [c.v0.x, c.v0.y, c.v0.z],
+          v1: [c.v1.x, c.v1.y, c.v1.z],
+          v2: [c.v2.x, c.v2.y, c.v2.z],
+          v3: [c.v3.x, c.v3.y, c.v3.z],
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const c = new ns.CubicBezierCurve3(
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 1, 0),
+          new THREE.Vector3(1, 1, 0),
+          new THREE.Vector3(1, 0, 0),
+        );
+        const p0 = c.getPoint(0);
+        const p1 = c.getPoint(1);
+        const target = new THREE.Vector3(9, 9, 9);
+        const pr = c.getPoint(0.5, target);
+        return {
+          p0: [p0.x, p0.y, p0.z],
+          p1: [p1.x, p1.y, p1.z],
+          reused: pr === target,
+          mid: [pr.x, pr.y, pr.z],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/CurvePath",
+    tsjs: "src/game/math/CurvePath.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        // 本模块只导出 CurvePath，不重导出 LineCurve → mod 注入
+        const LineCurve = mod("game/math/LineCurve").LineCurve;
+        const path = new ns.CurvePath();
+        path.curves = [new LineCurve({ x: 0, y: 0 }, { x: 1, y: 0 })];
+        const before = path.curves.length;
+        path.closePath();
+        return {
+          before,
+          after: path.curves.length,
+          grew: path.curves.length > before,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns, THREE, mod) => {
+        // 首尾已重合 → 不追加。LineCurve 用 mod 注入（本模块不重导出）
+        const LineCurve = mod("game/math/LineCurve").LineCurve;
+        const path = new ns.CurvePath();
+        const line = new LineCurve({ x: 0, y: 0 }, { x: 1, y: 0 });
+        path.curves = [line, new LineCurve({ x: 1, y: 0 }, { x: 0, y: 0 })];
+        const before = path.curves.length;
+        path.closePath();
+        return { before, after: path.curves.length, stayed: path.curves.length === before };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/Cylindrical",
+    tsjs: "src/game/math/Cylindrical.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.Cylindrical().setFromVector3({ x: 3, y: 5, z: 4 });
+        return {
+          radius: c.radius,
+          theta: c.theta,
+          y: c.y,
+          self: c instanceof ns.Cylindrical,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const c = new ns.Cylindrical().setFromVector3({ x: 0, y: 0, z: 5 });
+        return { radius: c.radius, theta: c.theta, y: c.y };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/Euler",
+    tsjs: "src/game/math/Euler.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.Euler(0, 0, 0, "XYZ");
+        const v = e.toVector3();
+        const e2 = new ns.Euler(0.1, 0.2, 0.3, "XYZ");
+        e2.setFromRotationMatrix({ elements: [1, 0, 0, 0, 1, 0, 0, 0, 1] }, "XYZ");
+        return {
+          toVec: [v.x, v.y, v.z],
+          isEuler: e.isEuler === true,
+          identityX: e2.x,
+          identityY: e2.y,
+          identityZ: e2.z,
+          order: e2.order,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const e = new ns.Euler(0.5, 0.6, 0.7, "XYZ");
+        const e3 = new ns.Euler(0, 0, 0, "XYZ");
+        const out = e3.reorder("ZXY");
+        return {
+          same: out === e3,
+          order: e3.order,
+          hasX: typeof e3.x === "number",
+          srcOrder: e.order,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/LineCurve",
+    tsjs: "src/game/math/LineCurve.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.LineCurve();
+        const p0 = c.getPoint(0);
+        const p1 = c.getPoint(1);
+        const m = c.getPoint(0.5);
+        return {
+          p0: [p0.x, p0.y],
+          p1: [p1.x, p1.y],
+          mid: [m.x, m.y],
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns, THREE, mod) => {
+        // getPoint 的 target 会被 three r94 的 Curve.getPoint 调 copy/lerp → 注入真 Vector2
+        const Vector2 = mod("game/math/Vector2").Vector2;
+        const c = new ns.LineCurve({ x: 0, y: 0 }, { x: 10, y: 0 });
+        const target = new Vector2(0, 0);
+        const r = c.getPoint(0.5, target);
+        return { reused: r === target, pt: [r.x, r.y], mid: [c.getPoint(0.5).x, c.getPoint(0.5).y] };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/QuadraticBezierCurve",
+    tsjs: "src/game/math/QuadraticBezierCurve.ts.js",
+    probes: [
+      (ns) => {
+        const c = new ns.QuadraticBezierCurve();
+        return {
+          v0: [c.v0.x, c.v0.y],
+          v1: [c.v1.x, c.v1.y],
+          v2: [c.v2.x, c.v2.y],
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns, THREE, mod) => {
+        // getPoint 的 target 会被 three r94 的 Curve.getPoint 调 set → 注入真 Vector2
+        const Vector2 = mod("game/math/Vector2").Vector2;
+        const c = new ns.QuadraticBezierCurve();
+        const p0 = c.getPoint(0);
+        const t = new Vector2(-1, -1);
+        const pr = c.getPoint(1, t);
+        return {
+          p0: [p0.x, p0.y],
+          reused: pr === t,
+          p1: [pr.x, pr.y],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/Spherical",
+    tsjs: "src/game/math/Spherical.ts.js",
+    probes: [
+      (ns) => {
+        const s = new ns.Spherical();
+        const self = s.setFromVector3({ x: 0, y: 0, z: 0, length: () => 0 });
+        const zero = { radius: s.radius, theta: s.theta, phi: s.phi, self: self === s };
+        const s2 = new ns.Spherical();
+        s2.setFromVector3({ x: 0, y: 2, z: 0, length: () => 2 });
+        return {
+          zero,
+          up: { radius: s2.radius, theta: s2.theta, phi: s2.phi },
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const s = new ns.Spherical();
+        // 半径非 0：theta/phi 经 GameMath 查表
+        s.setFromVector3({ x: 1, y: 1, z: 1, length: () => Math.sqrt(3) });
+        return { radius: s.radius, thetaIsNum: typeof s.theta === "number", phiIsNum: typeof s.phi === "number" };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/Matrix4",
+    tsjs: "src/game/math/Matrix4.ts.js",
+    probes: [
+      (ns) => {
+        const m = new ns.Matrix4().makeRotationZ(0);
+        const e = m.elements;
+        const ones = [0, 5, 10, 15].map((i) => e[i]);
+        const zeros = [1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14].map((i) => e[i]);
+        return { ones, allOne: ones.every((v) => v === 1), allZero: zeros.every((v) => v === 0) };
+      },
+      (ns) => {
+        const m = new ns.Matrix4().makeRotationX(Math.PI / 2);
+        const scale = m.getMaxScaleOnAxis();
+        // GameMath 查表精度：≈1
+        return { nearOne: Math.abs(scale - 1) < 1e-4, scale };
+      },
+      (ns) => {
+        const m = new ns.Matrix4().makeRotationY(0.3);
+        const pos = new THREE.Vector3(9, 9, 9);
+        const quat = new THREE.Quaternion();
+        const scale = new THREE.Vector3(0, 0, 0);
+        m.decompose(pos, quat, scale);
+        return {
+          pos: [pos.x, pos.y, pos.z],
+          scale: [scale.x, scale.y, scale.z],
+          quatOk: typeof quat.x === "number",
+        };
+      },
+      (ns) => {
+        // extractRotation：带缩放矩阵 → 平移清零、[15]=1
+        const src = new THREE.Matrix4().makeScale(2, 3, 4);
+        src.elements[12] = 7;
+        src.elements[13] = 8;
+        src.elements[14] = 9;
+        const out = new ns.Matrix4().extractRotation(src);
+        const te = out.elements;
+        return {
+          t: [te[12], te[13], te[14]],
+          e15: te[15],
+          col0len: Math.hypot(te[0], te[1], te[2]),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/math/geometry",
+    tsjs: "src/game/math/geometry.ts.js",
+    probes: [
+      (ns) => {
+        return {
+          rad90: ns.radToDeg(Math.PI / 2),
+          deg180: ns.degToRad(180),
+          deg0: ns.degToRad(0),
+          round90: Math.round(ns.radToDeg(Math.PI / 2)),
+        };
+      },
+      (ns) => {
+        const a = new THREE.Vector2(1, 0);
+        const b = new THREE.Vector2(0, 1);
+        const same = new THREE.Vector2(1, 0);
+        return {
+          angA: ns.angleDegFromVec2(a),
+          between: ns.angleDegBetweenVec2(a, b),
+          same0: ns.angleDegBetweenVec2(a, same),
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const v = new THREE.Vector2(1, 0);
+        const r = ns.rotateVec2(v, 90);
+        return { x: r.x, y: r.y, isVec: r instanceof THREE.Vector2 };
+      },
+      (ns) => {
+        const q = ns.quaternionFromVec3(new THREE.Vector3(0, 0, 1));
+        const ang = ns.angleDegBetweenVec3(new THREE.Vector3(1, 0, 0), new THREE.Vector3(1, 0, 0));
+        return { isQ: q != null, ang, keys: ["radToDeg", "degToRad"].filter((k) => typeof ns[k] === "function") };
+      },
+      (ns) => {
+        // rotateVec3Towards 保长；角差 0 跳过 slerp
+        const v = new THREE.Vector3(1, 0, 0);
+        const before = v.length();
+        ns.rotateVec3Towards(v, new THREE.Vector3(1, 0, 0), Math.PI);
+        const after = v.length();
+        return { before, after, sameDir: v.x > 0.99, lenOk: Math.abs(before - after) < 1e-6 };
+      },
+    ],
+  },
+
+  {
     name: "util/array",
     tsjs: "src/util/array.ts.js",
     probes: [
@@ -22184,6 +22502,1340 @@ const CONVERTED = [
     ],
   },
 
+  {
+    name: "game/Hashable",
+    tsjs: "src/game/Hashable.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "game/GameTurnManager",
+    tsjs: "src/game/GameTurnManager.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "game/SpecialWarheadType",
+    tsjs: "src/game/SpecialWarheadType.ts.js",
+    probes: [
+      (ns) => ns.SpecialWarheadType.None,
+      (ns) => ns.SpecialWarheadType.Shrapnel,
+      (ns) => ns.SpecialWarheadType.LightningStrike,
+      (ns) => ns.SpecialWarheadType.TntCharge,
+      (ns) => Object.keys(ns.SpecialWarheadType).length,
+    ],
+  },
+
+  {
+    name: "game/type/PowerupType",
+    tsjs: "src/game/type/PowerupType.ts.js",
+    probes: [
+      (ns) => ns.PowerupType.Armor,
+      (ns) => ns.PowerupType.Money,
+      (ns) => ns.PowerupType.Invulnerability,
+      (ns) => ns.PowerupType.Squad,
+      (ns) => Object.keys(ns.PowerupType).length,
+    ],
+  },
+
+  {
+    name: "game/World",
+    tsjs: "src/game/World.ts.js",
+    probes: [
+      (ns) => {
+        const w = new ns.World();
+        return { size: w.allObjects.size, hasSpawned: w.onObjectSpawned != null };
+      },
+      (ns) => {
+        const w = new ns.World();
+        let err = "";
+        try { w.spawnObject({ id: 1 }); w.spawnObject({ id: 1 }); } catch (e) { err = e.message; }
+        return err;
+      },
+      (ns) => {
+        const w = new ns.World();
+        w.spawnObject({ id: 7 });
+        let err = "";
+        try { w.getObjectById(8); } catch (e) { err = e.message; }
+        return { has: w.hasObjectId(7), err, all: w.getAllObjects().length };
+      },
+    ],
+  },
+
+  {
+    name: "game/GameEventBus",
+    tsjs: "src/game/GameEventBus.ts.js",
+    probes: [
+      (ns) => {
+        const bus = new ns.GameEventBus();
+        const got = [];
+        const off = bus.subscribe((e) => got.push(e.type));
+        bus.dispatch({ type: 3 });
+        bus.dispatch({ type: 9 });
+        off();
+        bus.dispatch({ type: 1 });
+        return got;
+      },
+      (ns) => {
+        const bus = new ns.GameEventBus();
+        const got = [];
+        bus.subscribeType(5, (e) => got.push(e.type));
+        bus.dispatch({ type: 5 });
+        bus.dispatch({ type: 6 });
+        return got;
+      },
+    ],
+  },
+
+  {
+    name: "game/SuperWeapon",
+    tsjs: "src/game/SuperWeapon.ts.js",
+    probes: [
+      (ns) => ns.SuperWeaponStatus.Charging,
+      (ns) => ns.SuperWeaponStatus.Paused,
+      (ns) => ns.SuperWeaponStatus.Ready,
+      (ns) => Object.keys(ns.SuperWeaponStatus).length,
+      (ns) => {
+        const sw = new ns.SuperWeapon("Nuke", { rechargeTime: 1 }, { name: "P" }, false);
+        return {
+          status: sw.status,
+          chargeTicks: sw.chargeTicks,
+          rechargeTicks: sw.rechargeTicks,
+          isGift: sw.isGift,
+          progress0: sw.getChargeProgress(),
+        };
+      },
+      (ns) => {
+        const sw = new ns.SuperWeapon("One", { rechargeTime: 2 }, {}, true);
+        return { status: sw.status, chargeTicks: sw.chargeTicks };
+      },
+      (ns) => {
+        const sw = new ns.SuperWeapon("X", { rechargeTime: 1 }, {}, false);
+        sw.update({ events: { dispatch: () => {} } });
+        const after = sw.chargeTicks;
+        sw.pauseTimer();
+        const paused = sw.status;
+        sw.resumeTimer();
+        const resumed = sw.status;
+        sw.resetTimer();
+        return { after, paused, resumed, resetCharge: sw.chargeTicks, resetStatus: sw.status };
+      },
+    ],
+  },
+
+  {
+    name: "game/StartingUnitsGenerator",
+    tsjs: "src/game/StartingUnitsGenerator.ts.js",
+    probes: [
+      (ns) => {
+        const rules = [
+          { name: "MCV", cost: 100, isAvailableTo: () => true, hasOwner: () => true },
+          { name: "Tank", cost: 50, isAvailableTo: () => true, hasOwner: () => true },
+          { name: "GI", cost: 20, isAvailableTo: () => true, hasOwner: () => true },
+          { name: "Rifle", cost: 10, isAvailableTo: () => true, hasOwner: () => true },
+        ];
+        const out = ns.StartingUnitsGenerator.generate(1, ["Tank"], rules, {});
+        return out.map((e) => ({ name: e.name, type: e.type, count: e.count }));
+      },
+    ],
+  },
+
+  {
+    name: "game/Target",
+    tsjs: "src/game/Target.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.Target(undefined, { landType: 0, rx: 1, ry: 2, z: 0 }, {});
+        return { isOre: t.isOre, hasTile: !!t.tile, isBridge: t.isBridge() };
+      },
+      (ns) => {
+        const t = new ns.Target(undefined, { landType: 9, rx: 0, ry: 0, z: 0 }, {});
+        return t.isOre;
+      },
+      (ns) => {
+        const obj = {
+          isOverlay: () => false,
+          isBuilding: () => true,
+          centerTile: { rx: 3, ry: 4, z: 0 },
+          tile: { rx: 9, ry: 9, z: 0 },
+          position: { worldPosition: { x: 1, y: 2, z: 3 } },
+        };
+        const t = new ns.Target(obj, obj.centerTile, {});
+        return { hasObj: t.obj === obj, tileIsCenter: t.tile === obj.centerTile, wc: t.getWorldCoords() };
+      },
+    ],
+  },
+
+  {
+    name: "game/GameMap",
+    tsjs: "src/game/GameMap.ts.js",
+    probes: [
+      (ns) => {
+        const d = ns.GameMap.prototype.computeQuadDepth;
+        return [d.call({}, 1), d.call({}, 5), d.call({}, 10), d.call({}, 0)];
+      },
+      (ns) => Object.keys(ns.GameMap.prototype).sort(),
+    ],
+  },
+
+  {
+    name: "game/BotManager",
+    tsjs: "src/game/BotManager.ts.js",
+    probes: [
+      (ns) => {
+        const mgr = ns.BotManager.factory(
+          { register: () => {} },
+          { create: () => ({}) },
+          { value: 0, onChange: { subscribe: () => {}, unsubscribe: () => {} } },
+          { debug: () => {} },
+        );
+        return {
+          hasQueue: !!mgr.actionQueue,
+          botsSize: mgr.bots.size,
+          chat: mgr.chatSender.hasMessages() === false,
+          queueLen: mgr.chatMessageQueue.length,
+        };
+      },
+      (ns) => {
+        const mgr = ns.BotManager.factory({}, {}, { value: 0, onChange: { subscribe() {}, unsubscribe() {} } }, { debug() {} });
+        mgr.chatSender.sayAll("Bot1", "hi");
+        mgr.chatSender.sayAll("Bot1", "");
+        const msgs = mgr.flushChatMessages();
+        return { n: msgs.length, text: msgs[0]?.text, has: mgr.chatSender.hasMessages() };
+      },
+    ],
+  },
+
+  {
+    name: "game/Game",
+    tsjs: "src/game/Game.ts.js",
+    probes: [
+      (ns) => ns.GameStatus.NotStarted,
+      (ns) => ns.GameStatus.Started,
+      (ns) => ns.GameStatus.Ended,
+      (ns) => Object.keys(ns.GameStatus).length,
+      (ns) => Object.keys(ns.Game.prototype).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/GameFactory",
+    tsjs: "src/game/GameFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.GameFactory).sort(),
+      (ns) => ({ keys: Object.keys(ns.GameFactory), arity: ns.GameFactory.create.length }),
+    ],
+  },
+
+  {
+    name: "game/scenario/ScenarioTeamRuntime",
+    tsjs: "src/game/scenario/ScenarioTeamRuntime.ts.js",
+    probes: [
+      (ns) => {
+        const f2 = ns.ScenarioTeamRuntime.prototype.createQuarryFilter.call(null, 2);
+        const f0 = ns.ScenarioTeamRuntime.prototype.createQuarryFilter.call(null, 0);
+        return {
+          building: f2({ isBuilding: () => true }),
+          notBuilding: f2({ isBuilding: () => false }),
+          all: f0({}),
+          keys: Object.keys(ns.ScenarioTeamRuntime.prototype).sort().join(","),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/Ai",
+    tsjs: "src/game/ai/Ai.ts.js",
+    probes: [
+      (ns) => {
+        const ini = { tag: "aimd" };
+        const ai = new ns.Ai(ini);
+        return { same: ai.getIni() === ini, tag: ai.ini.tag };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiData",
+    tsjs: "src/game/ai/AiData.ts.js",
+    probes: [
+      (ns) => {
+        const tf = new ns.TaskForce("TF001");
+        tf.groups.push({ unitType: "E1", count: 2 });
+        const sa = new ns.ScriptAction(1, 5, undefined);
+        const sc = new ns.ScriptType("Attack1");
+        sc.actions.push(sa);
+        const tt = new ns.TeamType("Team1");
+        const at = new ns.AITriggerType("Trig1");
+        const ad = new ns.AIDefenseType("Def1");
+        const bq = new ns.BuildQueueItem("GAPOWR", undefined);
+        return {
+          tf: [tf.name, tf.groups.length, tf.groups[0]],
+          sa: [sa.action, sa.target, sa.argument],
+          sc: [sc.name, sc.index, sc.actions.length],
+          tt: [tt.name, tt.house, tt.priority, tt.maxExecuted, tt.recruiter, tt.autoCreate, tt.group],
+          at: [at.name, at.condition, at.value, at.techLevel],
+          ad: [ad.name, ad.building, ad.adjacent, ad.cover],
+          bq: [bq.unitType, bq.priority],
+        };
+      },
+      (ns) => {
+        const sections = {
+          GroupWeights: new Map([["0", "10,1,2,3,4,5"]]),
+          TaskForces: new Map([["0", "TF001"]]),
+          TF001: new Map([["Group1", "2,E1"], ["Group2", "1,HTK"]]),
+          ScriptTypes: new Map([["0", "S1"]]),
+          S1: new Map([["0", "1,5,2"], ["1", "49,0"]]),
+          TeamTypes: new Map([["0", "T1"]]),
+          T1: new Map([
+            ["House", "Americans"], ["TaskForce", "TF001"], ["Script", "S1"],
+            ["Priority", "7"], ["Max", "2"], ["Annoyance", "yes"], ["Recruiter", "no"],
+          ]),
+          AITriggerTypes: new Map([["0", "MyTrig,1,1,0,2,5,T1,T2,0,3,0"]]),
+          AIDefenseTypes: new Map([["0", "Def,GAPILL,1,0"]]),
+          BuildQueueGroup: new Map([["0", "BuildQueue3"]]),
+          BuildQueue3: new Map([["0", "GAPOWR,5"], ["1", "GAPILE,3"]]),
+          BuildQueue: new Map([["0", "GAPOWR"], ["1", "GAPILE"]]),
+        };
+        const sec = (name) => {
+          const m = sections[name];
+          if (!m) return null;
+          return {
+            name,
+            get: (k) => (m.has(k) ? m.get(k) : undefined),
+            getNumber: (k, d) => {
+              const v = m.get(k);
+              return v === undefined ? d : Number(v);
+            },
+          };
+        };
+        const aiIni = { getSection: sec };
+        const gw = ns.parseGroupWeights(aiIni);
+        const tf = ns.parseTaskForces(aiIni);
+        const sc = ns.parseScriptTypes(aiIni);
+        const tt = ns.parseTeamTypes(aiIni);
+        const tr = ns.parseAITriggerTypes(aiIni);
+        const df = ns.parseAIDefenseTypes(aiIni);
+        const q = ns.parseBuildQueues(aiIni);
+        return {
+          gw0: gw[0],
+          tfGroups: tf.TF001.groups,
+          sc0: [sc.S1.index, sc.S1.actions[0].action, sc.S1.actions[0].target, sc.S1.actions[0].argument],
+          tt: [tt.T1.priority, tt.T1.maxExecuted, tt.T1.annoyance, tt.T1.recruiter],
+          tr: [tr.MyTrig.condition, tr.MyTrig.owner, tr.MyTrig.value, tr.MyTrig.team1, tr.MyTrig.techLevel],
+          df: [df.Def.building, df.Def.adjacent],
+          qKeys: Object.keys(q).sort(),
+          q3: q.BuildQueue3.map((i) => [i.unitType, i.priority]),
+          qDef: q.__default__,
+        };
+      },
+      (ns) => {
+        const empty = { getSection: () => null };
+        return [
+          Object.keys(ns.parseGroupWeights(empty)).length,
+          Object.keys(ns.parseTaskForces(empty)).length,
+          Object.keys(ns.parseScriptTypes(empty)).length,
+          Object.keys(ns.parseTeamTypes(empty)).length,
+          Object.keys(ns.parseAITriggerTypes(empty)).length,
+          Object.keys(ns.parseAIDefenseTypes(empty)).length,
+          Object.keys(ns.parseBuildQueues(empty)).length,
+        ];
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiEngine",
+    tsjs: "src/game/ai/AiEngine.ts.js",
+    probes: [
+      (ns) => {
+        // ActiveTeam only exported by TS; twin only exports AiEngine.
+        // Prototype: ES6 class (non-enumerable) vs prototype assign — use getOwnPropertyNames.
+        return {
+          hasEngine: typeof ns.AiEngine === "function",
+          arity: ns.AiEngine.length,
+          proto: Object.getOwnPropertyNames(ns.AiEngine.prototype)
+            .filter((k) => k !== "constructor")
+            .sort(),
+        };
+      },
+      (ns) => {
+        const logs = [];
+        const origLog = console.log;
+        const origWarn = console.warn;
+        console.log = (...a) => logs.push(a.join(" "));
+        console.warn = (...a) => logs.push(a.join(" "));
+        try {
+          const gameApi = {
+            getCurrentTick: () => 10,
+            getAiIni: () => { throw new Error("no-ini"); },
+          };
+          const eng = new ns.AiEngine(gameApi, { orderUnits() {} }, "Bob", { triggerCooldown: 1 });
+          eng.init(undefined);
+          const afterInit = {
+            hasParsed: !!eng.parsed,
+            teamKeys: Object.keys(eng.parsed.teamTypes).length,
+            tech: eng.getTechLevel(),
+            queue: eng.getBuildQueue(),
+            teams: eng.getActiveTeamInfo(),
+          };
+          eng.onTick();
+          eng.reset();
+          const afterReset = {
+            teams: eng.activeTeams.length,
+            tech: eng.getTechLevel(),
+            fired: Object.keys(eng.triggerFired).length,
+            total: eng.totalTeamsCreated,
+          };
+          return { afterInit, afterReset, logs: logs.map((l) => l.slice(0, 40)) };
+        } finally {
+          console.log = origLog;
+          console.warn = origWarn;
+        }
+      },
+      (ns) => {
+        const origLog = console.log;
+        console.log = () => {};
+        try {
+          const eng = new ns.AiEngine({ getCurrentTick: () => 0 }, {}, "Bob", {});
+          eng.parsed = {
+            taskForces: {},
+            scriptTypes: {},
+            teamTypes: { T1: { name: "T1", taskForce: "Missing", scriptType: "S", maxExecuted: 1, priority: 5 } },
+            triggers: {},
+            groupWeights: {},
+            defenses: {},
+            buildQueues: {},
+          };
+          eng.spawnTeam(eng.parsed.teamTypes.T1, 42);
+          const spawned = eng.activeTeams.map((t) => [t.state, t.createdAt]);
+          eng.activeTeams.push({ teamType: { name: "KeepMe" }, state: "executing", unitIds: [1], scriptIndex: 0 });
+          const destroyed = eng.destroyTeam("keepme");
+          const states = eng.activeTeams.map((t) => t.state);
+          return { spawned, destroyed, states, emptyName: eng.destroyTeam("") };
+        } finally {
+          console.log = origLog;
+        }
+      },
+      (ns) => {
+        const eng = new ns.AiEngine({ getCurrentTick: () => 0, getPlayerData: () => ({ startLocation: { x: 3, y: 4 } }) }, { orderUnits() {} }, "Bob", {});
+        eng.parsed = { scriptTypes: {}, taskForces: {}, teamTypes: {}, triggers: {}, groupWeights: {}, defenses: {}, buildQueues: {} };
+        const team = { unitIds: [1], scriptIndex: 0, scriptType: null, attackTarget: null, rallyPoint: null, teamType: { name: "T" }, state: "executing" };
+        const rSuccess = eng.executeAction(team, { action: 49, target: 0 }, 0);
+        const rJump = eng.executeAction(team, { action: 6, target: 4 }, 0);
+        const idxAfterJump = team.scriptIndex;
+        const rGoBerserk = eng.executeAction(team, { action: 2, target: 0 }, 0);
+        return { rSuccess, rJump, idxAfterJump, rGoBerserk, orderCalls: eng.actionsApi ? "ok" : "no" };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiApi",
+    tsjs: "src/game/ai/AiApi.ts.js",
+    probes: [
+      (ns) => {
+        const origLog = console.log;
+        console.log = () => {};
+        try {
+          const gameApi = {
+            getCurrentTick: () => 0,
+            getAiIni: () => { throw new Error("x"); },
+            getVisibleUnits: () => [],
+            getPlayerData: () => ({ credits: 100, startLocation: { x: 0, y: 0 } }),
+            rulesApi: { getBuilding: () => null, getObject: () => { throw new Error("no"); } },
+          };
+          const api = new ns.AiApi(gameApi, { orderUnits() {} }, "Bob", { adviceCooldown: 1 });
+          const before = { init: api.initialized, advice: api.getBuildAdvice(), tac: api.getTacticalAdvice() };
+          api.init(undefined);
+          api.onTick();
+          const after = {
+            init: api.initialized,
+            tech: api.getTechLevel(),
+            queue: api.getBuildQueue(),
+            teams: api.getActiveTeams(),
+            tfs: api.getAvailableTaskForces(),
+            force: api.forceSpawnTeam("Nope"),
+            nextStruct: api.getNextBuildItem("Structures"),
+            nextBad: api.getNextBuildItem("Nope"),
+          };
+          api.reset();
+          return { before, after, stance: api.getTacticalAdvice().stance };
+        } finally {
+          console.log = origLog;
+        }
+      },
+      (ns) => {
+        const origLog = console.log;
+        console.log = () => {};
+        try {
+          const api2 = new ns.AiApi(
+            {
+              getCurrentTick: () => 0,
+              rulesApi: {
+                getBuilding: () => { throw new Error("x"); },
+                getObject: () => { throw new Error("x"); },
+              },
+            },
+            {}, "P", {},
+          );
+          return [
+            api2._categorizeUnit("GAPOWR"),
+            api2._categorizeUnit("E1"),
+            api2._categorizeUnit("C1"),
+            api2._categorizeUnit("DOGE"),
+            api2._categorizeUnit("BEAG"),
+            api2._categorizeUnit("AIRC"),
+            api2._categorizeUnit("HTK"),
+            api2._getQueueForType("Vehicles"),
+            api2._getQueueForType("Unknown"),
+          ];
+        } finally {
+          console.log = origLog;
+        }
+      },
+    ],
+  },
+
+
+  {
+    name: "game/art/SequenceType",
+    tsjs: "src/game/art/SequenceType.ts.js",
+    probes: [
+      (ns) => ns.SequenceType.Ready,
+      (ns) => ns.SequenceType.Walk,
+      (ns) => ns.SequenceType.SecondaryFire,
+      (ns) => ns.SequenceType[ns.SequenceType.Die1],
+      (ns) => Object.keys(ns.SequenceType).length,
+    ],
+  },
+
+  {
+    name: "game/art/FlhCoords",
+    tsjs: "src/game/art/FlhCoords.ts.js",
+    probes: [
+      (ns) => {
+        const empty = new ns.FlhCoords();
+        const fromArr = new ns.FlhCoords([1, 2, 3]);
+        const short = new ns.FlhCoords([9, 9]);
+        const c = fromArr.clone();
+        const mut = empty.fromArray([4, 5, 6]);
+        return {
+          empty: [empty.forward, empty.lateral, empty.vertical],
+          fromArr: [fromArr.forward, fromArr.lateral, fromArr.vertical],
+          short: [short.forward, short.lateral, short.vertical],
+          clone: [c.forward, c.lateral, c.vertical, c === fromArr],
+          fromSame: mut === empty,
+          afterFrom: [empty.forward, empty.lateral, empty.vertical],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/art/SequenceReader",
+    tsjs: "src/game/art/SequenceReader.ts.js",
+    probes: [
+      (ns, THREE, mod) => {
+        // SequenceReader 只导入不重导出 SequenceType → mod 注入
+        const SequenceType = mod("game/art/SequenceType").SequenceType;
+        const section = {
+          entries: new Map([
+            ["Ready", "0,1,8"],
+            ["Walk", "2,6,8,N"],
+            ["NotAKey", "1,2,3"],
+            ["Die1", "10,2,8,E"],
+          ]),
+        };
+        const out = new ns.SequenceReader().readIni(section);
+        const keys = Array.from(out.keys());
+        return {
+          keys,
+          ready: out.get(SequenceType.Ready),
+          walk: out.get(SequenceType.Walk),
+          die: out.get(SequenceType.Die1),
+          hasUnknown: out.has("NotAKey"),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/art/RotorData",
+    tsjs: "src/game/art/RotorData.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "game/art/Art",
+    tsjs: "src/game/art/Art.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.Art.prototype).sort(),
+      (ns) => {
+        const art = Object.create(ns.Art.prototype);
+        art.artIni = { tag: "art" };
+        art.getIni = ns.Art.prototype.getIni;
+        return { same: art.getIni() === art.artIni, keys: Object.keys(ns).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "game/art/ObjectArt",
+    tsjs: "src/game/art/ObjectArt.ts.js",
+    probes: [
+      (ns) => [ns.ObjectArt.DEFAULT_LINE_TRAIL_DEC, ns.ObjectArt.MISSING_CAMEO],
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        return [
+          ns.ObjectArt.getDefaultPalette(ObjectType.Building),
+          ns.ObjectArt.getDefaultPalette(ObjectType.Overlay),
+          ns.ObjectArt.getDefaultPalette(ObjectType.Smudge),
+          ns.ObjectArt.getDefaultPalette(ObjectType.Animation),
+        ];
+      },
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        return [
+          ns.ObjectArt.getDefaultLighting(ObjectType.Animation),
+          ns.ObjectArt.getDefaultLighting(ObjectType.Building),
+          ns.ObjectArt.getDefaultLighting(ObjectType.Projectile),
+          ns.ObjectArt.getDefaultLighting(ObjectType.Overlay),
+        ];
+      },
+      (ns, THREE, mod) => {
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        return [
+          ns.ObjectArt.getDefaultRemapability(ObjectType.Building),
+          ns.ObjectArt.getDefaultRemapability(ObjectType.Overlay),
+          ns.ObjectArt.getDefaultShadow(ObjectType.Vehicle),
+          ns.ObjectArt.getDefaultHeight(ObjectType.Infantry),
+        ];
+      },
+    ],
+  },
+
+  {
+    name: "game/gameopts/constants",
+    tsjs: "src/game/gameopts/constants.ts.js",
+    probes: [
+      (ns) => [
+        ns.RANDOM_COUNTRY_ID, ns.RANDOM_COLOR_ID, ns.RANDOM_START_POS, ns.NO_TEAM_ID,
+        ns.OBS_COUNTRY_ID, ns.OBS_COLOR_ID, ns.RANDOM_COUNTRY_NAME, ns.OBS_COUNTRY_NAME,
+        ns.RANDOM_COUNTRY_UI_NAME, ns.RANDOM_COUNTRY_UI_TOOLTIP, ns.OBS_COUNTRY_UI_NAME,
+        ns.OBS_COUNTRY_UI_TOOLTIP, ns.RANDOM_COLOR_NAME,
+      ],
+      (ns) => ({
+        nameKeys: Object.keys(ns.aiUiNames).length,
+        tooltipKeys: Object.keys(ns.aiUiTooltips).length,
+        easy: ns.aiUiNames.get(2),
+        hard: ns.aiUiNames.get(5),
+        names: Object.keys(ns).sort(),
+      }),
+    ],
+  },
+
+  {
+    name: "game/gameopts/GameOpts",
+    tsjs: "src/game/gameopts/GameOpts.ts.js",
+    probes: [
+      (ns) => ns.isHumanPlayerInfo({ name: "P" }),
+      (ns) => ns.isHumanPlayerInfo({ ai: true }),
+      (ns) => ns.AiDifficulty.Brutal,
+      (ns) => ns.AiDifficulty.Medium,
+      (ns) => ns.AiDifficulty.Easy_Ori,
+      (ns) => ns.AiDifficulty.Medium_Custom,
+      (ns) => Object.keys(ns.AiDifficulty).length,
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "game/gameopts/GameOptRandomGen",
+    tsjs: "src/game/gameopts/GameOptRandomGen.ts.js",
+    probes: [
+      (ns) => {
+        const g = ns.GameOptRandomGen.factory(12345, 0);
+        const s1 = { humanPlayers: [{ colorId: -2, countryId: -2, startPos: -2, name: "P1" }], aiPlayers: [{ colorId: 0, countryId: 0, startPos: 0, isAi: true }] };
+        const colors = g.generateColors(s1);
+        const countries = g.generateCountries(s1, {
+          getMultiplayerCountries: () => [{ name: "Americans" }, { name: "Russians" }, { name: "French" }],
+        });
+        return {
+          hasPrng: !!g.prng,
+          colorEntries: [...colors.values()],
+          countryEntries: [...countries.values()],
+          keys: Object.keys(ns.GameOptRandomGen).sort(),
+          proto: Object.keys(ns.GameOptRandomGen.prototype).sort(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/gameopts/GameOptSanitizer",
+    tsjs: "src/game/gameopts/GameOptSanitizer.ts.js",
+    probes: [
+      (ns) => {
+        const opts = { credits: 999999, gameSpeed: 99, unitCount: 9999 };
+        const rules = { mpDialogSettings: { minMoney: 1000, maxMoney: 20000, minUnitCount: 0, maxUnitCount: 500 } };
+        ns.GameOptSanitizer.sanitize(opts, rules);
+        const opts2 = { credits: 1, gameSpeed: -5, unitCount: -1 };
+        ns.GameOptSanitizer.sanitize(opts2, rules);
+        return { a: opts, b: opts2, keys: Object.keys(ns).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "game/ini/GameModeType",
+    tsjs: "src/game/ini/GameModeType.ts.js",
+    probes: [
+      (ns) => ns.GameModeType.Battle,
+      (ns) => ns.GameModeType.FreeForAll,
+      (ns) => ns.GameModeType.Cooperative,
+      (ns) => Object.keys(ns.GameModeType).length,
+    ],
+  },
+
+  {
+    name: "game/ini/GameModes",
+    tsjs: "src/game/ini/GameModes.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.GameModes.prototype).sort(),
+      (ns) => {
+        const modeIni = {
+          getOrderedSections: () => [
+            {
+              name: "Battle",
+              entries: new Map([["1", ["Assault", "desc", "standard", "all", "yes"]]]),
+              getArray: () => ["Assault", "desc", "standard", "all", "yes"],
+            },
+          ],
+        };
+        const loader = () => ({
+          getOrCreateSection: () => ({
+            getNumber: (k, d) => d,
+            getBool: () => false,
+            getString: (k) => "",
+          }),
+        });
+        try {
+          const gm = new ns.GameModes(modeIni, loader);
+          const e = gm.get ? gm.get(1) : null;
+          return {
+            size: gm.entries.size,
+            entry: e
+              ? [e.id, e.label, e.description, e.rulesOverride, e.mapFilter, e.randomMapsAllowed, e.aiAllowed]
+              : [...gm.entries.values()].map((x) => [x.id, x.label, x.aiAllowed]),
+            keys: Object.keys(ns).sort(),
+          };
+        } catch (err) {
+          return "load:" + String(err && err.message).slice(0, 80);
+        }
+      },
+    ],
+  },
+
+  {
+    name: "game/ini/MixinRulesType",
+    tsjs: "src/game/ini/MixinRulesType.ts.js",
+    probes: [
+      (ns) => ns.MixinRulesType.NoDogEngiKills,
+      (ns) => Object.keys(ns.MixinRulesType).length,
+    ],
+  },
+
+  {
+    name: "game/ini/MixinRules",
+    tsjs: "src/game/ini/MixinRules.ts.js",
+    probes: [
+      (ns) => ns.MixinRules.getTypes({ noDogEngiKills: true }),
+      (ns) => ns.MixinRules.getTypes({ noDogEngiKills: false }),
+      (ns) => ns.MixinRules.getTypes({}),
+      (ns) => Object.keys(ns.MixinRules).sort(),
+    ],
+  },
+
+  {
+    name: "game/player/trait/RadarTrait",
+    tsjs: "src/game/player/trait/RadarTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.RadarTrait();
+        const before = [t.disabled, t.activeEvents.length, t.isDisabled()];
+        t.setDisabled(false);
+        const after = [t.disabled, t.isDisabled()];
+        t.setDisabled(true);
+        return { before, after, final: t.isDisabled(), keys: Object.keys(ns).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "game/player/trait/SharedDetectDisguiseTrait",
+    tsjs: "src/game/player/trait/SharedDetectDisguiseTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SharedDetectDisguiseTrait();
+        const a = { id: 1 };
+        const b = { id: 2 };
+        t.add(a);
+        t.add(b);
+        const mid = [t.has(a), t.has(b), t.objects.size];
+        t.delete(a);
+        const afterDel = [t.has(a), t.has(b), t.objects.size];
+        t.dispose();
+        return { mid, afterDel, final: t.objects.size, keys: Object.keys(ns).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "game/player/trait/SuperWeaponsTrait",
+    tsjs: "src/game/player/trait/SuperWeaponsTrait.ts.js",
+    probes: [
+      (ns) => {
+        const t = new ns.SuperWeaponsTrait();
+        t.add({ name: "Nuke" });
+        t.add({ name: "Chrono" });
+        t.add({ name: "Nuke" });
+        const all = t.getAll().map((s) => s.name);
+        const has = [t.has("Nuke"), t.has("Chrono"), t.has("Ion")];
+        const got = t.get("Chrono") && t.get("Chrono").name;
+        t.remove("Nuke");
+        const after = { all: t.getAll().length, has: t.has("Nuke") };
+        return { all, has, got, after, keys: Object.keys(ns).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "game/player/PlayerFactory",
+    tsjs: "src/game/player/PlayerFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.PlayerFactory.prototype).sort(),
+      (ns) => {
+        const f = new ns.PlayerFactory({ mock: true }, { mock: true }, {});
+        return {
+          hasCreate: typeof f.createCombatant === "function",
+          hasObserver: typeof f.createObserver === "function",
+          hasNeutral: typeof f.createNeutral === "function",
+          fields: [f.rules != null, f.gameOpts != null, f.allAvailableObjects != null],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/rules/DebrisRules",
+    tsjs: "src/game/rules/DebrisRules.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.DebrisRules.prototype).sort(),
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "game/rules/OverlayRules",
+    tsjs: "src/game/rules/OverlayRules.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.OverlayRules.prototype).sort(),
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "game/rules/SmudgeRules",
+    tsjs: "src/game/rules/SmudgeRules.ts.js",
+    probes: [
+      (ns) => Object.keys(ns.SmudgeRules.prototype).sort(),
+      (ns) => Object.keys(ns).sort(),
+    ],
+  },
+
+  {
+    name: "game/rules/TerrainRules",
+    tsjs: "src/game/rules/TerrainRules.ts.js",
+    probes: [
+      (ns) => ns.OccupationBits.All,
+      (ns) => ns.OccupationBits.Right,
+      (ns) => ns.OccupationBits.Left,
+      (ns) => ns.OccupationBits.Bottom,
+      (ns) => Object.keys(ns.OccupationBits).length,
+      (ns) => [
+        ns.testOccupationBit(0, 7),
+        ns.testOccupationBit(1, 7),
+        ns.testOccupationBit(2, ns.OccupationBits.Right),
+        ns.testOccupationBit(3, ns.OccupationBits.Left),
+        ns.testOccupationBit(4, ns.OccupationBits.Bottom),
+        ns.testOccupationBit(2, 0),
+        ns.testOccupationBit(3, 0),
+        ns.testOccupationBit(4, 0),
+      ],
+      (ns) => {
+        let err = "";
+        try { ns.testOccupationBit(9, 7); } catch (e) { err = e.message; }
+        return err;
+      },
+      (ns) => Object.keys(ns.TerrainRules.prototype).sort(),
+    ],
+  },
+
+  {
+    name: "game/theater/TileSet",
+    tsjs: "src/game/theater/TileSet.ts.js",
+    probes: [
+      (ns) => {
+        const set = new ns.TileSet("TEMPA0", "Temp", 4);
+        return {
+          fileName: set.fileName,
+          setName: set.setName,
+          tilesInSet: set.tilesInSet,
+          entries: set.entries.length,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/theater/TileSetAnim",
+    tsjs: "src/game/theater/TileSetAnim.ts.js",
+    probes: [
+      (ns) => {
+        const a = new ns.TileSetAnim("Anim1", 2, 10, -5);
+        return [a.name, a.subTile, a.offsetX, a.offsetY];
+      },
+    ],
+  },
+
+  {
+    name: "game/theater/TileSetEntry",
+    tsjs: "src/game/theater/TileSetEntry.ts.js",
+    probes: [
+      (ns) => {
+        const owner = { setName: "Temp" };
+        const e = new ns.TileSetEntry(owner, 3);
+        e.addFile({ id: "f0" });
+        e.addFile({ id: "f1" });
+        e.setAnimation({ name: "A" });
+        return {
+          owner: e.owner === owner,
+          index: e.index,
+          files: e.files.map((f) => f.id),
+          anim: e.getAnimation().name,
+        };
+      },
+      (ns) => {
+        const e = new ns.TileSetEntry({}, 0);
+        e.addFile({ images: [{ hasDamagedData: true }, { hasDamagedData: false }] });
+        e.addFile({ images: [{ hasDamagedData: false }] });
+        const pick = (lo, hi) => lo;
+        const damaged = e.getTmpFile(0, pick, true);
+        const normal = e.getTmpFile(0, pick, false);
+        const empty = new ns.TileSetEntry({}, 0).getTmpFile(0, pick);
+        return {
+          preferDamaged: damaged && damaged.images[0],
+          preferNormal: normal && normal.id === undefined ? normal.images : "f0",
+          empty,
+          subTileClamp: e.getTmpFile(99, pick).images.length,
+        };
+      },
+      (ns) => {
+        const e = new ns.TileSetEntry({}, 0);
+        e.addFile({ images: [{ x: 30, y: 30, height: 1 }, { x: 0, y: 60, height: 2 }] });
+        return e.getRelativeTilePositions();
+      },
+    ],
+  },
+
+  {
+    name: "game/theater/TileSets",
+    tsjs: "src/game/theater/TileSets.ts.js",
+    probes: [
+      (ns) => ns.HighBridgeHeadType.TopLeft,
+      (ns) => ns.HighBridgeHeadType.MiddleTrBl,
+      (ns) => ns.HighBridgeHeadType[ns.HighBridgeHeadType.BottomRight],
+      (ns) => Object.keys(ns.HighBridgeHeadType).length,
+      (ns) => {
+        const gen = new Map([
+          ["BridgeSet", "10"], ["WoodBridgeSet", "11"],
+          ["CliffSet", "20"], ["WaterCliffs", "21"], ["DestroyableCliffs", "22"],
+          ["RoughTile", "1"], ["SandTile", "2"], ["GreenTile", "3"], ["PaveTile", "4"],
+          ["ClearToRoughLat", "5"], ["ClearToSandLat", "6"], ["ClearToGreenLat", "7"], ["ClearToPaveLat", "8"],
+          ["MiscPaveTile", "9"], ["ShorePieces", "12"], ["WaterBridge", "13"],
+          ["PavedRoads", "14"], ["Medians", "15"],
+          ["BridgeTopLeft1", "1"], ["BridgeBottomRight1", "2"],
+          ["BridgeTopRight1", "3"], ["BridgeBottomLeft1", "4"],
+          ["BridgeMiddle1", "5"], ["BridgeMiddle2", "6"],
+          ["BridgeTopLeft2", "0"], ["BridgeBottomRight2", "0"],
+          ["BridgeTopRight2", "0"], ["BridgeBottomLeft2", "0"],
+        ]);
+        const sections = {
+          General: gen,
+          TileSet0000: new Map([["FileName", "TEMPA"], ["SetName", "Temp"], ["TilesInSet", "5"]]),
+        };
+        const general = { getNumber: (k) => Number(gen.get(k)) };
+        const theaterIni = {
+          getSection: (name) => {
+            if (name === "General") return general;
+            if (name === "TileSet0000") {
+              return {
+                getString: (k) => sections.TileSet0000.get(k),
+                getNumber: (k) => Number(sections.TileSet0000.get(k)),
+              };
+            }
+            return null;
+          },
+          getOrderedSections: () => [
+            { name: "TileSet0000", getString: () => undefined, getNumber: () => 0 },
+            {
+              // initAnimations 按 setName 匹配挂动画段（此前 "SomeAnimSet" 匹配不上，动画恒为 undefined）
+              name: "Temp",
+              getString: (k) => (k.endsWith("Anim") ? "Sparkle" : undefined),
+              getNumber: (k) => (k.endsWith("AttachesTo") ? 1 : k.endsWith("XOffset") ? 2 : k.endsWith("YOffset") ? 3 : 0),
+            },
+          ],
+        };
+        const ts = new ns.TileSets(theaterIni);
+        const bridge = [ts.highBridgeSetNums[0], ts.highBridgeSetNums[1]];
+        const cliff = ts.cliffSetNums.slice();
+        const max = ts.readMaxTileNum();
+        // loadTileData 按 "FileName + 序号 + 扩展名" 查表 → 键必须带 .tmp
+        const files = new Map([
+          ["TEMPA01.tmp", { images: [{ hasDamagedData: false }, { hasDamagedData: false }] }],
+          ["TEMPA02.tmp", { images: [{ hasDamagedData: false }] }],
+        ]);
+        ts.loadTileData(files, ".tmp");
+        const entry0 = ts.getTile(0);
+        const setNum0 = ts.getSetNum(0);
+        const fromSet = ts.getTileNumFromSet(0);
+        const fromSetR = ts.getTileNumFromSet(0, 3);
+        const image0 = ts.getTileImage(0, 0, () => 0); // 第 3 参是 getTmpFile 的 pick 选择函数（生产传 () => 0）
+        const lat = [
+          ts.isLAT(3), ts.isLAT(99),
+          ts.isCLAT(7), ts.isCLAT(0),
+          ts.getLAT(7), ts.getLAT(0),
+          ts.getCLATSet(3), ts.getCLATSet(0),
+          ts.canConnectTiles(3, 3),
+          ts.canConnectTiles(3, 12),
+          ts.canConnectTiles(3, 10),
+        ];
+        const bridgeHead = [
+          ts.getHighBridgeHeadType(0),
+          ts.getHighBridgeHeadType(1),
+          ts.getOppositeHighBridgeHeadType(ns.HighBridgeHeadType.TopLeft),
+          ts.isCliffTile(0),
+          ts.isHighBridgeBoundaryTile(0),
+          ts.isHighBridgeMiddleTile(4),
+        ];
+        let midErr = "";
+        try {
+          ts.getOppositeHighBridgeHeadType(ns.HighBridgeHeadType.MiddleTlBr);
+        } catch (e) {
+          midErr = e.message;
+        }
+        const animEntry = ts.getTile(0);
+        return {
+          bridge, cliff, max,
+          entries: ts.tileSets.length,
+          orderedLen: ts.orderedEntries.length,
+          entry0: [entry0.index, entry0.files.length, entry0.owner.setName],
+          setNum0, fromSet, fromSetR,
+          image0: !!image0,
+          anim: animEntry.getAnimation() && [animEntry.getAnimation().name, animEntry.getAnimation().subTile, animEntry.getAnimation().offsetX, animEntry.getAnimation().offsetY],
+          lat, bridgeHead, midErr,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/theater/AutoLat",
+    tsjs: "src/game/theater/AutoLat.ts.js",
+    probes: [
+      (ns) => {
+        const tileSets = {
+          getSetNum: () => 3,
+          isCLAT: (s) => s === 7,
+          isLAT: (s) => s === 3,
+          getLAT: () => 3,
+          getTileNumFromSet: (s, r = 0) => s * 100 + r,
+          canConnectTiles: (a, b) => a === 3 && b === 4,
+          getCLATSet: () => 7,
+          getGeneralValue: (k) => (k === "RampBase" ? 1 : k === "RampSmooth" ? 9 : 0),
+        };
+        const clatSingle = [{ tileNum: 700, rampType: 0, terrainType: 0 }];
+        const tsClat = Object.assign({}, tileSets, { getSetNum: (n) => (n === 700 ? 7 : 3) });
+        const tilesClat = { forEach: (fn) => clatSingle.forEach(fn), getNeighbourTile: () => null };
+        ns.AutoLat.calculate(tilesClat, tsClat);
+        const one = [{ tileNum: 300, rampType: 0, terrainType: 0 }];
+        const neighbor = { tileNum: 301, rampType: 0, terrainType: 0 };
+        const tsLat = Object.assign({}, tileSets, {
+          getSetNum: (n) => (n === 301 ? 4 : 3),
+          canConnectTiles: (a, b) => a === 3 && b === 4,
+        });
+        const tilesLat = { forEach: (fn) => one.forEach(fn), getNeighbourTile: () => neighbor };
+        ns.AutoLat.calculate(tilesLat, tsLat);
+        const tsRamp = {
+          getSetNum: () => 1,
+          isCLAT: () => false,
+          isLAT: () => false,
+          getGeneralValue: (k) => (k === "RampBase" ? 1 : k === "RampSmooth" ? 9 : 0),
+          getTileNumFromSet: (s, r = 0) => s * 1000 + r,
+          canConnectTiles: () => false,
+          getLAT: () => -1,
+          getCLATSet: () => -1,
+        };
+        const rampTile = { tileNum: 10, rampType: 2, terrainType: 0 };
+        const flatTR = { tileNum: 20, rampType: 0, terrainType: 0 };
+        const flatBL = { tileNum: 21, rampType: 0, terrainType: 0 };
+        const tilesRamp = {
+          forEach: (fn) => [rampTile].forEach(fn),
+          getNeighbourTile: () => {
+            const seq = [flatTR, null, flatBL, null];
+            tilesRamp._i = tilesRamp._i || 0;
+            const v = seq[tilesRamp._i % 4];
+            tilesRamp._i++;
+            return v;
+          },
+        };
+        ns.AutoLat.calculate(tilesRamp, tsRamp);
+        return {
+          clat: clatSingle[0].tileNum,
+          lat: one[0].tileNum,
+          ramp: rampTile.tileNum,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/SuperWeaponEffect",
+    tsjs: "src/game/superweapon/SuperWeaponEffect.ts.js",
+    probes: [
+      (ns) => [ns.EffectStatus.NotStarted, ns.EffectStatus.Running, ns.EffectStatus.Finished],
+      (ns) => Object.keys(ns.EffectStatus).length,
+      (ns) => {
+        const e = new ns.SuperWeaponEffect(7, { id: 1 }, { rx: 3, ry: 4 });
+        return {
+          type: e.type, owner: e.owner, tile: e.tile, status: e.status,
+          tick: e.onTick({}),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/IronCurtainEffect",
+    tsjs: "src/game/superweapon/IronCurtainEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.IronCurtainEffect(1, "owner", { rx: 0, ry: 0 });
+        return { done: e.onTick({}), status: e.status, type: e.type };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/NukeEffect",
+    tsjs: "src/game/superweapon/NukeEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.NukeEffect(0, "owner", { rx: 1, ry: 2 }, "NukeMissile");
+        return { weaponType: e.weaponType, done: e.onTick({}) };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/PsychicRevealEffect",
+    tsjs: "src/game/superweapon/PsychicRevealEffect.ts.js",
+    probes: [
+      (ns) => {
+        // rules.combatDamage.psychicRevealRadius 缺省 10；onStart 对发动者永久开图（记账式 shroud mock）
+        const revealed = [];
+        const e = new ns.PsychicRevealEffect(11, { id: 3 }, { rx: 5, ry: 6 });
+        e.onStart({
+          rules: { combatDamage: { psychicRevealRadius: 7 } },
+          mapShroudTrait: {
+            getPlayerShroud: (owner) => ({
+              revealAround: (tile, radius) => revealed.push([owner.id, tile.rx, tile.ry, radius]),
+            }),
+          },
+        });
+        const fallback = [];
+        const e2 = new ns.PsychicRevealEffect(11, { id: 4 }, { rx: 1, ry: 2 });
+        e2.onStart({
+          rules: {},
+          mapShroudTrait: {
+            getPlayerShroud: () => ({
+              revealAround: (tile, radius) => fallback.push([tile.rx, tile.ry, radius]),
+            }),
+          },
+        });
+        return {
+          done: e.onTick({}),
+          status: e.status,
+          tile: [e.tile.rx, e.tile.ry],
+          revealed,
+          fallbackRadius: fallback[0] && fallback[0][2],
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/DominatorEffect",
+    tsjs: "src/game/superweapon/DominatorEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.DominatorEffect(7, { id: 1 }, { rx: 2, ry: 2, z: 0 });
+        const withoutStart = e.onTick({
+          rules: { audioVisual: {}, general: {} },
+          map: { getTileZone: () => 0 },
+          events: { dispatch: () => {} },
+          alliances: { areAllied: () => false },
+        });
+        return { withoutStart };
+      },
+      (ns) => {
+        const e = new ns.DominatorEffect(7, null, { rx: 0, ry: 0, z: 0 });
+        e.onStart({
+          rules: {
+            audioVisual: { dominatorFireAtPercentage: 50, dominatorFirstAnim: "" },
+            general: {},
+          },
+          art: { getAnimation: () => { throw new Error("no anim"); } },
+        });
+        const first = e.onTick({
+          rules: { audioVisual: {}, general: {} },
+          events: { dispatch: () => {} },
+          map: { getTileZone: () => 0 },
+          alliances: { areAllied: () => false },
+        });
+        return { first };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/ForceShieldEffect",
+    tsjs: "src/game/superweapon/ForceShieldEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ForceShieldEffect(10, null, { rx: 0, ry: 0 });
+        e.onStart({
+          currentTick: 100,
+          rules: { combatDamage: { forceShieldDuration: 0, forceShieldRadius: 0, forceShieldBlackoutDuration: 0, forceShieldPlayFadeSoundTime: 0 }, superWeaponRules: new Map() },
+          map: { tiles: {}, mapBounds: {} },
+        });
+        return { done: e.onTick({ currentTick: 100, events: { dispatch: () => {} } }) };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/ChronoSphereEffect",
+    tsjs: "src/game/superweapon/ChronoSphereEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ChronoSphereEffect(3, { id: 1 }, { rx: 1, ry: 1 }, { rx: 8, ry: 8 });
+        return { dest: [e.tile.rx, e.tile.ry], pending: 0 };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/GeneticMutatorEffect",
+    tsjs: "src/game/superweapon/GeneticMutatorEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.GeneticMutatorEffect(9, { id: 1 }, { rx: 4, ry: 4 });
+        e.onStart({
+          rules: {
+            audioVisual: {},
+            general: { mutateExplosion: false },
+            hasObject: () => false,
+            getWarhead: () => { throw new Error("none"); },
+          },
+          map: { tiles: {}, mapBounds: {}, getGroundObjectsOnTile: () => [] },
+        });
+        const done = e.onTick({ createUnitForPlayer: () => { throw new Error("n/a"); } });
+        return { done };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/LightningStormEffect",
+    tsjs: "src/game/superweapon/LightningStormEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.LightningStormEffect(2, { id: 1 }, { rx: 0, ry: 0 });
+        e.onStart({ rules: { general: { lightningStorm: { deferment: 3, duration: 5, hitDelay: 10, scatterDelay: 20, cellSpread: 10, separation: 5, warhead: "Bomb" } } } });
+        const w = {
+          rules: { general: { lightningStorm: { deferment: 3, duration: 5, hitDelay: 10, scatterDelay: 20, cellSpread: 10, separation: 5, warhead: "Bomb" } }, audioVisual: { weatherConClouds: [] } },
+          events: { dispatch: (ev) => { w._last = ev && ev.constructor && ev.constructor.name; } },
+          map: { tiles: {}, mapBounds: {}, tileOccupation: { getBridgeOnTile: () => null }, getTileZone: () => 0, getGroundObjectsOnTile: () => [] },
+          generateRandomInt: () => 0,
+          art: { getAnimation: () => ({ art: { getNumber: () => 60 } }) },
+          createTarget: () => ({}),
+        };
+        const t1 = e.onTick(w);
+        const t2 = e.onTick(w);
+        const t3 = e.onTick(w);
+        return { t1, t2, t3, last: w._last };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/ParadropEffect",
+    tsjs: "src/game/superweapon/ParadropEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.ParadropEffect(5, { id: 1 }, { rx: 10, ry: 10 }, { inf: "AMMO", num: 2 }, 0);
+        return {
+          type: e.type,
+          owner: e.owner,
+          tile: [e.tile.rx, e.tile.ry],
+          status: e.status,
+          passengerCount: e.passengerCount,
+          spawnDelay: e.spawnDelay,
+        };
+      },
+      (ns) => {
+        const e = new ns.ParadropEffect(5, { id: 1 }, { rx: 0, ry: 0 }, { inf: "GI", num: 3 }, 1);
+        return {
+          hasOnStart: typeof e.onStart === "function",
+          hasOnTick: typeof e.onTick === "function",
+          passengerCount: e.passengerCount === undefined ? "undef" : e.passengerCount,
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/superweapon/SpyPlaneEffect",
+    tsjs: "src/game/superweapon/SpyPlaneEffect.ts.js",
+    probes: [
+      (ns) => {
+        const e = new ns.SpyPlaneEffect(8, { id: 1 }, { rx: 5, ry: 5 });
+        e.onStart({
+          rules: {
+            getObject: () => { throw new Error("no SPYP"); },
+            audioVisual: {},
+            general: {},
+          },
+        });
+        const done = e.onTick({});
+        return { done, status: e.status };
+      },
+    ],
+  },
 
   {
     name: "engine/AnimProps",
@@ -23640,6 +25292,696 @@ const CONVERTED = [
     ],
   },
 
+  {
+    name: "game/AttackerInfo",
+    tsjs: "src/game/AttackerInfo.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/ActionsApi",
+    tsjs: "src/game/api/ActionsApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ActionsApi": typeof ns["ActionsApi"] }),
+      (ns) => { const p = ns["ActionsApi"]?.prototype ?? {}; return ["placeBuilding","sellObject","sellBuilding","toggleRepairWrench","toggleAlliance","pauseProduction","resumeProduction","queueForProduction","unqueueFromProduction","activateSuperWeapon","orderUnits","sayAll"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/ChatApi",
+    tsjs: "src/game/api/ChatApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/EventsApi",
+    tsjs: "src/game/api/EventsApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ApiEventType": typeof ns["ApiEventType"], "EventsApi": typeof ns["EventsApi"] }),
+      (ns) => { const p = ns["EventsApi"]?.prototype ?? {}; return ["subscribe","dispose"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/api/GameApi",
+    tsjs: "src/game/api/GameApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "GameApi": typeof ns["GameApi"] }),
+      (ns) => { const p = ns["GameApi"]?.prototype ?? {}; return ["isPlayerDefeated","areAlliedPlayers","canPlaceBuilding","getBuildingPlacementData","getPlayers","getPlayerData","addPlayerCredits","getAllTerrainObjects","getAllUnits","getNeutralUnits","getUnitsInArea","getVisibleUnits"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/LoggerApi",
+    tsjs: "src/game/api/LoggerApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LoggerApi": typeof ns["LoggerApi"] }),
+      (ns) => { const p = ns["LoggerApi"]?.prototype ?? {}; return ["setDebugLevel","debug","info","log","warn","error","time","timeEnd"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/MapApi",
+    tsjs: "src/game/api/MapApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapApi": typeof ns["MapApi"] }),
+      (ns) => { const p = ns["MapApi"]?.prototype ?? {}; return ["getRealMapSize","getStartingLocations","getTheaterType","getTile","getTileAtWaypoint","getTilesInRect","getObjectsOnTile","hasBridgeOnTile","hasHighBridgeOnTile","isPassableTile","findPath","getReachabilityMap"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/PlayerApi",
+    tsjs: "src/game/api/PlayerApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PlayerApi": typeof ns["PlayerApi"] }),
+      (ns) => { const p = ns["PlayerApi"]?.prototype ?? {}; return ["getPlayerData","isDefeated","isAlliedWith","canPlaceBuilding","getVisibleUnits"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/ProductionApi",
+    tsjs: "src/game/api/ProductionApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ProductionApi": typeof ns["ProductionApi"] }),
+      (ns) => { const p = ns["ProductionApi"]?.prototype ?? {}; return ["isAvailableForProduction","getAvailableObjects","getQueueTypeForObject","getQueueData"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/RulesApi",
+    tsjs: "src/game/api/RulesApi.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RulesApi": typeof ns["RulesApi"] }),
+      (ns) => { const p = ns["RulesApi"]?.prototype ?? {}; return ["hasObject","getObject","getBuilding","getWeapon","getWarhead","getProjectile","getOverlayName","getOverlayId","getOverlay","getCountry","getMultiplayerCountries","getIni"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/api/index",
+    tsjs: "src/game/api/index.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ApiEventType": typeof ns["ApiEventType"], "ArmorType": typeof ns["ArmorType"], "AttackState": typeof ns["AttackState"], "Bot": typeof ns["Bot"], "Box2": typeof ns["Box2"], "BuildCat": typeof ns["BuildCat"], "BuildStatus": typeof ns["BuildStatus"], "Cylindrical": typeof ns["Cylindrical"], "Euler": typeof ns["Euler"], "FactoryStatus": typeof ns["FactoryStatus"], "FactoryType": typeof ns["FactoryType"], "GameMath": typeof ns["GameMath"], "InfDeathType": typeof ns["InfDeathType"], "LandTargeting": typeof ns["LandTargeting"], "LandType": typeof ns["LandType"], "LocomotorType": typeof ns["LocomotorType"], "Matrix4": typeof ns["Matrix4"], "MovementZone": typeof ns["MovementZone"], "NavalTargeting": typeof ns["NavalTargeting"], "ObjectType": typeof ns["ObjectType"], "OrderType": typeof ns["OrderType"], "PipColor": typeof ns["PipColor"], "PrereqCategory": typeof ns["PrereqCategory"], "Quaternion": typeof ns["Quaternion"], "QueueStatus": typeof ns["QueueStatus"], "QueueType": typeof ns["QueueType"], "RadarEventType": typeof ns["RadarEventType"], "SideType": typeof ns["SideType"], "SpeedType": typeof ns["SpeedType"], "Spherical": typeof ns["Spherical"], "StanceType": typeof ns["StanceType"], "SuperWeaponStatus": typeof ns["SuperWeaponStatus"], "SuperWeaponType": typeof ns["SuperWeaponType"], "TagRepeatType": typeof ns["TagRepeatType"], "TerrainType": typeof ns["TerrainType"], "TheaterType": typeof ns["TheaterType"], "Vector2": typeof ns["Vector2"], "Vector3": typeof ns["Vector3"], "VeteranAbility": typeof ns["VeteranAbility"], "VeteranLevel": typeof ns["VeteranLevel"], "VhpScan": typeof ns["VhpScan"], "WeaponType": typeof ns["WeaponType"], "ZoneType": typeof ns["ZoneType"] }),
+    ],
+  },
+
+  {
+    name: "game/api/interface/BuildingPlacementData",
+    tsjs: "src/game/api/interface/BuildingPlacementData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/GameObjectData",
+    tsjs: "src/game/api/interface/GameObjectData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/PathFinderOptions",
+    tsjs: "src/game/api/interface/PathFinderOptions.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/PathNode",
+    tsjs: "src/game/api/interface/PathNode.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/PlaceCheckOptions",
+    tsjs: "src/game/api/interface/PlaceCheckOptions.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/PlayerData",
+    tsjs: "src/game/api/interface/PlayerData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/PlayerStats",
+    tsjs: "src/game/api/interface/PlayerStats.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/ReachabilityMap",
+    tsjs: "src/game/api/interface/ReachabilityMap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/SuperWeaponData",
+    tsjs: "src/game/api/interface/SuperWeaponData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/TileResourceData",
+    tsjs: "src/game/api/interface/TileResourceData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/api/interface/UnitData",
+    tsjs: "src/game/api/interface/UnitData.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/bot/Bot",
+    tsjs: "src/game/bot/Bot.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Bot": typeof ns["Bot"] }),
+      (ns) => { const p = ns["Bot"]?.prototype ?? {}; return ["setContext","setGameApi","setActionsApi","setProductionApi","setLogger","setDebugMode","getDebugMode","onGameInit","onGameStart","onGameTick","onGameEvent","onChatMessage"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/BotContext",
+    tsjs: "src/game/bot/BotContext.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BotContext": typeof ns["BotContext"] }),
+      (ns) => ({ ctor: typeof ns["BotContext"] === "function", arity: ns["BotContext"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "game/bot/BotFactory",
+    tsjs: "src/game/bot/BotFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BotFactory": typeof ns["BotFactory"] }),
+      (ns) => { const p = ns["BotFactory"]?.prototype ?? {}; return ["create"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/BotsLib",
+    tsjs: "src/game/bot/BotsLib.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "IraqBot": typeof ns["IraqBot"], "OriginalAiBot": typeof ns["OriginalAiBot"], "version": typeof ns["version"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/bot/DummyBot",
+    tsjs: "src/game/bot/DummyBot.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DummyBot": typeof ns["DummyBot"] }),
+      (ns) => { const p = ns["DummyBot"]?.prototype ?? {}; return ["onGameStart","onGameTick"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/campaign/ScenarioTeamBot",
+    tsjs: "src/game/bot/campaign/ScenarioTeamBot.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ScenarioTeamBot": typeof ns["ScenarioTeamBot"] }),
+      (ns) => { const p = ns["ScenarioTeamBot"]?.prototype ?? {}; return ["_ensureEngine","onGameStart","onGameTick","onChatMessage"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/iraq/Economy",
+    tsjs: "src/game/bot/iraq/Economy.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Economy": typeof ns["Economy"] }),
+      (ns) => { const p = ns["Economy"]?.prototype ?? {}; return ["avail","lowPower","econDecision","decideNextBuilding","tickBuild","getOreAnchor","tickProduction","tickHarvest","tickRefinerySell"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/iraq/IraqBot",
+    tsjs: "src/game/bot/iraq/IraqBot.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "IraqBot": typeof ns["IraqBot"] }),
+      (ns) => { const p = ns["IraqBot"]?.prototype ?? {}; return ["buildRulesCache","onGameStart","hasCY","onGameTick","pushDiag","_tick","onGameEvent"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/iraq/Military",
+    tsjs: "src/game/bot/iraq/Military.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Military": typeof ns["Military"] }),
+      (ns) => { const p = ns["Military"]?.prototype ?? {}; return ["setupDogRoutes","tickScout","computeRally","pickAttackTarget","tickArmy","micro","tickDefense"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/iraq/Util",
+    tsjs: "src/game/bot/iraq/Util.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "A": typeof ns["A"], "Blackboard": typeof ns["Blackboard"], "Config": typeof ns["Config"], "assessThreat": typeof ns["assessThreat"], "countName": typeof ns["countName"], "dist": typeof ns["dist"], "findPlacement": typeof ns["findPlacement"], "findRefineryPlacement": typeof ns["findRefineryPlacement"], "firepower": typeof ns["firepower"], "makeSnapshot": typeof ns["makeSnapshot"], "myCYTile": typeof ns["myCYTile"], "nearestOreAnchor": typeof ns["nearestOreAnchor"], "scanOre": typeof ns["scanOre"] }),
+      (ns) => { const p = ns["Blackboard"]?.prototype ?? {}; return ["add"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/bot/original/OriginalAiBot",
+    tsjs: "src/game/bot/original/OriginalAiBot.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "OriginalAiBot": typeof ns["OriginalAiBot"] }),
+      (ns) => { const p = ns["OriginalAiBot"]?.prototype ?? {}; return ["onGameStart","onGameTick","_tick","_tryDeployMCV","_handleProduction","_queueBuilding","_queueUnit","_canAfford","_getQueueInfo","_tryScout","_handleUnits","_tryGrind"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/Debris",
+    tsjs: "src/game/gameobject/Debris.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Debris": typeof ns["Debris"] }),
+      (ns) => { const p = ns["Debris"]?.prototype ?? {}; return ["onSpawn","update","detonate"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/ObjectFactory",
+    tsjs: "src/game/gameobject/ObjectFactory.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ObjectFactory": typeof ns["ObjectFactory"] }),
+      (ns) => { const p = ns["ObjectFactory"]?.prototype ?? {}; return ["create"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/Overlay",
+    tsjs: "src/game/gameobject/Overlay.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Overlay": typeof ns["Overlay"] }),
+      (ns) => { const p = ns["Overlay"]?.prototype ?? {}; return ["isTiberium","isBridge","isXBridge","isHighBridge","isLowBridge","isBridgePlaceholder","getFoundation","getLandType"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/Projectile",
+    tsjs: "src/game/gameobject/Projectile.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Projectile": typeof ns["Projectile"], "ProjectileState": typeof ns["ProjectileState"] }),
+      (ns) => { const p = ns["Projectile"]?.prototype ?? {}; return ["onSpawn","adjustAimForBallisticScatter","calculateBallisticOvershootVsMoving","calculateInaccurateBallisticOvershoot","update","isHoming","isInHomingRange","updateSpeed","computeMaxSpeed","checkObstacles","computeBaseDamage","detonate"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/gameobject/common/AnimTerrainEffect",
+    tsjs: "src/game/gameobject/common/AnimTerrainEffect.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "AnimTerrainEffect": typeof ns["AnimTerrainEffect"] }),
+      (ns) => { const p = ns["AnimTerrainEffect"]?.prototype ?? {}; return ["destroyOre","spawnSmudges"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/infantry/sequenceMap",
+    tsjs: "src/game/gameobject/infantry/sequenceMap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "findSequence": typeof ns["findSequence"], "getCrashingSequences": typeof ns["getCrashingSequences"], "getDeathAnim": typeof ns["getDeathAnim"], "getDeathSequence": typeof ns["getDeathSequence"], "getFireSequenceBy": typeof ns["getFireSequenceBy"], "getIdleSequenceBy": typeof ns["getIdleSequenceBy"], "getMoveSequenceBy": typeof ns["getMoveSequenceBy"], "getStanceTransitionSequenceBy": typeof ns["getStanceTransitionSequenceBy"], "getStillSequenceBy": typeof ns["getStillSequenceBy"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/gameobject/selection/SelectionLevel",
+    tsjs: "src/game/gameobject/selection/SelectionLevel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "SelectionLevel": typeof ns["SelectionLevel"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/gameobject/selection/SelectionList",
+    tsjs: "src/game/gameobject/selection/SelectionList.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/gameobject/selection/SelectionModel",
+    tsjs: "src/game/gameobject/selection/SelectionModel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "SelectionModel": typeof ns["SelectionModel"] }),
+      (ns) => { const p = ns["SelectionModel"]?.prototype ?? {}; return ["getSelectionLevel","setSelectionLevel","setHover","setSelected","isHovered","isSelected","getControlGroupNumber","setControlGroupNumber"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/selection/UnitSelection",
+    tsjs: "src/game/gameobject/selection/UnitSelection.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "UnitSelection": typeof ns["UnitSelection"] }),
+      (ns) => { const p = ns["UnitSelection"]?.prototype ?? {}; return ["getOrCreateSelectionModel","deselectAll","addToSelection","removeFromSelection","getSelectedUnits","isSelected","cleanupUnit","updateHash","getHash","createGroup","addUnitsToGroup","addGroupToSelection"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/selection/UnitSelectionLite",
+    tsjs: "src/game/gameobject/selection/UnitSelectionLite.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "UnitSelectionLite": typeof ns["UnitSelectionLite"] }),
+      (ns) => { const p = ns["UnitSelectionLite"]?.prototype ?? {}; return ["update","getSelectedUnits","isSelected"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/unit/CollisionHelper",
+    tsjs: "src/game/gameobject/unit/CollisionHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "CollisionHelper": typeof ns["CollisionHelper"] }),
+      (ns) => { const p = ns["CollisionHelper"]?.prototype ?? {}; return ["checkCollisions","computeDetonationZone"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/unit/HealthLevel",
+    tsjs: "src/game/gameobject/unit/HealthLevel.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "HealthLevel": typeof ns["HealthLevel"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/gameobject/unit/LosHelper",
+    tsjs: "src/game/gameobject/unit/LosHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LosHelper": typeof ns["LosHelper"] }),
+      (ns) => { const p = ns["LosHelper"]?.prototype ?? {}; return ["hasLineOfSight"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/unit/MovePositionHelper",
+    tsjs: "src/game/gameobject/unit/MovePositionHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MovePositionHelper": typeof ns["MovePositionHelper"] }),
+      (ns) => { const p = ns["MovePositionHelper"]?.prototype ?? {}; return ["findPositions","shouldStackObject","tileHasRoom","isEligibleTile","clusterObjects","findCenterTile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/unit/RangeHelper",
+    tsjs: "src/game/gameobject/unit/RangeHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RangeHelper": typeof ns["RangeHelper"] }),
+      (ns) => { const p = ns["RangeHelper"]?.prototype ?? {}; return ["isInWeaponRange","computeWeaponRangeVsTarget","isInRange","isInRange3","isInRange2","distance3","distance2","isInTileRange","tileDistance"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/gameobject/unit/ScatterPositionHelper",
+    tsjs: "src/game/gameobject/unit/ScatterPositionHelper.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "ScatterPositionHelper": typeof ns["ScatterPositionHelper"] }),
+      (ns) => { const p = ns["ScatterPositionHelper"]?.prototype ?? {}; return ["findPositions","findFreeMovePosition"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/BridgeOverlayTypes",
+    tsjs: "src/game/map/BridgeOverlayTypes.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BridgeOverlayTypes": typeof ns["BridgeOverlayTypes"], "OverlayBridgeType": typeof ns["OverlayBridgeType"] }),
+      (ns) => ({ ctor: typeof ns["BridgeOverlayTypes"] === "function", arity: ns["BridgeOverlayTypes"]?.length ?? -1 }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/map/Bridges",
+    tsjs: "src/game/map/Bridges.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "BridgeHeadType": typeof ns["BridgeHeadType"], "Bridges": typeof ns["Bridges"] }),
+      (ns) => { const p = ns["Bridges"]?.prototype ?? {}; return ["getPieceAtTile","handlePieceHealthChange","findDominoPieces","findBridgeAdjacentTiles","connectPiece","disconnectPiece","computeHead","updateOverlayData","findClosestBridgeSpec","findHighBridgeBoundary","canBeRepaired","getPieceTiles"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/map/MapBounds",
+    tsjs: "src/game/map/MapBounds.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapBounds": typeof ns["MapBounds"] }),
+      (ns) => { const p = ns["MapBounds"]?.prototype ?? {}; return ["fromMapFile","updateRawLocalSize","computeLocalSize","getLocalSize","getRawLocalSize","getFullSize","getClampedFullSize","isWithinBounds","clampWithinBounds","isWithinHardBounds"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => {
+        const b = new ns.MapBounds();
+        const resized = [];
+        // onLocalResize 是 getter，返回 EventDispatcher 本身 → 用 subscribe 记账
+        b.onLocalResize.subscribe((bounds) => resized.push(bounds === b));
+        b.fromMapFile(
+          { fullSize: { width: 16, height: 20 }, localSize: { x: 3, y: 4, width: 6, height: 8 } },
+          { getCutoffTileHeight: () => 9 },
+        );
+        b.updateRawLocalSize({ x: 3, y: 4, width: 6, height: 8 }); // 与 rawLocalSize 相等 → 跳过、不派发
+        return {
+          cutoff: b.mapCutoffHeight,
+          fullSize: b.fullSize,
+          clampedFullSize: b.clampedFullSize,
+          localSize: { ...b.getLocalSize() },
+          rawLocalSize: { ...b.getRawLocalSize() },
+          mapBuildableSize: { ...b.mapBuildableSize },
+          inside: b.isWithinBounds({ dx: 8, dy: 12, z: 0 }),
+          outside: b.isWithinBounds({ dx: 0, dy: 0, z: 0 }),
+          clamped: b.clampWithinBounds({ dx: 100, dy: 100, z: 0 }),
+          resized,
+          eventApi: typeof b.onLocalResize.subscribe,
+          ownKeys: Object.keys(b).sort(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "game/map/MapShroud",
+    tsjs: "src/game/map/MapShroud.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "MapShroud": typeof ns["MapShroud"], "ShroudFlag": typeof ns["ShroudFlag"], "ShroudType": typeof ns["ShroudType"] }),
+      (ns) => { const p = ns["MapShroud"]?.prototype ?? {}; return ["fromTiles","getSize","getTileIndex","rxyzToSxy","sxyzToRxy","shroudCoordsToWorld","findTilesAtShroudCoords","clone","copy","merge","isShrouded","getShroudType"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/map/OreOverlayTypes",
+    tsjs: "src/game/map/OreOverlayTypes.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "OreOverlayTypes": typeof ns["OreOverlayTypes"] }),
+      (ns) => ({ ctor: typeof ns["OreOverlayTypes"] === "function", arity: ns["OreOverlayTypes"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "game/map/OreSpread",
+    tsjs: "src/game/map/OreSpread.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "OreSpread": typeof ns["OreSpread"] }),
+      (ns) => ({ ctor: typeof ns["OreSpread"] === "function", arity: ns["OreSpread"]?.length ?? -1 }),
+    ],
+  },
+
+  {
+    name: "game/map/Terrain",
+    tsjs: "src/game/map/Terrain.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "Terrain": typeof ns["Terrain"] }),
+      (ns) => { const p = ns["Terrain"]?.prototype ?? {}; return ["getGraphKey","invalidateTiles","computePath","computeAllPassabilityGraphs","computePassabilityGraph","updatePassability","computePassability","connectTiles","getNodeId","computeIslandIds","floodIslandId","getIslandIdMap"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/Tile",
+    tsjs: "src/game/map/Tile.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+    ],
+  },
+
+  {
+    name: "game/map/TileCollection",
+    tsjs: "src/game/map/TileCollection.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TileCollection": typeof ns["TileCollection"], "TileDirection": typeof ns["TileDirection"] }),
+      (ns) => { const p = ns["TileCollection"]?.prototype ?? {}; return ["computeLandBehindCliffTiles","getTileRadarColor","getAll","forEach","getMinTileHeight","getMaxTileHeight","getCutoffTileHeight","computeCutoffTileHeight","getAllBridgeSetTiles","getAllNeighbourTiles","getNeighbourTile","getByDisplayCoords"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/map/TileOcclusion",
+    tsjs: "src/game/map/TileOcclusion.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "TileOcclusion": typeof ns["TileOcclusion"] }),
+      (ns) => { const p = ns["TileOcclusion"]?.prototype ?? {}; return ["addOccluder","removeOccluder","calculateTilesForGameObject","occludeTile","unoccludeTile","isTileOccluded"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/TileOccupation",
+    tsjs: "src/game/map/TileOccupation.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "LayerType": typeof ns["LayerType"], "TileOccupation": typeof ns["TileOccupation"] }),
+      (ns) => { const p = ns["TileOccupation"]?.prototype ?? {}; return ["occupyTileRange","unoccupyTileRange","occupySingleTile","unoccupySingleTile","calculateTilesForGameObject","occupyTile","unoccupyTile","isTileOccupiedBy","computeTileLandType","computeOnBridgeLandType","getTileZone","getBridgeOnTile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
+
+  {
+    name: "game/map/pathFinder/NodeHeap",
+    tsjs: "src/game/map/pathFinder/NodeHeap.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "NodeHeap": typeof ns["NodeHeap"] }),
+      (ns) => { const p = ns["NodeHeap"]?.prototype ?? {}; return ["compare","setNodeId","push","pop","peek","updateItem","up","down"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/pathFinder/PathFinder",
+    tsjs: "src/game/map/pathFinder/PathFinder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "PathFinder": typeof ns["PathFinder"] }),
+    ],
+  },
+
+  {
+    name: "game/map/pathFinder/SearchStatePool",
+    tsjs: "src/game/map/pathFinder/SearchStatePool.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "NodeSearchState": typeof ns["NodeSearchState"], "makeSearchStatePool": typeof ns["makeSearchStatePool"] }),
+      (ns) => { const p = ns["NodeSearchState"]?.prototype ?? {}; return ["createNewState","reset"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/tileFinder/DirectionalTileFinder",
+    tsjs: "src/game/map/tileFinder/DirectionalTileFinder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "DirectionalTileFinder": typeof ns["DirectionalTileFinder"] }),
+      (ns) => { const p = ns["DirectionalTileFinder"]?.prototype ?? {}; return ["getNextTile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/tileFinder/FloodTileFinder",
+    tsjs: "src/game/map/tileFinder/FloodTileFinder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "FloodTileFinder": typeof ns["FloodTileFinder"] }),
+      (ns) => { const p = ns["FloodTileFinder"]?.prototype ?? {}; return ["getNextTile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/tileFinder/RadialBackFirstTileFinder",
+    tsjs: "src/game/map/tileFinder/RadialBackFirstTileFinder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RadialBackFirstTileFinder": typeof ns["RadialBackFirstTileFinder"] }),
+      (ns) => { const p = ns["RadialBackFirstTileFinder"]?.prototype ?? {}; return ["getNextTile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/tileFinder/RandomTileFinder",
+    tsjs: "src/game/map/tileFinder/RandomTileFinder.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "RandomTileFinder": typeof ns["RandomTileFinder"] }),
+      (ns) => { const p = ns["RandomTileFinder"]?.prototype ?? {}; return ["getNextTile"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/map/wallTypes",
+    tsjs: "src/game/map/wallTypes.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "wallTypes": typeof ns["wallTypes"] }),
+      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
+    ],
+  },
   {
     name: "gui/CanvasMetrics",
     tsjs: "src/gui/CanvasMetrics.ts.js",
