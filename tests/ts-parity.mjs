@@ -21682,6 +21682,8 @@ const CONVERTED = [
     tsjs: "src/util/stream.ts.js",
     probes: [
       (ns) => {
+        // 仅 File/Blob 形状（.stream()，无 getReader）——与孪生 e.stream().getReader() 一致。
+        // 若 TS 误写成 stream.getReader() 会在此抛 TypeError（曾漏检的 API 偏差）。
         const enc = new TextEncoder();
         const stream = new ReadableStream({
           start(c) {
@@ -21689,16 +21691,16 @@ const CONVERTED = [
             c.close();
           },
         });
+        const fileLike = { stream: () => stream };
         const lines = [];
-        const duck = { stream: () => stream, getReader: () => stream.getReader() };
         return (async () => {
-          for await (const line of ns.makeTextFileLineIterator(duck)) lines.push(line);
+          for await (const line of ns.makeTextFileLineIterator(fileLike)) lines.push(line);
           return { lines, keys: Object.keys(ns).sort() };
-        })().catch((e) => ({ error: String(e) }));
+        })().catch((e) => ({ error: String(e), name: e && e.name }));
       },
       (ns) => {
         const enc = new TextEncoder();
-        // 跨 chunk 断行 + 尾行无换行
+        // 跨 chunk 断行 + 尾行无换行；同样只给 .stream()
         const stream = new ReadableStream({
           start(c) {
             c.enqueue(enc.encode("hel"));
@@ -21707,12 +21709,31 @@ const CONVERTED = [
             c.close();
           },
         });
+        const fileLike = { stream: () => stream };
         const lines = [];
-        const duck = { stream: () => stream, getReader: () => stream.getReader() };
         return (async () => {
-          for await (const line of ns.makeTextFileLineIterator(duck)) lines.push(line);
+          for await (const line of ns.makeTextFileLineIterator(fileLike)) lines.push(line);
           return { lines };
-        })().catch((e) => ({ error: String(e) }));
+        })().catch((e) => ({ error: String(e), name: e && e.name }));
+      },
+      (ns) => {
+        // 裸 ReadableStream（无 .stream）必须两侧同抛 —— 禁止只支持 getReader 的单边实现
+        const enc = new TextEncoder();
+        const rs = new ReadableStream({
+          start(c) {
+            c.enqueue(enc.encode("x"));
+            c.close();
+          },
+        });
+        const lines = [];
+        return (async () => {
+          for await (const line of ns.makeTextFileLineIterator(rs)) lines.push(line);
+          return { ok: true, lines };
+        })().catch((e) => ({
+          // 只比 name：两侧 TypeError 文案含 minify 变量名，message 会假失败
+          ok: false,
+          name: e && e.name,
+        }));
       },
     ],
   },

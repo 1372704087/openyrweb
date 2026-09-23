@@ -11204,6 +11204,10 @@
         "hello",
         "world"
       ]
+    },
+    "2": {
+      "ok": false,
+      "name": "TypeError"
     }
   },
   "util/time": {

@@ -188,9 +188,9 @@ export class Replay {
 
   /**
    * 仅解析头部三行（不解析事件体）。
-   * @param source 文本或可迭代字节源。
+   * @param source 文本，或 File/Blob 类可 `.stream()` 的源（FS 存储 getRawFile）。
    */
-  async parseHeader(source: string | Uint8Array): Promise<ReplayHeader> {
+  async parseHeader(source: string | { stream(): ReadableStream<Uint8Array> }): Promise<ReplayHeader> {
     let lineIndex = 0;
     let replayVersion: number;
     let engineVersion: string;
@@ -200,7 +200,7 @@ export class Replay {
     let gameOptsSerialized: string;
 
     const lines =
-      typeof source === "string" ? source.split("\n") : makeTextFileLineIterator(source as unknown as ReadableStream<Uint8Array>);
+      typeof source === "string" ? source.split("\n") : makeTextFileLineIterator(source);
 
     for await (const line of lines as AsyncIterable<string> | string[]) {
       if (lineIndex === 0) {

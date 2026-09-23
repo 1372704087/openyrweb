@@ -5,18 +5,26 @@
  * 才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 
+/** 孪生入参形状：File/Blob 类对象，经 `.stream()` 得到 ReadableStream（非裸 RS）。 */
+export interface StreamableTextSource {
+  stream(): ReadableStream<Uint8Array>;
+}
+
 /**
- * 按行迭代 `ReadableStream<Uint8Array>` 上的 UTF-8 文本。
+ * 按行迭代 `stream()` 返回的 UTF-8 文本流。
  *
  * 兼容 `\r\n` / `\n` / `\r` 三种换行；跨 chunk 断行通过保留未消费尾部
  * 拼接解决。流结束时若仍有未 yield 的尾部则作为最后一行输出。
- * 签名与孪生 async generator 一致（async function*）。
+ *
+ * 取 reader 必须走 `source.stream().getReader()`（与孪生一致）——
+ * 不能直接 `source.getReader()`：调用方传入的是 File/Blob（如
+ * ReplayStorageFileSystem.getRawFile → Replay.parseHeader）。
  */
 export async function* makeTextFileLineIterator(
-  stream: ReadableStream<Uint8Array>,
+  source: StreamableTextSource,
 ): AsyncGenerator<string, void, unknown> {
   const decoder = new TextDecoder("utf-8");
-  const reader = stream.getReader();
+  const reader = source.stream().getReader();
   let { value, done } = await reader.read();
   let text: string = value ? decoder.decode(value, { stream: true }) : "";
   // 全局 + lastIndex 状态复用：匹配到换行后从 lastIndex 继续扫描
