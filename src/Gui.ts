@@ -183,6 +183,7 @@ const QuickGameScreen: any = (QuickGameScreenNs as any).QuickGameScreen;
 const WLadderService: any = (WLadderServiceNs as any).WLadderService;
 const LadderScreen: any = (LadderScreenNs as any).LadderScreen;
 const WolConfig: any = (WolConfigNs as any).WolConfig;
+const ClientType: any = (WolConfigNs as any).ClientType; // ClientType 是模块顶层导出的枚举，不是 WolConfig 类的静态
 const LadderRulesScreen: any = (LadderRulesScreenNs as any).LadderRulesScreen;
 const WGameResService: any = (WGameResServiceNs as any).WGameResService;
 const MapTransferService: any = (MapTransferServiceNs as any).MapTransferService;
@@ -360,7 +361,7 @@ export class Gui {
     const modWebRes = new ResourceLoader(this.config.modsBaseUrl);
     const mapFileLoader = new MapFileLoader(mapLoaderRes, Engine.vfs);
     const wolLogger = AppLogger.get("wol");
-    const wolConfig = WolConfig.factory(WolConfig.ClientType.Cdral2);
+    const wolConfig = WolConfig.factory(ClientType.Cdral2);
     let wolConnection: any = WolConnection.factory(wolLogger);
     const wolService = new WolService(wolConfig, wolConnection, this.appVersion, this.appLocale);
     (wolService.init(), this.disposables.add(wolService));

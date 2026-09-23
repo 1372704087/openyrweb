@@ -31,10 +31,10 @@ export class AudioBagFile {
   /** 文件名 → 合成后的 WAV 数据流。 */
   private fileData: Map<string, DataStream> = new Map();
 
-  /** 从已解析的 BAG 索引 VirtualFile 逐条合成 WAV 并缓存。 */
-  fromVirtualFile(stream: DataStream, bag: { entries: Array<[string, AudioBagEntry]> }): this {
+  /** 从已解析的 BAG 索引 VirtualFile 逐条合成 WAV 并缓存（与孪生一致：解包 file.stream 后逐条读）。 */
+  fromVirtualFile(file: VirtualFile, bag: { entries: Array<[string, AudioBagEntry]> }): this {
     for (const [name, entry] of bag.entries) {
-      const wav = this.buildWavData(stream, entry);
+      const wav = this.buildWavData(file.stream, entry);
       this.fileData.set(name, wav);
     }
     return this;

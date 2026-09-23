@@ -89,7 +89,7 @@ const VehicleTester: any = (VehicleTesterNs as any).VehicleTester;
 const InfantryTester: any = (InfantryTesterNs as any).InfantryTester;
 const AircraftTester: any = (AircraftTesterNs as any).AircraftTester;
 const SoundTester: any = (SoundTesterNs as any).SoundTester;
-const LocalPrefs: any = LocalPrefsNs;
+const LocalPrefs: any = (LocalPrefsNs as any).LocalPrefs;
 const StorageKey: any = LocalPrefsNs.StorageKey;
 const FullScreen: any = (FullScreenNs as any).FullScreen;
 const version: any = (versionNs as any).version ?? versionNs;
@@ -117,7 +117,7 @@ const CsfFile: any = (CsfFileNs as any).CsfFile;
 const Sentry: any = (SentryNs as any).Sentry;
 const NoWebAssemblyError: any = (NoWebAssemblyErrorNs as any).NoWebAssemblyError;
 const WolConfig: any = (WolConfigNs as any).WolConfig;
-const ExtensionHost: any = ExtensionHostNs;
+const ExtensionHost: any = (ExtensionHostNs as any).ExtensionHost;
 
 declare const window: any;
 declare const SystemJS: any;
@@ -326,8 +326,8 @@ export class Application {
       );
     }
     try {
-      (await new (FontFace as any).default("Fira Sans Condensed").load(),
-        await new (FontFace as any).default("Fira Sans Condensed", { weight: "bold" }).load());
+      (await new (FontFaceObserver as any).default("Fira Sans Condensed").load(),
+        await new (FontFaceObserver as any).default("Fira Sans Condensed", { weight: "bold" }).load());
     } catch (e) {
       console.error("Failed to load font", e);
     }
@@ -717,5 +717,3 @@ export class Application {
 }
 
 // 构造贴孪生：仅初始化 viewport。上面 constructor 中的重复赋值已收敛。
-// （保留 resPath 静态；FontFaceObserver 默认导出取 .default 惯例见 main。）
-const FontFace: any = (FontFaceObserver as any).default ?? FontFaceObserver;

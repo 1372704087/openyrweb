@@ -96,7 +96,7 @@ const ShadowQuality: any = (ShadowQualityNs as any).ShadowQuality;
 const CanvasMetrics: any = (CanvasMetricsNs as any).CanvasMetrics;
 const ZoneType: any = (ZoneTypeNs as any).ZoneType;
 const math: any = mathNs;
-const NotifyTileChange: any = NotifyTileChangeNs;
+const NotifyTileChange: any = (NotifyTileChangeNs as any).NotifyTileChange;
 const TiberiumType: any = (TiberiumTypeNs as any).TiberiumType;
 
 declare const THREE: any;
