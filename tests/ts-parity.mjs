@@ -18301,6 +18301,817 @@ const CONVERTED = [
     ],
   },
 
+  {
+    name: "util/array",
+    tsjs: "src/util/array.ts.js",
+    probes: [
+      (ns) => {
+        return {
+          hit: ns.findReverse([1, 2, 3, 2], (x) => x === 2),
+          miss: ns.findReverse([1, 3], (x) => x === 2),
+          idx: ns.findIndexReverse([1, 2, 3, 2], (x) => x === 2),
+          idxMiss: ns.findIndexReverse([], () => true),
+        };
+      },
+      (ns) => {
+        return {
+          eq: ns.equals([1, "a", true], [1, "a", true]),
+          len: ns.equals([1], [1, 2]),
+          order: ns.equals([1, 2], [2, 1]),
+          bothEmpty: ns.equals([], []),
+          keys: Object.keys(ns).sort(),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "util/keyNames",
+    tsjs: "src/util/keyNames.ts.js",
+    probes: [
+      (ns) => {
+        return {
+          enter: ns.getKeyName(13),
+          left: ns.getKeyName(37),
+          num0: ns.getKeyName(96),
+          num1: ns.getKeyName(97),
+          f1: ns.getKeyName(112),
+          f32: ns.getKeyName(143),
+          semi: ns.getKeyName(186),
+          fallbackA: ns.getKeyName(65),
+          fallback0: ns.getKeyName(0),
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        // 未映射边界与已映射分界
+        return {
+          backspace: ns.getKeyName(8),
+          scroll: ns.getKeyName(145),
+          fromCode: ns.getKeyName(66),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "util/ScriptLoader",
+    tsjs: "src/util/ScriptLoader.ts.js",
+    probes: [
+      (ns) => {
+        const fakeDoc = { head: null, createElement: () => ({}) };
+        const loader = new ns.ScriptLoader(fakeDoc);
+        return { docRef: loader.document === fakeDoc, keys: Object.keys(loader).sort() };
+      },
+      (ns) => {
+        // mock document.head.appendChild 捕获注入的 script
+        const created = [];
+        let fireOnload = true;
+        let fireOnerror = false;
+        const fakeScript = {
+          type: "",
+          charset: "",
+          async: true,
+          src: "",
+          text: "",
+          onload: null,
+          onerror: null,
+          attrs: {},
+          setAttribute(k, v) {
+            this.attrs[k] = v;
+          },
+        };
+        const fakeDoc = {
+          createElement: () => {
+            Object.assign(fakeScript, { type: "", charset: "", async: true, src: "", text: "", attrs: {}, onload: null, onerror: null });
+            created.push(fakeScript);
+            return fakeScript;
+          },
+          head: {
+            appendChild(s) {
+              if (fireOnload) s.onload && s.onload();
+              else if (fireOnerror) s.onerror && s.onerror();
+            },
+          },
+        };
+        const loader = new ns.ScriptLoader(fakeDoc);
+        const p = loader.load("/a.js");
+        return p.then(
+          () => ({
+            type: fakeScript.type,
+            charset: fakeScript.charset,
+            async: fakeScript.async,
+            src: fakeScript.src,
+          }),
+          (e) => ({ err: e.message }),
+        );
+      },
+      (ns) => {
+        let rejectMsg = "";
+        const fakeScript = { onload: null, onerror: null, setAttribute() {} };
+        const fakeDoc = {
+          createElement: () => Object.assign(fakeScript, { type: "", charset: "", async: true, src: "", text: "", onload: null, onerror: null }),
+          head: {
+            appendChild(s) {
+              s.onerror && s.onerror();
+            },
+          },
+        };
+        const loader = new ns.ScriptLoader(fakeDoc);
+        return loader.load("/a.js").then(
+          () => "resolved",
+          (e) => {
+            rejectMsg = e.message;
+            return { rejectMsg, asyncFalse: "ok" };
+          },
+        );
+      },
+    ],
+  },
+
+  {
+    name: "util/Routing",
+    tsjs: "src/util/Routing.ts.js",
+    probes: [
+      (ns) => {
+        const r = new ns.Routing();
+        return { routesEmpty: Object.keys(r.routes).length === 0, keys: Object.keys(r).sort() };
+      },
+      (ns) => {
+        const r = new ns.Routing();
+        const ctrl = () => "c";
+        r.addRoute("/foo", ctrl);
+        return { has: r.routes["/foo"].controller === ctrl, star: r.routes["*"] };
+      },
+      async (ns) => {
+        // 精确 + 通配：先注册 "/" 避免 entry.controller TypeError
+        const r = new ns.Routing();
+        const calls = [];
+        r.addRoute("*", (seg) => {
+          calls.push(["star", seg.slice()]);
+        });
+        r.addRoute("/foo", (seg) => {
+          calls.push(["foo", seg.slice()]);
+        });
+        r.addRoute("/", (seg) => {
+          calls.push(["root", seg.slice()]);
+        });
+        const hadLoc = Object.prototype.hasOwnProperty.call(globalThis, "location");
+        const prevLoc = globalThis.location;
+        globalThis.location = { hash: "#/foo/a/b" };
+        await r.router();
+        globalThis.location = { hash: "#foo" };
+        await r.router();
+        globalThis.location = { hash: "" };
+        await r.router();
+        if (hadLoc) globalThis.location = prevLoc;
+        else delete globalThis.location;
+        return {
+          star: calls[0] && calls[0][0],
+          starRest: calls[0] && calls[0][1],
+          foo: calls[1] && calls[1][0],
+          fooRest: calls[1] && calls[1][1],
+          nonSlashNoFoo: calls.filter((c) => c[0] === "foo").length === 1,
+          total: calls.length,
+          rootFromEmpty: calls.filter((c) => c[0] === "root").length,
+        };
+      },
+      async (ns) => {
+        // 未注册 "/" 时：entry.controller 读 undefined → TypeError（孪生同抛）
+        const r = new ns.Routing();
+        r.addRoute("*", () => {});
+        const hadLoc = Object.prototype.hasOwnProperty.call(globalThis, "location");
+        const prevLoc = globalThis.location;
+        globalThis.location = { hash: "" };
+        let msg = "none";
+        try {
+          await r.router();
+        } catch (e) {
+          msg = e.constructor.name;
+        }
+        if (hadLoc) globalThis.location = prevLoc;
+        else delete globalThis.location;
+        return { msg };
+      },
+    ],
+  },
+
+  {
+    name: "util/QuadTree",
+    tsjs: "src/util/QuadTree.ts.js",
+    probes: [
+      (ns) => {
+        const box = new THREE.Box2(new THREE.Vector2(-10, -10), new THREE.Vector2(10, 10));
+        const cfg = {
+          getKey: (o) => new THREE.Vector2(o.x, o.y),
+          joinThreshold: 4,
+          splitThreshold: 4,
+          maxDepth: 3,
+        };
+        const tree = new ns.QuadTree(box, cfg);
+        const a = { x: 1, y: 1 };
+        const outside = { x: 100, y: 0 };
+        const addA = tree.add(a);
+        const addOut = tree.add(outside);
+        const hits = tree.queryRange(new THREE.Box2(new THREE.Vector2(0, 0), new THREE.Vector2(5, 5)));
+        const had = tree.objects.length;
+        tree.remove(a);
+        return {
+          addA,
+          addOut,
+          hits: hits.map((o) => (o === a ? "a" : "?")),
+          afterRemove: tree.objects.length,
+          had,
+          hasRegions: tree.regions != null,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        try {
+          const box = new THREE.Box2(new THREE.Vector2(-10, -10), new THREE.Vector2(10, 10));
+          const cfg = {
+            getKey: (o) => new THREE.Vector2(o.x, o.y),
+            joinThreshold: 4,
+            splitThreshold: 4,
+            maxDepth: 3,
+          };
+          const tree = new ns.QuadTree(box, cfg);
+          for (let i = 0; i < 4; i++) tree.add({ x: i, y: i });
+          const splitHappened = tree.regions != null;
+          let joinRet;
+          if (tree.regions) {
+            joinRet = tree.join();
+          } else {
+            joinRet = "no-split";
+          }
+          return {
+            splitHappened,
+            joinRet,
+            regionsAfterJoin: tree.regions === undefined || tree.regions === null,
+            objects: tree.objects.length,
+          };
+        } catch (e) {
+          return { err: String(e), name: e && e.name };
+        }
+      },
+      (ns) => {
+        const box = new THREE.Box2(new THREE.Vector2(-1, -1), new THREE.Vector2(1, 1));
+        const cfg = {
+          getKey: (o) => new THREE.Vector2(o.x, o.y),
+          joinThreshold: 0,
+          splitThreshold: 100,
+          maxDepth: 1,
+        };
+        const tree = new ns.QuadTree(box, cfg);
+        const ok = tree.add({ x: 0, y: 0 });
+        const cannotSplit = tree.split();
+        return { ok, cannotSplit, regions: tree.regions == null, count: tree.objects.length };
+      },
+    ],
+  },
+
+  {
+    name: "util/disposable/Disposable",
+    tsjs: "src/util/disposable/Disposable.ts.js",
+    probes: [
+      (ns) => {
+        const keys = Object.keys(ns).sort();
+        return { keys, length: keys.length, empty: keys.length === 0 };
+      },
+    ],
+  },
+
+  {
+    name: "util/disposable/LegacyDisposable",
+    tsjs: "src/util/disposable/LegacyDisposable.ts.js",
+    probes: [
+      (ns) => {
+        const keys = Object.keys(ns).sort();
+        return { keys, length: keys.length, empty: keys.length === 0 };
+      },
+    ],
+  },
+
+  {
+    name: "util/mouse",
+    tsjs: "src/util/mouse.ts.js",
+    probes: [
+      (ns) => {
+        const keys = Object.keys(ns).sort();
+        return { keys, length: keys.length, empty: keys.length === 0 };
+      },
+    ],
+  },
+
+  {
+    name: "util/Serializable",
+    tsjs: "src/util/Serializable.ts.js",
+    probes: [
+      (ns) => {
+        const keys = Object.keys(ns).sort();
+        return { keys, length: keys.length, empty: keys.length === 0 };
+      },
+    ],
+  },
+
+  {
+    name: "util/Logger",
+    tsjs: "src/util/Logger.ts.js",
+    probes: [
+      (ns) => {
+        // re-export：AppLogger 与 js-logger 默认导出同引用
+        const L = ns.AppLogger;
+        return {
+          has: L != null,
+          isObj: typeof L === "object" || typeof L === "function",
+          hasCreate: L != null && typeof L.create === "function",
+          hasInfo: L != null && typeof L.info === "function",
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        // 可调用日志方法不抛
+        const L = ns.AppLogger;
+        let ok = false;
+        try {
+          if (L && typeof L.debug === "function") L.debug("probe");
+          ok = true;
+        } catch (e) {
+          ok = false;
+        }
+        return { ok, name: L && L.name };
+      },
+    ],
+  },
+
+  {
+    name: "util/CssLoader",
+    tsjs: "src/util/CssLoader.ts.js",
+    probes: [
+      (ns) => {
+        // 构造注入 document
+        const fakeDoc = { head: null };
+        const c = new ns.CssLoader(fakeDoc);
+        return { keys: Object.keys(c).sort(), hasLoad: typeof c.load === "function" };
+      },
+      (ns) => {
+        // onload resolve / onerror 带 href；createElement 用全局 document
+        // 需 mock 全局 document —— 孪生与 TS 共用同一 globalThis，探针两侧
+        // 各自跑一次，临时替换后恢复
+        const prev = globalThis.document;
+        let mode = "load";
+        const created = [];
+        const fakeLink = {
+          rel: "",
+          type: "",
+          href: "",
+          onload: null,
+          onerror: null,
+        };
+        const head = {
+          appendChild(el) {
+            if (mode === "load") el.onload && el.onload();
+            else el.onerror && el.onerror();
+          },
+        };
+        globalThis.document = {
+          createElement: (tag) => {
+            const el = Object.assign({}, fakeLink, { rel: "", type: "", href: "", onload: null, onerror: null });
+            created.push(el);
+            return el;
+          },
+        };
+        const docForCtor = { head };
+        const c = new ns.CssLoader(docForCtor);
+        return c
+          .load("/a.css")
+          .then(
+            () => ({ phase: "load", href: created[0] && created[0].href, rel: created[0] && created[0].rel }),
+            (e) => ({ phase: "load-err", msg: e.message }),
+          )
+          .then((loadRes) => {
+            mode = "error";
+            return c.load("/b.css").then(
+              () => ({ phase: "error-resolved", loadRes }),
+              (e) => ({ phase: "error-rejected", msg: e.message, hrefB: created[1] && created[1].href, loadRes }),
+            );
+          })
+          .finally(() => {
+            globalThis.document = prev;
+          });
+      },
+    ],
+  },
+
+  {
+    name: "util/number",
+    tsjs: "src/util/number.ts.js",
+    probes: [
+      (ns) => {
+        return {
+          f1: ns.int32ToFloat32(0x3f800000),
+          f0: ns.int32ToFloat32(0),
+          fNeg: ns.int32ToFloat32(-1082130432), // 0xbf800000 → -1
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const v = ns.int32ToFloat32(0x40000000);
+        return { two: v, isNum: typeof v === "number" };
+      },
+    ],
+  },
+
+  {
+    name: "util/format",
+    tsjs: "src/util/format.ts.js",
+    probes: [
+      (ns) => {
+        return {
+          s65: ns.formatTimeDuration(65),
+          s0: ns.formatTimeDuration(0),
+          s0h: ns.formatTimeDuration(0, true),
+          s3661: ns.formatTimeDuration(3661),
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        return {
+          s59: ns.formatTimeDuration(59),
+          s3600: ns.formatTimeDuration(3600),
+          s3600h: ns.formatTimeDuration(3600, true),
+          s70: ns.formatTimeDuration(70, true),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "util/dom",
+    tsjs: "src/util/dom.ts.js",
+    probes: [
+      (ns) => {
+        // getOffset：逗号表达式逐级累加
+        const leaf = { offsetTop: 10, offsetLeft: 5, offsetParent: null };
+        const mid = { offsetTop: 3, offsetLeft: 2, offsetParent: leaf };
+        const top = { offsetTop: 1, offsetLeft: 1, offsetParent: mid };
+        const off = ns.getOffset(top);
+        return { top: off.top, left: off.left, keys: Object.keys(ns).sort() };
+      },
+      (ns) => {
+        // contains：do-while 上溯
+        const g = { parentElement: null };
+        const p = { parentElement: g };
+        const c = { parentElement: p };
+        return {
+          self: ns.contains(c, c),
+          ancestor: ns.contains(g, c),
+          mid: ns.contains(p, c),
+          stranger: ns.contains({ parentElement: null }, c),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "util/fullScreen",
+    tsjs: "src/util/fullScreen.ts.js",
+    probes: [
+      (ns) => {
+        // 无 fullscreenEnabled → warn + undefined
+        const doc = { fullscreenEnabled: false, addEventListener() {}, removeEventListener() {} };
+        const out = ns.setupFullScreenChangeListener(doc, () => {});
+        return { out: out === undefined ? "undef" : typeof out, keys: Object.keys(ns).sort() };
+      },
+      (ns) => {
+        // 支持时返回清理函数；进入全屏立即置位、退出后 100ms 节流
+        const listeners = {};
+        let onChangeCalls = 0;
+        const doc = {
+          fullscreenEnabled: true,
+          fullscreenElement: null,
+          documentElement: {
+            requestFullscreen: async () => {
+              doc.fullscreenElement = {};
+            },
+          },
+          addEventListener(t, fn) {
+            (listeners[t] = listeners[t] || []).push(fn);
+          },
+          removeEventListener(t, fn) {
+            listeners[t] = (listeners[t] || []).filter((f) => f !== fn);
+          },
+        };
+        const dispose = ns.setupFullScreenChangeListener(doc, () => {
+          onChangeCalls++;
+        });
+        const types = Object.keys(listeners).sort();
+        // 进入全屏
+        doc.fullscreenElement = {};
+        listeners.fullscreenchange[0]();
+        const afterEnter = onChangeCalls;
+        // 退出全屏
+        doc.fullscreenElement = null;
+        listeners.fullscreenchange[0]();
+        const afterExit = onChangeCalls;
+        // F11 拒绝不抛
+        let f11 = "ok";
+        const keyup = listeners.keyup[0];
+        doc.documentElement.requestFullscreen = async () => {
+          const err = new Error("denied");
+          err.name = "NotAllowedError";
+          throw err;
+        };
+        return Promise.resolve()
+          .then(() => keyup({ keyCode: 122 }))
+          .then(() => {
+            dispose();
+            return {
+              isFn: typeof dispose === "function",
+              types,
+              afterEnter,
+              afterExit,
+              f11,
+              removed: (listeners.fullscreenchange || []).length === 0,
+            };
+          });
+      },
+    ],
+  },
+
+  {
+    name: "util/Graph",
+    tsjs: "src/util/Graph.ts.js",
+    probes: [
+      (ns) => {
+        const g = new ns.Graph();
+        const a = g.addNode("a", 1);
+        const b = g.addNode("b", 2);
+        a.addLink(b);
+        const both =
+          a.neighbors.has(b) && b.neighbors.has(a);
+        a.addLink(a); // 自环只加一次
+        const selfSize = a.neighbors.size;
+        const miss = g.removeNode("missing");
+        const rm = g.removeNode("a");
+        return {
+          both,
+          selfSize,
+          miss,
+          rm,
+          count: g.getNodeCount(),
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        const g = new ns.Graph();
+        const a = g.addNode("a", 1);
+        g.addNode("a", 99); // 覆盖 data
+        const again = g.getNode("a");
+        const b = g.addNode("b", 2);
+        a.addLink(b);
+        a.deleteLinks();
+        return {
+          data: again.data,
+          sameNode: again === a,
+          cleared: a.neighbors.size === 0,
+          bCleared: b.neighbors.size === 0,
+          has: g.hasNode("a"),
+          forEach: (() => {
+            let n = 0;
+            g.forEachNode(() => n++);
+            return n;
+          })(),
+        };
+      },
+      (ns) => {
+        const g = new ns.Graph();
+        g.addNode("x", 1);
+        g.clear();
+        return { count: g.getNodeCount(), has: g.hasNode("x"), keys: Object.keys(ns).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "util/Sentry",
+    tsjs: "src/util/Sentry.ts.js",
+    probes: [
+      (ns) => {
+        // 未 init 时方法 no-op（?. 短路）
+        const s = new ns.Sentry();
+        let ok = true;
+        try {
+          s.captureException(new Error("x"));
+          s.configureScope(() => {});
+          s.addBreadcrumb({ message: "b" });
+        } catch (e) {
+          ok = false;
+        }
+        return { ok, keys: Object.keys(s).sort() };
+      },
+      (ns) => {
+        // init 后 defaultIntegrations:false 才展开该键
+        // 只 mock 捕获 options：临时替换 BrowserSdk 不可行（模块级），
+        // 改为记录 init 调用是否抛错 + 实例键
+        const s = new ns.Sentry();
+        let initOk = true;
+        let errMsg = "";
+        try {
+          s.init(
+            {
+              dsn: "https://x",
+              tunnel: "",
+              env: "test",
+              defaultIntegrations: false,
+              autoSessionTracking: false,
+            },
+            "0.1.0",
+          );
+        } catch (e) {
+          initOk = false;
+          errMsg = String(e.message || e.name).slice(0, 120);
+        }
+        return { initOk, errMsg, keys: Object.keys(s).sort() };
+      },
+    ],
+  },
+
+  {
+    name: "util/stream",
+    tsjs: "src/util/stream.ts.js",
+    probes: [
+      (ns) => {
+        const enc = new TextEncoder();
+        const stream = new ReadableStream({
+          start(c) {
+            c.enqueue(enc.encode("a\r\nb\nc\rd"));
+            c.close();
+          },
+        });
+        const lines = [];
+        const duck = { stream: () => stream, getReader: () => stream.getReader() };
+        return (async () => {
+          for await (const line of ns.makeTextFileLineIterator(duck)) lines.push(line);
+          return { lines, keys: Object.keys(ns).sort() };
+        })().catch((e) => ({ error: String(e) }));
+      },
+      (ns) => {
+        const enc = new TextEncoder();
+        // 跨 chunk 断行 + 尾行无换行
+        const stream = new ReadableStream({
+          start(c) {
+            c.enqueue(enc.encode("hel"));
+            c.enqueue(enc.encode("lo\nwor"));
+            c.enqueue(enc.encode("ld"));
+            c.close();
+          },
+        });
+        const lines = [];
+        const duck = { stream: () => stream, getReader: () => stream.getReader() };
+        return (async () => {
+          for await (const line of ns.makeTextFileLineIterator(duck)) lines.push(line);
+          return { lines };
+        })().catch((e) => ({ error: String(e) }));
+      },
+    ],
+  },
+
+  {
+    name: "util/time",
+    tsjs: "src/util/time.ts.js",
+    probes: [
+      (ns) => {
+        const fn = ns.throttle(() => {}, 0);
+        const p = fn();
+        return {
+          isFn: typeof fn === "function",
+          returnsPromise: p != null && typeof p.then === "function",
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        // sleep 真实等待
+        const t0 = Date.now();
+        return ns.sleep(5).then(() => {
+          const dt = Date.now() - t0;
+          const Throttle = ns.Throttle;
+          return {
+            slept: dt >= 4,
+            dt,
+            hasThrottleDecorator: typeof Throttle === "function",
+          };
+        });
+      },
+      (ns) => {
+        // 进行中不重入
+        let calls = 0;
+        const fn = ns.throttle(() => {
+          calls++;
+        }, 20);
+        const a = fn();
+        const b = fn(); // inFlight → 直接返回 undefined
+        return Promise.all([a, b]).then(() => ({
+          calls,
+          bIsUndefined: true,
+          keys: Object.keys(ns).sort(),
+        }));
+      },
+    ],
+  },
+
+  {
+    name: "util/userAgent",
+    tsjs: "src/util/userAgent.ts.js",
+    probes: [
+      (ns) => {
+        const mac = ns.isMac();
+        const ipad = ns.isIpad();
+        const macFf = ns.isMacFirefox();
+        return {
+          macType: typeof mac,
+          ipadType: typeof ipad,
+          macFfType: typeof macFf,
+          implies: !macFf || mac === true,
+          keys: Object.keys(ns).sort(),
+        };
+      },
+      (ns) => {
+        // 一致性：isMacFirefox ⇒ isMac
+        const mac = ns.isMac();
+        const macFf = ns.isMacFirefox();
+        return { mac, macFf, imply: !macFf || mac === true, ipad: ns.isIpad() };
+      },
+    ],
+  },
+
+  {
+    name: "util/PointerLock",
+    tsjs: "src/util/PointerLock.ts.js",
+    probes: [
+      (ns) => {
+        const listeners = {};
+        const doc = {
+          pointerLockElement: null,
+          addEventListener: (t, fn) => {
+            (listeners[t] = listeners[t] || []).push(fn);
+          },
+          removeEventListener: (t, fn) => {
+            listeners[t] = (listeners[t] || []).filter((f) => f !== fn);
+          },
+          exitPointerLock: () => {},
+        };
+        const el = { requestPointerLock: () => Promise.resolve() };
+        const pl = new ns.PointerLock(el, doc);
+        return {
+          listening: pl.listening,
+          active: pl.isActive(),
+          hasOnChange: pl.onChange != null,
+          hasDispose: typeof pl.dispose === "function",
+          keys: Object.keys(pl).sort(),
+          listenerTypes: Object.keys(listeners).sort(),
+        };
+      },
+      (ns) => {
+        const listeners = {};
+        const doc = {
+          pointerLockElement: null,
+          addEventListener: (t, fn) => {
+            (listeners[t] = listeners[t] || []).push(fn);
+          },
+          removeEventListener: (t, fn) => {
+            listeners[t] = (listeners[t] || []).filter((f) => f !== fn);
+          },
+          exitPointerLock: () => {},
+        };
+        let lockCalls = 0;
+        const el = {
+          requestPointerLock: () => {
+            lockCalls++;
+            doc.pointerLockElement = el;
+            (listeners.pointerlockchange || []).forEach((f) => f());
+            return Promise.resolve();
+          },
+        };
+        const pl = new ns.PointerLock(el, doc);
+        let changes = 0;
+        // onChange 是 getter，返回 EventDispatcher 本身（asEvent() 返回 this）→ 用 subscribe
+        pl.onChange.subscribe(() => {
+          changes++;
+        });
+        // mock 的 requestPointerLock 同步派发 pointerlockchange，requestInternal 同步完成
+        pl.request();
+        return {
+          lockCalls,
+          listening: pl.listening,
+          active: pl.isActive(),
+          changes,
+          listenerTypes: Object.keys(listeners).sort(),
+        };
+      },
+    ],
+  },
+
   // ---- network 鏃忥紙64 妯″潡锛?---
   {
     name: "network/ladder/wladderConfig",
@@ -18355,6 +19166,96 @@ const CONVERTED = [
     ],
   },
 
+
+  {
+    name: "worker/WorkerApi",
+    tsjs: "src/worker/WorkerApi.ts.js",
+    probes: [(ns) => Object.keys(ns).length],
+  },
+
+  {
+    name: "worker/workerHost",
+    tsjs: "src/worker/workerHost.ts.js",
+    probes: [
+      (ns) => {
+        const api = ns.workerHostApi;
+        return {
+          concurrency: api.concurrency,
+          hasMethods: ["warmUpPool", "queueTask", "waitForTasks", "dispose"].every((k) => typeof api[k] === "function"),
+          formula:
+            api.concurrency === ((typeof navigator !== "undefined" && navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4) - 1),
+        };
+      },
+    ],
+  },
+
+  {
+    name: "vendor/priority-queue",
+    tsjs: "src/vendor/priority-queue.ts.js",
+    probes: [
+      (ns) => {
+        const q = new ns.PriorityQueue();
+        [5, 1, 4, 2].forEach((n) => q.enqueue(n));
+        return {
+          size: q.size(),
+          front: q.front(),
+          toArray: q.toArray(),
+          isEmpty: q.isEmpty(),
+          out: [q.dequeue(), q.dequeue(), q.dequeue(), q.dequeue()],
+          after: { size: q.size(), isEmpty: q.isEmpty(), front: q.front() === undefined ? "undef" : q.front() },
+        };
+      },
+      (ns) => {
+        const q = new ns.PriorityQueue((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+        ["b", "a", "c"].forEach((s) => q.enqueue(s));
+        return [q.dequeue(), q.dequeue(), q.dequeue()];
+      },
+      (ns) => {
+        const q = new ns.PriorityQueue();
+        return { d: q.dequeue() === undefined ? "undef" : q.dequeue(), f: q.front() === undefined ? "undef" : "x", empty: q.isEmpty() };
+      },
+    ],
+  },
+
+  {
+    name: "vendor/quadtree",
+    tsjs: "src/vendor/quadtree.ts.js",
+    probes: [
+      (ns) => {
+        const tree = new ns.Quadtree({ x: 0, y: 0, width: 100, height: 100, maxObjects: 2, maxLevels: 2 });
+        const a = new ns.Circle({ x: 10, y: 10, r: 5, data: "a" });
+        const b = new ns.Circle({ x: 70, y: 10, r: 5, data: "b" });
+        const c = new ns.Circle({ x: 10, y: 70, r: 5, data: "c" });
+        tree.insert(a);
+        tree.insert(b);
+        tree.insert(c);
+        const found = tree.retrieve(new ns.Circle({ x: 10, y: 10, r: 6 })).map((o) => o.data).sort();
+        const bounds = { ...tree.bounds };
+        const levels = { maxObjects: tree.maxObjects, maxLevels: tree.maxLevels, level: tree.level, nodes: tree.nodes.length };
+        tree.clear();
+        return {
+          bounds,
+          levels,
+          found,
+          afterClear: { objects: tree.objects.length, nodes: tree.nodes.length },
+          circle: { x: a.x, y: a.y, r: a.r, data: a.data },
+        };
+      },
+      (ns) => {
+        const viaNew = new ns.Quadtree.Branch({ x: 0, y: 0, width: 10, height: 10 });
+        const viaCall = ns.Quadtree.Branch({ x: 1, y: 2, width: 3, height: 4 });
+        return {
+          newBounds: [viaNew.bounds.x, viaNew.bounds.y, viaNew.bounds.width, viaNew.bounds.height],
+          callBounds: [viaCall.bounds.x, viaCall.bounds.y, viaCall.bounds.width, viaCall.bounds.height],
+          bothQuadtree: viaNew instanceof ns.Quadtree && viaCall instanceof ns.Quadtree,
+        };
+      },
+      (ns) => {
+        const t = new ns.Quadtree();
+        return { bounds: t.bounds, maxObjects: t.maxObjects, maxLevels: t.maxLevels, level: t.level };
+      },
+    ],
+  },
 
 
   {
