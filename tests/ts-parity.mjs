@@ -25704,6 +25704,64 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns.DebrisRules.prototype).sort(),
       (ns) => Object.keys(ns).sort(),
+      (ns, THREE, mod) => {
+        // 构造即 parse()：驱动 clamp 上下界 / 空串→undefined / 全部数值与共享标志
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const full = new ns.DebrisRules(
+          ObjectType.Debris,
+          makeMockIni("DEBRIS", {
+            Damage: "15",
+            DamageRadius: "3",
+            Duration: "80",
+            Elasticity: "1.5", // clamp → 1
+            ExpireAnim: "FOO",
+            MinAngularVelocity: "2",
+            MaxAngularVelocity: "40",
+            MaxXYVel: "25",
+            MinZVel: "5",
+            MaxZVel: "30",
+            ShareTurretData: "yes",
+            ShareBodyData: "yes",
+            ShareBarrelData: "no",
+            ShareSource: "TURRET",
+            TrailerAnim: "TRAIL",
+            TrailerSeperation: "4",
+            Warhead: "Frag",
+          }),
+        );
+        const empty = new ns.DebrisRules(ObjectType.Debris, makeMockIni("E", {}));
+        const clampLow = new ns.DebrisRules(
+          ObjectType.Debris,
+          makeMockIni("CLAMP", { Elasticity: "-2" }),
+        );
+        return {
+          damage: full.damage,
+          damageRadius: full.damageRadius,
+          duration: full.duration,
+          elasticity: full.elasticity,
+          expireAnim: full.expireAnim,
+          minAngularVelocity: full.minAngularVelocity,
+          maxAngularVelocity: full.maxAngularVelocity,
+          maxXYVel: full.maxXYVel,
+          minZVel: full.minZVel,
+          maxZVel: full.maxZVel,
+          shareTurretData: full.shareTurretData,
+          shareBodyData: full.shareBodyData,
+          shareBarrelData: full.shareBarrelData,
+          shareSource: full.shareSource,
+          trailerAnim: full.trailerAnim,
+          trailerSeparation: full.trailerSeparation,
+          warhead: full.warhead,
+          name: full.name,
+          // 缺省：Elasticity 默认 0.75；空串字段 → undefined
+          emptyElasticity: empty.elasticity,
+          emptyExpireAnim: empty.expireAnim,
+          emptyShareSource: empty.shareSource,
+          emptyTrailerAnim: empty.trailerAnim,
+          emptyWarhead: empty.warhead,
+          clampLowElasticity: clampLow.elasticity, // -2 → 0
+        };
+      },
     ],
   },
 
@@ -25713,6 +25771,62 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns.OverlayRules.prototype).sort(),
       (ns) => Object.keys(ns).sort(),
+      (ns, THREE, mod) => {
+        // 构造即 parse()：enum/bool 键、雷达不可见缺省 !wall && !isARock、显式覆盖
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const ArmorType = mod("game/type/ArmorType").ArmorType;
+        const LandType = mod("game/type/LandType").LandType;
+        const wall = new ns.OverlayRules(
+          ObjectType.Overlay,
+          makeMockIni("ORE01", {
+            Armor: "Heavy",
+            Crate: "yes",
+            IsARock: "no",
+            Wall: "yes",
+            Strength: "400",
+            Tiberium: "yes",
+            Land: "Tiberium",
+            IsRubble: "yes",
+            IsVeinholeMonster: "no",
+            IsVeins: "yes",
+            NoUseTileLandType: "Rock",
+          }),
+        );
+        // neither wall nor rock → radarInvisible 缺省 true
+        const plain = new ns.OverlayRules(
+          ObjectType.Overlay,
+          makeMockIni("PLAIN", { Wall: "no", IsARock: "no" }),
+        );
+        // 显式 RadarInvisible=no 覆盖缺省 true
+        const override = new ns.OverlayRules(
+          ObjectType.Overlay,
+          makeMockIni("OVR", { Wall: "no", IsARock: "no", RadarInvisible: "no" }),
+        );
+        const rock = new ns.OverlayRules(
+          ObjectType.Overlay,
+          makeMockIni("ROCK", { IsARock: "yes", Wall: "no" }),
+        );
+        return {
+          armor: wall.armor,
+          armorHeavy: ArmorType.Heavy,
+          crate: wall.crate,
+          isARock: wall.isARock,
+          isRubble: wall.isRubble,
+          isVeinholeMonster: wall.isVeinholeMonster,
+          isVeins: wall.isVeins,
+          wall: wall.wall,
+          radarInvisible: wall.radarInvisible, // wall yes → false
+          strength: wall.strength,
+          tiberium: wall.tiberium,
+          land: wall.land,
+          landTiberium: LandType.Tiberium,
+          noUseTileLandType: wall.noUseTileLandType,
+          plainRadar: plain.radarInvisible, // !wall && !isARock → true
+          overrideRadar: override.radarInvisible, // 显式 no → false
+          rockRadar: rock.radarInvisible, // isARock yes → false
+          name: wall.name,
+        };
+      },
     ],
   },
 
@@ -25722,6 +25836,32 @@ const CONVERTED = [
     probes: [
       (ns) => Object.keys(ns.SmudgeRules.prototype).sort(),
       (ns) => Object.keys(ns).sort(),
+      (ns, THREE, mod) => {
+        // 构造即 parse()：缺省 Width/Height=1；显式 0 不被缺省覆盖
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const empty = new ns.SmudgeRules(ObjectType.Smudge, makeMockIni("SCRT", {}));
+        const full = new ns.SmudgeRules(
+          ObjectType.Smudge,
+          makeMockIni("SCRT", { Burn: "yes", Crater: "yes", Width: "3", Height: "5" }),
+        );
+        const zero = new ns.SmudgeRules(
+          ObjectType.Smudge,
+          makeMockIni("Z", { Width: "0", Height: "0" }),
+        );
+        return {
+          emptyWidth: empty.width,
+          emptyHeight: empty.height,
+          emptyBurn: empty.burn,
+          emptyCrater: empty.crater,
+          burn: full.burn,
+          crater: full.crater,
+          width: full.width,
+          height: full.height,
+          zeroWidth: zero.width,
+          zeroHeight: zero.height,
+          name: full.name,
+        };
+      },
     ],
   },
 

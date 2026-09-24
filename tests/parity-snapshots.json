@@ -14214,19 +14214,74 @@
     "0": [],
     "1": [
       "DebrisRules"
-    ]
+    ],
+    "2": {
+      "damage": 15,
+      "damageRadius": 3,
+      "duration": 80,
+      "elasticity": 1,
+      "expireAnim": "FOO",
+      "minAngularVelocity": 2,
+      "maxAngularVelocity": 40,
+      "maxXYVel": 25,
+      "minZVel": 5,
+      "maxZVel": 30,
+      "shareTurretData": true,
+      "shareBodyData": true,
+      "shareBarrelData": false,
+      "shareSource": "TURRET",
+      "trailerAnim": "TRAIL",
+      "trailerSeparation": 4,
+      "warhead": "Frag",
+      "name": "DEBRIS",
+      "emptyElasticity": 0.75,
+      "clampLowElasticity": 0
+    }
   },
   "game/rules/OverlayRules": {
     "0": [],
     "1": [
       "OverlayRules"
-    ]
+    ],
+    "2": {
+      "armor": 5,
+      "armorHeavy": 5,
+      "crate": true,
+      "isARock": false,
+      "isRubble": true,
+      "isVeinholeMonster": false,
+      "isVeins": true,
+      "wall": true,
+      "radarInvisible": false,
+      "strength": 400,
+      "tiberium": true,
+      "land": 9,
+      "landTiberium": 9,
+      "noUseTileLandType": true,
+      "plainRadar": true,
+      "overrideRadar": false,
+      "rockRadar": false,
+      "name": "ORE01"
+    }
   },
   "game/rules/SmudgeRules": {
     "0": [],
     "1": [
       "SmudgeRules"
-    ]
+    ],
+    "2": {
+      "emptyWidth": 1,
+      "emptyHeight": 1,
+      "emptyBurn": false,
+      "emptyCrater": false,
+      "burn": true,
+      "crater": true,
+      "width": 3,
+      "height": 5,
+      "zeroWidth": 0,
+      "zeroHeight": 0,
+      "name": "SCRT"
+    }
   },
   "game/rules/TerrainRules": {
     "0": 7,
