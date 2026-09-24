@@ -63,8 +63,8 @@ export class MapSpriteBatchLayer {
    * @param theater - 战区
    * @param art - art
    * @param imageFinder - ImageFinder
-   * @param lighting - Lighting
    * @param camera - 相机
+   * @param lighting - Lighting
    * @param shpAggregator - ShpAggregator
    */
   constructor(
@@ -74,8 +74,8 @@ export class MapSpriteBatchLayer {
     theater: any,
     art: any,
     imageFinder: any,
-    lighting: any,
     camera: any,
+    lighting: any,
     shpAggregator: any,
   ) {
     this.label = label;

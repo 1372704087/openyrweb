@@ -57,7 +57,11 @@ export class TileCollection {
   /** 遮蔽/渲染截断高度。 */
   cutoffTileHeight: number;
 
-  constructor(rawTiles: any[], tileSets: any, generalRules: any, theaterType: any) {
+  /**
+   * @param damaged 传给 `TileSets.getTileImage` 的第 3 参（damaged 索引回调，
+   * 孪生 GameMap 传入 randomInt；非 theaterType）。
+   */
+  constructor(rawTiles: any[], tileSets: any, generalRules: any, damaged: any) {
     this.tileSets = tileSets;
     this.generalRules = generalRules;
     const rSize = (this.rSize = { width: 0, height: 0 });
@@ -83,7 +87,7 @@ export class TileCollection {
     this.minTileHeight = Number.POSITIVE_INFINITY;
     for (let i = 0, n = rawTiles.length; i < n; ++i) {
       const raw = rawTiles[i];
-      const image = tileSets.getTileImage(raw.tileNum, raw.subTile, theaterType);
+      const image = tileSets.getTileImage(raw.tileNum, raw.subTile, damaged);
       const terrainType = image.terrainType;
       if (!knownTerrain.has(terrainType)) {
         throw new Error(`Tile (${raw.rx}, ${raw.ry}) has unknown terrain type "${terrainType}"`);

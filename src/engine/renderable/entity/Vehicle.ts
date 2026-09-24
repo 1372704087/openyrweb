@@ -184,7 +184,10 @@ export class Vehicle {
   constructor(
     gameObject: any,
     rules: any,
+    // 孪生第 3/5 参：art、theater — 调用方按 17 参传入，本类不写入字段（与孪生一致）
+    art: any,
     imageFinder: any,
+    theater: any,
     voxels: any,
     voxelAnims: any,
     palette: any,
@@ -198,6 +201,8 @@ export class Vehicle {
     pipOverlay: any,
     worldSound: any,
   ) {
+    void art;
+    void theater;
     this.gameObject = gameObject;
     this.rules = rules;
     this.imageFinder = imageFinder;
@@ -613,7 +618,8 @@ export class Vehicle {
           const factor = this.gameObject.rocking.factor;
           if (factor > 0) this.startRocking(rockingFacing, factor, now);
         }
-        const squidGrabbed = !!(
+        // 孪生：b = !( !isInfested || !organic )，即"被有机寄生体抓住"
+        const squidGrabbed = !(
           !this.gameObject.parasiteableTrait?.isInfested() ||
           !this.gameObject.parasiteableTrait.getParasite()?.rules.organic
         );
@@ -623,16 +629,16 @@ export class Vehicle {
         if (this.gameObject.turretTrait && this.objectRules.turretCount > 1 && turretIdxChanged) {
           this.updateActiveTurret(this.currentTurretIdx);
         }
-        // 孪生参数：updateSquidGrab(i, b, f, p, e, T, v)
-        // i=grabChanged, b=grab, f=grabChanged(实际孪生 f 为 grabChanged 后的变量)、
-        // p=dirChanged, e=direction, T=firingChanged, v=rockingFacingChanged
+        // 孪生参数：updateSquidGrab(now, grabbed, grabChanged, dirChanged,
+        //   direction, rockingFacing, rockingFacingChanged)
+        // 孪生第 6 参 T 在此分支已被重赋为 rocking?.facing（非 firingChanged）。
         this.updateSquidGrab(
           now,
           squidGrabbed,
           grabChanged,
           dirChanged,
           direction,
-          firingChanged,
+          rockingFacing,
           rockingFacingChanged,
         );
       } else if (this.shpAnimRunner) {
@@ -871,8 +877,8 @@ export class Vehicle {
    * @param grabChanged - 抓取状态变化
    * @param dirChanged - 方向变化
    * @param direction - 方向
-   * @param firingChanged - 开火变化（孪生第 6 参）
-   * @param rockingChanged - 摇晃触发（孪生第 7 参）
+   * @param rockingFacing - 摇晃朝向（孪生第 6 参 a，rocking?.facing）
+   * @param rockingChanged - 摇晃触发（孪生第 7 参 n）
    */
   updateSquidGrab(
     now: number,
@@ -880,10 +886,10 @@ export class Vehicle {
     grabChanged: boolean,
     dirChanged: boolean,
     direction: number,
-    firingChanged: boolean,
+    rockingFacing: number | undefined,
     rockingChanged: boolean,
   ): void {
-    // 孪生参数：e=now, t=grab, i=grabChanged, r=dirChanged, s=direction, a=firingChanged, n=rockingChanged
+    // 孪生参数：e=now, t=grabbed, i=grabChanged, r=dirChanged, s=direction, a=rockingFacing, n=rockingChanged
     if (grabChanged && this.squidGrabAnim) {
       this.posObj?.remove(this.squidGrabAnim.get3DObject());
       this.squidGrabAnim.dispose();
@@ -904,24 +910,21 @@ export class Vehicle {
       this.squidGrabAnim.create3DObject();
       this.posObj?.add(this.squidGrabAnim.get3DObject());
     }
-    if (grabbed && (firingChanged || grabChanged) && this.squidGrabAnim) {
+    // 孪生：t && (r || i) → 抓住且朝向/抓取变化时播吸附段
+    if (grabbed && (dirChanged || grabChanged) && this.squidGrabAnim) {
       this.updateSquidGrabAnim(this.squidGrabAnim.getAnimProps(), direction, SquidGrabPhase.Grab);
     }
-    if (grabbed && rockingChanged && firingChanged && this.squidGrabAnim) {
-      const phase = firingChanged && this.rockingFactor && this.rockingFactor > 0
-        ? SquidGrabPhase.Shake1
-        : SquidGrabPhase.Shake2;
-      // 孪生：o = 0 < a ? Shake1 : Shake2，a=firingChanged 的布尔被当作 0/1
-      // 但实际 a 是 firingChanged；孪生用 0<a 即 firingChanged
+    // 孪生：t && n && a && (0 < a ? Shake1 : Shake2)
+    if (grabbed && rockingChanged && rockingFacing && this.squidGrabAnim) {
       this.updateSquidGrabAnim(
         this.squidGrabAnim.getAnimProps(),
         direction,
-        firingChanged ? SquidGrabPhase.Shake1 : SquidGrabPhase.Shake2,
+        rockingFacing > 0 ? SquidGrabPhase.Shake1 : SquidGrabPhase.Shake2,
       );
       this.squidGrabAnim.reset();
     }
     // 孪生：t && n && !a → 死亡水花
-    if (grabbed && rockingChanged && !firingChanged) {
+    if (grabbed && rockingChanged && !rockingFacing) {
       const splash = this.rules.combatDamage.splashList;
       for (let i = 0; i < 3; i++) {
         const name = splash[getRandomInt(0, splash.length - 1)];

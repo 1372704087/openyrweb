@@ -174,6 +174,8 @@ export class MapShroudLayer {
         count++;
       }
     }
+    // 0×0 迷雾（空图/shroud 未初始化）：跳过合并与 mesh，避免 geometries[0] 空指针
+    if (count === 0 || geos.length === 0) return;
     const material = new PaletteBasicMaterial({
       map: atlas.getTexture(),
       palette: paletteTex,
@@ -184,7 +186,7 @@ export class MapShroudLayer {
       blending: (THREE as any).MultiplyBlending,
     });
     const merged = BufferGeometryUtils.mergeBufferGeometries(geos);
-    if (merged.getAttribute("position").count !== SpriteUtils.VERTICES_PER_SPRITE * count) {
+    if (merged.getAttribute("position")?.count !== SpriteUtils.VERTICES_PER_SPRITE * count) {
       throw new Error("Vertex count mismatch");
     }
     this.uvAttribute = merged.getAttribute("uv");

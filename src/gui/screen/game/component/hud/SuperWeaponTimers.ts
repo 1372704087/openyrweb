@@ -169,7 +169,7 @@ export class SuperWeaponTimers extends UiComponent {
   drawLine(text: string, color: string, y: number): number {
     return CanvasUtils.drawText(this.ctx, text, 0, y, {
       color,
-      fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+      fontFamily: "'Fira Sans Condensed', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', Arial, sans-serif",
       fontSize: 14,
       fontWeight: "500",
       paddingTop: 5,

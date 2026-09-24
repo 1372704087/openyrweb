@@ -121,7 +121,7 @@ export class ShpTester {
     const rules = new Rules(Engine.getRules());
     const art = new Art(rules, Engine.getArt());
     const theater = await Engine.loadTheater(TheaterType.Temperate);
-    const gameMap = new GameMap(theater.tileSets, rules, math.getRandomInt);
+    const gameMap = new GameMap(mapFile, theater.tileSets, rules, math.getRandomInt);
     const gameOpts = { superWeapons: false, gameSpeed: 5 };
     const country = Country.factory("Americans", rules);
     const player = new Player("Player", country);

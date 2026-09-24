@@ -157,6 +157,8 @@ export class Infantry {
     rules: any,
     art: any,
     imageFinder: any,
+    // 孪生第 5 参 theater：调用方传入，本类不写入字段（与孪生一致）
+    theater: any,
     palette: any,
     camera: any,
     lighting: any,
@@ -168,6 +170,7 @@ export class Infantry {
     pipOverlay: any,
     worldSound: any,
   ) {
+    void theater;
     this.gameObject = gameObject;
     this.rules = rules;
     this.art = art;

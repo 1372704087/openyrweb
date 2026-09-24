@@ -81,6 +81,18 @@ export class MapSurface {
       geo.applyMatrix(new (THREE as any).Matrix4().makeTranslation(pos.x, pos.y + 0.05, pos.z));
       geos.push(geo);
     });
+    // 空图：返回空 mesh，避免 mergeBufferGeometries 读 geometries[0]
+    if (geos.length === 0) {
+      const emptyMat = new (THREE as any).ShadowMaterial();
+      emptyMat.transparent = true;
+      emptyMat.opacity = 0.5;
+      const emptyMesh = new (THREE as any).Mesh(new (THREE as any).BufferGeometry(), emptyMat);
+      emptyMesh.receiveShadow = true;
+      emptyMesh.renderOrder = 5;
+      emptyMesh.frustumCulled = false;
+      this.disposables.add(emptyMat);
+      return emptyMesh;
+    }
     const merged = BufferGeometryUtils.mergeBufferGeometries(geos);
     const mat = new (THREE as any).ShadowMaterial();
     mat.transparent = true;

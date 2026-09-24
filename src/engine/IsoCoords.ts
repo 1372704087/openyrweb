@@ -26,6 +26,10 @@ let worldOrigin: IsoPoint | undefined;
 /**
  * 等距坐标换算工具类（静态方法）。
  * 必须先 init(worldOrigin) 才能做世界↔屏幕换算。
+ *
+ * ⚠️ 方法体内必须用类名 `IsoCoords.xxx` 而非 `this.xxx`：
+ * 调用方（如 MapTileLayerDebug）会 `IsoCoords.tileToScreen.apply(instance, args)`，
+ * thisArg 不是类本身；孪生用类别名 `s` 引用，TS 若用 this 会在错误 this 上找 worldToScreen。
  */
 export class IsoCoords {
   /** 设置世界原点（屏幕换算的基准）。 */
@@ -70,8 +74,8 @@ export class IsoCoords {
    * @param e - { x, y(高度), z } 世界向量
    */
   static vecWorldToScreen(e: IsoVec3): IsoPoint {
-    const t = this.worldToScreen(e.x, e.z);
-    t.y -= this.tileHeightToScreen(Coords.worldToTileHeight(e.y));
+    const t = IsoCoords.worldToScreen(e.x, e.z);
+    t.y -= IsoCoords.tileHeightToScreen(Coords.worldToTileHeight(e.y));
     return t;
   }
 
@@ -82,7 +86,7 @@ export class IsoCoords {
    */
   static tileToScreen(e: number, t: number): IsoPoint {
     const i = Coords.tileToWorld(e, t);
-    return this.worldToScreen(i.x, i.y);
+    return IsoCoords.worldToScreen(i.x, i.y);
   }
 
   /**
@@ -100,8 +104,8 @@ export class IsoCoords {
    * @param i - 高度层数
    */
   static tile3dToScreen(e: number, t: number, i: number): IsoPoint {
-    const r = this.tileToScreen(e, t);
-    r.y -= this.tileHeightToScreen(i);
+    const r = IsoCoords.tileToScreen(e, t);
+    r.y -= IsoCoords.tileHeightToScreen(i);
     return r;
   }
 
@@ -129,15 +133,15 @@ export class IsoCoords {
    * @param t - 屏幕 tile Y
    */
   static screenTileToWorld(e: number, t: number): IsoPoint {
-    const i = this.screenTileToScreen(e, t);
-    return this.screenToWorld(i.x, i.y);
+    const i = IsoCoords.screenTileToScreen(e, t);
+    return IsoCoords.screenToWorld(i.x, i.y);
   }
 
   /** 单个屏幕 tile 的像素宽高。 */
   static getScreenTileSize(): { width: number; height: number } {
     return {
-      width: this.tileToScreen(1, 0).x - this.tileToScreen(0, 1).x,
-      height: this.tileToScreen(1, 1).y - this.tileToScreen(0, 0).y,
+      width: IsoCoords.tileToScreen(1, 0).x - IsoCoords.tileToScreen(0, 1).x,
+      height: IsoCoords.tileToScreen(1, 1).y - IsoCoords.tileToScreen(0, 0).y,
     };
   }
 

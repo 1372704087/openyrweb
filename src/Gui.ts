@@ -624,7 +624,7 @@ export class Gui {
     (taunts.onChange.subscribe(persistTaunts), this.disposables.add(() => taunts.onChange.unsubscribe(persistTaunts)));
     const gameMenuScreens = new Map()
       .set(GameMenuScreenType.Home, new GameMenuHomeScreen(strings, this.fullScreen))
-      .set(GameMenuScreenType.Diplo, new DiploScreen(strings, jsxRenderer, renderer, rules, taunts, readySet))
+      .set(GameMenuScreenType.Diplo, new DiploScreen(strings, jsxRenderer, renderer, mpModes, taunts, readySet))
       .set(GameMenuScreenType.ConnectionInfo, new ConnectionInfoScreen(strings, jsxRenderer))
       .set(GameMenuScreenType.QuitConfirm, new QuitConfirmScreen(strings, jsxRenderer))
       .set(GameMenuScreenType.Options, new OptionsScreen(strings, jsxRenderer, options, this.localPrefs, this.fullScreen, true, false, mixer, music))
@@ -634,10 +634,12 @@ export class Gui {
     const webglRenderer = renderer;
     const clientApi = new ClientApi();
     (window.dispatchEvent(new CustomEvent("CdApiReady", { detail: clientApi })), ((window as any).CdApi = clientApi));
+    // GameScreen 第 3 形参是 wgameresService（孪生 R=WGameResService）；勿传 ladderService，
+    // 否则 sendGameRes 会因缺少 sendGameResPacket 报错。
     ((loadingKeys = new GameScreen(
       (workerHost as any).workerHostApi,
       gservConnection,
-      ladderService,
+      wGameResService,
       wolService,
       mapTransferService,
       this.engineVersion,

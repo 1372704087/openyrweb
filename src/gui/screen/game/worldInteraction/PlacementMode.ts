@@ -80,7 +80,7 @@ export class PlacementMode {
       worker,
       renderer,
       eva,
-      new PlacementGridCtor(model, renderer.camera, game.map.tiles),
+      new PlacementGridCtor(model, worldScene.camera, game.map.tiles),
       worldScene,
     );
     inst.placementGridModel = model;

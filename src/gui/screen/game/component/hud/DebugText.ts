@@ -136,7 +136,7 @@ export class DebugText extends UiComponent {
    */
   drawLine(text: string, color: any, y: number): number {
     const font = {
-      fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+      fontFamily: "'Fira Sans Condensed', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', Arial, sans-serif",
       fontSize: 12,
       fontWeight: "400",
       paddingTop: 6,

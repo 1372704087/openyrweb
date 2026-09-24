@@ -47,7 +47,7 @@ export class SidebarMenu extends UiComponent {
       pos.y = this.props.menuHeight - img.height;
     }
     const box = { x: pos.x, y: pos.y, width: img.width, height: img.height };
-    const ref = jsx.createRef();
+    const ref = (jsxModule as any).createRef();
     return jsx(
       "fragment",
       null,

@@ -182,6 +182,8 @@ export class MapTileLayer {
       lightTriples.push(light.x, light.y, light.z);
       this.tileIndexes.set(tile, x);
     }
+    // 空图/无 tile：跳过合并，避免 geometries[0] 空指针
+    if (geos.length === 0) return;
     const material = new PaletteBasicMaterial({
       map: atlas.getTexture(),
       palette: paletteTex,
@@ -190,7 +192,7 @@ export class MapTileLayer {
       useVertexColorMult: true,
     });
     const merged = BufferGeometryUtils.mergeBufferGeometries(geos);
-    const vertCount = merged.getAttribute("position").count;
+    const vertCount = merged.getAttribute("position")?.count ?? 0;
     if (vertCount !== (SpriteUtils.VERTICES_PER_SPRITE * lightTriples.length) / 3) {
       throw new Error("Vertex count mismatch");
     }

@@ -96,7 +96,7 @@ export class DebugLabel {
         color,
         outlineColor: outline,
         outlineWidth: 2,
-        fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+        fontFamily: "'Fira Sans Condensed', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', Arial, sans-serif",
         fontSize: 10,
         fontWeight: "400",
         paddingTop: 3,

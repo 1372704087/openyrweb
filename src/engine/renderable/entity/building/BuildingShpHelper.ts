@@ -29,30 +29,30 @@ export class BuildingShpHelper {
   /**
    * 收集主图/受损图与各动画层的 SHP 帧信息。
    * @param art - 建筑 art 段（含 hasShadow）
-   * @param mainShp - 主 SHP 路径（可空）
-   * @param damagedShp - 受损 SHP 路径（可空）
-   * @param animPropsByImage - image 名 → AnimProps
+   * @param mainShp - 主 SHP 文件（可空）
+   * @param damagedShp - 受损/bib SHP 文件（可空）
+   * @param animPropsByImage - image 名 → SHP 文件（collectAnimShpFiles 结果）
    * @param animData - BuildingAnimArtProps（getAll 遍历）
-   * @returns shp 路径 → frameInfo
+   * @returns SHP 文件 → frameInfo
    */
   getShpFrameInfos(
     art: any,
-    mainShp: string | undefined,
-    damagedShp: string | undefined,
+    mainShp: any,
+    damagedShp: any,
     animPropsByImage: Map<string, any>,
     animData: { getAll(): Map<number, any[]> },
-  ): Map<string, any> {
-    const result = new Map<string, any>();
+  ): Map<any, any> {
+    const result = new Map<any, any>();
     if (mainShp) result.set(mainShp, ShpAggregator.getShpFrameInfo(mainShp, art.hasShadow));
     if (damagedShp) result.set(damagedShp, ShpAggregator.getShpFrameInfo(damagedShp, art.hasShadow));
     animData.getAll().forEach((list) => {
       list.forEach((entry) => {
         const addFrameInfo = (animArt: any, image: string | undefined) => {
           if (!image) return;
-          const props = animPropsByImage.get(image);
-          if (props) {
-            const ap = new AnimProps(animArt, props);
-            result.set(image, ShpAggregator.getShpFrameInfo(image, ap.shadow));
+          const shpFile = animPropsByImage.get(image);
+          if (shpFile) {
+            const ap = new AnimProps(animArt, shpFile);
+            result.set(shpFile, ShpAggregator.getShpFrameInfo(shpFile, ap.shadow));
           }
         };
         addFrameInfo(entry.art, entry.image);

@@ -475,7 +475,7 @@ export class SidebarCard extends UiComponent {
     return OverlayUtils.createTextBox(text, {
       color,
       backgroundColor: "rgba(0, 0, 0, .5)",
-      fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+      fontFamily: "'Fira Sans Condensed', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', Arial, sans-serif",
       fontSize: 14,
       fontWeight: "500",
       paddingTop: 6,

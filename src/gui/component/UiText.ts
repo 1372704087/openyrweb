@@ -104,7 +104,7 @@ export class UiText extends UiComponent {
     this.ctx.clearRect(0, 0, this.props.width, this.props.height);
     CanvasUtils.drawText(this.ctx, value, 0, 0, {
       color,
-      fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+      fontFamily: "'Fira Sans Condensed', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', Arial, sans-serif",
       fontSize: 12,
       fontWeight: "500",
       paddingTop: 6,

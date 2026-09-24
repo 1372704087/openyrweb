@@ -162,7 +162,7 @@ export class SecureProgressSprite {
         ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
         CanvasUtils.drawText(ctx, player.name, 0, 0, {
           color: colorHex,
-          fontFamily: "'Fira Sans Condensed', Arial, sans-serif",
+          fontFamily: "'Fira Sans Condensed', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', Arial, sans-serif",
           fontSize: 10,
           fontWeight: "500",
           textAlign: "center",

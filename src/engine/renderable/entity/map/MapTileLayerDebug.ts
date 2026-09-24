@@ -102,11 +102,15 @@ export class MapTileLayerDebug {
 
   /**
    * 切换可见性。
+   * 孪生：`e !== this.visible && ((this.visible = e), this.target)` ——
+   * 先更新 visible 标志再判 target；target 未创建时也必须记录新状态，
+   * 否则 create3DObject 会按构造默认值(true)把调试网格建出来。
    * @param visible - 目标可见
    */
   setVisible(visible: boolean): void {
-    if (visible === this.visible || !this.target) return;
+    if (visible === this.visible) return;
     this.visible = visible;
+    if (!this.target) return;
     this.target.visible = visible;
     if (this.visible) {
       if (!this.tileOverlay) {

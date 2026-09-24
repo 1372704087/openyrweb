@@ -82,7 +82,7 @@ export class GameFactory {
    * 10 gameOpts, 11 gameModes, 12 singlePlayer, 13 botsLib,
    * 14 logger, 15 productionRules, 16 botDebugIndex, 17 actionLogger
    *
-   * tileSets 仅作兼容入参（TS GameMap 从 mapFile.tiles 构建，不读 tileSets）；
+   * tileSets 传入 GameMap/TileCollection/Bridges/AutoLat（孪生 create 第 2 参）；
    * gameModeId 取自 gameOpts.gameMode；human 玩家名取自 gameOpts.humanPlayers。
    */
   static create(
@@ -106,6 +106,7 @@ export class GameFactory {
   ): any {
     return GameFactory.createInner(
       mapFile,
+      tileSets,
       rulesIni,
       artIni,
       aiIni,
@@ -125,9 +126,10 @@ export class GameFactory {
     );
   }
 
-  /** 内部实现：参数与孪生 create 对齐（不含 tileSets，与 GameMap 构造一致）。 */
+  /** 内部实现：参数与孪生 create 对齐（含 tileSets，供 GameMap 使用）。 */
   private static createInner(
     mapFile: any,
+    tileSets: any,
     baseRulesIni: any,
     baseArtIni: any,
     defaultAiIni: any,
@@ -164,7 +166,7 @@ export class GameFactory {
     let multiplayerCountries = rawRules.getMultiplayerCountries();
     let multiplayerColors = [...rawRules.getMultiplayerColors().values()];
     let prng = Prng.factory(seed, startTimestamp);
-    let gameMap = new GameMap(mapFile, rules, gameOpts, prng.generateRandomInt.bind(prng));
+    let gameMap = new GameMap(mapFile, tileSets, rules, prng.generateRandomInt.bind(prng));
     var world = new World();
     var gameModeType = gameModes.getById(gameModeId).type;
     var playerList = new PlayerList();

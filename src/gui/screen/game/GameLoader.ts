@@ -681,24 +681,27 @@ export class GameLoader {
       ),
     );
     for (const b of rules.buildingRules.values()) {
+      // 与孪生一致：freeUnit/undeploysInto/初始单位从 **rules** 取规则对象入 set；
+      // 若误用 art.getObject，塞进的是无 .name 的 ObjectArt，二次 art.getObject(name)
+      // 会抛 "Must specify an art name for type Vehicle"。
       if (b.freeUnit) {
         let free: any;
-        if (art.hasObject(b.freeUnit, ObjectType.Vehicle)) {
-          free = art.getObject(b.freeUnit, ObjectType.Vehicle);
+        if (rules.hasObject(b.freeUnit, ObjectType.Vehicle)) {
+          free = rules.getObject(b.freeUnit, ObjectType.Vehicle);
         }
         if (free) set.add(free);
       }
       if (
         b.undeploysInto &&
-        art.hasObject(b.undeploysInto, ObjectType.Vehicle)
+        rules.hasObject(b.undeploysInto, ObjectType.Vehicle)
       ) {
-        set.add(art.getObject(b.undeploysInto, ObjectType.Vehicle));
+        set.add(rules.getObject(b.undeploysInto, ObjectType.Vehicle));
       }
     }
     for (const obj of map.getInitialMapObjects().technos) {
       if (!obj.isVehicle() && !obj.isAircraft()) continue;
-      if (!art.hasObject(obj.name, obj.type)) continue;
-      set.add(art.getObject(obj.name, obj.type));
+      if (!rules.hasObject(obj.name, obj.type)) continue;
+      set.add(rules.getObject(obj.name, obj.type));
     }
     const files = new Map<string, any>();
     for (const rules of set) {

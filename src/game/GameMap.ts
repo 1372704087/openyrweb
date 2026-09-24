@@ -55,9 +55,15 @@ export class GameMap {
     return this.mapFile.startingLocations;
   }
 
-  constructor(mapFile: any, rules: any, gameOpts: any, randomInt: any) {
+  /**
+   * 与孪生 GameMap(mapFile, tileSets, rules, randomInt) 一致：
+   * - tileSets → TileCollection / Bridges / AutoLat（需 getTileImage 等）
+   * - rules（Rules 实例）→ generalRules、Terrain.rules、Bridges.rules
+   * - randomInt → 传入 getTileImage 的 damaged 回调
+   */
+  constructor(mapFile: any, tileSets: any, rules: any, randomInt: any) {
     this.mapFile = mapFile;
-    this.tiles = new TileCollection(this.mapFile.tiles, rules, gameOpts.general, randomInt);
+    this.tiles = new TileCollection(this.mapFile.tiles, tileSets, rules.general, randomInt);
     this.mapBounds = new MapBounds().fromMapFile(this.mapFile, this.tiles);
     this.tileOccupation = new TileOccupation(this.tiles);
     this.tileOcclusion = new TileOcclusion(this.tiles);
@@ -66,9 +72,9 @@ export class GameMap {
       this.mapFile.theaterType,
       this.mapBounds,
       this.tileOccupation,
-      gameOpts,
+      rules,
     );
-    this.bridges = new Bridges(rules, this.tiles, this.tileOccupation, this.mapBounds, gameOpts);
+    this.bridges = new Bridges(tileSets, this.tiles, this.tileOccupation, this.mapBounds, rules);
     // 把 cellTags 上的 tagId 解析成 tag 对象挂到对应 tile
     let tags = this.mapFile.tags;
     for (const cellTag of this.mapFile.cellTags) {
@@ -92,7 +98,7 @@ export class GameMap {
       },
     );
     // 雪地剧院不做 AutoLat（孪生条件：theaterType !== Snow 才计算）
-    if (this.mapFile.theaterType !== TheaterType.Snow) AutoLat.calculate(this.tiles, rules);
+    if (this.mapFile.theaterType !== TheaterType.Snow) AutoLat.calculate(this.tiles, tileSets);
   }
 
   /** 计算 QuadTree 最大深度：反复对半直至 <2，再补一层（若有余数）。 */

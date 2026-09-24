@@ -212,7 +212,7 @@ export class WorldInteractionFactory {
       ),
       selectionHandler,
       defaultAction,
-      viewportHelper,
+      keyboard,
       new ArrowScrollHandler(scrollHandler),
       new CustomScrollHandler(scrollHandler),
       new MinimapHandler(
