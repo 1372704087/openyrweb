@@ -11782,6 +11782,29 @@
     "4": {
       "type": "function",
       "arity": 1
+    },
+    "5": {
+      "sent": [
+        "PONG :irc.westwood.com",
+        "PONG"
+      ],
+      "queue": {
+        "position": 5,
+        "avgWaitSeconds": 30
+      },
+      "chatCount": 2,
+      "chat0": {
+        "from": "Bob",
+        "toType": 0,
+        "toName": "#room",
+        "text": "hi there"
+      },
+      "chat1": {
+        "from": "Bob",
+        "toType": 1,
+        "toName": "Alice",
+        "text": "secret"
+      }
     }
   },
   "network/WolGameReport": {
@@ -12563,7 +12586,31 @@
     },
     "3": [
       "GameRes"
-    ]
+    ],
+    "4": {
+      "sameClientRef": true,
+      "playerCount": 2,
+      "speed": 2,
+      "duration": 42,
+      "tournament": true,
+      "buildOff": true,
+      "dstb": true,
+      "names": [
+        "Alice",
+        "Bob"
+      ],
+      "team": [
+        0,
+        0
+      ],
+      "color": 1,
+      "cmp": 256,
+      "buildingsBuilt": 4,
+      "unitsLeft": 2,
+      "lost": false,
+      "chained": true,
+      "clientAccount": "Alice"
+    }
   },
   "network/IrcConnection": {
     "0": {

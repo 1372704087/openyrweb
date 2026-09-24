@@ -192,7 +192,7 @@ export class GameRes {
       instantCapture: opts.instantCapture,
       delayedOils: opts.delayedOils,
     };
-    this.client = { ...client };
+    this.client = client;
     const teams = this.computePlayerTeams(g, humanPlayers);
     this.players = humanPlayers.map((p) => ({
       buildingsBuilt: p.getUnitsBuilt(ObjectType.Building),
@@ -217,7 +217,7 @@ export class GameRes {
       completionStatus: this.getCompletionStatus(p, g, this.client, humanPlayers.length),
       country: p.country.id,
       side: p.country.side,
-      team: teams.get(p) ?? 0,
+      team: teams.get(p)!,
       startPos: p.startLocation,
     }));
     return this;

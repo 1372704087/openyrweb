@@ -22415,6 +22415,55 @@ const CONVERTED = [
         const F = ns["WolConnection"] && ns["WolConnection"].factory;
         return { type: typeof F, arity: F ? F.length : -1 };
       },
+      (ns) => {
+        // handleMessage 分发：PING / 数字 RPL / 二进制丢弃 / PRIVMSG / PAGE
+        const sent = [];
+        const queues = [];
+        const chats = [];
+        const log = { info() {}, warn() {}, error() {} };
+        const conStub = {
+          onMessage: { subscribe() {}, unsubscribe() {} },
+          onClose: { subscribe() {}, subscribeOnce() {}, unsubscribe() {} },
+          sendMessage(m) {
+            sent.push(m);
+          },
+          sendCommand: async () => [],
+          isOpen: () => false,
+          onError: { subscribe() {}, unsubscribe() {} },
+        };
+        const w = new ns.WolConnection(conStub, log);
+        w.currentUser = "Alice";
+        w.onLoginQueueUpdate.subscribe((u) => {
+          queues.push(u);
+        });
+        w.onChatMessage.subscribe((msg) => {
+          chats.push(msg);
+        });
+        w.handleMessage("PING :irc.westwood.com");
+        w.handleMessage("PING");
+        w.handleMessage(new Uint8Array([1, 2, 3]));
+        // RPL_LOGIN_QUEUE=720；params=[nick, "^N", avgWait]
+        w.handleMessage(":server 720 Alice ^5 30");
+        w.handleMessage(":Bob!x@y PRIVMSG #room :hi there");
+        w.handleMessage(":Bob!x@y PAGE Alice :secret");
+        return {
+          sent,
+          queue: queues[0],
+          chatCount: chats.length,
+          chat0: chats[0] && {
+            from: chats[0].from,
+            toType: chats[0].to && chats[0].to.type,
+            toName: chats[0].to && chats[0].to.name,
+            text: chats[0].text,
+          },
+          chat1: chats[1] && {
+            from: chats[1].from,
+            toType: chats[1].to && chats[1].to.type,
+            toName: chats[1].to && chats[1].to.name,
+            text: chats[1].text,
+          },
+        };
+      },
     ],
   },
 
@@ -23028,6 +23077,101 @@ const CONVERTED = [
         };
       },
       (ns) => Object.keys(ns).sort(),
+      (ns, THREE, mod) => {
+        // fromGame：client 引用保留（非浅拷贝）、OBS 过滤、team/color/completion
+        const OBS = mod("game/gameopts/constants").OBS_COUNTRY_ID;
+        const ObjectType = mod("engine/type/ObjectType").ObjectType;
+        const mkPlayer = (name, countryId) => ({
+          name,
+          country: { id: countryId, side: 1 },
+          color: { asHex: () => "#" + name },
+          buildings: { size: 2 },
+          credits: 100,
+          creditsGained: 5,
+          buildingsCaptured: 0,
+          cratesPickedUp: 1,
+          startLocation: 3,
+          defeated: false,
+          getUnitsBuilt: (t) => (t === ObjectType.Building ? 4 : 1),
+          getUnitsKilled: () => 0,
+          getOwnedObjectsByType: () => ({ length: 2 }),
+        });
+        const alice = mkPlayer("Alice", 5);
+        const bob = mkPlayer("Bob", 6);
+        const obs = mkPlayer("Obs", OBS);
+        const byName = { Alice: alice, Bob: bob, Obs: obs };
+        const client = {
+          avgFps: 60,
+          avgRtt: 20,
+          finished: true,
+          gameSku: 16640,
+          outOfSync: false,
+          pingsRecv: 1,
+          pingsSent: 1,
+          clientVers: "1.0.6",
+          quit: false,
+          accountName: "Alice",
+          suddenDisconnect: false,
+        };
+        const game = {
+          id: "G-from",
+          startTimestamp: 1700000000000,
+          currentTime: 42000,
+          gameOpts: {
+            gameSpeed: 4,
+            credits: 5000,
+            unitCount: 10,
+            shortGame: true,
+            superWeapons: false,
+            buildOffAlly: true,
+            mcvRepacks: false,
+            cratesAppear: false,
+            gameMode: 1,
+            mapName: "m.map",
+            mapDigest: "deadbeef",
+            destroyableBridges: true,
+            multiEngineer: false,
+            noDogEngiKills: false,
+            instantCapture: true,
+            delayedOils: false,
+            humanPlayers: [
+              { name: "Alice", countryId: 5 },
+              { name: "Bob", countryId: 6 },
+              { name: "Obs", countryId: OBS },
+            ],
+            aiPlayers: [],
+          },
+          getPlayerByName: (n) => byName[n],
+          alliances: { getAllies: (p) => (p === alice ? [alice, bob] : [bob]) },
+          rules: {
+            colors: new Map([
+              [5, { asHex: () => "#Alice" }],
+              [6, { asHex: () => "#Bob" }],
+            ]),
+          },
+        };
+        const g = new ns.GameRes();
+        const ret = g.fromGame(game, true, client);
+        return {
+          sameClientRef: g.client === client,
+          playerCount: g.players.length,
+          speed: g.game.speed,
+          duration: g.game.duration,
+          tournament: g.game.tournament,
+          buildOff: g.game.buildOffAlly,
+          dstb: g.game.destroyableBridges,
+          names: g.players.map((p) => p.name),
+          team: g.players.map((p) => p.team),
+          color: g.players[0].color,
+          cmp: g.players[0].completionStatus,
+          buildingsBuilt: g.players[0].buildingsBuilt,
+          unitsLeft: g.players[0].unitsLeft,
+          lost: g.players[0].lostConnection,
+          chained: ret === g,
+          clientAccount: g.client.accountName,
+        };
+      },
+
     ],
   },
 
