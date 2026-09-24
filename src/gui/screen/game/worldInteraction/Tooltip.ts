@@ -13,8 +13,8 @@ import * as CanvasUtilsModule from "engine/gfx/CanvasUtils"; // 孪生
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // 孪生 any-shim
-const SpriteUtils: any = SpriteUtilsModule as any;
-const CanvasUtils: any = CanvasUtilsModule as any;
+const SpriteUtils: any = (SpriteUtilsModule as any).SpriteUtils;
+const CanvasUtils: any = (CanvasUtilsModule as any).CanvasUtils;
 
 /** 悬停 Tooltip。 */
 export class Tooltip extends UiObject {

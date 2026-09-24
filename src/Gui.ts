@@ -370,7 +370,8 @@ export class Gui {
     const mapTransferService = new MapTransferService(wolService);
     const gservLogger = AppLogger.get("gserv");
     const gservConnection = GservConnection.factory(gservLogger);
-    let mapList = Engine.getMapList();
+    const realMapList = Engine.getMapList();
+    let mapList = realMapList;
     let modDir = await Engine.getModDir().catch((e: any) => {
       (console.error("Couldn't get mods directory", [e]),
         e instanceof StorageQuotaError ||
@@ -590,41 +591,31 @@ export class Gui {
         vxlPool.clearStorage().catch((e: any) => console.warn("Couldn't clear VXL geocache", [e])));
     });
     menuScreens.get(MainMenuScreenType.OptionsStorage).setVxlGeometryPool(vxlPool);
-    ((mapDir = new BoxedVar(false)),
-      (modDir = new Map()),
-      (modMeta = AppLogger.get("action")));
+    const realMapDir = mapDir;
+    const gameMapDir = realMapDir;
+    const gameMapList = realMapList;
+    const speedCheat = new BoxedVar(false);
+    const buildingImageDataCache = new Map();
+    const actionLogger = AppLogger.get("action");
     const lockstepLogger = AppLogger.get("lockstep");
-    ((mpModes = new GameLoader(
-      this.appVersion,
-      (workerHost as any).workerHostApi,
-      this.cdnResourceLoader,
-      rules,
-      sound,
-      music,
-      this.gpuTier,
-      this.runtimeVars.debugBotIndex,
-      this.config.devMode,
-    )),
-      // 注意：GameLoader 实参顺序贴孪生（s=rules 前的局部变量被后续覆盖），
-      // 此处以类型宽松 any 链承接，运行期与孪生逐位一致。
-      (modMeta = new Set()));
-    // 修正：上面 GameLoader 实参按孪生局部变量槽位还原——见下方完整绑定。
-    // （为避免中间变量覆盖造成的错位，GameLoader 改用显式实参。）
     const gameLoader = new GameLoader(
       this.appVersion,
       (workerHost as any).workerHostApi,
       this.cdnResourceLoader,
+      modLoaderRes,
       rules,
+      mpModes,
       sound,
-      music,
-      this.gpuTier,
+      iniLogger,
+      actionLogger,
+      speedCheat,
+      gameResConfig,
+      vxlPool,
+      buildingImageDataCache,
       this.runtimeVars.debugBotIndex,
       this.config.devMode,
     );
-    const pausedFlag = new BoxedVar(false);
     let loadingKeys: any = new Map();
-    const actionLogger = AppLogger.get("action");
-    // 锁定上面对 actionLogger 的绑定（modMeta 槽位在孪生也被复用）。
     const readySet = new Set();
     const taunts = new BoxedVar(Boolean(Number(this.localPrefs.getItem(StorageKey.TauntsEnabled) ?? "1")));
     const persistTaunts = (on: boolean) => {
@@ -639,9 +630,10 @@ export class Gui {
       .set(GameMenuScreenType.Options, new OptionsScreen(strings, jsxRenderer, options, this.localPrefs, this.fullScreen, true, false, mixer, music))
       .set(GameMenuScreenType.OptionsSound, new SoundOptsScreen(strings, jsxRenderer, mixer, music, this.localPrefs))
       .set(GameMenuScreenType.OptionsKeyboard, new KeyboardScreen(strings, jsxRenderer, keyBinds));
-    const loadingScreenApiFactory = new LoadingScreenApiFactory(rules, strings, uiScene, jsxRenderer, renderer, gservConnection);
-    (renderer = new ClientApi());
-    (window.dispatchEvent(new CustomEvent("CdApiReady", { detail: renderer })), ((window as any).CdApi = renderer));
+    const loadingScreenApiFactory = new LoadingScreenApiFactory(rules, strings, uiScene, jsxRenderer, gameResConfig, gservConnection);
+    const webglRenderer = renderer;
+    const clientApi = new ClientApi();
+    (window.dispatchEvent(new CustomEvent("CdApiReady", { detail: clientApi })), ((window as any).CdApi = clientApi));
     ((loadingKeys = new GameScreen(
       (workerHost as any).workerHostApi,
       gservConnection,
@@ -653,62 +645,68 @@ export class Gui {
       errorHandler,
       gameMenuScreens,
       loadingScreenApiFactory,
-      pausedFlag as any,
-      lockstepLogger as any,
+      gameoptParser,
+      gameoptSerializer,
       this.config,
       strings,
-      mixer as any,
-      uiScene as any,
+      webglRenderer,
+      uiScene,
       this.runtimeVars,
       this.messageBoxApi,
       this.toastApi,
-      loop as any,
+      loop,
       this.viewport,
-      jsxRenderer as any,
-      pointer as any,
-      sound as any,
-      music as any,
-      taunts as any,
-      keyBinds as any,
-      options as any,
-      actionLogger as any,
-      lockstepLogger as any,
-      replayManager as any,
-      this.fullScreen as any,
-      mapFileLoader as any,
-      mapList as any,
-      gameLoader as any,
-      vxlPool as any,
-      loadingKeys as any,
-      readySet as any,
-      taunts as any,
-      pausedFlag as any,
-      this.sentry as any,
-      (renderer as any).battleControl,
+      jsxRenderer,
+      pointer,
+      sound,
+      music,
+      mixer,
+      keyBinds,
+      options,
+      this.localPrefs,
+      actionLogger,
+      lockstepLogger,
+      replayManager,
+      this.fullScreen,
+      mapFileLoader,
+      gameMapDir,
+      gameMapList,
+      gameLoader,
+      vxlPool,
+      buildingImageDataCache,
+      readySet,
+      taunts,
+      speedCheat,
+      this.sentry,
+      clientApi.battleControl,
     )),
       (renderer = new ReplayScreen(
         this.engineVersion,
         this.engineModHash,
-        errorHandler as any,
-        gameMenuScreens as any,
+        errorHandler,
+        gameMenuScreens,
         loadingScreenApiFactory,
         this.config,
+        uiScene,
         strings,
-        mixer as any,
-        uiScene as any,
+        webglRenderer,
+        uiScene,
         this.runtimeVars,
         this.messageBoxApi,
-        loop as any,
+        loop,
         this.viewport,
-        jsxRenderer as any,
-        pointer as any,
-        sound as any,
-        music as any,
-        taunts as any,
-        this.fullScreen as any,
-        mapFileLoader as any,
-        vxlPool as any,
-        loadingKeys as any,
+        jsxRenderer,
+        pointer,
+        sound,
+        music,
+        keyBinds,
+        options,
+        actionLogger,
+        this.fullScreen,
+        mapFileLoader,
+        gameLoader,
+        vxlPool,
+        buildingImageDataCache,
         () => {
           void 0 !== replayTarget
             ? (window.close(),
@@ -718,7 +716,7 @@ export class Gui {
               })())
             : rootController.goToScreen(RootScreenType.MainMenuRoot);
         },
-        (renderer as any).battleControl,
+        clientApi.battleControl,
       )));
     (rootController.addScreen(RootScreenType.MainMenuRoot, wolConnection as any),
       rootController.addScreen(RootScreenType.Game, loadingKeys as any),

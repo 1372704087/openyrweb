@@ -22,7 +22,7 @@ import * as ObjectArtModule from "game/art/ObjectArt"; // 孪生
 const jsx: any = (jsxModule as any).jsx;
 const UiObject: any = (UiObjectModule as any).UiObject;
 const UiComponent: any = (UiComponentModule as any).UiComponent;
-const OverlayUtils: any = OverlayUtilsModule as any;
+const OverlayUtils: any = (OverlayUtilsModule as any).OverlayUtils;
 const HtmlContainer: any = (HtmlContainerModule as any).HtmlContainer;
 const ObjectArt: any = (ObjectArtModule as any).ObjectArt ?? ObjectArtModule;
 

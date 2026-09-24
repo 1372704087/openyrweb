@@ -19,12 +19,12 @@ import * as EngineModule from "engine/Engine"; // 孪生
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // 孪生 any-shim
-const OverlayUtils: any = OverlayUtilsModule as any;
-const SpriteUtils: any = SpriteUtilsModule as any;
-const IsoCoords: any = IsoCoordsModule as any;
-const ExtensionHost: any = ExtensionHostModule as any;
-const ShpFile: any = ShpFileModule as any;
-const Engine: any = EngineModule as any;
+const OverlayUtils: any = (OverlayUtilsModule as any).OverlayUtils;
+const SpriteUtils: any = (SpriteUtilsModule as any).SpriteUtils;
+const IsoCoords: any = (IsoCoordsModule as any).IsoCoords;
+const ExtensionHost: any = (ExtensionHostModule as any).ExtensionHost;
+const ShpFile: any = (ShpFileModule as any).ShpFile;
+const Engine: any = (EngineModule as any).Engine;
 
 /** 2 的幂取整（与孪生 THREE.Math.ceilPowerOfTwo 一致）。 */
 const ceilPowerOfTwo: (n: number) => number = (THREE as any).Math?.ceilPowerOfTwo ?? ((n: number) => Math.pow(2, Math.ceil(Math.log2(n))));

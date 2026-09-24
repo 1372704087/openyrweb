@@ -12811,6 +12811,17 @@
       "types": {
         "MapManifest": "function"
       }
+    },
+    "1": {
+      "fileName": "testmap.map",
+      "uiName": "NOSTR:Test Map",
+      "maxSlots": 4,
+      "official": true,
+      "gameModes": 1,
+      "title": "[NOSTR:Test Map] (2-4)",
+      "suffixKept": "Already (2)",
+      "suffixAdded": "Plain (2-4)",
+      "suffixAdded2": "Plain (2)"
     }
   },
   "engine/MapSupport": {
@@ -15563,7 +15574,9 @@
     "1": {
       "Renderer": "function"
     },
-    "2": "addScene,createGlRenderer,destroyStats,getCanvas,getStats,init,initStats,removeScene,setViewportSize,supportsInstancing,update"
+    "2": "addScene,createGlRenderer,destroyStats,getCanvas,getStats,init,initStats,removeScene,setViewportSize,supportsInstancing,update",
+    "3": "create3DObject > update(1111,2222) > update(3333,undefined)",
+    "4": "[object Object],[object Object]"
   },
   "engine/gfx/RendererError": {
     "0": "RendererError",

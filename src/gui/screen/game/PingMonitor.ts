@@ -10,8 +10,8 @@ import { EventDispatcher } from "util/event"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// 孪生 any-shim：NoReplyError 取命名空间
-const IrcConnection: any = IrcConnectionModule as any;
+// 孪生 any-shim：取命名空间上的类；整模块别名会让 NoReplyError 为 undefined
+const IrcConnection: any = (IrcConnectionModule as any).IrcConnection;
 
 /** 网络延迟监控。 */
 export class PingMonitor {

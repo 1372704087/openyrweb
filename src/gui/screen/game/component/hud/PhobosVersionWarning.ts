@@ -17,7 +17,7 @@ import * as PhobosVersionModule from "extensions/phobos/PhobosVersion"; // 孪�
 
 // 孪生 any-shim：取命名空间成员
 const React: any = (ReactModule as any).default ?? ReactModule;
-const ExtensionHost: any = ExtensionHostModule as any;
+const ExtensionHost: any = (ExtensionHostModule as any).ExtensionHost;
 const PhobosVersion: any = PhobosVersionModule as any;
 
 /**

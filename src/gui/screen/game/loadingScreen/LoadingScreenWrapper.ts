@@ -28,8 +28,8 @@ const HtmlView: any = (HtmlViewModule as any).HtmlView;
 const LoadingScreen: any = (LoadingScreenModule as any).LoadingScreen;
 const OBS_COUNTRY_NAME: any = (constantsModule as any).OBS_COUNTRY_NAME;
 const OBS_COUNTRY_UI_NAME: any = (constantsModule as any).OBS_COUNTRY_UI_NAME;
-const Engine: any = EngineModule as any;
-const EngineType: any = EngineTypeModule as any;
+const Engine: any = (EngineModule as any).Engine;
+const EngineType: any = (EngineTypeModule as any).EngineType;
 
 /** 国家 → 背景 SHP。 */
 const COUNTRY_IMAGE = new Map<string, string>()

@@ -22,9 +22,9 @@ import { GameSpeed } from "game/GameSpeed"; // 已转换
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // 孪生 any-shim
-const SpriteUtils: any = SpriteUtilsModule as any;
+const SpriteUtils: any = (SpriteUtilsModule as any).SpriteUtils;
 const MinimapRenderer: any = (MinimapRendererModule as any).MinimapRenderer;
-const IsoCoords: any = IsoCoordsModule as any;
+const IsoCoords: any = (IsoCoordsModule as any).IsoCoords;
 const RadarEventType: any = (RadarRulesModule as any).RadarEventType;
 const MinimapModel: any = (MinimapModelModule as any).MinimapModel;
 

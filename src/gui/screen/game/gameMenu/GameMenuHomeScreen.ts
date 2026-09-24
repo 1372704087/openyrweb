@@ -14,7 +14,7 @@ import { GameMenuScreen } from "gui/screen/game/GameMenuScreen"; // 已转换
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // 孪生 any-shim
-const FullScreen: any = FullScreenModule as any;
+const FullScreen: any = (FullScreenModule as any).FullScreen;
 
 /** 菜单主页。 */
 export class GameMenuHomeScreen extends GameMenuScreen {

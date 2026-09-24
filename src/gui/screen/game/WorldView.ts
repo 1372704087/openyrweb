@@ -34,8 +34,8 @@ import * as VirusCloudFxHandlerModule from "engine/renderable/fx/handler/VirusCl
 
 // 孪生 any-shim：未完全转换的命名空间取成员
 const WorldScene: any = (WorldSceneModule as any).WorldScene ?? WorldSceneModule;
-const Engine: any = EngineModule as any;
-const IsoCoords: any = IsoCoordsModule as any;
+const Engine: any = (EngineModule as any).Engine;
+const IsoCoords: any = (IsoCoordsModule as any).IsoCoords;
 const VirusCloudFxHandler: any = (VirusCloudFxHandlerModule as any).VirusCloudFxHandler;
 const WorldSoundCtor: any = (WorldSound as any) ?? WorldSound;
 const MapRenderableCtor: any = (MapRenderable as any) ?? MapRenderable;

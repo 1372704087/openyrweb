@@ -23938,7 +23938,34 @@ const CONVERTED = [
         t["MapManifest"] = ns["MapManifest"] !== undefined ? (typeof ns["MapManifest"]) : "__undefined__";
       
       return { keys: Object.keys(ns).sort(), expected: ["MapManifest"], types: t };
-    }
+    },
+      // 行为探针（2026-09-24）：getFullMapTitle(strings) 的入参是 **Strings 对象**，
+      // 取文案必须走 `strings.get(key)`。此处曾写成把入参当函数调用 `e(key)` ⇒
+      // 所有调用点（SkirmishScreen.initOptions/createGame 等）传的都是对象，
+      // 运行期抛 "e is not a function"，遭遇战开局菜单中断。这条路必须有真值覆盖。
+      (ns) => {
+        const section = {
+          name: "TestMap",
+          getString: (k) => ({ File: "testmap.map", Description: "NOSTR:Test Map" }[k]),
+          getNumber: () => 4,
+          getBool: () => true,
+          getArray: () => ["standard"],
+          entries: new Map(),
+        };
+        const m = new ns.MapManifest().fromIni(section, [{ mapFilter: "standard" }]);
+        const strings = { get: (key) => "[" + key + "]" };
+        return {
+          fileName: m.fileName,
+          uiName: m.uiName,
+          maxSlots: m.maxSlots,
+          official: m.official,
+          gameModes: m.gameModes.length,
+          title: m.getFullMapTitle(strings),
+          suffixKept: m.addTitleSlotsSuffix("Already (2)", 4),
+          suffixAdded: m.addTitleSlotsSuffix("Plain", 4),
+          suffixAdded2: m.addTitleSlotsSuffix("Plain", 2),
+        };
+      },
     ],
   },
 
@@ -26612,6 +26639,37 @@ const CONVERTED = [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "Renderer": typeof ns["Renderer"] }),
       (ns) => { const p = ns["Renderer"]?.prototype ?? {}; return ["create3DObject","update","getCanvas","getStats","supportsInstancing","initStats","destroyStats","init","createGlRenderer","setViewportSize","addScene","removeScene"].filter((k) => typeof p[k] === "function").sort().join(","); },
+      // 行为探针（2026-09-24）：renderer.update(A, B) 必须**按原顺序**转发给 scene.update。
+      // 此处曾写成 scene.update(delta, nowMs)（参数交换）⇒ UI 循环只传 1 个参数时，
+      // 所有 UI 对象拿到的 tick 变成 undefined，动画时间戳变 NaN、状态机永不停机，
+      // 主菜单侧栏滑入动画永不结束、右侧按钮永久隐藏。用记录型假 scene 锁死顺序。
+      (ns) => {
+        const log = [];
+        const scene = {
+          create3DObject() { log.push("create3DObject"); },
+          update(...a) { log.push("update(" + a.map((v) => String(v)).join(",") + ")"); },
+          viewport: { x: 0, y: 0, width: 10, height: 10 },
+          scene: {},
+          camera: {},
+        };
+        const r = new ns.Renderer(100, 200);
+        r.addScene(scene);
+        r.update(1111, 2222); // 世界循环：2 个参数
+        r.update(3333);       // UI 循环：只传 tick
+        r.removeScene(scene);
+        return log.join(" > ");
+      },
+      // 行为探针：onFrame 广播的载荷必须是第一个参数（时间戳），不是第二个。
+      (ns) => {
+        const payloads = [];
+        const scene = { create3DObject() {}, update() {}, viewport: { x: 0, y: 0, width: 1, height: 1 }, scene: {}, camera: {} };
+        const r = new ns.Renderer(1, 1);
+        r.onFrame.subscribe((_sender, payload) => payloads.push(String(payload)));
+        r.addScene(scene);
+        r.update(7777, 8888);
+        r.update(9999);
+        return payloads.join(",");
+      },
     ],
   },
 

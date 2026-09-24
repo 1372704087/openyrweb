@@ -22,9 +22,9 @@ const jsx: any = (jsxModule as any).jsx;
 const UiComponent: any = (UiComponentModule as any).UiComponent;
 const UiObject: any = (UiObjectModule as any).UiObject;
 const HtmlContainer: any = (HtmlContainerModule as any).HtmlContainer;
-const SpriteUtils: any = SpriteUtilsModule as any;
-const Engine: any = EngineModule as any;
-const EngineType: any = EngineTypeModule as any;
+const SpriteUtils: any = (SpriteUtilsModule as any).SpriteUtils;
+const Engine: any = (EngineModule as any).Engine;
+const EngineType: any = (EngineTypeModule as any).EngineType;
 
 /** 暂停菜单内容区。 */
 export class GameMenuContentArea extends UiComponent {

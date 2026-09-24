@@ -39,8 +39,8 @@ import { PhobosVersionWarning } from "gui/screen/game/component/hud/PhobosVersio
 const jsx: any = (jsxModule as any).jsx;
 const ShpFile: any = (ShpFileModule as any).ShpFile;
 const HtmlView: any = (HtmlViewModule as any).HtmlView;
-const Engine: any = EngineModule as any;
-const EngineType: any = EngineTypeModule as any;
+const Engine: any = (EngineModule as any).Engine;
+const EngineType: any = (EngineTypeModule as any).EngineType;
 const ShpAggregatorCtor: any = (ShpAggregator as any) ?? ShpAggregator;
 
 /** 对局 HUD。 */

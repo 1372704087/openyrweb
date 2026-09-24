@@ -17,7 +17,7 @@ const polyfillDataTransferItem: any = (FileSystemAccessModule as any).polyfillDa
 const showDirectoryPicker: any = (FileSystemAccessModule as any).showDirectoryPicker;
 const React: any = (ReactModule as any).default;
 const classnames: any = (ClassnamesModule as any).default ?? ClassnamesModule;
-const FileSystemUtil: any = FileSystemUtilModule as any;
+const FileSystemUtil: any = (FileSystemUtilModule as any).FileSystemUtil;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

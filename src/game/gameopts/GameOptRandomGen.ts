@@ -88,10 +88,16 @@ export class GameOptRandomGen {
    * 情况，用「与已放置点距离和最远」启发式补位。槽位数超过可用点时循环
    * 复用或回退到第一个固定点。
    *
+   * 与孪生一致：入参为坐标数组（`MapFile.startingLocations`），不是 Map；
+   * 用 `.keys()` 取下标迭代器，用 `arr[i]` 取坐标。
+   *
    * @param opts 对局槽位
-   * @param startLocations 出生点下标 → Vector2 坐标
+   * @param startLocations 出生点坐标数组（下标即出生点序号）
    */
-  generateStartLocations(opts: any, startLocations: Map<number, Vector2>): Map<any, number> {
+  generateStartLocations(
+    opts: any,
+    startLocations: { x: number; y: number }[],
+  ): Map<any, number> {
     const slots = [...opts.humanPlayers, ...opts.aiPlayers].filter(isNotNullOrUndefined);
     const fixed = slots
       .filter((s: any) => s.startPos !== RANDOM_START_POS)
@@ -107,7 +113,7 @@ export class GameOptRandomGen {
     if (shuffled.length >= 3) {
       for (const slot of [1, 2]) {
         if (!(fixed.length - 1 >= slot)) {
-          const coords = shuffled.map((i) => startLocations.get(i));
+          const coords = shuffled.map((i) => startLocations[i]);
           const far = this.findFarthestPointFrom(coords.slice(0, slot), coords.slice(slot));
           const found = coords.findIndex((c) => c.x === far.x && c.y === far.y);
           shuffled.splice(slot, 0, ...shuffled.splice(found, 1));
@@ -116,7 +122,7 @@ export class GameOptRandomGen {
     }
     if (shuffled.length >= 4) {
       if (fixed.length - 1 < 3) {
-        const coords = shuffled.map((i) => startLocations.get(i));
+        const coords = shuffled.map((i) => startLocations[i]);
         const far = this.findFarthestPointFrom(coords.slice(2, 3), coords.slice(3));
         const found = coords.findIndex((c) => c.x === far.x && c.y === far.y);
         shuffled.splice(3, 0, ...shuffled.splice(found, 1));
@@ -145,9 +151,12 @@ export class GameOptRandomGen {
    * 在 candidates 中选出到 anchors 距离和最大的点。
    * @throws candidates 为空时抛错（与孪生一致）
    */
-  findFarthestPointFrom(anchors: Vector2[], candidates: Vector2[]): Vector2 {
+  findFarthestPointFrom(
+    anchors: { x: number; y: number }[],
+    candidates: { x: number; y: number }[],
+  ): { x: number; y: number } {
     const anchorVecs = anchors.map((p) => new Vector2(p.x, p.y));
-    let best: Vector2;
+    let best: { x: number; y: number };
     let bestDist = 0;
     if (!candidates.length) throw new Error("Search array must have at least one element");
     for (const c of candidates) {

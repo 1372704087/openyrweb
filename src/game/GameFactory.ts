@@ -75,64 +75,57 @@ const { isNotNullOrUndefined } = TypeGuardModule as any;
 export class GameFactory {
   /**
    * 拼装一局游戏。
-   * @param mapFile 已解析的 MapFile
-   * @param rulesIni 基础 rules INI（将被 map overrides 合并）
-   * @param artIni 基础 art INI
-   * @param aiIni 遭遇战 AI INI（战役时改用地图 AI）
-   * @param gameOpts 局选项（会被 sanitize）
-   * @param gameSeed / startTimestamp 用于 Prng.factory
-   * @param gameModeRules GameModes 条目
-   * @param gameModeId 局模式 id
-   * @param singlePlayer 是否单机
-   * @param botDebugIndex / actionLogger Bot 调试
-   * @param productionRules 合并用 rules
-   * @param mapOverrides 地图 rules 覆盖
-   * @param rulesOverrides 额外 rules 覆盖列表
-   * @param humanPlayers / aiPlayers 槽位（战役 id 取自 gameOpts.campaignId，与孪生 17 参一致）
+   *
+   * 形参顺序与孪生 create(e,t,i,r,s,a,n,o,l,c,h,u,d,g,p,m,f) / GameLoader.createGame 一致：
+   * 1 mapFile, 2 tileSets, 3 rulesIni, 4 artIni, 5 aiIni,
+   * 6 mapOverrides, 7 rulesOverrides, 8 seed, 9 startTimestamp,
+   * 10 gameOpts, 11 gameModes, 12 singlePlayer, 13 botsLib,
+   * 14 logger, 15 productionRules, 16 botDebugIndex, 17 actionLogger
+   *
+   * tileSets 仅作兼容入参（TS GameMap 从 mapFile.tiles 构建，不读 tileSets）；
+   * gameModeId 取自 gameOpts.gameMode；human 玩家名取自 gameOpts.humanPlayers。
    */
   static create(
     mapFile: any,
+    tileSets: any,
     rulesIni: any,
     artIni: any,
     aiIni: any,
-    gameOpts: any,
-    gameSeed: any,
-    startTimestamp: any,
-    gameModeRules: any,
-    gameModeId: any,
-    singlePlayer: any,
-    botDebugIndex: any,
-    actionLogger: any,
-    productionRules: any,
     mapOverrides: any,
     rulesOverrides: any,
-    humanPlayers: any,
-    aiPlayers: any,
+    seed: any,
+    startTimestamp: any,
+    gameOpts: any,
+    gameModes: any,
+    singlePlayer: any,
+    botsLib: any,
+    logger: any,
+    productionRules: any,
+    botDebugIndex: any,
+    actionLogger: any,
   ): any {
-    // 孪生签名 17 参 create(e,t,i,r,s,a,n,o,l,c,h,u,d,g,p,m,f)；c=gameOpts 含 campaignId
     return GameFactory.createInner(
       mapFile,
       rulesIni,
       artIni,
       aiIni,
       gameOpts,
-      gameSeed,
+      seed,
       startTimestamp,
-      gameModeRules,
-      gameModeId,
+      gameModes,
+      logger,
       singlePlayer,
+      botsLib,
       botDebugIndex,
       actionLogger,
       productionRules,
       mapOverrides,
       rulesOverrides,
       gameOpts && gameOpts.campaignId,
-      humanPlayers,
-      aiPlayers,
     );
   }
 
-  /** 内部实现：参数顺序与孪生 create 一一对应（见文件头）。 */
+  /** 内部实现：参数与孪生 create 对齐（不含 tileSets，与 GameMap 构造一致）。 */
   private static createInner(
     mapFile: any,
     baseRulesIni: any,
@@ -142,25 +135,26 @@ export class GameFactory {
     seed: any,
     startTimestamp: any,
     gameModes: any,
-    gameModeId: any,
+    logger: any,
     singlePlayer: any,
+    botsLib: any,
     botDebugIndex: any,
     actionLogger: any,
-    productionRules: any, // 孪生 p：ProductionTrait 第二参
+    productionRules: any,
     mapOverrides: any,
     rulesOverrides: any,
     campaignId: any,
-    humanPlayers: any,
-    aiPlayers: any,
   ): any {
+    const gameModeId = gameOpts && gameOpts.gameMode;
+    const humanPlayers = (gameOpts && gameOpts.humanPlayers) || [];
     // 合并 rules：base + mapOverrides + rulesOverrides[] + mapFile 自身
     let mergedRulesIni = baseRulesIni.clone().mergeWith(mapOverrides);
     for (const ov of rulesOverrides) mergedRulesIni.mergeWith(ov);
     mergedRulesIni.mergeWith(mapFile);
     // Art：base art + map artOverrides（缺失则空 IniFile）
     var artOverrides = baseArtIni.clone().mergeWith(mapFile.artOverrides ?? new IniFile());
-    let rules = new Rules(mergedRulesIni, gameModeId);
-    var art = new Art(rules, artOverrides, mapFile, gameModeId);
+    let rules = new Rules(mergedRulesIni, logger);
+    var art = new Art(rules, artOverrides, mapFile, logger);
     // 战役模式: 敌方 AI 使用地图定义的 AI 数据（TeamTypes 等），缺失时回退 aimd.ini
     var campaignAiIni = campaignId ? mapFile.getAiIni() : void 0;
     var ai = new Ai(campaignAiIni || defaultAiIni);

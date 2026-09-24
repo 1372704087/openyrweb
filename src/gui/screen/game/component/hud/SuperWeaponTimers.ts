@@ -22,8 +22,8 @@ const jsx: any = (jsxModule as any).jsx;
 const UiObject: any = (UiObjectModule as any).UiObject;
 const UiComponent: any = (UiComponentModule as any).UiComponent;
 const HtmlContainer: any = (HtmlContainerModule as any).HtmlContainer;
-const SpriteUtils: any = SpriteUtilsModule as any;
-const CanvasUtils: any = CanvasUtilsModule as any;
+const SpriteUtils: any = (SpriteUtilsModule as any).SpriteUtils;
+const CanvasUtils: any = (CanvasUtilsModule as any).CanvasUtils;
 
 /** 超武计时条。 */
 export class SuperWeaponTimers extends UiComponent {

@@ -21,7 +21,13 @@ const Stats: any = (StatsModule as any).default ?? StatsModule;
 /** 场景最小形状。 */
 export interface SceneLike {
   create3DObject(): void;
-  update(delta?: any, time?: any): void;
+  /**
+   * 帧更新。⚠️ 第一个参数是「当前时间戳（tick）」，第二个是帧插值 alpha
+   * （UI 循环 `UiAnimationLoop` 只传 1 个参数，世界循环 `GameAnimationLoop`
+   * 传 2 个）。孪生里 `renderer.update(A, B)` 原样转发成 `scene.update(A, B)`，
+   * 两个参数**不可交换**：交换后 UI 侧 tick 会变成 undefined。
+   */
+  update(nowMs?: any, delta?: any): void;
   viewport: { x: number; y: number; width: number; height: number };
   scene: any;
   camera: any;
@@ -163,10 +169,17 @@ export class Renderer {
     return [...this.scenes];
   }
 
-  /** 每场景 update + 广播 onFrame（listener 收到 (nowMs, this)）。 */
+  /**
+   * 每场景 update + 广播 onFrame（listener 收到 (nowMs, this)）。
+   *
+   * ⚠️ 参数必须**按原顺序**转发给 `scene.update(...)`（孪生是 `e.update(t, i)`）。
+   * 这里曾把两个参数写反（`scene.update(delta, nowMs)`）：UI 循环只传 1 个参数，
+   * 写反后所有 UI 对象拿到的 `tick` 变成 `undefined`，动画时间戳成 NaN ⇒
+   * 主菜单侧栏滑入动画永不结束、按钮永久隐藏（表现为右侧菜单不显示）。
+   */
   update(nowMs: number, delta?: any): void {
     this.scenes.forEach((scene) => {
-      scene.update(delta, nowMs);
+      scene.update(nowMs, delta);
     });
     this._onFrame.dispatch(this, nowMs);
   }

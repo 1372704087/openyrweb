@@ -57,10 +57,15 @@ export class MapManifest {
 
   /**
    * 带槽位后缀的完整标题。
-   * @param e - 本地化文案取值函数（如 locale.get）
+   * @param e - 本地化文案表（Strings 实例；**取文案走 `e.get(key)`**）。
+   *
+   * ⚠️ 孪生是 `e.get(this.uiName)`：`e` 是**对象**不是回调。此处曾误写成
+   * `e(this.uiName)` ⇒ 所有调用点（`SkirmishScreen.initOptions` / `createGame`、
+   * `LobbyScreen`、`MapSelScreen`、`GameBrowser`）传入的都是 `strings` 对象，
+   * 运行期抛 `TypeError: e is not a function`，遭遇战开局菜单直接中断。
    */
-  getFullMapTitle(e: (key: string) => string): string {
-    return this.addTitleSlotsSuffix(e(this.uiName), this.maxSlots);
+  getFullMapTitle(e: { get(key: string): string }): string {
+    return this.addTitleSlotsSuffix(e.get(this.uiName), this.maxSlots);
   }
 
   /**

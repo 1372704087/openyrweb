@@ -357,6 +357,13 @@ const EN_LOCALE = {
   "TS:ConfirmClearGameData": "Are you sure you want to clear all game data?\n\nThis will delete ALL imported game files and you will need to re-import your RA2 / YR game files to play again.\n\nReplays, mods, maps, and cached data will also be removed.",
   "TS:GameDataCleared": "Game data cleared. Reloading...",
   "TS:ClearGameDataFailed": "Failed to clear game data. Please try again.",
+  "GUI:CopyDetails": "Copy Details",
+  "GUI:DownloadLog": "Download Log",
+  "GUI:ErrorDetails": "Details",
+  "GUI:Copied": "Copied!",
+  "GUI:MapTransfer": "Transferring map...",
+  "GUI:HostMapTransfer": 'Sending map to player: %s ("%s")',
+  "GUI:JoinerMapTransfer": 'Receiving map from host ("%s")...',
 };
 const ZH_CN_LOCALE = {
   "ts:disclaimer":
@@ -403,6 +410,13 @@ const ZH_CN_LOCALE = {
   "TS:ConfirmClearGameData": "确定要清除所有游戏数据吗？\n\n这将删除所有已导入的游戏文件，您需要重新导入 RA2 / YR 游戏文件才能继续游玩。\n\n录像、模组、地图和缓存数据也将被删除。",
   "TS:GameDataCleared": "游戏数据已清除，正在重新加载……",
   "TS:ClearGameDataFailed": "清除游戏数据失败，请重试。",
+  "GUI:CopyDetails": "复制详细信息",
+  "GUI:DownloadLog": "下载日志",
+  "GUI:ErrorDetails": "详细信息",
+  "GUI:Copied": "已复制！",
+  "GUI:MapTransfer": "正在传输地图...",
+  "GUI:HostMapTransfer": "正在向玩家发送地图：%s（“%s”）",
+  "GUI:JoinerMapTransfer": "正在从主机接收地图（“%s”）...",
 };
 const ZH_TW_LOCALE = {
   "ts:disclaimer":
@@ -449,6 +463,13 @@ const ZH_TW_LOCALE = {
   "TS:ConfirmClearGameData": "確定要清除所有遊戲資料嗎？\n\n這將刪除所有已匯入的遊戲檔案，您需要重新匯入 RA2 / YR 遊戲檔案才能繼續遊玩。\n\n錄影、模組、地圖和快取資料也將被刪除。",
   "TS:GameDataCleared": "遊戲資料已清除，正在重新載入……",
   "TS:ClearGameDataFailed": "清除遊戲資料失敗，請重試。",
+  "GUI:CopyDetails": "複製詳細資訊",
+  "GUI:DownloadLog": "下載日誌",
+  "GUI:ErrorDetails": "詳細資訊",
+  "GUI:Copied": "已複製！",
+  "GUI:MapTransfer": "正在傳輸地圖...",
+  "GUI:HostMapTransfer": "正在向玩家傳送地圖：%s（「%s」）",
+  "GUI:JoinerMapTransfer": "正在從主機接收地圖（「%s」）...",
 };
 function localizeStrings(file, table, extTable) {
   const obj = JSON.parse(readFileSync(join(VENDOR, "res", "locale", file), "utf8"));
