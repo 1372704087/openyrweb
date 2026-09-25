@@ -110,7 +110,9 @@ export class SlaveGatherTask extends Task {
     // 排序后最前面的就是最近的最高值格），5 个奴隶会自然分散。
     const topValue = candidates[0].tibTrait.rules.value || 0;
     const pool = candidates.filter((c: any) => (c.tibTrait.rules.value || 0) === topValue).slice(0, 5);
-    return pool[randInt(game, 0, pool.length)].tile;
+    // generateRandomInt 为闭区间 [min,max]：上界须 length-1，否则 pool[length] 越界
+    // 读 .tile 抛 TypeError（99e9b31 换锁步随机时引入的 off-by-one）
+    return pool[randInt(game, 0, pool.length - 1)].tile;
   }
 
   /**

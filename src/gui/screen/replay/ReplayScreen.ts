@@ -35,13 +35,11 @@ import { TauntPlayback } from "gui/screen/game/TauntPlayback"; // 已转换
 import { CommandBarButtonType } from "gui/screen/game/component/hud/commandBar/CommandBarButtonType"; // 已转换
 import { isIpad } from "util/userAgent"; // 已转换
 import { RootScreen } from "gui/screen/RootScreen"; // 孪生（本组内一并转换）
-import { LoadingScreenApiFactory } from "gui/screen/game/loadingScreen/LoadingScreenApiFactory"; // 已转换
+import { LoadingScreenApiFactory, LoadingScreenType } from "gui/screen/game/loadingScreen/LoadingScreenApiFactory"; // 已转换
 import { MapFile } from "data/MapFile"; // 已转换
 import { DownloadError } from "engine/ResourceLoader"; // 已转换
 import { MapDigest } from "engine/MapDigest"; // 已转换
 import { ChatHistory } from "gui/chat/ChatHistory"; // 已转换
-
-declare const LoadingScreenType: any;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -175,7 +173,7 @@ export class ReplayScreen extends RootScreen {
       return;
     }
     const loadingApi = this.loadingScreenApiFactory.create(
-      (LoadingScreenType as any).Replay,
+      LoadingScreenType.Replay,
     );
     this.loadingScreenApi = loadingApi;
     this.disposables.add(loadingApi, () => (this.loadingScreenApi = void 0));

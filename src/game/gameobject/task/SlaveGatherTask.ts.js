@@ -144,7 +144,8 @@ System.register(
               var pool = candidates
                 .filter((c) => (c.tibTrait.rules.value || 0) === topValue)
                 .slice(0, 5);
-              return pool[randInt(t, 0, pool.length)].tile;
+              // 与 TS 侧对齐：闭区间上界须 length-1（原 pool.length 会越界读 .tile 崩溃）
+              return pool[randInt(t, 0, pool.length - 1)].tile;
             }
             // Search for higher-value ore within a small radius around the slave.
             // Used after the IDLE_BEFORE_HARVEST thinking pause — the slave looks around
