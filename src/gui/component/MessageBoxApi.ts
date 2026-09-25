@@ -50,11 +50,12 @@ export class MessageBoxApi {
    * 显示消息框。
    * @param children - 文本或节点
    * @param buttonsOrOk - 字符串（单 OK）或按钮数组
-   * @param onOk - 字符串时的关闭回调
+   * @param onOk - 字符串时的关闭回调；或 {className} 选项对象（非函数时作为 options）
    */
   show(children: any, buttonsOrOk?: any, onOk?: any): void {
     this.destroy();
-    const options = typeof buttonsOrOk !== "function" ? buttonsOrOk : undefined;
+    // 孪生：options 取第 3 参（非函数时），buttons 取第 2 参
+    const options = typeof onOk !== "function" ? onOk : undefined;
     const [ui] = this.jsxRenderer.render(
       jsx(HtmlView, {
         innerRef: (el: any) => (this.component = el),
@@ -75,7 +76,7 @@ export class MessageBoxApi {
                     },
                   },
                 ]
-              : (options ?? []).map((btn: any) => ({
+              : (buttonsOrOk ?? []).map((btn: any) => ({
                   label: btn.label,
                   disabled: btn.disabled,
                   onClick: () => {

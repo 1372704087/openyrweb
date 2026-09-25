@@ -459,12 +459,12 @@ export class Rules {
     });
   }
 
-  /** 逐名实例化对象规则；缺段仅 debug（地图可能引用可选对象）。 */
+  /** 逐名实例化对象规则；缺段仅 debug（地图可能引用可选对象）。第 4 参传数字 id（Map key）而非名字。 */
   readObjects(type: ObjectType, typeNames: Map<number, string>, target: Map<string, any>): void {
-    typeNames.forEach((name) => {
+    typeNames.forEach((name, id) => {
       let section = this.ini.getSection(name);
       if (section) {
-        section = new ObjectRulesFactory().create(type, section, this.general, name);
+        section = new ObjectRulesFactory().create(type, section, this.general, id);
         target.set(name, section);
       } else {
         this.logger?.debug(ObjectType[type] + ` type "${name}" has no rules section`);

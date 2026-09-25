@@ -62,9 +62,9 @@ export class PlayerFactory {
     return player;
   }
 
-  /** 创建观察者（无国家、浅灰、雷达不禁用）。 */
-  createObserver(name: string, colors: Map<string, any>): any {
-    const observer: any = new Player(name, undefined, undefined, colors.get("LightGrey"));
+  /** 创建观察者（无国家、浅灰、雷达不禁用）。入参为 Rules，经 colors 取色。 */
+  createObserver(name: string, rules: any): any {
+    const observer: any = new Player(name, undefined, undefined, rules.colors.get("LightGrey"));
     observer.radarTrait = new RadarTrait();
     observer.traits.add(observer.radarTrait);
     observer.radarTrait.setDisabled(false);

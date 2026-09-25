@@ -395,7 +395,7 @@ export class GameFactory {
           var country = Country.factory(countryName, rules);
           var color = multiplayerColors[colorId];
           game.addPlayer(playerFactory.createCombatant(name, country, startPos, color, isAi, difficulty));
-        } else game.addPlayer(playerFactory.createObserver(name, rules as any)); // 孪生直接传 rules
+        } else game.addPlayer(playerFactory.createObserver(name, rules));
       });
       game.addPlayer(playerFactory.createNeutral(rules, "@@NEUTRAL@@"));
     }

@@ -237,7 +237,11 @@ export class ChatUi {
 }
 
 // 孪生：__decorate([Throttle(5e3)], ChatUi.prototype, "refreshPlayerRanks", null)
+// __decorate 末尾有 Object.defineProperty 写回（descriptor 是副本，仅改 .value 不生效）
 {
   const desc = Object.getOwnPropertyDescriptor(ChatUi.prototype, "refreshPlayerRanks");
-  if (desc) Throttle(5000)(ChatUi.prototype, "refreshPlayerRanks", desc);
+  if (desc) {
+    Throttle(5000)(ChatUi.prototype, "refreshPlayerRanks", desc);
+    Object.defineProperty(ChatUi.prototype, "refreshPlayerRanks", desc);
+  }
 }

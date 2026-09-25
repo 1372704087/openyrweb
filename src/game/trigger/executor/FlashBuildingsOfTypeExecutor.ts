@@ -54,7 +54,7 @@ export class FlashBuildingsOfTypeExecutor extends TriggerExecutor {
     }
     game.pendingUnitFlash = { ids, cycles: 3 };
     console.warn(
-      `[OpenYRWeb] FlashBuildingsOfType: ${owner.name} highlighted ${ids.length} building(s) type="${type || "*"}`,
+      `[OpenYRWeb] FlashBuildingsOfType: ${owner.name} highlighted ${ids.length} building(s) type="${type || "*"}"`,
     );
   }
 }

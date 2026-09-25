@@ -1948,12 +1948,16 @@ export class LobbyScreen extends MainMenuScreen {
 }
 
 // 孪生：__decorate([Throttle(5e3/350/350)], LobbyScreen.prototype, <name>, null)
-// 项目未开 experimentalDecorators，此处手动执行装饰器等价语义。
+// 项目未开 experimentalDecorators，手动执行装饰器等价语义。
+// __decorate 末尾有 Object.defineProperty 写回（descriptor 是副本，仅改 .value 不生效）
 for (const [name, wait] of [
   ["updateGservPing", 5000],
   ["sendGameOpts", 350],
   ["sendGameSlotInfo", 350],
 ] as const) {
   const desc = Object.getOwnPropertyDescriptor(LobbyScreen.prototype, name);
-  if (desc) Throttle(wait)(LobbyScreen.prototype, name, desc);
+  if (desc) {
+    Throttle(wait)(LobbyScreen.prototype, name, desc);
+    Object.defineProperty(LobbyScreen.prototype, name, desc);
+  }
 }

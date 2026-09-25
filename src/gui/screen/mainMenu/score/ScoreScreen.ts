@@ -121,14 +121,14 @@ export class ScoreScreen extends MainMenuScreen {
     this.controller.setMainComponent(el);
   }
 
-  /** 轮询直至拿到匹配 gameId 的战报。 */
-  loadGameReport(gameId: any): void {
+  /** 轮询直至拿到匹配 game.id 的战报（入参为 game 对象，与孪生一致）。 */
+  loadGameReport(game: any): void {
     this.reportUpdateTask?.cancel();
     let task = (this.reportUpdateTask = new Task(async (cancel) => {
       for (;;) {
         if (cancel.isCancelled()) return;
         let report = this.wolService.getLastGameReport();
-        if (report?.gameId === gameId)
+        if (report?.gameId === game.id)
           return void this.scoreTable.applyOptions((opts: any) => {
             opts.gameReport = report;
           });

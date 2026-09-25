@@ -100,21 +100,7 @@ System.register(
                 a && s.updateMatrix();
               }
               var o = -this.computeSink();
-              (o !== e.position.y && ((e.position.y = o), e.updateMatrix()),
-                // 报告一次实际参数，便于在控制台确认封顶真的生效 —— sink 若恒为 0，说明地面
-                // 基准取错了（见 computeSink 的注释），而不是"上限设得太小"。
-                i._reported ||
-                  ((i._reported = !0),
-                  console.debug(
-                    "[VxlShadowProxy] cap active: offset ≤ " +
-                      (i.MAX_SHADOW_OFFSET / n.Coords.LEPTONS_PER_TILE).toFixed(2) +
-                      " tile (MAX_SHADOW_OFFSET=" +
-                      i.MAX_SHADOW_OFFSET +
-                      ", MAX_PROJECTION_HEIGHT=" +
-                      i.MAX_PROJECTION_HEIGHT.toFixed(1) +
-                      "), current sink=" +
-                      (-o).toFixed(0),
-                  )));
+              o !== e.position.y && ((e.position.y = o), e.updateMatrix());
             }
             dispose() {
               this.wrap?.parent?.remove(this.wrap);

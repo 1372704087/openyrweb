@@ -865,17 +865,18 @@ export class QuickGameScreen extends MainMenuScreen {
     const user = this.wolCon.getCurrentUser();
     if (!user) return;
     const ladderType = (getLadderTypeForQueueType as any)(type, this.partySize);
-    ([this.playerProfile] = await this.wladderService.listSearch(
+    // 孪生：先接局部变量，仅在拿到结果且未取消时才写回 this.playerProfile
+    const [profile] = await this.wladderService.listSearch(
       [user],
       cancel,
       ladderType,
       WLadderService.CURRENT_SEASON,
       this.clientLocale,
-    ));
-    if (this.playerProfile && !cancel.isCancelled())
-      this.form?.applyOptions(
-        (o: any) => (o.playerProfile = this.playerProfile),
-      );
+    );
+    if (profile && !cancel.isCancelled()) {
+      this.playerProfile = profile;
+      this.form?.applyOptions((o: any) => (o.playerProfile = this.playerProfile));
+    }
   }
 
   getAvailablePlayerCountryRules() {

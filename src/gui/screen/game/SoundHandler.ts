@@ -1201,7 +1201,8 @@ export class SoundHandler {
    */
   handleProductionQueueUpdate(queue: any): void {
     const prev = this.lastQueueStatuses.get(queue.type);
-    if (prev === void 0 || queue.status === prev) return;
+    // 孪生：prev 为空或状态变化才进入（首次必须写回，否则永远不更新）
+    if (prev !== void 0 && queue.status === prev) return;
     this.lastQueueStatuses.set(queue.type, queue.status);
     switch (queue.status) {
       case QueueStatus.Ready:

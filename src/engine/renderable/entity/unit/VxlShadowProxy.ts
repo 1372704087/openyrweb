@@ -34,8 +34,6 @@ export class VxlShadowProxy {
   pairs: [any, any][];
   /** 是否启用更新。 */
   enabled: boolean;
-  /** 已报告封顶日志。 */
-  private static _reported = false;
 
   /** @param gameObject - 单位 */
   constructor(gameObject: any) {
@@ -152,21 +150,6 @@ export class VxlShadowProxy {
     if (y !== wrap.position.y) {
       wrap.position.y = y;
       wrap.updateMatrix();
-    }
-    // 报告一次实际参数，便于在控制台确认封顶真的生效 —— sink 若恒为 0，说明地面
-    // 基准取错了（见 computeSink 的注释），而不是"上限设得太小"。
-    if (!VxlShadowProxy._reported) {
-      VxlShadowProxy._reported = true;
-      console.debug(
-        "[VxlShadowProxy] cap active: offset ≤ " +
-          (VxlShadowProxy.MAX_SHADOW_OFFSET / Coords.LEPTONS_PER_TILE).toFixed(2) +
-          " tile (MAX_SHADOW_OFFSET=" +
-          VxlShadowProxy.MAX_SHADOW_OFFSET +
-          ", MAX_PROJECTION_HEIGHT=" +
-          VxlShadowProxy.MAX_PROJECTION_HEIGHT.toFixed(1) +
-          "), current sink=" +
-          (-y).toFixed(0),
-      );
     }
   }
 
