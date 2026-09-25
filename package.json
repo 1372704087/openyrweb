@@ -13,7 +13,6 @@
     "build:ts": "node tools/compile-ts.mjs",
     "split": "node tools/split-bundle.mjs",
     "beautify": "prettier --write \"src/**/*.ts\"",
-    "beautify:twins": "prettier --write \"src/**/*.ts.js\"",
     "repack": "node tools/repack.mjs",
     "build": "node tools/build.mjs",
     "serve": "node server/index.mjs",
