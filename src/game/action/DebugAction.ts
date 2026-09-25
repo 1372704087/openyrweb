@@ -72,7 +72,7 @@ export class DebugAction extends ActionModule.Action {
   }
 
   process(): void {
-    if (!this.command) return;
+    // 孪生无 command 空值守卫（null 时在 .type 处抛错暴露问题）
     if (this.command.type === DebugCommandType.SetUnitDebugText) {
       const { unitId, label } = this.command.params;
       if (this.game.getWorld().hasObjectId(unitId)) {

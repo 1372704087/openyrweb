@@ -199,17 +199,10 @@ export class SidebarPower extends UiComponent {
     }
     const target = this.targetPipCount;
     const alreadySame = this.pipCount && samePipCount(this.pipCount, target);
-    const needTick =
-      !(
-        this.lastPipUpdate &&
-        !(now - this.lastPipUpdate >= 50) &&
-        alreadySame
-      );
-    // 与孪生一致：有 50ms 节流且计数相同则跳过；否则更新
+    // 孪生 `(lastPipUpdate && !(50<=elapsed)) || alreadySame || (更新块)`：
+    // 节流中 **或** 计数已相同，二者任一成立即跳过（&& 会令高亮每 50ms 重启）
     const skip =
-      this.lastPipUpdate &&
-      !(50 <= now - this.lastPipUpdate) &&
-      alreadySame;
+      (this.lastPipUpdate && !(50 <= now - this.lastPipUpdate)) || alreadySame;
     if (!skip) {
       this.lastPipUpdate = now;
       if (this.pipCount) {
@@ -224,14 +217,17 @@ export class SidebarPower extends UiComponent {
               this.pipCount.green = Math.max(0, this.pipCount.green - dRed);
             }
           }
-        } else if (dYellow) {
-          if (dYellow > 0) {
-            this.pipCount.green = Math.max(0, this.pipCount.green - dYellow);
-          }
         } else {
-          this.pipCount.green += dGreen;
+          // 孪生：yellow += dYellow 仅在 dRed===0 分支内执行
+          if (dYellow) {
+            if (dYellow > 0) {
+              this.pipCount.green = Math.max(0, this.pipCount.green - dYellow);
+            }
+          } else {
+            this.pipCount.green += dGreen;
+          }
+          this.pipCount.yellow += dYellow;
         }
-        this.pipCount.yellow += dYellow;
         this.pipCount.red += dRed;
       } else {
         this.pipCount = { red: 1, yellow: 0, green: 0 };

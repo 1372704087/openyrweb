@@ -53,9 +53,9 @@ export class RenderableContainer {
         this.children.delete(item);
         const queueIndex = this.renderQueue.indexOf(item);
         if (queueIndex === -1) {
-          // 不在创建队列：若已有 3D 对象则从场景图摘除
-          const obj = item.get3DObject ? item.get3DObject() : undefined;
-          if (obj && obj.parent && this.get3DObject()) this.get3DObject().remove(obj);
+          // 不在创建队列：孪生无方法存在性守卫，仅结果与 parent 判真
+          const obj = item.get3DObject();
+          if (obj && obj.parent) this.get3DObject().remove(obj);
         } else {
           this.renderQueue.splice(queueIndex, 1);
         }
@@ -73,8 +73,8 @@ export class RenderableContainer {
     }
     let item: RenderableLike | undefined;
     while ((item = this.renderQueue.shift())) {
-      item.create3DObject!();
-      const obj = item.get3DObject ? item.get3DObject() : undefined;
+      item.create3DObject();
+      const obj = item.get3DObject();
       if (obj) this.get3DObject().add(obj);
     }
   }

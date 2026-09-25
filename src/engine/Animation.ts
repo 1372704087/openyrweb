@@ -186,10 +186,10 @@ export class Animation {
         return true;
       }
 
-      // endLoop 标志只消耗一次（不推进圈）
+      // endLoop 标志只消耗一次；孪生 `return !(flag = false)` → 返回 true（update 置 STOPPED）
       if (this.endLoopFlag) {
         this.endLoopFlag = false;
-        return false;
+        return true;
       }
 
       // 扣除到边界 + 1 帧的步长，跳到圈起点，圈号 +1

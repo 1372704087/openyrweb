@@ -83,6 +83,7 @@ const BuildingTester: any = (BuildingTesterNs as any).BuildingTester;
 const IniFile: any = (IniFileNs as any).IniFile;
 const time: any = timeNs;
 const ResourceLoader: any = (ResourceLoaderNs as any).ResourceLoader;
+const DownloadError: any = (ResourceLoaderNs as any).DownloadError;
 const AppLogger: any = (LoggerNs as any).AppLogger;
 const DevToolsApi: any = (DevToolsApiNs as any).DevToolsApi;
 const VehicleTester: any = (VehicleTesterNs as any).VehicleTester;
@@ -432,7 +433,7 @@ export class Application {
       ? ((message += "\n\n" + strings.get("ts:import_checksum_mismatch", e.file)), (details.file = e.file))
       : e instanceof ImportFileNotFoundError
         ? ((message += "\n\n" + strings.get("ts:import_file_not_found", e.file)), (details.file = e.file))
-        : e instanceof ArchiveDownloadError || e.message?.match(/XHR error|Failed to fetch/i)
+        : e instanceof DownloadError || e.message?.match(/XHR error|Failed to fetch/i)
           ? (message += "\n\n" + strings.get("ts:downloadfailed"))
           : e instanceof NoStorageError
             ? (message += "\n\n" + strings.get("ts:import_no_storage"))
@@ -473,7 +474,7 @@ export class Application {
             ? (message += "\n\n" + strings.get("ts:import_no_web_assembly"))
             : e instanceof ChecksumError
               ? ((message += "\n\n" + strings.get("ts:import_checksum_mismatch", e.file)), (details.file = e.file))
-              : e instanceof ArchiveDownloadError ||
+              : e instanceof DownloadError ||
                 e.message?.match(
                   /XHR error|Failed to fetch|CompileError: WebAssembly|SystemJS|NetworkError|Load failed/i,
                 )

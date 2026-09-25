@@ -44,7 +44,7 @@ export class SequenceReader {
     for (let [key, value] of section.entries) {
       const type = SequenceType[key as keyof typeof SequenceType];
       if (type !== undefined) {
-        const parts = String(value).split(",");
+        const parts = value.split(",");
         const def: SequenceDef = {
           type: type as SequenceType,
           startFrame: Number(parts[0]),

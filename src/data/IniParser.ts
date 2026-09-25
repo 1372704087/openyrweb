@@ -84,11 +84,13 @@ export class IniParser {
    * 按未转义点号拆分键。
    * 用 fromCharCode(1)/(2) 构造占位符（避免源码裸控制字符）：
    * 先把字面 SOH 与转义点号换成占位，再按点号 split，最后还原。
+   * LIT 中间必须是文本 \1（孪生 \x02LITERAL\1LITERAL\x02）——
+   * 若用 0x01 会在首个 replace 中被自噬、后续 split(LIT) 永不命中。
    */
   dotSplit(key: string): string[] {
     const P1 = String.fromCharCode(1);
     const P2 = String.fromCharCode(2);
-    const LIT = P2 + 'LITERAL' + P1 + 'LITERAL' + P2;
+    const LIT = P2 + 'LITERAL' + '\\1' + 'LITERAL' + P2;
     return key
       .replace(/\x01/g, LIT)
       .replace(/\\\./g, P1)

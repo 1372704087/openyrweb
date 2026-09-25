@@ -166,7 +166,8 @@ export class ResourceLoader {
    * @param i - 进度回调（增量字节）
    */
   async loadResource(e: ResourceDescriptor, t?: CancelTokenLike, i?: LoadOptions["onProgress"]): Promise<any> {
-    const r = await this.fetchResource(this.resourceBaseUrl + e.src, t, { onProgress: i });
+    // 孪生第 3 参原样透传 fetch init（不包装 {onProgress}；当前调用方 ≤2 参未触发）
+    const r = await this.fetchResource(this.resourceBaseUrl + e.src, t, i as any);
     return this.httpRequest.parseResult(e.type, r);
   }
 

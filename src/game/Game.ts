@@ -155,8 +155,8 @@ export class Game {
   traits = new Traits();
   /** 调试文本（BoxedVar）。 */
   debugText = new BoxedVar("");
-  /** 状态。 */
-  status: any = GameStatus.NotStarted;
+  /** 状态（孪生无字段初始化，start() 前为 undefined——update 守卫靠 `!== NotStarted` 对 undefined 放行）。 */
+  status: any;
   /** 本地玩家。 */
   localPlayer: any;
   /** 上次胜负检查时间。 */
@@ -496,9 +496,8 @@ export class Game {
           ry += obj.isXBridge() ? -1 : 0;
         }
         var tibId: any;
-        var isX = obj.isXBridge();
         var tile = this.map.tiles.getByMapCoords(rx, ry);
-        if (tile)
+        if (tile) {
           if (
             (obj.rules.tiberium &&
               (void 0 === (tibId = OreOverlayTypesModule.OreOverlayTypes.getOverlayTibType(entry.id)) ||
@@ -509,21 +508,23 @@ export class Game {
                   (obj.overlayId = tibId),
                   (obj.value = entry.value)))),
             BridgeOverlayTypesModule.BridgeOverlayTypes.isLowBridge(entry.id))
-          )
+          ) {
             if (!BridgeOverlayTypesModule.BridgeOverlayTypes.isBridgePlaceholder(entry.id)) {
               lowBridgeValues.set(tile, entry.value);
               if (1 === entry.value) headTilesWithHigh.set(tile, obj);
               else obj.dispose();
-            } else {
-              if (obj.isTiberium())
-                if (this.map.getObjectsOnTile(tile).find((o) => o.isTerrain())) {
-                  obj.dispose();
-                  continue;
-                }
-              if (suppressTiberiumSpawns && obj.isTiberium()) obj.dispose();
-              else this.spawnObject(obj, tile);
             }
-        else {
+            // 低桥占位块：孪生此处不处理，统一在段三生成
+          } else {
+            if (obj.isTiberium())
+              if (this.map.getObjectsOnTile(tile).find((o) => o.isTerrain())) {
+                obj.dispose();
+                continue;
+              }
+            if (suppressTiberiumSpawns && obj.isTiberium()) obj.dispose();
+            else this.spawnObject(obj, tile);
+          }
+        } else {
           console.warn(`Invalid map object location (${rx},${ry})`, entry);
           obj.dispose();
         }

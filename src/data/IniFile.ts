@@ -12,6 +12,50 @@
  * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { IniSection } from './IniSection';
+
+/**
+ * 按字节自动探测编码并解码 INI 文本：
+ * 全 ASCII 走历史逐字节路径（行为不变）；否则依次尝试
+ * UTF-8（严格）→ GBK / BIG5（按 U+FFFD 替换数择优）。
+ * 中文/台港 mod 的 rules.ini、地图 INI 多为 GBK/BIG5 存储，
+ * 历史实现按 Latin-1 逐字节解码会产生乱码国家名/选项名。
+ */
+function decodeIniBytes(bytes: Uint8Array): string {
+  let hasHigh = false;
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] > 0x7f) {
+      hasHigh = true;
+      break;
+    }
+  }
+  if (!hasHigh) {
+    // 与历史行为一致：Latin-1 逐字节
+    let ascii = '';
+    for (let i = 0; i < bytes.length; i++) ascii += String.fromCharCode(bytes[i]);
+    return ascii;
+  }
+  // CSF 语言检测设置的偏好（ChineseTW→big5 / ChineseCN→gbk）：
+  // GBK 与 BIG5 对多数字节对都能无替换符解码，仅按 U+FFFD 计分区分不了，
+  // 必须用已检测的 UI 语言定优先级，否则繁中 mod 的 INI 会被按 GBK 解成乱码。
+  const preferred = (globalThis as any).__yrwebCjkEncoding;
+  if (preferred) {
+    const preferredText = new TextDecoder(preferred).decode(bytes);
+    if (!preferredText.includes('\uFFFD')) return preferredText;
+  }
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    // 非 UTF-8：在 GBK / BIG5 间按替换符数量择优
+    const gbk = new TextDecoder('gbk').decode(bytes);
+    const big5 = new TextDecoder('big5').decode(bytes);
+    const bad = (s: string): number => {
+      let n = 0;
+      for (const ch of s) if (ch === '\uFFFD') n++;
+      return n;
+    };
+    return bad(gbk) <= bad(big5) ? gbk : big5;
+  }
+}
 import { IniParser } from './IniParser';
 import { VirtualFile } from './vfs/VirtualFile';
 
@@ -31,7 +75,8 @@ export class IniFile {
 
   /** 从 VirtualFile 读取全文并解析。 */
   fromVirtualFile(file: VirtualFile): this {
-    return this.fromString(file.readAsString());
+    // 编码自动探测：ASCII 逐字节（历史行为）/ UTF-8 / GBK / BIG5
+    return this.fromString(decodeIniBytes(file.getBytes()));
   }
 
   /** 从 INI 文本解析。 */

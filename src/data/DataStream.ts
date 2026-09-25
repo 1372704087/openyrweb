@@ -56,7 +56,8 @@ export class DataStream {
 
     if (source instanceof ArrayBuffer) {
       this.buffer = source;
-    } else if (typeof source === "object" && source !== null) {
+    } else if (typeof source === "object") {
+      // 孪生无 null 守卫：显式 new DataStream(null) 会在 dataView 后续使用处抛错
       this.dataView = source;
       if (byteOffset) this._byteOffset += byteOffset;
     } else {

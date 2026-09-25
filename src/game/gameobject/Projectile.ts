@@ -320,9 +320,9 @@ export class Projectile extends GameObject {
     } else this.lastTargetLockPosition = lock.clone();
 
     if (this.isHoming()) {
-      this._updateHoming(game, lock, stepLen, prevPos, prevVel);
+      if (this._updateHoming(game, lock, stepLen, prevPos, prevVel)) return;
     } else {
-      this._updateBallistic(game, lock, stepLen, prevPos, prevVel);
+      if (this._updateBallistic(game, lock, stepLen, prevPos, prevVel)) return;
     }
 
     // 声波弹头：沿途收集可伤对象，再对仍在占用 tile 的对象造成 ambient 伤害
@@ -368,15 +368,18 @@ export class Projectile extends GameObject {
     }
   }
 
-  /** homing 分支：目标失效自毁、limbo 贴脸、射程判定、转向与障碍。 */
-  private _updateHoming(game: any, lock: any, stepLen: number, prevPos: any, prevVel: any): void {
+  /**
+   * homing 分支：目标失效自毁、limbo 贴脸、射程判定、转向与障碍。
+   * @returns true=已自毁/终止（孪生提前 return，须跳过 sonic 尾段）
+   */
+  private _updateHoming(game: any, lock: any, stepLen: number, prevPos: any, prevVel: any): boolean {
     if (
       this.target.obj?.isUnit() &&
       (this.target.obj.isDestroyed || this.target.obj.isCrashing || !this.target.obj.isSpawned) &&
       (this.fromWeapon.rules.limboLaunch || this.homingTravelDistance >= 2 * Coords.LEPTONS_PER_TILE)
     ) {
       this.detonate(game);
-      return;
+      return true;
     }
     if (!this.homingMoveDir) {
       const u = FacingUtil.toMapCoords(this.direction);
@@ -389,13 +392,13 @@ export class Projectile extends GameObject {
           this.position.moveToLeptons(this.target.obj.position.getMapPosition());
           this.position.tileElevation = this.target.obj.position.tileElevation;
           this.detonate(game);
-          return;
+          return true;
         }
         this.limboTravelTicks++;
       }
     } else if (!this.isInHomingRange(lock, game)) {
       this.detonate(game);
-      return;
+      return true;
     }
     const helper = new RangeHelper(this.tileOccupation);
     const distTiles0 = Math.floor(helper.distance2(lock, this) / Coords.LEPTONS_PER_TILE);
@@ -464,10 +467,14 @@ export class Projectile extends GameObject {
       this.collisionType = hit;
       this.detonate(game, hit);
     }
+    return false;
   }
 
-  /** 弹道（非 homing）分支：弧弹高度解算、过冲、snap、Impact 计时。 */
-  private _updateBallistic(game: any, lock: any, stepLen: number, prevPos: any, prevVel: any): void {
+  /**
+   * 弹道（非 homing）分支：弧弹高度解算、过冲、snap、Impact 计时。
+   * @returns true=已 unspawn 终止（孪生提前 return，须跳过 sonic 尾段）
+   */
+  private _updateBallistic(game: any, lock: any, stepLen: number, prevPos: any, prevVel: any): boolean {
     let toAim = this.aimPoint.clone().sub(this.position.worldPosition);
     this.rules.vertical || (this.direction = FacingUtil.fromMapCoords(new Vector2(toAim.x, toAim.z)));
     if (this.rules.arcing) toAim.y = 0;
@@ -519,13 +526,13 @@ export class Projectile extends GameObject {
         const a = Coords.vecGroundToWorld(dir).add(this.position.worldPosition);
         if (!game.map.isWithinHardBounds(a)) {
           game.unspawnObject(this);
-          return;
+          return true;
         }
         this.position.moveByLeptons(dir.x, dir.y);
       } else if (this.snapToTarget && !this.targetLockLost) {
         if (!game.map.isWithinHardBounds(lock)) {
           game.unspawnObject(this);
-          return;
+          return true;
         }
         this.position.moveByLeptons3(lock.clone().sub(this.position.worldPosition));
       }
@@ -542,6 +549,7 @@ export class Projectile extends GameObject {
         this.detonationTimer = Math.max(1, Math.floor(this.fromWeapon.rules.laserDuration * 0.7));
       } else this.detonate(game, hit);
     }
+    return false;
   }
 
   /** 是否 homing（有旋转且非弧弹）。 */
@@ -660,7 +668,7 @@ export class Projectile extends GameObject {
         dmgBase = Number.POSITIVE_INFINITY;
       } else if (target.parasiteableTrait && this.fromObject?.isUnit()) {
         if (!(weapon instanceof Weapon))
-          throw new Error("Projectile with parasite warhead must be a weapon reference");
+          throw new Error("Projectile with parasite warhead must have a weapon reference");
         target.parasiteableTrait.infest(this.fromObject, weapon);
         parasiteOk = true;
       }

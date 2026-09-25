@@ -223,11 +223,14 @@ export class ParasiteableTrait {
     );
   }
 
-  /** 传送前：压制则杀，否则驱逐+眩晕。 */
+  /**
+   * 传送前：压制则杀，否则驱逐+眩晕。
+   * 孪生为 4 形参 (obj, world, toAny, isWarp)——分发点只传 4 参，
+   * 多出的第 5 形参会令 !isWarp 恒真、传送处理永不执行。
+   */
   [NotifyTeleportModule.NotifyTeleport.onBeforeTeleport](
     obj: any,
     world: any,
-    _from: any,
     toAny: any,
     isWarp: any,
   ): void {

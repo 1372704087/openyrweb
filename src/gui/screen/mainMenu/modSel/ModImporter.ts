@@ -87,9 +87,8 @@ export class ModImporter {
           cause: quitMsg,
         });
       if (quitMsg?.message?.match(/out of memory|allocation/i))
-        throw Object.assign(new RangeError("Out of memory"), {
-          cause: quitMsg,
-        });
+        // 孪生为 { cause } 构造（cause 不可枚举）；Object.assign 会使其可枚举
+        throw new (RangeError as any)("Out of memory", { cause: quitMsg });
       throw new ArchiveExtractionError(
         "Archive extraction failed with code " + quitCode,
         { cause: quitMsg },

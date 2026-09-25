@@ -681,7 +681,9 @@ System.register(
                   this.gameModeType === x.GameModeType.Unholy &&
                     e.push(
                       ...this.rules.general.baseUnit
-                        .filter((e) => e !== t)
+                        // 原还原版误写模块回调形参 t（函数，!== 恒真=不过滤）；
+                        // 与 TS 侧对齐：真正剔除已部署 MCV 同名变体
+                        .filter((e) => e !== mcvName)
                         .map((e) => ({ name: e, type: S.ObjectType.Vehicle, count: 1 })),
                     );
                   var h, u, d;

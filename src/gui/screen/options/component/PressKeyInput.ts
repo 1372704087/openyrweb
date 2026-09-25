@@ -43,7 +43,9 @@ export const PressKeyInput = ({
   const [combo, setCombo] = useState<any>();
   const commit = (value: any) => {
     setCombo(value);
-    if (!value || void 0 === value.keyCode || true) onChange(value);
+    // 孪生 `(value && void 0 === value.keyCode) || onChange(value)`：
+    // 纯修饰键组合（keyCode 为空）不上报，仅清空与完整组合触发 onChange
+    if (!value || void 0 !== value.keyCode) onChange(value);
   };
   var text = combo ? getHumanReadableKey(combo) : "";
   return React.createElement("input", {

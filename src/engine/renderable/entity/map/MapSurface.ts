@@ -81,7 +81,7 @@ export class MapSurface {
       geo.applyMatrix(new (THREE as any).Matrix4().makeTranslation(pos.x, pos.y + 0.05, pos.z));
       geos.push(geo);
     });
-    // 空图：返回空 mesh，避免 mergeBufferGeometries 读 geometries[0]
+    // 空图：返回空 mesh，避免 mergeBufferGeometries 读 geometries[0]（运行时必要加固）
     if (geos.length === 0) {
       const emptyMat = new (THREE as any).ShadowMaterial();
       emptyMat.transparent = true;
@@ -93,6 +93,7 @@ export class MapSurface {
       this.disposables.add(emptyMat);
       return emptyMesh;
     }
+
     const merged = BufferGeometryUtils.mergeBufferGeometries(geos);
     const mat = new (THREE as any).ShadowMaterial();
     mat.transparent = true;

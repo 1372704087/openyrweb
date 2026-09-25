@@ -20,12 +20,13 @@ export class CardinalTileFinder {
   diagonal = true;
   distance: number;
 
-  constructor(tiles: any, mapBounds: any, startTile: any, distance: number, maxDistance: number, predicate?: (tile: any) => boolean) {
+  // 孪生为默认参（仅 undefined 触发缺省；显式传 null 不兜底）
+  constructor(tiles: any, mapBounds: any, startTile: any, distance: number, maxDistance: number, predicate: (tile: any) => boolean = () => true) {
     this.tiles = tiles;
     this.mapBounds = mapBounds;
     this.startTile = startTile;
     this.maxDistance = maxDistance;
-    this.predicate = predicate ?? (() => true);
+    this.predicate = predicate;
     this.dirVec = new Vector2(10, 0);
     this.finished = false;
     this.diagonal = true;

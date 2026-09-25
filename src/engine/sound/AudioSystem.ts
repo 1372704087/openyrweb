@@ -351,13 +351,14 @@ export class AudioSystem {
     this.removeSuspendedSounds();
     this.stopMusic();
     const state = this.musicState ?? this.initMusicNode();
-    const el = state.source.mediaElement;
+    // 孪生为 let：回调里要置 undefined（TS 版若写 const，(el as any)=undefined 运行时抛 Assignment to constant）
+    let el = state.source.mediaElement;
     el.loop = loop;
     const objectUrl = (el.src = URL.createObjectURL(file.asFile()));
     el.onended = el.onpause = () => {
       URL.revokeObjectURL(objectUrl);
       // 孪生：局部 el 置 undefined（不影响 state.source.mediaElement 引用）
-      (el as any) = undefined;
+      el = undefined as any;
     };
     if (onEnd) {
       state.onEnd = onEnd;

@@ -92,8 +92,10 @@ export class LoginScreen extends MainMenuScreen {
         this.controller &&
         ((this.isBusy = true), this.selectedRegion)
       ) {
+        // 孪生在 await 前快照 region（hideSidebarButtons 期间换区不影响本次登录）
+        const region = this.selectedRegion;
         await this.controller.hideSidebarButtons();
-        await this.login(user, pass, this.selectedRegion.id);
+        await this.login(user, pass, region.id);
       }
     };
   }
@@ -321,7 +323,7 @@ export class LoginScreen extends MainMenuScreen {
           this.wolService.isConnected() &&
           this.wolService.getConnection().getCurrentUser()
         )
-      )
+      ) {
         msgs = await this.wolService.connectAndLogin(
           { url: region.wolUrl, user, pass },
           ({ position, avgWaitSeconds }: any) => {
@@ -346,10 +348,12 @@ export class LoginScreen extends MainMenuScreen {
             );
           },
         );
-      this.wladderService.setUrl(region.wladderUrl);
-      this.wgameresService.setUrl(region.wgameresUrl);
-      this.mapTransferService.setUrl(region.mapTransferUrl);
-      credentials = { user, pass, regionId };
+        // 孪生：setUrl×3 与 credentials 写回在『未连接』分支内（已连接时跳过）
+        this.wladderService.setUrl(region.wladderUrl);
+        this.wgameresService.setUrl(region.wgameresUrl);
+        this.mapTransferService.setUrl(region.mapTransferUrl);
+        credentials = { user, pass, regionId };
+      }
       connecting.cancel();
       this.messageBoxApi.destroy();
       this.localPrefs.setItem(StorageKey.PreferredServerRegion, regionId);

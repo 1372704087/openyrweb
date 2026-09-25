@@ -53,16 +53,19 @@ export const __decorate: (decorators: any[], target: any, key?: any, desc?: any)
   function __decorate(decorators: any[], target: any, key?: any, desc?: any): any {
     var result: any;
     var argc = arguments.length;
-    var targetDesc = argc < 3 ? target : desc === null ? (desc = Object.getOwnPropertyDescriptor(target, key)) : desc;
+    // 与孪生一致：null 描述符先就地取 getter，n 作为“当前描述符”逐轮累积
+    var n = argc < 3 ? target : desc === null ? (desc = Object.getOwnPropertyDescriptor(target, key)) : desc;
     const reflectAny = Reflect as any;
     if (typeof Reflect === "object" && typeof reflectAny.decorate === "function")
-      result = reflectAny.decorate(decorators, target, key, desc);
+      n = reflectAny.decorate(decorators, target, key, desc);
     else
       for (var i = decorators.length - 1; i >= 0; i--)
+        // 三实参形式传入的是“当前描述符 n”（不是装饰器函数本身），且 `|| n` 累积：
+        // 装饰器返回 undefined 时保留上一轮描述符（孪生 `(… ) || n`）
         if ((result = decorators[i]))
-          result = argc < 3 ? result(target) : argc > 3 ? result(target, key, result) : result(target, key);
-    if (argc > 3 && result && Object.defineProperty) Object.defineProperty(target, key, result);
-    return result;
+          n = (argc < 3 ? result(target) : argc > 3 ? result(target, key, n) : result(target, key)) || n;
+    if (argc > 3 && n && Object.defineProperty) Object.defineProperty(target, key, n);
+    return n;
   };
 
 // 回写到 globalThis，保证打包后仍可被当作自由标识符解析（与孪生脚本顶层 var 等价）。

@@ -440,10 +440,11 @@ export class ReplayScreen extends RootScreen {
     minimap: any,
     messages: any,
   ): void {
+    // 构造器形参 (game, worldSound, eva, ...)：第 2/3 参不是 worldScene/worldSound
     let soundHandler = new SoundHandler(
       game,
-      worldScene,
       worldSound,
+      eva,
       this.sound,
       game.events,
       messages,

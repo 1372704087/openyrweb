@@ -20,11 +20,12 @@ const React: any = (ReactModule as any).default ?? ReactModule;
 const CountryIcon: any = (CountryIconModule as any).CountryIcon;
 const Chat: any = (ChatModule as any).Chat;
 const OBS_COUNTRY_NAME: any = (constantsModule as any).OBS_COUNTRY_NAME;
-const TURN_TIMEOUT_MILLIS: any = (constantsModule as any).TURN_TIMEOUT_MILLIS;
-const LAG_STATE_THRESH_MILLIS: any = (constantsModule as any).LAG_STATE_THRESH_MILLIS;
-const CON_INFO_THRESH_MILLIS: any = (constantsModule as any).CON_INFO_THRESH_MILLIS;
-const RECIPIENT_ALL: any = (constantsModule as any).RECIPIENT_ALL;
-const RECIPIENT_TEAM: any = (constantsModule as any).RECIPIENT_TEAM;
+// 孪生这 5 个常量取自 gservConfig（gameopts/constants 里没有，取错会得 undefined → NaN/频道失效）
+const TURN_TIMEOUT_MILLIS: any = (gservConfigModule as any).TURN_TIMEOUT_MILLIS;
+const LAG_STATE_THRESH_MILLIS: any = (gservConfigModule as any).LAG_STATE_THRESH_MILLIS;
+const CON_INFO_THRESH_MILLIS: any = (gservConfigModule as any).CON_INFO_THRESH_MILLIS;
+const RECIPIENT_ALL: any = (gservConfigModule as any).RECIPIENT_ALL;
+const RECIPIENT_TEAM: any = (gservConfigModule as any).RECIPIENT_TEAM;
 const PlayerConnectionStatus: any = (PlayerConnectionStatusModule as any).PlayerConnectionStatus;
 
 /**

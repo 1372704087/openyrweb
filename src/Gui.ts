@@ -348,7 +348,7 @@ export class Gui {
           e instanceof IOError ||
           e instanceof ReplayFileNotFoundError ||
           this.sentry?.captureException(
-            Object.assign(new Error(`Couldn't get replay directory (${e.name})`), { cause: e }),
+            new (Error as any)(`Couldn't get replay directory (${e.name})`, { cause: e }),
           ));
     });
     const replayStorage = replayDir
@@ -378,7 +378,7 @@ export class Gui {
           e instanceof IOError ||
           e instanceof ReplayFileNotFoundError ||
           this.sentry?.captureException(
-            Object.assign(new Error(`Couldn't get mods directory (${e.name})`), { cause: e }),
+            new (Error as any)(`Couldn't get mods directory (${e.name})`, { cause: e }),
           ));
     });
     let modManager: any = modDir ? new ModManager(window.location, modDir, modLoaderRes) : void 0;
@@ -615,7 +615,7 @@ export class Gui {
       this.runtimeVars.debugBotIndex,
       this.config.devMode,
     );
-    let loadingKeys: any = new Map();
+    let loadingKeys: any; // 孪生为未初始化声明（原 = new Map() 恒被 GameScreen 覆盖，死初始化）
     const readySet = new Set();
     const taunts = new BoxedVar(Boolean(Number(this.localPrefs.getItem(StorageKey.TauntsEnabled) ?? "1")));
     const persistTaunts = (on: boolean) => {
@@ -626,7 +626,7 @@ export class Gui {
       .set(GameMenuScreenType.Home, new GameMenuHomeScreen(strings, this.fullScreen))
       .set(GameMenuScreenType.Diplo, new DiploScreen(strings, jsxRenderer, renderer, mpModes, taunts, readySet))
       .set(GameMenuScreenType.ConnectionInfo, new ConnectionInfoScreen(strings, jsxRenderer))
-      .set(GameMenuScreenType.QuitConfirm, new QuitConfirmScreen(strings, jsxRenderer))
+      .set(GameMenuScreenType.QuitConfirm, new QuitConfirmScreen(strings))
       .set(GameMenuScreenType.Options, new OptionsScreen(strings, jsxRenderer, options, this.localPrefs, this.fullScreen, true, false, mixer, music))
       .set(GameMenuScreenType.OptionsSound, new SoundOptsScreen(strings, jsxRenderer, mixer, music, this.localPrefs))
       .set(GameMenuScreenType.OptionsKeyboard, new KeyboardScreen(strings, jsxRenderer, keyBinds));
@@ -723,9 +723,7 @@ export class Gui {
     (rootController.addScreen(RootScreenType.MainMenuRoot, wolConnection as any),
       rootController.addScreen(RootScreenType.Game, loadingKeys as any),
       rootController.addScreen(RootScreenType.Replay, renderer as any),
-      renderer as any,
-      // 渲染场景与 HtmlContainer 挂载
-      (loop as any).addScene?.(uiScene),
+      // 渲染场景与 HtmlContainer 挂载（孪生仅 renderer.addScene 一次）
       (this.renderer as any).addScene(uiScene),
       (this.uiScene = uiScene),
       this.rootEl.appendChild(uiScene.getHtmlContainer().getElement()),
@@ -812,7 +810,8 @@ export class Gui {
           (navigated = true)),
         (rawConn && rawConn === this.appVersion) ||
           this.localPrefs.setItem(StorageKey.LastSeenPatch, this.appVersion)),
-      sound &&
+      // 孪生门控在 music（无音乐目录时 music 为 undefined，不弹音频权限提示）
+      music &&
         !navigated &&
         sound.audioSystem.isSuspended() &&
         (await new Promise<void>((resolve) =>
@@ -984,7 +983,7 @@ export class Gui {
         e instanceof StorageQuotaError ||
           e instanceof IOError ||
           e instanceof ReplayFileNotFoundError ||
-          this.sentry?.captureException(Object.assign(new Error(`Couldn't get music directory (${e.name})`), { cause: e })),
+          this.sentry?.captureException(new (Error as any)(`Couldn't get music directory (${e.name})`, { cause: e })),
         (hasMusicDir = false));
     }
     let music: any;

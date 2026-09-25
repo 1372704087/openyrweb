@@ -111,7 +111,8 @@ export class Vehicle {
   highlightAnimRunner: any;
   invulnAnimRunner: any;
   // invulnerable visual state tracking (version counter, flash, FS).
-  _invulnFlashTimer: number | undefined;
+  // 孪生构造器初始化为 0（TS 此前留 undefined，首帧 lazy-init 后才一致）
+  _invulnFlashTimer: number | undefined = 0;
   _lastInvulnV: number = 0;
   _lastFSActive: boolean = false;
   _fsEndFlashEndTimer: number = 0;

@@ -242,16 +242,20 @@ export class AttackTrait {
     return weapons.filter((w) => w && !w.rules.neverUse);
   }
 
-  /** 伪装穿透判定（间谍/幻影坦克等）。 */
+  /**
+   * 伪装穿透判定（间谍/幻影坦克等）。
+   * 孪生形参序 (object, target, disguise, game, ignoreBuildings, ignoreDisguise, ignoreAircraft)，
+   * 体内三开关取值：!ignoreBuildings（地形伪装守卫）/ gate=ignoreDisguise / inner=ignoreAircraft。
+   */
   canAttackThroughDisguise(
     object: any, target: any, disguiseTrait: any,
     ignoreBuildings: boolean, ignoreDisguise: boolean, game: any, ignoreAircraft: boolean,
   ): boolean {
-    if (!ignoreDisguise && disguiseTrait.hasTerrainDisguise() && !game.areFriendly(object, target) && !object.owner.sharedDetectDisguiseTrait?.has(target))
+    if (!ignoreBuildings && disguiseTrait.hasTerrainDisguise() && !game.areFriendly(object, target) && !object.owner.sharedDetectDisguiseTrait?.has(target))
       return false;
-    if (ignoreAircraft) {
+    if (ignoreDisguise) {
       if (
-        ignoreBuildings &&
+        ignoreAircraft &&
         target.moveTrait.isIdle() &&
         !object.rules.detectDisguise &&
         !object.owner.sharedDetectDisguiseTrait?.has(target) &&

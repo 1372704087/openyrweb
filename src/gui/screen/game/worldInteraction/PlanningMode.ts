@@ -250,7 +250,9 @@ export class PlanningMode {
 
   /** 同步原路径变更并清理空路径。 */
   updatePaths(): void {
-    for (const path of [...this.paths]) {
+    // 孪生直接迭代活数组 this.paths 并在体内 splice（会跳过被挪位的后续元素）——
+    // 迭代副本会把清理提前到同帧全部完成，时序与孪生不同
+    for (const path of this.paths) {
       if (!path.original) continue;
       if (
         path.original.units.length !== path.units.size &&

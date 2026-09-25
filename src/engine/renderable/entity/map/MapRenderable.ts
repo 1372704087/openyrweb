@@ -172,7 +172,7 @@ export class MapRenderable {
       [...this.rules.terrainRules.values()].filter(
         (r: any) => !r.isAnimated && this.art.hasObject(r.name, r.type),
       ),
-      () => 0,
+      () => false,
       this.theater,
       this.art,
       this.imageFinder,
@@ -188,7 +188,7 @@ export class MapRenderable {
           this.art.hasObject(r.name, r.type) &&
           !BridgeOverlayTypes.isBridge(this.rules.getOverlayId(r.name)),
       ),
-      (obj: any) => (obj.rules.wall ? 1 : 0),
+      (obj: any) => obj.rules.wall,
       this.theater,
       this.art,
       this.imageFinder,
@@ -200,7 +200,7 @@ export class MapRenderable {
     this.smudgeLayer = new MapSpriteBatchLayer(
       "map_smudge_layer",
       [...this.rules.smudgeRules.values()].filter((r: any) => this.art.hasObject(r.name, r.type)),
-      () => 0,
+      () => false,
       this.theater,
       this.art,
       this.imageFinder,

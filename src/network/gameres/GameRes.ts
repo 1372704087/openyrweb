@@ -353,11 +353,12 @@ export class GameRes {
    * @param flat 字段表
    */
   fromFlat(flat: FlatFields): void {
+    // 孪生助手无 undefined 容错（畸形包在 e[0] 处抛错）、无 Number/String 包装
     const asInt = (v: FlatValue | undefined): number =>
-      v && (v[0] === GameResFieldType.Int || v[0] === GameResFieldType.Time) ? Number(v[1]) : 0;
-    const asBool = (v: FlatValue | undefined): boolean => !!(v && v[0] === GameResFieldType.Boolean && v[1]);
+      (v as any)[0] === GameResFieldType.Int || (v as any)[0] === GameResFieldType.Time ? (v as any)[1] : 0;
+    const asBool = (v: FlatValue | undefined): boolean => (v as any)[0] === GameResFieldType.Boolean && (v as any)[1];
     const asStr = (v: FlatValue | undefined): string =>
-      v && v[0] === GameResFieldType.String ? String(v[1]) : "";
+      (v as any)[0] === GameResFieldType.String ? (v as any)[1] : "";
 
     const plrs = asInt(flat.PLRS);
     const bamr = asInt(flat.BAMR);

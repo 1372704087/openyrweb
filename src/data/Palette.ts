@@ -25,7 +25,8 @@ export class Palette {
   constructor(input?: unknown) {
     // 孪生：仅在 fromJson 路径赋值 colors；无参构造不初始化
     if (input instanceof VirtualFile) this.fromVirtualFile(input);
-    else if (typeof input === "object" && input !== null) this.fromJson(input as ArrayLike<number>);
+    // 孪生无 null 守卫（typeof null === "object"，null 会进 fromJson 后抛错）
+    else if (typeof input === "object") this.fromJson(input as ArrayLike<number>);
   }
 
   /** 从虚拟文件流读 768 字节调色板。 */

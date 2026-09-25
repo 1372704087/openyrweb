@@ -2,7 +2,7 @@
  * GeneralOptions — 通用设置（玩法 + 图形 + 源码扩展开关）。
  *
  * 由 gui/screen/options/GeneralOptions.ts.js 重写为 TS。
- * serialize 末尾追加 enableAres / enablePhobos；旧存档缺字段时保持默认关闭。
+ * （原头注释提到 enableAres/enablePhobos 字段——代码中并不存在，已删除误导描述。）
  *
  * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */

@@ -116,15 +116,18 @@ export class DockTrait {
             unit.unitOrderTrait.addTask(
               new TaskGroupModule.TaskGroup(
                 new MoveTaskModule.MoveTask(game, unit.tile, false),
-                new CallbackTaskModule.CallbackTask((world: any) => {
-                  if (unit.crashableTrait) unit.crashableTrait.crash({ player: object.owner });
-                  else world.destroyObject(unit, { player: object.owner });
+                // CallbackTask 的回调实参是执行该任务的单位（TaskRunner 传 obj），
+                // 孪生即用它调 game.destroyObject——不是 world
+                new CallbackTaskModule.CallbackTask((u: any) => {
+                  if (u.crashableTrait) u.crashableTrait.crash({ player: object.owner });
+                  else game.destroyObject(u, { player: object.owner });
                 }),
               ).setCancellable(false),
             );
           }
-          index++;
         }
+        // 孪生对空泊位也无条件递增（稀疏泊位时分配不错位）
+        index++;
       }
     } else {
       // 非停机坪（修理厂等）：可修理 → sell（返还资金），否则 undock。

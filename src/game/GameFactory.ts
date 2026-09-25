@@ -175,7 +175,7 @@ export class GameFactory {
     var nextObjectId = new BoxedVar(1);
     var objectFactory = new ObjectFactory(gameMap.tiles, gameMap.tileOccupation, gameMap.bridges, nextObjectId);
     var actionFactory = new ActionFactory();
-    var botFactory = new BotFactory(actionLogger);
+    var botFactory = new BotFactory(botsLib);
     var botManager = BotManager.factory(actionFactory, botFactory, botDebugIndex, actionLogger);
     let game = new Game(
       world,
@@ -305,7 +305,7 @@ export class GameFactory {
           hp.scenarioPlayerControl = true;
           hp.scenarioIq = h.iq || 0;
           hp.scenarioAliases = [h.name, h.country, cname].filter(Boolean);
-          hp.scenarioCredits = (h.credits || 0) * 1000;
+          hp.scenarioCredits = (h.credits || 0) * 100;
           game.addPlayer(hp);
           game.housePlayers.set(h.name, game.getPlayerByName(pname));
           // 地图对象/触发器的 Owner= 常用短名（Player/BadGuy1），把别名也注册进 housePlayers
@@ -340,7 +340,7 @@ export class GameFactory {
           cp.scenarioPlayerControl = false;
           cp.scenarioIq = h.iq || 0;
           cp.scenarioAliases = [h.name, h.country, cname].filter(Boolean);
-          cp.scenarioCredits = (h.credits || 0) * 1000;
+          cp.scenarioCredits = (h.credits || 0) * 100;
           game.addPlayer(cp);
           game.housePlayers.set(h.name, game.getPlayerByName(h.name));
           for (const al of [h.name.replace(/\s+House$/i, "").trim(), h.country, cname]) {

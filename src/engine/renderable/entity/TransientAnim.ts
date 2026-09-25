@@ -70,10 +70,11 @@ export class TransientAnim extends Anim {
    * @param now - 当前时间戳（ms）
    */
   update(now: number): void {
-    // 仅在「尚未开始」时尝试 report 音效（?. 短路与孪生一致）
+    // 仅在「尚未开始」时尝试 report 音效（worldSound?. 短路与孪生一致；
+    // 不额外校验 playEffect 方法存在——孪生缺方法时会抛错暴露绑定问题）
     if (this.isAnimNotStarted()) {
       const report = this.objectArt.report;
-      if (report && this.worldSound?.playEffect) {
+      if (report) {
         this.worldSound?.playEffect(report, this.getPosition());
       }
     }

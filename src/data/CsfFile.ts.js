@@ -13,7 +13,9 @@ System.register("data/CsfFile", [], function (t, e) {
       ((o = new Uint32Array(
         new Uint8Array(Array.prototype.map.call("STRW", (e) => e.charCodeAt(0)).reverse()).buffer,
       )[0]),
-        (l = (e) => e.map((e) => ~e >>> 0)),
+        // 与 TS 侧对齐：掩码回 8 位。>>>0 会令 UTF-16 配对恒为 0xFFxx 乱码
+        // （标准 CSF 实测 "Hi"→"ｈｩ"），GBK 误回退 + sprintf %\0 炸
+        (l = (e) => e.map((e) => (~e & 255))),
         (c = (e) => {
           let t = "";
           for (let i = 0; i < e.length; i += 2) t += String.fromCharCode((e[i + 1] << 8) | e[i]);
@@ -58,16 +60,18 @@ System.register("data/CsfFile", [], function (t, e) {
               (t.readInt32(), t.readInt32(), (this.language = t.readInt32()));
               for (let n = 0; n < i; n++) {
                 t.readInt32();
-                var r,
-                  s = t.readInt32(),
+                var s = t.readInt32(),
                   a = t.readString(t.readInt32());
-                0 != (1 & s)
-                  ? ((r = t.readInt32() === o),
-                    (s = l(t.readUint8Array(2 * t.readInt32()))),
-                    (s = c(s)),
-                    r && t.readString(t.readInt32()),
-                    (this.data[a] = s))
-                  : (this.data[a] = "");
+                // 与 TS 侧对齐：s 是标签内字符串数量（原误当标志位，偶数标签存空串且流不消费致后续乱码）；
+                // 逐块解析取第一串为值
+                let v = "";
+                for (let m = 0; m < s; m++) {
+                  var r = t.readInt32() === o,
+                    u = c(l(t.readUint8Array(2 * t.readInt32())));
+                  if (0 === m) v = u;
+                  r && t.readString(t.readInt32());
+                }
+                this.data[a] = v;
               }
               this.language === h.Unknown && this.autoDetectLocale();
             }

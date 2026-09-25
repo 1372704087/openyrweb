@@ -29,10 +29,11 @@ System.register(
     "util/typeGuard",
     "game/Weapon",
     "data/IniSection",
+    "extensions/ExtensionHost",
   ],
   function (e, t) {
     "use strict";
-    var a, n, s, r, i, o, l, c, h, u, d, g, p, m, f, y, T, v, b, S, w, E, C, x, z;
+    var a, n, s, r, i, o, l, c, h, u, d, g, p, m, f, y, T, v, b, S, w, E, C, x, z, A;
     t && t.id;
     return {
       setters: [
@@ -107,6 +108,9 @@ System.register(
         },
         function (e) {
           z = e;
+        },
+        function (e) {
+          A = e;
         },
       ],
       execute: function () {
@@ -292,7 +296,9 @@ System.register(
               e.initialVeteran && (this.general.veteran.initialVeteran = !0);
             }
             init() {
-              (this.readAudioVisual(),
+              // 与 TS 侧对齐：源码扩展（Ares/Phobos）先改写 INI 再进入正常解析
+              (A.ExtensionHost.applyToRules(this.ini),
+                this.readAudioVisual(),
                 this.readCombatDamage(),
                 this.readRadiation(),
                 this.readGeneral(),

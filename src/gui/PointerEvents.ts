@@ -172,16 +172,13 @@ export class PointerEvents {
       let origin: any;
       let mapped: any;
       if (touches.length > 1) {
-        if (
-          this.touchFingers > 0 ||
-          (touches[0].target === this.renderer.getCanvas() &&
-            touches.length === 2)
-        ) {
-          if (this.touchStartBuffer) {
-            clearTimeout(this.touchStartBuffer.timeoutId);
-            this.touchStartBuffer = undefined;
-          }
+        // 孪生：touchFingers>0 短路守卫——已有手指状态时不重复发 mousedown
+        if (this.touchFingers <= 0) {
           if (touches[0].target === this.renderer.getCanvas() && touches.length === 2) {
+            if (this.touchStartBuffer) {
+              clearTimeout(this.touchStartBuffer.timeoutId);
+              this.touchStartBuffer = undefined;
+            }
             this.touchFingers = 2;
             if (!this.initialTouchEvent) this.initialTouchEvent = ev;
             origin = this.initialTouchEvent.touches[0];

@@ -175,7 +175,7 @@ export class CanvasUtils {
       width: fixedWidth,
       height: fixedHeight,
       autoEnlargeCanvas = false,
-    }: DrawTextOptions = {},
+    }: DrawTextOptions,
   ): TextLayout {
     const font = fontWeight + ` ${fontSize}px ` + fontFamily;
     ctx.font = font;

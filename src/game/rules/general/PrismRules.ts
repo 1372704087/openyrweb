@@ -21,7 +21,7 @@ export class PrismRules {
     this.type = ini.getString("PrismType");
     this.supportHeight = ini.getNumber("PrismSupportHeight");
     this.supportMax = ini.getNumber("PrismSupportMax");
-    this.supportModifier = ini.getNumber("PrismSupportModifier");
+    this.supportModifier = ini.getNumber("PrismSupportModifier", 1);
     return this;
   }
 }

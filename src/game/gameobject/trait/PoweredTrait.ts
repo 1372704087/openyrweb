@@ -48,7 +48,7 @@ export class PoweredTrait {
       !!this.obj &&
       !!this.turnedOn &&
       (forceOn || !this.isCharged()
-        ? this.obj.rules.power || this.obj.rules.needsEngineer
+        ? !this.obj.rules.power && this.obj.rules.needsEngineer
           ? !this.obj.owner.isNeutral
           : !!this.obj.owner.powerTrait && this.obj.owner.powerTrait?.level !== PowerTraitModule.PowerLevel.Low
         : true)

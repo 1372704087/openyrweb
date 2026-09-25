@@ -12,7 +12,7 @@
 import { ActionType } from "game/action/ActionType"; // 已转换
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export class Action {
+export abstract class Action {
   // 字段一律不带初始化器：孪生构造函数按固定顺序赋值，TS 的字段
   // 初始化器会被提升到 super() 之后立刻执行，改变 Object.keys() 顺序。
   actionType: ActionType;
@@ -35,7 +35,7 @@ export class Action {
   print(): string {
     return "";
   }
-
-  /** 将动作落地到游戏状态（子类覆写；基类默认 no-op）。 */
-  process(): void {}
+  // 孪生基类无 process()——具体动作各自实现；基类直调会在原型链缺失处抛错。
+  // abstract 方法不发射实现（原型上无 process，与孪生一致），仅保留类型结构。
+  abstract process(): void;
 }

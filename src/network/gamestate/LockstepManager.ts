@@ -21,6 +21,7 @@ import { EventDispatcher } from "util/event"; // 孪生
 import * as gservConfig from "network/gservConfig"; // 孪生
 import { GameSpeed } from "game/GameSpeed"; // 孪生
 import { computeNetworkTurnMillis } from "network/gamestate/lockstepUtil"; // 孪生
+import { GameStatus } from "game/Game"; // 孪生 r.GameStatus（Game 模块导出）
 import type { Parser, PlayerActionPayload } from "network/gameopt/Parser"; // 类型
 import type { Serializer } from "network/gameopt/Serializer"; // 类型
 
@@ -279,7 +280,8 @@ export class LockstepManager {
     if (this.errorState) return;
     if (!this.networkTurnMillis) throw new Error("Network turn rate should be set by now.");
     const gameStatus = (this.game as Game & { status?: number | string }).status;
-    const ended = String(gameStatus) === "Ended" || gameStatus === 3;
+    // 孪生 `game.status !== GameStatus.Ended`：Ended=2（===3 恒假曾致结束后仍走锁步主路径）
+    const ended = String(gameStatus) === "Ended" || gameStatus === GameStatus.Ended;
     if (ended) {
       this.game.update();
       return;

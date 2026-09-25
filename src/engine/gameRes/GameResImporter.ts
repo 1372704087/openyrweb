@@ -54,26 +54,28 @@ function toMiB(bytes: number): number {
  */
 function withKnownContentSize(makeOpen: (...args: any[]) => any): (...args: any[]) => any {
   return function (this: any, ...openArgs: any[]): any {
-    const node: any = makeOpen(...openArgs);
-    const known: any = knownSizeByFileName.get(node.name);
+    // FS.open 返回 stream，节点在 .node（孪生 a.node.name / a.node.contents）
+    const stream: any = makeOpen(...openArgs);
+    const known: any = knownSizeByFileName.get(stream.node.name);
     if (known) {
-      node.contents = new Uint8Array(known);
-      const origWrite = node.stream_ops.write;
-      node.stream_ops = { ...node.stream_ops };
-      node.stream_ops.write = ((base: any) =>
+      stream.node.contents = new Uint8Array(known);
+      const origWrite = stream.stream_ops.write;
+      stream.stream_ops = { ...stream.stream_ops };
+      stream.stream_ops.write = ((base: any) =>
         function (this: any, ...writeArgs: any[]) {
           const canChangeLength = writeArgs[4]; // offsetBytes 参数（falsy 时才更新 usedBytes）
+          const s: any = writeArgs[0];
           if (!canChangeLength) {
-            node.usedBytes = node.contents.byteLength;
+            s.node.usedBytes = s.node.contents.byteLength;
           }
           const n = base(...writeArgs);
           if (!canChangeLength) {
-            node.usedBytes = n;
+            s.node.usedBytes = n;
           }
           return n;
         })(origWrite);
     }
-    return node;
+    return stream;
   };
 }
 

@@ -844,8 +844,7 @@ export class SkirmishScreen extends MainMenuScreen {
       else s.occupation = SlotOccupation.Occupied;
       if (slot.type === SlotType.Ai) {
         s.aiDifficulty = (slot as any).difficulty;
-        s.type = (SlotOccupation as any).Ai === undefined ? (SlotOccupation as any).Occupied : s.type;
-        // viewmodel SlotType.Ai 与 SlotOccupation 共享键空间，贴孪生用 viewmodel SlotType
+        // 孪生无 :847 死语句（其写入恒被下一行覆盖）
         s.type = (FormSlotType as any).Ai;
       } else if (slot.type === SlotType.Player) {
         s.name = slot.name;

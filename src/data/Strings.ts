@@ -21,7 +21,10 @@ export class Strings {
     this.data = {};
     this.warnedKeys = new Set();
     if (input instanceof CsfFile) this.fromCsf(input);
-    else if (typeof input === "object" && input !== null) this.fromJson(input as Record<string, unknown>);
+    // 孪生无 null 守卫（typeof null === "object"，null 会进 fromJson 后抛错）
+    else if (typeof input === "object") this.fromJson(input as Record<string, unknown>);
+    // 诊断探针：控制台可经 window.__strings 检查解析后的字符串表
+    (globalThis as any).__strings = this;
   }
 
   /** 从 CsfFile 载入（委托 data 字段）。 */

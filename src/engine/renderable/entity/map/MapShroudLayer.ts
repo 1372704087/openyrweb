@@ -174,8 +174,10 @@ export class MapShroudLayer {
         count++;
       }
     }
-    // 0×0 迷雾（空图/shroud 未初始化）：跳过合并与 mesh，避免 geometries[0] 空指针
+    // 0×0 迷雾（占位 shroud 未初始化）：跳过合并与 mesh，避免 geometries[0] 空指针
+    // 【运行时验证】loadUi 阶段 shroud 为占位空壳，无守卫时用户对局必炸（reading 'index'）
     if (count === 0 || geos.length === 0) return;
+
     const material = new PaletteBasicMaterial({
       map: atlas.getTexture(),
       palette: paletteTex,
@@ -186,7 +188,7 @@ export class MapShroudLayer {
       blending: (THREE as any).MultiplyBlending,
     });
     const merged = BufferGeometryUtils.mergeBufferGeometries(geos);
-    if (merged.getAttribute("position")?.count !== SpriteUtils.VERTICES_PER_SPRITE * count) {
+    if (merged.getAttribute("position").count !== SpriteUtils.VERTICES_PER_SPRITE * count) {
       throw new Error("Vertex count mismatch");
     }
     this.uvAttribute = merged.getAttribute("uv");
@@ -237,6 +239,26 @@ export class MapShroudLayer {
 
   /** 每帧应用 full/cover/clear/incremental 更新。 */
   update(_tick?: number): void {
+    // 把当前状态暴露给控制台探针（window.__shroudLayerState / __shroudLayer）
+    (globalThis as any).__shroudLayer = this;
+    (globalThis as any).__shroudLayerState = {
+      built: !!this.uvAttribute,
+      size: this.shroud.getSize ? this.shroud.getSize() : null,
+      needsFullUpdate: this.needsFullUpdate,
+      pendingIncremental: this.needsIncrementalUpdate.length,
+    };
+    // 占位 shroud（0×0，loadUi 时真 shroud 尚未由 setShroud 注入）阶段：
+    // createTileObjects 会早退、无 mesh。等真 shroud（size>0）到位后首次 update 补建，
+    // 否则占位阶段每帧读 uvAttribute.subarray 会炸。
+    if (!this.uvAttribute) {
+      // !(width > 0) 同时拦截 NaN/undefined/≤0（宽为 NaN 时旧 `width <= 0` 判不住）
+      const size = this.shroud.getSize();
+      if (!this.target || !(size && size.width > 0)) return;
+      this.createTileObjects(this.target);
+      // createTileObjects 可能因 count===0（height 为 0/NaN）早退：
+      // 未产出 uv 状态时不得落进 needsFullUpdate 分支，否则 uvLookup.subarray 必炸
+      if (!this.uvAttribute || !this.uvLookup) return;
+    }
     if (this.needsFullUpdate) {
       if ("cover" === this.needsFullUpdate || "clear" === this.needsFullUpdate) {
         this.toggleAllTiles("cover" === this.needsFullUpdate ? ShroudType.Unexplored : ShroudType.Explored);
@@ -305,8 +327,10 @@ export class MapShroudLayer {
    * @param type - ShroudType
    */
   toggleAllTiles(type: number): void {
+    // 兜底：uv 状态未建（占位/异常尺寸路径）时跳过，避免 uvLookup.subarray 炸帧循环
+    if (!this.uvLookup || !this.uvAttribute) return;
     const frame = type === ShroudType.Unexplored ? 15 : 0;
-    const piece = this.uvLookup!.subarray(frame * this.uvElemsPerPiece, (1 + frame) * this.uvElemsPerPiece);
+    const piece = this.uvLookup.subarray(frame * this.uvElemsPerPiece, (1 + frame) * this.uvElemsPerPiece);
     const arr = this.uvAttribute!.array;
     const size = this.shroud.getSize();
     for (let i = 0, n = size.width * size.height; i < n; i++) arr.set(piece, i * this.uvElemsPerPiece);
@@ -318,8 +342,9 @@ export class MapShroudLayer {
    * @param frameNo - 帧号
    */
   updateTilePiece(index: number, frameNo: number): void {
-    this.uvAttribute!.array.set(
-      this.uvLookup!.subarray(frameNo * this.uvElemsPerPiece, (frameNo + 1) * this.uvElemsPerPiece),
+    if (!this.uvLookup || !this.uvAttribute) return;
+    this.uvAttribute.array.set(
+      this.uvLookup.subarray(frameNo * this.uvElemsPerPiece, (frameNo + 1) * this.uvElemsPerPiece),
       index * this.uvElemsPerPiece,
     );
   }

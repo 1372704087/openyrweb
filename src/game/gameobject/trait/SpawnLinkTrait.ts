@@ -41,7 +41,8 @@ export class SpawnLinkTrait {
       !parentTarget ||
       (spawnerWeapon &&
         rangeHelper.isInWeaponRange(this.parent, parentTarget.obj ?? parentTarget.tile, spawnerWeapon, world.rules));
-    if (obj.ammo && targetsInSync && inWeaponRange) {
+    // 孪生 `ammo && !targetsInSync && inRange ? 攻击路径 : 跟随父`：未同步才跟随母体目标
+    if (obj.ammo && !targetsInSync && inWeaponRange) {
       if (parentTarget && obj.primaryWeapon.targeting.canTarget(parentTarget.obj, parentTarget.tile, world, true, false)) {
         if (!currentTask || currentTask instanceof MoveTaskModule.MoveTask) {
           obj.unitOrderTrait.cancelAllTasks();

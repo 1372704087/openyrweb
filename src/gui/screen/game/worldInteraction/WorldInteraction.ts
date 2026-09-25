@@ -346,14 +346,13 @@ export class WorldInteraction {
           if (!inRange) return;
           this.unitSelectionHandler.deselectAll();
         }
-        if (
-          boxed ||
+        // 孪生为逗号表达式：以下判定只决定是否走点击分发，
+        // 双击哈希刷新在其后无条件执行（不受该条件包裹）。
+        boxed ||
           (!rightClickMove && !isPrimary) ||
-          this.handleDefaultClickAction(rightClickMove, isPrimary, doubleClick, isLongTouch, up, hover)
-        ) {
-          if (this.lastDefaultModeClickDetails) {
-            this.lastDefaultModeClickDetails.selectionHash = this.unitSelectionHandler.getHash();
-          }
+          this.handleDefaultClickAction(rightClickMove, isPrimary, doubleClick, isLongTouch, up, hover);
+        if (this.lastDefaultModeClickDetails) {
+          this.lastDefaultModeClickDetails.selectionHash = this.unitSelectionHandler.getHash();
         }
       }
     };

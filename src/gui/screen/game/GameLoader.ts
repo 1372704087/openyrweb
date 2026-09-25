@@ -704,36 +704,38 @@ export class GameLoader {
       set.add(rules.getObject(obj.name, obj.type));
     }
     const files = new Map<string, any>();
-    for (const rules of set) {
-      const objectArt = art.getObject(rules.name, rules.type);
+    for (const objRules of set) {
+      const objectArt = art.getObject(objRules.name, objRules.type);
       const isVoxel =
         objectArt.isVoxel ||
-        (rules.type === ObjectType.Building && rules.turretAnimIsVoxel);
+        (objRules.type === ObjectType.Building && objRules.turretAnimIsVoxel);
       if (!isVoxel) continue;
       const base = objectArt.imageName.toLowerCase();
       const names: string[] = [];
-      if (rules.type !== ObjectType.Building) {
+      if (objRules.type !== ObjectType.Building) {
         names.push(base + ".vxl");
-        if (rules.spawns && rules.noSpawnAlt) names.push(base + "wo.vxl");
+        if (objRules.spawns && objRules.noSpawnAlt) names.push(base + "wo.vxl");
         if (
-          rules.harvester &&
-          rules.unloadingClass &&
-          art.hasObject(rules.unloadingClass, ObjectType.Vehicle) 
+          objRules.harvester &&
+          objRules.unloadingClass &&
+          // rules = 外层参数（Rules 实例）：unloadingClass 的查询走 rules.hasObject，
+          // 不能用循环变量（规则对象没有 hasObject，遮蔽会抛 TypeError）
+          rules.hasObject(objRules.unloadingClass, ObjectType.Vehicle)
         ) {
           names.push(
-            art.getObject(rules.unloadingClass, ObjectType.Vehicle).imageName.toLowerCase() +
+            rules.getObject(objRules.unloadingClass, ObjectType.Vehicle).imageName.toLowerCase() +
               ".vxl",
           );
         }
-        if (rules.turret) {
-          for (let i = 0; i < rules.turretCount; ++i) {
+        if (objRules.turret) {
+          for (let i = 0; i < objRules.turretCount; ++i) {
             names.push(base + `tur${i || ""}.vxl`);
           }
           const barl = base + "barl.vxl";
           if (voxels.has(barl)) names.push(barl);
         }
-      } else if (rules.turretAnimIsVoxel) {
-        const tur = rules.turretAnim.toLowerCase() + ".vxl";
+      } else if (objRules.turretAnimIsVoxel) {
+        const tur = objRules.turretAnim.toLowerCase() + ".vxl";
         names.push(tur);
         const barl = tur.replace("tur", "barl");
         if (voxels.has(barl)) names.push(barl);

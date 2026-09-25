@@ -25,7 +25,8 @@ export class IronCurtainExecutor extends TriggerExecutor {
     if (!owner) return;
     const rules = [...game.rules.superWeaponRules.values()].find((r) => r.type === SuperWeaponType.IronCurtain);
     if (rules) {
-      game.traits.get(SuperWeaponsTrait).activateEffect(rules, tile, game, tile, undefined, true);
+      // 孪生第 2 参为解析出的玩家 owner（非 tile），与 ForceShieldAt 等同构
+      game.traits.get(SuperWeaponsTrait).activateEffect(rules, owner, game, tile, undefined, true);
     }
   }
 }

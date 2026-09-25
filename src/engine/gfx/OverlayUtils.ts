@@ -38,7 +38,7 @@ export class OverlayUtils {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 0;
     const ctx = canvas.getContext("2d", {
-      alpha: !options.backgroundColor || !!String(options.backgroundColor).match(/^rgba/),
+      alpha: !options.backgroundColor || !!options.backgroundColor.match(/^rgba/),
     });
     CanvasUtils.drawText(ctx as CanvasRenderingContext2D, text, 0, 0, { ...options, autoEnlargeCanvas: true });
     return canvas;

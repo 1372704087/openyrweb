@@ -600,7 +600,9 @@ export class CombatantUi {
             });
           }
         }
-      } else if (event.button === 2) {
+      } else {
+        // 孪生：button≠0/2（中键等）在 GenericClick 前直接 return
+        if (event.button !== 2) return;
         if (queue.status === QueueStatus.Active && entries[0] === queue.getFirst()) {
           this.pushAction(ActionType.UpdateQueue, (a: any) => {
             a.queueType = queue.type;

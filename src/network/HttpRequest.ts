@@ -157,7 +157,8 @@ export class HttpRequest {
     }
 
     if (!response.ok) {
-      throw new DownloadError(`Fetch failed with status ${response.status}: ${response.statusText}`, undefined, response.status);
+      // 孪生冒号后无空格（`...status:` 模板 + 字符串拼接）
+      throw new DownloadError(`Fetch failed with status ${response.status}:` + response.statusText, undefined, response.status);
     }
 
     if (response.headers.get("Content-Type") === "text/html" && !init?.allowHtmlMimeType) {

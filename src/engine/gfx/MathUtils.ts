@@ -36,11 +36,12 @@ export class MathUtils {
     convertToWorldSpace: boolean = false,
   ): void {
     const useWorld = (convertToWorldSpace = convertToWorldSpace !== undefined && convertToWorldSpace);
-    if (useWorld && object.parent) object.parent.localToWorld(object.position);
+    // 孪生无 object.parent 守卫（缺父节点时抛错暴露绑定问题）
+    if (useWorld) object.parent.localToWorld(object.position);
     object.position.sub(point);
     object.position.applyAxisAngle(axis, angle);
     object.position.add(point);
-    if (useWorld && object.parent) object.parent.worldToLocal(object.position);
+    if (useWorld) object.parent.worldToLocal(object.position);
     object.rotateOnAxis(axis, angle);
   }
 

@@ -81,11 +81,11 @@ export class AudioLoop {
     volume: number,
     pan: number,
     rate: number,
-    delayMs?: { min: number; max: number },
-    attack?: number | boolean,
-    decay?: number | boolean,
-    remainingLoops: number = Number.POSITIVE_INFINITY,
-    playBuffer: AudioLoopPlayBuffer = (() => ({ handle: undefined, source: undefined })) as any,
+    delayMs: { min: number; max: number } | undefined,
+    attack: number | boolean | undefined,
+    decay: number | boolean | undefined,
+    remainingLoops: number,
+    playBuffer: AudioLoopPlayBuffer,
   ) {
     this.audioContext = audioContext;
     this.volume = volume;

@@ -70,8 +70,7 @@ export class ShpAggregator {
     for (const { file: n, hasShadow: o, frameCount } of e) {
       if (!s.has(n)) {
         s.set(n, a);
-        const l =
-          frameCount ?? Math.floor(n.numImages * (o ? 0.5 : 1));
+        const l = frameCount;
         for (let e2 = 0; e2 < l; e2++) {
           (i.addImage(n.getImage(e2)),
             r.push(o ? n.getImage(l + e2) : new ShpImage()),

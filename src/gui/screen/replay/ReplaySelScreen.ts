@@ -110,10 +110,8 @@ export class ReplaySelScreen extends MainMenuScreen {
         !(e instanceof StorageQuotaError)
       )
         this.sentry?.captureException(
-          Object.assign(
-            new Error(`Failed to load replay list (${e.name ?? e.message})`),
-            { cause: e },
-          ),
+          // 孪生为 { cause } 构造（cause 不可枚举）；Object.assign 会使其可枚举
+          new (Error as any)(`Failed to load replay list (${e.name ?? e.message})`, { cause: e }),
         );
       this.handleError(e, this.strings.get("GUI:ReplayListError"));
       return;

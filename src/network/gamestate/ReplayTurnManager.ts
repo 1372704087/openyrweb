@@ -163,7 +163,7 @@ export class ReplayTurnManager {
         action.player = this.game.getPlayer(playerId);
         action.unserialize(actionData.params);
         action.process();
-        const printed = action.print?.();
+        const printed = action.print();
         if (printed) {
           this.actionLogger?.debug(`(${action.player!.name})@${this.game.currentTick}: ` + printed);
         }

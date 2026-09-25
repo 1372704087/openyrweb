@@ -342,7 +342,7 @@ export const Ladder = (props: LadderProps) => {
                   var ladder = ladders?.find(
                     (l: any) => l.id === id && l.type === type,
                   );
-                  if (ladder) onLadderSelect?.(ladder);
+                  if (ladder) onLadderSelect(ladder);
                 },
                 className: "ladder-select",
               },
@@ -372,7 +372,7 @@ export const Ladder = (props: LadderProps) => {
               onSubmit: (e: any) => {
                 e.preventDefault();
                 if (searchRef.current?.value) {
-                  onPlayerSearch?.(searchRef.current.value);
+                  onPlayerSearch(searchRef.current.value);
                   searchRef.current.value = "";
                 }
               },
@@ -416,7 +416,7 @@ export const Ladder = (props: LadderProps) => {
               disabled,
               onClick: () => {
                 setShowSeasonInfo(false);
-                onLadderTypeSelect?.(type);
+                onLadderTypeSelect(type);
               },
             },
             strings.get(TYPE_LABEL_KEYS.get(type) ?? type),

@@ -35,12 +35,13 @@ export class FrustumCuller {
       const wasVisible = node.visible;
       if (f.intersectsBox(node.box)) {
         node.visible = true;
-        if (children !== null && children !== undefined) {
+        // 孪生仅判 null !== children（undefined 会照常进入并在 .length 处抛错）
+        if (children !== null) {
           for (let i = 0, len = children.length; i < len; ++i) {
             const child = children[i];
             if (child.isOctree) {
               visit(child, f, out, depth + 1);
-            } else if (!wasVisible && node.config && node.config.skipInvisMatrixUpdate) {
+            } else if (!wasVisible && node.config.skipInvisMatrixUpdate) {
               child.updateMatrixWorld(false);
             }
           }

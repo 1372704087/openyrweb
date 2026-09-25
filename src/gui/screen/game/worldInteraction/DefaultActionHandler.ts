@@ -263,27 +263,27 @@ export class DefaultActionHandler {
    * @param playerOwner 悬停对象属主
    * @param selected 选中
    * @param hover 悬停
+   * @param target 订单目标
    * @param filter 过滤器
-   * @param rightClickMove 右键移动
-   * @param force 强制
+   * @param rightClickMove 右键移动（孪生：setForce 用此值）
+   * @param force 强制（孪生：SelectOnly 分支 setTypeSelect 用此值）
    * @param mods 修饰键
-   * @param allowTypeSelect 允许类型选择
    * @param isMinimap 是否小地图
    */
   getDefaultAction(
     playerOwner: any,
     selected: any[],
     hover: any,
+    target: any,
     filter: ActionFilter,
     rightClickMove: boolean,
     force: boolean,
     mods: any,
-    allowTypeSelect: boolean,
     isMinimap: boolean,
   ): any {
     const obj = hover.gameObject;
     const select = this.selectAction;
-    select.setForce(force).setTypeSelect(false);
+    select.setForce(rightClickMove).setTypeSelect(false);
     if (!playerOwner || playerOwner.owner !== this.currentPlayer || playerOwner.rules.spawned) {
       if (!isMinimap && filter !== ActionFilter.NoSelect && select.isValidTarget(obj)) {
         return select;
@@ -300,20 +300,20 @@ export class DefaultActionHandler {
       return this.selectToggleAction;
     }
     if (filter === ActionFilter.SelectOnly) {
-      if (!isMinimap && select.setTypeSelect(allowTypeSelect).isValidTarget(obj)) return select;
+      if (!isMinimap && select.setTypeSelect(force).isValidTarget(obj)) return select;
       return void 0;
     }
     const allWarped = selected.every((u: any) => u.warpedOutTrait.isActive());
     if (mods?.ctrlKey && !allWarped) {
       if (mods.shiftKey) {
-        if (this.attackMoveAction?.set(playerOwner, hover).isValid()) return this.attackMoveAction;
+        if (this.attackMoveAction?.set(playerOwner, target).isValid()) return this.attackMoveAction;
       } else if (mods.altKey) {
-        if (this.guardAreaAction?.set(playerOwner, hover).isValid()) return this.guardAreaAction;
-      } else if (this.forceAttackAction?.set(playerOwner, hover).isValid()) {
+        if (this.guardAreaAction?.set(playerOwner, target).isValid()) return this.guardAreaAction;
+      } else if (this.forceAttackAction?.set(playerOwner, target).isValid()) {
         return this.forceAttackAction;
       }
     }
-    if (mods?.altKey && !allWarped && this.forceMoveAction?.set(playerOwner, hover).isValid()) {
+    if (mods?.altKey && !allWarped && this.forceMoveAction?.set(playerOwner, target).isValid()) {
       return this.forceMoveAction;
     }
     for (const action of this.defaultActions.values()) {
@@ -321,7 +321,7 @@ export class DefaultActionHandler {
         if (
           filter !== ActionFilter.NoSelect &&
           !isMinimap &&
-          action.setForce(force).setTypeSelect(false).isValidTarget(obj)
+          action.setForce(rightClickMove).setTypeSelect(false).isValidTarget(obj)
         ) {
           return action;
         }
@@ -329,12 +329,12 @@ export class DefaultActionHandler {
         !allWarped &&
         (!isMinimap || action.minimapAllowed) &&
         !(action.singleSelectionRequired && selected.length > 1) &&
-        action.set(playerOwner, hover).isValid()
+        action.set(playerOwner, target).isValid()
       ) {
         return action;
       }
     }
-    if (isMinimap && !allWarped && this.forceMoveAction?.set(playerOwner, hover).isValid()) {
+    if (isMinimap && !allWarped && this.forceMoveAction?.set(playerOwner, target).isValid()) {
       return this.forceMoveAction;
     }
     return void 0;
@@ -366,11 +366,11 @@ export class DefaultActionHandler {
         void 0,
         selected,
         hover,
+        target,
         filter,
         rightClickMove,
         force,
         mods,
-        void 0,
         isMinimap,
       );
     }
@@ -380,11 +380,11 @@ export class DefaultActionHandler {
           unit,
           selected,
           hover,
+          target,
           filter,
           rightClickMove,
           force,
           mods,
-          void 0,
           isMinimap,
         );
         if (action) return { unit, action };
@@ -511,7 +511,7 @@ export class DefaultActionHandler {
         });
       } else if (
         !(this.mostSignificantAction instanceof SelectAction) &&
-        selected.includes(hover.gameObject)
+        !selected.includes(hover.gameObject)
       ) {
         hover.entity?.highlight?.();
       }

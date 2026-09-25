@@ -1,7 +1,8 @@
 /**
  * SelectUnitsAction — 更新玩家选择集的动作。
  *
- * unserialize 读 unitIds（uint32 数组，setter 按 ORDER_UNIT_LIMIT 截断）；
+ * unserialize 读 unitIds（uint32 数组；按下标写回使 setter 截断被撑开——
+ * 与孪生一致实际不截断，见 unserialize 注释）；
  * process 将仍存在的己方/世界 techno 写入 OrderActionContext 对应选择集。
  *
  * 由 game/action/SelectUnitsAction.ts.js 重写为 TS（行为完全一致）。两个
@@ -39,14 +40,14 @@ export class SelectUnitsAction extends Action {
 
   unserialize(data: any): void {
     const stream = new DataStreamModule.DataStream(data);
-    // 先读满载荷再整体赋值：若在 setter 截断后的数组上按下标写入，
-    // i ≥ ORDER_UNIT_LIMIT 会把长度重新撑开，截断被绕过。
-    const count = data.byteLength / 4;
-    const ids = new Array<number>(count);
-    for (let i = 0; i < count; i++) {
-      ids[i] = stream.readUint32();
+    // 还原孪生写法（需定夺→按迁移等价）：先经 setter 赋长数组（slice 截断到
+    // ORDER_UNIT_LIMIT），再按下标逐个写回——i ≥ LIMIT 会把 _unitIds 重新撑开，
+    // 实际不截断。>128 id 载荷与锁步基线保持一致（原 TS 本地读满再整体赋值
+    // 会真截断，>128 时 lockstep 分叉；若要保留修 bug 语义需单独立项同步发送端）。
+    this.unitIds = new Array(data.byteLength / 4);
+    for (let i = 0; i < data.byteLength / 4; i++) {
+      this.unitIds[i] = stream.readUint32();
     }
-    this.unitIds = ids;
   }
 
   serialize(): Uint8Array {

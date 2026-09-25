@@ -132,8 +132,8 @@ export class EntityIntersectHelper {
    * 屏幕点拾取优先级（与孪生一致）：
    * 1) 视口外 → undefined；
    * 2) 任一单位命中 → 直接返回；
-   * 3) 有相交网格的建筑命中 → 再查格上建筑是否命中，命中则用该建筑 + 建筑命中点，
-   *    否则回退到建筑命中本身；
+   * 3) 有相交网格的建筑命中 → 查格上建筑是否命中：命中则用该建筑 + 建筑命中点，
+   *    无 tile / 格上无合格建筑 → undefined（孪生隐式，不回退 buildingHit）；
    * 4) 无单位/建筑 → 返回第一个命中；完全无命中 → undefined。
    */
   getEntityAtScreenPoint(screenPoint: Point): { renderable: RenderableLike; point: Point } | undefined {
@@ -159,14 +159,15 @@ export class EntityIntersectHelper {
     if (!buildingHit) return candidates[0];
 
     const tile = this.mapTileIntersectHelper.getTileAtScreenPoint(screenPoint);
-    if (!tile) return buildingHit;
+    // 孪生两路径隐式返回 undefined：无 tile / 格上无合格建筑时都不回退 buildingHit
+    if (!tile) return undefined;
 
     const objectOnTile = this.map.getObjectsOnTile(tile).find((obj) => {
       if (!obj.isBuilding()) return false;
       const renderable = this.renderableManager.getRenderableByGameObject(obj);
       return void 0 !== renderable.getIntersectTarget?.();
     });
-    if (!objectOnTile) return buildingHit;
+    if (!objectOnTile) return undefined;
 
     return { renderable: this.renderableManager.getRenderableByGameObject(objectOnTile), point: buildingHit.point };
   }

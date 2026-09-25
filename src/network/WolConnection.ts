@@ -195,8 +195,9 @@ export class WolConnection {
               )
               .replace(
                 /^(:([^ ]+) (privmsg|page|notice) ([^ ]+ )+):(.+)\r?\n?$/i,
-                (full, _lead: string, sender: string) =>
-                  sender.startsWith(MATCH_BOT_NAME + "!") ? full : sender + ":<redacted>",
+                (full, lead: string, sender: string) =>
+                  // 孪生回传组 1（完整前导 :nick!user@host ...），非组 2 昵称
+                  sender.startsWith(MATCH_BOT_NAME + "!") ? full : lead + ":<redacted>",
               ),
         },
         logger as never,
@@ -839,7 +840,8 @@ export class WolConnection {
   handleIrcError(line: string): void {
     const match = line.match(/^:([A-Za-z0-9-_]+) (\d+) ([^ ]+) (?:([^ ]*) )?:(.*)/i);
     if (match) {
-      const [, sender, codeStr, , target, text] = match;
+      // 孪生解构 [, sender, code, target(g3), —(g4跳过), text]：目标昵称取捕获组 3
+      const [, sender, codeStr, target, , text] = match;
       if (
         [
           wolCodes.ERR_NOSUCHNICK,

@@ -76,7 +76,7 @@ export class MapTransferService {
     for (let retries = 3; retries--; )
       try {
         console.log("Uploading map...", retries + " retries left");
-        token?.throwIfCancelled?.();
+        token?.throwIfCancelled();
         await new HttpRequest().fetchRaw(`${this.url}/${fileName}`, token as never, {
           method: "PUT",
           body: data,
@@ -101,7 +101,7 @@ export class MapTransferService {
     for (let retries = 6; retries--; )
       try {
         console.log("Transferring map...", retries + " retries left");
-        token?.throwIfCancelled?.();
+        token?.throwIfCancelled();
         const bytes = await new HttpRequest().fetchBinary(`${this.url}/${fileName}`, token as never, {
           headers: { authorization },
         });

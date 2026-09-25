@@ -761,8 +761,10 @@ export class GameScreen extends RootScreen {
       const pal = new Palette(Engine.vfs.openFile("unitdes.pal"));
       const shpImg = shp.getImage(0);
       let shpRefData: ImageData | null = null;
+      // 孪生：无色/无 data 时回退返回未染色原图画布（而非 null）
+      let shpCanvas: HTMLCanvasElement | null = null;
       if (shpImg) {
-        const shpCanvas = document.createElement("canvas");
+        shpCanvas = document.createElement("canvas");
         shpCanvas.width = shpImg.width;
         shpCanvas.height = shpImg.height;
         const shpCtx = shpCanvas.getContext("2d");
@@ -784,14 +786,14 @@ export class GameScreen extends RootScreen {
       // Cache tinted mmpb canvases per colorId
       const tintedCache = new Map<string, HTMLCanvasElement>();
       const getTinted = (colorObj: any): HTMLCanvasElement | null => {
-        if (!shpRefData || !colorObj) return null;
+        if (!shpRefData || !colorObj) return shpCanvas;
         const key = colorObj.asHexString();
         if (tintedCache.has(key)) return tintedCache.get(key)!;
         const c = document.createElement("canvas");
         c.width = shpRefData.width;
         c.height = shpRefData.height;
         const cctx = c.getContext("2d");
-        if (!cctx) return null;
+        if (!cctx) return shpCanvas;
         const img = cctx.createImageData(shpRefData.width, shpRefData.height);
         const s = shpRefData.data;
         const d = img.data;
@@ -845,8 +847,8 @@ export class GameScreen extends RootScreen {
             Math.round(target.height * mmpbScale),
           );
         } else {
-          // Empty slot: black dot
-          const r = Math.max(3, 4 * scale) * 0.75;
+          // Empty slot: black dot（孪生半径含 +0.5）
+          const r = (Math.max(3, 4 * scale) + 0.5) * 0.75;
           ctx.fillStyle = "rgb(0,0,0)";
           ctx.fillRect(
             Math.round(cx - r) + 1,
@@ -922,7 +924,7 @@ export class GameScreen extends RootScreen {
         try {
           console.log(
             `Attempting to join game with id ${gameId}...`,
-            retries + 1 + " retries left",
+            retries + " retries left",
           );
           token.throwIfCancelled();
           await this.gservCon.joinGame(
@@ -1958,10 +1960,13 @@ export class GameScreen extends RootScreen {
       } else {
         text = this.strings.get("WOL:MatchBadParameters");
         if (e instanceof GservError) {
-          this.sendDebugInfo(new Error("Gserv error " + e.code));
+          this.sendDebugInfo(Object.assign(new Error("Gserv error " + e.code), { cause: e }));
         } else if (!(e instanceof IrcConnection.NoReplyError)) {
           this.sendDebugInfo(
-            new Error(`Failed to connect to game instance (${e.message ?? e.name})`),
+            Object.assign(
+              new Error(`Failed to connect to game instance (${e.message ?? e.name})`),
+              { cause: e },
+            ),
           );
         }
       }
@@ -2033,8 +2038,11 @@ export class GameScreen extends RootScreen {
         replay.debugInfo = e instanceof Error ? e.stack : e;
         replay.finish(0);
         this.sendDebugInfo(
-          new Error(
-            `Game init failed (${typeof e === "string" ? e : e.message ?? e.name})`,
+          Object.assign(
+            new Error(
+              `Game init failed (${typeof e === "string" ? e : e.message ?? e.name})`,
+            ),
+            { cause: e },
           ),
           {
             gameId: params.gameId,
@@ -2346,6 +2354,7 @@ export class GameScreen extends RootScreen {
         row.appendChild(lbl);
         row.appendChild(btn);
         el.appendChild(row);
+        return refresh;
       };
       const addBtn = (label: string, onClick: () => void) => {
         const row = document.createElement("div");

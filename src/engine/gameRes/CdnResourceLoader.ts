@@ -104,7 +104,8 @@ export class CdnResourceLoader extends ResourceLoaderBase {
       if (fileName.endsWith(".mix") && void 0 !== expected && this.cacheDir && (await this.cacheDir.containsEntry(cacheKey))) {
         const resp = await this.cacheDir.getRawFile(cacheKey);
         const cached = new Uint8Array(await resp.arrayBuffer());
-        if (String(Crc32.calculateCrc(cached)) === String(expected)) {
+        // 孪生原样 ===（number vs checksum 原类型；String() 强转会在十进制串清单下分叉）
+        if ((Crc32.calculateCrc(cached) as any) === expected) {
           i?.onProgress?.(cached.length);
           return cached;
         }
@@ -122,7 +123,7 @@ export class CdnResourceLoader extends ResourceLoaderBase {
       url += (url.includes("?") ? "&" : "?") + "h=" + expected;
     }
     const network = await super.fetchResource(url, a, i);
-    if (String(Crc32.calculateCrc(network)) !== String(expected)) {
+    if ((Crc32.calculateCrc(network) as any) !== expected) {
       throw new DownloadError(`Checksum mismatch for URL "${url}"`);
     }
     try {

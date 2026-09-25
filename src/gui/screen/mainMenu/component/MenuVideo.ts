@@ -109,14 +109,12 @@ export class MenuVideo extends React.Component<any> {
   /** 循环 append 直到缓冲逼近播放位置。 */
   processNextSegment(sb: any, video: HTMLVideoElement, data: ArrayBuffer) {
     try {
-      if (
-        !sb.updating &&
+      // 孪生为逗号表达式：缓冲 <10s 才 appendBuffer；play() 在缓冲条件外，
+      // 只要 SourceBuffer 空闲且有缓冲、视频暂停就续播。
+      !sb.updating &&
         0 < sb.buffered.length &&
-        sb.buffered.end(sb.buffered.length - 1) - video.currentTime < 10
-      ) {
-        sb.appendBuffer(data);
-        if (video.paused) video.play()?.catch((e) => console.error(e));
-      }
+        (sb.buffered.end(sb.buffered.length - 1) - video.currentTime < 10 && sb.appendBuffer(data),
+        video.paused && video.play()?.catch((e) => console.error(e)));
     } catch (e) {
       console.error(e);
       return;

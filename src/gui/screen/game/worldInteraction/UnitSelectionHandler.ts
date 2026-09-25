@@ -248,6 +248,7 @@ export class UnitSelectionHandler {
       new THREE.Vector2(origin.x, origin.y),
       new THREE.Vector2(p.x, p.y),
     ]);
+    // 孪生无 ?? [] 兜底：getEntitiesAtScreenBox 返回 undefined 时后续 .length 照样抛错
     const found =
       this.entityIntersectHelper
         .getEntitiesAtScreenBox(box)
@@ -258,7 +259,7 @@ export class UnitSelectionHandler {
             o.rules.selectable &&
             !(o.rules.slaved && !o.liberated) &&
             o.owner === this.player,
-        ) ?? [];
+        );
     if (!found.length) return false;
     const chosen = found.length === 1 ? [found[0]] : found.filter((o: any) => !o.isBuilding());
     if (!chosen.length) return false;
@@ -344,9 +345,8 @@ export class UnitSelectionHandler {
     const queryType = this.shouldSelectByTypeOnMap ? QueryType.OnMap : QueryType.OnScreen;
     if (matched.length) {
       this.selectMultipleUnits(matched, { queryType }, false);
-    } else if (names.size) {
-      this.selectMultipleUnits([], { queryType }, false);
-    } else {
+    } else if (!names.size) {
+      // 孪生 `names.size || selectMultipleUnits([])`：有名称集时短路不调用
       this.selectMultipleUnits([], { queryType });
     }
     this.shouldSelectByTypeOnMap = true;
@@ -459,12 +459,11 @@ export class UnitSelectionHandler {
       new THREE.Vector2(vp.x, vp.y),
       new THREE.Vector2(vp.x + vp.width - 1, vp.x + vp.height - 1),
     );
-    return (
-      this.entityIntersectHelper
-        .getEntitiesAtScreenBox(box)
-        ?.map((e: any) => e.gameObject)
-        .filter((o: any) => o.isTechno() && o.owner === owner) ?? []
-    );
+    // 孪生无 ?? [] 兜底
+    return this.entityIntersectHelper
+      .getEntitiesAtScreenBox(box)
+      ?.map((e: any) => e.gameObject)
+      .filter((o: any) => o.isTechno() && o.owner === owner);
   }
 
   /** 释放框选节点。 */

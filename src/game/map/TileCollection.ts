@@ -85,6 +85,9 @@ export class TileCollection {
     const bridgeTiles = (this.bridgeSetTiles = []);
     const knownTerrain = new Set(Object.values(TerrainType));
     this.minTileHeight = Number.POSITIVE_INFINITY;
+    // 孪生循环头 (this.maxTileHeight = 0)：丢此初始化会令 maxTileHeight=NaN →
+    // MapShroud.padding=NaN → rxyzToSxy 全 NaN → 迷雾恒读 Unexplored（选不中单位的根因）
+    this.maxTileHeight = 0;
     for (let i = 0, n = rawTiles.length; i < n; ++i) {
       const raw = rawTiles[i];
       const image = tileSets.getTileImage(raw.tileNum, raw.subTile, damaged);

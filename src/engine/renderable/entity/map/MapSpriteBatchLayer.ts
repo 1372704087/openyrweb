@@ -28,7 +28,7 @@ export class MapSpriteBatchLayer {
   /** 层标签/根名。 */
   label: string;
   /** 深度计算回调。 */
-  spriteUseDepth: (obj: any) => number;
+  spriteUseDepth: (obj: any) => any;
   /** 战区。 */
   theater: any;
   /** art。 */
@@ -70,7 +70,7 @@ export class MapSpriteBatchLayer {
   constructor(
     label: string,
     objectRules: Iterable<any>,
-    spriteUseDepth: (obj: any) => number,
+    spriteUseDepth: (obj: any) => any,
     theater: any,
     art: any,
     imageFinder: any,

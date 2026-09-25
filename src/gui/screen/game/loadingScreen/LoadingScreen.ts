@@ -18,7 +18,6 @@ import * as TeamSelectModule from "gui/component/TeamSelect"; // 孪生
 const React: any = (ReactModule as any).default ?? ReactModule;
 const PlayerConnectionStatus: any = (PlayerConnectionStatusModule as any).PlayerConnectionStatus;
 const CountryIcon: any = (CountryIconModule as any).CountryIcon;
-const TeamSelect: any = (TeamSelectModule as any).TeamSelect;
 const NO_TEAM_ID: any = (constantsModule as any).NO_TEAM_ID;
 const OBS_COUNTRY_NAME: any = (constantsModule as any).OBS_COUNTRY_NAME;
 
@@ -152,7 +151,7 @@ export class LoadingScreen extends React.Component {
           "span",
           { className: "player-team" },
           info.country !== void 0 &&
-            this.props.strings.get("GUI:TeamNo", TeamSelect.formatTeamId(info.team)),
+            this.props.strings.get("GUI:TeamNo", TeamSelectModule.formatTeamId(info.team)),
         ),
       React.createElement("progress", { value: "" + info.loadPercent, max: 100 }),
       React.createElement(CountryIcon, {

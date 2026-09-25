@@ -73,24 +73,25 @@ export class BattleControlApi {
 
   /** 按世界坐标请求平移滚动（未绑定世界时 no-op）。 */
   requestPan(x: number, y: number): void {
-    // 孪生构造 THREE.Vector2 后交给 customScrollHandler.requestScroll。
+    // 孪生构造 THREE.Vector2 后交给 customScrollHandler.requestScroll；
+    // 仅 world 一层 ?.，handler 缺失时抛错暴露绑定问题（不静默吞）
     const target = new (THREE as any).Vector2(x, y);
-    this.world?.customScrollHandler?.requestScroll(target);
+    this.world?.customScrollHandler.requestScroll(target);
   }
 
   /** 取消进行中的平移。 */
   cancelPan(): void {
-    this.world?.customScrollHandler?.cancel();
+    this.world?.customScrollHandler.cancel();
   }
 
   /** 执行具名键盘命令。 */
   executeKeyCommand(command: string): void {
-    this.world?.keyboardHandler?.executeCommand(command);
+    this.world?.keyboardHandler.executeCommand(command);
   }
 
   /** 应用键盘修饰键（透传给世界；孪生为 world?.applyKeyModifiers(e)）。 */
   applyKeyModifiers(modifiers: unknown): void {
-    this.world?.applyKeyModifiers?.(modifiers);
+    this.world?.applyKeyModifiers(modifiers);
   }
 }
 

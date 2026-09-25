@@ -1,8 +1,8 @@
 /**
  * LobbyScreen — 多人大厅（房主/访客 GAMEOPT 同步）。
  *
- * updateGservPing/sendGameOpts/sendGameSlotInfo 原 Throttle 装饰
- * 已剥离为方法体（孪生 __decorate 语义由调用频率保持近似）。
+ * updateGservPing/sendGameOpts/sendGameSlotInfo 保留孪生 Throttle 装饰
+ * （5s/350ms/350ms，类声明后手动等价 __decorate 调用）。
  *
  * 由 gui/screen/mainMenu/lobby/LobbyScreen.ts.js 重写为 TS。
  * 两个文件并存期间，本文件才是修改目标。
@@ -12,7 +12,7 @@ import { WolError } from "network/WolError"; // 已转换
 import { WolHasMapStatus } from "network/WolConnection"; // 已转换
 import { AiDifficulty } from "game/gameopts/GameOpts"; // 已转换
 import { SlotType } from "network/gameopt/SlotInfo"; // 孪生（slotsInfo 槽位类型）
-import { LobbyType, PlayerStatus, SlotOccupation } from "gui/screen/mainMenu/lobby/component/viewmodel/lobby"; // 孪生（本组内一并转换）
+import { LobbyType, PlayerStatus, SlotOccupation, SlotType as FormSlotType } from "gui/screen/mainMenu/lobby/component/viewmodel/lobby"; // 孪生（本组内一并转换；FormSlotType 避免与 SlotInfo 的 SlotType 撞名）
 import { NO_TEAM_ID, OBS_COLOR_ID, OBS_COUNTRY_ID, OBS_COUNTRY_NAME, RANDOM_COLOR_ID, RANDOM_COLOR_NAME, RANDOM_COUNTRY_ID, RANDOM_COUNTRY_NAME, RANDOM_START_POS, aiUiNames } from "game/gameopts/constants"; // 已转换
 import { LobbyForm } from "gui/screen/mainMenu/lobby/component/LobbyForm"; // 孪生（本组内一并转换）
 import { PasswordBox } from "gui/screen/mainMenu/lobby/component/PasswordBox"; // 孪生（本组内一并转换）
@@ -38,6 +38,7 @@ import { LAG_STATE_THRESH_MILLIS, MAX_MAP_TRANSFER_BYTES as GSERV_MAX_MAP_TRANSF
 import { MAX_MAP_TRANSFER_BYTES } from "network/WolConfig"; // 已转换
 import * as gameOptsC from "game/gameopts/constants"; // 孪生（constants 命名空间别名）
 import { MainMenuRoute } from "gui/screen/mainMenu/MainMenuRoute"; // 孪生（本组内一并转换）
+import { Throttle } from "util/time"; // 孪生 __decorate 用的节流装饰器
 import { sleep } from "@puzzl/core/lib/async/sleep"; // 已转换
 import { ChatRecipientType } from "network/chat/ChatMessage"; // 已转换
 import { ChatHistory } from "gui/chat/ChatHistory"; // 已转换
@@ -111,7 +112,6 @@ export class LobbyScreen extends MainMenuScreen {
       rootController,
       errorHandler,
       messageBoxApi,
-      _unusedBotSounds,
       strings,
       uiScene,
       wolCon,
@@ -205,92 +205,15 @@ export class LobbyScreen extends MainMenuScreen {
       if (ev.user.name !== this.wolCon.getCurrentUser())
         this.handlePlayerJoinLeave(ev);
     } else if (
-      ev.user.name !== this.hostPlayerName &&
-      ev.user.name !== this.wolCon.getCurrentUser()
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (ev.user.name !== this.hostPlayerName && ev.user.name !== this.wolCon.getCurrentUser())
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      (ev.user.name !== this.hostPlayerName ||
-        ev.user.name !== this.wolCon.getCurrentUser()) &&
-      ev.user.name !== this.hostPlayerName &&
-      ev.user.name !== this.wolCon.getCurrentUser()
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      !(ev.user.name === this.hostPlayerName ||
-        ev.user.name === this.wolCon.getCurrentUser())
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      ev.user.name !== this.hostPlayerName &&
-      ev.user.name !== this.wolCon.getCurrentUser()
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      (ev.user.name === this.hostPlayerName ||
-        ev.user.name === this.wolCon.getCurrentUser()) &&
-      false
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
       !(
-        ev.user.name === this.hostPlayerName ||
-        ev.user.name === this.wolCon.getCurrentUser()
-      )
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      ev.user.name !== this.hostPlayerName &&
-      ev.user.name !== this.wolCon.getCurrentUser()
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      !(ev.user.name === this.hostPlayerName && ev.user.name === this.wolCon.getCurrentUser()) &&
-      (ev.user.name === this.hostPlayerName ||
-        ev.user.name === this.wolCon.getCurrentUser()) &&
-      false
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      !(
-        ev.user.name === this.hostPlayerName ||
-        ev.user.name === this.wolCon.getCurrentUser()
-      )
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      ev.user.name !== this.hostPlayerName &&
-      ev.user.name !== this.wolCon.getCurrentUser()
-    )
-      this.controller?.goToScreen(ScreenType.CustomGame, {});
-    else if (
-      !(
-        (ev.user.name !== this.hostPlayerName &&
-          ev.user.name !== this.wolCon.getCurrentUser()) ||
-        false
+        ev.user.name !== this.hostPlayerName &&
+        ev.user.name !== this.wolCon.getCurrentUser()
       )
     ) {
-      /* twin: (a !== host && a !== me) || go — only go when not both host/self */
-      if (
-        ev.user.name !== this.hostPlayerName ||
-        ev.user.name !== this.wolCon.getCurrentUser()
-      ) {
-        if (
-          !(
-            ev.user.name === this.hostPlayerName &&
-            ev.user.name === this.wolCon.getCurrentUser()
-          )
-        )
-          this.controller?.goToScreen(ScreenType.CustomGame, {});
-      }
+      // 孪生 `(a!==host && a!==me) || go()`：离开者是房主或自己才跳回 CustomGame
+      this.controller?.goToScreen(ScreenType.CustomGame, {});
     }
   };
-
-  // 简化贴孪生逻辑：仅当 不是(host 且 self 同时满足的排除) 时...
-  // 实际孪生: (a !== host && a !== me) || goTo —— 若用户既不是 host 也不是 me 则跳走
-  // 下面用更直接的表达重写 onChannelLeave 的核心判定
 
   onChannelJoin = (ev: any): void => {
     if (
@@ -464,11 +387,12 @@ export class LobbyScreen extends MainMenuScreen {
     this.hostMode = params.create;
     if (this.hostMode) {
       this.title = this.strings.get("GUI:HostScreen");
-      await this.createGame(cancel, void 0);
+      // 孪生不 await：create/join 流程自行异步推进
+      this.createGame(cancel, void 0);
     } else {
       this.title = this.strings.get("GUI:JoinScreen");
       const { game, observe } = params;
-      await this.joinGame(game, observe, void 0, cancel);
+      this.joinGame(game, observe, void 0, cancel);
     }
   }
 
@@ -1074,6 +998,7 @@ export class LobbyScreen extends MainMenuScreen {
           this.formModel.playerSlots[idx].team,
           idx,
         );
+        this.updateFormModel();
       },
       onTeamSelect: (team: any, idx: number) => {
         if (!this.wolCon.isOpen() || !this.gameChannelName) return;
@@ -1084,6 +1009,7 @@ export class LobbyScreen extends MainMenuScreen {
           team,
           idx,
         );
+        this.updateFormModel();
       },
       onSlotChange: (occ: any, idx: number, diff?: any) => {
         if (this.wolCon.isOpen() && this.gameChannelName)
@@ -1380,9 +1306,9 @@ export class LobbyScreen extends MainMenuScreen {
           (slot as any).type === (SlotType as any).OpenObserver ||
           idx === this.observerSlotIndex
         )
-          s.type = (SlotOccupation as any).Observer;
-        else if (slot.type === SlotType.Ai) s.type = (SlotOccupation as any).Ai;
-        else s.type = (SlotOccupation as any).Player;
+          s.type = FormSlotType.Observer;
+        else if (slot.type === SlotType.Ai) s.type = FormSlotType.Ai;
+        else s.type = FormSlotType.Player;
         if (slot.type === SlotType.Ai) {
           s.aiDifficulty = (slot as any).difficulty;
           s.status = PlayerStatus.Ready;
@@ -1421,7 +1347,7 @@ export class LobbyScreen extends MainMenuScreen {
           (p: any) => !!s.name && p.playerName === s.name,
         );
         if (ping) s.ping = 0 < ping.ping ? ping.ping : void 0;
-        if (this.playerProfiles && s.type === (SlotOccupation as any).Player)
+        if (this.playerProfiles && s.type === FormSlotType.Player)
           s.playerProfile = this.playerProfiles.get(s.name);
       } else if (idx === this.observerSlotIndex) s.country = OBS_COUNTRY_NAME;
       else {
@@ -2019,4 +1945,15 @@ export class LobbyScreen extends MainMenuScreen {
     await this.controller.hideSidebarButtons();
     if (this.lobbyForm) this.lobbyForm = void 0;
   }
+}
+
+// 孪生：__decorate([Throttle(5e3/350/350)], LobbyScreen.prototype, <name>, null)
+// 项目未开 experimentalDecorators，此处手动执行装饰器等价语义。
+for (const [name, wait] of [
+  ["updateGservPing", 5000],
+  ["sendGameOpts", 350],
+  ["sendGameSlotInfo", 350],
+] as const) {
+  const desc = Object.getOwnPropertyDescriptor(LobbyScreen.prototype, name);
+  if (desc) Throttle(wait)(LobbyScreen.prototype, name, desc);
 }

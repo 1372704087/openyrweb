@@ -48,7 +48,7 @@ export class CrashableTrait {
       if (locomotor !== LocomotorTypeModule.LocomotorType.Aircraft) {
         throw new Error(`Unhandled locomotor type "${locomotor}"`);
       }
-      if (!obj.isAircraft()) throw new Error(`Obj "${obj.name}#${obj.id}" is not an aircraft`);
+      if (!obj.isAircraft()) throw new Error(`Obj "${obj.name}#${obj.id} is not an aircraft`);
       delta = WingedLocomotorModule.WingedLocomotor.tickCrash(obj, world, this.crashState);
     }
     let landed = false;

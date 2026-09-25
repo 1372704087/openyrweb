@@ -1,8 +1,8 @@
 /**
  * ChatUi — 快速游戏聊天辅助类（频道、系统消息、军衔刷新）。
  *
- * refreshPlayerRanks 原有 Throttle(5000) 装饰（孪生 __decorate），
- * 此处保留方法体；调用方自行节流即可。
+ * refreshPlayerRanks 保留孪生 Throttle(5000) 装饰
+ * （类声明后手动等价 __decorate 调用，防止每条频道消息都发 wladder 请求）。
  *
  * 由 gui/screen/mainMenu/quickGame/ChatUi.ts.js 重写为 TS。
  * 两个文件并存期间，本文件才是修改目标。
@@ -16,6 +16,7 @@ import { ChannelType } from "engine/sound/ChannelType"; // 已转换
 import { Task } from "@puzzl/core/lib/async/Task"; // 已转换
 import { ChatHistory } from "gui/chat/ChatHistory"; // 已转换
 import { IMPLICIT_CHANNEL_NAME } from "gui/component/ChatInput"; // 已转换
+import { Throttle } from "util/time"; // 孪生 __decorate 用的节流装饰器
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -233,4 +234,10 @@ export class ChatUi {
     this.users = [];
     this.playerProfiles.clear();
   }
+}
+
+// 孪生：__decorate([Throttle(5e3)], ChatUi.prototype, "refreshPlayerRanks", null)
+{
+  const desc = Object.getOwnPropertyDescriptor(ChatUi.prototype, "refreshPlayerRanks");
+  if (desc) Throttle(5000)(ChatUi.prototype, "refreshPlayerRanks", desc);
 }

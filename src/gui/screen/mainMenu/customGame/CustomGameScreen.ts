@@ -341,7 +341,9 @@ export class CustomGameScreen extends MainMenuScreen {
       this.playerProfiles.clear();
       this.initView(cancel);
       this.gameBrowser?.applyOptions((o: any) => (o.users = this.users));
-      await this.refreshGames(cancel);
+      // 孪生为 fire-and-forget：不 await，setInterval 注册不被推迟、
+      // 非 Socket 异常也不会改道 handleError 弹错流程
+      this.refreshGames(cancel);
       this.refreshTimeoutId = setInterval(
         () => this.refreshGames(cancel),
         5000,

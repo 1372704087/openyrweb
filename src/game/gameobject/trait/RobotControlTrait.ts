@@ -177,7 +177,7 @@ export class RobotControlTrait {
             if (isReverse && Math.abs(d) >= 90) validTargets.push(candidate);
           }
           this.landTurretPhase2Target =
-            validTargets[Math.floor(Math.random() * validTargets.length)] ?? p1End;
+            validTargets[Math.floor(Math.random() * validTargets.length)];
         }
         object.spinVelocity = 0;
       }

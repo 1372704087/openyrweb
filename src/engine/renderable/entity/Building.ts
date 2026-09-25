@@ -1671,11 +1671,12 @@ export class Building {
     renderable.setFlat(entry.flat);
     if (entry.translucent || entry.translucency > 0) renderable.setForceTransparent(true);
     renderable.create3DObject();
-    // Rear wall: disable depthTest+depthWrite so it renders on top of body
+    // Rear wall: disable depthTest so it renders on top of body
     // but the tank (separate Object3D) can still render via depth buffer.
+    // 孪生为 `mesh && (material.depthTest = false) && (material.depthWrite = false)`：
+    // 赋值表达式求值为 false，depthWrite 短路从不执行——只关 depthTest。
     if (isTankBunkerRear && renderable.getShapeMesh()) {
       renderable.getShapeMesh().material.depthTest = false;
-      renderable.getShapeMesh().material.depthWrite = false;
     }
     this.animations.set(renderable, new Animation(props, this.gameSpeed));
     return renderable;

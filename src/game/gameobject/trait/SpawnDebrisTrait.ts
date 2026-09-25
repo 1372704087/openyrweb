@@ -26,11 +26,12 @@ export class SpawnDebrisTrait {
   /**
    * 摧毁时产生碎屑。跳过：temporal 弹头、坠毁中、Sink 死亡、非 Spawned
    * 对象（与孪生锁步一致）。
+   * 孪生分发序为 (object, world, attacker)——第 2 参是 world、第 3 参是 attacker。
    */
   [NotifyDestroyModule.NotifyDestroy.onDestroy](
     object: any,
-    attacker: any,
     world: any,
+    attacker: any,
   ): void {
     if (attacker?.weapon?.warhead.rules.temporal) return;
     if (object.isCrashing) return;

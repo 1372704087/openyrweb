@@ -45,7 +45,7 @@ export class MergedSpriteMesh extends THREE.Mesh {
         new THREE.BufferAttribute(new Float32Array(vertexCount * instances), 1),
       );
     }
-    for (const attr of Object.values(geometry.attributes)) (attr as any).setDynamic?.(true);
+    for (const attr of Object.values(geometry.attributes)) (attr as any).setDynamic(true);
     if (source.index) {
       geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(instances * source.index.array.length), 1));
       for (let i = 0; i < instances; i++) {

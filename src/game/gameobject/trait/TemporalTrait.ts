@@ -71,7 +71,8 @@ export class TemporalTrait {
       this.currentWeapon = weapon;
       const wasEmpty = target.temporalTrait.attackers.size;
       target.temporalTrait.attackers.add(this.gameObject);
-      if (!wasEmpty) return;
+      // 孪生 `if (!size)`：首个攻击者（集合原为空）才触发 warpedOut/eraseTicks 初始化
+      if (wasEmpty) return;
       target.warpedOutTrait.setActive(!0, !0, world);
       const task = target.unitOrderTrait.getCurrentTask();
       if ((task && task instanceof AttackTask) || task instanceof MoveTask) task.cancel();

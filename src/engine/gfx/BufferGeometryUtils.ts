@@ -109,9 +109,11 @@ export class BufferGeometryUtils {
    */
   static mergeBufferGeometries(geometries: any[], useGroups: boolean = false): any {
     // 空列表（迷雾 0×0、无 tile 等）直接返回空几何，避免 geometries[0].index 抛错
+    // 【运行时验证】无守卫时用户对局在 MapShroudLayer.createTileObjects 必炸，此守卫为必要加固
     if (!geometries || geometries.length === 0) {
       return new THREE.BufferGeometry();
     }
+
     const isIndexed = geometries[0].index !== null;
     const attributes = new Set(Object.keys(geometries[0].attributes));
     const collected: Record<string, any[]> = {};

@@ -35,7 +35,7 @@ import { RankIndicator } from "gui/screen/mainMenu/lobby/component/RankIndicator
 export type LobbyFormProps = any;
 
 
-/** 主机选项复选框（模块级，避免挂到 prototype 与孪生对齐）。 */
+/** 主机选项复选框（模块级；回调用传入 props——调用点 props 即 this.props，与孪生内联闭包等价）。 */
 function renderCheckboxes(props: any, strings: any, enabled: boolean) {
     const box = (
       tooltipKey: string,
@@ -44,10 +44,11 @@ function renderCheckboxes(props: any, strings: any, enabled: boolean) {
       labelKey: string,
       onChange?: (v: boolean) => void,
       disabledOverride?: boolean,
+      tooltipArgs?: any[],
     ) =>
       React.createElement(
         "div",
-        { "data-r-tooltip": strings.get(tooltipKey) },
+        { "data-r-tooltip": strings.get(tooltipKey, ...(tooltipArgs ?? [])) },
         React.createElement(
           "label",
           null,
@@ -68,28 +69,28 @@ function renderCheckboxes(props: any, strings: any, enabled: boolean) {
         "shortGame",
         props.shortGame,
         "GUI:ShortGame",
-        (v) => this.props.onToggleShortGame(v),
+        (v) => props.onToggleShortGame(v),
       ),
       box(
         "STT:HostCBoxRedeploys",
         "mcvRepacks",
         props.mcvRepacks,
         "GUI:MCVRepacks",
-        (v) => this.props.onToggleMcvRepacks(v),
+        (v) => props.onToggleMcvRepacks(v),
       ),
       box(
         "STT:HostCBoxCrates",
         "cratesAppear",
         props.cratesAppear,
         "GUI:CratesAppear",
-        (v) => this.props.onToggleCratesAppear(v),
+        (v) => props.onToggleCratesAppear(v),
       ),
       box(
         "STT:HostCBoxSWAllowed",
         "superWeapons",
         props.superWeapons,
         "GUI:SuperWeaponsAllowed",
-        (v) => this.props.onToggleSuperWeapons(v),
+        (v) => props.onToggleSuperWeapons(v),
       ),
       void 0 !== props.hostTeams &&
         box(
@@ -97,21 +98,23 @@ function renderCheckboxes(props: any, strings: any, enabled: boolean) {
           "hostTeams",
           props.hostTeams,
           "GUI:HostTeams",
-          (v) => this.props.onToggleHostTeams?.(v),
+          (v) => props.onToggleHostTeams?.(v),
         ),
       box(
         "STT:DestroyableBridges",
         "destBridges",
         props.destroyableBridges,
         "GUI:DestroyableBridges",
-        (v) => this.props.onToggleDestroyableBridges?.(v),
+        (v) => props.onToggleDestroyableBridges?.(v),
       ),
       box(
         "STT:MultiEngineer",
         "multiEngineer",
         props.multiEngineer,
         "GUI:MultiEngineer",
-        (v) => this.props.onToggleMultiEngineer?.(v),
+        (v) => props.onToggleMultiEngineer?.(v),
+        undefined,
+        [props.multiEngineerCount],
       ),
       // instantCapture 的 tooltip 需要 multiEngineerCount，单独处理
       React.createElement(
@@ -129,7 +132,7 @@ function renderCheckboxes(props: any, strings: any, enabled: boolean) {
             name: "instantCapture",
             checked: props.instantCapture || props.multiEngineer,
             onChange: (e: any) =>
-              this.props.onToggleInstantCapture?.(e.target.checked),
+              props.onToggleInstantCapture?.(e.target.checked),
             disabled: !enabled || props.multiEngineer,
           }),
           " ",
@@ -145,14 +148,14 @@ function renderCheckboxes(props: any, strings: any, enabled: boolean) {
         "noDogEngiKills",
         props.noDogEngiKills,
         "GUI:NoDogEngiKills",
-        (v) => this.props.onToggleNoDogEngiKills?.(v),
+        (v) => props.onToggleNoDogEngiKills?.(v),
       ),
       box(
         "STT:DelayedOils",
         "delayedOils",
         props.delayedOils,
         "GUI:DelayedOils",
-        (v) => this.props.onToggleDelayedOils?.(v),
+        (v) => props.onToggleDelayedOils?.(v),
       ),
     ].filter(Boolean);}
 

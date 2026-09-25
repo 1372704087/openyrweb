@@ -20,9 +20,6 @@ export interface IsoVec3 {
   z: number;
 }
 
-/** 世界原点（worldToScreen 依赖）。 */
-let worldOrigin: IsoPoint | undefined;
-
 /**
  * 等距坐标换算工具类（静态方法）。
  * 必须先 init(worldOrigin) 才能做世界↔屏幕换算。
@@ -32,9 +29,15 @@ let worldOrigin: IsoPoint | undefined;
  * thisArg 不是类本身；孪生用类别名 `s` 引用，TS 若用 this 会在错误 this 上找 worldToScreen。
  */
 export class IsoCoords {
+  /**
+   * 世界原点（worldToScreen 依赖）。
+   * 孪生为类公有静态属性，GameScreen 地图预览会 save/restore 它。
+   */
+  static worldOrigin: IsoPoint | undefined;
+
   /** 设置世界原点（屏幕换算的基准）。 */
   static init(e: IsoPoint): void {
-    worldOrigin = e;
+    IsoCoords.worldOrigin = e;
   }
 
   /**
@@ -43,11 +46,11 @@ export class IsoCoords {
    * @param t - 世界 y（孪生参数名 t）
    */
   static worldToScreen(e: number, t: number): IsoPoint {
-    if (!worldOrigin) {
+    if (!IsoCoords.worldOrigin) {
       throw new Error("Coords not initialized with world origin");
     }
-    e -= worldOrigin.x;
-    t -= worldOrigin.y;
+    e -= IsoCoords.worldOrigin.x;
+    t -= IsoCoords.worldOrigin.y;
     return {
       x: (e /= Coords.ISO_WORLD_SCALE) - (t /= Coords.ISO_WORLD_SCALE),
       y: (e + t) / 2,
@@ -60,12 +63,12 @@ export class IsoCoords {
    * @param t - 屏幕 y
    */
   static screenToWorld(e: number, t: number): IsoPoint {
-    if (!worldOrigin) {
+    if (!IsoCoords.worldOrigin) {
       throw new Error("Coords not initialized with world origin");
     }
     return {
-      x: ((e + 2 * t) / 2) * Coords.ISO_WORLD_SCALE + worldOrigin.x,
-      y: ((2 * t - e) / 2) * Coords.ISO_WORLD_SCALE + worldOrigin.y,
+      x: ((e + 2 * t) / 2) * Coords.ISO_WORLD_SCALE + IsoCoords.worldOrigin.x,
+      y: ((2 * t - e) / 2) * Coords.ISO_WORLD_SCALE + IsoCoords.worldOrigin.y,
     };
   }
 

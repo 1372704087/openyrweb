@@ -771,13 +771,6 @@ export class Infantry {
     const main = this.createMainObject(this.objectArt);
     wrap.add(main);
 
-    // 非地面单位或空降时挂 blob 影子
-    if (
-      this.gameObject.rules.movementZone === MovementZone.Fly &&
-      !this.objectArt.isVoxel
-    ) {
-      // 条件：(!Fly || isVoxel) && stance!==Paradrop 时不挂 —— 即 Fly 非 voxel 或空降才挂
-    }
     // 孪生：((movementZone !== Fly || isVoxel) && stance !== Paradrop) || 挂影子
     if (
       !(

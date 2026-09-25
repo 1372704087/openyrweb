@@ -157,15 +157,18 @@ export const getDeathAnim = (rules: any, deathType: any): any =>
                   : void 0;
 
 /**
- * 按优先级在可用序列里查找：
- * canFire→fire（当前姿态，再回退默认姿态）；canMove→move（当前，再回退 None）；
+ * 按「开火→移动→静止」优先级在可用序列里回退查找。
+ * 形参位次与孪生一致：3rd=移动门控（isMoving）、4th=开火门控（isFiring）——
+ * 调用方 findSequenceBy 传 (zone, stance, isMoving, isFiring, isPanicked)，
+ * 门控与位次必须对齐，否则移动播开火帧、开火播走路帧。
+ * fire 先查（当前姿态，再回退默认姿态）；move 再查（当前，再回退 None）；
  * 最后 still（当前，再回退默认，再回退 Ground 区默认）。全部落空返回 undefined。
  */
 export const findSequence = (
   zone: any,
   stance: any,
-  canFire: boolean,
   canMove: boolean,
+  canFire: boolean,
   panic: boolean,
   available: any[],
 ): any => {
