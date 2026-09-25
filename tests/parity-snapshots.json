@@ -1087,9 +1087,9 @@
         "level": 1
       },
       "dispatched": [
-        "i:100",
-        "i:100",
-        "i:50"
+        "PowerChangeEvent:100",
+        "PowerChangeEvent:100",
+        "PowerChangeEvent:50"
       ]
     },
     "1": {
@@ -2704,7 +2704,7 @@
       ],
       "dispatched": [
         [
-          "?",
+          "evt",
           1
         ]
       ],
@@ -2922,10 +2922,10 @@
   },
   "game/rules/ObjectRulesFactory": {
     "0": {
-      "techno": "b",
+      "techno": "TechnoRules",
       "technoType": 3,
-      "overlay": "a",
-      "fallback": "s"
+      "overlay": "OverlayRules",
+      "fallback": "DebrisRules"
     }
   },
   "game/gameobject/task/MagnetronDragTask": {
@@ -5608,7 +5608,7 @@
   "game/action/factories/NoActionFactory": {
     "0": {
       "actionType": 0,
-      "ctor": "s",
+      "ctor": "NoAction",
       "isNo": true
     }
   },
@@ -7494,20 +7494,20 @@
   },
   "game/trigger/TriggerExecutorFactory": {
     "0": {
-      "noName": "r",
-      "winName": "r",
+      "noName": "NoActionExecutor",
+      "winName": "WinLoseExecutor",
       "winFlag": true,
-      "gsName": "r",
+      "gsName": "GlobalVariableExecutor",
       "gsValue": true,
       "gsIdx": 5,
-      "adName": "r",
+      "adName": "ApplyDamageExecutor",
       "adDamage": 100,
-      "meteorName": "r",
+      "meteorName": "SuperWeaponFxExecutor",
       "meteorMode": "meteor",
-      "uiName": "r",
+      "uiName": "UserInputExecutor",
       "uiLock": true,
-      "teName": "r",
-      "feName": "r",
+      "teName": "TimerExtendExecutor",
+      "feName": "ForceEndExecutor",
       "noDebug": "1[0] (T).",
       "threw": "Unhandled action type \"undefined\"",
       "ownKeys": []

@@ -31211,6 +31211,11 @@ function makeSystem() {
       // 按需从孪生或编译产物读取，避免手工维护完整的依赖清单。
       const lazyTwin = "src/" + name + ".ts.js";
       const lazyCompiled = "build/ts-modules/" + name + ".js";
+      // 编译产物优先（bundle 发布形态，依赖类名为真实名）；孪生回退。
+      if (existsSync(join(ROOT, lazyCompiled))) {
+        loadFile(system, lazyCompiled);
+        return get(name);
+      }
       if (existsSync(join(ROOT, lazyTwin))) {
         const hadBefore = defs.has(name);
         loadFile(system, lazyTwin);
@@ -31227,10 +31232,6 @@ function makeSystem() {
             },
           });
         }
-        return get(name);
-      }
-      if (existsSync(join(ROOT, lazyCompiled))) {
-        loadFile(system, lazyCompiled);
         return get(name);
       }
       // Bare npm specifier (e.g. "mersenne-twister"): resolve via node and wrap
@@ -31290,12 +31291,12 @@ function syncInstantiate(system, name) {
     }
     const lazyTwin = "src/" + name + ".ts.js";
     const lazyCompiled = "build/ts-modules/" + name + ".js";
-    if (existsSync(join(ROOT, lazyTwin))) {
-      loadFile(system, lazyTwin);
-      return syncInstantiate(system, name);
-    }
     if (existsSync(join(ROOT, lazyCompiled))) {
       loadFile(system, lazyCompiled);
+      return syncInstantiate(system, name);
+    }
+    if (existsSync(join(ROOT, lazyTwin))) {
+      loadFile(system, lazyTwin);
       return syncInstantiate(system, name);
     }
     throw new Error("module not registered (mod): " + name);
@@ -31329,8 +31330,9 @@ function makeMod(system) {
     if (!system._instances.has(name)) {
       // loadFile 经全局 System.register 注册，必须先切到本变体的运行时。
       globalThis.System = system;
+      const compiled = "build/ts-modules/" + name + ".js";
       const twin = "src/" + name + ".ts.js";
-      const file = existsSync(join(ROOT, twin)) ? twin : "build/ts-modules/" + name + ".js";
+      const file = existsSync(join(ROOT, compiled)) ? compiled : twin;
       if (!existsSync(join(ROOT, file))) throw new Error("mod(): missing module " + name);
       loadFile(system, file);
     }
@@ -31351,11 +31353,10 @@ async function instantiate(variantSource) {
   globalThis.System = sys;
   for (const dep of RECON_DEPS) {
     const twin = "src/" + dep + ".ts.js";
-    // Prefer the .ts.js twin; once a dep's twin is deleted, fall back to its
-    // compiled TS output so both variants still share identical dependencies.
-    const file = existsSync(join(ROOT, twin))
-      ? twin
-      : "build/ts-modules/" + dep + ".js";
+    // 编译产物优先（与惰性加载一致，保证两侧依赖同一且为发布形态）；
+    // 孪生删除后自动回退链仍然成立。
+    const compiled = "build/ts-modules/" + dep + ".js";
+    const file = existsSync(join(ROOT, compiled)) ? compiled : twin;
     if (!existsSync(join(ROOT, file)))
       throw new Error(`missing dep source for ${dep}: run npm run build:ts`);
     const code = readFileSync(join(ROOT, file), "utf8");
@@ -31545,8 +31546,10 @@ function assertRegistryMatchesDisk() {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
-      else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts") && existsSync(join(dir, entry.name.replace(/.ts$/, ".ts.js")))) {
-        onDisk.push(relative(SRC, full).replace(/\\/g, "/").replace(/\.ts$/, ""));
+      else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
+        const rel = relative(SRC, full).replace(/\\/g, "/");
+        // 扩展层是新增源码（无孪生、不登记），口径与 quality-audit 一致
+        if (!rel.startsWith("extensions/")) onDisk.push(rel.replace(/\.ts$/, ""));
       }
     }
   };

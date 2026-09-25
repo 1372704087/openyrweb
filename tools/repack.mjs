@@ -276,8 +276,27 @@ function main() {
   console.log("Repacking " + map.moduleCount + " modules from src/ -> " + OUT_FILE);
 
   const parts = [];
-  // Prelude first.
-  let prelude = readFileSync(join(SRC, "_runtime", "prelude.ts.js"), "utf8");
+  // Prelude first: bundle 前置必须是裸脚本（非 System.register），故把编译产物的
+// register 包装就地解包为立即执行：FACTORY(stubs).execute()。
+// execute 体尾部自带 globalThis.__classPrivateFieldSet/Get/__decorate 回写，
+// 与孪生裸 prelude 的全局定义等价（parity 已双向核验）。孪生仅作历史回退。
+  const preludeCompiled = join(TS_MODULES, "_runtime", "prelude.js");
+  const preludeTwin = join(SRC, "_runtime", "prelude.ts.js");
+  let prelude;
+  if (existsSync(preludeCompiled)) {
+    const reg = readFileSync(preludeCompiled, "utf8");
+    const head = 'System.register("_runtime/prelude", [], ';
+    if (!reg.includes(head)) throw new Error("compiled prelude: unexpected System.register shape");
+    prelude = reg
+      .replace(head, "(")
+      .replace(/\}\);\s*$/, '})(function () {}, { id: "_runtime/prelude" }).execute();');
+    if (!prelude.includes("globalThis.__decorate"))
+      throw new Error("compiled prelude: unwrap produced no helper assignments");
+  } else if (existsSync(preludeTwin)) {
+    prelude = readFileSync(preludeTwin, "utf8");
+  } else {
+    throw new Error("prelude source missing: run tools/compile-ts.mjs (build/ts-modules/_runtime/prelude.js)");
+  }
   // strip the header comment from prelude
   prelude = prelude.replace(/^\/\/[^\n]*\n/gm, "").trim();
   parts.push(collapseWhitespace(prelude));

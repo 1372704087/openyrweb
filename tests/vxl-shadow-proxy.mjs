@@ -22,10 +22,18 @@
  * Run: node tests/vxl-shadow-proxy.mjs
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const ROOT = new URL("../", import.meta.url);
+
+/** 孪生优先；删除后回退 build/ts-modules 编译产物（同为具名 System.register，本 shim 兼容两态）。 */
+function resolveModulePath(rel) {
+  if (existsSync(new URL(rel, ROOT))) return rel;
+  const compiled = rel.replace(/^src\//, "build/ts-modules/").replace(/\.ts\.js$/, ".js");
+  if (existsSync(new URL(compiled, ROOT))) return compiled;
+  throw new Error("module not found (run: npm run build:ts): " + rel);
+}
 
 // vendor/ three is a UMD build, but this package is "type": "module", so a plain
 // require() would load it as ESM and blow up on `this`. Hand it the UMD globals.
@@ -81,13 +89,13 @@ const Coords = {
   tileHeightToWorld: (v) => v * (256 / 2) * Z_SCALE,
 };
 
-const bmExports = loadModule("src/engine/gfx/batch/BatchedMesh.ts.js");
+const bmExports = loadModule(resolveModulePath("src/engine/gfx/batch/BatchedMesh.ts.js"));
 const BatchedMesh = bmExports.BatchedMesh;
 const BatchMode = bmExports.BatchMode;
 check("BatchedMesh module loads", typeof BatchedMesh === "function");
 check("BatchMode exported", BatchMode && BatchMode.Instancing === 0);
 
-const modExports = loadModule("src/engine/renderable/entity/unit/VxlShadowProxy.ts.js", {
+const modExports = loadModule(resolveModulePath("src/engine/renderable/entity/unit/VxlShadowProxy.ts.js"), {
   "game/Coords": { Coords },
 });
 const VxlShadowProxy = modExports.VxlShadowProxy;

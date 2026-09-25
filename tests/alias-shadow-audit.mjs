@@ -205,6 +205,11 @@ function analyze(file) {
 
 const files = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const targets = files.length ? files : walk(SRC);
+if (targets.length === 0) {
+  // 该审计针对孪生的单字母别名结构；孪生全部删除后无扫描对象，按迁移终态跳过（exit 0）。
+  console.log("=== alias-shadow audit: no src/**/*.ts.js on disk (migration end state) — skipped ===");
+  process.exit(0);
+}
 
 let confirmed = 0;
 let suspectFiles = 0;

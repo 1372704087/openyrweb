@@ -1318,11 +1318,16 @@ const ann = {
 };
 
 const files = [];
+// 走 .ts 而非 .ts.js：孪生删除后清单仍可再生。范围口径与原孪生集合一致——
+// 排除 .d.ts 与 src/extensions/（扩展层新源码、无孪生、不参与比对）。
 (function walk(d) {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) {
     const p = path.join(d, e.name);
     if (e.isDirectory()) walk(p);
-    else if (e.name.endsWith(".ts.js")) files.push(p.split(path.sep).join("/").replace(/\.ts\.js$/, ".ts"));
+    else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) {
+      const rel = p.split(path.sep).join("/");
+      if (!rel.startsWith("src/extensions/")) files.push(rel);
+    }
   }
 })("src");
 

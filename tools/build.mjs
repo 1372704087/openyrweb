@@ -528,7 +528,7 @@ const KEY_COMMAND_TYPE_SRC = join(
   "game",
   "worldInteraction",
   "keyboard",
-  "KeyCommandType.ts.js",
+  "KeyCommandType.ts",
 );
 
 /** 扫描全部扩展 manifest → { "zh-CN": {key: value}, ... }；命令声明挂在函数属性上供校验用。 */
@@ -580,10 +580,10 @@ function validateExtensionKeyCommands(perLang) {
   const withCmds = manifests.filter((m) => m.keyCommands.length > 0);
   if (withCmds.length === 0) return;
 
-  // 从 KeyCommandType 源码提取枚举成员名：(e.AutoLoad = "AutoLoad")
+  // 从 KeyCommandType.ts 枚举提取成员名（Member = "Member"）
   const src = readFileSync(KEY_COMMAND_TYPE_SRC, "utf8");
   const members = new Set();
-  for (const m of src.matchAll(/\(\s*\w+\.(\w+)\s*=\s*"[^"]*"\s*\)/g)) members.add(m[1]);
+  for (const m of src.matchAll(/^\s*([A-Za-z_$][\w$]*)\s*=\s*"[^"]*"/gm)) members.add(m[1]);
   if (members.size === 0) {
     throw new Error(`未能从 ${KEY_COMMAND_TYPE_SRC} 提取到任何枚举成员（正则失配？）`);
   }

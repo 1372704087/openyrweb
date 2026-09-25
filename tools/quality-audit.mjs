@@ -133,10 +133,16 @@ if (dupes.length) fail(`CONVERTED 重复登记 ${dupes.length} 条：${[...new S
 const unregistered = recon.filter((f) => !registered.has(f.slice(4).replace(/\.ts$/, "")));
 const noProduct = entries.filter((e) => !fs.existsSync(path.join(ROOT, "src", e.name + ".ts")));
 const noTwin = entries.filter((e) => !fs.existsSync(path.join(ROOT, "src", e.name + ".ts.js")));
+const twinOnDisk = entries.length - noTwin.length;
 if (unregistered.length) fail(`磁盘有 .ts 但未登记 parity：${unregistered.join(", ")}`);
 if (noProduct.length) fail(`登记了但磁盘无 .ts：${noProduct.map((e) => e.name).join(", ")}`);
-if (noTwin.length) fail(`登记了但无孪生（快照失去 oracle）：${noTwin.map((e) => e.name).join(", ")}`);
-if (!unregistered.length && !noProduct.length && !noTwin.length && !dupes.length) console.log("  ✓ 双向一致");
+// 孪生全部删除 = 迁移终态，oracle 移交给 tests/parity-snapshots.json；只拦「删了一半」的混合状态。
+if (noTwin.length && twinOnDisk > 0)
+  fail(`登记了但无孪生（混合状态，快照 oracle 需确认）：${noTwin.map((e) => e.name).join(", ")}`);
+else if (noTwin.length === entries.length)
+  console.log("  ℹ 孪生已全部删除（迁移终态），oracle = tests/parity-snapshots.json");
+if (!unregistered.length && !noProduct.length && (!noTwin.length || twinOnDisk === 0) && !dupes.length)
+  console.log("  ✓ 双向一致");
 
 // ---------------------------------------------------------------- 2. 生成器 DESC ⇄ 产物
 console.log("\n=== 2. 生成器 DESC ⇄ 产物 ===");
