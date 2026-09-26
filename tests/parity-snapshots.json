@@ -2951,7 +2951,7 @@
         "_dropTile",
         "_movingToDrop",
         "_maxTicks",
-        "_controlledDrop"
+        "_minDragDist"
       ],
       "abortedNoVictim": true,
       "abortedMissingTraits": true,
@@ -2977,10 +2977,7 @@
       "landed": true,
       "landEventCount": 2,
       "droppedFlag": true,
-      "controlledDrop": false,
-      "uncontrolledSelfDmg": [
-        100
-      ]
+      "uncontrolledSelfDmg": []
     },
     "4": {
       "sampleCount": 40,
@@ -2995,21 +2992,56 @@
       "attackNotCancelled": true
     },
     "5": {
-      "controlledEmptyDmg": [],
-      "controlledEmptyDestroyed": false,
-      "uncontrolledEmptyDmg": [
-        100
-      ],
-      "controlledCrushSelfDmg": [],
+      "emptyDropSelfDmg": [],
+      "emptyDropDestroyed": false,
+      "crushDropSelfDmg": [],
       "crushTargetDmg": [
+        50
+      ],
+      "selfDmgWhenCanCrush": [],
+      "selfDmgWhenCannotCrush": [
+        50
+      ],
+      "buildingCrushTargetDmg": [
         100
       ],
+      "buildingVictimSelfDmg": [],
       "crushDeathType": 3,
       "crushDeathTypeIsCrush": true,
       "waterDestroyed": true,
       "waterDeathType": 5,
       "waterDeathTypeIsSink": true,
       "amphWaterDestroyed": false
+    },
+    "6": {
+      "sampleCount": 40,
+      "earlyY": 100,
+      "lastY": 522.2911719846655,
+      "lastX": 300,
+      "done": false,
+      "dropped": false,
+      "stillAir": true,
+      "selfDmg": [],
+      "attackNotCancelled": true
+    },
+    "7": {
+      "unstandableDestroyed": true,
+      "unstandableNoCredit": true,
+      "crashableTargetDmg": [],
+      "crashableVictimDestroyed": true,
+      "bunkeredBunkerDmg": [],
+      "bunkeredVictimAlive": true,
+      "killCreditToMagnetron": true
+    },
+    "8": {
+      "buildingDmg": [
+        200
+      ],
+      "buildingDmgIs200Percent": true,
+      "victimSelfDmg": [
+        100
+      ],
+      "victimDestroyed": true
     }
   },
   "game/gameobject/task/EnterHospitalTask": {

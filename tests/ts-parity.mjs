@@ -11093,7 +11093,8 @@ const CONVERTED = [
           locomotorCleared: victim.moveTrait.locomotor === undefined,
         };
       },
-      // 光束断裂 → 重力坠落：Land 事件 + zone 恢复 + 非受控自身坠落伤害。
+      // 光束断裂 → 重力坠落：Land 事件 + zone 恢复；自身不因坠落掉血
+      //（原版 FallingDamageMultiplier 只作用于碾压，见 _applyDrop）。
       (ns, THREE, mod) => {
         const EventType = mod("game/event/EventType").EventType;
         const dispatched = [];
@@ -11157,9 +11158,7 @@ const CONVERTED = [
           zoneGround: victim.zone === 0,
           landed: dispatched.some((e) => e.type === EventType.ObjectLand && e.gameObject === victim),
           landEventCount: dispatched.length,
-          droppedFlag: task._dropped,
-          controlledDrop: task._controlledDrop,
-          uncontrolledSelfDmg: selfDmg.slice(),
+          droppedFlag: task._dropped,          uncontrolledSelfDmg: selfDmg.slice(),
         };
       },
       // 活跃 AttackTask → 光束不断：爬升到巡航高度后水平靠近磁电，不提前坠落。
@@ -11245,7 +11244,8 @@ const CONVERTED = [
           attackNotCancelled: !attackTask.cancelled,
         };
       },
-      // _applyDrop 伤害契约：受控空地安全 / 非受控自伤 / 受控砸人不自伤 / 落水沉没。
+      // _applyDrop 伤害契约：空地投放自身不掉血 / 碾压落点单位吃
+      // base × FallingDamageMultiplier（此处 0.5 → 50）/ 落水沉没。
       (ns, THREE, mod) => {
         const DeathType = mod("game/gameobject/common/DeathType").DeathType;
         const LandType = mod("game/type/LandType").LandType;
@@ -11276,7 +11276,7 @@ const CONVERTED = [
           },
           rules: {
             combatDamage: {
-              fallingDamageMultiplier: 1,
+              fallingDamageMultiplier: 0.5,
               currentStrengthDamage: true,
               crushWarhead: "Crush",
             },
@@ -11286,16 +11286,9 @@ const CONVERTED = [
 
         const v1 = makeVictim(0, SpeedType.Wheel);
         const t1 = new ns.MagnetronDragTask(game, v1, {});
-        t1._controlledDrop = true;
         t1._applyDrop(v1, game);
-        const controlledEmptyDmg = v1.dmg.slice();
-        const controlledEmptyDestroyed = !!v1.isDestroyed;
-
-        const v2 = makeVictim(0, SpeedType.Wheel);
-        const t2 = new ns.MagnetronDragTask(game, v2, {});
-        t2._controlledDrop = false;
-        t2._applyDrop(v2, game);
-        const uncontrolledEmptyDmg = v2.dmg.slice();
+        const emptyDropSelfDmg = v1.dmg.slice();
+        const emptyDropDestroyed = !!v1.isDestroyed;
 
         const targetDmg = [];
         const crushTarget = {
@@ -11310,37 +11303,360 @@ const CONVERTED = [
         const v3 = makeVictim(0, SpeedType.Wheel);
         v3.tile._objs = [v3, crushTarget];
         const t3 = new ns.MagnetronDragTask(game, v3, {});
-        t3._controlledDrop = true;
         t3._applyDrop(v3, game);
-        const controlledCrushSelfDmg = v3.dmg.slice();
+        const crushDropSelfDmg = v3.dmg.slice();
         const crushTargetDmg = targetDmg.slice();
         const crushDeathType = crushTarget.deathType;
 
+        // 原版分叉：落点目标碾得动（坦克砸步兵）→ 砸者安全；
+        // 碾不动（坦克砸坦克）→ 砸者自己也吃同一份伤害。
+        function mkTarget() {
+          const d = [];
+          return {
+            dmg: d,
+            isDestroyed: false,
+            isTechno: () => true,
+            healthTrait: {
+              getHitPoints: () => 50,
+              maxHitPoints: 50,
+              inflictDamage: (x) => d.push(x),
+            },
+          };
+        }
+        const canCrushVictim = makeVictim(0, SpeedType.Wheel);
+        canCrushVictim.canCrushObject = () => true;
+        canCrushVictim.tile._objs = [canCrushVictim, mkTarget()];
+        const t6 = new ns.MagnetronDragTask(game, canCrushVictim, {});
+        t6._applyDrop(canCrushVictim, game);
+        const selfDmgWhenCanCrush = canCrushVictim.dmg.slice();
+
+        const noCrushVictim = makeVictim(0, SpeedType.Wheel);
+        noCrushVictim.canCrushObject = () => false;
+        noCrushVictim.tile._objs = [noCrushVictim, mkTarget()];
+        const t7 = new ns.MagnetronDragTask(game, noCrushVictim, {});
+        t7._applyDrop(noCrushVictim, game);
+        const selfDmgWhenCannotCrush = noCrushVictim.dmg.slice();
+
+        // 原版：被砸者车辆/船 100%、建筑 200%（此处 50 → 100）。
+        const buildingTarget = mkTarget();
+        buildingTarget.isBuilding = () => true;
+        const onBuildingVictim = makeVictim(0, SpeedType.Wheel);
+        onBuildingVictim.canCrushObject = () => true;
+        onBuildingVictim.tile._objs = [onBuildingVictim, buildingTarget];
+        const t8 = new ns.MagnetronDragTask(game, onBuildingVictim, {});
+        t8._applyDrop(onBuildingVictim, game);
+        const buildingCrushTargetDmg = buildingTarget.dmg.slice();
+        const buildingVictimSelfDmg = onBuildingVictim.dmg.slice();
+
         const v4 = makeVictim(LandType.Water, SpeedType.Wheel);
         const t4 = new ns.MagnetronDragTask(game, v4, {});
-        t4._controlledDrop = true;
         t4._applyDrop(v4, game);
         const waterDestroyed = !!v4.isDestroyed;
         const waterDeathType = v4.deathType;
 
         const v5 = makeVictim(LandType.Water, SpeedType.Amphibious);
         const t5 = new ns.MagnetronDragTask(game, v5, {});
-        t5._controlledDrop = true;
         t5._applyDrop(v5, game);
         const amphWaterDestroyed = !!v5.isDestroyed;
 
         return {
-          controlledEmptyDmg,
-          controlledEmptyDestroyed,
-          uncontrolledEmptyDmg,
-          controlledCrushSelfDmg,
+          emptyDropSelfDmg,
+          emptyDropDestroyed,
+          crushDropSelfDmg,
           crushTargetDmg,
+          selfDmgWhenCanCrush,
+          selfDmgWhenCannotCrush,
+          buildingCrushTargetDmg,
+          buildingVictimSelfDmg,
           crushDeathType,
           crushDeathTypeIsCrush: crushDeathType === DeathType.Crush,
           waterDestroyed,
           waterDeathType,
           waterDeathTypeIsSink: waterDeathType === DeathType.Sink,
           amphWaterDestroyed,
+        };
+      },
+      // 斜坡起吸：磁电在低 10 个高度单位（≈1045 lepton）、8 格外起吸，
+      // 且双方 worldPosition 都是完整的 {x,y,z}（探针#4 缺 z/x，只测得到
+      // 异常路径）。拉扯上限必须量**平面**距离：量 3D 会让爬升把半格迟滞
+      // 整段吃掉 → 爬到一半误断束 → 提前落地（dropped/done 提前置位），
+      // 拖拽根本走不完。期望轨迹与探针#4 完全一致：40 tick 不落地。
+      (ns) => {
+        const LPT = 256;
+        const GROUND_DROP = 10 * 104.51156235874893; // 10 个 tile 高度单位
+        const dmg = [];
+        const victim = {
+          tile: { z: 0, landType: 0, rx: 0, ry: 0 },
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          rules: { speedType: 0 },
+          healthTrait: {
+            getHitPoints: () => 100,
+            maxHitPoints: 100,
+            inflictDamage: (d) => dmg.push(d),
+          },
+          moveTrait: { moveState: 0, locomotor: undefined, velocity: { set: () => {} } },
+          unitOrderTrait: {},
+          position: {
+            x: 0,
+            worldY: 0,
+            get worldPosition() {
+              return { x: this.x, y: this.worldY, z: 0 };
+            },
+            setAbsoluteElevationWorld: function (v) {
+              this.worldY = v;
+            },
+            moveByLeptons3: function (vec) {
+              this.x += vec.x;
+              this.worldY += vec.y;
+            },
+            getMapPosition: function () {
+              return { x: this.x, y: 0 };
+            },
+          },
+        };
+        const attackTask = {
+          isCancelling: () => false,
+          target: { obj: victim },
+          getWeapon: () => ({}),
+          cancelled: false,
+          cancel() {
+            this.cancelled = true;
+          },
+        };
+        const magnetron = {
+          position: {
+            worldPosition: { x: 8 * LPT, y: -GROUND_DROP, z: 0 },
+            getMapPosition: () => ({ x: 8 * LPT, y: 0 }),
+          },
+          unitOrderTrait: { getTasks: () => [attackTask] },
+          isFiring: false,
+        };
+        const game = {
+          events: { dispatch: () => {} },
+          map: {
+            tileOccupation: {
+              getGroundObjectsOnTile: () => [],
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+            },
+          },
+          rules: {
+            combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+            getWarhead: () => null,
+          },
+          destroyObject: (o) => {
+            o.isDestroyed = true;
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, magnetron);
+        task.onStart({});
+        const samples = [];
+        for (let i = 0; i < 40; i++) {
+          const done = task.onTick({});
+          samples.push({ y: victim.position.worldY, x: victim.position.x, done });
+          if (done) break;
+        }
+        const last = samples[samples.length - 1];
+        return {
+          sampleCount: samples.length,
+          earlyY: samples[Math.min(4, samples.length - 1)].y,
+          lastY: last.y,
+          lastX: last.x,
+          done: last.done,
+          dropped: task._dropped,
+          stillAir: victim.zone === 1,
+          selfDmg: dmg,
+          attackNotCancelled: !attackTask.cancelled,
+        };
+      },
+      // 原版落地边界：不可停驻落点秒杀 / Crashable 走自身坠毁、不结算落点
+      // 坠落伤害 / 有驻军的坦克碉堡免疫坠落伤害 / 击杀经验归磁电。
+      (ns) => {
+        const destroyed = [];
+
+        function mkGame(passable) {
+          return {
+            map: {
+              terrain: { getPassableSpeed: () => passable },
+              tileOccupation: {
+                getGroundObjectsOnTile: (t) => (t && t._objs) || [],
+                getObjectsOnTile: (t) => (t && t._objs) || [],
+                unoccupyTileRange: () => {},
+              },
+            },
+            rules: {
+              combatDamage: {
+                fallingDamageMultiplier: 1,
+                currentStrengthDamage: true,
+                crushWarhead: "Crush",
+              },
+              getWarhead: () => null,
+            },
+            events: { dispatch: () => {} },
+            destroyObject: (o, attacker) => {
+              o.isDestroyed = true;
+              destroyed.push({ victim: o, attacker });
+            },
+          };
+        }
+
+        function mkVictim(rules) {
+          return {
+            tile: { z: 0, landType: 0, rx: 0, ry: 0 },
+            isDisposed: false,
+            isDestroyed: false,
+            owner: { id: "p1" },
+            rules: rules || { speedType: 0 },
+            healthTrait: {
+              getHitPoints: () => 100,
+              maxHitPoints: 100,
+              inflictDamage: () => {},
+            },
+          };
+        }
+
+        function mkTarget(opt) {
+          const o = opt || {};
+          const d = [];
+          const hp = o.hp === undefined ? 50 : o.hp;
+          const t = {
+            dmg: d,
+            isDestroyed: false,
+            isTechno: () => true,
+            healthTrait: {
+              getHitPoints: () => hp,
+              maxHitPoints: () => hp,
+              inflictDamage: (x) => d.push(x),
+            },
+          };
+          if (o.building) t.isBuilding = () => true;
+          if (o.bunkered) t.tankBunkerTrait = { bunkeredVehicle: {} };
+          return t;
+        }
+
+        // ① 落点不可停驻（getPassableSpeed <= 0）→ 直接秒杀，且不计击杀归属
+        destroyed.length = 0;
+        const g1 = mkGame(0);
+        const v1 = mkVictim();
+        v1.tile._objs = [];
+        const p1 = new ns.MagnetronDragTask(g1, v1, {});
+        p1._applyDrop(v1, g1);
+        const unstandableDestroyed = destroyed.length === 1 && destroyed[0].victim === v1;
+        const unstandableNoCredit = destroyed.length === 1 && destroyed[0].attacker === undefined;
+
+        // ② Crashable（JUMPJET/HIND/ZEP/DISK…）→ 落点目标不掉血，自己坠毁
+        const g2 = mkGame(1);
+        const v2 = mkVictim({ speedType: 0, crashable: true });
+        const t2 = mkTarget();
+        v2.tile._objs = [v2, t2];
+        const p2 = new ns.MagnetronDragTask(g2, v2, {});
+        p2._applyDrop(v2, g2);
+        const crashableTargetDmg = t2.dmg.slice();
+        const crashableVictimDestroyed = v2.isDestroyed;
+
+        // ③ 有驻军的坦克碉堡 → 坠落伤害归零；砸者碾得动 → 自己也安全
+        const g3 = mkGame(1);
+        const v3 = mkVictim();
+        v3.canCrushObject = () => true;
+        const t3 = mkTarget({ building: true, bunkered: true });
+        v3.tile._objs = [v3, t3];
+        const p3 = new ns.MagnetronDragTask(g3, v3, {});
+        p3._applyDrop(v3, g3);
+        const bunkeredBunkerDmg = t3.dmg.slice();
+        const bunkeredVictimAlive = !v3.isDestroyed;
+
+        // ④ 击杀记到磁电名下（经验归属）
+        destroyed.length = 0;
+        const g4 = mkGame(1);
+        const magnetron = { isDisposed: false, isDestroyed: false, owner: { id: "p2" } };
+        const v4 = mkVictim();
+        v4.canCrushObject = () => true;
+        const t4 = mkTarget({ hp: 0 });
+        v4.tile._objs = [v4, t4];
+        const p4 = new ns.MagnetronDragTask(g4, v4, magnetron);
+        p4._applyDrop(v4, g4);
+        const killCreditToMagnetron = destroyed.some(
+          (x) => x.victim === t4 && x.attacker && x.attacker.obj === magnetron,
+        );
+
+        return {
+          unstandableDestroyed,
+          unstandableNoCredit,
+          crashableTargetDmg,
+          crashableVictimDestroyed,
+          bunkeredBunkerDmg,
+          bunkeredVictimAlive,
+          killCreditToMagnetron,
+        };
+      },
+      // 回归：落点是**普通建筑**时不能被地形判定拦下（建筑占用格会让
+      // getPassableSpeed 因 isBlockerObject 返回 0）。原版扔到建筑上是
+      // "建筑吃 200% + 砸者自爆"的碾压路径，不是地形秒杀——曾出现
+      // "坦克爆了、建筑零伤害"。
+      (ns) => {
+        const destroyed = [];
+        const game = {
+          map: {
+            terrain: { getPassableSpeed: () => 0, findObstacles: () => [] },
+            tileOccupation: {
+              getGroundObjectsOnTile: (t) => (t && t._objs) || [],
+              getObjectsOnTile: (t) => (t && t._objs) || [],
+              unoccupyTileRange: () => {},
+            },
+          },
+          rules: {
+            combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true, crushWarhead: "Crush" },
+            getWarhead: () => null,
+          },
+          events: { dispatch: () => {} },
+          destroyObject: (o, attacker) => {
+            o.isDestroyed = true;
+            destroyed.push({ victim: o, attacker });
+          },
+        };
+        const buildingDmg = [];
+        const building = {
+          isDestroyed: false,
+          isBuilding: () => true,
+          isTechno: () => true,
+          healthTrait: {
+            getHitPoints: () => 500,
+            maxHitPoints: () => 500,
+            inflictDamage: (d) => buildingDmg.push(d),
+          },
+        };
+        const victim = {
+          tile: { z: 0, landType: 0, rx: 0, ry: 0 },
+          isDisposed: false,
+          isDestroyed: false,
+          owner: { id: "p1" },
+          rules: { speedType: 0 },
+          healthTrait: { getHitPoints: () => 100, maxHitPoints: 100, inflictDamage: () => {} },
+        };
+        // 非墙建筑永远不可被碾 → 砸者自爆
+        victim.canCrushObject = () => false;
+        victim.tile._objs = [victim, building];
+        const victimSelfDmg = [];
+        let victimHp = 100;
+        victim.healthTrait = {
+          getHitPoints: () => victimHp,
+          maxHitPoints: 100,
+          inflictDamage: (d) => {
+            victimSelfDmg.push(d);
+            victimHp -= d;
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, {});
+        task._applyDrop(victim, game);
+        return {
+          buildingDmg,
+          buildingDmgIs200Percent: buildingDmg.length === 1 && buildingDmg[0] === 200,
+          victimSelfDmg,
+          victimDestroyed: victim.isDestroyed,
         };
       },
     ],

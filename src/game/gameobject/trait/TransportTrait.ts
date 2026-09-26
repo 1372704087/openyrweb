@@ -72,14 +72,16 @@ export class TransportTrait {
 
   /**
    * 运输车被毁：根据死因决定乘员命运——
-   *  - 主目标被毁 / 死亡武器 / 空中被毁 → 乘员一同摧毁（继承位置/区域/死型）；
-   *  - 寄生弹头 → 清除死亡武器（不被寄生者带走）；
+   *  - 主目标被毁 / 死亡武器 / **真飞行器**被毁 / 寄生弹头 → 乘员一同摧毁
+   *    （继承位置/区域/死型）；
+   *  - 地面载具被磁电吸到空中再砸下来 → 走幸存者散开（原版战斗要塞：
+   *    车内步兵安全回到地面）；
    *  - 其余 → 幸存者散开（Selectable 保留选择 + ScatterTask）。
    */
   [NotifyDestroyModule.NotifyDestroy.onDestroy](object: any, world: any, attacker: any, isPrimary: any): void {
     const hasDeathWeapon = !!object.armedTrait?.deathWeapon;
     const isParasite = attacker?.weapon?.warhead.rules.parasite;
-    if (isPrimary || hasDeathWeapon || object.zone === ZoneType.Air || isParasite) {
+    if (isPrimary || hasDeathWeapon || object.isAircraft() || isParasite) {
       for (const unit of this.units) {
         if (hasDeathWeapon && unit.armedTrait) unit.armedTrait.deathWeapon = undefined;
         unit.position.tileElevation = object.position.tileElevation;

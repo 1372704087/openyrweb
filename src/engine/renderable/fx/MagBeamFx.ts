@@ -18,7 +18,7 @@ import { Coords } from "game/Coords"; // 已转换
 export interface MagBeamParams {
   /** 波颜色 [r,g,b] 0-255。 */
   waveColor?: number[];
-  /** 波强度 [x,y,z]（Ares 式）。 */
+  /** 波强度 [x,y,z]。 */
   waveIntensity?: number[];
   /** 波是否用阵营色。 */
   waveIsHouseColor?: boolean;
@@ -104,7 +104,7 @@ export class MagBeamFx {
     this.camera = camera || null;
     const p = params || {};
 
-    // 原版 YR 波参数（Ares 逆向）
+    // 原版 YR 波参数
     this._waveColor = p.waveColor || [0, 0, 0];
     this._waveIntensity = p.waveIntensity || [128, 0, 1024];
     this._waveIsHouseColor = !!p.waveIsHouseColor;
@@ -434,16 +434,15 @@ export class MagBeamFx {
       const cycle = Math.floor(wavePos);
       let saw = wavePos - cycle;
 
-      // 最多 6 个脉冲
-      if (cycle < 0 || cycle >= 6) {
-        saw = 0;
-      }
+      // 原版调色板循环：脉冲沿束全长重复流动，不设个数上限
+      //（旧实现的 cycle 0..5 钳制会让长束后半段只剩平板底色）。
 
-      // 底色 50%，脉冲占 25%，峰值 +25%，边缘渐变 20%
+      // 束体保持 50% 半透；行进的"块"是透明窗口——块位置把束往透明
+      // 方向压（不是变亮），两侧以块宽一半平滑渐变融入束体
       const base = 0.5;
-      const pulseWidth = 0.25;
-      const extra = 0.25;
-      const fade = pulseWidth * 0.2;
+      const pulseWidth = 0.8;
+      const dip = 0.2;
+      const fade = pulseWidth * 0.5;
 
       let t = 0.0;
       if (saw < fade) {
@@ -453,11 +452,13 @@ export class MagBeamFx {
       } else if (saw < pulseWidth) {
         t = (pulseWidth - saw) / fade;
       }
-      const modulation = base + extra * t;
+      // smoothstep 让两侧渐变更顺
+      t = t * t * (3 - 2 * t);
+      const modulation = base - dip * t;
 
       const x = modulation * pulse * alpha * timeLeft;
 
-      // 紫色光束 + 强度调制
+      // 紫色光束（块是变透明，不做白帽）
       const r = 0.5 * mod.x * x * 2;
       const g = 0;
       const b = 1.0 * mod.z * x * 2;

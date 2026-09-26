@@ -66,10 +66,14 @@ export class CombatDamageRules {
               // 碾压判定也走这里（已在 FUN_0054ca90 处验证：TakeDamage 弹头 =
               // Rules+0xfac）。缺省 "Crush"，与原版 rulesmd.ini 一致。
               (this.crushWarhead = ini.getString("CrushWarhead", "Crush")),
-              // 磁电拖拽落地伤害参数（原版 YR [CombatDamage] ;***Magnetron*** 段）：
-              // FallingDamageMultiplier = 坠落伤害 = 载具基础血量 × 此系数（缺省 1.0）；
-              // CurrentStrengthDamage = true（缺省）按当前血量计，否则按最大血量计；
-              // 由 MagnetronDragTask._applyDrop 在被拖载具落地时使用。
+              // 原版 YR [CombatDamage] ;***Magnetron*** 段（gamemd.exe 复核）：
+              // FallingDamageMultiplier = 砸下去的伤害 = 砸者 base × 此系数
+              //   （缺省 1.0）；base 取值由 CurrentStrengthDamage 决定
+              //   （true 缺省 = 当前血量，false = 最大血量）。
+              // 该伤害经 CrushWarhead（Rules+0xFAC）打给落点对象；gamemd.exe 里
+              //   落点目标为空时**回落到砸者自己**——落点上有碾不动的目标
+              //   （!canCrushObject）时砸者就吃自己那一份，乘数 1.0 即秒杀。
+              // 由 MagnetronDragTask._applyDrop 使用。
               (this.fallingDamageMultiplier = ini.getNumber("FallingDamageMultiplier", 1)),
               (this.currentStrengthDamage = ini.getBool("CurrentStrengthDamage", !0)),
               (this.deathWeapon = ini.getString("DeathWeapon")),

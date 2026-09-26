@@ -124,7 +124,9 @@ export class WeaponRules {
               // 原版 YR：单层平面 2D 波形、无光晕。缺省 0 = 无光晕。
               (this.magnaBeamOuterSpread = this.rules.getNumber("MagnaBeamOuterSpread", 0)),
               (this.magnaBeamWaveAmplitude = this.rules.getNumber("MagnaBeamWaveAmplitude", 1.8)),
-              (this.magnaBeamWaveFrequency = this.rules.getNumber("MagnaBeamWaveFrequency", 6.0)),
+              // 波纹频率：每 100 屏幕像素的脉冲个数。6 太密（间隔 ~17px），
+              // 3（间隔 ~33px）斑块密度。
+              (this.magnaBeamWaveFrequency = this.rules.getNumber("MagnaBeamWaveFrequency", 1.6)),
               (this.magnaBeamWaveSpeed = this.rules.getNumber("MagnaBeamWaveSpeed", 2.2)),
               (this.magnaBeamPulse = this.rules.getNumber("MagnaBeamPulse", 0.3)),
               (this.magnaBeamPulseRate = this.rules.getNumber("MagnaBeamPulseRate", 3.5)),

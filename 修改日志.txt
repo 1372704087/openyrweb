@@ -1,3 +1,19 @@
+- 🧲 **磁电拖拽"坦克凭空消失"排查修复 + 坠落/碾压伤害语义按原版校正**
+  - **凭空消失（不播死亡表现）**：`MagnetronDragTask._forceDestroyObject` 在无攻击者时把 `attacker` 塞成 `{obj: undefined}`（真值），使 `Game.destroyObject` 的 `!attacker` 短路失效、走到 `attacker.player.addUnitsKilled(...)` 抛 `TypeError`；整条正规销毁链（`isDestroyed` / `onDestroy` / `ObjectDestroyEvent` / 计分 / `unspawn` / `dispose`）被整段打断，只剩降级路径 `world.removeObject` 把渲染体直接摘掉 → 单位凭空消失。改为无攻击者时传 `undefined`。
+  - **拉扯上限误断束**：绳长改量**平面**（x/z）距离、基线挪到 `onStart` 的起吸距离，绳长判定与 AttackTask 存活判定拆成两个独立 try/catch（此前绳长段任何异常都被当成断束）。原 3D 距离在磁电处于低处时会随爬升单调变大、把半格迟滞整段吃掉 → 斜坡地形爬升到一半误断束。
+  - **坠落/碾压伤害语义**：按 gamemd.exe 复核（`UnitClass::vftable_1[0]` 算出 `base × FallingDamageMultiplier` 经 `Rules+0xFAC` = CrushWarhead 打给落点对象，**落点目标为空时回落到砸者自己**）修正——碾压伤害由 `base` 改为 `base × FallingDamageMultiplier`；落点上有砸者**碾不动**的目标（`!canCrushObject`，典型是坦克砸坦克 `Crushable=no`）时，砸者自己也吃同一份伤害（乘数 1.0 即秒杀，同归于尽）；碾得动（坦克砸步兵 `Crushable=yes`）或落在空地上则砸者安全。`[LTNK]` Lasher 实测 `Crusher=yes`，全表 29 个 `Crusher=yes` / 9 个 `Crushable=yes`，分叉与原版一致。
+  - **被砸者伤害量**：被砸者吃"砸者**落地瞬间**血量 × `FallingDamageMultiplier`"，车辆/船 **100%**、**建筑 200%**，与双方装甲类型无关（`[Crush]` 的 `Verses` 在本机 rulesmd 里是 11 档全 `100%`，所以走 `computeDamage` 本身不会引入装甲差异，建筑 ×2 是 `_applyDrop` 里单独补的）。
+  - **落地边界（原版分情况处理）**：① 落点**不可停驻**（非两栖坦克入水 / 舰船搁浅 / 悬崖）或落点有**树木、路灯等障碍覆盖物** → 与坠落伤害平行的直接秒杀，且不计击杀归属；障碍物本身免疫。② `Crashable=yes`（`JUMPJET`/`HIND`/`ZEP`/`DISK` 等跳跃机、直升机、基洛夫、飞碟；**战机不在名单内**）砸下走自身坠毁，不结算落点坠落伤害。③ 落点是**有坦克驻守的坦克碉堡** → 坠落伤害归零，既不打碉堡也不穿透给内部坦克（坠毁伤害不受此限制）。④ 碾压击杀的经验归**磁电**而非砸者。⑤ 战斗要塞等**地面**运输载具在空中被毁时乘员改为幸存落地——`TransportTrait.onDestroy` 的 `zone === ZoneType.Air` 改为 `isAircraft()`，只有真飞行器才连坐乘员。
+  - **两处原版引擎 bug 不复现**：低空（高度 <≈208）双倍伤害（本引擎 `_applyDrop` 每次落地只结算一次，天然不复现）；`BalloonHover` JumpJet 被拖拽时落到攻击者头上、坠落伤害误用 `DeathWeapon`（资料标注为"错误"，故不照搬，仍走 `FallingDamageMultiplier`）。`DeathWeapon` 的"坠毁伤害"发射点在本引擎尚未落地（`armedTrait.deathWeapon` 目前仅 `CAOS` 神经毒气与 `selectSpecialWeapon` 的自杀弹头在用），故 Crashable 单位只做到"不结算落点伤害 + 自身正常销毁"，其 `Explodes + DeathWeapon` 会由 `Vehicle.onRemove` 走各自的死亡武器表现。
+  - **碾压致死无爆炸动画**：`Vehicle.onRemove` 对 `DeathType.Crush` 直接 return（爆炸本该由弹头事件提供），而 `_applyDrop` 只结算伤害、没派发爆炸 → 载具血量归零后渲染体被直接摘掉，看起来是"死了却没爆炸"。现仿 `MoveTrait` 碾压链路：致死时先 `warhead.pickExplodeAnim(...)` 再 dispatch `WarheadDetonateEvent`；取不到 CrushWarhead 的降级分支让载具按 `DeathType.Normal` 走常规爆炸。建筑仍由 `Building.onRemove` 自己播爆炸，不变。
+  - 移除已无消费方的 `_controlledDrop`；探针#5 合并因此重复的两个用例，键名 `controlled*` → `emptyDrop*` / `crushDrop*`，`FallingDamageMultiplier` 取 0.5 以真正锁住"碾压吃系数"；新增探针#7 锁死上述 4 条落地边界（不可停驻秒杀 / Crashable 跳过 / 碉堡免疫 / 击杀归磁电）。
+  - 排障用的 `[MagDrag]` 埋点（MagnetronDragTask / Warhead / AttackTask / Task / UnitOrderTrait / OrderUnitsAction）已整体移除。
+
+- 🧲 **磁电坦克武器机制考证（gamemd.exe IDA 逆向）+ 光束脉冲调优**
+  用 IDA Pro 逆向 H:\Red-Alert-2-Yuris-Revenge\gamemd.exe（YR 1.001）完成机制考证。曾给 `MagnetronDragTask._isBeamBroken` 加 8.5 格（6×单格对角线）距离断束，实测**在 8.5~12 格起吸时会秒断束 → 非受控坠落 → 满血坦克被坠落伤害秒杀（"抬升瞬间消失"）**，当时已回滚静态起吸检查——原版该断束语义是拖拽中距离拉大才断，不能做成起吸瞬间的固定距离判断（该检查后来又以 3D 距离形式加回、并在斜坡上再次翻车，现已改为平面绳长，见上条）。
+  - 光束脉冲按用户反馈调优（`MagBeamFx._updateColors` + `WeaponRules`）：去掉旧实现 `cycle>=6` 的 6 个脉冲上限（长束后半段曾是平板底色），脉冲沿全长无限流动；形态改为**透明窗口**（束体 50% 半透，块位置压到 30% 透明度，非变亮无白帽），块宽 0.8 周期、两侧 smoothstep 渐变，`MagnaBeamWaveFrequency` 缺省 6.0→1.6（周期约 62px）。
+  - 逆向结论备查：原版束为宽能带（约 1/3~1/2 格宽）、蓝紫色调（调色板动画着色，[AudioVisual] MagnaBeamColor=255,200,255 为死键——解析于 dword_8871E0+0x1869 但 exe 内无读者）；几何为直线四边形（WaveClass 截面表 type3 行），目标端 z+50 抬升、纵向过冲 -44…+56；生长/收束=head/tail 双进度每帧 +0.05；<240 lepton 不建束（WaveClass ctor）；IsMagBeam 武器建 WaveClass(WaveType=3) 挂 TechnoClass+0x324，存活不重建；SetTarget 对 IsLocomotor 武器改抓 *(victim+0x2E4)（恐怖机器人拽出实证）。关键地址：Fire=sub_6FDD50、WaveClass ctor=sub_75E950、Draw_Magnetic=0x762070、Update_Wave=0x762AF0、AI=0x760F50；WeaponType.MagBeam=+0x15C、WarheadType.IsLocomotor=+0x15B。
+
 - 🏗️ **建筑动画状态机与生化反应炉特殊表现**
   建造期间仅播放建造动画，不叠加 IDLE/ACTIVE。生化反应炉建成后：无进驻→ACTIVE未进驻状态，有进驻→进驻状态，IDLE默认隐藏。修复受损时正确切换 damagedImage 帧。红血时不再撤离步兵（InfantryAbsorb=yes 保持原版YR行为）。
 
