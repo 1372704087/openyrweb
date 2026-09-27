@@ -5665,6 +5665,13 @@
       "resigned": true,
       "hasEvent": false,
       "nonCombatResigned": false
+    },
+    "1": {
+      "firstDispatch": true,
+      "firstRedistribute": true,
+      "firstResigned": true,
+      "replayNoDoubleDispatch": true,
+      "replayNoDoubleRedistribute": true
     }
   },
   "game/action/ObserveGameAction": {

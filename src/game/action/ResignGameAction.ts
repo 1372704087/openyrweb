@@ -27,6 +27,11 @@ export class ResignGameAction extends ActionModule.Action {
   process(): void {
     if (this.localPlayerName === this.player.name) return;
     const player = this.player;
+    // 幂等守卫：同一玩家的重复 ResignGame 动作（服务器重播/掉线客户端在被
+    // 移除前反复发送）只处理一次。isCombatant() 不含 resigned，无此守卫时
+    // 每次重放都会重发 PlayerResignedEvent（"X 离开了游戏。"刷屏）并重跑
+    // 资产再分配/移除。
+    if (player.resigned) return;
     const redistributed = this.game.redistributeAllPlayerAssets(player);
     this.game.removeAllPlayerAssets(player);
     if (player.isCombatant()) {

@@ -5866,6 +5866,38 @@ const CONVERTED = [
           nonCombatResigned: nonCombat.resigned === true,
         };
       },
+      // 幂等守卫：同一玩家的重复 ResignGame（服务器重播/掉线客户端反复发送）
+      // 只处理一次——重放不再重发 PlayerResignedEvent、不再重跑资产再分配。
+      (ns) => {
+        let dispatched = 0;
+        let redistributeCalls = 0;
+        const game = {
+          redistributeAllPlayerAssets: (p) => {
+            redistributeCalls++;
+            return { units: p.name };
+          },
+          removeAllPlayerAssets: () => {},
+          events: {
+            dispatch: () => {
+              dispatched++;
+            },
+          },
+        };
+        const player = { name: "R", resigned: false, isCombatant: () => true };
+        const a = new ns.ResignGameAction(game, "Local");
+        a.player = player;
+        a.process();
+        const first = { dispatched, redistributeCalls, resigned: player.resigned === true };
+        a.process();
+        a.process();
+        return {
+          firstDispatch: first.dispatched === 1,
+          firstRedistribute: first.redistributeCalls === 1,
+          firstResigned: first.resigned,
+          replayNoDoubleDispatch: dispatched === 1,
+          replayNoDoubleRedistribute: redistributeCalls === 1,
+        };
+      },
     ],
   },
 
