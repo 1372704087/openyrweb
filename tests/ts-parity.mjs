@@ -2429,6 +2429,116 @@ const CONVERTED = [
           aliveResult,
         };
       },
+      // IsLocomotor 抓取门槛：EMP 瘫痪（moveTrait disabled）的载具照常被磁电
+      // 抓起——原版"先瘫痪使其完全静止、再抓放"正是安全操作路径；抓取挂
+      // MagnetronDragTask、移动状态复位、旧任务清空，对 disabled 与否一致。
+      (ns) => {
+        const mkVictim = (disabled) => ({
+          isSpawned: true,
+          isDisposed: false,
+          isDestroyed: false,
+          isCrashing: false,
+          isTechno: () => true,
+          isUnit: () => false,
+          isVehicle: () => true,
+          isBuilding: () => false,
+          isInfantry: () => false,
+          isAircraft: () => false,
+          isOverlay: () => false,
+          isTerrain: () => false,
+          warpedOutTrait: { isInvulnerable: () => false },
+          healthTrait: { getHitPoints: () => 100, maxHitPoints: 100 },
+          rules: { immune: false, typeImmune: false, warpable: true },
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          name: "TNKD",
+          position: {
+            x: 5 * 256,
+            get worldPosition() {
+              const self = this;
+              return {
+                x: self.x,
+                y: 0,
+                z: 0,
+                distanceTo(o) {
+                  return Math.hypot(self.x - o.x, 0 - (o.y || 0), 0 - (o.z || 0));
+                },
+              };
+            },
+          },
+          moveTrait: {
+            moveState: 3,
+            locomotor: { id: "drive" },
+            velocity: { set: () => {} },
+            unreservePathNodes: () => {},
+            isDisabled: () => disabled,
+          },
+          unitOrderTrait: {
+            cancelled: 0,
+            added: [],
+            cancelAllTasks() {
+              this.cancelled++;
+            },
+            tasks: [],
+            addTaskToFront(t) {
+              this.added.push(t);
+              this.tasks.unshift(t);
+            },
+          },
+        });
+        const shooter = { name: "MGTK", player: { name: "P1" }, rules: { damageSelf: false } };
+        let currentVictim = null;
+        const game = {
+          map: {
+            tileOccupation: {},
+            tiles: {},
+            mapBounds: {},
+            getObjectsOnTile: () => (currentVictim ? [currentVictim] : []),
+          },
+          events: { dispatch: () => {} },
+          mapRadiationTrait: { createRadSite: () => {} },
+          alliances: { areAllied: () => false },
+          rules: { audioVisual: { weaponNullifyAnim: "NULL" }, combatDamage: { splashList: [] } },
+          generateRandomInt: () => 0,
+        };
+        const center = { x: 0, y: 0, addScalar() {}, distanceTo() { return 0; } };
+        const mkWarhead = () =>
+          new ns.Warhead({ cellSpread: 0, percentAtMax: 0.5, radLevel: 0, animList: ["boom"], conventional: false, emEffect: false, wall: false, wood: false, psychicDamage: false, isLocomotor: true, rocker: false, causesDelayKill: false, affectsAllies: false, wallAbsoluteDestroyer: false, infDeath: 1, penetratesBunker: false, proneDamage: 1, verses: new Map() });
+        const tile = { rx: 5, ry: 5, z: 0, rampType: 0 };
+        const fire = (victim) =>
+          mkWarhead().detonate(game, 100, tile, 0, center, 0, 0, { obj: victim, getBridge: () => null }, { weapon: null, obj: shooter, player: shooter.player }, undefined, undefined, undefined, false);
+        const v1 = mkVictim(false);
+        currentVictim = v1;
+        fire(v1);
+        const v2 = mkVictim(true);
+        currentVictim = v2;
+        fire(v2);
+        // 挂具对 game/gameobject/task/** 依赖注入魔法桩：Warhead 内部
+        // new MagnetronDragTask(...) 产出 {$stub, $args}——用 $stub 验类、
+        // $args 验构造身份（游戏/受害者/磁电），足以锁定抓取门槛行为。
+        const t1 = v1.unitOrderTrait.tasks[0];
+        const t2 = v2.unitOrderTrait.tasks[0];
+        // 磁电侧单目标守卫：注入"已在拖 v2"状态后，对第三载具的新拖拽被
+        // 拒绝（正版"仅能锁定单一目标"）；对 v2 的重复命中（光束刷新）
+        // 不二次挂任务、不重跑移动状态复位。
+        shooter.magnetronDragging = v2;
+        v2.magnetronDraggedBy = shooter;
+        const v3 = mkVictim(false);
+        currentVictim = v3;
+        fire(v3);
+        fire(v2);
+        const isDragTask = (t) => !!t && t.$stub === "game/gameobject/task/MagnetronDragTask";
+        return {
+          normalAttached: isDragTask(t1) && t1.$args[1] === v1 && t1.$args[2] === shooter,
+          disabledAttached: isDragTask(t2) && t2.$args[1] === v2 && t2.$args[2] === shooter,
+          disabledMoveStateIdle: v2.moveTrait.moveState === 0,
+          disabledLocomotorCleared: v2.moveTrait.locomotor === undefined,
+          disabledTasksCancelled: v2.unitOrderTrait.cancelled === 1,
+          busyMagnetronRejected: v3.unitOrderTrait.tasks.length === 0,
+          sameVictimRefreshNoOp: v2.unitOrderTrait.tasks.length === 1 && v2.unitOrderTrait.cancelled === 1,
+        };
+      },
     ],
   },
 
@@ -11657,6 +11767,504 @@ const CONVERTED = [
           buildingDmgIs200Percent: buildingDmg.length === 1 && buildingDmg[0] === 200,
           victimSelfDmg,
           victimDestroyed: victim.isDestroyed,
+        };
+      },
+      // Speed=0 静态单位（MOD 规则）：光束施加瘫痪（zone=Air、持续开火）
+      // 但 40 tick 内零位移（不爬升不平移）；断束后原地落地、zone 恢复、
+      // 双向链接清理。原版引擎"对 Speed=0 单位无效、仅瘫痪"的边界行为。
+      (ns) => {
+        const LPT = 256;
+        const victim = {
+          tile: { z: 0, landType: 0, rx: 0, ry: 0 },
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          rules: { speed: 0, speedType: 0 },
+          moveTrait: { moveState: 3, locomotor: { id: "drive" }, velocity: { set: () => {} } },
+          unitOrderTrait: {},
+          position: {
+            x: 0,
+            worldY: 0,
+            get worldPosition() {
+              return { x: this.x, y: this.worldY, z: 0 };
+            },
+            setAbsoluteElevationWorld: function (v) {
+              this.worldY = v;
+            },
+            moveByLeptons3: function (vec) {
+              this.x += vec.x;
+              this.worldY += vec.y;
+            },
+            getMapPosition: function () {
+              return { x: this.x, y: 0 };
+            },
+          },
+        };
+        let beamAlive = true;
+        const attackTask = {
+          isCancelling: () => false,
+          target: { obj: victim },
+          getWeapon: () => ({}),
+          cancel() {},
+        };
+        const magnetron = {
+          position: {
+            getMapPosition: () => ({ x: 8 * LPT, y: 0 }),
+            worldPosition: { x: 8 * LPT, y: 0, z: 0 },
+          },
+          unitOrderTrait: { getTasks: () => (beamAlive ? [attackTask] : []) },
+          isFiring: false,
+        };
+        const game = {
+          events: { dispatch: () => {} },
+          map: {
+            tileOccupation: {
+              getGroundObjectsOnTile: () => [],
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+            },
+          },
+          rules: {
+            combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+            getWarhead: () => null,
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, magnetron);
+        task.onStart({});
+        const samples = [];
+        for (let i = 0; i < 40; i++) {
+          task.onTick({});
+          samples.push({ x: victim.position.x, y: victim.position.worldY });
+        }
+        const noDisplacement = samples.every((s) => s.x === 0 && s.y === 0);
+        const zoneAirWhileBeam = victim.zone === 1;
+        const firingWhileBeam = magnetron.isFiring === true;
+        // 磁电停火 → 断束 → 原地落地。
+        beamAlive = false;
+        let done = false;
+        for (let i = 0; i < 10 && !done; i++) {
+          done = task.onTick({});
+        }
+        task.onEnd({});
+        return {
+          noDisplacement,
+          zoneAirWhileBeam,
+          firingWhileBeam,
+          dropped: task._dropped,
+          done,
+          finalX: victim.position.x,
+          finalY: victim.position.worldY,
+          zoneGround: victim.zone === 0,
+          linksCleared: victim.magnetronDraggedBy === undefined && magnetron.magnetronDragging === undefined,
+        };
+      },
+      // 建筑碰撞抬升（已知问题 #12 子项）：拖拽路径 rx=4 有一栋
+      // art.height=6（≈627 lepton，高于 500 巡航高）的建筑。期望：
+      // 提前 1 格探测到障碍 → 暂停水平位移爬升到 障碍顶+500 → 越过建筑
+      // 期间 y 始终高于障碍顶（不穿插）→ 越过后平滑回落并继续拖拽。
+      (ns) => {
+        const LPT = 256;
+        const ZSCALE = Math.SQRT1_2 / (Math.sqrt(3) / 2); // ≈0.8165，Coordinvocation
+        const OBSTACLE_H = 6;
+        const OBSTACLE_TOP = OBSTACLE_H * (LPT / 2) * ZSCALE; // ≈627
+        const CLEARANCE_TARGET = OBSTACLE_TOP + 500; // 障碍顶 + 巡航高 ≈1127
+        const BUILDING_RX = 4;
+        const tiles = [];
+        for (let rx = 0; rx <= 11; rx++) {
+          tiles[rx] = { rx, ry: 0, z: 0, landType: 0, onBridgeLandType: null };
+        }
+        const building = {
+          zone: 0,
+          isDestroyed: false,
+          tileElevation: 0,
+          art: { height: OBSTACLE_H },
+          isTechno: () => true,
+          isBuilding: () => true,
+        };
+        const victim = {
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          rules: { speedType: 0 },
+          moveTrait: { moveState: 0, locomotor: undefined, velocity: { set: () => {} } },
+          unitOrderTrait: {},
+          position: {
+            x: 0,
+            worldY: 0,
+            get worldPosition() {
+              return { x: this.x, y: this.worldY, z: 0 };
+            },
+            setAbsoluteElevationWorld: function (v) {
+              this.worldY = v;
+            },
+            moveByLeptons3: function (vec) {
+              this.x += vec.x;
+              this.worldY += vec.y;
+            },
+            getMapPosition: function () {
+              return { x: this.x, y: 0 };
+            },
+          },
+        };
+        // tile 随 x 位置实时更新（真实引擎 moveToTileCoords 同效）。
+        Object.defineProperty(victim, "tile", {
+          get() {
+            const rx = Math.max(0, Math.min(11, Math.floor(victim.position.x / LPT)));
+            return tiles[rx];
+          },
+        });
+        const attackTask = {
+          isCancelling: () => false,
+          target: { obj: victim },
+          getWeapon: () => ({}),
+          cancel() {},
+        };
+        const magnetron = {
+          position: {
+            getMapPosition: () => ({ x: 8 * LPT, y: 0 }),
+            worldPosition: { x: 8 * LPT, y: 0, z: 0 },
+          },
+          unitOrderTrait: { getTasks: () => [attackTask] },
+          isFiring: false,
+        };
+        const game = {
+          events: { dispatch: () => {} },
+          map: {
+            tiles: {
+              getByMapCoords: (rx, ry) => (ry === 0 && rx >= 0 && rx <= 11 ? tiles[rx] : null),
+            },
+            tileOccupation: {
+              getGroundObjectsOnTile: (t) => (t && t.rx === BUILDING_RX ? [building] : []),
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+            },
+          },
+          rules: {
+            combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+            getWarhead: () => null,
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, magnetron);
+        task.onStart({});
+        const samples = [];
+        for (let i = 0; i < 220; i++) {
+          task.onTick({});
+          samples.push({ x: victim.position.x, y: victim.position.worldY });
+          // 越过建筑后即停（落点在 x≥1536 才触发，停在 1300 前不会进投放段，
+          // 也不会调用 RandomTileFinder——其 mock 不完整）。
+          if (victim.position.x >= (BUILDING_RX + 1) * LPT + 20) break;
+        }
+        const overBuilding = samples.filter((s) => s.x >= BUILDING_RX * LPT && s.x < (BUILDING_RX + 1) * LPT);
+        const maxY = Math.max(...samples.map((s) => s.y));
+        const maxX = Math.max(...samples.map((s) => s.x));
+        return {
+          reachedClearance: maxY >= CLEARANCE_TARGET - 60,
+          crossedBuildingSamples: overBuilding.length,
+          neverClippedBuilding: overBuilding.length > 0 && overBuilding.every((s) => s.y > OBSTACLE_TOP),
+          crossedPastBuilding: maxX >= (BUILDING_RX + 1) * LPT,
+          stillAirWhileBeam: victim.zone === 1,
+          notDropped: !task._dropped,
+          firing: magnetron.isFiring === true,
+        };
+      },
+      // 投放段（_moveToDropTile）参数契约：水平步长取受害者自身 jumpjetSpeed、
+      // 巡航高度取自身 jumpjetHeight——常量 20/500 只是无规则环境下的兜底，
+      // 不能泄漏进真实牵引路径（原版"牵引速度由目标自身决定"）。
+      (ns) => {
+        const LPT = 256;
+        const JJ_SPEED = 7;
+        const JJ_CRUISE = 300;
+        const victim = {
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          rules: { speedType: 0, speed: 10, jumpjetSpeed: JJ_SPEED, jumpjetHeight: JJ_CRUISE, jumpjetClimb: 6 },
+          moveTrait: { moveState: 0, locomotor: undefined, velocity: { set: () => {} } },
+          unitOrderTrait: {},
+          position: {
+            x: 0,
+            wy: 0,
+            tileElevation: 0,
+            get worldPosition() {
+              const self = this;
+              return { x: self.x, y: self.wy, z: 0 };
+            },
+            setAbsoluteElevationWorld: function (v) {
+              this.wy = v;
+            },
+            moveByLeptons3: function (vec) {
+              this.x += vec.x;
+              this.wy += vec.y;
+            },
+            getMapPosition: function () {
+              return { x: this.x, y: 0 };
+            },
+          },
+        };
+        Object.defineProperty(victim, "tile", {
+          get() {
+            const rx = Math.floor(victim.position.x / LPT);
+            return { rx, ry: 0, z: 0, landType: 0, onBridgeLandType: null };
+          },
+        });
+        const attackTask = {
+          isCancelling: () => false,
+          target: { obj: victim },
+          getWeapon: () => ({}),
+          cancel() {},
+        };
+        const magnetron = {
+          position: {
+            getMapPosition: () => ({ x: 0, y: 0 }),
+            worldPosition: { x: 0, y: 0, z: 0 },
+          },
+          unitOrderTrait: { getTasks: () => [attackTask] },
+          isFiring: false,
+        };
+        const game = {
+          events: { dispatch: () => {} },
+          map: {
+            tileOccupation: {
+              getGroundObjectsOnTile: () => [],
+              unoccupyTileRange: () => {},
+              occupyTileRange: () => {},
+            },
+          },
+          rules: {
+            combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+            getWarhead: () => null,
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, magnetron);
+        task.onStart({});
+        // 直接置为投放段，绕过 _initiateDrop（RandomTileFinder 无完整桩）。
+        task._dropTile = { rx: 6, ry: 0, z: 0, landType: 0, onBridgeLandType: null };
+        task._movingToDrop = true;
+        let maxStep = 0;
+        let maxY = Number.NEGATIVE_INFINITY;
+        for (let i = 0; i < 120; i++) {
+          const px = victim.position.x;
+          task.onTick({});
+          maxStep = Math.max(maxStep, Math.abs(victim.position.x - px));
+          maxY = Math.max(maxY, victim.position.worldPosition.y);
+        }
+        const finalY = victim.position.worldPosition.y;
+        return {
+          stepAtOwnSpeed: maxStep > 0 && maxStep <= JJ_SPEED + 0.01,
+          maxStep,
+          heightAtOwnCruise: Math.abs(finalY - JJ_CRUISE) <= 40 && maxY <= JJ_CRUISE + 45,
+          finalY: Math.round(finalY),
+          stillAir: victim.zone === 1,
+          notDropped: !task._dropped,
+          firing: magnetron.isFiring === true,
+        };
+      },
+      // 建筑抬升门槛（v1.2 翻车点）：障碍判定是"障碍顶 > 脚底地面"，不是
+      // "障碍顶 > 地面+巡航高"——art.height=2 的普通建筑（占用 2 层 ≈209
+      // leptons < 500 巡航）也必须触发抬升：先爬过障碍顶再平移，途中继续
+      // 升到 障碍顶+巡航高；越过建筑（扫描窗口离开占位）后回落到巡航高。
+      // 位置机制用真实编译版 ObjectPosition + 真实 Coords（v1.2.1：手写
+      // position 桩走了 worldY 直读捷径，掩盖不了 tileElevation/_absolute
+      // 双分支的真实行为）。
+      (ns, THREE, mod) => {
+        const LPT = 256;
+        const ObjectPositionCls = mod("game/gameobject/ObjectPosition").ObjectPosition;
+        const CoordsCls = mod("game/Coords").Coords;
+        const runFor = (obstacleH, magnetronX, stopX) => {
+          const OBSTACLE_TOP = CoordsCls.tileHeightToWorld(obstacleH);
+          const BUILDING_RX = 4;
+          const tiles = [];
+          for (let rx = 0; rx <= 16; rx++) tiles[rx] = { rx, ry: 0, z: 0, landType: 0, rampType: 0, onBridgeLandType: null };
+          const tilesStub = {
+            getByMapCoords: (rx, ry) => (ry === 0 && rx >= 0 && rx <= 16 ? tiles[rx] : null),
+          };
+          const building = {
+            zone: 0,
+            isDestroyed: false,
+            tileElevation: 0,
+            art: { height: obstacleH },
+            isTechno: () => true,
+            isBuilding: () => true,
+          };
+          const occStub = {
+            getGroundObjectsOnTile: (t) => (t && t.rx === BUILDING_RX ? [building] : []),
+            unoccupyTileRange: () => {},
+            occupyTileRange: () => {},
+          };
+          const victim = {
+            isDisposed: false,
+            isDestroyed: false,
+            zone: 0,
+            onBridge: false,
+            magnetronDraggedBy: undefined,
+            rules: { speedType: 0 },
+            moveTrait: { moveState: 0, locomotor: undefined, velocity: { set: () => {} } },
+            unitOrderTrait: {},
+            position: new ObjectPositionCls(tilesStub, occStub),
+          };
+          victim.position.tile = tiles[0];
+          Object.defineProperty(victim, "tile", {
+            get() {
+              return victim.position.tile;
+            },
+          });
+          const attackTask = {
+            isCancelling: () => false,
+            target: { obj: victim },
+            getWeapon: () => ({}),
+            cancel() {},
+          };
+          const magnetron = {
+            position: {
+              getMapPosition: () => ({ x: magnetronX, y: 0 }),
+              worldPosition: { x: magnetronX, y: 0, z: 0 },
+            },
+            unitOrderTrait: { getTasks: () => [attackTask] },
+            isFiring: false,
+          };
+          const game = {
+            events: { dispatch: () => {} },
+            map: {
+              tiles: tilesStub,
+              tileOccupation: occStub,
+            },
+            rules: {
+              combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+              getWarhead: () => null,
+            },
+          };
+          const task = new ns.MagnetronDragTask(game, victim, magnetron);
+          task.onStart({});
+          const samples = [];
+          for (let i = 0; i < 220; i++) {
+            task.onTick({});
+            samples.push({ x: victim.position.worldPosition.x, y: victim.position.worldPosition.y });
+            if (victim.position.worldPosition.x >= stopX) break;
+          }
+          const overBuilding = samples.filter((s) => s.x >= BUILDING_RX * LPT && s.x < (BUILDING_RX + 1) * LPT);
+          return {
+            obstacleTop: OBSTACLE_TOP,
+            clearanceTarget: OBSTACLE_TOP + 500,
+            maxY: Math.max(...samples.map((s) => s.y)),
+            maxX: Math.max(...samples.map((s) => s.x)),
+            overSamples: overBuilding.length,
+            minOverY: overBuilding.length ? Math.min(...overBuilding.map((s) => s.y)) : -1,
+            lastY: samples[samples.length - 1].y,
+          };
+        };
+        // art.height=2（rulesmd 普通建筑的缺省占用高）——旧阈值下永不抬升。
+        const low = runFor(2, 8 * LPT, 5 * LPT + 20);
+        // 磁电放远（12 格），穿越建筑后继续拖 3 格观察回落（2 格投放半径之外）。
+        const cross = runFor(2, 12 * LPT, 8 * LPT);
+        return {
+          lowBuildingClimbs: low.maxY >= low.clearanceTarget - 60,
+          lowBuildingStallsUntilAboveRoof: low.overSamples > 0 && low.minOverY > low.obstacleTop,
+          lowBuildingCrosses: low.maxX >= 5 * LPT,
+          lowMaxY: Math.round(low.maxY),
+          lowMinOverY: Math.round(low.minOverY),
+          descendsAfterCross: cross.lastY < cross.maxY - 100,
+          descendsBackToCruise: Math.abs(cross.lastY - 500) <= 45,
+          crossMaxY: Math.round(cross.maxY),
+          crossLastY: Math.round(cross.lastY),
+        };
+      },
+      // 断束时序（原版"先播断束动画、播完坦克再坠落"）：_startDrop 挂起
+      // magnetronBeamBreakPending，受害者悬停至插件消费该标志（无渲染环境
+      // 按 BEAM_BREAK_ANIM_MAX_TICKS 上限兜底）才进入重力坠落。
+      (ns, THREE, mod) => {
+        const ObjectPositionCls = mod("game/gameobject/ObjectPosition").ObjectPosition;
+        const LPT = 256;
+        const tiles = [];
+        for (let rx = 0; rx <= 16; rx++) tiles[rx] = { rx, ry: 0, z: 0, landType: 0, rampType: 0, onBridgeLandType: null };
+        const tilesStub = {
+          getByMapCoords: (rx, ry) => (ry === 0 && rx >= 0 && rx <= 16 ? tiles[rx] : null),
+        };
+        const occStub = {
+          getGroundObjectsOnTile: () => [],
+          unoccupyTileRange: () => {},
+          occupyTileRange: () => {},
+        };
+        const victim = {
+          isDisposed: false,
+          isDestroyed: false,
+          zone: 0,
+          onBridge: false,
+          magnetronDraggedBy: undefined,
+          rules: { speedType: 0 },
+          moveTrait: { moveState: 0, locomotor: undefined, velocity: { set: () => {} } },
+          unitOrderTrait: {},
+          position: new ObjectPositionCls(tilesStub, occStub),
+        };
+        victim.position.tile = tiles[0];
+        Object.defineProperty(victim, "tile", {
+          get() {
+            return victim.position.tile;
+          },
+        });
+        const attackTask = {
+          isCancelling: () => false,
+          target: { obj: victim },
+          getWeapon: () => ({}),
+          cancel() {},
+        };
+        let beamAlive = true;
+        const magnetron = {
+          position: {
+            getMapPosition: () => ({ x: 10 * LPT, y: 0 }),
+            worldPosition: { x: 10 * LPT, y: 0, z: 0 },
+          },
+          unitOrderTrait: { getTasks: () => (beamAlive ? [attackTask] : []) },
+          isFiring: false,
+        };
+        const game = {
+          events: { dispatch: () => {} },
+          map: {
+            tiles: tilesStub,
+            tileOccupation: occStub,
+          },
+          rules: {
+            combatDamage: { fallingDamageMultiplier: 1, currentStrengthDamage: true },
+            getWarhead: () => null,
+          },
+        };
+        const task = new ns.MagnetronDragTask(game, victim, magnetron);
+        task.onStart({});
+        // 拖拽升空（兜底爬升 20/tick，60 tick 后 y≈1200，仍在拖拽段）。
+        for (let i = 0; i < 60 && !task._dropping; i++) task.onTick({});
+        const airY = victim.position.worldPosition.y;
+        // 断束：磁电停火（攻击任务消失）。
+        beamAlive = false;
+        const breakTickResult = task.onTick({});
+        const hoverY = victim.position.worldPosition.y;
+        let stayedHovering = true;
+        for (let i = 0; i < 5; i++) {
+          task.onTick({});
+          if (victim.position.worldPosition.y !== hoverY) stayedHovering = false;
+        }
+        const pendingDuringHold = magnetron.magnetronBeamBreakPending === true;
+        // 模拟渲染插件：收缩动画播完，消费挂起标志。
+        magnetron.magnetronBeamBreakPending = false;
+        let beganFalling = false;
+        for (let i = 0; i < 60 && !task._dropped; i++) {
+          task.onTick({});
+          if (victim.position.worldPosition.y < hoverY) beganFalling = true;
+        }
+        task.onEnd({});
+        return {
+          liftedBeforeBreak: airY > 500,
+          holdsOnBreakTick: breakTickResult === false,
+          stayedHovering,
+          pendingDuringHold,
+          beganFallingAfterConsume: beganFalling,
+          landedAndSettled: task._dropped && victim.zone === 0,
+          hoverY: Math.round(hoverY),
+          finalY: Math.round(victim.position.worldPosition.y),
         };
       },
     ],

@@ -221,12 +221,17 @@ export class Warhead {
   /**
    * 磁电（Magnetron）移动束拖拽：给受害者挂 MagnetronDragTask——把
    * 受害者抬升为空中单位（zone→Air，可被对空武器攻击）、飞向磁电、
-   * 在附近随机空格放下。拖拽持续到磁电的攻击任务结束；同一磁电已
-   * 在拖拽该受害者时不重复挂任务。挂任务前清空受害者当前移动状态
-   * （取消全部任务、解除路径预留、清空航点/速度/移动器）。
+   * 在附近随机空格放下。拖拽持续到磁电的攻击任务结束。同一磁电只拖
+   * 一个目标（原版"仅能锁定单一目标"）：已在拖该受害者时不重复挂任务
+   * （光束刷新），在拖其他受害者时拒绝新拖拽——否则后者会覆盖
+   * magnetronDragging，令前者的断束清理（_startDrop）被
+   * `magnetronDragging !== victim` 挡住，AttackTask 不被取消、落地后
+   * 立即被重新抓起。挂任务前清空受害者当前移动状态（取消全部任务、
+   * 解除路径预留、清空航点/速度/移动器）。
    */
   _dragVehicleTo(victim: any, game: any, attacker: any): void {
     if (victim.magnetronDraggedBy) return;
+    if (attacker && attacker.magnetronDragging && attacker.magnetronDragging !== victim) return;
     if (!victim.unitOrderTrait) return;
     victim.unitOrderTrait.cancelAllTasks();
     if (victim.moveTrait) {
@@ -399,7 +404,9 @@ export class Warhead {
         if (!target.isDestroyed && !target.isCrashing) {
           // 磁电移动束：改拖拽为 MagnetronDragTask（参数遮蔽模块别名，
           // 故委托 _dragVehicleTo）。拖走后跳过常规伤害。
-          if (this.rules.isLocomotor && target.isVehicle() && target.moveTrait && !target.moveTrait.isDisabled() && shooter) {
+          // 不排除 EMP 瘫痪目标：原版"先瘫痪使其完全静止、再抓取释放"正是
+          // 规避悬停 bug 的标准操作，IsLocomotor 命中对 disabled 单位照常生效。
+          if (this.rules.isLocomotor && target.isVehicle() && target.moveTrait && shooter) {
             this._dragVehicleTo(target, game, shooter);
             continue;
           }

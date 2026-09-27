@@ -2769,6 +2769,15 @@
       "bruteSpawned": 1,
       "mutateInfDeath": 0,
       "aliveResult": false
+    },
+    "8": {
+      "normalAttached": true,
+      "disabledAttached": true,
+      "disabledMoveStateIdle": true,
+      "disabledLocomotorCleared": true,
+      "disabledTasksCancelled": true,
+      "busyMagnetronRejected": true,
+      "sameVictimRefreshNoOp": true
     }
   },
   "game/rules/AiRules": {
@@ -2951,7 +2960,8 @@
         "_dropTile",
         "_movingToDrop",
         "_maxTicks",
-        "_minDragDist"
+        "_minDragDist",
+        "_beamBreakHoldTicks"
       ],
       "abortedNoVictim": true,
       "abortedMissingTraits": true,
@@ -2971,7 +2981,7 @@
     },
     "3": {
       "done": true,
-      "ticks": 11,
+      "ticks": 25,
       "finalY": 0,
       "zoneGround": true,
       "landed": true,
@@ -3042,6 +3052,56 @@
         100
       ],
       "victimDestroyed": true
+    },
+    "9": {
+      "noDisplacement": true,
+      "zoneAirWhileBeam": true,
+      "firingWhileBeam": true,
+      "dropped": true,
+      "done": true,
+      "finalX": 0,
+      "finalY": 0,
+      "zoneGround": true,
+      "linksCleared": true
+    },
+    "10": {
+      "reachedClearance": true,
+      "crossedBuildingSamples": 12,
+      "neverClippedBuilding": true,
+      "crossedPastBuilding": true,
+      "stillAirWhileBeam": true,
+      "notDropped": true,
+      "firing": true
+    },
+    "11": {
+      "stepAtOwnSpeed": true,
+      "maxStep": 6.97938139851107,
+      "heightAtOwnCruise": true,
+      "finalY": 318,
+      "stillAir": true,
+      "notDropped": true,
+      "firing": true
+    },
+    "12": {
+      "lowBuildingClimbs": true,
+      "lowBuildingStallsUntilAboveRoof": true,
+      "lowBuildingCrosses": true,
+      "lowMaxY": 739,
+      "lowMinOverY": 738,
+      "descendsAfterCross": true,
+      "descendsBackToCruise": true,
+      "crossMaxY": 739,
+      "crossLastY": 513
+    },
+    "13": {
+      "liftedBeforeBreak": true,
+      "holdsOnBreakTick": true,
+      "stayedHovering": true,
+      "pendingDuringHold": true,
+      "beganFallingAfterConsume": true,
+      "landedAndSettled": true,
+      "hoverY": 529,
+      "finalY": 0
     }
   },
   "game/gameobject/task/EnterHospitalTask": {

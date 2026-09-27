@@ -14,7 +14,10 @@
  *    使其升空并拖向磁电。受害者变为空中单位（zone=Air），可被防空武器攻击，
  *    自身武器失效（战斗要塞内部乘员例外，仍可对外射击）；
  *  - 磁电持续开火（ROF=20）时每次命中刷新 locomotor，维持拖拽。磁电停止开火
- *    （死亡、新命令、目标被毁、超射程）时 locomotor 失效，受害者坠落；
+ *    （死亡、新命令、目标被毁、超射程）时 locomotor 失效，受害者坠落。
+ *    断束时序（原版"先播断束动画、播完坦克再坠落"）：_startDrop 挂起
+ *    `magnetronBeamBreakPending`，受害者悬停至光束插件播完收缩动画并消费
+ *    该标志（无渲染环境按 `BEAM_BREAK_ANIM_MAX_TICKS` 上限兜底）才进入坠落；
  *  - 受害者被拖到磁电附近（2 格内）后，扔在磁电附近一个随机的、尽量空闲的格子上。
  *
  * ── 落地伤害（_applyDrop）───────────────────────────────────────────────
@@ -52,10 +55,15 @@
  *  G. 战斗要塞等**地面**运输载具在空中被毁 → 乘员幸存落地
  *     （`TransportTrait.onDestroy` 判 `isAircraft()` 而非 `zone === ZoneType.Air`）
  *
- * ── 不复现的两处原版引擎 bug ────────────────────────────────────────────
+ * ── 不复现的三处原版引擎 bug ────────────────────────────────────────────
  *  · 低空（高度 <≈ 208）双倍伤害：本实现每次落地只结算一次，天然不复现；
  *  · `BalloonHover` 的 JumpJet 被拖拽时落到攻击者头上、坠落伤害误用 DeathWeapon
  *    ——资料标注为"错误"，故不照搬，仍走 FallingDamageMultiplier。
+ *  · 低 JumpjetSpeed（0~3）或半格移动中被抓取后的"悬停空中永不落地"：
+ *    本实现抓取瞬间即清空受害者任务与速度（Warhead._dragVehicleTo），坠落
+ *    阶段重力恒在 + `_maxTicks` 兜底强制贴地，结构性不可能复现；原版玩家
+ *    靠"先 EMP 使目标完全静止再抓放"规避，本实现不再依赖该操作（抓取
+ *    IsLocomotor 命中不排除 disabled 目标，瘫痪单位照常可抓）。
  *  注：`DeathWeapon` 的"坠毁伤害"发射链在本引擎尚未落地（`armedTrait.deathWeapon`
  *  目前仅 CAOS 神经毒气与 `selectSpecialWeapon` 的自杀弹头在用），因此
  *  Crashable 单位只做到"不结算落点伤害 + 自身正常销毁"。
@@ -76,13 +84,35 @@
  *    `attacker.player.addUnitsKilled` 抛 TypeError、打断整条销毁链 → 单位凭空消失；
  *  - 自包含：每 tick 直接驱动受害者位置，不派生 MoveTask 子任务；保持
  *    moveTrait.moveState = Idle 使 MoveTrait.NotifyTick 休眠；
- *  - onEnd 在 `_aborted` 时只回滚本任务建立的状态，不动别人的拖拽链接。
+ *  - onEnd 在 `_aborted` 时只回滚本任务建立的状态，不动别人的拖拽链接；
+ *  - Speed=0 的 MOD 静态单位：光束仍挂本任务施加瘫痪（zone=Air、任务锁定、
+ *    可被对空选中）但**无任何牵引位移**（不爬升、不拖拽），断束后原地落地
+ *    结算照旧——对齐原版引擎"对 Speed=0 单位无效、仅瘫痪"的边界行为。
+ *    原版单位表无 Speed=0 载具，此分支只在第三方规则下触发。
+ *  - 建筑碰撞抬升（已知问题 #12）：垂直方向用**单控制器 + 双向限速**追踪
+ *    `max(地面, 障碍顶) + 巡航高 + 浮动`（与 JumpjetLocomotor 净空语义一致，
+ *    量纲 tile.z + tileElevation + art.height，即占用高度层）。障碍判定阈值
+ *    是"障碍顶 > 脚底地面"——曾是"障碍顶 > 地面+巡航高"：建筑占用高默认
+ *    2 层（≈209 leptons）永远过不了 500 巡航线 → 抬升永不触发（v1.2 翻车点：
+ *    飞跃建筑看不到爬升）。越障回落按 DESCEND_RATE(2)×爬升 下降——与爬升
+ *    同速（真实 climb=5）时 2 层建筑的回落要 2.8 秒、屏幕仅 ~31px 缓降，
+ *    视觉上读不出来（v1.2.2 翻车点："过了建筑一直保持过建筑时候的高度"）。
+ *    水平闸门与垂直目标同源：
+ *    有障碍 → 先爬到障碍顶+1 lepton 再平移（防穿模），途中继续升到
+ *    障碍顶+巡航高；无障碍 → 追踪 desiredY 爬满巡航高再平飞。
+ *    旧实现拆爬升/巡航两分支且浮动不含在阈值里——浮动负半周会把状态
+ *    踢回爬升分支（该分支不做水平位移），造成隔 tick 水平走-停与纵向
+ *    抖动（视觉卡）；投放段（_moveToDropTile）旧版只有上升限速，
+ *    从障碍净空高进入投放时一帧绝对定位回巡航高（秒降）。均已修复。
  *
  * 拖拽物理参数：巡航高度 500 leptons、爬升 20/tick、水平漂移 20/tick、
- * 重力 4/tick²、拖近到 2 格内寻找落点（半径 2 格搜索）、`_maxTicks = 300` 兜底。
+ * 重力 4/tick²、拖近到 2 格内寻找落点（半径 2 格搜索）、`_maxTicks = 600`
+ * 兜底（真实 climb=5 时越过一栋高建筑的爬升预算）。
  *
- * 回归由 tests/ts-parity.mjs 的 9 条探针锁住（含落地伤害契约、斜坡起吸、
- * 落地边界四条与建筑落点）。孪生 .ts.js 已删除，本文件是唯一修改目标。
+ * 回归由 tests/ts-parity.mjs 的 14 条探针锁住（含落地伤害契约、斜坡起吸、
+ * 落地边界四条、建筑落点、Speed=0 零位移、建筑净空越顶、低建筑抬升门槛、
+ * 投放段自身 Jumpjet 参数与断束悬停时序；Warhead 模块另有 1 条 IsLocomotor
+ * 抓取门槛探针）。孪生 .ts.js 已删除，本文件是唯一修改目标。
  */
 import { Task } from "game/gameobject/task/system/Task"; // 已转换
 import * as RandomTileFinderModule from "game/map/tileFinder/RandomTileFinder"; // 未转换（any-shim）
@@ -100,13 +130,25 @@ import { Warhead } from "game/Warhead"; // 已转换
 import * as WarheadDetonateEventModule from "game/event/WarheadDetonateEvent"; // 未转换（any-shim）
 import { AttackState } from "game/gameobject/trait/AttackTrait"; // 已转换
 
-// 拖拽物理参数。
-const CRUISE_HEIGHT = 500; // 地面以上 leptons
-const CLIMB_RATE = 20; // leptons/帧 爬升速度
-const HORIZ_SPEED = 20; // leptons/帧 水平漂移速度
+// 拖拽物理参数 —— **都是兜底值**，实际取受害者自身的 Jumpjet 参数：
+//   起飞高度 = victim.rules.jumpjetHeight   （缺省 500 = [JumpjetControls] CruiseHeight）
+//   爬升速度 = victim.rules.jumpjetClimb    （缺省 5）
+//   牵引速度 = victim.rules.jumpjetSpeed    （缺省 14）
+// TechnoRules 已把 [JumpjetControls] 的全局缺省兜进每条规则，所以普通坦克
+//（如 LTNK 未声明 Jumpjet*）也会拿到 500/5/14；声明了自己的则用自己的。
+const CRUISE_HEIGHT = 500; // 地面以上 leptons（兑底）
+const CLIMB_RATE = 20; // leptons/帧 爬升速度（兑底）
+const HORIZ_SPEED = 20; // leptons/帧 水平漂移速度（兑底）
 const FALL_GRAVITY = 4; // leptons/帧² 重力加速度
 const DRAG_DIST_TILES = 2; // 到达此距离内时寻找落点
 const DROP_SEARCH_RADIUS = 2; // 落点搜索半径（格）
+const DESCEND_RATE = 2; // 越障回落速率 = 2×爬升——与爬升同速（真实 climb=5）时
+// 2 层建筑的回落要 2.8 秒、屏幕仅 ~31px 缓降，视觉上读不出来（v1.2.2 翻车点：
+// "过了建筑一直保持过建筑时候的高度"）。
+const BEAM_BREAK_ANIM_MAX_TICKS = 15; // 断束瓦解等待上限：MagBeamFx 收缩动画
+// （startDying → growth 1→0 @ 3.0/s ≈ 0.33s ≈ 5 tick @15tps）播完才坠落，
+// 原版时序。插件播完消费 `magnetronBeamBreakPending`；无渲染环境（探针/
+// 后台标签页）按本上限兜底，取 3× 余量。
 
 // 原版拉扯上限（gamemd.exe WaveClass::Update_Wave 的 dbl_B45D80×6）：
 // √(2×256²)×6 ≈ 2172 lepton ≈ 8.5 格。语义是"拖拽持续中距离被拉大才
@@ -128,11 +170,13 @@ export class MagnetronDragTask extends Task {
   _fallSpeed: number;
   _dropTile: any;
   _movingToDrop: boolean;
-  /** 安全上限（约 20 秒）。超时但仍在空中时，onEnd 强制落地。 */
+  /** 安全上限（约 40 秒）。超时但仍在空中时，onEnd 强制落地。 */
   _maxTicks: number;
   _aborted: boolean;
   /** 拉扯上限的绳长基线（平面 lepton）：onStart 记起吸距离，之后只降不升。 */
   _minDragDist: number;
+  /** 断束瓦解等待倒计时（tick）：>0 时受害者悬停，等光束收缩动画播完。 */
+  _beamBreakHoldTicks: number;
 
   constructor(game: any, victim: any, magnetron: any) {
     super();
@@ -145,8 +189,9 @@ export class MagnetronDragTask extends Task {
     this._fallSpeed = 0;
     this._dropTile = null;
     this._movingToDrop = false;
-    this._maxTicks = 300;
+    this._maxTicks = 600;
     this._minDragDist = Number.POSITIVE_INFINITY;
+    this._beamBreakHoldTicks = 0;
     this.cancellable = true;
     this.blocking = true;
     this.preventOpportunityFire = true;
@@ -154,7 +199,8 @@ export class MagnetronDragTask extends Task {
 
   /**
    * 启动：受害者有效性校验（不存在/已销毁/缺移动特性/已被其它磁电
-   * 拖拽 → 中止）；将受害者置为空中单位（zone=Air）并派发升空事件，
+   * 拖拽、或磁电已在拖其他目标——单目标守卫的双保险层 → 中止）；
+   * 将受害者置为空中单位（zone=Air）并派发升空事件，
    * 建立双向链接（victim.magnetronDraggedBy / magnetron.magnetronDragging，
    * 后者供磁电渲染器绘制持续牵引光束），保持 MoveTrait 休眠。
    */
@@ -169,6 +215,15 @@ export class MagnetronDragTask extends Task {
       return;
     }
     if (victim.magnetronDraggedBy) {
+      this._aborted = true;
+      return;
+    }
+    // 磁电侧单目标守卫（入口在 Warhead._dragVehicleTo，此处双保险）：
+    // 磁电已在拖其他受害者时拒绝，否则下方对 magnetronDragging 的写入
+    // 会顶掉先入者的链接，令其 _startDrop/onEnd 的磁电侧清理被
+    // `magnetronDragging !== victim` 挡死——AttackTask 不被取消，落地后
+    // 立即被重新抓起。
+    if (this.magnetron && this.magnetron.magnetronDragging && this.magnetron.magnetronDragging !== victim) {
       this._aborted = true;
       return;
     }
@@ -209,19 +264,22 @@ export class MagnetronDragTask extends Task {
     if (++this._tickCount > this._maxTicks) {
       return true;
     }
-    // 坠落阶段——仅驱动重力下落。
+    // 坠落阶段——仅驱动重力下落。坠落前先等断束瓦解动画播完（原版时序：
+    // 光束先收缩消失，受害者再坠落）。
     if (this._dropping) {
+      if (this._holdBeamBreak(victim)) return false;
       return this._descend(victim);
     }
     const magnetron = this.magnetron;
     const magnetronGone = !magnetron || magnetron.isDisposed || magnetron.isDestroyed;
     if (magnetronGone) {
-      // 磁电没了 → 断束坠落。
+      // 磁电没了 → 断束坠落（无光束动画可等）。
       this._startDrop(magnetron, victim);
       return this._descend(victim);
     }
     if (this._isBeamBroken(magnetron, victim)) {
       this._startDrop(magnetron, victim);
+      if (this._holdBeamBreak(victim)) return false;
       return this._descend(victim);
     }
     // 光束活跃：保持磁电视觉上持续开火（连续光束）。
@@ -238,19 +296,135 @@ export class MagnetronDragTask extends Task {
     return false;
   }
 
+  /**
+   * 受害者被切到 Jumpjet 运动模式后的三个物理参数。
+   * 全部取 `victim.rules.jumpjet*`，缺省回落到 `[JumpjetControls]` 的全局值
+   * ——原版把目标切成 Jumpjet 后，**起飞高度/爬升速度/牵引速度都由目标自己
+   * 决定**（这也是"磁电需要持续照射一段时间才能把目标拉近"的原因）。
+   */
+  private _jumpjetParams(victim: any): { cruise: number; climb: number; speed: number } {
+    const r = (victim && victim.rules) || {};
+    return {
+      cruise: Number.isFinite(r.jumpjetHeight) ? r.jumpjetHeight : CRUISE_HEIGHT,
+      climb: Number.isFinite(r.jumpjetClimb) ? r.jumpjetClimb : CLIMB_RATE,
+      speed: Number.isFinite(r.jumpjetSpeed) ? r.jumpjetSpeed : HORIZ_SPEED,
+    };
+  }
+
+  /**
+   * 拖拽路径上的最高障碍顶（世界 Y）。候选格 = 受害者当前格 + 朝 dir
+   * 方向的一格（含对角），与 JumpjetLocomotor.findTilesToCheckForBlockers
+   * 同构；量纲也对齐其净空公式：`tile.z + max(tileElevation + art.height)`
+   * 后经 `tileHeightToWorld` 换算（空地即 tile.z 本身）。
+   * 跳过自身、已摧毁与空中对象（被举者 zone=Air 仍在地面占位表里，
+   * 不排除会把自己的爬升高度算成"障碍"→ 正反馈飞天）。
+   * 无地图/接口缺失时返回 0，由调用方与地面高度取 max 兜底。
+   */
+  private _obstacleTopWorldY(victim: any, dirX: number, dirY: number): number {
+    try {
+      const map = this.game && this.game.map;
+      const tile = victim && victim.tile;
+      if (!map || !tile || !map.tiles || typeof map.tiles.getByMapCoords !== "function") return 0;
+      const occ = map.tileOccupation;
+      const getObjs =
+        occ && typeof occ.getGroundObjectsOnTile === "function"
+          ? (t: any) => occ.getGroundObjectsOnTile(t)
+          : typeof map.getGroundObjectsOnTile === "function"
+            ? (t: any) => map.getGroundObjectsOnTile(t)
+            : null;
+      if (!getObjs) return 0;
+      const sx = Math.sign(dirX);
+      const sy = Math.sign(dirY);
+      const coords: number[][] = [[tile.rx, tile.ry]];
+      if (sx) coords.push([tile.rx + sx, tile.ry]);
+      if (sy) coords.push([tile.rx, tile.ry + sy]);
+      if (sx && sy) coords.push([tile.rx + sx, tile.ry + sy]);
+      let maxZ = Number.NEGATIVE_INFINITY;
+      for (let i = 0; i < coords.length; i++) {
+        const t = map.tiles.getByMapCoords(coords[i][0], coords[i][1]);
+        if (!t) continue;
+        let topZ = t.z;
+        const objs = getObjs(t) || [];
+        for (let j = 0; j < objs.length; j++) {
+          const o = objs[j];
+          if (!o || o === victim || o.isDestroyed || o.zone === ZoneType.Air) continue;
+          const elev = Number.isFinite(o.tileElevation) ? o.tileElevation : 0;
+          const height = o.art && Number.isFinite(o.art.height) ? o.art.height : 0;
+          if (t.z + elev + height > topZ) topZ = t.z + elev + height;
+        }
+        if (topZ > maxZ) maxZ = topZ;
+      }
+      if (!Number.isFinite(maxZ)) return 0;
+      return Math.max(0, Coords.tileHeightToWorld(maxZ));
+    } catch (err) {
+      return 0;
+    }
+  }
+
   /** 磁场光束期间：将受害者提升到巡航高度并水平拉向磁电。 */
   _liftAndDrag(victim: any, magnetron: any): void {
+    // Speed=0（MOD 静态单位）：原版引擎光束对它无牵引位移——不爬升、
+    // 不水平拖拽、不浮动；瘫痪（zone=Air/任务锁定）已在 onStart 施加，
+    // 断束后按正常流程原地落地结算。
+    const staticSpeed = victim.rules ? victim.rules.speed : undefined;
+    if (Number.isFinite(staticSpeed) && staticSpeed <= 0) return;
+    const jj = this._jumpjetParams(victim);
     const pos = victim.position;
     const beforeTile = victim.tile;
-    const worldY = pos.worldPosition.y;
     const groundY = this._groundWorldY(victim);
-    const targetY = groundY + CRUISE_HEIGHT;
-    if (worldY < targetY - 0.5) {
-      // 爬升阶段：向巡航高度上升。无水平移动，无浮动。
-      const dy = Math.min(CLIMB_RATE, targetY - worldY);
+    // 巡航目标 = max(地面, 路径前方障碍顶) + 巡航高度。与 JumpjetLocomotor
+    // 的净空语义一致（障碍顶 + 悬浮高）：被举者沿拖拽方向逐格探测建筑/
+    // 障碍，先爬到障碍顶再平移，越过途中继续升到巡航高。
+    let dirX = 0;
+    let dirY = 0;
+    if (magnetron && magnetron.position) {
+      try {
+        const vp = pos.getMapPosition();
+        const mp = magnetron.position.getMapPosition();
+        if (vp && mp) {
+          dirX = mp.x - vp.x;
+          dirY = mp.y - vp.y;
+        }
+      } catch (err) {}
+    }
+    const obstacleTopY = this._obstacleTopWorldY(victim, dirX, dirY);
+    // 有障碍 = 前方（含当前格）探测到高于脚底地面的东西——建筑 art.height≥1
+    // 层即算。阈值曾是"障碍顶 > 地面+巡航高"：建筑占用高默认 2 层
+    //（≈209 leptons）永远过不了 500 巡航线 → obstaclePresent 恒 false →
+    // 飞跃建筑看不到爬升（v1.2 翻车点）。现改为：有障碍就把巡航基准抬到
+    // 障碍顶（= max(地面, 障碍顶) + 巡航），与投放段 _moveToDropTile 的
+    // max 公式同源。
+    const obstaclePresent = obstacleTopY > groundY + 0.5;
+    const targetY = (obstaclePresent ? obstacleTopY : groundY) + jj.cruise;
+    const floatOffset = 30 * Math.sin(this._tickCount * 0.02094);
+    let desiredY = targetY + floatOffset;
+    if (desiredY < groundY + 10) desiredY = groundY + 10;
+    // 垂直：单控制器 + 双向限速追踪 desiredY。旧实现把爬升/巡航拆成两个分支
+    //（worldY < targetY-0.5 走爬升、否则走巡航加浮动）——浮动负半周会把
+    // worldY 压回阈值以下，下一 tick 又跳回爬升分支（该分支**不做水平位移**），
+    // 造成隔 tick 的水平走-停与 ±climb 纵向抖动（视觉上的卡）。浮动斜率
+    //（振幅30×频率0.02094≈0.63/tick）远小于爬升率，限速不会削掉浮动节奏。
+    const currentY = pos.worldPosition.y;
+    let dy = desiredY - currentY;
+    // 下降比爬升快（DESCEND_RATE 倍）：磁电吊着单位爬升要慢（原版牵引感），
+    // 越障后的回落要肉眼可见。
+    const vertRate = dy < 0 ? DESCEND_RATE * jj.climb : jj.climb;
+    if (dy > vertRate) dy = vertRate;
+    else if (dy < -vertRate) dy = -vertRate;
+    if (dy !== 0) {
       try {
         pos.moveByLeptons3(new Vector3(0, dy, 0));
       } catch (err) {}
+      this._syncTile(victim, beforeTile);
+    }
+    // 水平闸门（与垂直目标同源，消除阈值/落点不一致的振荡）：
+    //  - 有障碍 → 先爬到障碍顶+1 lepton 余量再平移（防穿模），途中
+    //    继续升到 障碍顶+巡航高——旧实现要求爬满 障碍顶+整段巡航净空才
+    //    恢复水平移动（真实 climb=5 时高建筑前冻结 6~8 秒，"爬升非常卡"）；
+    //  - 无障碍 → 维持原行为：追踪 desiredY 爬满巡航高再平移
+    //    （闸门与垂直目标同为 desiredY，浮动负半周不会把状态踢回"爬升停走"）。
+    const gateY = obstaclePresent ? obstacleTopY + 1 : desiredY;
+    if (pos.worldPosition.y < gateY - 0.5) {
       this._syncTile(victim, beforeTile);
       return;
     }
@@ -260,7 +434,7 @@ export class MagnetronDragTask extends Task {
     if (magnetron && magnetron.position) {
       const victimPos = pos.getMapPosition();
       const magnetronPos = magnetron.position.getMapPosition();
-      // 取不到地图坐标（_tile 为空）会直接抛到 onTick 之外，这里是主要嫌疑点之一。
+      // 取不到地图坐标（_tile 为空）时跳过本 tick 的位移。
       if (!victimPos || !magnetronPos) {
         this._syncTile(victim, beforeTile);
         return;
@@ -275,7 +449,7 @@ export class MagnetronDragTask extends Task {
         return;
       }
       const want = Math.max(0, hlen - minSep);
-      const step = Math.min(HORIZ_SPEED, want);
+      const step = Math.min(jj.speed, want);
       if (hlen > 0.001 && step > 0) {
         dx = (hx / hlen) * step;
         dz = (hz / hlen) * step;
@@ -287,15 +461,9 @@ export class MagnetronDragTask extends Task {
       } catch (err) {}
     }
     this._syncTile(victim, beforeTile);
-    // 在巡航高度上叠加波浪浮动效果（约 5 秒一个完整起伏周期）。
-    const floatAmplitude = 30;
-    const floatFrequency = 0.02094;
-    const floatOffset = floatAmplitude * Math.sin(this._tickCount * floatFrequency);
-    let finalY = targetY + floatOffset;
-    if (finalY < groundY + 10) finalY = groundY + 10;
-    try {
-      pos.setAbsoluteElevationWorld(finalY);
-    } catch (err) {}
+    // 垂直高度已由函数开头的统一控制器（限速追踪 desiredY，含浮动）设置，
+    // 此处不再 setAbsoluteElevationWorld——旧实现在这里绝对定位会绕过限速，
+    // 造成越障后"秒降"与浮动负半周的隔 tick 抖动。
   }
 
   /** 受害者到达磁电附近：寻找随机空闲落点并开始移向该格。 */
@@ -314,6 +482,10 @@ export class MagnetronDragTask extends Task {
 
   /** 向落点格子水平移动（巡航高度不变），到格子上方开始坠落。 */
   _moveToDropTile(victim: any, magnetron: any): void {
+    // 投放段仍属牵引阶段：水平步长与巡航高度同取受害者自身 Jumpjet 参数
+    //（与 _liftAndDrag 一致），不能用兜底常量——自定义 JumpjetSpeed/Height
+    // 的单位在最后一段会 speed=14→20 加速、被拽回 500 高度。
+    const jj = this._jumpjetParams(victim);
     const pos = victim.position;
     const beforeTile = victim.tile;
     const targetTile = this._dropTile;
@@ -335,7 +507,7 @@ export class MagnetronDragTask extends Task {
     const dx = targetLeptons.x - victimPos.x;
     const dz = targetLeptons.y - victimPos.y;
     const hlen = Math.hypot(dx, dz);
-    if (hlen <= HORIZ_SPEED + 0.01) {
+    if (hlen <= jj.speed + 0.01) {
       // 到达落点格子上方——开始坠落。
       try {
         pos.moveByLeptons3(new Vector3(dx, 0, dz));
@@ -346,21 +518,31 @@ export class MagnetronDragTask extends Task {
       this._startDrop(magnetron, victim);
       return;
     }
-    const step = Math.min(HORIZ_SPEED, hlen);
+    const step = Math.min(jj.speed, hlen);
     if (hlen > 0.001 && step > 0) {
       try {
         pos.moveByLeptons3(new Vector3((dx / hlen) * step, 0, (dz / hlen) * step));
       } catch (err) {}
     }
     this._syncTile(victim, beforeTile);
-    // 保持巡航高度 + 浮动。
+    // 保持巡航高度 + 浮动；与 _liftAndDrag 同款障碍净空（最后一段也可能
+    // 从建筑旁绕过），上升限速用爬升率避免瞬移。
     const groundY = this._groundWorldY(victim);
-    const targetY = groundY + CRUISE_HEIGHT;
+    const obstacleTopY = this._obstacleTopWorldY(victim, dx, dz);
+    const targetY = Math.max(groundY, obstacleTopY) + jj.cruise;
     const floatAmplitude = 30;
     const floatFrequency = 0.02094;
     const floatOffset = floatAmplitude * Math.sin(this._tickCount * floatFrequency);
     let finalY = targetY + floatOffset;
     if (finalY < groundY + 10) finalY = groundY + 10;
+    const currentY = pos.worldPosition.y;
+    // 双向限速（下降 DESCEND_RATE 倍加速，与 _liftAndDrag 同款）：进入投放段
+    // 时受害者可能还挂在障碍净空高度（如刚越过建筑），旧实现只有上升限速、
+    // 下降直接绝对定位 → 一帧"秒降"回巡航高。
+    const dropRise = jj.climb;
+    const dropFall = DESCEND_RATE * jj.climb;
+    if (finalY > currentY + dropRise) finalY = currentY + dropRise;
+    else if (finalY < currentY - dropFall) finalY = currentY - dropFall;
     try {
       pos.setAbsoluteElevationWorld(finalY);
     } catch (err) {}
@@ -485,6 +667,13 @@ export class MagnetronDragTask extends Task {
     }
     magnetron.magnetronDragging = undefined;
     magnetron.isFiring = false;
+    // 断束时序：请求光束插件播瓦解收缩动画（MagnetronBeamPlugin 在
+    // startDying → isFinished 时消费 `magnetronBeamBreakPending`），受害者
+    // 悬停至动画播完（或超时兜底）再坠。磁电已死则没有动画可等。
+    if (!magnetron.isDisposed && !magnetron.isDestroyed) {
+      magnetron.magnetronBeamBreakPending = true;
+      this._beamBreakHoldTicks = BEAM_BREAK_ANIM_MAX_TICKS;
+    }
     try {
       const unitOrderTrait = magnetron.unitOrderTrait;
       if (unitOrderTrait) {
@@ -504,6 +693,40 @@ export class MagnetronDragTask extends Task {
         }
       }
     } catch (err) {}
+  }
+
+  /**
+   * 断束瓦解等待：`_startDrop` 后受害者先悬停，等光束收缩动画（插件播完
+   * 时把 `magnetronBeamBreakPending` 消费为 false）再坠落——原版"先播断束
+   * 动画、播完坦克再坠落"的时序。`_beamBreakHoldTicks` 是无渲染环境
+   * （探针/后台标签页插件不跑）的上限兜底。
+   * 返回 true = 仍在等待（本 tick 悬停不动）；false = 等待结束/无需等待。
+   */
+  _holdBeamBreak(victim: any): boolean {
+    if (!this._beamBreakHoldTicks) return false;
+    // 已贴地（Speed=0 静态单位等）无需等动画，直接落地结算。
+    const groundY = this._groundWorldY(victim);
+    if (victim.position.worldPosition.y <= groundY + 10) {
+      this._beamBreakHoldTicks = 0;
+      return false;
+    }
+    const magnetron = this.magnetron;
+    if (
+      !magnetron ||
+      magnetron.isDisposed ||
+      magnetron.isDestroyed ||
+      magnetron.magnetronBeamBreakPending !== true
+    ) {
+      // 插件已播完（消费为 false）、磁电没了、或从未挂起 → 立即坠。
+      this._beamBreakHoldTicks = 0;
+      return false;
+    }
+    this._beamBreakHoldTicks--;
+    if (this._beamBreakHoldTicks <= 0) {
+      this._beamBreakHoldTicks = 0;
+      return false;
+    }
+    return true;
   }
 
   /** 坠落阶段：重力加速下落，触地后恢复 zone 并做落地结算。 */

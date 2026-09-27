@@ -55,21 +55,21 @@ export class MagnetronBeamPlugin {
     this._params = this._resolveParams();
   }
 
-  /** Find the IsMagBeam weapon on this unit and build MagBeamFx params from it. */
+  /** 从本单位的武器中查找 IsMagBeam 武器，并据此构建 MagBeamFx 参数。 */
   private _resolveParams(): MagBeamParams | null {
     const src = this.source;
     let wr: any = null;
-    // Search primary then secondary for IsMagBeam weapon.
+    // 先查主武器、再查副武器上的 IsMagBeam。
     if (src.primaryWeapon && src.primaryWeapon.rules && src.primaryWeapon.rules.isMagBeam) {
       wr = src.primaryWeapon.rules;
     } else if (src.secondaryWeapon && src.secondaryWeapon.rules && src.secondaryWeapon.rules.isMagBeam) {
       wr = src.secondaryWeapon.rules;
     }
     if (!wr) return null;
-    // Store wave reversal flag for per-frame direction control in update().
+    // 记录波纹反转开关，供 update() 每帧控制方向。
     this._waveReverseAgainstVehicles = wr.waveReverseAgainstVehicles;
-    // Build params for shader-based MagBeamFx (vanilla YR Wave blending).
-    // Formula: result = c + color*x + c*intensity*x  (Ares reverse-engineered)
+    // 构建 shader 版 MagBeamFx 的参数（原版 YR Wave 混合）。
+    // 混合公式：result = c + color*x + c*intensity*x（Ares 逆向）。
     const houseColor = wr.waveIsHouseColor
       ? new (THREE as any).Color(src.owner ? src.owner.color.asHex() : 0xb000d0)
       : null;
@@ -77,8 +77,8 @@ export class MagnetronBeamPlugin {
       waveColor: wr.waveColor,
       waveIntensity: wr.waveIntensity,
       waveIsHouseColor: wr.waveIsHouseColor,
-      waveReverse: false, // set per-frame via setWaveReverse()
-      growFromTarget: false, // set per-frame via update()
+      waveReverse: false, // 每帧经 setWaveReverse() 设置
+      growFromTarget: false, // 每帧经 update() 设置
       growthSpeed: 3.0, // 光束生长/收缩速度（每秒）
       width: wr.magnaBeamWidth,
       waveFrequency: wr.magnaBeamWaveFrequency,
@@ -86,7 +86,7 @@ export class MagnetronBeamPlugin {
       pulseStrength: wr.magnaBeamPulse,
       pulseRate: wr.magnaBeamPulseRate,
       alpha: wr.magnaBeamAlpha,
-      durationSeconds: null, // continuous beam, no timeout
+      durationSeconds: null, // 持续光束，无时限
       color: houseColor,
     };
   }
@@ -106,19 +106,24 @@ export class MagnetronBeamPlugin {
     const victim = src.magnetronDragging;
     let beamTarget: any = null;
 
-    // Case 1: dragging a vehicle (existing behaviour).
+    // 情形一：正在拖拽载具（既有行为）。
     if (victim && !victim.isDestroyed && !victim.isDisposed) {
       beamTarget = victim;
     } else {
-      // Case 2: attacking a building/target with IsMagBeam weapon (no drag).
-      // Render a continuous beam while the Magnetron is actively firing at a target.
+      // 情形二：用 IsMagBeam 武器攻击建筑/其他目标（非拖拽）。
+      // 磁电持续开火时渲染连续光束。
       beamTarget = this._getAttackBeamTarget(src);
     }
 
     if (!beamTarget) {
       if (this.beam) {
         if (!this.beam.isDying()) this.beam.startDying();
-        if (this.beam.isFinished()) this.beam = void 0;
+        if (this.beam.isFinished()) {
+          this.beam = void 0;
+          // 光束收缩动画播完：消费 MagnetronDragTask 的断束挂起标志，
+          // 受害者自此才开始坠落（原版"先播断束动画、播完再坠"时序）。
+          src.magnetronBeamBreakPending = false;
+        }
       }
       return;
     }
@@ -134,8 +139,8 @@ export class MagnetronBeamPlugin {
         const sin = Math.sin(rad);
         const lx = flh.lateral;
         const fy = flh.forward;
-        const rx = lx * cos - fy * sin; // rotated lateral
-        const ry = lx * sin + fy * cos; // rotated forward
+        const rx = lx * cos - fy * sin; // 旋转后的横向分量
+        const ry = lx * sin + fy * cos; // 旋转后的前向分量
         // 炮塔偏移（TurretOffset 沿车身中心线）
         const turretOff = (src.art && src.art.turretOffset) || 0;
         if (turretOff) {
@@ -150,14 +155,14 @@ export class MagnetronBeamPlugin {
       }
     } catch (_err) {}
     let b: any;
-    // Handle both game objects (with position) and tile objects (with rx, ry, z)
+    // 兼容两类目标：带 position 的游戏对象与带 rx/ry/z 的 tile 对象
     if (beamTarget.position) {
       b = beamTarget.position.worldPosition.clone();
     } else if (typeof beamTarget.getWorldCoords === "function") {
       b = beamTarget.getWorldCoords().clone();
     } else if (beamTarget.rx !== undefined && beamTarget.ry !== undefined) {
-      // Tile object: { dx, dy, rx, ry, z, ... } - rx/ry are tile indices
-      // Use tile center (rx+0.5, ry+0.5) for proper world position
+      // tile 对象：{ dx, dy, rx, ry, z, ... }——rx/ry 为 tile 索引
+      // 取 tile 中心（rx+0.5, ry+0.5）换算正确的世界坐标
       b = Coords.tile3dToWorld(beamTarget.rx + 0.5, beamTarget.ry + 0.5, beamTarget.z || 0);
     }
     if (!b) {
@@ -197,8 +202,10 @@ export class MagnetronBeamPlugin {
     } else if (!this.beam.isDying()) {
       this.beam.updateEndpoints(a, b);
     } else if (this.beam.isFinished()) {
-      // 旧光束已缩完，清理后下帧创建新光束
+      // 旧光束已缩完，清理后下帧创建新光束；同样消费断束挂起标志
+      //（该收缩动画播完，等待中的受害者即可坠落）。
       this.beam = void 0;
+      src.magnetronBeamBreakPending = false;
     }
     // 波纹方向：车辆目标从目标流向炮口，建筑/地面从炮口流向目标
     if (this.beam) {
@@ -207,26 +214,26 @@ export class MagnetronBeamPlugin {
   }
 
   /**
-   * Check if the source is attacking a target with an IsMagBeam weapon
-   * (e.g. MagneShake vs buildings, or ground attack) and return the attack target for beam rendering.
+   * 判定源单位是否正用 IsMagBeam 武器攻击目标（如 MagneShake 打建筑、
+   * 或对地攻击），返回用于光束渲染的攻击目标。
    * @param src - 源单位
    */
   private _getAttackBeamTarget(src: any): any {
     try {
       const at = src.attackTrait;
       if (!at || !at.currentTarget) return null;
-      // Must be actively firing (not in Idle/CheckRange).
-      // AttackState: Idle=0, CheckRange=1, PrepareToFire=2, FireUp=3, Firing=4, JustFired=5
-      // Allow beam through PrepareToFire/FireUp/Firing/JustFired to avoid gaps between shots.
+      // 必须处于开火状态（不能是 Idle/CheckRange）。
+      // AttackState：Idle=0、CheckRange=1、PrepareToFire=2、FireUp=3、Firing=4、JustFired=5
+      // PrepareToFire/FireUp/Firing/JustFired 期间都放行光束，避免连射间隙闪烁。
       if (at.attackState == null || at.attackState <= 1) return null;
-      // Support both object targets and ground (tile) targets
+      // 同时支持对象目标与地面（tile）目标
       const target = at.currentTarget.obj || at.currentTarget.tile;
       if (!target) return null;
-      // For object targets, check if destroyed/disposed
+      // 对象目标需检查是否已销毁/移除
       if (target.isDestroyed || target.isDisposed) return null;
-      // Verify the source has an IsMagBeam weapon (primary or secondary).
-      // The MagnetronBeamPlugin is only created for units with IsMagBeam weapons,
-      // but double-check to be safe.
+      // 校验源单位确有 IsMagBeam 武器（主武器或副武器）。
+      // MagnetronBeamPlugin 本就只为带 IsMagBeam 武器的单位创建，
+      // 这里再核一道以防万一。
       const hasMagBeam =
         (src.primaryWeapon && src.primaryWeapon.rules && src.primaryWeapon.rules.isMagBeam) ||
         (src.secondaryWeapon && src.secondaryWeapon.rules && src.secondaryWeapon.rules.isMagBeam);
