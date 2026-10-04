@@ -17,6 +17,7 @@ import { MapApi } from "game/api/MapApi"; // 已转换
 import { ObjectType } from "engine/type/ObjectType"; // 已转换
 import { GameSpeed } from "game/GameSpeed"; // 已转换
 import { RulesApi } from "game/api/RulesApi"; // 已转换
+import { FactoryType } from "game/rules/TechnoRules"; // 已转换（出厂通道格判定用）
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class GameApi {
@@ -184,6 +185,99 @@ export class GameApi {
         (o: any) => o.isTechno() && !o.isDestroyed && isVisible(o) && pred(o.rules),
       )
       .map((o: any) => o.id);
+  }
+
+  /**
+   * 某玩家"名下各类型对象数"快照（typeName → count，一次遍历）。
+   *
+   * 用途：AITrigger 的 `EnemyHouseOwns 0x41EAF0` / `OwnerHouseOwns 0x41EE90` /
+   * `CivilianHouseOwns 0x41EC90` 原义都是"数**某个 house** 拥有多少某类型对象"，
+   * 且原版**不吃迷雾**（作弊读真实状态）。`getVisibleUnits(…,"enemy")` 是
+   * 可见性过滤版：aimd 里 50 条 `条件 0 = 敌方拥有对象`的触发器若走它，
+   * 迷雾下计数恒 0 → 命中算子 `>=1` 恒假 → 整类触发器被永久钉死。
+   * 触发器层必须用这个真值版。
+   */
+  getPlayerOwnedTypeCounts(playerName: any): any {
+    const player = this.game.getPlayerByName(playerName);
+    const counts: any = {};
+    if (!player) return counts;
+    for (const obj of player.getOwnedObjects()) {
+      const n = obj.rules && obj.rules.name;
+      if (!n) continue;
+      counts[n] = (counts[n] || 0) + 1;
+    }
+    return counts;
+  }
+
+  /** 中立（Civilian）玩家名；无中立玩家时返回 null。 */
+  getCivilianPlayerName(): any {
+    const player = this.game.getCivilianPlayer();
+    return player ? player.name : null;
+  }
+
+  /**
+   * 某玩家指定超武类型的充能进度 [0,1]。
+   *
+   * 对应原版 `IronCurtainCharged 0x41F0D0` / `ChronoSphereCharged 0x41F180`：
+   * 在 house 的超武表里按 `SuperWeaponType`（铁幕=1、超时空=3，**不是 2**）找，
+   * 用 `1 - 剩余/总充能` 与 `[General] AIMinorSuperReadyPercent`（缺省 .7）比。
+   */
+  getPlayerSuperWeaponCharge(playerName: any, swType: any): number {
+    const player = this.game.getPlayerByName(playerName);
+    const list = player?.superWeaponsTrait?.getAll?.() || [];
+    for (const sw of list) {
+      if (sw && sw.rules && sw.rules.type === swType) return sw.getChargeProgress();
+    }
+    return 0;
+  }
+
+  /**
+   * 己方出兵工厂的"出厂通道格"（出生格 + 集结格）。
+   *
+   * 为什么需要：`FactoryTrait.produceGroundUnitAt` 把单位 spawn 在出生格、
+   * 再挂 `ExitFactoryTask` 以集结格为**精确**目标（`strictCloseEnough`、
+   * `closeEnoughTiles: 0`）。集结格一旦被建筑永久占住，这个任务就永远
+   * 完不成 → 单位烂在厂里 → 工厂每台单位都要白等 150 tick 的抗卡死释放
+   * 阈值。2026-10-01 实测：AI 把精炼厂放在 (79,31)，3x2 占位正好压住
+   * GAPILE(80,29) 的集结格 (81,31)，此后该兵营每个步兵都卡满 150 tick。
+   *
+   * 口径与 `SlaveMinerVehicleTrait._exitCorridorCells` 一致：出生格取
+   * `computeExitCoords`，集结格按工厂类型分派（建筑工厂会抛错，正好用来
+   * 过滤掉"不吐单位"的建造厂）。
+   */
+  getFactoryExitCorridors(playerName: any): any[] {
+    const player = this.game.getPlayerByName(playerName);
+    if (!player || !player.getOwnedObjectsByType) return [];
+    let buildings: any[] = [];
+    try {
+      buildings = player.getOwnedObjectsByType(ObjectType.Building) || [];
+    } catch {
+      return [];
+    }
+    const cells: any[] = [];
+    for (const b of buildings) {
+      if (!b || !b.tile || !b.factoryTrait) continue;
+      const ft = b.factoryTrait;
+      try {
+        cells.push(ft.computeExitCoords(b, ft.type));
+      } catch {
+        continue; // 建筑工厂（建造厂）没有出口格
+      }
+      try {
+        const rally =
+          ft.type === FactoryType.InfantryType
+            ? ft.computeBarracksInternalRallyCoords(b)
+            : ft.type === FactoryType.UnitType
+              ? ft.computeWarFactoryInternalRallyCoords(b)
+              : null;
+        if (rally) cells.push(rally);
+      } catch {
+        /* ignore */
+      }
+    }
+    return cells.filter(
+      (c: any) => c && typeof c.rx === "number" && typeof c.ry === "number",
+    );
   }
 
   getGameObjectData(id: any): any {

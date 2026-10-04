@@ -21,6 +21,7 @@ import { MoveTask } from "game/gameobject/task/move/MoveTask"; // 未转换（an
 import { DeployIntoTask } from "game/gameobject/task/morph/DeployIntoTask"; // 未转换（any-shim）
 import { SlaveGatherTask } from "game/gameobject/task/SlaveGatherTask"; // 未转换（any-shim）
 import { ObjectType } from "engine/type/ObjectType"; // 未转换（any-shim）
+import { FactoryType } from "game/rules/TechnoRules"; // 已转换
 
 /**
  * 动作后小 settle 冷却（tick）。无 INI 对应，仅避免同帧连发。
@@ -28,6 +29,18 @@ import { ObjectType } from "engine/type/ObjectType"; // 未转换（any-shim）
  * ScanCorrection / KickFrameDelay。
  */
 const POST_ACTION_COOLDOWN = 7;
+
+/**
+ * 就地展开时"离己方工厂出口多远才算安全"（曼哈顿格数）。
+ *
+ * 展开体是精炼厂（3x3）。锚点距出口格 d 时，占位能覆盖到出口格的充分条件
+ * 是 |dx| ≤ 2 且 |dy| ≤ 2 ⇒ 曼哈顿距离 ≤ 4。取 4 是该条件的**保守超集**
+ * （会连带拒绝少数其实压不到出口的锚点），宁可多让几格，也不能万一压住。
+ *
+ * （旧值 3 是按"车在出口格上"估的，算漏了占位向外铺开的 2 格——实测锚点
+ * 在出口格正东 2 格照样能把集结格盖住。）
+ */
+const EXIT_BLOCK_RADIUS = 4;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class SlaveMinerVehicleTrait {
@@ -207,11 +220,17 @@ export class SlaveMinerVehicleTrait {
     );
     let best: any = void 0;
     let bestDist = Number.POSITIVE_INFINITY;
+    // 落点必须同时满足"能放置"和"展开后不挡住己方出厂通道"——只在下车判定
+    // （_canDeployHere）拦是不够的：那样车会一次次走到出口旁的可放置格、
+    // 被拒、再被同一个"就近落点"选回来，原地压着集结格不动。
+    const avoidExit = !!(obj.owner && obj.owner.isAi);
+    const cells = avoidExit ? this._exitCorridorCells(game, obj) : [];
     let tile;
     while ((tile = finder.getNextTile())) {
       if (
         worker.canPlaceAt(rules, tile, { ignoreAdjacent: !0, ignoreObjects: [obj] }) &&
-        tile.passable !== !1
+        tile.passable !== !1 &&
+        (!avoidExit || this._exitDistance(cells, tile) > EXIT_BLOCK_RADIUS)
       ) {
         const dist = Math.abs(tile.rx - obj.tile.rx) + Math.abs(tile.ry - obj.tile.ry);
         if (dist < bestDist) {
@@ -223,7 +242,117 @@ export class SlaveMinerVehicleTrait {
     return best;
   }
 
-  /** 当前格能否直接展开（可放置 + 足下有矿）。 */
+  /**
+   * 己方所有"出兵工厂"的出口格 + 集结格（= 出厂通道必须保持畅通的格）。
+   *
+   * 两类格各有来源：出生格 `computeExitCoords`（单位被 spawn 处，战车工厂
+   * = 占位中心、兵营 = 出口角），集结格 `compute*InternalRallyCoords`
+   * （`ExitFactoryTask` 的目标，`strictCloseEnough` 要求精确到达）。
+   * `computeExitCoords` 只认兵营/战厂/船坞/机场，建筑工厂（建造厂）会抛错——
+   * 正好用来把"不吐单位的厂"过滤掉。
+   */
+  private _exitCorridorCells(game: any, obj: any): any[] {
+    const cells: any[] = [];
+    try {
+      // 注意：不能用 `game.combatants.get(owner).allObjects` —— 全仓没有
+      // `game.combatants` 这个入口，`.allObjects` 也是 World 上那张
+      // Map<id,obj>，不是玩家字段。写错时 `?.allObjects || []` 静默退化成
+      // 空数组，整个保护变成永不生效的死代码（上一版实测就是这样：判定
+      // 一直返回 false，矿车照旧压在厂门口）。正确入口是 Player 的方法。
+      const own = obj.owner && obj.owner.getOwnedObjectsByType
+        ? obj.owner.getOwnedObjectsByType(ObjectType.Building)
+        : [];
+      for (const b of own) {
+        if (!b || b === obj || !b.tile || b.isDisposed || b.isDestroyed) continue;
+        const ft = b.factoryTrait;
+        if (!ft) continue;
+        try {
+          cells.push(ft.computeExitCoords(b, ft.type));
+        } catch (_) {
+          continue; // 建筑工厂（建造厂）没有出口格
+        }
+        try {
+          cells.push(
+            ft.type === FactoryType.InfantryType
+              ? ft.computeBarracksInternalRallyCoords(b)
+              : ft.type === FactoryType.UnitType
+                ? ft.computeWarFactoryInternalRallyCoords(b)
+                : null,
+          );
+        } catch {
+          /* ignore */
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    return cells.filter((c: any) => c && typeof c.rx === "number" && typeof c.ry === "number");
+  }
+
+  /** 某格到最近出口/集结格的曼哈顿距离（无工厂时 +∞）。 */
+  private _exitDistance(cells: any[], tile: any): number {
+    if (!tile || typeof tile.rx !== "number") return Number.POSITIVE_INFINITY;
+    let best = Number.POSITIVE_INFINITY;
+    for (const c of cells) {
+      const d = Math.abs(tile.rx - Math.floor(c.rx)) + Math.abs(tile.ry - Math.floor(c.ry));
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
+  /**
+   * 就地展开前的一道额外保护：**别把展开体压在己方出兵工厂的出厂通道上**。
+   *
+   * 背景（2026-10-01 实机）：ini 里 `SlaveMinerShortScan=8` 的官方注释是
+   * "the Slave Miner looks this far to decide if it needs to move closer"
+   * —— 语义是"看去决定要不要再靠近点"，而上游把它当成了"8 格内有矿就地展开"。
+   * AI 的战车工厂（YAWEAP 等）本来就贴着矿脉建，于是奴隶矿车一出厂门就满足
+   * "8 格内有矿"，当场展开；展开体是精炼厂（3x3），直接压住工厂出口/集结格。
+   * 而工厂侧的 `produceGroundUnitAt` 把单位 spawn 在出口格、`ExitFactoryTask`
+   * 又以集结格为精确目标 → 通道被占后 `canStopAtTile`/`isCloseEnoughToDest`
+   * 永远不成立 → 车辆队列长期停在 `status=3 size=N`，队伍 stall 一路涨到 150。
+   *
+   * **只对 AI 生效**：人类玩家同样会遇到"矿车自己展开堵门"，但那是原版行为，
+   * 不替人类改；AI 的基地布局是程序生成的，必须自保。
+   */
+  private _isInExitDangerZone(game: any, obj: any, tile: any): boolean {
+    return this._exitDistance(this._exitCorridorCells(game, obj), tile) <= EXIT_BLOCK_RADIUS;
+  }
+
+  /**
+   * 退避：从当前格向外找一格"不挡出口、可通行"的落脚点。
+   * 只接受**离出口更远**的格（距离单调递增），否则会在出口附近来回蹭，
+   * 仍旧压着集结格 —— 那正是上一版只有判定、没有退避时留下的洞。
+   */
+  private _retreatFromExit(game: any, obj: any): boolean {
+    try {
+      const cells = this._exitCorridorCells(game, obj);
+      const here = this._exitDistance(cells, obj.tile);
+      const finder = new RadialTileFinder(
+        game.map.tiles,
+        game.map.mapBounds,
+        obj.tile,
+        { width: 1, height: 1 },
+        1,
+        10,
+        (tile: any) =>
+          !!tile &&
+          tile.passable !== !1 &&
+          0 < game.map.terrain.getPassableSpeed(tile, obj.rules.speedType, !1, !1) &&
+          this._exitDistance(cells, tile) > Math.max(here, EXIT_BLOCK_RADIUS),
+      );
+      const tile = finder.getNextTile();
+      if (tile) {
+        obj.unitOrderTrait.addTask(new MoveTask(game, tile, !1));
+        return !0;
+      }
+    } catch {
+      /* ignore */
+    }
+    return !1;
+  }
+
+  /** 当前格能否直接展开（可放置 + 不挡出厂通道 + 足下有矿）。 */
   private _canDeployHere(game: any, obj: any): boolean {
     const worker = game.getConstructionWorker(obj.owner);
     if (
@@ -233,6 +362,9 @@ export class SlaveMinerVehicleTrait {
         ignoreObjects: [obj],
       })
     ) {
+      return !1;
+    }
+    if (obj.owner && obj.owner.isAi && this._isInExitDangerZone(game, obj, obj.tile)) {
       return !1;
     }
     const totalOre = this._countOreBailsAround(
@@ -285,10 +417,13 @@ export class SlaveMinerVehicleTrait {
       let aiDeployed = 0;
       const existingMinerTiles: any[] = [];
       try {
-        for (const cobj of world.combatants.get(vt.owner)?.allObjects || []) {
+        // 同 _exitCorridorCells：`game.combatants` 不存在，写错会让
+        // aiDeployed 恒为 0 → AISlaveMinerNumber 上限永不生效。
+        for (const cobj of vt.owner.getOwnedObjectsByType
+          ? vt.owner.getOwnedObjectsByType(ObjectType.Building)
+          : []) {
           if (
             cobj !== vt &&
-            cobj.isBuilding &&
             !cobj.isDisposed &&
             !cobj.isDestroyed &&
             cobj.rules &&
@@ -305,7 +440,15 @@ export class SlaveMinerVehicleTrait {
         // at limit → find an ore field NOT near our existing deployed miners
         let farOre: any = void 0;
         let farPlace: any = void 0;
-        // 孪生此处只传 6 参（predicate 为 undefined），与 RadialTileFinder 锁步
+        // ⚠ 上游孪生此处只传 6 参（predicate 为 undefined），而 RadialTileFinder
+        // 的 generate() 在 distance=0 时会**直接调 this.predicate(startTile)**
+        // ⇒ 一取 next() 就抛 `TypeError: this.predicate is not a function`。
+        // 这是**上游自带**的 latent bug（已用
+        // `git show backup-before-twins-removal:...SlaveMinerVehicleTrait.ts.js`
+        // 逐字核对：同样 6 参、同样顺序），不是我们转写错。
+        // 该路径要求"AI 且已部署矿车数达 AISlaveMinerNumber 上限"才走到，
+        // 上游极少触发所以没人发现。这里补一个宽松谓词（真正的过滤在下面的
+        // `_isOreTile` 循环里做），与同文件另两处 `() => !0` 的用法一致。
         const rf = new (RadialTileFinder as any)(
           world.map.tiles,
           world.map.mapBounds,
@@ -313,6 +456,7 @@ export class SlaveMinerVehicleTrait {
           { width: 1, height: 1 },
           0,
           world.rules.general.slaveMinerLongScan,
+          () => !0,
         );
         let scanTile;
         while ((scanTile = rf.getNextTile())) {
@@ -334,7 +478,11 @@ export class SlaveMinerVehicleTrait {
         }
         if (farPlace) {
           vt.unitOrderTrait.addTask(new MoveTask(world, farPlace, !1));
-        } else {
+        } else if (
+          // 找不到远处矿脉时只会进长冷却、原地待命。刚出厂的矿车此刻正好
+          // 停在集结格上 → 等于把出厂通道堵死。先把位让开再冷却。
+          !(this._isInExitDangerZone(world, vt, vt.tile) && this._retreatFromExit(world, vt))
+        ) {
           this.scanCooldown = world.rules.general.slaveMinerKickFrameDelay || 150;
         }
         return;
@@ -352,12 +500,18 @@ export class SlaveMinerVehicleTrait {
       const placeTile = this._findPlaceableNear(world, vt, oreTile);
       if (placeTile) {
         vt.unitOrderTrait.addTask(new MoveTask(world, placeTile, !1));
+      } else if (vt.owner.isAi && this._isInExitDangerZone(world, vt, vt.tile)) {
+        // 矿脉旁边找不到"既不挡出口、又能展开"的落点：车正停在出厂通道上，
+        // 再原地等冷却就等于把后来的车一直堵在厂里。先让开通道。
+        if (!this._retreatFromExit(world, vt)) this.scanCooldown = POST_ACTION_COOLDOWN;
       } else {
         this.scanCooldown = POST_ACTION_COOLDOWN;
       }
     } else {
-      // 5) no ore anywhere: long cooldown
-      this.scanCooldown = world.rules.general.slaveMinerKickFrameDelay || 150;
+      // 5) no ore anywhere: long cooldown（同样先让开出厂通道再待命）
+      if (!(this._isInExitDangerZone(world, vt, vt.tile) && this._retreatFromExit(world, vt))) {
+        this.scanCooldown = world.rules.general.slaveMinerKickFrameDelay || 150;
+      }
     }
   }
 }

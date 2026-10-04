@@ -1,6 +1,6 @@
 {
   "source": "client/dist/ra2web.min.js",
-  "moduleCount": 1323,
+  "moduleCount": 1330,
   "modules": [
     {
       "name": "extensions/ExtensionDefinition",
@@ -3982,6 +3982,7 @@
       "name": "game/gameobject/trait/SlaveMinerVehicleTrait",
       "file": "game/gameobject/trait/SlaveMinerVehicleTrait.ts.js",
       "deps": [
+        "game/rules/TechnoRules",
         "game/gameobject/trait/interface/NotifySpawn",
         "game/gameobject/trait/interface/NotifyTick",
         "game/gameobject/trait/interface/NotifyDestroy",
@@ -5417,7 +5418,8 @@
         "game/api/MapApi",
         "engine/type/ObjectType",
         "game/GameSpeed",
-        "game/api/RulesApi"
+        "game/api/RulesApi",
+        "game/rules/TechnoRules"
       ],
       "bytes": 7318
     },
@@ -5629,7 +5631,12 @@
       "file": "game/ai/AiEngine.ts.js",
       "deps": [
         "game/api/index",
-        "game/ai/AiData"
+        "game/ai/AiData",
+        "game/ai/AiTriggerRuntime",
+        "game/ai/Randomizer",
+        "game/ai/AiTeamRuntime",
+        "game/ai/AiProductionRuntime",
+        "game/ai/AiSuperWeaponRuntime"
       ],
       "bytes": 12800
     },
@@ -5648,9 +5655,18 @@
       "file": "game/bot/original/OriginalAiBot.ts.js",
       "deps": [
         "game/api/index",
-        "game/ai/AiApi"
+        "game/ai/AiApi",
+        "game/bot/original/Util"
       ],
       "bytes": 12800
+    },
+    {
+      "name": "game/bot/original/Util",
+      "file": "game/bot/original/Util.ts.js",
+      "deps": [
+        "game/api/index"
+      ],
+      "bytes": 6533
     },
     {
       "name": "game/BotManager",
@@ -13692,6 +13708,42 @@
         "game/order/EnterTransportOrder"
       ],
       "bytes": 0
+    },
+    {
+      "name": "game/ai/AiPlacementRuntime",
+      "file": "game/ai/AiPlacementRuntime.ts.js",
+      "deps": [],
+      "bytes": 4855
+    },
+    {
+      "name": "game/ai/AiProductionRuntime",
+      "file": "game/ai/AiProductionRuntime.ts.js",
+      "deps": [],
+      "bytes": 10667
+    },
+    {
+      "name": "game/ai/AiSuperWeaponRuntime",
+      "file": "game/ai/AiSuperWeaponRuntime.ts.js",
+      "deps": [],
+      "bytes": 3942
+    },
+    {
+      "name": "game/ai/AiTeamRuntime",
+      "file": "game/ai/AiTeamRuntime.ts.js",
+      "deps": [],
+      "bytes": 4791
+    },
+    {
+      "name": "game/ai/AiTriggerRuntime",
+      "file": "game/ai/AiTriggerRuntime.ts.js",
+      "deps": [],
+      "bytes": 14673
+    },
+    {
+      "name": "game/ai/Randomizer",
+      "file": "game/ai/Randomizer.ts.js",
+      "deps": [],
+      "bytes": 3450
     }
   ]
 }

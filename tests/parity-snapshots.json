@@ -3995,8 +3995,15 @@
         "strictAfter": true
       },
       "stallForceWait": false,
+      "stallTicksAfter": 91,
       "logged": [
         "exit_factory_repath_after_stall"
+      ],
+      "relaxStrict": false,
+      "relaxCloseEnough": 2,
+      "relaxLogged": [
+        "exit_factory_repath_after_stall",
+        "exit_factory_relax_arrival"
       ]
     }
   },
@@ -10475,7 +10482,7 @@
       "level": 1,
       "force": true,
       "ambient": 1,
-      "same": false
+      "same": true
     },
     "3": {
       "calls": [
@@ -14697,28 +14704,56 @@
       "hasEngine": true,
       "arity": 4,
       "proto": [
+        "_addMemberNames",
+        "baseGrowthBudget",
+        "buildProductionWorld",
+        "buildTriggerWorld",
+        "buildableBuildingTypes",
+        "buildingFamily",
+        "buildingNameByIndex",
+        "canSpawnTriggerTeam",
+        "checkOriginalTriggers",
         "checkTriggers",
+        "claimUnit",
+        "defenseWeight",
         "destroyTeam",
         "executeAction",
+        "findBuildingByTypeFamily",
         "findFreeUnits",
         "findWaypointAttackTarget",
-        "fireTrigger",
+        "finishTeam",
+        "generalGroupByName",
         "getActiveTeamInfo",
         "getBuildQueue",
         "getTechLevel",
+        "getUnitDemands",
         "getWaypointTile",
         "init",
+        "isMissionComplete",
+        "noteAnger",
         "onTick",
         "orderUnits",
         "orderUnitsTarget",
+        "ownBuildingInstances",
         "pickAndAttack",
         "pickTarget",
+        "pickTargetByQuarry",
+        "playDifficulty",
+        "productionSideIndex",
+        "pruneDeadMembers",
+        "readRulesTechLevel",
+        "releaseTeam",
         "reset",
         "setRallyPoint",
         "spawnTeam",
         "spawnTeamWithUnits",
+        "teamAllAttacking",
+        "teamArrived",
         "updateExecuting",
+        "updateFocusEnemy",
+        "updateProduction",
         "updateRecruiting",
+        "updateSuperWeapons",
         "updateTeams",
         "updateTechLevel"
       ]
@@ -14755,6 +14790,67 @@
       "rJump": "jump",
       "idxAfterJump": 3,
       "orderCalls": "ok"
+    },
+    "4": {
+      "afterIssue": {
+        "started": true,
+        "idx": 0,
+        "cell": {
+          "x": 12,
+          "y": 12
+        },
+        "orders": 1
+      },
+      "waiting": {
+        "started": true,
+        "idx": 0,
+        "orders": 1
+      },
+      "arrived": {
+        "started": false,
+        "idx": 1,
+        "done": "executing"
+      }
+    },
+    "5": {
+      "g0": true,
+      "gNotYet": false,
+      "name2": "GAREFN",
+      "name15": "NAWEAP",
+      "nameMissing": null,
+      "famLen": 1,
+      "famHasNAREFN": false
+    },
+    "6": {
+      "c1": true,
+      "stealLow": false,
+      "stealHigh": true,
+      "aAfterSteal": 0,
+      "c4": true,
+      "owners": 1
+    },
+    "7": {
+      "vCy": 100,
+      "vCyTanky": 100,
+      "vPowerE": 60,
+      "vPowerB": 100,
+      "vDef": 35,
+      "vPlainB": 4,
+      "vInf": 1,
+      "vEng": 1,
+      "vHarv": 1,
+      "vTank": 2,
+      "winnerId": "a",
+      "none": null,
+      "pick1": "Carol",
+      "pick2": "Bob",
+      "pick3": "Bob",
+      "pickEmpty": null,
+      "bobAnger": 40
+    },
+    "8": {
+      "before": 2,
+      "after": 0
     }
   },
   "game/map/BridgeOverlayTypes": {
@@ -15326,14 +15422,13 @@
     }
   },
   "game/bot/BotsLib": {
-    "0": "IraqBot,OriginalAiBot,version",
+    "0": "OriginalAiBot,version",
     "1": {
-      "IraqBot": "function",
       "OriginalAiBot": "function",
       "version": "string"
     },
     "2": {
-      "keys": 3,
+      "keys": 2,
       "hasDefault": false
     }
   },
@@ -15343,87 +15438,6 @@
       "ScenarioTeamBot": "function"
     },
     "2": "_ensureEngine,onChatMessage,onGameStart,onGameTick"
-  },
-  "game/bot/iraq/Util": {
-    "0": "A,Blackboard,Config,assessThreat,countName,dist,findPlacement,findRefineryPlacement,firepower,makeSnapshot,myCYTile,nearestOreAnchor,scanOre",
-    "1": {
-      "A": "object",
-      "Blackboard": "function",
-      "Config": "object",
-      "assessThreat": "function",
-      "countName": "function",
-      "dist": "function",
-      "findPlacement": "function",
-      "findRefineryPlacement": "function",
-      "firepower": "function",
-      "makeSnapshot": "function",
-      "myCYTile": "function",
-      "nearestOreAnchor": "function",
-      "scanOre": "function"
-    },
-    "2": "",
-    "3": {
-      "keys": 13,
-      "hasDefault": false
-    },
-    "4": [
-      {
-        "x": 0,
-        "y": 0
-      },
-      {
-        "x": 7,
-        "y": 8
-      },
-      {
-        "x": 9,
-        "y": 3
-      }
-    ]
-  },
-  "game/bot/iraq/Economy": {
-    "0": "Economy",
-    "1": {
-      "Economy": "function"
-    },
-    "2": "avail,decideNextBuilding,econDecision,getOreAnchor,lowPower,tickBuild,tickHarvest,tickProduction,tickRefinerySell",
-    "3": [
-      "NAPOWR",
-      "NAHAND",
-      "NAREFN",
-      "NAWEAP"
-    ]
-  },
-  "game/bot/iraq/Military": {
-    "0": "Military",
-    "1": {
-      "Military": "function"
-    },
-    "2": "computeRally,micro,pickAttackTarget,setupDogRoutes,tickArmy,tickDefense,tickScout",
-    "3": [
-      {
-        "tag": "start0",
-        "x": 20,
-        "y": 0
-      },
-      {
-        "tag": "start1",
-        "x": 0,
-        "y": 25
-      },
-      {
-        "tag": "fan2",
-        "x": -16,
-        "y": -28
-      }
-    ]
-  },
-  "game/bot/iraq/IraqBot": {
-    "0": "IraqBot",
-    "1": {
-      "IraqBot": "function"
-    },
-    "2": "_tick,buildRulesCache,hasCY,onGameEvent,onGameStart,onGameTick,pushDiag"
   },
   "game/bot/original/OriginalAiBot": {
     "0": "OriginalAiBot",
@@ -17689,5 +17703,87 @@
   "gui/screen/replay/StorageWarning": {
     "0": "StorageWarning",
     "1": "function"
+  },
+  "game/ai/AiTriggerRuntime": {
+    "0": {
+      "same": true,
+      "tag": "weight dynamics"
+    },
+    "1": {
+      "same": true,
+      "tag": "scan+gates"
+    }
+  },
+  "game/ai/Randomizer": {
+    "0": {
+      "same": true,
+      "tag": "rng"
+    }
+  },
+  "game/ai/AiTeamRuntime": {
+    "0": {
+      "same": true,
+      "tag": "recruiting"
+    }
+  },
+  "game/ai/AiProductionRuntime": {
+    "0": {
+      "r": 0.16,
+      "rl": 4,
+      "dr": 0.16,
+      "dl": 4,
+      "t10": 1,
+      "t30": 4,
+      "tB": 1,
+      "tW": 2,
+      "tP": -1,
+      "cloneAt2of20": "GAREFN",
+      "cloneAt4of20": 0
+    },
+    "1": {
+      "same": true,
+      "tag": "prereq any-of"
+    },
+    "2": {
+      "same": true,
+      "tag": "first buildable"
+    },
+    "3": {
+      "same": true,
+      "tag": "factory queue"
+    },
+    "4": {
+      "same": null,
+      "tag": "build queue maintainer"
+    }
+  },
+  "game/ai/AiSuperWeaponRuntime": {
+    "0": {
+      "same": true,
+      "tag": "sw dispatch"
+    }
+  },
+  "game/ai/AiPlacementRuntime": {
+    "0": {
+      "same": true,
+      "tag": "position pick"
+    },
+    "1": {
+      "same": true,
+      "tag": "fail limit"
+    }
+  },
+  "game/bot/original/Util": {
+    "0": "findPlacement",
+    "1": {
+      "findPlacement": "function"
+    },
+    "2": {
+      "picked": {
+        "rx": 52,
+        "ry": 50
+      },
+      "count": 36
+    }
   }
 }

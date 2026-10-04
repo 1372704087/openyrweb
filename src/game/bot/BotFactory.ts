@@ -3,7 +3,7 @@
  *
  * 遭遇战每个难度档位对应一个 Bot 实现：
  *   简单 → DummyBot / 原版AI(Easy)
- *   普通 → IraqBot / 原版AI(Medium)
+ *   普通 → 原版AI(Medium)（旧自研 IraqBot 已移除）
  *   困难 → 原版AI(Brutal)
  * 战役：电脑阵营 → OriginalAiBot；人类阵营 → ScenarioTeamBot（仅脚本小队引擎）
  * （当前实现中战役 AI 亦回落 ScenarioTeamBot，见 create 内注释。）
@@ -13,15 +13,14 @@
  *   SlaveGatherTask:504、SlaveMinerVehicleTrait:318）。
  *   因此 AiDifficulty 的成员与数值一律不得增删或重排。
  *   Brutal(0) / Easy_Custom(6) / Medium_Custom(7) 原由 custom-ai 承担，
- *   custom-ai 移除后统一回落到 OriginalAiBot —— 数值槽位保留不动，
- *   将来接自研 Bot 时只需改下面这三个 case。
+ *   custom-ai 与旧自研 IraqBot 移除后统一回落到 OriginalAiBot ——
+ *   数值槽位保留不动，将来接新 Bot 时只需改对应 case。
  *
  * 由 game/bot/BotFactory.ts.js 重写为 TS（行为完全一致）。两个文件并存期间，
  * 本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
  */
 import { AiDifficulty } from "game/gameopts/GameOpts"; // 已转换
 import { DummyBot } from "game/bot/DummyBot"; // 已转换
-import { IraqBot } from "game/bot/iraq/IraqBot"; // 已转换
 import { OriginalAiBot } from "game/bot/original/OriginalAiBot"; // 已转换
 import { ScenarioTeamBot } from "game/bot/campaign/ScenarioTeamBot"; // 已转换
 
@@ -56,7 +55,8 @@ export class BotFactory {
       case AiDifficulty.Easy_Custom:
         return new OriginalAiBot(player.name, player.country.name, "Easy");
       case AiDifficulty.Medium:
-        return new IraqBot(player.name, player.country.name);
+        // 旧自研 IraqBot 移除后，普通档回落原版 AI（难度列 Medium）
+        return new OriginalAiBot(player.name, player.country.name, "Medium");
       case AiDifficulty.Medium_Ori:
         return new OriginalAiBot(player.name, player.country.name, "Medium");
       case AiDifficulty.Medium_Custom:

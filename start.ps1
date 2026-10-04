@@ -70,12 +70,24 @@ if (-not (Test-Path $vendorBundle) -or -not (Test-Path $vendorWorker)) {
 }
 
 # 4. 构建客户端
+# 完整产物 = index.html（build.mjs）+ 逐模块文件（emit-permodule.mjs，客户端逐文件
+# XHR 加载的入口 build/main）。旧版构建只产出前者时，游戏会因模块 404 起不来，
+# 所以两样都查：缺 index.html 走全量构建，只缺逐模块文件则只补发（免全量重建）。
 $buildIndex = [System.IO.Path]::Combine($ROOT, "build", "index.html")
+$buildMain = [System.IO.Path]::Combine($ROOT, "build", "main")
 if (-not (Test-Path $buildIndex)) {
-    Write-Step "构建客户端"
+    Write-Step "构建客户端（全量：bundle + 逐模块）"
     npm run build
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误：npm run build 失败" -ForegroundColor Red
+        pause
+        exit 1
+    }
+} elseif (-not (Test-Path $buildMain)) {
+    Write-Step "build/ 缺逐模块文件，补发（emit:modules）"
+    npm run emit:modules
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "错误：npm run emit:modules 失败" -ForegroundColor Red
         pause
         exit 1
     }

@@ -10,7 +10,8 @@ Write-Host "[INFO] Starting build..." -ForegroundColor Yellow
 Write-Host ""
 
 try {
-    node tools/build.mjs
+    # npm run build = tools/build.mjs + tools/emit-permodule.mjs（缺后者则逐模块 404）
+    npm run build
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""

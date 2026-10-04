@@ -2,7 +2,7 @@
  * AiApi — 统一 AI 接口（AIMD.INI 策略/建造/战术门面）。
  *
  * 封装 AiEngine，提供高层 API 供 Bot 调用；Bot 不需要直接操作 AiEngine 或
- * AiData 的内部结构。CustomAiBot / IraqBot / 其他 Bot 均可通过此接口使用
+ * AiData 的内部结构。OriginalAiBot / ScenarioTeamBot 等均可通过此接口使用
  * 原版 AIMD.INI 配置。
  *
  * 使用方式：

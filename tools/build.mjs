@@ -32,7 +32,21 @@ const SRC = join(ROOT, "src");
 const VENDOR = join(ROOT, "vendor");
 const BUILD = join(ROOT, "build");
 const SERVER_CFG = join(ROOT, "server", "config", "config.ini");
-const VERSION = process.env.VERSION || "0.1.0";
+// 构建标识：默认取构建时刻（本地时间 YYYYMMDD-HHMMSS），也可以用环境变量固定。
+// 用途有两个，都是给"我到底跑的是哪一版"这个反复出现的问题兜底：
+//   1. 拼进 VERSION → index.html 里所有 ?v= 都随构建变化，浏览器不可能再命中旧 JS；
+//   2. 写进 <meta name="openyrweb-build"> 并在页面加载时 console.log 一行，
+//      于是用户贴回来的任何控制台日志都自带版本号，不会再出现
+//      "改了但日志里看不出改没改"的来回确认（2026-10-01 连踩两轮）。
+const BUILD_ID = process.env.BUILD_ID || (() => {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return (
+    d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" +
+    p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds())
+  );
+})();
+const VERSION = process.env.VERSION || "0.1.0-b" + BUILD_ID;
 
 const log = (m) => console.log(m);
 const logv = (m) => console.log("  " + m);
@@ -177,14 +191,18 @@ function stepIndex() {
   // Drop any lingering internal cache-bust query strings.
   html = html.replace(/\?v=0\.82\.0(-\d+)?/g, "?v=" + VERSION);
 
-  // Inject favicon + build-marker meta.
+  // Inject favicon + build-marker meta + 一行版本自报（首屏最先执行，日志里排在最前）。
   const headInject =
     '  <meta name="openyrweb" content="built">\n' +
+    '  <meta name="openyrweb-build" content="' + BUILD_ID + '">\n' +
+    '  <script>console.log("[OpenYRWeb] build ' + BUILD_ID +
+      ' (bundle v=' + VERSION + ')");</script>\n' +
     '  <link rel="icon" type="image/svg+xml" href="res/favicon.svg">\n';
   html = html.replace(/<head>/i, "<head>\n" + headInject);
 
   writeOut("index.html", html);
   logv("index.html (title/favicon/aliases set, third-party injectors stripped)");
+  logv("build id " + BUILD_ID + " (bundle ?v=" + VERSION + ")");
 }
 
 // ---- 5. Generate assets ------------------------------------------------------

@@ -73,6 +73,15 @@ export class RulesApi {
     return this.rules.radiation;
   }
 
+  /**
+   * 多人/遭遇战开局设置（含权威科技等级 TechLevel）。
+   * 引擎侧生产层用它过滤可造对象（Production 的 maxTechLevel），
+   * AI 侧也应以它为准，避免与玩家/生产层看到的科技树不一致。
+   */
+  get mpDialogSettings(): any {
+    return this.rules.mpDialogSettings;
+  }
+
   hasObject(name: any, type: any): any {
     return this.rules.hasObject(name, type);
   }

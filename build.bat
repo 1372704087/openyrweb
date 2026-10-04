@@ -10,7 +10,8 @@ cd /d "%~dp0"
 echo [INFO] Starting build...
 echo.
 
-node tools/build.mjs
+rem npm run build = tools/build.mjs + tools/emit-permodule.mjs（缺后者则逐模块 404）
+npm run build
 
 if %errorlevel% equ 0 (
     echo.

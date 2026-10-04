@@ -13263,6 +13263,17 @@ const CONVERTED = [
         stallTask.game = game;
         stallTask.log = (obj, msg) => logged.push(msg);
         ns.ExitFactoryTask.prototype.onTick.call(stallTask, unit);
+        // 到达容差放宽：stall > 135 tick（远超正常出厂耗时）后，允许停在集结格
+        // 2 格内。集结格长期被单位/建筑占住时，`strictCloseEnough` 会让单位
+        // 永远停不下来 → 烂在厂里 → 工厂每台车都白等 150 tick 释放阈值。
+        const relaxTask = new ns.ExitFactoryTask(game, factory, { rx: 9, ry: 9 }, undefined);
+        relaxTask.game = game;
+        relaxTask.checkRampTiles = undefined;
+        relaxTask.options = { ...relaxTask.$args[3], strictCloseEnough: true, closeEnoughTiles: 0 };
+        relaxTask.stallTicks = 135;
+        const relaxLogged = [];
+        relaxTask.log = (obj, msg) => relaxLogged.push(msg);
+        ns.ExitFactoryTask.prototype.onTick.call(relaxTask, unit);
         parentProto.onTick = prevTick;
         parentProto.updateTarget = prevUpdate;
         parentProto.canStopAtTile = prevCanStop;
@@ -13272,6 +13283,9 @@ const CONVERTED = [
           stallForceWait: stallTask.options.forceWaitOnPathBlocked,
           stallTicksAfter: stallTask.stallTicks,
           logged,
+          relaxStrict: relaxTask.options.strictCloseEnough,
+          relaxCloseEnough: relaxTask.options.closeEnoughTiles,
+          relaxLogged,
         };
       },
     ],
@@ -21229,8 +21243,15 @@ const CONVERTED = [
         const a = new ns.MapLighting();
         a.level = 1;
         a.forceTint = true;
+        // copy() 深拷贝全部字段到 this 并返回新实例自身——断言字段值一致且实例互异
+        // （旧断言 `a === b` 恒 false，把失配冻结成了基线）
         const b = new ns.MapLighting().copy(a);
-        return { level: b.level, force: b.forceTint, ambient: b.ambient, same: a === b };
+        return {
+          level: b.level,
+          force: b.forceTint,
+          ambient: b.ambient,
+          same: a !== b && b.level === 1 && b.forceTint === true,
+        };
       },
       (ns) => {
         // prefix path
@@ -26248,6 +26269,433 @@ const CONVERTED = [
   },
 
   {
+    name: "game/ai/AiTriggerRuntime",
+    tsjs: "src/game/ai/AiTriggerRuntime.ts.js",
+    probes: [
+      (ns) => {
+        // 权重涨落公式（0x41FD60/0x41FE20）
+        const s = { weightCurrent: 10, minWeight: 1, maxWeight: 70, successCount: 0, totalCount: 0 };
+        ns.registerSuccess(s, ns.DEFAULT_GENERAL);
+        const okSuccess = s.weightCurrent === 30 && s.successCount === 1 && s.totalCount === 1;
+        ns.registerFailure(s, ns.DEFAULT_GENERAL);
+        // 0+(-50)+30 = -20 → 钳位到 min=1
+        const okFailure = s.weightCurrent === 1 && s.totalCount === 2 && s.successCount === 1;
+        // TrackRecord 失败增量：total=2, ratio=0.5 → adjust=0 → wc=-49 → 钳位 min
+        ns.registerFailure(s, ns.DEFAULT_GENERAL);
+        const okClamp = s.weightCurrent === s.minWeight;
+        return { same: okSuccess && okFailure && okClamp, tag: "weight dynamics" };
+      },
+      (ns) => {
+        // 比较器六档算子
+        const w = {
+          randomRanged: () => 1,
+          resolveTeamType: () => ({ isBaseDefense: false, max: 1 }),
+          countActiveTeams: () => 0,
+          isAIHouseActive: () => true,
+          difficulty: () => 1,
+          isSkirmishOrMP: () => true,
+          isCampaign: () => false,
+          techLevel: () => 9,
+          credits: () => 0,
+          ownedCount: () => 0,
+          hasTargetHouse: () => true,
+          targetOwnedCount: () => 0,
+          targetCredits: () => 0,
+          targetPowerSurplus: () => Number.POSITIVE_INFINITY,
+          superWeaponCharge: () => 0,
+          civilianOwns: () => false,
+        };
+        const p = ns.DEFAULT_GENERAL;
+        const mk = (over) => Object.assign({
+          team1: "T1", team2: "", globalFlag: 1, enabled: 1,
+          enabledEasy: 1, enabledMedium: 1, enabledHard: 1,
+          techLevel: -1, conditionType: -1,
+        }, over);
+        const st = { weightCurrent: 10, minWeight: 1, maxWeight: 70, successCount: 0, totalCount: 0 };
+        const states = new Map([[mk({}), st]]);
+        // 恒真条件 + 无防御压力 → 命中 team1
+        const hit = ns.scanTriggers([...states.keys()], states, w, p, 0, 0, 0);
+        const okScan = hit && hit.team1 === "T1";
+        // 防御触发但防御已满 → 拒绝
+        const defTrig = mk({ team1: "D1" });
+        const w2 = Object.assign({}, w, { resolveTeamType: () => ({ isBaseDefense: true, max: 1 }) });
+        const okDefenseGate = ns.conditionMet(defTrig, w2, p, 0, true) === false;
+        // TechLevel 门槛：house 9 < 需要 10 → 拒绝
+        const okTech = ns.conditionMet(mk({ techLevel: 10 }), w, p, 0, false) === false;
+        return { same: !!okScan && okDefenseGate && okTech, tag: "scan+gates" };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/Randomizer",
+    tsjs: "src/game/ai/Randomizer.ts.js",
+    probes: [
+      (ns) => {
+        // 同种子同序列（表驱动展开确定性）
+        const a = new ns.Randomizer(42);
+        const b = new ns.Randomizer(42);
+        let same = true;
+        for (let i = 0; i < 8; i++) {
+          if (a.random() !== b.random()) same = false;
+        }
+        // 不同种子序列不同
+        const c = new ns.Randomizer(43);
+        const d = new ns.Randomizer(42);
+        let diff = false;
+        for (let i = 0; i < 8; i++) {
+          if (c.random() !== d.random()) diff = true;
+        }
+        // 范围采样落在界内且有变化
+        const r = new ns.Randomizer(7);
+        const seen = new Set();
+        let inRange = true;
+        for (let i = 0; i < 500; i++) {
+          const v = r.randomRanged(1, 6);
+          if (v < 1 || v > 6) inRange = false;
+          seen.add(v);
+        }
+        return { same: same && diff && inRange && seen.size === 6, tag: "rng" };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiTeamRuntime",
+    tsjs: "src/game/ai/AiTeamRuntime.ts.js",
+    probes: [
+      (ns) => {
+        // 缺员计算：编成 3×E1 + 1×GGI，现有 2×E1 → 缺 1×E1 + 1×GGI
+        const groups = [
+          { unitType: "E1", count: 3 },
+          { unitType: "GGI", count: 1 },
+        ];
+        const existing = new Map([["E1", 2]]);
+        const missing = ns.getTaskForceMissingMemberTypes(groups, existing);
+        const ok1 =
+          missing.length === 2 &&
+          missing[0].unitType === "E1" &&
+          missing[1].unitType === "GGI";
+        // recruitStep：候选中类型匹配才补，且受 max 上限约束。
+        // 缺员清单=[E1,E1,E1,GGI]，候选 E1×2+GGI×1 全收 → [1,2,3]
+        const cands = [
+          { id: 1, name: "E1" },
+          { id: 2, name: "E1" },
+          { id: 3, name: "GGI" },
+        ];
+        const got = ns.recruitStep(groups, [], cands, { max: 30 });
+        const ok2 = got.length === 3 && got[0] === 1 && got[1] === 2 && got[2] === 3;
+        // fetchALeader 取最高评分
+        const leader = ns.fetchALeader([
+          { id: 1, name: "E1", leaderRating: 3 },
+          { id: 2, name: "GGI", leaderRating: 9 },
+        ]);
+        const ok3 = leader && leader.id === 2;
+        return { same: ok1 && ok2 && !!ok3, tag: "recruiting" };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiProductionRuntime",
+    tsjs: "src/game/ai/AiProductionRuntime.ts.js",
+    probes: [
+      (ns) => {
+        // 持续扩张（rulesmd [General] Ratio/Limit 真键 + 组口径判定）
+        const params = ns.loadExpansionParams({
+          get: (k) =>
+            ({
+              RefineryRatio: "0.16",
+              RefineryLimit: "4",
+              BarracksRatio: ".16",
+              BarracksLimit: "2",
+              WarRatio: ".1",
+              WarLimit: "2",
+            })[k],
+        });
+        const dflt = ns.loadExpansionParams(null);
+        const t10 = ns.expansionTargetFor("BuildRefinery", 10, params);   // floor(1.6)=1
+        const t30 = ns.expansionTargetFor("BuildRefinery", 30, params);   // min(4,4)=4
+        const tB = ns.expansionTargetFor("BuildBarracks", 12, params);    // min(1,2)=1
+        const tW = ns.expansionTargetFor("BuildWeapons", 20, params);     // min(2,2)=2
+        const tP = ns.expansionTargetFor("BuildPower", 10, params);       // 无 ratio → -1
+        // 组口径 clone：total=20 → target=min(floor(20×.16)=3, 4)=3；
+        // 已有 2 座精炼厂 → 可加一条；已有 4 座 → 已超额不加
+        const groups = { BuildRefinery: ["GAREFN", "NAREFN", "YAREFN"] };
+        const inst2 = [{ name: "GAREFN", rx: 1, ry: 1 }, { name: "NAREFN", rx: 5, ry: 5 }];
+        const added2 = ns.cloneExistingBuildings(
+          inst2, new Set(), [], groups, () => 3, 5,
+          { params: params, totalBuildings: 20 },
+        );
+        const inst4 = inst2.concat([
+          { name: "YAREFN", rx: 9, ry: 9 }, { name: "GAREFN", rx: 3, ry: 3 },
+        ]);
+        const added4 = ns.cloneExistingBuildings(
+          inst4, new Set(), [], groups, () => 3, 5,
+          { params: params, totalBuildings: 20 },
+        );
+        return {
+          r: params.refineryRatio, rl: params.refineryLimit,
+          dr: dflt.refineryRatio, dl: dflt.refineryLimit,
+          t10, t30, tB, tW, tP,
+          cloneAt2of20: added2.length && added2[0].typeName,
+          cloneAt4of20: added4.length,
+        };
+      },
+      (ns) => {
+        // 前置 any-of：负数索引走 General 组，任一命中即过；名字条目直接比对
+        const world = {
+          countryIndex: () => 0,
+          sideIndex: () => 0,
+          generalPrerequisiteGroup: (i) =>
+            i === -1 ? ["GAPILE", "NAHAND"] : ["GAREFN"],
+          ownedBuildingTypes: () => new Set(["NAHAND"]),
+          prerequisitesOf: () => [-1, "GAREFN"],
+          typeMasks: () => ({ countryBits: 1, requiredBits: -1, excludedBits: -1, ownerSide: -1 }),
+          factoryQueue: () => null,
+          factoryItemCanSustain: () => true,
+          suspendFactory: () => {},
+        };
+        const okPrereqFail =
+          ns.allPrerequisitesAvailable("X", world) === false; // GAREFN 未拥有 → false
+        world.ownedBuildingTypes = () => new Set(["NAHAND", "GAREFN"]);
+        const okPrereqOk = ns.allPrerequisitesAvailable("X", world) === true;
+        world.ownedBuildingTypes = () => new Set(["GACNST"]);
+        const okPrereqFail2 = ns.allPrerequisitesAvailable("X", world) === false;
+        return {
+          same: okPrereqFail && okPrereqOk && okPrereqFail2,
+          tag: "prereq any-of",
+        };
+      },
+      (ns) => {
+        // FirstBuildable：country 位掩码 + 排除位 + 侧位过滤
+        const masks = {
+          GAPOWR: { countryBits: 1, requiredBits: -1, excludedBits: -1, ownerSide: -1 },
+          NAPOWR: { countryBits: 2, requiredBits: -1, excludedBits: -1, ownerSide: -1 },
+          GAREFN: { countryBits: 1, requiredBits: 2, excludedBits: -1, ownerSide: 0 },
+        };
+        const world = {
+          countryIndex: () => 0,
+          sideIndex: () => 0,
+          generalPrerequisiteGroup: () => [],
+          ownedBuildingTypes: () => new Set(),
+          prerequisitesOf: () => [],
+          typeMasks: (n) => masks[n],
+          factoryQueue: () => null,
+          factoryItemCanSustain: () => true,
+          suspendFactory: () => {},
+        };
+        const pick = ns.firstBuildableFromArray(["NAPOWR", "GAPOWR", "GAREFN"], world);
+        const pick2 = ns.firstBuildableFromArray(["GAREFN"], world);
+        return { same: pick === "GAPOWR" && pick2 === null, tag: "first buildable" };
+      },
+      (ns) => {
+        // 工厂队列：撤销不可维持项 + 空队列挂起
+        const suspended = [];
+        const q = { items: [{ n: 1 }, { n: 2 }], active: null };
+        const world = {
+          countryIndex: () => 0,
+          sideIndex: () => 0,
+          generalPrerequisiteGroup: () => [],
+          ownedBuildingTypes: () => new Set(),
+          prerequisitesOf: () => [],
+          typeMasks: () => ({ countryBits: 1, requiredBits: -1, excludedBits: -1, ownerSide: -1 }),
+          factoryQueue: () => q,
+          factoryItemCanSustain: (it) => it.n === 1,
+          suspendFactory: (c) => suspended.push(c),
+        };
+        const st1 = ns.updateFactoriesQueues(world, ns.ABS_BUILDING, false, 0);
+        const ok1 = st1 === "abandoned-items" && q.items.length === 1;
+        q.active = null;
+        q.items.length = 0;
+        const st2 = ns.updateFactoriesQueues(world, ns.ABS_BUILDING, false, 0);
+        const ok2 = st2 === "suspended" && suspended[0] === ns.ABS_BUILDING;
+        return { same: ok1 && ok2, tag: "factory queue" };
+      },
+      (ns) => {
+        // 初始队列：按 Power→Barracks→Proc→Factory→Radar 组序选本国型号
+        // 初始队列：按 Build* 列表组序选本国型号（键名=rulesmd [General] 实键）
+        const groups = {
+          BuildPower: ["NAPOWR", "GAPOWR"],
+          BuildWeapons: ["NAWEAP", "GAWEAP"],
+          BuildBarracks: ["NAHAND", "GAPILE"],
+          BuildRadar: ["NARADR", "GAAIRC"],
+          BuildTech: ["GATECH"],
+          BuildRefinery: ["NAREFN", "GAREFN"],
+        };
+        const mk = (owned, queue) => ({
+          countryIndex: () => 1,
+          sideIndex: () => 0,
+          generalPrerequisiteGroup: () => [],
+          ownedBuildingTypes: () => new Set(owned),
+          prerequisitesOf: () => [],
+          typeMasks: (n) => ({ countryBits: n.charAt(0) === "G" ? 1 : 2, requiredBits: -1, excludedBits: -1, ownerSide: -1 }),
+          factoryQueue: () => null,
+          factoryItemCanSustain: () => true,
+          suspendFactory: () => {},
+          generalGroup: (k) => groups[k] || [],
+          powerLow: () => false,
+          queue: () => queue,
+          randomRanged: (a, b) => a,
+        });
+        const queue = [];
+        const initial = ns.buildInitialQueue(mk([], queue));
+        const ok1 =
+          initial.length === 5 &&
+          initial[0].typeName === "NAPOWR" &&
+          initial[1].typeName === "NAHAND" &&
+          initial[2].typeName === "NAREFN" &&
+          initial[3].typeName === "NAWEAP" &&
+          initial[4].typeName === "NARADR";
+        // 维持：拥有全部组 → 不补；失去 Proc → 补一条
+        const full = mk(["GAPOWR", "GAWEAP", "GAPILE", "GAAIRC", "GATECH", "GAREFN"], queue);
+        const ok2 = ns.maintainPrerequisiteGroups(full) === null;
+        const q2 = [];
+        const lost = mk(["GAPOWR", "GAWEAP", "GAPILE", "GAAIRC", "GATECH"], q2);
+        const added = ns.maintainPrerequisiteGroups(lost);
+        // 组键 2026-09-28 起改用 rulesmd [AI] Build* 名单（原 Prerequisite* 键仅
+        // 作前置判定，不再作为建造组键）；失去的组是精炼厂 → groupName=BuildRefinery
+        const ok3 =
+          added && added.groupName === "BuildRefinery" && added.typeName === "NAREFN";
+        // 电力插队：插入中部且不重复
+        const q3 = [{ groupName: "PrerequisiteFactory", typeName: "GAWEAP" }, { groupName: "PrerequisiteBarracks", typeName: "GAPILE" }];
+        const low = mk([], q3);
+        low.powerLow = () => true;
+        const ins = ns.insertPowerIfLow(low);
+        const ok4 = ins && q3.length === 3 && q3[1].groupName === "PrerequisitePower";
+        const again = ns.insertPowerIfLow(low);
+        const ok5 = again === null;
+        return { same: ok1 && ok2 && ok3 && ok4 && ok5, tag: "build queue maintainer" };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiSuperWeaponRuntime",
+    tsjs: "src/game/ai/AiSuperWeaponRuntime.ts.js",
+    probes: [
+      (ns) => {
+        // 分发：0 核弹需目标、1/3/4/10 永不自动释放、5 空投自施放、7 需密集点
+        const world = {
+          hasTarget: () => true,
+          pickPointTarget: () => ({ x: 30, y: 40 }),
+          pickSelfCastTarget: () => ({ x: 1, y: 2 }),
+          pickCrowdTarget: () => ({ x: 50, y: 60 }),
+        };
+        const supers = [0, 1, 2, 3, 4, 5, 7, 9, 10, 11].map((t) => ({
+          swType: t,
+          ready: true,
+        }));
+        const cmds = ns.tryFireSupers(supers, world);
+        const types = cmds.map((c) => c.swType).sort((a, b) => a - b);
+        const okFired =
+          JSON.stringify(types) === JSON.stringify([0, 2, 5, 7, 9, 11]);
+        const nuke = cmds.find((c) => c.swType === 0);
+        const okNuke = nuke && nuke.target.x === 30 && nuke.target.y === 40;
+        // 无目标 → 核弹不发；空投仍发（自施放）
+        const worldNoTarget = Object.assign({}, world, { hasTarget: () => false });
+        const cmds2 = ns.tryFireSupers(
+          [
+            { swType: 0, ready: true },
+            { swType: 5, ready: true },
+          ],
+          worldNoTarget,
+        );
+        const okNoTarget =
+          cmds2.length === 1 && cmds2[0].swType === 5;
+        // 未充能跳过
+        const cmds3 = ns.tryFireSupers([{ swType: 0, ready: false }], world);
+        const okReady = cmds3.length === 0;
+        return { same: okFired && !!okNuke && okNoTarget && okReady, tag: "sw dispatch" };
+      },
+    ],
+  },
+
+  {
+    name: "game/ai/AiPlacementRuntime",
+    tsjs: "src/game/ai/AiPlacementRuntime.ts.js",
+    probes: [
+      (ns) => {
+        // 固定位置优先（不可放不回退候选格——原版固定位置节点没有候选格回退，
+        // 走 no-position/FailedToPlaceNode 语义）；无 fixedPos 才走候选格回退
+        let placedAt = null;
+        const mkWorld = (canPlaceFn) => ({
+          canPlace: canPlaceFn,
+          candidateCells: () => [{ x: 10, y: 10 }, { x: 11, y: 10 }],
+          isProducing: () => true,
+          cancelCurrentProduction: () => {},
+          place: (t, x, y) => {
+            placedAt = { x, y };
+            return 0;
+          },
+          isCampaign: () => false,
+          difficulty: () => 1,
+          failLimits: () => [3, 2, 1],
+        });
+        // 1) 固定位置可放 → 原地 placed
+        const nodeFix = {
+          groupName: "PrerequisitePower",
+          typeName: "GAPOWR",
+          fixedPos: { x: 5, y: 5 },
+          failCount: 0,
+        };
+        placedAt = null;
+        const rFix = ns.attemptPlacement(nodeFix, mkWorld(() => true));
+        const okA = rFix === "placed" && placedAt.x === 5;
+        // 2) 固定位置不可放 → no-position + 撤生产（不回退候选格）
+        let cancelledFix = false;
+        const world2 = Object.assign(mkWorld((t, x, y) => !(x === 5 && y === 5)), {
+          cancelCurrentProduction: () => {
+            cancelledFix = true;
+          },
+        });
+        const rFixBad = ns.attemptPlacement(nodeFix, world2);
+        const okB = rFixBad === "no-position" && cancelledFix;
+        // 3) 无 fixedPos → 候选格回退，取首个可放格
+        const nodeCell = {
+          groupName: "PrerequisitePower",
+          typeName: "GAPOWR",
+          failCount: 0,
+        };
+        placedAt = null;
+        const rCell = ns.attemptPlacement(nodeCell, mkWorld((t, x, y) => !(x === 10 && y === 10)));
+        const okC = rCell === "placed" && placedAt.x === 11;
+        return { same: okA && okB && okC, tag: "position pick" };
+      },
+      (ns) => {
+        // 失败计数：超难度上限 → cancelled + 撤生产；成功重置语义由上层处理
+        let cancelCount = 0;
+        const node = {
+          groupName: "PrerequisiteFactory",
+          typeName: "GAWEAP",
+          failCount: 0,
+        };
+        const world = {
+          canPlace: () => true,
+          candidateCells: () => [{ x: 3, y: 4 }],
+          isProducing: () => true,
+          cancelCurrentProduction: () => {
+            cancelCount++;
+          },
+          place: () => 1,
+          isCampaign: () => false,
+          difficulty: () => 1, // limit=2
+          failLimits: () => [3, 2, 1],
+        };
+        const nodes = [node];
+        let sawCancelled = false;
+        for (let i = 0; i < 5; i++) {
+          const r = ns.processPlacementNodes(nodes, world);
+          if (r === "cancelled") sawCancelled = true;
+        }
+        // limit=2：fail 1,2 → failed（保留）；第 3 次 failCount=3 > 2 → cancelled 出队
+        const ok = sawCancelled && nodes.length === 0 && cancelCount > 0;
+        return { same: ok, tag: "fail limit" };
+      },
+    ],
+  },
+
+  {
     name: "game/ai/AiData",
     tsjs: "src/game/ai/AiData.ts.js",
     probes: [
@@ -26418,6 +26866,137 @@ const CONVERTED = [
         const idxAfterJump = team.scriptIndex;
         const rGoBerserk = eng.executeAction(team, { action: 2, target: 0 }, 0);
         return { rSuccess, rJump, idxAfterJump, rGoBerserk, orderCalls: eng.actionsApi ? "ok" : "no" };
+      },
+      (ns) => {
+        // TeamClass::AI 状态机语义：任务首帧只下发一次（is_next），到位/超时才推进
+        const unitPos = { 1: [100, 100], 2: [10, 10] };
+        const eng = new ns.AiEngine(
+          {
+            getCurrentTick: () => 0,
+            getPlayerData: () => ({ startLocation: { x: 3, y: 4 } }),
+            mapApi: { getTileAtWaypoint: () => ({ rx: 12, ry: 12 }) },
+            getVisibleUnits: () => [],
+            getUnitData: (id) => ({
+              name: "GI",
+              tile: { rx: unitPos[id][0], ry: unitPos[id][1] },
+              hitPoints: 100,
+            }),
+            getRulesIni: () => null,
+          },
+          { orderUnits() {}, orderUnitsTarget() {} },
+          "Bob",
+          {},
+        );
+        eng.parsed = { scriptTypes: {}, taskForces: {}, teamTypes: {}, triggers: {}, groupWeights: {}, defenses: {}, buildQueues: {} };
+        const team = {
+          unitIds: [1], scriptIndex: 0,
+          scriptType: { actions: [{ action: 3, target: 7 }] },
+          attackTarget: null, rallyPoint: null, teamType: { name: "T" },
+          state: "executing", missionStarted: false, missionCell: null,
+          missionTargetId: 0, missionStartTick: 0, createdAt: 0, recruitTicks: 0,
+          taskForce: null,
+        };
+        const orders = [];
+        eng.actionsApi = { orderUnits: (ids, o) => orders.push(o) };
+        eng.updateExecuting(team, 30); // 首帧下发
+        const afterIssue = { started: team.missionStarted, idx: team.scriptIndex, cell: team.missionCell, orders: orders.length };
+        eng.updateExecuting(team, 60); // 未到位：不推进不重下发
+        const waiting = { started: team.missionStarted, idx: team.scriptIndex, orders: orders.length };
+        unitPos[1] = [12, 12]; // 成员到位
+        eng.updateExecuting(team, 90);
+        const arrived = { started: team.missionStarted, idx: team.scriptIndex, done: team.state };
+        return { afterIssue, waiting, arrived };
+      },
+      (ns) => {
+        // Guard 计时完成 + buildingTypesByIndex 索引表
+        const eng = new ns.AiEngine(
+          {
+            getCurrentTick: () => 0,
+            getRulesIni: () => ({
+              getSection: (name) =>
+                name === "BuildingTypes"
+                  ? { entries: new Map([["2", "GAREFN"], ["15", "NAWEAP"]]) }
+                  : null,
+            }),
+          },
+          { orderUnits() {} },
+          "Bob",
+          {},
+        );
+        const g0 = eng.isMissionComplete({ missionStartTick: 100 }, { action: 5, target: 10 }, 100 + 15 * 10);
+        const gNotYet = eng.isMissionComplete({ missionStartTick: 100 }, { action: 5, target: 10 }, 100 + 15 * 10 - 1);
+        const name2 = eng.buildingNameByIndex(2);
+        const name15 = eng.buildingNameByIndex(15);
+        const nameMissing = eng.buildingNameByIndex(999);
+        const fam = eng.buildingFamily("GAREFN");
+        return { g0, gNotYet, name2, name15, nameMissing, famLen: fam.length, famHasNAREFN: fam.indexOf("NAREFN") >= 0 };
+      },
+      (ns) => {
+        // CanRecruitUnit 归属登记：无主才可招 / 本队可重复登记 / 优先级
+        // 抢人（高 Priority 夺走低 Priority 队的成员）/ 解散释放
+        const eng = new ns.AiEngine({ getCurrentTick: () => 0 }, {}, "Bob", {});
+        eng.parsed = { scriptTypes: {}, taskForces: {}, teamTypes: {}, triggers: {}, groupWeights: {}, defenses: {}, buildQueues: {} };
+        const tA = { unitIds: [], state: "recruiting", teamType: { name: "A", priority: 5 } };
+        const tB = { unitIds: [], state: "recruiting", teamType: { name: "B", priority: 9 } };
+        const tC = { unitIds: [], state: "recruiting", teamType: { name: "C", priority: 2 } };
+        const c1 = eng.claimUnit(tA, 7);
+        if (c1) tA.unitIds.push(7);
+        const stealLow = eng.claimUnit(tC, 7);      // 低优先级被拒
+        const stealHigh = eng.claimUnit(tB, 7);     // 高优先级夺走
+        if (stealHigh) tB.unitIds.push(7);
+        const aAfterSteal = tA.unitIds.length;      // 旧队名册同步移除
+        eng.releaseTeam(tB);
+        const c4 = eng.claimUnit(tA, 7);            // 释放后可再招
+        return { c1, stealLow, stealHigh, aAfterSteal, c4, owners: eng.unitTeamOwners.size };
+      },
+      (ns, _three, mod) => {
+        // 超武目标评分（gamemd 0x50CBF0 真版校对：无一击死门控，类别直给分）
+        const S = mod("game/ai/AiSuperWeaponRuntime");
+        const dmg = 751;
+        const mk = (over) => Object.assign(
+          { id: 1, tile: { x: 1, y: 1 }, hitPoints: 400, isInfantry: false, engineer: false, harvester: false, isMcv: false, isBuilding: false, constructionYard: false, warFactory: false, powerPlant: false, baseDefense: false, techCenter: false, cloaked: false },
+          over,
+        );
+        const vCy = S.scoreIonCannonTarget(mk({ isBuilding: true, constructionYard: true, hitPoints: 400 }), dmg, 1);
+        const vCyTanky = S.scoreIonCannonTarget(mk({ isBuilding: true, constructionYard: true, hitPoints: 5000 }), dmg, 1);
+        const vPowerE = S.scoreIonCannonTarget(mk({ isBuilding: true, powerPlant: true }), dmg, 0);
+        const vPowerB = S.scoreIonCannonTarget(mk({ isBuilding: true, powerPlant: true }), dmg, 2);
+        const vDef = S.scoreIonCannonTarget(mk({ isBuilding: true, baseDefense: true }), dmg, 1);
+        const vPlainB = S.scoreIonCannonTarget(mk({ isBuilding: true }), dmg, 1);
+        const vInf = S.scoreIonCannonTarget(mk({ isInfantry: true }), dmg, 1);
+        const vEng = S.scoreIonCannonTarget(mk({ isInfantry: true, engineer: true }), dmg, 1);
+        const vHarv = S.scoreIonCannonTarget(mk({ harvester: true }), dmg, 1);
+        const vTank = S.scoreIonCannonTarget(mk({}), dmg, 1);
+        const winner = S.pickIonCannonTarget(
+          [mk({ id: "a", isBuilding: true, powerPlant: true }), mk({ id: "b", isBuilding: true, baseDefense: true })],
+          dmg, 1, (lo, hi) => lo,
+        );
+        const winnerId = winner && winner.id;
+        const none = S.pickIonCannonTarget([], dmg, 1, (lo) => lo);
+        // 怒气选敌（UpdateAngerNodes 0x504790 移植）
+        const TR = mod("game/ai/AiTriggerRuntime");
+        const nodes = {};
+        TR.addAnger(nodes, "Bob", 20);
+        TR.addAnger(nodes, "Bob", 20);
+        TR.addAnger(nodes, "Carol", 60);
+        const pick1 = TR.selectAngriest(nodes, () => false);
+        const pick2 = TR.selectAngriest(nodes, (h) => h === "Carol");
+        TR.addAnger(nodes, "Carol", -60);
+        const pick3 = TR.selectAngriest(nodes, () => false);
+        const pickEmpty = TR.selectAngriest({}, () => false);
+        return { vCy, vCyTanky, vPowerE, vPowerB, vDef, vPlainB, vInf, vEng, vHarv, vTank, winnerId, none,
+          pick1, pick2, pick3, pickEmpty, bobAnger: nodes.Bob };
+      },
+      (ns) => {
+        // done 队出列：updateTeams 清扫已解散队伍
+        const eng = new ns.AiEngine({ getCurrentTick: () => 0 }, {}, "Bob", {});
+        eng.parsed = { scriptTypes: {}, taskForces: {}, teamTypes: {}, triggers: {}, groupWeights: {}, defenses: {}, buildQueues: {} };
+        eng.activeTeams.push({ state: "done", unitIds: [], teamType: { name: "D1" } });
+        eng.activeTeams.push({ state: "done", unitIds: [], teamType: { name: "D2" } });
+        const before = eng.activeTeams.length;
+        eng.updateTeams(30);
+        const after = eng.activeTeams.length;
+        return { before, after };
       },
     ],
   },
@@ -29207,7 +29786,7 @@ const CONVERTED = [
     tsjs: "src/game/bot/BotsLib.ts.js",
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
-      (ns) => ({ "IraqBot": typeof ns["IraqBot"], "OriginalAiBot": typeof ns["OriginalAiBot"], "version": typeof ns["version"] }),
+      (ns) => ({ "OriginalAiBot": typeof ns["OriginalAiBot"], "version": typeof ns["version"] }),
       (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
     ],
   },
@@ -29233,53 +29812,48 @@ const CONVERTED = [
   },
 
   {
-    name: "game/bot/iraq/Economy",
-    tsjs: "src/game/bot/iraq/Economy.ts.js",
-    probes: [
-      (ns) => Object.keys(ns).sort().join(","),
-      (ns) => ({ "Economy": typeof ns["Economy"] }),
-      (ns) => { const p = ns["Economy"]?.prototype ?? {}; return ["avail","lowPower","econDecision","decideNextBuilding","tickBuild","getOreAnchor","tickProduction","tickHarvest","tickRefinerySell"].filter((k) => typeof p[k] === "function").sort().join(","); },
-    ],
-  },
-
-  {
-    name: "game/bot/iraq/IraqBot",
-    tsjs: "src/game/bot/iraq/IraqBot.ts.js",
-    probes: [
-      (ns) => Object.keys(ns).sort().join(","),
-      (ns) => ({ "IraqBot": typeof ns["IraqBot"] }),
-      (ns) => { const p = ns["IraqBot"]?.prototype ?? {}; return ["buildRulesCache","onGameStart","hasCY","onGameTick","pushDiag","_tick","onGameEvent"].filter((k) => typeof p[k] === "function").sort().join(","); },
-    ],
-  },
-
-  {
-    name: "game/bot/iraq/Military",
-    tsjs: "src/game/bot/iraq/Military.ts.js",
-    probes: [
-      (ns) => Object.keys(ns).sort().join(","),
-      (ns) => ({ "Military": typeof ns["Military"] }),
-      (ns) => { const p = ns["Military"]?.prototype ?? {}; return ["setupDogRoutes","tickScout","computeRally","pickAttackTarget","tickArmy","micro","tickDefense"].filter((k) => typeof p[k] === "function").sort().join(","); },
-    ],
-  },
-
-  {
-    name: "game/bot/iraq/Util",
-    tsjs: "src/game/bot/iraq/Util.ts.js",
-    probes: [
-      (ns) => Object.keys(ns).sort().join(","),
-      (ns) => ({ "A": typeof ns["A"], "Blackboard": typeof ns["Blackboard"], "Config": typeof ns["Config"], "assessThreat": typeof ns["assessThreat"], "countName": typeof ns["countName"], "dist": typeof ns["dist"], "findPlacement": typeof ns["findPlacement"], "findRefineryPlacement": typeof ns["findRefineryPlacement"], "firepower": typeof ns["firepower"], "makeSnapshot": typeof ns["makeSnapshot"], "myCYTile": typeof ns["myCYTile"], "nearestOreAnchor": typeof ns["nearestOreAnchor"], "scanOre": typeof ns["scanOre"] }),
-      (ns) => { const p = ns["Blackboard"]?.prototype ?? {}; return ["add"].filter((k) => typeof p[k] === "function").sort().join(","); },
-      (ns) => ({ keys: Object.keys(ns).length, hasDefault: "default" in ns }),
-    ],
-  },
-
-  {
     name: "game/bot/original/OriginalAiBot",
     tsjs: "src/game/bot/original/OriginalAiBot.ts.js",
     probes: [
       (ns) => Object.keys(ns).sort().join(","),
       (ns) => ({ "OriginalAiBot": typeof ns["OriginalAiBot"] }),
       (ns) => { const p = ns["OriginalAiBot"]?.prototype ?? {}; return ["onGameStart","onGameTick","_tick","_tryDeployMCV","_handleProduction","_queueBuilding","_queueUnit","_canAfford","_getQueueInfo","_tryScout","_handleUnits","_tryGrind"].filter((k) => typeof p[k] === "function").sort().join(","); },
+    ],
+  },
+
+  {
+    name: "game/bot/original/Util",
+    tsjs: "src/game/bot/original/Util.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => ({ "findPlacement": typeof ns["findPlacement"] }),
+      (ns, _three, mod) => {
+        // findPlacement：候选带 pad= max(2, 底盘)；中心只认真建筑
+        const game = {
+          getBuildingPlacementData: () => ({ foundation: { width: 3, height: 3 } }),
+          getVisibleUnits: (_n, _f, filter) => {
+            // 一个真建筑 + 一辆 baseNormal=true 的车（须被排除）
+            const r = [
+              { id: "b1", baseNormal: true, type: mod("engine/type/ObjectType").ObjectType.Building },
+              { id: "v1", baseNormal: true, type: mod("engine/type/ObjectType").ObjectType.Vehicle },
+            ];
+            return r.filter(filter).map((o) => o.id);
+          },
+          getUnitData: (id) =>
+            id === "b1" ? { tile: { rx: 50, ry: 50 }, foundation: { width: 2, height: 2 } } : null,
+          mapApi: {
+            getTilesInRect: (rect) => {
+              const out = [];
+              for (let x = rect.x; x < rect.x + rect.width; x++)
+                for (let y = rect.y; y < rect.y + rect.height; y++) out.push({ rx: x, ry: y });
+              return out;
+            },
+          },
+          canPlaceBuilding: (_n, _name, t) => t.rx === 52 && t.ry === 50,
+        };
+        const picked = ns.findPlacement(game, "AI", "GAWEAP", { x: 50, y: 50 });
+        return { picked, count: game.mapApi.getTilesInRect({ x: 48, y: 48, width: 6, height: 6 }).length };
+      },
     ],
   },
 

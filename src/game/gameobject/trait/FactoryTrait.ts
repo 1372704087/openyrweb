@@ -129,6 +129,28 @@ export class FactoryTrait {
         // （150 tick）后释放工厂继续生产；卡住单位保留 ExitFactoryTask
         // 仍可后续移动，此处仅解锁工厂槽位。
         this.deliverStallTicks = (this.deliverStallTicks ?? 0) + 1;
+        // 卡死诊断：出口到底被什么占着，只靠"延迟 150 tick"这个数字看不出来。
+        // 阈值定 100 而不是 60：战车工厂在 rulesmd 里有 `DeployTime=.044`
+        // （= floor(15 × .044 × 60) = 39 tick 的开舱门等待，`produceGroundUnitAt`
+        // 走 `WaitMinutesTask(deployTime)` 先等它再 moveToRally），加上驶出
+        // 占位本来就够 60+ tick —— 那是**正常出厂**，不该刷屏。真被堵住的
+        // （集结格被建筑/单位占死）会一路顶到 150 的释放阈值，在 100 时必然
+        // 已经出现，所以阈值上移只去噪、不漏报。
+        if (this.deliverStallTicks === 100) {
+          try {
+            console.log(
+              "[FactoryStall] " + (object.name || "?") +
+                " tile=" + (object.tile ? object.tile.rx + "," + object.tile.ry : "?") +
+                " type=" + FactoryType[this.type] +
+                " deployTime=" + (object.rules && object.rules.deployTime ? object.rules.deployTime : 0) +
+                " unit=" + (this.deliveringUnit.name || "?") +
+                " unitTile=" + (this.deliveringUnit.tile ? this.deliveringUnit.tile.rx + "," + this.deliveringUnit.tile.ry : "?") +
+                " " + this.describeExitBlockage(object, world),
+            );
+          } catch {
+            /* ignore */
+          }
+        }
         if (this.deliverStallTicks < 150) return;
         this.deliverStallTicks = undefined;
       }
@@ -216,6 +238,66 @@ export class FactoryTrait {
     );
   }
 
+  /**
+   * 出口卡死现场描述（诊断用）：把"集结格 / 出生格"两处的占位者列出来。
+   *
+   * 出厂路径上真正必须保持畅通的是：
+   *  - 出生格 = computeExitCoords（单位被 spawn 在这里）；
+   *  - 集结格 = computeInternalRallyPoint（ExitFactoryTask 的目标，
+   *    `strictCloseEnough` 要求精确到达）。
+   * 任一处被建筑或单位长期占住，`canStopAtTile` / `isCloseEnoughToDest`
+   * 就永远不成立，单位只能烂在厂里，表现为车辆队列长期 `status=3`。
+   * `B:` = 建筑，`U:` = 单位；`-` = 无人占用。
+   */
+  describeExitBlockage(building: any, world: any): string {
+    const describe = (rx: number, ry: number): string => {
+      try {
+        const tile = world.map.tiles.getByMapCoords(Math.floor(rx), Math.floor(ry));
+        if (!tile) return rx + "," + ry + " occ=?";
+        const objs = world.map.tileOccupation.getGroundObjectsOnTile(tile) || [];
+        const names = objs.map((o: any) => {
+          let kind = "?";
+          try {
+            // B=建筑（硬堵）、U=单位（可能自己走开）、O=覆盖物（矿等，可通行、非阻塞）
+            kind = o.isBuilding && o.isBuilding()
+              ? "B"
+              : o.isUnit && o.isUnit()
+                ? "U"
+                : o.isOverlay && o.isOverlay()
+                  ? "O"
+                  : "?";
+          } catch {
+            /* ignore */
+          }
+          return kind + ":" + (o.name || "?");
+        });
+        return rx + "," + ry + " occ[" + (names.length ? names.join("|") : "-") + "]";
+      } catch {
+        return rx + "," + ry + " occ=err";
+      }
+    };
+    let out = "spawn=";
+    try {
+      const c = this.computeExitCoords(building, this.type);
+      out += describe(c.rx, c.ry);
+    } catch {
+      out += "n/a";
+    }
+    out += " rally=";
+    try {
+      const r = this.computeInternalRallyPoint(
+        building,
+        this.type,
+        building.rallyTrait.getRallyPoint(),
+        world.map,
+      );
+      out += r && typeof r.rx === "number" ? describe(r.rx, r.ry) : "n/a";
+    } catch {
+      out += "n/a";
+    }
+    return out;
+  }
+
   /** 在工厂本体生产地面单位（含步兵九宫格分配/集结点/ veterans）。第二参为生产队列项（含 .rules）。 */
   produceGroundUnitAt(building: any, queueItem: any, world: any): void {
     const rules = queueItem.rules;
@@ -224,8 +306,14 @@ export class FactoryTrait {
       unit.veteranTrait?.setVeteranLevel(VeteranLevelModule.VeteranLevel.Veteran);
     if (unit.isInfantry()) unit.position.subCell = InfantryModule.Infantry.SUB_CELLS[0];
     let rallyTile = this.computeInternalRallyPoint(building, this.type, building.rallyTrait.getRallyPoint(), world.map);
-    if (this.type !== FactoryType.UnitType)
-      rallyTile = building.rallyTrait.findRallyPointforUnit(unit, rallyTile, world.map, false, building.tile.z);
+    // 全厂型都挑空闲落位（2026-10-04）：战车工厂原先被排除，内部集结格
+    // （占位右侧一格）被前一台车/收割中的矿车长期占住时，出厂目标直接选
+    // 在被占格上，MoveTask 只能靠 forceWaitOnPathBlocked 死等 + 90/135t
+    // 两级反卡死，工厂再白耗 150t 释放阈值（[FactoryStall] 实测 GAWEAP
+    // 例：集结格 87,25 被另一台 CMIN 占着收矿）。findRallyPointforUnit 以
+    // 内部集结格为中心径向 5 格找空闲格，落点仍在出口一侧、不改变出厂方
+    // 向语义；海军出厂 spawn=rallyTile，顺带修正水面落位被占的spawn。
+    rallyTile = building.rallyTrait.findRallyPointforUnit(unit, rallyTile, world.map, false, building.tile.z);
     let spawnTile;
     if (this.type === FactoryType.NavalUnitType) {
       spawnTile = rallyTile;

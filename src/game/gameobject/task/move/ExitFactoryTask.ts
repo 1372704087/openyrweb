@@ -34,6 +34,8 @@ import { AttackMoveTask } from "game/gameobject/task/move/AttackMoveTask"; // �
 
 /** 出厂死等反卡死阈值（tick）：超过后放弃 forceWaitOnPathBlocked。 */
 const EXIT_FACTORY_STALL_TICKS = 90;
+/** 出厂到达容差放宽阈值（tick）：超过后允许停在集结格 2 格内。 */
+const EXIT_FACTORY_RELAX_TICKS = 135;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class ExitFactoryTask extends MoveTask {
@@ -96,8 +98,17 @@ export class ExitFactoryTask extends MoveTask {
     this.stallTicks = (this.stallTicks ?? 0) + 1;
     if (this.stallTicks > EXIT_FACTORY_STALL_TICKS && this.options?.forceWaitOnPathBlocked) {
       this.options.forceWaitOnPathBlocked = false;
-      this.stallTicks = undefined;
       if (this.game && this.log) this.log(object, "exit_factory_repath_after_stall");
+    }
+    // 二次放宽：重规划后若仍走不出集结格（集结格被单位/建筑长期占住），
+    // 把"必须精确停在集结格"放宽成"停在它 2 格内"。集结格 = 厂房占位右侧
+    // 一格，它的邻域已在占位之外，停在那里同样让 unitHasClearedFactory 成立
+    // → 工厂槽位释放、队列继续生产，不会每台车都白等工厂的 150 tick 释放阈值。
+    // 只在已经卡了 135 tick（远超正常出厂耗时）后才放宽，正常出厂不受影响。
+    if (this.stallTicks > EXIT_FACTORY_RELAX_TICKS && this.options?.strictCloseEnough) {
+      this.options.strictCloseEnough = false;
+      this.options.closeEnoughTiles = 2;
+      if (this.game && this.log) this.log(object, "exit_factory_relax_arrival");
     }
     if (this.checkRampTiles) {
       for (const rampTile of this.checkRampTiles) {
