@@ -7,7 +7,7 @@ $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $ROOT
 
 $NODE_MIN = 20
-$SERVE_PORT = if ($env:PORT) { $env:PORT } else { 8080 }
+$SERVE_PORT = if ($env:PORT) { $env:PORT } else { 8081 }
 $SERVE_URL = "http://127.0.0.1:$SERVE_PORT/"
 
 function Write-Step {
