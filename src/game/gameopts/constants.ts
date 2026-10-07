@@ -41,8 +41,7 @@ export const aiUiNames = new Map<AiDifficulty, string>()
   .set(AiDifficulty.Easy_Ori, "GUI:AIEasy")
   .set(AiDifficulty.Medium_Ori, "GUI:AINormal")
   .set(AiDifficulty.Brutal_Ori, "GUI:AIHard")
-  .set(AiDifficulty.Easy, "GUI:AIDummy")
-  .set(AiDifficulty.Medium, "NOSTR:伊拉克AI");
+  .set(AiDifficulty.Easy, "GUI:AIDummy");
 
 /** AI 难度 → 悬浮提示（当前为空表，预留扩展）。 */
 export const aiUiTooltips = new Map<AiDifficulty, string>();

@@ -55,6 +55,38 @@ export interface TriggerGeneralParams {
   /** 基地防御优先总开关（General 字节 6131；键名待考证）。
    *  开=防御队没到上限前压制全部进攻触发器（易卡死进攻）；默认关=放行进攻。 */
   baseDefensePriority: boolean;
+  /** BaseBias=num（敌人靠近基地时威胁判定倍数） */
+  baseBias: number;
+  /** BaseDefenseDelay=num（分钟，基地防御响应延迟） */
+  baseDefenseDelay: number;
+  /** AIHateDelays=X,Y,Z（帧，选敌重评估间隔） */
+  aiHateDelays: number[];
+  /** AIAlternateProductionCreditCutoff=num（低于此金额不花钱） */
+  creditCutoff: number;
+  /** MultiplayerAICM=X,Y,Z（开局金钱百分比） */
+  multiplayerAICM: number[];
+  /** AIVirtualPurifiers=X,Y,Z（资金获取倍数） */
+  virtualPurifiers: number[];
+  /** AISlaveMinerNumber=X,Y,Z（奴隶矿车数） */
+  slaveMinerNumber: number[];
+  /** HarvestersPerRefinery=X,Y,Z（每矿场矿车数，三阵营） */
+  harvestersPerRefinery: number[];
+  /** AIExtraRefineries=X,Y,Z（追加矿车数） */
+  extraRefineries: number[];
+  /** FillEarliestTeamProbability=X,Y,Z（第一队出兵时间，帧） */
+  fillEarliestTeamProbability: number[];
+  /** MinimumAIDefensiveTeams=X,Y,Z（最少守家队数） */
+  minDefensiveTeams: number[];
+  /** MaximumAIDefensiveTeams=X,Y,Z（最多守家队数） */
+  maxDefensiveTeams: number[];
+  /** UseMinDefenseRule=bool（先造守家队再出兵） */
+  useMinDefenseRule: boolean;
+  /** DissolveUnfilledTeamDelay=num（解散不完整队伍延迟，帧） */
+  dissolveUnfilledTeamDelay: number;
+  /** AISafeDistance=num（集结点距敌距离） */
+  aiSafeDistance: number;
+  /** AIFriendlyDistance=num（集结点距己距离） */
+  aiFriendlyDistance: number;
 }
 
 export const DEFAULT_GENERAL: TriggerGeneralParams = {
@@ -66,6 +98,22 @@ export const DEFAULT_GENERAL: TriggerGeneralParams = {
   baseDefenseTeamCap: [4, 3, 2],
   minorSuperReadyPercent: 0.7,
   baseDefensePriority: false,
+  baseBias: 1.0,
+  baseDefenseDelay: 0,
+  aiHateDelays: [450, 375, 300],
+  creditCutoff: 0,
+  multiplayerAICM: [200, 100, 0],
+  virtualPurifiers: [3, 2, 1],
+  slaveMinerNumber: [4, 3, 2],
+  harvestersPerRefinery: [1, 1, 1],
+  extraRefineries: [4, 3, 2],
+  fillEarliestTeamProbability: [900, 1200, 1500],
+  minDefensiveTeams: [1, 1, 1],
+  maxDefensiveTeams: [4, 3, 2],
+  useMinDefenseRule: true,
+  dissolveUnfilledTeamDelay: 5000,
+  aiSafeDistance: 10,
+  aiFriendlyDistance: 10,
 };
 
 /** 触发层对世界的查询接口（由 AiEngine/上层适配；不支持的查询给保守缺省）。 */
@@ -173,9 +221,13 @@ export function conditionMet(
 
   const targetHouse = world.hasTargetHouse();
   const diff = world.difficulty();
-  const defCap = params.baseDefenseTeamCap[diff] ?? 4;
-  const defenseFull =
-    !params.baseDefensePriority || defenseTeamCount >= defCap;
+  const defCap = params.maxDefensiveTeams[diff] ?? (params.baseDefenseTeamCap[diff] ?? 4);
+  const minDef = params.minDefensiveTeams[diff] ?? 1;
+  const defenseFull = !params.baseDefensePriority || defenseTeamCount >= defCap;
+  // UseMinDefenseRule：守家队没到最低数量前，不刷进攻队
+  if (params.useMinDefenseRule && !isDefenseTrigger && defenseTeamCount < minDef) {
+    return false;
+  }
 
   // ===== 门控块（ConditionMet 前 60 行）=====
   if (targetHouse) {
@@ -463,6 +515,29 @@ export function loadGeneralParams(general: any): TriggerGeneralParams {
   p.totalTeamCap = numList(general.get("TotalAITeamCap"), p.totalTeamCap);
   const v4 = general.get("AIMinorSuperReadyPercent");
   if (v4 !== undefined && v4 !== null) p.minorSuperReadyPercent = parseFloat(v4) || 0.7;
+  const v5 = general.get("BaseBias");
+  if (v5 !== undefined && v5 !== null) p.baseBias = parseFloat(v5) || 1.0;
+  const v6 = general.get("BaseDefenseDelay");
+  if (v6 !== undefined && v6 !== null) p.baseDefenseDelay = parseFloat(v6) || 0;
+  p.aiHateDelays = numList(general.get("AIHateDelays"), p.aiHateDelays);
+  const v7 = general.get("AIAlternateProductionCreditCutoff");
+  if (v7 !== undefined && v7 !== null) p.creditCutoff = parseFloat(v7) || 0;
+  p.multiplayerAICM = numList(general.get("MultiplayerAICM"), p.multiplayerAICM);
+  p.virtualPurifiers = numList(general.get("AIVirtualPurifiers"), p.virtualPurifiers);
+  p.slaveMinerNumber = numList(general.get("AISlaveMinerNumber"), p.slaveMinerNumber);
+  p.harvestersPerRefinery = numList(general.get("HarvestersPerRefinery"), p.harvestersPerRefinery);
+  p.extraRefineries = numList(general.get("AIExtraRefineries"), p.extraRefineries);
+  p.fillEarliestTeamProbability = numList(general.get("FillEarliestTeamProbability"), p.fillEarliestTeamProbability);
+  p.minDefensiveTeams = numList(general.get("MinimumAIDefensiveTeams"), p.minDefensiveTeams);
+  p.maxDefensiveTeams = numList(general.get("MaximumAIDefensiveTeams"), p.maxDefensiveTeams);
+  const v8 = general.get("UseMinDefenseRule");
+  if (v8 !== undefined && v8 !== null) p.useMinDefenseRule = String(v8).toLowerCase() !== "no" && String(v8).toLowerCase() !== "0";
+  const v9 = general.get("DissolveUnfilledTeamDelay");
+  if (v9 !== undefined && v9 !== null) p.dissolveUnfilledTeamDelay = parseFloat(v9) || 5000;
+  const v10 = general.get("AISafeDistance");
+  if (v10 !== undefined && v10 !== null) p.aiSafeDistance = parseFloat(v10) || 10;
+  const v11 = general.get("AIFriendlyDistance");
+  if (v11 !== undefined && v11 !== null) p.aiFriendlyDistance = parseFloat(v11) || p.aiSafeDistance;
   return p;
 }
 

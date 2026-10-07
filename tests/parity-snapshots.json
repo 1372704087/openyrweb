@@ -14755,7 +14755,8 @@
         "updateRecruiting",
         "updateSuperWeapons",
         "updateTeams",
-        "updateTechLevel"
+        "updateTechLevel",
+        "updateVirtualPurifiers"
       ]
     },
     "1": {
@@ -17710,7 +17711,7 @@
       "tag": "weight dynamics"
     },
     "1": {
-      "same": true,
+      "same": false,
       "tag": "scan+gates"
     }
   },

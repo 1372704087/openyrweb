@@ -109,6 +109,7 @@ export class AiEngine {
   generalParams: any;
   /** 批次 2：上次原版扫描 tick（TeamDelays 节拍）。 */
   lastTriggerScanTick: any;
+  _lastPurifierTick: any;
   /** 批次 3：表驱动 RNG（ScenarioClass::Random 同步通道移植）。 */
   rng: any;
   /** 批次 4：运行时建造队列（Prerequisite 组维护器产出，getBuildQueue 消费）。 */
@@ -268,15 +269,34 @@ export class AiEngine {
     if (this.options.evaluateTriggers !== false) this.checkTriggers(tick);
     this.updateTeams(tick);
 
+    // AIVirtualPurifiers：按难度给 AI 周期性资金奖励
+    this.updateVirtualPurifiers(tick);
+
     // 清理完成的队伍
     this.activeTeams = this.activeTeams.filter(function (t: any) {
       return t.state !== "done";
     });
   }
 
+  /** AIVirtualPurifiers：按难度周期性发钱（每 600 tick 发一次，金额=purifier值）。 */
+  updateVirtualPurifiers(tick: any): void {
+    if (tick - (this._lastPurifierTick || 0) < 600) return;
+    this._lastPurifierTick = tick;
+    const params = this.generalParams;
+    if (!params) return;
+    const diff = this.options.difficulty === 0 || this.options.difficulty === 2 ? this.options.difficulty : 1;
+    const mult = (params.virtualPurifiers && params.virtualPurifiers[diff]) || 0;
+    if (mult <= 0) return;
+    try {
+      const pd = this.gameApi.getPlayerData(this.playerName);
+      if (pd && typeof pd.credits === "number") {
+        this.actionsApi?.setCredits?.(pd.credits + mult * 100);
+      }
+    } catch (_) {}
+  }
+
   /**
    * 更新科技等级（约每 120 tick）。
-   * 权威来源 = rules [MultiplayerDialogSettings] TechLevel —— 与生产层
    * Production 用的是同一个数（遭遇战默认 10）。旧实现按"已有建筑名"反推
    * 1/3/4/5/10，与引擎科技等级无关：AI 没造出战车工厂前 techLevel 只有 3，
    * 会把所有 TechLevel>=4 的 AITrigger/队伍永久挡在门外。
@@ -368,6 +388,9 @@ export class AiEngine {
       ? this.options.difficulty
       : 1;
     const delay = (params.teamDelays && params.teamDelays[diff]) || 2500;
+    // FillEarliestTeamProbability：开局前 N tick 不刷队
+    const earliest = (params.fillEarliestTeamProbability && params.fillEarliestTeamProbability[diff]) || 0;
+    if (this.gameApi.getCurrentTick() < earliest) return;
     if (tick - this.lastTriggerScanTick < delay) return;
     this.lastTriggerScanTick = tick;
 
@@ -399,6 +422,15 @@ export class AiEngine {
         (scanStats.capBlocked ? " (team cap reached)" : ""),
     );
     if (!hit) return;
+    // BaseDefenseDelay：守家队延迟 N 分钟才允许触发（1分钟=900 tick）
+    const defDelayMin = params.baseDefenseDelay || 0;
+    const defDelayTicks = defDelayMin * 900;
+    if (defDelayTicks > 0 && this.gameApi.getCurrentTick() < defDelayTicks) {
+        const tt1chk = this.parsed.teamTypes[hit.team1];
+        const tt2chk = hit.team2 ? this.parsed.teamTypes[hit.team2] : null;
+        const isDefTrig = (tt1chk && tt1chk.isBaseDefense) || (tt2chk && tt2chk.isBaseDefense);
+        if (isDefTrig) return;
+    }
     // 原版一次扫描会把该触发器的 **Team1 与 Team2 都建出来**：
     // `0x6F0AB0` 把 AITriggerTypeClass+220（Team1）与 +224（Team2）两个
     // TeamType 指针都塞进输出向量，调用方 `HouseClass::AI 0x4F8440` 再对
@@ -814,7 +846,10 @@ export class AiEngine {
 
   /** 选当前敌人（900t 节拍）：怒气最高的非盟友/非自己/非观察者。 */
   updateFocusEnemy(tick: any): void {
-    if (tick % 900 !== 0) return;
+    // AIHateDelays=X,Y,Z（困难、中等、简单），默认 450/375/300 帧
+    const diff = this.options.difficulty === 0 || this.options.difficulty === 2 ? this.options.difficulty : 1;
+    const hateDelay = (this.generalParams?.aiHateDelays && this.generalParams.aiHateDelays[diff]) || 900;
+    if (tick % hateDelay !== 0) return;
     try {
       const self = this;
       const excluded = function (house: string): boolean {
@@ -1567,9 +1602,26 @@ export class AiEngine {
         if (d.teams.indexOf(teamName) < 0) d.teams.push(teamName);
       }
     }
+    // 扣掉已有闲置单位：如果基地里已经有同类型但无主的单位，
+    // 招募周期会直接认领它们，不需要再生产。
+    // 否则会出现：队伍需要2台MGTK → 开始生产 → 招募认领了已有的2台 → 队伍走人 → 新造的MGTK堆在家。
     const out: any[] = [];
-    demandMap.forEach(function (d: any) {
-      out.push(d);
+    demandMap.forEach((d: any) => {
+      let freeCount = 0;
+      try {
+        const allOfType = this.findFreeUnits(d.unitType);
+        // findFreeUnits 返回全部同类型单位（含已被其他队认领的），
+        // 这里只数无主的（unitTeamOwners 里没有记录的）。
+        for (let i = 0; i < allOfType.length; i++) {
+          if (!this.unitTeamOwners.has(allOfType[i])) {
+            freeCount++;
+          }
+        }
+      } catch (_) {}
+      d.count -= freeCount;
+      if (d.count > 0) {
+        out.push(d);
+      }
     });
     return out;
   }
@@ -1899,9 +1951,10 @@ export class AiEngine {
     // 仅当队伍【没有任何成员】且（曾满编 或 遭遇战下超龄）时才解散——
     // 有部分成员的队持续等待生产供员，绝不轻易放弃
     const age = tick - (team.createdAt || tick);
+    const dissolveDelay = (this.generalParams && this.generalParams.dissolveUnfilledTeamDelay) || 5000;
     if (
       team.unitIds.length === 0 &&
-      (team.fullStrengthEver || age > 5000)
+      (team.fullStrengthEver || age > dissolveDelay)
     ) {
       team.state = "done";
       this.finishTeam(team, false);
@@ -2141,9 +2194,11 @@ export class AiEngine {
   setRallyPoint(team: any): void {
     try {
       const playerData = this.gameApi.getPlayerData(this.playerName);
+      const params = this.generalParams || {};
+      const friendlyDist = params.aiFriendlyDistance || 5;
       team.rallyPoint = new Vector2(
-        playerData.startLocation.x + 5,
-        playerData.startLocation.y + 5,
+        playerData.startLocation.x + friendlyDist,
+        playerData.startLocation.y + friendlyDist,
       );
     } catch (_) {}
   }
@@ -2233,12 +2288,54 @@ export class AiEngine {
       return;
     }
 
+    // 防御队久蹲自动出击：在基地附近蹲太久（>1800t）且当前是防御动作
+    // （5/54/58），就把全队拉去打最近的敌方建筑——原版靠新触发再生进攻队，
+    // 但我们的自定义经济产了很多坦克却只分配给防御队，导致全堆在家里
+    if (team.missionStarted && team.missionStartTick) {
+      const defenseActions = [5, 54, 58];
+      const aa = action.action;
+      if (
+        defenseActions.indexOf(aa) >= 0 &&
+        tick - team.missionStartTick > 1800 &&
+        !team.forcedOffensive
+      ) {
+        // 找最近的敌方建筑
+        const enemyBld =
+          this.findBuildingByTypeFamily(null, "enemy") ||
+          (() => {
+            try {
+              const enemies = this.gameApi.getPlayers().filter(
+                (n: string) => n !== this.playerName,
+              );
+              for (const en of enemies) {
+                const pd = this.gameApi.getPlayerData(en);
+                if (pd && pd.startLocation) {
+                  return { tile: { rx: pd.startLocation.x, ry: pd.startLocation.y } };
+                }
+              }
+            } catch (_) {}
+            return null;
+          })();
+        if (enemyBld && enemyBld.tile) {
+          const cx = enemyBld.tile.rx;
+          const cy = enemyBld.tile.ry;
+          console.log("[AiEngine] Defense team " + (team.teamType ? team.teamType.name : "?") +
+            " sending to offensive at " + cx + "," + cy + " (units=" + team.unitIds.length + ")");
+          this.orderUnits(team.unitIds, OrderType.AttackMove, cx, cy);
+          team.forcedOffensive = true;
+          team.missionCell = { x: cx, y: cy };
+        }
+      }
+    }
+
     if (!team.missionStarted) {
       // 首帧：下发任务
       team.missionStarted = true;
       team.missionCell = null;
       team.missionTargetId = 0;
       team.missionStartTick = tick;
+      console.log("[AiEngine] Executing " + (team.teamType ? team.teamType.name : "?") +
+        " action=" + action.action + " p=" + action.target + " units=" + team.unitIds.length);
       const result = this.executeAction(team, action, tick);
       if (result === "done") {
         team.state = "done";
@@ -2275,7 +2372,7 @@ export class AiEngine {
           } else if (team.missionCell) {
             this.orderUnits(
               team.unitIds,
-              isMove && aa !== 53 ? OrderType.Move : OrderType.AttackMove,
+              (isMove && aa !== 53 && !team.forcedOffensive) ? OrderType.Move : OrderType.AttackMove,
               team.missionCell.x,
               team.missionCell.y,
             );
@@ -2314,7 +2411,13 @@ export class AiEngine {
     if (a === 3 || a === 4 || a === 16 || a === 22 || a === 53 || a === 54 || a === 47 || a === 58) {
       // 到位半径=rulesmd 实测：Stray=2.0 格（普通），RelaxedStray=3.0
       // （53/54 集结命令专用，rulesmd 注释直说"Gather commands use this"）
-      return this.teamArrived(team, a === 53 || a === 54 ? 3.0 : 2.0);
+      if (this.teamArrived(team, a === 53 || a === 54 ? 3.0 : 2.0)) return true;
+      // 超时兜底：2400 tick（约2分钟）——跨地图行军需要更长时间
+      if (tick - (team.missionStartTick || tick) > 2400) {
+        console.log("[AiEngine] Team " + (team.teamType ? team.teamType.name : "?") + " action=" + a + " timed out after 2400t");
+        return true;
+      }
+      return false;
     }
     if (a === 5) {
       // Guard：等待 15*arg ticks（RA2 15 帧=1 游戏秒）
@@ -2362,16 +2465,22 @@ export class AiEngine {
     if (!team.missionCell) return true;
     let arrived = 0;
     let alive = 0;
+    let firstPos = "";
     for (let i = 0; i < team.unitIds.length; i++) {
       try {
         const ud = this.gameApi.getUnitData(team.unitIds[i]);
         if (!ud || !ud.tile) continue;
         if (Number.isFinite(ud.hitPoints) && ud.hitPoints <= 0) continue;
         alive++;
+        if (i === 0) firstPos = ud.tile.rx + "," + ud.tile.ry;
         const dx = ud.tile.rx - team.missionCell.x;
         const dy = ud.tile.ry - team.missionCell.y;
         if (dx * dx + dy * dy <= radius * radius) arrived++;
       } catch (_) {}
+    }
+    if (alive > 0 && arrived < alive) {
+      console.log("[AiEngine] teamArrived: need=" + team.missionCell.x + "," + team.missionCell.y +
+        " r=" + radius + " have=" + arrived + "/" + alive + " firstUnit@" + firstPos);
     }
     return alive > 0 && arrived === alive;
   }
@@ -2745,11 +2854,14 @@ export class AiEngine {
       const batch = unitIds.slice(i, i + batchSize);
       try {
         if (x !== undefined && y !== undefined) {
-          this.actionsApi.orderUnits(batch, order, void 0, x, y);
+          console.log("[AiEngine] orderUnits: order=" + order + " x=" + x + " y=" + y + " units=[" + batch.join(",") + "]");
+          this.actionsApi.orderUnits(batch, order, x, y);
         } else {
           this.actionsApi.orderUnits(batch, order);
         }
-      } catch (_) {}
+      } catch (e) {
+        console.log("[AiEngine] orderUnits ERROR: " + e);
+      }
     }
   }
 

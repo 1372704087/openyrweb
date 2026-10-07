@@ -325,22 +325,25 @@ export class Game {
     this.mapShroudTrait.init(this);
     this.crateGeneratorTrait.init(this);
     this.playerList.getAll().forEach((p) => (p.credits = p.scenarioCredits ?? this.gameOpts.credits));
-    // AI 难度开局资金加成（Brutal +10000 / Medium +5000 / Easy +2000，含 _Ori/_Custom 变体）
+    // AI 开局资金：MultiplayerAICM=X,Y,Z（困难、中等、简单）
+    // AI credits = base * (value + 100) / 100
     this.playerList.getAll().forEach((p) => {
       if (p.isAi) {
-        if (p.aiDifficulty === AiDifficulty.Brutal || p.aiDifficulty === AiDifficulty.Brutal_Ori) p.credits += 10000;
-        else if (
-          p.aiDifficulty === AiDifficulty.Medium ||
-          p.aiDifficulty === AiDifficulty.Medium_Ori ||
-          p.aiDifficulty === AiDifficulty.Medium_Custom
-        )
-          p.credits += 5000;
-        else if (
-          p.aiDifficulty === AiDifficulty.Easy ||
-          p.aiDifficulty === AiDifficulty.Easy_Ori ||
-          p.aiDifficulty === AiDifficulty.Easy_Custom
-        )
-          p.credits += 2000;
+        let diffIdx = 1; // default medium
+        if (p.aiDifficulty === AiDifficulty.Brutal || p.aiDifficulty === AiDifficulty.Brutal_Ori) diffIdx = 0;
+        else if (p.aiDifficulty === AiDifficulty.Easy || p.aiDifficulty === AiDifficulty.Easy_Ori || p.aiDifficulty === AiDifficulty.Easy_Custom) diffIdx = 2;
+        let aicmBonus = [100, 50, 0][diffIdx]; // fallback: hard=100%, med=50%, easy=0%
+        try {
+          const genSec = this.rules?.ini?.getSection?.("General");
+          if (genSec && genSec.get) {
+            const raw = genSec.get("MultiplayerAICM");
+            if (raw) {
+              const parts = String(raw).split(",").map(Number);
+              if (parts.length >= 3 && !parts.some(isNaN)) aicmBonus = parts[diffIdx];
+            }
+          }
+        } catch (_) {}
+        p.credits = Math.round(p.credits * (100 + aicmBonus) / 100);
       }
     });
     if (this.rules.mpDialogSettings.alliesAllowed) this.createInitialTeams();

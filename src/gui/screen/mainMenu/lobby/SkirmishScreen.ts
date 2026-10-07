@@ -243,7 +243,7 @@ export class SkirmishScreen extends MainMenuScreen {
       countMapStartLocations(mapFile) || chosen.maxSlots,
     );
     let mp = mode.mpDialogSettings;
-    let defaultDiff = AiDifficulty.Medium;
+    let defaultDiff = AiDifficulty.Medium_Ori;
     let bots = lastBots ? new Parser().parseAiOpts(lastBots) : void 0;
     if (bots)
       this.sanitizeLastBotSettings(
@@ -340,7 +340,7 @@ export class SkirmishScreen extends MainMenuScreen {
       this.hostObserver = true;
       if (!this.gameOpts.aiPlayers[0])
         this.gameOpts.aiPlayers[0] = {
-          difficulty: AiDifficulty.Medium,
+          difficulty: AiDifficulty.Medium_Ori,
           countryId: RANDOM_COUNTRY_ID,
           colorId: RANDOM_COLOR_ID,
           startPos: RANDOM_START_POS,
