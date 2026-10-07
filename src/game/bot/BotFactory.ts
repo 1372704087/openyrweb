@@ -1,27 +1,26 @@
 /**
  * BotFactory — 按玩家类型与 AI 难度创建对应 Bot 实例。
  *
- * 遭遇战每个难度档位对应一个 Bot 实现：
- *   简单 → DummyBot / 原版AI(Easy)
- *   普通 → 原版AI(Medium)（旧自研 IraqBot 已移除）
- *   困难 → 原版AI(Brutal)
- * 战役：电脑阵营 → OriginalAiBot；人类阵营 → ScenarioTeamBot（仅脚本小队引擎）
- * （当前实现中战役 AI 亦回落 ScenarioTeamBot，见 create 内注释。）
+ * 遭遇战 AI 现状：原版 AI 移植（OriginalAiBot）判定为失败品，已整体屏蔽——
+ * 全部难度档位暂回落 DummyBot 占位（展开基地后待机）。其代码与模块登记
+ * （game/bot/original/、_module-map.json、ts-parity）均保留在仓，仅运行时不可达；
+ * BotsLib 的导出也未摘除。
  *
  * ⚠️ AiDifficulty 的数值同时被当作「难度档位索引」硬编码在别的模块里
  *   （0=最难 / 1=中 / 2=易，见 Game.ts:377、ReturnOreTask:184、
  *   SlaveGatherTask:504、SlaveMinerVehicleTrait:318）。
  *   因此 AiDifficulty 的成员与数值一律不得增删或重排。
- *   Brutal(0) / Easy_Custom(6) / Medium_Custom(7) 原由 custom-ai 承担，
- *   custom-ai 与旧自研 IraqBot 移除后统一回落到 OriginalAiBot ——
- *   数值槽位保留不动，将来接新 Bot 时只需改对应 case。
+ *   Brutal(0) / Easy_Custom(6) / Medium_Custom(7) 等槽位历经
+ *   custom-ai / OriginalAiBot 两代承载者，数值槽位始终保留不动，
+ *   将来接新 Bot 时只需在对应 case 恢复分档。
  *
- * 由 game/bot/BotFactory.ts.js 重写为 TS（行为完全一致）。两个文件并存期间，
- * 本文件才是修改目标：tools/repack.mjs 打包时优先采用 .ts 模块的编译产物。
+ * 战役：电脑/人类阵营统一 → ScenarioTeamBot（仅脚本小队引擎）。
+ *
+ * 由 game/bot/BotFactory.ts.js 重写为 TS。tools/repack.mjs 打包时优先采用
+ * .ts 模块的编译产物。
  */
 import { AiDifficulty } from "game/gameopts/GameOpts"; // 已转换
 import { DummyBot } from "game/bot/DummyBot"; // 已转换
-import { OriginalAiBot } from "game/bot/original/OriginalAiBot"; // 已转换
 import { ScenarioTeamBot } from "game/bot/campaign/ScenarioTeamBot"; // 已转换
 
 export class BotFactory {
@@ -46,25 +45,18 @@ export class BotFactory {
     // 战役 AI 不使用遭遇战 AI（OriginalAiBot / IraqBot 等），
     // 统一使用 ScenarioTeamBot —— 只执行地图/触发器创建的脚本小队，不做自主生产与进攻。
     if (player.isCampaign) return new ScenarioTeamBot(player.name, player.country.name);
+    // OriginalAiBot 已屏蔽（失败品，代码留在 game/bot/original/）：遭遇战全档位
+    // 回落 DummyBot 占位。难度数值槽位按上面的 ⚠️ 保留，接新 Bot 时恢复分档。
     switch (player.aiDifficulty) {
       case AiDifficulty.Easy:
-        return new DummyBot(player.name, player.country.name);
       case AiDifficulty.Easy_Ori:
-        return new OriginalAiBot(player.name, player.country.name, "Easy");
-      // custom-ai 移除后回落的三个槽位（数值保留，见文件头说明）
       case AiDifficulty.Easy_Custom:
-        return new OriginalAiBot(player.name, player.country.name, "Easy");
       case AiDifficulty.Medium:
-        // 旧自研 IraqBot 移除后，普通档回落原版 AI（难度列 Medium）
-        return new OriginalAiBot(player.name, player.country.name, "Medium");
       case AiDifficulty.Medium_Ori:
-        return new OriginalAiBot(player.name, player.country.name, "Medium");
       case AiDifficulty.Medium_Custom:
-        return new OriginalAiBot(player.name, player.country.name, "Medium");
       case AiDifficulty.Brutal:
-        return new OriginalAiBot(player.name, player.country.name, "Brutal");
       case AiDifficulty.Brutal_Ori:
-        return new OriginalAiBot(player.name, player.country.name, "Brutal");
+        return new DummyBot(player.name, player.country.name);
       default:
         throw new Error(`Unsupported AI difficulty "${player.aiDifficulty}"`);
     }
