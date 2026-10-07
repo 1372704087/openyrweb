@@ -1,0 +1,4 @@
+# cmd.exe 批处理必须 CRLF(LF 会导致解析错位、命令被啃碎),检出时强制 CRLF
+*.bat text eol=crlf
+# PowerShell 对行尾不敏感,统一 LF
+*.ps1 text eol=lf
