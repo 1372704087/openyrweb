@@ -450,6 +450,7 @@ html:-moz-full-screen body {
 #ra2web-root .lobby-form,
 #ra2web-root .gamebrowser-wrapper,
 #ra2web-root .map-sel-form,
+#ra2web-root .map-gen-form,
 #ra2web-root .replay-sel-form,
 #ra2web-root .mod-sel-form,
 #ra2web-root .qm-form,
@@ -1318,6 +1319,67 @@ input[type="range"]:focus {
 
 #ra2web-root .map-sel-form .map-sel-search label input {
     flex: 1 0;
+}
+
+/* 生成地图（随机地图）子屏表单——坐标对齐原版 800×600 参考图：
+   标签列 x≈107、下拉列 x≈265 宽 228、首行 y≈66、行距 40、
+   按钮行 y≈420（随机挑选 x≈110 / 生成地图 x≈372） */
+#ra2web-root .map-gen-form {
+    padding: 100px 100px;
+    box-sizing: border-box;
+}
+
+#ra2web-root .map-gen-form .map-gen-row {
+    margin-bottom: 13px;
+}
+
+#ra2web-root .map-gen-form .map-gen-label {
+    display: inline-block;
+    width: 158px;
+    vertical-align: middle;
+}
+
+#ra2web-root .map-gen-form .map-gen-row .select {
+    width: 228px;
+}
+
+#ra2web-root .map-gen-form .slider-item span.label {
+    width: 158px;
+}
+
+#ra2web-root .map-gen-form .slider-item input[type="range"] {
+    width: 172px;
+}
+
+#ra2web-root .map-gen-form .slider-item input[type="text"] {
+    width: 43px;
+    margin-left: 13px;
+}
+
+#ra2web-root .map-gen-form .map-gen-urban {
+    margin: 12px 0 0 158px;
+}
+
+#ra2web-root .map-gen-form .map-gen-urban label {
+    display: inline-block;
+    line-height: 18px;
+    white-space: nowrap;
+}
+
+#ra2web-root .map-gen-form .map-gen-buttons {
+    margin-top: 94px;
+    display: flex;
+    align-items: flex-start;
+}
+
+/* 覆盖 .dialog-button 基础样式（display:block + margin-top:10px），按钮需同行排列；
+   宽度保持雪碧图原生帧宽 126px（mnbttn 帧：0/-126/-252），改小会裁掉右边缘 */
+#ra2web-root .map-gen-form .map-gen-buttons .dialog-button {
+    margin-top: 0;
+}
+
+#ra2web-root .map-gen-form .map-gen-buttons .dialog-button + .dialog-button {
+    margin-left: 136px;
 }
 
 #ra2web-root ::-webkit-scrollbar {

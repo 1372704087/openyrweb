@@ -32198,6 +32198,25 @@ const CONVERTED = [
     ],
   },
   {
+    // 新增模块（无孪生）：snapshot track only，首捕用 --update-snapshots
+    name: "gui/screen/mainMenu/mapSel/MapGenScreen",
+    tsjs: "src/gui/screen/mainMenu/mapSel/MapGenScreen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => Object.getOwnPropertyNames(ns.MapGenScreen.prototype || {}).sort().join(","),
+    ],
+  },
+  {
+    // 新增模块（无孪生）：snapshot track only，首捕用 --update-snapshots
+    name: "gui/screen/mainMenu/mapSel/component/MapGen",
+    tsjs: "src/gui/screen/mainMenu/mapSel/component/MapGen.ts.js",
+    probes: [
+      (ns) => Object.keys(ns).sort().join(","),
+      (ns) => typeof ns["MapGen"] + ":" + ns["MapGen"].length,
+      (ns) => JSON.stringify(ns["MapGenDefaultOptions"]),
+    ],
+  },
+  {
     name: "gui/screen/mainMenu/modSel/BadModArchiveError",
     tsjs: "src/gui/screen/mainMenu/modSel/BadModArchiveError.ts.js",
     probes: [

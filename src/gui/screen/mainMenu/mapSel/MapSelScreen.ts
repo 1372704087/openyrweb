@@ -15,6 +15,7 @@ import {
   OperationCanceledError,
 } from "@puzzl/core/lib/async/cancellation"; // 已转换
 import { MainMenuScreen } from "gui/screen/mainMenu/MainMenuScreen"; // 孪生（本组内一并转换）
+import { ScreenType } from "gui/screen/mainMenu/ScreenType"; // 孪生（本组内一并转换）
 import { GameModeType } from "game/ini/GameModeType"; // 已转换
 import { StorageKey } from "LocalPrefs"; // 已转换
 import { MapFile } from "data/MapFile"; // 已转换
@@ -183,6 +184,13 @@ export class MapSelScreen extends MainMenuScreen {
           tooltip: this.strings.get("STT:ScenarioButtonUseMap"),
           onClick: () => {
             this.handleSubmit();
+          },
+        },
+        {
+          label: this.strings.get("GUI:GenerateMap"),
+          tooltip: this.strings.get("STT:ScenarioButtonRandom"),
+          onClick: () => {
+            this.controller?.pushScreen(ScreenType.MapGenerator);
           },
         },
         ...(this.mapDir
@@ -437,6 +445,19 @@ export class MapSelScreen extends MainMenuScreen {
     this.controller.setMainComponent();
     this.disposables.dispose();
     await this.controller.hideSidebarButtons();
+  }
+
+  /** 被生成地图屏覆盖：停掉在途任务，并按惯例收起侧栏按钮（滑出动画）。 */
+  async onStack(): Promise<void> {
+    this.mapFileUpdateTask?.cancel();
+    await this.controller.hideSidebarButtons();
+  }
+
+  /** 从生成地图屏返回：重建表单与侧栏，并恢复预览区。 */
+  onUnstack(): void {
+    this.initSidebar();
+    this.initForm();
+    if (this.selectedMapName) this.updateMapDeferred({ updatePreview: true });
   }
 
   updateMapDeferred({ updatePreview }: { updatePreview: boolean }): void {

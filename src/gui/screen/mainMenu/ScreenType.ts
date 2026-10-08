@@ -1,7 +1,8 @@
 /**
  * ScreenType — 主菜单内部屏幕类型枚举。
  *
- * Home=0 … Extensions=22，共 23 项；数值与反向映射与孪生一致。
+ * Home=0 … Extensions=22 为原有 23 项，MapGenerator=23 为新增
+ * （生成地图/随机地图子屏，无孪生）；数值与反向映射与孪生一致。
  *
  * 由 gui/screen/mainMenu/ScreenType.ts.js 重写为 TS（行为完全一致）。
  * 两个文件并存期间，本文件才是修改目标：tools/repack.mjs 打包时优先
@@ -54,4 +55,6 @@ export enum ScreenType {
   Campaign = 21,
   /** 扩展/模组管理入口。 */
   Extensions = 22,
+  /** 生成地图（随机地图）。 */
+  MapGenerator = 23,
 }

@@ -73,6 +73,7 @@ import * as NewAccountScreenNs from "gui/screen/mainMenu/newAccount/NewAccountSc
 import * as CustomGameScreenNs from "gui/screen/mainMenu/customGame/CustomGameScreen"; // 孪生
 import * as LobbyScreenNs from "gui/screen/mainMenu/lobby/LobbyScreen"; // 孪生
 import * as MapSelScreenNs from "gui/screen/mainMenu/mapSel/MapSelScreen"; // 孪生
+import * as MapGenScreenNs from "gui/screen/mainMenu/mapSel/MapGenScreen"; // 新增（无孪生）
 import * as ReplaySelScreenNs from "gui/screen/replay/ReplaySelScreen"; // 孪生
 import * as ScoreScreenNs from "gui/screen/mainMenu/score/ScoreScreen"; // 孪生
 import * as InfoAndCreditsScreenNs from "gui/screen/mainMenu/infoAndCredits/InfoAndCreditsScreen"; // 孪生
@@ -161,6 +162,7 @@ const NewAccountScreen: any = (NewAccountScreenNs as any).NewAccountScreen;
 const CustomGameScreen: any = (CustomGameScreenNs as any).CustomGameScreen;
 const LobbyScreen: any = (LobbyScreenNs as any).LobbyScreen;
 const MapSelScreen: any = (MapSelScreenNs as any).MapSelScreen;
+const MapGenScreen: any = (MapGenScreenNs as any).MapGenScreen;
 const ReplaySelScreen: any = (ReplaySelScreenNs as any).ReplaySelScreen;
 const ScoreScreen: any = (ScoreScreenNs as any).ScoreScreen;
 const InfoAndCreditsScreen: any = (InfoAndCreditsScreenNs as any).InfoAndCreditsScreen;
@@ -520,6 +522,10 @@ export class Gui {
       .set(
         MainMenuScreenType.MapSelection,
         new MapSelScreen(strings, jsxRenderer, mapFileLoader, errorHandler, this.messageBoxApi, this.localPrefs, mapList, mpModes, mapDir, this.sentry),
+      )
+      .set(
+        MainMenuScreenType.MapGenerator,
+        new MapGenScreen(strings, jsxRenderer, this.messageBoxApi),
       )
       .set(
         MainMenuScreenType.ReplaySelection,

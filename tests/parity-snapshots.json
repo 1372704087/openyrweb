@@ -10371,7 +10371,7 @@
       ],
       "types": [
         "number",
-        "p"
+        "n"
       ]
     }
   },
@@ -17323,8 +17323,8 @@
     "0": 0
   },
   "gui/screen/mainMenu/ScreenType": {
-    "0": 46,
-    "1": "Home,Skirmish,QuickGame,CustomGame,Login,NewAccount,Lobby,MapSelection,Ladder,LadderRules,ReplaySelection,ModSelection,Score,InfoAndCredits,PatchNotes,Credits,Options,OptionsSound,OptionsKeyboard,OptionsStorage,SinglePlayer,Campaign,Extensions,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"
+    "0": 48,
+    "1": "Home,Skirmish,QuickGame,CustomGame,Login,NewAccount,Lobby,MapSelection,Ladder,LadderRules,ReplaySelection,ModSelection,Score,InfoAndCredits,PatchNotes,Credits,Options,OptionsSound,OptionsKeyboard,OptionsStorage,SinglePlayer,Campaign,Extensions,MapGenerator,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
   },
   "gui/screen/mainMenu/campaign/CampaignResources": {
     "0": "CampaignResources",
@@ -17534,7 +17534,7 @@
   },
   "gui/screen/mainMenu/mapSel/MapSelScreen": {
     "0": "MapSelScreen",
-    "1": "backgroundImageName,computeAvailableMaps,constructor,handleMapImportError,handleSubmit,importMap,initForm,initSidebar,onEnter,onLeave,readInitialSort,refreshMapInfo,submitMap,updateMapDeferred,updateMapsAndModes"
+    "1": "backgroundImageName,computeAvailableMaps,constructor,handleMapImportError,handleSubmit,importMap,initForm,initSidebar,onEnter,onLeave,onStack,onUnstack,readInitialSort,refreshMapInfo,submitMap,updateMapDeferred,updateMapsAndModes"
   },
   "gui/screen/mainMenu/mapSel/component/MapSel": {
     "0": "MapSel,SortType",
@@ -17786,5 +17786,14 @@
       },
       "count": 36
     }
+  },
+  "gui/screen/mainMenu/mapSel/MapGenScreen": {
+    "0": "MapGenScreen",
+    "1": "backgroundImageName,constructor,handleGenerate,initForm,initSidebar,onEnter,onLeave"
+  },
+  "gui/screen/mainMenu/mapSel/component/MapGen": {
+    "0": "MapGen,MapGenDefaultOptions",
+    "1": "function:1",
+    "2": "{\"terrainType\":\"continent\",\"timeOfDay\":\"afternoon\",\"theater\":\"temperate\",\"mapSize\":\"medium\",\"resources\":\"high\",\"players\":8,\"urbanTerrain\":true}"
   }
 }
