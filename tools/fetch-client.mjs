@@ -95,7 +95,7 @@ const MANIFEST = [
 
   // Vendor / engine libraries
   { path: "lib/system.js", dest: "script" },
-  // three.min.js 现为 r95 官方 UMD（升级于 2026-10-09）。重跑本工具会用上游 r94 覆盖，
+  // three.min.js 现为 r100 官方 UMD（升级于 2026-10-09）。重跑本工具会用上游 r94 覆盖，
   // 故注释掉该条目防误用；需要重新获取时改回上游地址并同步 vendor/lib/three.min.js。
   // { path: "lib/three.min.js?v0.94", dest: "script", saveAs: "lib/three.min.js" },
   { path: "lib/three/three.shader-patch.js?v=2", dest: "script", saveAs: "lib/three/three.shader-patch.js" },

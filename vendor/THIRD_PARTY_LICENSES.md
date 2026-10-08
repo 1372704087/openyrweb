@@ -35,7 +35,7 @@ Bundled at build time from the npm registry by `tools/build-vendor.mjs`.
 
 | Library | Source | License |
 |---|---|---|
-| three.js | https://threejs.org (r95, official UMD build) | MIT |
+| three.js | https://threejs.org (r100, official UMD build) | MIT |
 | three addons (MeshLine-free: SPE, Octree, TrailRenderer, LightningStrike, SimplexNoise, shader-patch) | threejs.org examples / respective authors | MIT |
 | SystemJS | https://github.com/systemjs/systemjs (v0.19.41) | MIT |
 | minilzo-js (lzo1x.js) | Alistair Braidwood, port of minilzo | GPL-2.0+ (see header) |
